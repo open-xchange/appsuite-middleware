@@ -86,8 +86,7 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
             return smtpAuthEncStr;
         }
         final String fallback = SMTPProperties.getInstance().getSmtpAuthEnc();
-        LOG.error(new StringBuilder(64).append("SMTP Auth Encoding: Unsupported charset \"").append(smtpAuthEncStr).append(
-            "\". Setting to fallback ").append(fallback).toString());
+        LOG.error("SMTP Auth Encoding: Unsupported charset \"{}\". Setting to fallback {}", smtpAuthEncStr, fallback);
         return fallback;
     }
 

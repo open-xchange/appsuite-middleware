@@ -274,7 +274,7 @@ public final class SMTPCapabilityCache {
                         sb.append(chars, 0, read);
                     }
                     if (0 == sb.length()) {
-                        LOG.warn("Empty EHLO response for: " + command);
+                        LOG.warn("Empty EHLO response for: {}", command);
                     }
                 }
                 final String capabilities = sb.toString();

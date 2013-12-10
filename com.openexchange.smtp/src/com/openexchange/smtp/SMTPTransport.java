@@ -786,8 +786,7 @@ public final class SMTPTransport extends MailTransport {
                  */
                 smtpMessage.removeHeader("x-original-headers");
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(new StringBuilder(128).append("SMTP mail prepared for transport in ").append(
-                        System.currentTimeMillis() - startPrep).append("msec").toString());
+                    LOG.debug("SMTP mail prepared for transport in {}msec", System.currentTimeMillis() - startPrep);
                 }
                 final long start = System.currentTimeMillis();
                 final Transport transport = getSMTPSession().getTransport(SMTP);
@@ -902,7 +901,7 @@ public final class SMTPTransport extends MailTransport {
             try {
                 tmpPass = new String(password.getBytes(Charsets.forName(getTransportConfig0().getSMTPProperties().getSmtpAuthEnc())), Charsets.ISO_8859_1);
             } catch (final UnsupportedCharsetException e) {
-                LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
+                LOG.error("Unsupported encoding in a message detected and monitored: \"{}{}", e.getMessage(), '"', e);
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             }
         }
