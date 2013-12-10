@@ -73,13 +73,13 @@ public class I18nServices {
 
     public void addService(final I18nService i18n) {
         if (null != services.put(i18n.getLocale(), i18n)) {
-            LOG.warn("Another i18n translation service found for " + i18n.getLocale());
+            LOG.warn("Another i18n translation service found for {}", i18n.getLocale());
         }
     }
 
     public void removeService(final I18nService i18n) {
         if (null == services.remove(i18n.getLocale())) {
-            LOG.warn("Unknown i18n translation service shut down for " + i18n.getLocale());
+            LOG.warn("Unknown i18n translation service shut down for {}", i18n.getLocale());
         }
     }
 
@@ -92,12 +92,12 @@ public class I18nServices {
         final I18nService service = services.get(loc);
         if (null == service) {
             if (!"en".equalsIgnoreCase(loc.getLanguage())) {
-                LOG.warn("No i18n service for locale " + loc + ".");
+                LOG.warn("No i18n service for locale {}.", loc);
             }
             return toTranslate;
         }
         if (!service.hasKey(toTranslate)) {
-            LOG.warn("I18n service for locale " + loc + " has no translation for \"" + toTranslate + "\".");
+            LOG.warn("I18n service for locale {} has no translation for \"{}\".", loc, toTranslate);
             return toTranslate;
         }
         return service.getLocalized(toTranslate);

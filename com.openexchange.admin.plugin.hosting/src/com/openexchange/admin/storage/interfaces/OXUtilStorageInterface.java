@@ -107,7 +107,7 @@ public abstract class OXUtilStorageInterface {
                     }
                 } else {
                     final StorageException storageException = new StorageException("Property for util_storage not defined");
-                    log.error(storageException.getMessage(), storageException);
+                    log.error("", storageException);
                     throw storageException;
                 }
             }

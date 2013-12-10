@@ -128,7 +128,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         this.context = context;
         this.pool = new OXAdminPoolDBPoolExtension();
         if (log.isDebugEnabled()) {
-            log.debug("Class loaded: " + this.getClass().getName());
+            log.debug("Class loaded: {}", this.getClass().getName());
         }
     }
 
@@ -175,7 +175,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             quota = quotaValue;
         }
 
-        log.debug(ctx+" - "+modules + " - " + quota);
+        log.debug("{} - {} - {}", ctx, modules, quota);
 
         try {
             if (!tool.existsContext(ctx)) {
@@ -261,7 +261,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             doNullCheck(ctx);
         } catch (final InvalidDataException e1) {
             final InvalidDataException invalidDataException = new InvalidDataException("Context is invalid");
-            log.error(invalidDataException.getMessage(), invalidDataException);
+            log.error("", invalidDataException);
             throw invalidDataException;
         }
         validateloginmapping(ctx);
@@ -318,7 +318,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 }
             }
         } catch (final OXException e) {
-            log.error("Error invalidating cached infos of context "+ctx.getId()+" in context storage",e);
+            log.error("Error invalidating cached infos of context {} in context storage", ctx.getId(),e);
         }
 
         final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
@@ -392,7 +392,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             doNullCheck(ctx);
         } catch (final InvalidDataException e) {
             final InvalidDataException e1 = new InvalidDataException("Context is null");
-            log.error(e1.getMessage(), e1);
+            log.error("", e1);
             throw e1;
         }
 
@@ -451,9 +451,9 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
             pool.resetPoolMappingForContext(contextID);
         } catch (final OXException e) {
-            log.error("Error invalidating context " + ctx.getId() + " in ox context storage", e);
+            log.error("Error invalidating context {} in ox context storage", ctx.getId(), e);
         } catch (PoolException e) {
-            log.info("Could not reset PoolMapping for context " + ctx.getId() + " while deleting it. Should not have been mapped then.");
+            log.info("Could not reset PoolMapping for context {} while deleting it. Should not have been mapped then.", ctx.getId());
         }
 
         final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
@@ -491,7 +491,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } catch (NoSuchObjectException e) {
             throw new NoSuchContextException(e);
         }
-        log.debug(ctx + " - " + reason);
+        log.debug("{} - {}", ctx, reason);
         try {
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
@@ -506,13 +506,13 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.disable(ctx, reason);
-            log.info("Context " + ctx.getId() + " successfully disabled");
+            log.info("Context {} successfully disabled", ctx.getId());
 
             try {
                 ContextStorage.getInstance().invalidateContext(ctx.getId().intValue());
-                log.info("Context " + ctx.getId() + " successfully invalidated");
+                log.info("Context {} successfully invalidated", ctx.getId());
             } catch (final OXException e) {
-                log.error("Error invalidating context "+ctx.getId()+" in ox context storage",e);
+                log.error("Error invalidating context {} in ox context storage", ctx.getId(),e);
             }
 
         } catch (final NoSuchContextException e) {
@@ -548,7 +548,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         new BasicAuthenticator(context).doAuthentication(auth);
 
         final int reason_id = reason.getId();
-        log.debug("" + reason_id);
+        log.debug("{}", reason_id);
         try {
 //            if (!tool.existsReason(reason_id)) {
 //                throw new NoSuchReasonException();
@@ -591,7 +591,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             doNullCheck(ctx);
         } catch (final InvalidDataException e1) {
             final InvalidDataException invalidDataException = new InvalidDataException("Context is null");
-            log.error(invalidDataException.getMessage(), invalidDataException);
+            log.error("", invalidDataException);
             throw invalidDataException;
         }
 
@@ -621,7 +621,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         try {
             ContextStorage.getInstance().invalidateContext(ctx.getId().intValue());
         } catch (final OXException e) {
-            log.error("Error invalidating context "+ctx.getId()+" in ox context storage",e);
+            log.error("Error invalidating context {} in ox context storage", ctx.getId(),e);
         }
     }
 
@@ -735,12 +735,12 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             doNullCheck(search_pattern);
         } catch (final InvalidDataException e) {
             final InvalidDataException invalidDataException = new InvalidDataException("Search pattern is null");
-            log.error(invalidDataException.getMessage(), invalidDataException);
+            log.error("", invalidDataException);
             throw invalidDataException;
         }
         new BasicAuthenticator(context).doAuthentication(auth);
 
-        log.debug("" + search_pattern);
+        log.debug("{}", search_pattern);
 
         try {
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
@@ -761,7 +761,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                                 final OXContextPluginInterface oxctx = (OXContextPluginInterface) this.context.getService(servicereference);
                                 //TODO: Implement check for contextadmin here
                                 if (log.isDebugEnabled()) {
-                                    log.debug("Calling list for plugin: " + bundlename);
+                                    log.debug("Calling list for plugin: {}", bundlename);
                                 }
                                 try {
                                     filter = oxctx.filter(auth);
@@ -773,7 +773,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                                         loaderFilter.add(loader);
                                     }
                                 } catch (final PluginException e) {
-                                    log.error("Error while calling method list of plugin " + bundlename,e);
+                                    log.error("Error while calling method list of plugin {}", bundlename,e);
                                     throw new StorageException(e.getCause());
                                 }
                             }
@@ -805,7 +805,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             doNullCheck(db);
         } catch (final InvalidDataException e) {
             final InvalidDataException invalidDataException = new InvalidDataException("Database is null");
-            log.error(invalidDataException.getMessage(), invalidDataException);
+            log.error("", invalidDataException);
             throw invalidDataException;
         }
         new BasicAuthenticator().doAuthentication(auth);
@@ -845,7 +845,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             doNullCheck(filestore.getId());
         } catch (final InvalidDataException e) {
             final InvalidDataException invalidDataException = new InvalidDataException("Filestore is null");
-            log.error(invalidDataException.getMessage(), invalidDataException);
+            log.error("", invalidDataException);
             throw invalidDataException;
         }
         new BasicAuthenticator().doAuthentication(auth);
@@ -905,7 +905,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
         final int reason_id = reason.getId();
         if (log.isDebugEnabled()) {
-            log.debug(ctx + " - " + db + " - " + reason_id);
+            log.debug("{} - {} - {}", ctx, db, reason_id);
         }
         try {
             /*if (!tool.existsReason(reason_id)) {
@@ -970,7 +970,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         Context retval = null;
 
-        log.debug(ctx+ " - " + dst_filestore);
+        log.debug("{} - {}", ctx, dst_filestore);
 
         final OXContextStorageInterface oxcox;
         try {
@@ -1037,7 +1037,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
         } catch (final URISyntaxException e) {
             final StorageException storageException = new StorageException(e);
-            log.error(storageException.getMessage(), storageException);
+            log.error("", storageException);
             throw storageException;
         } catch (final NoSuchFilestoreException e) {
             log.error("", e);
@@ -1137,7 +1137,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw new NoSuchContextException(e);
         }
 
-        log.debug(ctx+" - "+access);
+        log.debug("{} - {}", ctx, access);
 
         try {
             if (!tool.existsContext(ctx)) {
@@ -1201,7 +1201,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw new NoSuchContextException(e);
         }
 
-        log.debug(ctx+" - "+access_combination_name);
+        log.debug("{} - {}", ctx, access_combination_name);
 
         try {
 
@@ -1261,7 +1261,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } catch (final InvalidDataException e1) {
             final InvalidDataException invalidDataException
                 = new InvalidDataException("Context is invalid");
-            log.error(invalidDataException.getMessage(), invalidDataException);
+            log.error("", invalidDataException);
             throw invalidDataException;
         }
         new BasicAuthenticator(context).doAuthentication(auth);
@@ -1290,7 +1290,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         try {
             ContextStorage.getInstance().invalidateContext(ctx.getId().intValue());
         } catch (final OXException e) {
-            log.error("Error invalidating context "+ctx.getId()+" in ox context storage",e);
+            log.error("Error invalidating context {} in ox context storage", ctx.getId(),e);
         }
     }
 
@@ -1304,7 +1304,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             doNullCheck(ctx);
         } catch (final InvalidDataException e1) {
             final InvalidDataException invalidDataException = new InvalidDataException("Context is invalid");
-            log.error(invalidDataException.getMessage(), invalidDataException);
+            log.error("", invalidDataException);
             throw invalidDataException;
         }
 
@@ -1343,7 +1343,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             doNullCheck(ctx);
         } catch (final InvalidDataException e1) {
             final InvalidDataException invalidDataException = new InvalidDataException("Context is invalid");
-            log.error(invalidDataException.getMessage(), invalidDataException);
+            log.error("", invalidDataException);
             throw invalidDataException;
         }
 
@@ -1394,13 +1394,13 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                             extensionsFound = true;
                             final OXContextPluginInterface oxctx = (OXContextPluginInterface) this.context.getService(servicereference);
                             if (log.isDebugEnabled()) {
-                                log.debug("Calling getData for plugin: " + bundlename);
+                                log.debug("Calling getData for plugin: {}", bundlename);
                             }
                             try {
                                 retval = oxctx.getData(ctxs, auth);
                                 addExtensionToContext(ctxs, retval, bundlename);
                             } catch (final PluginException e) {
-                                log.error("Error while calling method list of plugin " + bundlename,e);
+                                log.error("Error while calling method list of plugin {}", bundlename,e);
                                 throw new StorageException(e.getCause());
                             }
                         }

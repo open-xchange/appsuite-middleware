@@ -139,7 +139,7 @@ public class DataFetcherMysql implements DataFetcher{
         try{
             prep = this.dbConnection.prepareStatement(sb.toString());
             prep.setObject(1,getColumnMatchObject(),getColumnMatchType());
-            log.debug("######## "+sb.toString());
+            log.debug("######## {}", sb);
             ResultSet rs = prep.executeQuery();
             while(rs.next()){
                 TableRowObject tro = new TableRowObject();
@@ -174,7 +174,7 @@ public class DataFetcherMysql implements DataFetcher{
 
 //        if(to.getDataRowCount()>0){
 //            tableObjects.add(to);
-//            //log.debug(to.getName() +" "+to.getDataRowCount());
+//            //log.debug("{} {}", to.getName(), to.getDataRowCount());
 //        }
 
 
@@ -215,7 +215,7 @@ public class DataFetcherMysql implements DataFetcher{
                 tableObjects.add(to);
             }
         }
-        log.debug("####### Found -> "+tableObjects.size()+" tables");
+        log.debug("####### Found -> {} tables", tableObjects.size());
 
         return tableObjects;
     }
@@ -270,7 +270,7 @@ public class DataFetcherMysql implements DataFetcher{
             while(table_references.next()){
                 String pk = table_references.getString("PKTABLE_NAME");
                 String pkc = table_references.getString("PKCOLUMN_NAME");
-                log.debug("--> Table: "+pk+" column ->"+pkc);
+                log.debug("--> Table: {} column ->{}", pk, pkc);
                 to.addCrossReferenceTable(pk);
                 int pos_in_list = tableListContainsObject(pk);
                 if(pos_in_list!=-1){
@@ -310,7 +310,7 @@ public class DataFetcherMysql implements DataFetcher{
             for(int a = 0;a<unsorted.size();a++){
                 TableObject to = unsorted.get(a);
                 if(!to.hasCrossReferences()){
-                    //log.error("removing "+to.getName());
+                    //log.error("removing {}", to.getName());
                     nasty_order.add(to);
                     // remove object from list and sort the references new
                     removeAndSortNew(unsorted,to);

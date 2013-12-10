@@ -114,7 +114,7 @@ public class ContextSearcher extends AbstractTask<Collection<Integer>> {
             try {
                 cache.pushConnectionForConfigDB(con);
             } catch (PoolException e1) {
-                LOG.error(e1.getMessage(), e1);
+                LOG.error("", e1);
             }
         }
         return cids;

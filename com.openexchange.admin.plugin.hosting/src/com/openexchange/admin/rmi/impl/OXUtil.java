@@ -100,7 +100,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         basicauth.doAuthentication(auth);
 
-        log.debug(fstore.getUrl() + " - " + fstore.getSize());
+        log.debug("{} - {}", fstore.getUrl(), fstore.getSize());
 
         if (!checkValidStoreURI(fstore.getUrl())) {
             throw new InvalidDataException("Invalid url sent");
@@ -141,7 +141,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         }
 
         final int response = oxutil.registerFilestore(fstore);
-        log.debug("RESPONSE " + response);
+        log.debug("RESPONSE {}", response);
         return new Filestore(response);
 
     }
@@ -157,7 +157,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         }
         basicauth.doAuthentication(auth);
 
-        log.debug(fstore.getUrl() + " " + fstore.getMaxContexts() + " " + fstore.getSize() + " " + fstore.getId());
+        log.debug("{} {} {} {}", fstore.getUrl(), fstore.getMaxContexts(), fstore.getSize(), fstore.getId());
 
         if (null != fstore.getUrl() && !checkValidStoreURI(fstore.getUrl())) {
             throw new InvalidDataException("Invalid store url " + fstore.getUrl());
@@ -259,7 +259,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             doNullCheck(search_pattern);
         } catch (final InvalidDataException e) {
             final InvalidDataException invalidDataException = new InvalidDataException("The search_pattern is null");
-            log.error(invalidDataException.getMessage(), invalidDataException);
+            log.error("", invalidDataException);
             throw invalidDataException;
         }
 
