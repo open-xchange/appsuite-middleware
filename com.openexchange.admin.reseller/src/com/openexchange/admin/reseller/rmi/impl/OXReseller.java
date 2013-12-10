@@ -89,7 +89,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
     public OXReseller() throws StorageException {
         super();
         if (log.isDebugEnabled()) {
-            log.debug("Class loaded: " + this.getClass().getName());
+            log.debug("Class loaded: {}", this.getClass().getName());
         }
         basicauth = new BasicAuthenticator();
         resellerauth = new ResellerAuth();
@@ -139,7 +139,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             // if no password mech supplied, use the old one as set in db
             final ResellerAdmin dbadm = oxresell.getData(new ResellerAdmin[] { adm })[0];
             if( pid > 0 && dbadm.getParentId() != pid ) {
-                log.error("unathorized access to " + dbadm.getName() + " by " + creds.getLogin());
+                log.error("unathorized access to {} by {}", dbadm.getName(), creds.getLogin());
                 throw new InvalidCredentialsException("authentication failed");
             }
             if (adm.getPasswordMech() == null) {
