@@ -65,7 +65,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 
 /**
- * {@link GetSchemaName}
+ * {@link GetSchemaName} - Determines the name of the database schema in which a specified context is located.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.4.2
