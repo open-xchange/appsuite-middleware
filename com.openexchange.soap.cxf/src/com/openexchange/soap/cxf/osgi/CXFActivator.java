@@ -150,7 +150,7 @@ public class CXFActivator extends HousekeepingActivator {
                                         config.put("base-address", baseAddress);
                                     }
                                     final String hideServiceListPage = configService.getProperty("com.openexchange.soap.cxf.hideServiceListPage");
-                                    if (null != baseAddress) {
+                                    if (null != hideServiceListPage) {
                                         if (null == config) {
                                             config = new Hashtable<String, Object>(2);
                                         }
