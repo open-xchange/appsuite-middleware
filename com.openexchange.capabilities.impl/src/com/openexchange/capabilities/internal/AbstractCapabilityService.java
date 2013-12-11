@@ -512,7 +512,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                         return false;
                     }
                 } catch (final Exception e) {
-                    LOG.warn("Could not check availability for capability '" + cap + "'. Assuming as absent this time.", e);
+                    LOG.warn("Could not check availability for capability '{}'. Assuming as absent this time.", cap, e);
                 }
             }
         }
