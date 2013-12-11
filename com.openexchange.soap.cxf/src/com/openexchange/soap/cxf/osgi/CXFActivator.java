@@ -85,7 +85,6 @@ public class CXFActivator extends HousekeepingActivator {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CXFActivator.class);
         try {
             log.info("Starting Bundle: com.openexchange.soap.cxf");
-            LogUtils.setLoggerClass(Slf4jLogger.class);
             final BundleContext context = this.context;
             final String alias = "/webservices";
             final String alias2 = "/servlet/axis2/services";
@@ -131,7 +130,6 @@ public class CXFActivator extends HousekeepingActivator {
                         boolean servletRegistered = false;
                         boolean collectorOpened = false;
                         try {
-                            System.setProperty("org.apache.cxf.Logger", "com.openexchange.soap.cxf.logger.Slf4jLogger");
                             System.setProperty(StaxUtils.ALLOW_INSECURE_PARSER, "true");
                             // System.setProperty("org.apache.cxf.servlet.base-address", "http://localhost/foo/");
                             final CXFNonSpringServlet cxfServlet = new CXFNonSpringServlet();
