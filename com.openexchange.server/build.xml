@@ -31,15 +31,7 @@
     </target>
 
     <target name="patchConfigFiles">
-        <antcall target="patchFileLoggingProperties"/>
         <antcall target="patchScriptConf"/>
-    </target>
-
-    <target name="patchFileLoggingProperties">
-        <move tofile="${patchConfDir}/file-logging.properties" file="${patchConfDir}/file-logging.properties.in" overwrite="true"/>
-        <replace file="${patchConfDir}/file-logging.properties">
-            <replacefilter token="@serverlogfile@" value="${logInstallDir}/open-xchange.log"/>
-        </replace>
     </target>
 
     <target name="patchScriptConf">
@@ -47,7 +39,6 @@
         <replace file="${patchConfDir}/ox-scriptconf.sh">
             <replacefilter token="@libDir@" value="${prefix}/${libDir}"/>
             <replacefilter token="@propertiesdir@" value="${confInstallDir}"/>
-            <replacefilter token="@loggingproperties@" value="${confInstallDir}/file-logging.properties"/>
             <replacefilter token="@oxgroupwaresysconfdir@" value="${prefix}"/>
         </replace>
     </target>

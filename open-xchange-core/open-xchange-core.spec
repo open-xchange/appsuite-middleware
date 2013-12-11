@@ -5,6 +5,7 @@ BuildArch:     noarch
 #!BuildIgnore: post-build-checks
 BuildRequires: ant
 BuildRequires: ant-nodeps
+BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
@@ -142,6 +143,8 @@ Provides:      open-xchange-cluster-discovery-mdns = %{version}
 Obsoletes:     open-xchange-cluster-discovery-mdns <= %{version}
 Provides:      open-xchange-cluster-discovery-static = %{version}
 Obsoletes:     open-xchange-cluster-discovery-static <= %{version}
+Provides:      open-xchange-log4j = %{version}
+Obsoletes:     open-xchange-log4j <= %{version}
 
 %description
 This package installs all essential bundles that are necessary to get a working backend installation. This are the bundles for the main
@@ -234,7 +237,7 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
        for prop in $CHECKPROPS; do
            oval=$(ox_read_property $prop ${pfile}.rpmnew)
            if [ -n "$oval" ]; then
-          ox_set_property $prop "$oval" $pfile
+               ox_set_property $prop "$oval" $pfile
            fi
        done
     fi
@@ -545,23 +548,6 @@ EOF
    rm -f $ptmp
 fi
 
-# SoftwareChange_Request-1214
-# SoftwareChange_Request-1429
-# SoftwareChange_Request-1467
-pfile=/opt/open-xchange/etc/file-logging.properties
-for opt in org.apache.cxf.level com.openexchange.soap.cxf.logger.level org.jaudiotagger.level \
-    com.gargoylesoftware.htmlunit.level; do
-    if ! ox_exists_property $opt $pfile; then
-       ox_set_property $opt WARNING $pfile
-    fi
-done
-
-# SoftwareChange_Request-1184
-pfile=/opt/open-xchange/etc/file-logging.properties
-if ! ox_exists_property com.hazelcast.level $pfile; then
-   ox_set_property com.hazelcast.level SEVERE $pfile
-fi
-
 # SoftwareChange_Request-1212
 pfile=/opt/open-xchange/etc/foldercache.properties
 if ! ox_exists_property com.openexchange.folderstorage.outlook.showPersonalBelowInfoStore $pfile; then
@@ -803,30 +789,10 @@ if ! ox_exists_property com.openexchange.templating.trusted $pfile; then
     ox_set_property com.openexchange.templating.trusted server $pfile
 fi
 
-# SoftwareChange_Request-1620, 1631
-PFILE=/opt/open-xchange/etc/file-logging.properties
-if ! ox_exists_property org.glassfish.grizzly.level $PFILE; then
-    ox_set_property org.glassfish.grizzly.level WARNING $PFILE
-fi
-if ! grep com.openexchange.appsuite.level >/dev/null $PFILE; then
-    echo -e "\n# Log access to UI files\n" >> $PFILE
-    echo "# com.openexchange.appsuite.level=FINE" >> $PFILE
-fi
-if ! ox_exists_property com.openexchange.ajax.requesthandler.DispatcherServlet.level $PFILE; then
-    ox_set_property com.openexchange.ajax.requesthandler.DispatcherServlet.level INFO $PFILE
-fi
-
 # SoftwareChange_Request-1635
 PFILE=/opt/open-xchange/etc/permissions.properties
 if ! ox_exists_property com.openexchange.capability.filestore $PFILE; then
     ox_set_property com.openexchange.capability.filestore true $PFILE
-fi
-
-# SoftwareChange_Request-1636
-PFILE=/opt/open-xchange/etc/file-logging.properties
-VALUE=$(ox_read_property org.jaudiotagger.level $PFILE)
-if [ "$VALUE" == "WARNING" -o -z "$VALUE" ]; then
-    ox_set_property org.jaudiotagger.level SEVERE $PFILE
 fi
 
 # SoftwareChange_Request-1643
@@ -865,6 +831,17 @@ ox_add_property com.openexchange.mail.transport.removeMimeVersionInSubParts fals
 # SoftwareChange_Request-1707
 ox_add_property com.openexchange.servlet.contentSecurityPolicy '""' /opt/open-xchange/etc/server.properties
 
+# SoftwareChange_Request-1772
+MODIFIED=$(rpm --verify open-xchange-core | grep file-logging.properties | grep 5 | wc -l)
+if [ -e /opt/open-xchange/etc/file-logging.properties -a $MODIFIED -eq 1 ]; then
+    # Configuration has been modified after installation. Try to migrate.
+    /opt/open-xchange/sbin/extractJULModifications -i /opt/open-xchange/etc/file-logging.properties | /opt/open-xchange/sbin/convertJUL2Logback | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration -a -
+    mv /opt/open-xchange/etc/logback.xml.new /opt/open-xchange/etc/logback.xml
+fi
+rm -f /opt/open-xchange/etc/file-logging.properties
+
+# TODO enable SYSLOG if open-xchange-log4j was installed.
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
@@ -888,6 +865,7 @@ exit 0
 %dir /opt/open-xchange/i18n/
 %dir /opt/open-xchange/importCSV/
 %dir /opt/open-xchange/lib/
+/opt/open-xchange/lib/*
 /opt/open-xchange/lib/oxfunctions.sh
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*

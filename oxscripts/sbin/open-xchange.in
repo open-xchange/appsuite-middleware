@@ -72,8 +72,7 @@ test -z "$JAVA_XTRAOPTS" && JAVA_XTRAOPTS="-Xmx512M"
 
 JAVA_OPTS="${JAVA_XTRAOPTS} \
 -Djava.awt.headless=true \
--Dopenexchange.propdir=$PROPERTIESDIR \
--Djava.util.logging.config.file=$LOGGINGPROPERTIES"
+-Dopenexchange.propdir=$PROPERTIESDIR"
 
 CLASSPATH=""
 

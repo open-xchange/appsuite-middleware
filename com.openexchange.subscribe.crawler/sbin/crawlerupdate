@@ -75,8 +75,7 @@ test -z "$JAVA_OXCMD_OPTS" && JAVA_OXCMD_OPTS="-Xmx280M"
 
 JAVA_OPTS="${JAVA_OXCMD_OPTS} \
 -Djava.awt.headless=true \
--Dopenexchange.propdir=$PROPERTIESDIR \
--Djava.util.logging.config.file=$LOGGINGPROPERTIES"
+-Dopenexchange.propdir=$PROPERTIESDIR"
 
 CLASSPATH="-classpath $OXBUNDLES/com.openexchange.server.jar:\
 $OXBUNDLES/com.openexchange.global.jar:\
