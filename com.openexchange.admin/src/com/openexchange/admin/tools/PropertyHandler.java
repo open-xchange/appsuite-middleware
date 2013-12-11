@@ -146,9 +146,7 @@ public class PropertyHandler {
                     service = AdminCache.getConfigurationService();
                 }
                 if (null == service) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
-                    }
+                    log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
                 } else {
                     final Properties properties = service.getFile("Group.properties");
                     final Hashtable<String, String> ht = this.groupPropValues = new Hashtable<String, String>(properties.size());
@@ -184,9 +182,7 @@ public class PropertyHandler {
                     service = AdminCache.getConfigurationService();
                 }
                 if (null == service) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
-                    }
+                    log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
                 } else {
                     final Properties properties = service.getFile("Group.properties");
                     final Hashtable<String, String> ht = this.groupPropValues = new Hashtable<String, String>(properties.size());
@@ -200,9 +196,7 @@ public class PropertyHandler {
         if ( this.groupPropValues != null && this.groupPropValues.containsKey( key ) ) {
             retBool = Boolean.parseBoolean( this.groupPropValues.get( key ).toString() );
         } else {
-            if(log.isDebugEnabled()){
-                log.debug("Property '{}' not found in file 'Group.properties'! Using fallback :{}", key, fallBack );
-            }
+            log.debug("Property '{}' not found in file 'Group.properties'! Using fallback :{}", key, fallBack );
         }
 
         return retBool;
@@ -224,9 +218,7 @@ public class PropertyHandler {
                     service = AdminCache.getConfigurationService();
                 }
                 if (null == service) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
-                    }
+                    log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
                 } else {
                     final Properties properties = service.getFile("AdminUser.properties");
                     final Hashtable<String, String> ht = this.userPropValues = new Hashtable<String, String>(properties.size());
@@ -263,9 +255,7 @@ public class PropertyHandler {
                     service = AdminCache.getConfigurationService();
                 }
                 if (null == service) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
-                    }
+                    log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
                 } else {
                     final Properties properties = service.getFile("AdminUser.properties");
                     final Hashtable<String, String> ht = this.userPropValues = new Hashtable<String, String>(properties.size());
@@ -300,9 +290,7 @@ public class PropertyHandler {
                     service = AdminCache.getConfigurationService();
                 }
                 if (null == service) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
-                    }
+                    log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
                 } else {
                     final Properties properties = service.getFile("Resource.properties");
                     final Hashtable<String, String> ht = this.resPropValues = new Hashtable<String, String>(properties.size());
@@ -339,9 +327,7 @@ public class PropertyHandler {
                     service = AdminCache.getConfigurationService();
                 }
                 if (null == service) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
-                    }
+                    log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
                 } else {
                     final Properties properties = service.getFile("RMI.properties");
                     final Hashtable<String, String> ht = this.rmiPropValues = new Hashtable<String, String>(properties.size());
@@ -448,15 +434,13 @@ public class PropertyHandler {
     public String getResourceProp(final String key, final String fallback) {
         String retval = fallback;
         synchronized (this) {
-            if ( this.resPropValues == null ) {
+            if (this.resPropValues == null) {
                 ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
                 if (null == service) {
                     service = AdminCache.getConfigurationService();
                 }
                 if (null == service) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
-                    }
+                    log.debug("Service '{}' is missing.", ConfigurationService.class.getName());
                 } else {
                     final Properties properties = service.getFile("Resource.properties");
                     final Hashtable<String, String> ht = this.resPropValues = new Hashtable<String, String>(properties.size());
@@ -467,12 +451,10 @@ public class PropertyHandler {
             }
         }
 
-        if ( this.resPropValues != null && this.resPropValues.containsKey( key ) ) {
-            retval = this.resPropValues.get( key ).toString();
+        if (this.resPropValues != null && this.resPropValues.containsKey(key)) {
+            retval = this.resPropValues.get(key).toString();
         } else {
-            if(log.isDebugEnabled()){
-                log.debug("Property '{}' not found in file 'Resource.properties'! Using fallback :{}", key, fallback );
-            }
+            log.debug("Property '{}' not found in file 'Resource.properties'! Using fallback :{}", key, fallback);
         }
         return retval;
     }

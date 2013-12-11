@@ -98,9 +98,7 @@ public class IPTools {
         }
         // Don't return invalid IPs
         if (!InetAddresses.isInetAddress(remoteIP)) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("{} is not a valid IP. Discarding candidate for remote IP.", remoteIP);
-            }
+            LOG.debug("{} is not a valid IP. Discarding candidate for remote IP.", remoteIP);
             return "";
         }
         return remoteIP;

@@ -52,7 +52,6 @@ package com.openexchange.admin.reseller.rmi.impl;
 import java.rmi.RemoteException;
 import java.util.HashSet;
 import java.util.Map;
-import org.slf4j.Logger;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
@@ -88,9 +87,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
     public OXReseller() throws StorageException {
         super();
-        if (log.isDebugEnabled()) {
-            log.debug("Class loaded: {}", this.getClass().getName());
-        }
+        log.debug("Class loaded: {}", this.getClass().getName());
         basicauth = new BasicAuthenticator();
         resellerauth = new ResellerAuth();
         try {

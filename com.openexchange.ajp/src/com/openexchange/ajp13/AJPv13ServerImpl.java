@@ -55,7 +55,6 @@ import java.net.Socket;
 import java.text.DecimalFormat;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.slf4j.Logger;
 import com.openexchange.ajp13.coyote.sockethandler.CoyoteSocketHandler;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
@@ -253,9 +252,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
                     /*
                      * Socket closed while being blocked in accept
                      */
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("AJP socket closed", e);
-                    }
+                    LOG.debug("AJP socket closed", e);
                     LOG.info("AJPv13Server down");
                     keepOnRunning = false;
                 }

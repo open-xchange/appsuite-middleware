@@ -15,7 +15,26 @@
  */
 package com.google.android.gcm.server;
 
-import static com.google.android.gcm.server.Constants.*;
+import static com.google.android.gcm.server.Constants.GCM_SEND_ENDPOINT;
+import static com.google.android.gcm.server.Constants.JSON_CANONICAL_IDS;
+import static com.google.android.gcm.server.Constants.JSON_ERROR;
+import static com.google.android.gcm.server.Constants.JSON_FAILURE;
+import static com.google.android.gcm.server.Constants.JSON_MESSAGE_ID;
+import static com.google.android.gcm.server.Constants.JSON_MULTICAST_ID;
+import static com.google.android.gcm.server.Constants.JSON_PAYLOAD;
+import static com.google.android.gcm.server.Constants.JSON_REGISTRATION_IDS;
+import static com.google.android.gcm.server.Constants.JSON_RESULTS;
+import static com.google.android.gcm.server.Constants.JSON_SUCCESS;
+import static com.google.android.gcm.server.Constants.PARAM_COLLAPSE_KEY;
+import static com.google.android.gcm.server.Constants.PARAM_DELAY_WHILE_IDLE;
+import static com.google.android.gcm.server.Constants.PARAM_DRY_RUN;
+import static com.google.android.gcm.server.Constants.PARAM_PAYLOAD_PREFIX;
+import static com.google.android.gcm.server.Constants.PARAM_REGISTRATION_ID;
+import static com.google.android.gcm.server.Constants.PARAM_RESTRICTED_PACKAGE_NAME;
+import static com.google.android.gcm.server.Constants.PARAM_TIME_TO_LIVE;
+import static com.google.android.gcm.server.Constants.TOKEN_CANONICAL_REG_ID;
+import static com.google.android.gcm.server.Constants.TOKEN_ERROR;
+import static com.google.android.gcm.server.Constants.TOKEN_MESSAGE_ID;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
@@ -25,7 +44,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -215,9 +233,7 @@ public class Sender {
         }
       }
       Result result = builder.build();
-      if (logger.isDebugEnabled()) {
-        logger.debug("Message created succesfully ({})", result);
-      }
+      logger.debug("Message created succesfully ({})", result);
       return result;
     } else if (token.equals(TOKEN_ERROR)) {
       return new Result.Builder().errorCode(value).build();
@@ -260,9 +276,7 @@ public class Sender {
     do {
       multicastResult = null;
       attempt++;
-      if (logger.isDebugEnabled()) {
-        logger.debug("Attempt #{} to send message {} to regIds {}", attempt, message, unsentRegIds);
-      }
+      logger.debug("Attempt #{} to send message {} to regIds {}", attempt, message, unsentRegIds);
       try {
         multicastResult = sendNoRetry(message, unsentRegIds);
       } catch(IOException e) {

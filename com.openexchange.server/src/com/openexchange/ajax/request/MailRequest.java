@@ -363,14 +363,7 @@ public final class MailRequest {
     }
 
     private void performMultipleInternal(final MailServletInterface mailInterface) throws JSONException {
-        if (LOG.isDebugEnabled()) {
-            final long start = System.currentTimeMillis();
-            collectObj.performOperations(session, writer, mailInterface);
-            final long dur = System.currentTimeMillis() - start;
-            LOG.debug("Multiple '{}' mail request successfully performed: {}msec", getOpName(collectObj.getOperation()), dur);
-        } else {
-            collectObj.performOperations(session, writer, mailInterface);
-        }
+        collectObj.performOperations(session, writer, mailInterface);
     }
 
     public static boolean isMove(final JSONObject jsonObject) throws JSONException {

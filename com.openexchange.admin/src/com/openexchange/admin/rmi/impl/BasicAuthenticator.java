@@ -52,7 +52,6 @@ package com.openexchange.admin.rmi.impl;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.slf4j.Logger;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
@@ -127,9 +126,7 @@ public class BasicAuthenticator extends OXCommonImpl {
                             final Object property = servicereference.getProperty("name");
                             if (null != property && property.toString().equalsIgnoreCase("BasicAuthenticator")) {
                                 final BasicAuthenticatorPluginInterface authplug = (BasicAuthenticatorPluginInterface) this.context.getService(servicereference);
-                                if (LOG.isDebugEnabled()) {
-                                    LOG.debug("Calling doAuthentication for plugin: {}", bundlename);
-                                }
+                                LOG.debug("Calling doAuthentication for plugin: {}", bundlename);
                                 authplug.doAuthentication(authdata);
                                 // leave
                                 return;

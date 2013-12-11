@@ -1935,9 +1935,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                     && participant.getIdentifier() == 0) {
                                 pi.setNull(6, 0);
                             } else {
-                                if (LOG.isDebugEnabled()) {
-                                    LOG.debug("Missing mandatory email address in participant {}", participant.getClass().getSimpleName(), new Throwable());
-                                }
+                                LOG.debug("Missing mandatory email address in participant {}", participant.getClass().getSimpleName(), new Throwable());
                                 throw OXCalendarExceptionCodes.EXTERNAL_PARTICIPANTS_MANDATORY_FIELD.create();
                             }
                         } else {
@@ -4546,7 +4544,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                 rsql.updateReminder(ro);
                             }
 
-                        } else if (LOG.isDebugEnabled()) {
+                        } else {
                             LOG.debug("No recurrence change! Leave corresponding reminder unchanged");
                         }
                     } else {

@@ -2468,9 +2468,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 } catch (final OXException e) {
                     arrays[index] = null;
                     if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getCode()) {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("", e);
-                        }
+                        logger.debug("", e);
                         return null;
                     }
                     logger.error("", e);

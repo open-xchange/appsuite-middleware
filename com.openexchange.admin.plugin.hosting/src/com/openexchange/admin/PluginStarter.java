@@ -99,10 +99,8 @@ public class PluginStarter {
 
             // startJMX();
 
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Loading context implementation: {}", prop.getProp(PropertyHandlerExtended.CONTEXT_STORAGE, null));
-                LOG.debug("Loading util implementation: {}", prop.getProp(PropertyHandlerExtended.UTIL_STORAGE, null));
-            }
+            LOG.debug("Loading context implementation: {}", prop.getProp(PropertyHandlerExtended.CONTEXT_STORAGE, null));
+            LOG.debug("Loading util implementation: {}", prop.getProp(PropertyHandlerExtended.UTIL_STORAGE, null));
         } catch (final RemoteException e) {
             LOG.error("", e);
             throw e;

@@ -812,9 +812,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                      *
                      * Usually the servlet didn't read the previous request body
                      */
-                    if (LOG.isDebugEnabled()) {
-                        requestHeaderMessage.dump("Invalid forward-request detected");
-                    }
+                    requestHeaderMessage.dump("Invalid forward-request detected");
                     continue;
                 } catch (final IllegalStateException stateException) {
                     /*-
@@ -896,20 +894,15 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         if (isConsiderXForwards) {
                             // Scheme
                             String protocol = request.getHeader(AJPv13Config.getProtocolHeader());
-                            if(!isValidProtocol(protocol)) {
-                                if (LOG.isDebugEnabled()) {
-                                    LOG.debug("Could not detect a valid protocol header value in {}, falling back to default", protocol);
-                                }
-                                 protocol = request.getScheme();
+                            if (!isValidProtocol(protocol)) {
+                                LOG.debug("Could not detect a valid protocol header value in {}, falling back to default", protocol);
+                                protocol = request.getScheme();
                             }
                             // Remote address
                             String forHeaderValue = request.getHeader(AJPv13Config.getForHeader());
                             String remoteIP = IPTools.getRemoteIP(forHeaderValue, AJPv13Config.getKnownProxies());
                             if (remoteIP.isEmpty()) {
-                                if (LOG.isDebugEnabled()) {
-                                    forHeaderValue = forHeaderValue == null ? "" : forHeaderValue;
-                                    LOG.debug("Could not detect a valid remote ip in {}: [{}], falling back to default", AJPv13Config.getForHeader(), forHeaderValue);
-                                }
+                                LOG.debug("Could not detect a valid remote ip in {}: [{}], falling back to default", AJPv13Config.getForHeader(), forHeaderValue == null ? "" : forHeaderValue);
                                 remoteIP = request.getRemoteAddr();
                             }
                             // Apply values

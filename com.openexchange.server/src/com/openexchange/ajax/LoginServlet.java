@@ -338,7 +338,7 @@ public class LoginServlet extends AJAXServlet {
                     // Unknown random token; throw error
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("No session could be found for random token: {}", randomToken, new Throwable());
-                    } else if (LoginServlet.LOG.isInfoEnabled()) {
+                    } else {
                         LOG.info("No session could be found for random token: {}", randomToken);
                     }
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -432,9 +432,7 @@ public class LoginServlet extends AJAXServlet {
                         final String oldIP = session.getLocalIp();
                         if (!newIP.equals(oldIP)) {
                             // In case changing IP is intentionally requested by client, log it only if DEBUG aka FINE log level is enabled
-                            if (LOG.isDebugEnabled()) {
-                                LOG.info("Changing IP of session {} with authID: {} from {} to {}{}", session.getSessionID(), session.getAuthId(), oldIP, newIP, '.');
-                            }
+                            LOG.info("Changing IP of session {} with authID: {} from {} to {}", session.getSessionID(), session.getAuthId(), oldIP, newIP);
                             session.setLocalIp(newIP);
                         }
                         response.setData("1");

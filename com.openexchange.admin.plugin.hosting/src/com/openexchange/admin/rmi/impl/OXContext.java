@@ -126,9 +126,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         super();
         this.context = context;
         this.pool = new OXAdminPoolDBPoolExtension();
-        if (log.isDebugEnabled()) {
             log.debug("Class loaded: {}", this.getClass().getName());
-        }
     }
 
     @Override
@@ -756,9 +754,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                             if (null != property && property.toString().equalsIgnoreCase("oxcontext")) {
                                 final OXContextPluginInterface oxctx = (OXContextPluginInterface) this.context.getService(servicereference);
                                 //TODO: Implement check for contextadmin here
-                                if (log.isDebugEnabled()) {
                                     log.debug("Calling list for plugin: {}", bundlename);
-                                }
                                 try {
                                     filter = oxctx.filter(auth);
                                     if (null != filter) {
@@ -900,9 +896,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw new StorageException(e);
         }
         final int reason_id = reason.getId();
-        if (log.isDebugEnabled()) {
             log.debug("{} - {} - {}", ctx, db, reason_id);
-        }
         try {
             /*if (!tool.existsReason(reason_id)) {
                 // FIXME: Util in context???
@@ -1389,9 +1383,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                         if (null != property && property.toString().equalsIgnoreCase("oxcontext")) {
                             extensionsFound = true;
                             final OXContextPluginInterface oxctx = (OXContextPluginInterface) this.context.getService(servicereference);
-                            if (log.isDebugEnabled()) {
                                 log.debug("Calling getData for plugin: {}", bundlename);
-                            }
                             try {
                                 retval = oxctx.getData(ctxs, auth);
                                 addExtensionToContext(ctxs, retval, bundlename);

@@ -52,7 +52,6 @@ package com.sun.mail.imap;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.logging.Level;
-import org.slf4j.Logger;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.QueuingIMAPStore.CountingQueue;
 import com.sun.mail.imap.protocol.IMAPProtocol;

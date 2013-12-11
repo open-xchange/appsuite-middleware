@@ -136,9 +136,7 @@ public class QuotaRequest {
                     MailServletInterface.QUOTA_RESOURCE_STORAGE, MailServletInterface.QUOTA_RESOURCE_MESSAGE });
             } catch (final OXException e) {
                 if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("", e);
-                    }
+                    LOG.debug("", e);
                 } else {
                     LOG.error("", e);
                 }

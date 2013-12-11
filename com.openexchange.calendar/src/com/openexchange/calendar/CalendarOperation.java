@@ -90,7 +90,6 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
-import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -466,10 +465,13 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 Participant[] participants = cimp.getParticipants(cdao, readcon).getList();
                 cdao.setParticipants(participants);
                 if (check_permissions && !recColl.checkPermissions(cdao, so, ctx, readcon, check_special_action, action_folder)) {
-                    if (LOG.isDebugEnabled() && action_folder != inFolder) {
-                        LOG.debug(StringCollection.convertArraytoString(new Object[] {
-                            "Permission Exception 1 (fid!inFolder) for user:oid:fid:inFolder ", I(so.getUserId()), ":", I(oid), ":",
-                            I(action_folder), ":", inFolder }));
+                    if (action_folder != inFolder) {
+                        LOG.debug(
+                            "Permission Exception 1 (fid!inFolder) for user:oid:fid:inFolder {}:{}:{}:{}",
+                            I(so.getUserId()),
+                            I(oid),
+                            I(action_folder),
+                            inFolder);
                     }
                     throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.create(I(oid));
                 } else if (!check_permissions && 0 < inFolder && inFolder == action_folder) {
@@ -509,27 +511,32 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 cdao.setUsers(cimp.getUserParticipants(cdao, readcon, so.getUserId()).getUsers());
                 if (check_permissions && cdao.getEffectiveFolderId() != inFolder) {
                     if (cdao.getFolderType() != FolderObject.SHARED && check_special_action == action) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug(StringCollection.convertArraytoString(new Object[] {
-                                "Permission Exception 2 (fid!inFolder) for user:oid:fid:inFolder ", I(so.getUserId()), ":", I(oid), ":",
-                                I(inFolder), ":", I(action) }));
-                        }
+                        LOG.debug(
+                            "Permission Exception 2 (fid!inFolder) for user:oid:fid:inFolder {}:{}:{}:{}",
+                            I(so.getUserId()),
+                            I(oid),
+                            I(inFolder),
+                            I(action));
                         throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.create();
                     } else if (action_folder != inFolder && check_special_action == action) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug(StringCollection.convertArraytoString(new Object[] {
-                                "Permission Exception 3 (fid!inFolder) for user:oid:fid:inFolder ", I(so.getUserId()), ":", I(oid), ":",
-                                I(inFolder), ":", I(action) }));
-                        }
+                        LOG.debug(
+                            "Permission Exception 3 (fid!inFolder) for user:oid:fid:inFolder {}:{}:{}:{}",
+                            I(so.getUserId()),
+                            I(oid),
+                            I(inFolder),
+                            I(action));
                         throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_3.create();
                     }
                 }
                 if (check_permissions && action == UPDATE && inFolder != action_folder) {
                     if (!recColl.checkPermissions(cdao, so, ctx, readcon, DELETE, inFolder)) { // Move means to check delete
-                        if (LOG.isDebugEnabled() && inFolder != action_folder) {
-                            LOG.debug(StringCollection.convertArraytoString(new Object[] {
-                                "Permission Exception 4 (fid!inFolder) for user:oid:fid:inFolder ", I(so.getUserId()), ":", I(oid), ":",
-                                I(action_folder), ":", I(inFolder) }));
+                        if (inFolder != action_folder) {
+                            LOG.debug(
+                                "Permission Exception 4 (fid!inFolder) for user:oid:fid:inFolder {}:{}:{}:{}",
+                                I(so.getUserId()),
+                                I(oid),
+                                I(action_folder),
+                                I(inFolder));
                         }
                         throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_4.create();
                     }
@@ -1223,9 +1230,11 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                             }
                             colss.append(fn);
                         }
-                        LOG.debug(StringCollection.convertArraytoString(new Object[] {
-                            "Permission Exception (fid!inFolder) for user:oid:fid:cols ", I(so.getUserId()), ":", I(cdao.getObjectID()),
-                            ":", I(oids[index][1]), ":", colss.toString() }));
+                        LOG.debug("Permission Exception (fid!inFolder) for user:oid:fid:cols {}:{}:{}:{}",
+                            I(so.getUserId()),
+                            I(cdao.getObjectID()),
+                            I(oids[index][1]),
+                            colss.toString());
                     }
                     throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.create(I(cdao.getObjectID()));
                 }

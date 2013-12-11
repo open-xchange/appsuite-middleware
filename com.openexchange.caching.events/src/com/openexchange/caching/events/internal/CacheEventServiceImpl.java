@@ -84,37 +84,35 @@ public final class CacheEventServiceImpl implements CacheEventService {
 
     @Override
     public void addListener(CacheListener listener) {
-        if (cacheListeners.add(listener) && LOG.isDebugEnabled()) {
+        if (cacheListeners.add(listener)) {
             LOG.debug("Added cache listener: {}", listener);
         }
     }
 
     @Override
     public void removeListener(CacheListener listener) {
-        if (cacheListeners.remove(listener) && LOG.isDebugEnabled()) {
+        if (cacheListeners.remove(listener)) {
             LOG.debug("Removed cache listener for region: {}", listener);
         }
     }
 
     @Override
     public void addListener(String region, CacheListener listener) {
-        if (getListeners(region).add(listener) && LOG.isDebugEnabled()) {
+        if (getListeners(region).add(listener)) {
             LOG.debug("Added cache listener for region '{}': {}", region, listener);
         }
     }
 
     @Override
     public void removeListener(String region, CacheListener listener) {
-        if (getListeners(region).remove(listener) && LOG.isDebugEnabled()) {
+        if (getListeners(region).remove(listener)) {
             LOG.debug("Removed cache listener for region '{}': {}", region, listener);
         }
     }
 
     @Override
     public void notify(Object sender, CacheEvent event) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("notify: {}", event);
-        }
+        LOG.debug("notify: {}", event);
         List<Runnable> notificationRunnables = new ArrayList<Runnable>();
         if (null != event.getRegion()) {
             for (CacheListener listener : getListeners(event.getRegion())) {

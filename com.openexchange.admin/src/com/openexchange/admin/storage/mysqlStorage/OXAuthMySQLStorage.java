@@ -118,9 +118,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                         rs = prep.executeQuery();
                         if (!rs.next()) {
                             // auth failed , admin user not found in context
-                            if (log.isDebugEnabled()) {
                                 log.debug("Admin user \"{}\" not found in context \"{}\"!", authdata.getLogin(), ctx.getId());
-                            }
                             return false;
                         } else {
                             String pwcrypt = rs.getString("userPassword");
@@ -218,22 +216,19 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                 rs = prep.executeQuery();
                 if (!rs.next()) {
                     // auth failed , user not found in context
+                    log.debug("User \"{}\" not found in context \"{}\"!", authdata.getLogin(), ctx.getId());
+                    return false;
+                }
+                String pwcrypt = rs.getString("userPassword");
+                String pwmech  = rs.getString("passwordMech");
+                // now check via our crypt mech the password
+                if ( GenericChecks.authByMech(pwcrypt, authdata.getPassword(), pwmech) ) {
+                    return true;
+                } else {
                     if (log.isDebugEnabled()) {
-                        log.debug("User \"{}\" not found in context \"{}\"!", authdata.getLogin(), ctx.getId());
+                        log.debug("Password for ser \"{}\" did not match!", authdata.getLogin());
                     }
                     return false;
-                } else {
-                    String pwcrypt = rs.getString("userPassword");
-                    String pwmech  = rs.getString("passwordMech");
-                    // now check via our crypt mech the password
-                    if ( GenericChecks.authByMech(pwcrypt, authdata.getPassword(), pwmech) ) {
-                        return true;
-                    } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Password for ser \"{}\" did not match!", authdata.getLogin());
-                        }
-                        return false;
-                    }
                 }
             } catch (final SQLException sql) {
                 log.error("", sql);

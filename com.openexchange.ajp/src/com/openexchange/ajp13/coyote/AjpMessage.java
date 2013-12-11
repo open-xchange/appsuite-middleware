@@ -261,9 +261,7 @@ public final class AjpMessage {
     public void appendBytes(final byte[] b, final int off, final int numBytes) {
         if (pos + numBytes + 3 > buf.length) {
             log.error("ajpmessage.overflow: numBytes={}, pos={}", numBytes, pos, new ArrayIndexOutOfBoundsException());
-            if (log.isDebugEnabled()) {
-                dump("Overflow/coBytes");
-            }
+            dump("Overflow/coBytes");
             return;
         }
         appendInt(numBytes);
@@ -405,14 +403,10 @@ public final class AjpMessage {
         // Verify message signature
         if ((mark != 0x1234) && (mark != 0x4142)) {
             log.error("ajpmessage.invalid: mark={}", mark);
-            if (log.isDebugEnabled()) {
-                dump("In: ");
-            }
+            dump("In: ");
             return -1;
         }
-        if (log.isDebugEnabled()) {
-            log.debug("Received AJP message of length {}. First payload byte is: {}", len, buf[0]);
-        }
+        log.debug("Received AJP message of length {}. First payload byte is: {}", len, buf[0]);
         return len;
     }
 
@@ -420,23 +414,22 @@ public final class AjpMessage {
      * Dump the contents of the message, prefixed with the given String.
      */
     public void dump(final String msg) {
-        if (!log.isDebugEnabled()) {
-            return;
-        }
-        final com.openexchange.java.StringAllocator temp = new com.openexchange.java.StringAllocator(8192).append(msg).append('\n');
-        int max = pos;
-        if (len + 4 > pos) {
-            max = len + 4;
-        }
-        if (max > 1000) {
-            max = 1000;
-        }
+        if (log.isDebugEnabled()) {
+            final com.openexchange.java.StringAllocator temp = new com.openexchange.java.StringAllocator(8192).append(msg).append('\n');
+            int max = pos;
+            if (len + 4 > pos) {
+                max = len + 4;
+            }
+            if (max > 1000) {
+                max = 1000;
+            }
 
-        for (int j = 0; j < max; j += 16) {
-            hexLine(buf, j, len, temp);
-            temp.append('\n');
+            for (int j = 0; j < max; j += 16) {
+                hexLine(buf, j, len, temp);
+                temp.append('\n');
+            }
+            log.debug(temp.toString());
         }
-        log.debug(temp.toString());
     }
 
     // ------------------------------------------------------ Protected Methods

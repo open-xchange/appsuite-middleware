@@ -49,7 +49,6 @@
 
 package com.openexchange.contactcollector.internal;
 
-import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -162,9 +161,7 @@ public final class AliasesProvider {
             try {
                 set.add(new QuotedInternetAddress(aliase, false));
             } catch (final AddressException e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Alias could not be parsed to an internet address: {}", aliase, e);
-                }
+                LOG.debug("Alias could not be parsed to an internet address: {}", aliase, e);
             }
         }
         return set;

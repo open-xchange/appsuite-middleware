@@ -128,9 +128,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             throw e1;
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("{} - {} - {}", ctx, res, auth);
-        }
+        log.debug("{} - {} - {}", ctx, res, auth);
 
         try {
             try {
@@ -235,9 +233,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
            throw e;
        }
 
-       if (log.isDebugEnabled()) {
            log.debug("{} - {} - {}", ctx, res, auth);
-       }
 
        checkContextAndSchema(ctx);
 
@@ -293,9 +289,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
                        if (null != property && property.toString().equalsIgnoreCase("oxresource")) {
                            final OXResourcePluginInterface oxresource = (OXResourcePluginInterface) this.context.getService(servicereference);
                            try {
-                               if (log.isDebugEnabled()) {
                                    log.debug("Calling create for plugin: {}", bundlename);
-                               }
                                oxresource.create(ctx, res, auth);
                                interfacelist.add(oxresource);
                            } catch (final PluginException e) {
@@ -342,9 +336,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             } catch (NoSuchObjectException e) {
                 throw new NoSuchResourceException(e);
             }
-            if (log.isDebugEnabled()) {
                 log.debug("{} - {} - {}", ctx, res, auth);
-            }
             checkContextAndSchema(ctx);
             if (!tool.existsResource(ctx, res.getId())) {
                 throw new NoSuchResourceException("Resource with this id does not exist");
@@ -474,9 +466,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         try {
             basicauth.doAuthentication(auth,ctx);
 
-            if (log.isDebugEnabled()) {
                 log.debug("{} - {} - {}", ctx, Arrays.toString(resources), auth);
-            }
 
             checkContextAndSchema(ctx);
 
@@ -558,9 +548,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             throw e;
         }
 
-        if (log.isDebugEnabled()) {
             log.debug("{} - {} - {}", ctx, pattern, auth);
-        }
 
         checkContextAndSchema(ctx);
 

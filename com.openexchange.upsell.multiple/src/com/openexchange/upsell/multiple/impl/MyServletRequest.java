@@ -58,7 +58,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.rmi.RemoteException;
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -318,9 +317,7 @@ public final class MyServletRequest  {
                 }
 
                 sendUpsellEmail(email_addy_ox_user, email_addy_ox_user, oxuser_body, oxuser_subject);
-                if(LOG.isDebugEnabled()){
-                    LOG.debug("Sent upsell request email to enduser with email address:{}", email_addy_ox_user);
-                }
+                LOG.debug("Sent upsell request email to enduser with email address:{}", email_addy_ox_user);
             }
 
         } catch (final OXException e) {
@@ -402,16 +399,12 @@ public final class MyServletRequest  {
             final UpsellURLService urlservice = getServiceRegistry().getService(UpsellURLService.class);
             final UpsellURLService provider = null;
             if (null != urlservice) {
-                if(LOG.isDebugEnabled()){
-                    LOG.debug("Found URLGenerator service. Using it now to generate redirect Upsell URL instead of default.");
-                }
+                LOG.debug("Found URLGenerator service. Using it now to generate redirect Upsell URL instead of default.");
                 // We have a special service providing login information, so we use that one...
                 try {
                     // pass the parameters to the external implementation
                     url = urlservice.generateUrl(getParameterMap(jsonObject),this.sessionObj,this.user,this.admin,this.ctx);
-                    if(LOG.isDebugEnabled()){
-                        LOG.debug("Using custom redirect URL from URLGenerator service. URL: {}", url);
-                    }
+                    LOG.debug("Using custom redirect URL from URLGenerator service. URL: {}", url);
                 } catch (final OXException e) {
                     LOG.error("Fatal error occurred, generating redirect URL from custom implementation failed!", e);
                 }
@@ -437,21 +430,15 @@ public final class MyServletRequest  {
         String STATIC_URL_RAW = getFromConfig(PROPERTY_METHOD_STATIC_SHOP_REDIR_URL);
         final int contextId = this.ctx.getContextId();
 
-        if(LOG.isDebugEnabled()){
-            LOG.debug("Admin user attributes for context {} : {}", contextId, this.admin.getAttributes());
-        }
+        LOG.debug("Admin user attributes for context {} : {}", contextId, this.admin.getAttributes());
 
         if(this.admin.getAttributes().containsKey("com.openexchange.upsell/url")){
             final Set urlset = this.admin.getAttributes().get("com.openexchange.upsell/url");
             STATIC_URL_RAW = (String) urlset.iterator().next();
             STATIC_URL_RAW += "src=ox&user=_USER_&invite=_INVITE_&mail=_MAIL_&purchase_type=_PURCHASE_TYPE_&login=_LOGIN_&imaplogin=_IMAPLOGIN_&clicked_feat=_CLICKED_FEATURE_&upsell_plan=_UPSELL_PLAN_&cid=_CID_&lang=_LANG_";
-            if(LOG.isDebugEnabled()){
-                LOG.debug("Parsed UPSELL URL from context {} and admin user attributes: {}", contextId, STATIC_URL_RAW);
-            }
+            LOG.debug("Parsed UPSELL URL from context {} and admin user attributes: {}", contextId, STATIC_URL_RAW);
         }else{
-            if(LOG.isDebugEnabled()){
-                LOG.debug("Parsed UPSELL URL from configuration for context: {}", contextId);
-            }
+            LOG.debug("Parsed UPSELL URL from configuration for context: {}", contextId);
         }
 
         return STATIC_URL_RAW;

@@ -224,7 +224,6 @@ public final class StringCache {
                     // case the cache must be created, or we just update the count for
                     // the string
                     if (bcCount > trainThreshold) {
-                        final long t1 = System.currentTimeMillis();
                         // Sort the entries according to occurrence
                         final TreeMap tempMap = new TreeMap();
                         final Iterator entries = bcStats.keySet().iterator();
@@ -272,10 +271,6 @@ public final class StringCache {
                         bcCount = 0;
                         bcStats.clear();
                         bcCache = tempbcCache;
-                        if (log.isDebugEnabled()) {
-                            final long t2 = System.currentTimeMillis();
-                            log.debug("ByteCache generation time: " + (t2 - t1) + "ms");
-                        }
                     } else {
                         bcCount++;
                         // Allocate new ByteEntry for the lookup
@@ -335,7 +330,6 @@ public final class StringCache {
                     // case the cache must be created, or we just update the count for
                     // the string
                     if (ccCount > trainThreshold) {
-                        final long t1 = System.currentTimeMillis();
                         // Sort the entries according to occurrence
                         final TreeMap tempMap = new TreeMap();
                         final Iterator entries = ccStats.keySet().iterator();
@@ -383,10 +377,6 @@ public final class StringCache {
                         ccCount = 0;
                         ccStats.clear();
                         ccCache = tempccCache;
-                        if (log.isDebugEnabled()) {
-                            final long t2 = System.currentTimeMillis();
-                            log.debug("CharCache generation time: " + (t2 - t1) + "ms");
-                        }
                     } else {
                         ccCount++;
                         // Allocate new CharEntry for the lookup

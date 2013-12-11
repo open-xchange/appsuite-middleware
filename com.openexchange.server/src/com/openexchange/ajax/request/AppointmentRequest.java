@@ -157,10 +157,8 @@ public class AppointmentRequest extends CalendarRequest {
         appointmentFactory = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
 
         timeZone = getTimeZone(sTimeZone);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("use timezone string: {}", sTimeZone);
-            LOG.debug("use user timezone: {}", timeZone);
-        }
+        LOG.debug("use timezone string: {}", sTimeZone);
+        LOG.debug("use user timezone: {}", timeZone);
     }
 
     public Date getTimestamp() {

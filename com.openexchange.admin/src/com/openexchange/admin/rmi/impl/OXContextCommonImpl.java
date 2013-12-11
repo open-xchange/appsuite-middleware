@@ -129,9 +129,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
 
         new BasicAuthenticator(context).doAuthentication(auth);
 
-        if (log.isDebugEnabled()) {
-            log.debug("{} - {}", ctx, admin_user);
-        }
+        log.debug("{} - {}", ctx, admin_user);
 
         try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
@@ -205,9 +203,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                         final Object property = servicereference.getProperty("name");
                         if (null != property && property.toString().equalsIgnoreCase("oxcontext")) {
                             final OXContextPluginInterface oxctx = (OXContextPluginInterface) this.context.getService(servicereference);
-                            if (log.isDebugEnabled()) {
-                                log.debug("Calling {} for plugin: {}", method, bundlename);
-                            }
+                            log.debug("Calling {} for plugin: {}", method, bundlename);
                             try {
                                 final Class[] classes = new Class[args.length];
                                 for(int i=0; i<args.length; i++) {

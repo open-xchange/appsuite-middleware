@@ -50,9 +50,7 @@
 package com.openexchange.contactcollector.internal;
 
 import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
-
 import java.io.UnsupportedEncodingException;
-import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -63,13 +61,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
-
-
 import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
@@ -288,9 +283,7 @@ public class Memorizer implements Runnable {
             try {
                 set.add(new QuotedInternetAddress(aliase, false));
             } catch (final AddressException e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Alias could not be parsed to an internet address: {}", aliase, e);
-                }
+                LOG.debug("Alias could not be parsed to an internet address: {}", aliase, e);
             }
         }
         return set;

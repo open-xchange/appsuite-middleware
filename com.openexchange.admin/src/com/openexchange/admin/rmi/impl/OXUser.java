@@ -53,7 +53,6 @@ import static com.openexchange.java.Autoboxing.i;
 import java.io.UnsupportedEncodingException;
 import java.rmi.RemoteException;
 import java.security.NoSuchAlgorithmException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -253,9 +252,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
             }
 
-            if (log.isDebugEnabled()) {
                 log.debug("{} - {} - {}", ctx, usrdata, auth);
-            }
 
             if (!tool.existsUser(ctx, userid.intValue())) {
                 final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + userid + " in context " + ctx.getId());
@@ -293,9 +290,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                             final OXUserPluginInterface oxuser = (OXUserPluginInterface) this.context.getService(servicereference);
                             if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !isContextAdmin)) {
                                 try {
-                                    if (log.isDebugEnabled()) {
                                         log.debug("Calling change for plugin: {}", bundlename);
-                                    }
                                     oxuser.change(ctx, usrdata, auth);
                                 } catch (final PluginException e) {
                                     log.error("Error while calling change for plugin: {}", bundlename, e);
@@ -393,9 +388,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw invalidDataException;
         }
 
-        if (log.isDebugEnabled()) {
             log.debug("{} - {} - {} - {}", ctx, user, moduleAccess, auth);
-        }
 
         try {
             basicauth.doAuthentication(auth, ctx);
@@ -597,9 +590,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw e3;
         }
 
-        if (log.isDebugEnabled()) {
             log.debug("{} - {} - {}", ctx, usrdata, auth);
-        }
 
         basicauth.doAuthentication(auth, ctx);
 
@@ -652,9 +643,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw e3;
         }
 
-        if (log.isDebugEnabled()) {
             log.debug("{} - {} - {} - {}", ctx, usr, access, auth);
-        }
 
         try {
             basicauth.doAuthentication(auth,ctx);
@@ -726,9 +715,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                                 final boolean canHandleContextAdmin = oxuser.canHandleContextAdmin();
                                 if (canHandleContextAdmin || (!canHandleContextAdmin && !tool.isContextAdmin(ctx, usr.getId().intValue()))) {
                                     try {
-                                        if (log.isDebugEnabled()) {
                                             log.debug("Calling create for plugin: {}", bundlename);
-                                        }
                                         oxuser.create(ctx, usr, access, auth);
                                         interfacelist.add(oxuser);
                                     } catch (final PluginException e) {
@@ -858,9 +845,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
         basicauth.doAuthentication(auth,ctx);
 
-        if (log.isDebugEnabled()) {
             log.debug("{} - {} - {}", ctx, Arrays.toString(users), auth);
-        }
         checkContextAndSchema(ctx);
 
         try {
@@ -919,18 +904,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                             if (!oxuser.canHandleContextAdmin()) {
                                 retusers = removeContextAdmin(ctx, retusers);
                                 if (retusers.length > 0) {
-                                    if (log.isDebugEnabled()) {
                                         log.debug("Calling delete for plugin: {}", bundlename);
-                                    }
                                     final Exception exception = callDeleteForPlugin(ctx, auth, retusers, interfacelist, bundlename, oxuser);
                                     if (null != exception) {
                                         exceptionlist.add(exception);
                                     }
                                 }
                             } else {
-                                if (log.isDebugEnabled()) {
                                     log.debug("Calling delete for plugin: {}", bundlename);
-                                }
                                 final Exception exception = callDeleteForPlugin(ctx, auth, retusers, interfacelist, bundlename, oxuser);
                                 if (null != exception) {
                                     exceptionlist.add(exception);
@@ -1043,9 +1024,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw e;
         }
 
-        if (log.isDebugEnabled()) {
             log.debug("{} - {} - {}", ctx, Arrays.toString(users), auth);
-        }
 
         try {
             // enable check who wants to get data if authentcaition is enabled
@@ -1142,9 +1121,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                         if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
                             final OXUserPluginInterface oxuserplugin = (OXUserPluginInterface) this.context.getService(servicereference);
                             //TODO: Implement check for contextadmin here
-                            if (log.isDebugEnabled()) {
                                 log.debug("Calling getData for plugin: {}", bundlename);
-                            }
                             retusers = oxuserplugin.getData(ctx, retusers, auth);
                         }
                     }
@@ -1170,9 +1147,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             log.error("", invalidDataException);
             throw invalidDataException;
         }
-        if (log.isDebugEnabled()) {
             log.debug("{} - {} - {}", ctx, user, auth);
-        }
         try {
             basicauth.doAuthentication(auth, ctx);
             checkContextAndSchema(ctx);
@@ -1218,9 +1193,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             log.error("", invalidDataException);
             throw invalidDataException;
         }
-        if (log.isDebugEnabled()) {
             log.debug("{} - {} - {}", ctx, user, auth);
-        }
         try {
             basicauth.doAuthentication(auth, ctx);
             checkContextAndSchema(ctx);
@@ -1269,9 +1242,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw e1;
         }
 
-        if (log.isDebugEnabled()) {
             log.debug("{} - {}", ctx, auth);
-        }
 
         basicauth.doAuthentication(auth,ctx);
 
@@ -1292,9 +1263,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw e1;
         }
 
-        if (log.isDebugEnabled()) {
             log.debug("{} - {}", ctx, auth);
-        }
 
         basicauth.doAuthentication(auth,ctx);
 
@@ -1312,9 +1281,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     private Exception callDeleteForPlugin(final Context ctx, final Credentials auth, final User[] retusers, final ArrayList<OXUserPluginInterface> interfacelist, final String bundlename, final OXUserPluginInterface oxuser) {
         try {
-            if (log.isDebugEnabled()) {
                 log.debug("Calling delete for plugin: {}", bundlename);
-            }
             oxuser.delete(ctx, retusers, auth);
             interfacelist.add(oxuser);
             return null;
@@ -1516,9 +1483,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw invalidDataException;
         }
 
-        if (log.isDebugEnabled()) {
             log.debug("{} - {} - {} - {}", filter, addAccess, removeAccess, auth);
-        }
 
         try {
             basicauth.doAuthentication(auth);
@@ -1542,9 +1507,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
         final int addBits = getPermissionBits(addAccess);
         final int removeBits = getPermissionBits(removeAccess);
-        if (log.isDebugEnabled()) {
             log.debug("Adding {} removing {} to filter {}", addBits, removeBits, filter);
-        }
 
         try {
             tool.changeAccessCombination(permissionBits, addBits, removeBits);

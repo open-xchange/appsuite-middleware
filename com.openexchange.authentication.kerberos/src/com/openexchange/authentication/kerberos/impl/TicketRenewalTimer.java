@@ -57,7 +57,6 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import javax.security.auth.Subject;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.kerberos.ClientPrincipal;
@@ -102,15 +101,7 @@ class TicketRenewalTimer implements Runnable {
         if (LOG.isDebugEnabled()) {
             Calendar cal = new GregorianCalendar(TimeZones.UTC, Locale.ENGLISH);
             cal.add(Calendar.SECOND, ticketExpiresInSeconds);
-            StringBuilder sb = new StringBuilder();
-            sb.append("Ticket for ");
-            sb.append(getName(subject));
-            sb.append(" expires in ");
-            sb.append(cal.toString());
-            sb.append(". Running timer in ");
-            sb.append(ticketExpiresInSeconds);
-            sb.append(" seconds.");
-            LOG.debug(sb.toString());
+            LOG.debug("Ticket for {} expires in {}. Running timer in {} seconds.", getName(subject), cal.toString(), ticketExpiresInSeconds);
         }
         scheduled = timerService.schedule(this, ticketExpiresInSeconds, TimeUnit.SECONDS);
     }

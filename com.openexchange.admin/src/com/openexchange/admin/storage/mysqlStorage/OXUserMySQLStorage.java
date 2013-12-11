@@ -2024,8 +2024,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 final Map<String, String> guiPrefs = readGUISettings(ctx, newuser, read_ox_con);
 
-                if( guiPrefs != null ) {
-                    if( log.isDebugEnabled() ) {
+                if (guiPrefs != null) {
+                    if (log.isDebugEnabled()) {
                         String out = "User: " + username;
                         final Iterator<Entry<String, String>> i = guiPrefs.entrySet().iterator();
                         while (i.hasNext()) {

@@ -1306,9 +1306,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 if (classname == null) {
                     classname = default_class;
                 }
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Using {} in CalendarSql", classname);
-                }
+                LOG.debug("Using {} in CalendarSql", classname);
                 cimp = (CalendarSqlImp) Class.forName(classname).newInstance();
             }
         } catch(final ConfigurationException ce) {

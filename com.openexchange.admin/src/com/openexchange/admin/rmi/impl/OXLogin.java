@@ -53,7 +53,6 @@ import java.rmi.RemoteException;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.rmi.OXLoginInterface;
@@ -130,9 +129,7 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
                         final Object property = servicereference.getProperty("name");
                         if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
                             final OXUserPluginInterface oxuserplugin = (OXUserPluginInterface) this.context.getService(servicereference);
-                            if (log.isDebugEnabled()) {
-                                log.debug("Calling getData for plugin: {}", bundlename);
-                            }
+                            log.debug("Calling getData for plugin: {}", bundlename);
                             retusers = oxuserplugin.getData(ctx, retusers, auth);
                         }
                     }
