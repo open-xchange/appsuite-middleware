@@ -218,7 +218,7 @@ public final class ICalJSONDataHandler implements DataHandler {
                         try {
                             tmp = Integer.parseInt(recPosStr.trim());
                         } catch (final NumberFormatException e) {
-                            LOG.error(MessageFormat.format("Data argument \"{0}\" is not a number: {1}", recPosArg, recPosStr), e);
+                            LOG.error("Data argument \"{}\" is not a number: {}", recPosArg, recPosStr, e);
                             tmp = 0;
                         }
                         recurrencePosition = tmp;

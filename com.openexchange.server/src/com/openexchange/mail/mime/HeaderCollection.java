@@ -53,6 +53,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -981,7 +982,7 @@ public class HeaderCollection implements Serializable {
             final Iterator<Map.Entry<String, String>> iter = hc.getAllHeaders();
             while (iter.hasNext()) {
                 final Map.Entry<String, String> e = iter.next();
-                log2.info(e.getKey() + ": " + e.getValue());
+                log2.info(MessageFormat.format("{0}: {1}", e.getKey(), e.getValue()));
                 if ("Faust".equals(e.getKey())) {
                     iter.remove();
                 }
@@ -992,7 +993,7 @@ public class HeaderCollection implements Serializable {
             final Iterator<Map.Entry<String, String>> iter2 = hc.getAllHeaders();
             while (iter2.hasNext()) {
                 final Map.Entry<String, String> e = iter2.next();
-                log2.info(e.getKey() + ": " + e.getValue());
+                log2.info(MessageFormat.format("{0}: {1}", e.getKey(), e.getValue()));
             }
 
             log2.info("\n\nNon-Matching");
@@ -1000,7 +1001,7 @@ public class HeaderCollection implements Serializable {
             final Iterator<Map.Entry<String, String>> iter3 = hc.getNonMatchingHeaders(new String[] { "To", "From" });
             while (iter3.hasNext()) {
                 final Map.Entry<String, String> e = iter3.next();
-                log2.info(e.getKey() + ": " + e.getValue());
+                log2.info(MessageFormat.format("{0}: {1}", e.getKey(), e.getValue()));
             }
 
             log2.info("\n\nMatching");
@@ -1008,7 +1009,7 @@ public class HeaderCollection implements Serializable {
             final Iterator<Map.Entry<String, String>> iter4 = hc.getMatchingHeaders(new String[] { "To", "From" });
             while (iter4.hasNext()) {
                 final Map.Entry<String, String> e = iter4.next();
-                log2.info(e.getKey() + ": " + e.getValue());
+                log2.info(MessageFormat.format("{0}: {1}", e.getKey(), e.getValue()));
             }
 
             log2.info("\n\nEquals");

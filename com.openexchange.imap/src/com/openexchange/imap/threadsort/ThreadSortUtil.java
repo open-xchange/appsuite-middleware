@@ -52,6 +52,7 @@ package com.openexchange.imap.threadsort;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -498,8 +499,8 @@ public final class ThreadSortUtil {
             final MailMessage mail = mails[i];
             final int mailLevel = mail.getThreadLevel();
             if (mailLevel > level) {
-                if (LOG.isWarnEnabled() && mailLevel != level + 1) {
-                    LOG.warn("Unexpected thread level! Expected=" + (level + 1) + ", Actual=" + mailLevel);
+                if (mailLevel != level + 1) {
+                    LOG.warn("Unexpected thread level! Expected={}, Actual={}", (level + 1), mailLevel);
                 }
                 final ThreadSortMailMessage parent = newList.get(newList.size() - 1);
                 final List<ThreadSortMailMessage> sublist = new ArrayList<ThreadSortMailMessage>();

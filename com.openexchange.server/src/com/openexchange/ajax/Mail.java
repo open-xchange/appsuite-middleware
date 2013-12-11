@@ -1626,9 +1626,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
                 addrs.removeAll(validAddrs);
             } catch (final AddressException e) {
-                LOG.warn(MessageFormat.format("Contact collector could not be triggered: {0}", e.getMessage()), e);
+                LOG.warn("Contact collector could not be triggered: {}", e.getMessage(), e);
             } catch (final JSONException e) {
-                LOG.warn(MessageFormat.format("Contact collector could not be triggered: {0}", e.getMessage()), e);
+                LOG.warn("Contact collector could not be triggered: {}", e.getMessage(), e);
             }
             if (!addrs.isEmpty()) {
                 // Add addresses
@@ -2372,7 +2372,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             try {
                 tmp.append(Helper.encodeFilename(fileName, STR_UTF8, internetExplorer));
             } catch (final UnsupportedEncodingException e) {
-                LOG.error("Unsupported encoding in a message detected and monitored: \"" + STR_UTF8 + '"', e);
+                LOG.error("Unsupported encoding in a message detected and monitored: \"{}{}", STR_UTF8, '"', e);
                 MailServletInterface.mailInterfaceMonitor.addUnsupportedEncodingExceptions(STR_UTF8);
                 return fileName;
             }

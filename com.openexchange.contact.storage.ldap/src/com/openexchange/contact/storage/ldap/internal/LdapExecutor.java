@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.storage.ldap.internal;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -115,7 +116,7 @@ public class LdapExecutor  {
                 Date start = new Date();
                 LOG.debug("Search [{}]: {}", baseDN, filter);
                 List<LdapResult> ldapResults = LdapResult.getResults(context.search(baseDN, filter, searchControls));
-                LOG.debug("Got " + ldapResults.size() + " results, " + (new Date().getTime() - start.getTime()) + "ms eleapsed.");
+                LOG.debug("Got {} results, {}ms eleapsed.", ldapResults.size(), (new Date().getTime() - start.getTime()));
                 results.addAll(ldapResults);
                 cookie = extractPagedResultsCookie();
             } while (null != cookie);
@@ -151,7 +152,7 @@ public class LdapExecutor  {
             LOG.debug("Search []: (objectClass=*)");
             Date start = new Date();
             List<LdapResult> ldapResults = LdapResult.getResults(context.search("", "(objectClass=*)", searchControls));
-            LOG.debug("Got " + ldapResults.size() + " results, " + (new Date().getTime() - start.getTime()) + "ms eleapsed.");
+            LOG.debug("Got {} results, {}ms eleapsed.", ldapResults.size(), (new Date().getTime() - start.getTime()));
             for (LdapResult ldapResult : ldapResults) {
                 String defaultNamingContext = (String)ldapResult.getAttribute("defaultNamingContext");
                 if (null != defaultNamingContext) {

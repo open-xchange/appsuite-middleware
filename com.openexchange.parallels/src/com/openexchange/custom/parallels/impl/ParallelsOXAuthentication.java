@@ -55,6 +55,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import org.slf4j.Logger;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
@@ -180,8 +181,8 @@ public class ParallelsOXAuthentication implements AuthenticationService {
                 loginmapping = rs.getString("login_info");
             }else{
                 LOG.error("Did not get any login_info mapping from configdb database for loginstring {}", gui_loginstring);
-                LOG.error("Hint: Account \""+gui_loginstring+"\" not yet provsioned in OX?");
-                LOG.error("This authentication request for loginstring "+gui_loginstring+" will fail");
+                LOG.error("Hint: Account \"{}\" not yet provsioned in OX?", gui_loginstring);
+                LOG.error("This authentication request for loginstring {} will fail", gui_loginstring);
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
             }
 
@@ -212,7 +213,7 @@ public class ParallelsOXAuthentication implements AuthenticationService {
             try {
                 userId = userservice.getUserId(oxuser_, ctx);
             } catch (final OXException e) {
-                LOG.error("UserID for "+oxuser_+" could not be resolved via OX API from database. Not provisioned yet?",e);
+                LOG.error("UserID for {} could not be resolved via OX API from database. Not provisioned yet?", oxuser_,e);
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
             }
             final User user = userservice.getUser(userId, ctx);
@@ -245,7 +246,7 @@ public class ParallelsOXAuthentication implements AuthenticationService {
             LOG.error("Error in parsing context id from configdb", e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
         } catch (final OXException e) {
-            LOG.error("Error in loading user or context from loginstring "+gui_loginstring+" from OX API", e);
+            LOG.error("Error in loading user or context from loginstring {} from OX API", gui_loginstring, e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
         } finally {
 

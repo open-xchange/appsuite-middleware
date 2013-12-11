@@ -49,6 +49,7 @@
 
 package com.openexchange.logging.osgi;
 
+import java.text.MessageFormat;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
@@ -138,7 +139,7 @@ public class Activator extends HousekeepingActivator {
             if (lLogger != null) {
                 lLogger.setLevel(Level.INFO);
             } else {
-                logger.warn("Not able to override the log level to INFO for class: " + className);
+                logger.warn("Not able to override the log level to INFO for class: {}", className);
             }
         }
     }

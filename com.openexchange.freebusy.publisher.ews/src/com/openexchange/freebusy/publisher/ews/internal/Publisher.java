@@ -176,24 +176,24 @@ public class Publisher implements Runnable {
         for (int i = 0; i < users.length; i++) {
             String legacyExchangeDN = legacyExchangeDNs[i];
             if (null == legacyExchangeDN) {
-                LOG.debug("No legacyExchangeDN for user " + users[i].getLoginInfo() + ", skipping.");
+                LOG.debug("No legacyExchangeDN for user {}, skipping.", users[i].getLoginInfo());
                 continue;
-            } else if (LOG.isTraceEnabled()) {
-                LOG.trace("Using " + legacyExchangeDN + " as legacyExchangeDN for user " + users[i].getLoginInfo() + ".");
+            } else {
+                LOG.trace("Using {} as legacyExchangeDN for user {}.", legacyExchangeDN, users[i].getLoginInfo());
             }
             FreeBusyData freeBusyData = getFreeBusyInformation(users[i], from, until);
             if (null == freeBusyData) {
-                LOG.debug("No free/busy data for user " + users[i].getLoginInfo() + ", skipping.");
+                LOG.debug("No free/busy data for user {}, skipping.", users[i].getLoginInfo());
                 continue;
-            } else if (LOG.isTraceEnabled()) {
-                LOG.trace("Got the following free/busy data for user " + users[i].getLoginInfo() + ":\n" + freeBusyData);
+            } else {
+                LOG.trace("Got the following free/busy data for user {}:\n{}", users[i].getLoginInfo(), freeBusyData);
             }
             FolderIdType folderId = getFreeBusySubfolderId(legacyExchangeDN);
             if (null == folderId) {
                 LOG.warn("No free/busy subfolder for {}, skipping.", legacyExchangeDN);
                 continue;
-            } else if (LOG.isTraceEnabled()) {
-                LOG.trace("Using free/busy subfolder " + folderId + " for user " + users[i].getLoginInfo() + ":\n" + freeBusyData);
+            } else {
+                LOG.trace("Using free/busy subfolder {} for user {}:\n{}", folderId, users[i].getLoginInfo(), freeBusyData);
             }
             if (null == messagesPerFolder.get(folderId)) {
                 messagesPerFolder.put(folderId, new ArrayList<PostItemType>());

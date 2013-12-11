@@ -163,7 +163,7 @@ public final class AliasesProvider {
                 set.add(new QuotedInternetAddress(aliase, false));
             } catch (final AddressException e) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(MessageFormat.format("Alias could not be parsed to an internet address: {0}", aliase), e);
+                    LOG.debug("Alias could not be parsed to an internet address: {}", aliase, e);
                 }
             }
         }

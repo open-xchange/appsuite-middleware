@@ -262,7 +262,7 @@ public final class NotificationPool {
                     } while (null != cur);
                 }
             } catch (final Throwable t) {
-                logger.error(t.getMessage(), t);
+                logger.error("", t);
             } finally {
                 taskWriteLock.unlock();
             }

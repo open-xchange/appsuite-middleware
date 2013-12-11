@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.api;
 
+import java.text.MessageFormat;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
@@ -166,7 +167,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
             try {
                text = textFinder.getText(getMessage(folder, mailIds[i], false));
             } catch (Throwable t) {
-                LOG.warn("Error while getting primary content for mail '" + mailIds[i] + "' in folder '" + folder + "'. Returning null.", t);
+                LOG.warn("Error while getting primary content for mail ''{}'' in folder ''{}''. Returning null.", mailIds[i], folder, t);
             }
 
             retval[i] = text;

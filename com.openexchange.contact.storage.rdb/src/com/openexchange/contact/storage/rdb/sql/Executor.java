@@ -55,6 +55,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -980,7 +981,7 @@ public class Executor {
         } else {
             long start = System.currentTimeMillis();
             ResultSet resultSet = stmt.executeQuery();
-            LOG.debug("executeQuery: " + stmt.toString() + " - " + (System.currentTimeMillis() - start) + " ms elapsed.");
+            LOG.debug("executeQuery: {} - {} ms elapsed.", stmt.toString(), (System.currentTimeMillis() - start));
             return resultSet;
         }
     }
@@ -991,8 +992,7 @@ public class Executor {
         } else {
             long start = System.currentTimeMillis();
             final int rowCount = stmt.executeUpdate();
-            LOG.debug("executeUpdate: " + stmt.toString() + " - " + rowCount + " rows affected, " +
-                (System.currentTimeMillis() - start) + " ms elapsed.");
+            LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), rowCount, (System.currentTimeMillis() - start));
             return rowCount;
         }
     }

@@ -51,6 +51,7 @@ package com.openexchange.webdav.xml;
 
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.text.MessageFormat;
 import java.util.Date;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
@@ -232,8 +233,8 @@ public class DataWriter {
                         ch = 0x10000 + (ch - 0xD800) * 0x400 + (low - 0xDC00);
                         if (Verifier.isXMLCharacter(ch)) {
                             retvalBuilder.append((char) ch);
-                        } else if (DEBUG) {
-                            LOG.debug(("0x" + Integer.toHexString(ch) + " is not a legal XML character"));
+                        } else {
+                            LOG.debug("0x{} is not a legal XML character", Integer.toHexString(ch));
                         }
                     } else if (DEBUG) {
                         LOG.debug("illegal surrogate pair");
@@ -247,8 +248,8 @@ public class DataWriter {
                  */
                 if (Verifier.isXMLCharacter(ch)) {
                     retvalBuilder.append((char) ch);
-                } else if (DEBUG) {
-                    LOG.debug(("0x" + Integer.toHexString(ch) + " is not a legal XML character"));
+                } else {
+                    LOG.debug("0x{} is not a legal XML character", Integer.toHexString(ch));
                 }
             }
         }

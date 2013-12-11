@@ -54,8 +54,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.MessageFormat;
 import java.util.ArrayList;
-import org.slf4j.Logger;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.exceptions.PoolException;
@@ -325,7 +325,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             prep_del.executeUpdate();
 
             con.commit();
-            log.info("Resource " + resource_id + " deleted!");
+            log.info("Resource {} deleted!", resource_id);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             dorollback(con);
@@ -377,7 +377,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             prep_del.executeUpdate();
 
             con.commit();
-            log.info("Resource " + resource_id + " deleted!");
+            log.info("Resource {} deleted!", resource_id);
         } catch (final SQLException e) {
             log.error("SQL Error", e);
             dorollback(con);

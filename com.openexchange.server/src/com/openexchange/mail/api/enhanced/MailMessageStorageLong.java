@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.api.enhanced;
 
+import java.text.MessageFormat;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
@@ -267,7 +268,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
             try {
                 text = textFinder.getText(getMessageLong(folder, mailIds[i], false));
             } catch (Throwable t) {
-                LOG.warn("Error while getting primary content for mail '" + mailIds[i] + "' in folder '" + folder + "'. Returning null.", t);
+                LOG.warn("Error while getting primary content for mail ''{}'' in folder ''{}''. Returning null.", mailIds[i], folder, t);
             }
 
             retval[i] = text;

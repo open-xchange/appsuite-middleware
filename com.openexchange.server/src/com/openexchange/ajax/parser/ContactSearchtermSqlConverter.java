@@ -49,6 +49,7 @@
 
  package com.openexchange.ajax.parser;
 
+import java.text.MessageFormat;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -157,7 +158,7 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
         } else if(term instanceof CompositeSearchTerm) {
             traverseViaInorder((CompositeSearchTerm) term);
         } else {
-            LOG.error("Got a search term that was neither Composite nor Single. How? " + System.getProperty("line.separator") + term);
+            LOG.error("Got a search term that was neither Composite nor Single. How? {}{}", System.getProperty("line.separator"), term);
         }
 	}
 

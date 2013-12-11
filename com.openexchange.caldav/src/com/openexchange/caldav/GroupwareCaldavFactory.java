@@ -49,6 +49,7 @@
 
 package com.openexchange.caldav;
 
+import java.text.MessageFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -259,7 +260,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
                 try {
                     treeID = factory.getConfigValue("com.openexchange.caldav.tree", FolderStorage.REAL_TREE_ID);
                 } catch (OXException e) {
-                    LOG.warn("falling back to tree id '" + FolderStorage.REAL_TREE_ID + "'.", e);
+                    LOG.warn("falling back to tree id ''{}''.", FolderStorage.REAL_TREE_ID, e);
                     treeID = FolderStorage.REAL_TREE_ID;
                 }
             }

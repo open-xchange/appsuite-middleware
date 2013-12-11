@@ -54,6 +54,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -299,7 +300,7 @@ public final class ConfigJSlobService implements JSlobService {
                     try {
                         attributes.put(preferencePath, new AttributedProperty(preferencePath, entry.getKey(), property));
                     } catch (final Exception e) {
-                        logger.warn("Couldn't initialize preference path: " + preferencePath, e);
+                        logger.warn("Couldn''t initialize preference path: {}", preferencePath, e);
                     }
                 }
             }

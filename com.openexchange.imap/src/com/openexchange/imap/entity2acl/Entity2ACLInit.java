@@ -88,7 +88,7 @@ public final class Entity2ACLInit implements Initialization {
     @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
-            LOG.error(MessageFormat.format("{0} already started", Entity2ACLInit.class.getName()));
+            LOG.error("{} already started", Entity2ACLInit.class.getName());
             return;
         }
         Entity2ACLAutoDetector.initEntity2ACLMappings();
@@ -114,7 +114,7 @@ public final class Entity2ACLInit implements Initialization {
                 } else {
                     implementingClass = Class.forName(classNameProp).asSubclass(Entity2ACL.class);
                     if (LOG.isInfoEnabled()) {
-                        LOG.info(MessageFormat.format("Used IMAP server implementation: {0}", implementingClass.getName()));
+                        LOG.info("Used IMAP server implementation: {}", implementingClass.getName());
                     }
                     Entity2ACL.setInstance(implementingClass.newInstance());
                 }

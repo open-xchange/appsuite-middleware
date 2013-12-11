@@ -152,8 +152,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         String groupPassword = configService.getProperty("com.openexchange.hazelcast.group.password");
         if (false == Strings.isEmpty(groupPassword)) {
             if ("wtV6$VQk8#+3ds!a".equalsIgnoreCase(groupPassword)) {
-                LOG.warn("The value 'wtV6$VQk8#+3ds!a' for 'com.openexchange.hazelcast.group.password' has not been changed from it's " +
-                    "default. Please do so to restrict access to your cluster.");
+                LOG.warn("The value 'wtV6$VQk8#+3ds!a' for 'com.openexchange.hazelcast.group.password' has not been changed from it's default. Please do so to restrict access to your cluster.");
             }
             config.getGroupConfig().setPassword(groupPassword);
         }

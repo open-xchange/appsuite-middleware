@@ -243,7 +243,7 @@ public final class ResponseWriter {
                     json.put(name, value);
                 }
             } else {
-                LoggerFactory.getLogger(ResponseWriter.class).warn("Response property discarded. Illegal property name: " + name == null ? "null" : name);
+                LoggerFactory.getLogger(ResponseWriter.class).warn("Response property discarded. Illegal property name: {}", (name == null ? "null" : name));
             }
         }
     }

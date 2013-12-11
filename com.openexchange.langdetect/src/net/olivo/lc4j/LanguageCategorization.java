@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.LinkedList;
 import java.util.List;
 import cern.colt.GenericSorting;
@@ -53,8 +54,6 @@ import cern.colt.function.IntComparator;
 public class LanguageCategorization {
     private static final org.slf4j.Logger LOG =
         org.slf4j.LoggerFactory.getLogger(LanguageCategorization.class);
-	/** Enable debugging? */
-	private static final boolean DEBUG = LOG.isDebugEnabled();
 	/** Default buffer size. */
 	private static final int BUFFER_SIZE = 16 * 1024;
 
@@ -197,8 +196,6 @@ public class LanguageCategorization {
 	 * @return the language-model resulting from the given input text.
 	 */
 	public LanguageModel createLanguageModel( final ByteArrayList input ) {
-	    final long startTime = DEBUG ? System.currentTimeMillis() : 0L;
-
 		final IncrementalInt2IntMap hash = new IncrementalInt2IntMap();
 		final LanguageModel languageModel = new LanguageModel();
 
@@ -223,9 +220,7 @@ public class LanguageCategorization {
 			final int wordLength = word.size();
 			int length = wordLength;
 
-			if ( DEBUG ) {
-                LOG.error( "parsing " + word.toString() );
-            }
+			LOG.debug("parsing {}", word.toString());
 
 			for ( int k = 0; k < wordLength; k++ ) {
 				x = word.elements();
@@ -250,9 +245,7 @@ public class LanguageCategorization {
 			word.add( (byte)'_' );
 		}
 
-		if ( DEBUG ) {
-            LOG.error( "hash size is " + hash.size() );
-        }
+		LOG.debug("hash size is {}", hash.size());
 
 		final int[] ngrams = hash.getOrderedKeysByScore();
 		final int n = ( this.USE_TOPMOST_NGRAMS > 0 ? Math.min( ngrams.length, this.USE_TOPMOST_NGRAMS ) : ngrams.length );
@@ -265,19 +258,10 @@ public class LanguageCategorization {
 				break;
 			}
 
-			if ( DEBUG ) {
-                LOG.debug( "adding " + ngrams[k] + " with weight " + hash.get( ngrams[k] ) + " with pos " + k + " to languageModel" );
-            }
-		}
-
-		if ( DEBUG ) {
-            LOG.debug( "size of languageModel: " + languageModel.size() );
+            LOG.debug("adding {} with weight {} with pos {} to languageModel", ngrams[k], hash.get(ngrams[k]), k);
         }
 
-		if ( DEBUG ) {
-    		final long endTime = System.currentTimeMillis();
-    		LOG.debug( "time taken to create language-model from input: " + (double)( endTime - startTime ) / 1000 + "s" );
-		}
+        LOG.debug("size of languageModel: {}", languageModel.size());
 
 		return languageModel;
 	}
@@ -294,22 +278,20 @@ public class LanguageCategorization {
 		int i = 0;
 		int x;
 		final int n = lang1.size();
-		while ( i < n ) {
-			final int val = lang1.getNgram( i );
-			if ( DEBUG ) {
-                LOG.debug( "checking " + val );
-            }
+        while (i < n) {
+            final int val = lang1.getNgram(i);
+            LOG.debug("checking {}", val);
 
-			x = lang2.getPos( val );
+            x = lang2.getPos(val);
 
-			if ( x != -1 ) {
-                distance += Math.abs( x - i );
+            if (x != -1) {
+                distance += Math.abs(x - i);
             } else {
                 distance += this.USE_TOPMOST_NGRAMS;
             }
 
-			i++;
-		}
+            i++;
+        }
 
 		return distance;
 	}
@@ -321,67 +303,55 @@ public class LanguageCategorization {
 	 * @throws FileNotFoundException if the directory in which files are supposed to be cannot be found.
 	 */
 	public void loadLanguages( final String path ) throws IOException, FileNotFoundException {
-		if ( language == null ) {	// load language-models only if not already loaded
-		    final long startTime = DEBUG ? System.currentTimeMillis() : 0L;
+        if (language == null) { // load language-models only if not already loaded
 
-			if ( DEBUG ) {
-                LOG.debug( "loading language-models from files in " + path );
+            LOG.debug("loading language-models from files in {}", path);
+
+            final File[] files = new File(path).listFiles();
+            final int n = files.length;
+            language = new LanguageModel[n];
+            languageName = new String[n];
+
+            if (n == 0) {
+                LOG.warn("WARNING: no language-model files were found in the specified path ({}). Please check.", path);
             }
 
-			final File[] files = new File( path ).listFiles();
-			final int n = files.length;
-			language = new LanguageModel[n];
-			languageName = new String[n];
+                LOG.debug("found {} language-model files", n);
 
-			if ( n == 0 ) {
-				LOG.warn( "WARNING: no language-model files were found in the specified path (" + path + "). Please check." );
-			}
+            for (int i = 0; i < n; i++) {
+                final String s;
+                int k = 0;
 
-			if ( DEBUG ) {
-                LOG.debug( "found " + n + " language-model files" );
+                language[i] = new LanguageModel();
+                languageName[i] = files[i].getName();
+
+                // read language-model from file
+                final DataInputStream dis = new DataInputStream(new FastBufferedInputStream(new FileInputStream(files[i]), BUFFER_SIZE));
+                while (k < this.USE_TOPMOST_NGRAMS) {
+                    try {
+                        final int input = dis.readInt();
+                        final int ngramFreq = dis.readInt();
+
+                        language[i].add(input, ngramFreq);
+                    } catch (final EOFException e) {
+                        break;
+                    } catch (final IllegalArgumentException e) {
+                        LOG.error("", e);
+                        break;
+                    }
+
+                    k++;
+                }
+                dis.close();
             }
-
-			for ( int i = 0; i < n; i++ ) {
-				final String s;
-				int k = 0;
-
-				language[i] = new LanguageModel();
-				languageName[i] = files[i].getName();
-
-				// read language-model from file
-				final DataInputStream dis = new DataInputStream( new FastBufferedInputStream( new FileInputStream( files[i] ), BUFFER_SIZE ) );
-				while ( k < this.USE_TOPMOST_NGRAMS ) {
-					try {
-						final int input = dis.readInt();
-						final int ngramFreq = dis.readInt();
-
-						language[i].add( input, ngramFreq );
-					} catch ( final EOFException e ) {
-						break;
-					} catch ( final IllegalArgumentException e ) {
-						LOG.error( e.getMessage(), e );
-						break;
-					}
-
-					k++;
-				}
-				dis.close();
-			}
-
-			if (DEBUG) {
-                final long endTime = System.currentTimeMillis();
-                LOG.debug("time taken to load all available language-models: " + (double) (endTime - startTime) / 1000 + "s");
-            }
-		}
+        }
 
 		if ( language == null || language.length == 0 ) {
 			LOG.warn( "No language-model loaded." );
 			return;
 		}
 
-		if ( DEBUG ) {
-            LOG.debug( "language-model files loaded" );
-        }
+		LOG.debug( "language-model files loaded" );
 	}
 
 	/** Finds the language in which the input string is most likely written. Returns a {@link List}
@@ -406,8 +376,6 @@ public class LanguageCategorization {
 			LOG.error( "An exception was thrown when trying to load languages. Returning null.", e );
 			return null;
 		}
-
-		final long startTime = DEBUG ? System.currentTimeMillis() : 0L;
 
 		// where we store probabilities and language indexes
 		final int n = language.length;
@@ -448,42 +416,33 @@ public class LanguageCategorization {
 		GenericSorting.mergeSort( 0, n, comp, swapper );
 
 		final int maxProb = prob[0];
-		int countAnswers = 0;
+        int countAnswers = 0;
 
-		if ( DEBUG ) {
-            for ( int i = 0; i < n; i++ ) {
-                LOG.debug( "lang=" + languageName[langIndex[i]] + " prob=" + prob[i] );
+        if (LOG.isDebugEnabled()) {
+            for (int i = 0; i < n; i++) {
+                LOG.debug("lang={} prob={}", languageName[langIndex[i]], prob[i]);
             }
         }
-		if ( DEBUG ) {
-            LOG.debug( "maxProb=" + maxProb );
-        }
+        LOG.debug("maxProb={}", maxProb);
 
-		for ( int i = 0; i < n; i++ ) {
-			if ( prob[i] < this.UNKNOWN_THRESHOLD * maxProb || prob[i] == 0 ) {
-				/* prob[i] == 0 in the check above is for the (almost impossible) case that the input language-model
-				 * corresponds exactly to the original language-model. This could tipically happen only if the input
-				 * language-model is the same used for training.
-				 */
-				countAnswers++;
-				ret.add( languageName[langIndex[i]] );
-			} else {
+        for (int i = 0; i < n; i++) {
+            if (prob[i] < this.UNKNOWN_THRESHOLD * maxProb || prob[i] == 0) {
+                /*
+                 * prob[i] == 0 in the check above is for the (almost impossible) case that the input language-model corresponds exactly to
+                 * the original language-model. This could tipically happen only if the input language-model is the same used for training.
+                 */
+                countAnswers++;
+                ret.add(languageName[langIndex[i]]);
+            } else {
                 break;
             }
-		}
-		if ( DEBUG ) {
-            LOG.debug( "countAnswers=" + countAnswers );
         }
+        LOG.debug("countAnswers={}", countAnswers);
 
 		if ( countAnswers > this.MAX_LANGUAGES ) {
 			ret.clear();
 			ret.add( "UNKNOWN" );
 		}
-
-		if (DEBUG) {
-            final long endTime = System.currentTimeMillis();
-            LOG.debug("time taken to effectively determine the language: " + (double) (endTime - startTime) / 1000 + "s");
-        }
 
         return ret;
 	}

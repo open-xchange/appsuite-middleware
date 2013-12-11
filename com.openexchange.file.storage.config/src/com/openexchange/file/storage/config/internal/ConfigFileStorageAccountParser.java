@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.config.internal;
 
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,7 +61,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.config.ConfigFileStorageAccount;
@@ -170,7 +170,7 @@ public final class ConfigFileStorageAccountParser {
             return;
         }
         if (logger.isInfoEnabled()) {
-            logger.info("Found following pre-configured file storage accounts: " + new TreeSet<String>(ids));
+            logger.info("Found following pre-configured file storage accounts: {}", new TreeSet<String>(ids));
         }
         /*
          * Get the accounts for identifiers
@@ -187,7 +187,7 @@ public final class ConfigFileStorageAccountParser {
                 }
                 map.put(account.getId(), account);
             } catch (final OXException e) {
-                logger.warn("Configuration for file storage account \"" + id + "\" is invalid: " + e.getMessage(), e);
+                logger.warn("Configuration for file storage account \"{}\" is invalid: {}", id, e.getMessage(), e);
             }
         }
         this.map = m;

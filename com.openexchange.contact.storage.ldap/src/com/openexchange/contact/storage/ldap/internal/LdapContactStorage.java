@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.storage.ldap.internal;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -163,7 +164,7 @@ public class LdapContactStorage extends DefaultContactStorage {
     public SearchIterator<Contact> deleted(Session session, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
         check(session.getContextId(), folderId);
         if (null == mapper.opt(ContactField.LAST_MODIFIED)) {
-            LOG.warn("No LDAP mapping for " + ContactField.LAST_MODIFIED + ", unable to get deleted contacts in period.");
+            LOG.warn("No LDAP mapping for {}, unable to get deleted contacts in period.", ContactField.LAST_MODIFIED);
             return getSearchIterator(null);
         } else if (false == config.isAdsDeletionSupport()) {
             LOG.warn("No ADS deletion support available, unable to get deleted contacts in period.");
@@ -176,7 +177,7 @@ public class LdapContactStorage extends DefaultContactStorage {
     public SearchIterator<Contact> modified(Session session, String folderID, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
         check(session.getContextId(), folderID);
         if (null == mapper.opt(ContactField.LAST_MODIFIED)) {
-            LOG.warn("No LDAP mapping for " + ContactField.LAST_MODIFIED + ", unable to get modified contacts in period.");
+            LOG.warn("No LDAP mapping for {}, unable to get modified contacts in period.", ContactField.LAST_MODIFIED);
             return getSearchIterator(null);
         }
         return doModified(session, folderID, since, fields, sortOptions);

@@ -117,7 +117,7 @@ public class AJPv13TaskWatcher {
      */
     public void addTask(final com.openexchange.ajp13.watcher.Task task) {
         if (null != tasks.putIfAbsent(task.getNum(), task)) {
-            LOG.error(MessageFormat.format("AJP task with number {0} task could not be added to watcher!", task.getNum()));
+            LOG.error("AJP task with number {} task could not be added to watcher!", task.getNum());
         }
     }
 

@@ -19,6 +19,7 @@
 
 package org.apache.jsieve;
 
+import java.text.MessageFormat;
 import org.slf4j.Logger;
 
 
@@ -144,10 +145,8 @@ public final class ScriptCoordinate {
      * @param logger <code>Log</code>, not null
      */
     public void logDiagnosticsInfo(Logger logger) {
-        if (logger.isInfoEnabled()) {
-            logger.info("Expression starts line " + startLineNumber + " column " + startColumnNumber);
-            logger.info("Expression ends line " + endLineNumber + " column " + endColumnNumber);
-        }
+        logger.info("Expression starts line {} column {}", startLineNumber, startColumnNumber);
+        logger.info("Expression ends line {} column {}", endLineNumber, endColumnNumber);
     }
 
     /**
@@ -155,9 +154,7 @@ public final class ScriptCoordinate {
      * @param logger <code>Log</code>, not null
      */
     public void debugDiagnostics(Logger logger) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Expression starts line " + startLineNumber + " column " + startColumnNumber);
-            logger.debug("Expression ends line " + endLineNumber + " column " + endColumnNumber);
-        }
+        logger.debug("Expression starts line {} column {}", startLineNumber, startColumnNumber);
+        logger.debug("Expression ends line {} column {}", endLineNumber, endColumnNumber);
     }
 }

@@ -67,7 +67,6 @@ import java.util.Set;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.slf4j.Logger;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
@@ -354,10 +353,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw e3;
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug(ctx + " - " + admin_user + " - "+ access_combination_name
-                + " - "+ auth);
-        }
+        log.debug("{} - {} - {} - {}", ctx, admin_user, access_combination_name, auth);
 
         final UserModuleAccess access = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim());
         if(access==null){

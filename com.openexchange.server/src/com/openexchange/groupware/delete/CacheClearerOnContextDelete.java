@@ -52,7 +52,6 @@ package com.openexchange.groupware.delete;
 import java.sql.Connection;
 import java.util.Arrays;
 import java.util.List;
-import org.slf4j.Logger;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
@@ -96,7 +95,7 @@ public final class CacheClearerOnContextDelete extends ContextDelete {
                 final Cache cache = cacheService.getCache(cacheName);
                 cache.clear();
             } catch (final OXException e) {
-                logger.warn("Clearing cache \"" + cacheName + "\" failed.", e);
+                logger.warn("Clearing cache \"{}\" failed.", cacheName, e);
             }
         }
     }

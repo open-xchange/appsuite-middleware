@@ -56,7 +56,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map.Entry;
 import java.util.Properties;
-
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.config.ConfigurationService;
@@ -130,9 +129,7 @@ public class PropertyHandler {
         retString = syprops.getProperty( key );
 
         if ( retString == null ) {
-            if(log.isDebugEnabled()){
-                log.debug( "Property '" + key + "' not found in the run script! Using fallback :" + fallBack );
-            }
+            log.debug("Property ''{}'' not found in the run script! Using fallback :{}", key, fallBack);
             retString = fallBack;
         }
 
@@ -165,9 +162,7 @@ public class PropertyHandler {
         if ( this.groupPropValues != null && this.groupPropValues.containsKey( key ) ) {
             retBool =  this.groupPropValues.get( key ).toString();
         } else {
-            if(log.isDebugEnabled()){
-                log.debug( "Property '" + key + "' not found in file 'Group.properties'! Using fallback :" + fallBack );
-            }
+            log.debug("Property ''{}'' not found in file ''Group.properties''! Using fallback :{}", key, fallBack);
         }
 
         return retBool;
@@ -246,9 +241,7 @@ public class PropertyHandler {
             final String val = this.userPropValues.get( key ).toString();
             retBool = Boolean.parseBoolean( val );
         } else {
-            if(log.isDebugEnabled()){
-                log.debug( "Property '" + key + "' not found in file 'AdminUser.properties'! Using fallback :" + fallBack );
-            }
+            log.debug("Property ''{}'' not found in file ''AdminUser.properties''! Using fallback :{}", key, fallBack);
         }
 
         return retBool;
@@ -286,15 +279,10 @@ public class PropertyHandler {
         if ( this.userPropValues != null && this.userPropValues.containsKey( key ) ) {
             retBool =  this.userPropValues.get( key ).toString();
         } else {
-            if(log.isDebugEnabled()){
-                log.debug( "Property '" + key + "' not found in file 'AdminUser.properties'! Using fallback :" + fallBack );
-            }
+            log.debug("Property ''{}'' not found in file ''AdminUser.properties''! Using fallback :{}", key, fallBack);
         }
         return retBool;
     }
-
-
-
 
     /**
      *
@@ -328,9 +316,7 @@ public class PropertyHandler {
         if ( this.resPropValues != null && this.resPropValues.containsKey( key ) ) {
             retBool = Boolean.parseBoolean( this.resPropValues.get( key ).toString() );
         } else {
-            if(log.isDebugEnabled()){
-                log.debug( "Property '" + key + "' not found in file 'Resource.properties'! Using fallback :" + fallBack );
-            }
+            log.debug("Property ''{}'' not found in file ''Resource.properties''! Using fallback :{}", key, fallBack);
         }
 
         return retBool;
@@ -369,9 +355,7 @@ public class PropertyHandler {
         if ( this.rmiPropValues != null && this.rmiPropValues.containsKey( key ) ) {
             retInt = Integer.parseInt( this.rmiPropValues.get( key ).toString() );
         } else {
-            if(log.isDebugEnabled()){
-                log.debug( "Property '" + key + "' not found in file 'RMI.properties'! Using fallback :" + fallBack );
-            }
+            log.debug("Property ''{}'' not found in file ''RMI.properties''! Using fallback :{1", key, fallBack);
         }
 
         return retInt;

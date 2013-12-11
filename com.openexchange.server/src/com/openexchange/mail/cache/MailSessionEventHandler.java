@@ -134,7 +134,7 @@ public final class MailSessionEventHandler implements EventHandler {
                     }
                 }
             } catch (final Exception e) {
-                LOG.error(MessageFormat.format("Error while handling session event \"{0}\": {1}", topic, e.getMessage()), e);
+                LOG.error("Error while handling session event \"{}\": {}", topic, e.getMessage(), e);
             }
         }
 

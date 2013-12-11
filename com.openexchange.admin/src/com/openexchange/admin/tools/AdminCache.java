@@ -64,6 +64,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -283,7 +284,7 @@ public class AdminCache {
                 String[] modules = predefined_modules.split(",");
                 for (String module : modules) {
                     if (!module_method_mapping.containsKey(module)) {
-                        log.error("Predefined combination \"" + predefined_combination_name + "\" contains invalid module \"" + module + "\" ");
+                        log.error("Predefined combination \"{}\" contains invalid module \"{}\" ", predefined_combination_name, module);
                         // AS DEFINED IN THE CONTEXT WIDE ACCES SPECIFICAION ,
                         // THE SYSTEM WILL STOP IF IT FINDS AN INVALID
                         // CONFIGURATION!

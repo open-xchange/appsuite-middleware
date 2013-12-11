@@ -202,7 +202,7 @@ public final class PushEventHandler implements EventHandler {
                     }
                 }
             } catch (final Exception e) {
-                LOG.error(MessageFormat.format("Error while handling SessionD event \"{0}\": {1}", topic, e.getMessage()), e);
+                LOG.error("Error while handling SessionD event \"{}\": {}", topic, e.getMessage(), e);
             }
         }
     } // End of PushEventHandlerRunnable

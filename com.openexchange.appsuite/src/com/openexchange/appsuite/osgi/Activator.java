@@ -50,9 +50,9 @@
 package com.openexchange.appsuite.osgi;
 
 import java.io.File;
+import java.text.MessageFormat;
 import org.osgi.framework.BundleException;
 import org.osgi.service.http.HttpService;
-import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.appsuite.AppsLoadServlet;
 import com.openexchange.config.ConfigurationService;
@@ -96,6 +96,6 @@ public class Activator extends HousekeepingActivator {
             sb.append(':');
             sb.append(app.getPath());
         }
-        logger.info("Servlet path \"apps/load\" successfully registered with \"apps\"=" + sb.substring(1) + " and \"zoneinfo\"=" + zoneinfo.getPath());
+        logger.info("Servlet path \"apps/load\" successfully registered with \"apps\"={} and \"zoneinfo\"={}", sb.substring(1), zoneinfo.getPath());
     }
 }

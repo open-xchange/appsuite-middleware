@@ -105,8 +105,6 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpServletResponseImpl.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     public static final int OUTPUT_NOT_SELECTED = -1;
 
     public static final int OUTPUT_STREAM = 1;
@@ -842,9 +840,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         if (httpOnly /* && maxAge > 0 */) {
             strBuilder.append("; HttpOnly");
         }
-        if (DEBUG) {
-            LOG.debug("Cookie: " + strBuilder.toString());
-        }
+        LOG.debug("Cookie: {}", strBuilder.toString());
         return strBuilder.toString();
     }
 

@@ -158,7 +158,7 @@ public class UCSAuthentication implements AuthenticationService {
 
                 final NamingEnumeration<SearchResult> result = ctx.search("",search_pattern,sc);
 
-                LOG.debug("Now searching on server "+LDAP_CONFIG.get(Context.PROVIDER_URL)+" for DN of User "+uid+" with BASE: "+(String) props.get("LDAP_BASE")+ " and pattern "+search_pattern);
+                LOG.debug("Now searching on server {} for DN of User {} with BASE: {} and pattern {}", LDAP_CONFIG.get(Context.PROVIDER_URL), uid, props.get("LDAP_BASE"), search_pattern);
 
                 String user_dn = null;
                 String user_part = null;
@@ -190,7 +190,7 @@ public class UCSAuthentication implements AuthenticationService {
                 LDAP_CONFIG.put(Context.SECURITY_PRINCIPAL,user_dn);
                 LDAP_CONFIG.put(Context.SECURITY_CREDENTIALS, password);
 
-                LOG.debug("NOW trying to bind with DN: "+user_dn+" to fetch Attribute "+(String) props.get("LDAP_ATTRIBUTE"));
+                LOG.debug("NOW trying to bind with DN: {} to fetch Attribute {}", user_dn, props.get("LDAP_ATTRIBUTE"));
                 ctx = new InitialDirContext(LDAP_CONFIG);
 
                 final String[] attribs = {(String) props.get("LDAP_ATTRIBUTE"),"shadowLastChange","shadowMax"};
@@ -210,7 +210,7 @@ public class UCSAuthentication implements AuthenticationService {
                     try{
                         shadowlastchange_days = Long.parseLong(((String)shadowlastchange.get()));
                         shadowmax_days = Long.parseLong(((String)shadowmax.get()));
-                        LOG.debug("Found  shadowlastchange ("+shadowlastchange_days+") and shadowmax("+shadowmax_days+") in ldap! NOW calculating!");
+                        LOG.debug("Found  shadowlastchange ({}) and shadowmax({}) in ldap! NOW calculating!", shadowlastchange_days, shadowmax_days);
                     }catch(final Exception exp){
                         LOG.error("LDAP Attributes shadowlastchange or/and shadowmax contain invalid values!",exp);
                     }
@@ -225,7 +225,7 @@ public class UCSAuthentication implements AuthenticationService {
                     final long days_since_1970 = cal.getTimeInMillis()/86400000;
                     final long sum_up = shadowlastchange_days+shadowmax_days;
                     if(sum_up<days_since_1970){
-                        LOG.info("Password for account \""+uid+"\" seems to be expired("+sum_up+"<"+days_since_1970+")!");
+                        LOG.info("Password for account \"{}\" seems to be expired({}<{})!", uid, sum_up, days_since_1970);
                         throw LoginExceptionCodes.ACCOUNT_LOCKED.create(uid);
                     }
                 }else{
@@ -241,7 +241,7 @@ public class UCSAuthentication implements AuthenticationService {
                 }else{
                     final String[] data  = ((String)emailattrib.get()).split("@");
                     if(data.length!=2){
-                        LOG.error("FATAL! Email address {} could be splitted correctly!!", (String)emailattrib.get());
+                        LOG.error("FATAL! Email address {} could be splitted correctly!!", emailattrib.get());
                         throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                     }else{
                         splitted[0] = data[1];

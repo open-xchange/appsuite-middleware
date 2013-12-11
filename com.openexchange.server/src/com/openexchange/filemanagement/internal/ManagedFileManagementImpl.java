@@ -143,7 +143,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                     }
                 }
             } catch (final Throwable t) {
-                logger.error(t.getMessage(), t);
+                logger.error("", t);
             }
         }
     }

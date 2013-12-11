@@ -26,6 +26,7 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -96,7 +97,7 @@ public class AgglomerativeClustering {
 		path = args[0];
 
 		if ( DEBUG ) {
-            LOG.debug( "loading language models from files in " + path );
+            LOG.debug("loading language models from files in {}", path);
         }
 
 		final File[] files = new File( path ).listFiles();
@@ -150,9 +151,7 @@ public class AgglomerativeClustering {
 				for ( int i = 0; i < n; i++ ) {
 					for ( int j = i + 1; j < n; j++ ) {
 						distance[i][j] = lc.calcDistance( lm[i], lm[j] );
-						if ( DEBUG ) {
-                            LOG.debug( "initializing distance <" + i + "," + j + ">: " + distance[i][j] );
-                        }
+						LOG.debug("initializing distance <{},{}>: {}", i, j, distance[i][j]);
 					}
 
 					clusters[i] = new IntArrayList();
@@ -175,9 +174,7 @@ public class AgglomerativeClustering {
                     }
                 }
 			}
-			if ( DEBUG ) {
-                LOG.debug( "minimal distance found between <" + minI + "," + minJ + ">: " + minDistance );
-            }
+			LOG.debug("minimal distance found between <{},{}>: {}", minI, minJ, minDistance);
 
 			// ... and merge them
 			lm[minI] = LanguageModel.merge( lm[minI], lm[minJ], useTopmostNgrams );
@@ -201,13 +198,13 @@ public class AgglomerativeClustering {
 
 			final long endTime = System.currentTimeMillis();
 
-			if ( DEBUG ) {
-				LOG.debug( "step " + ( n - numClusters + 1 ) + ": merging clusters <" + minI + "," + minJ + ">" );
-				LOG.debug( "time taken: " + (double)( endTime - startTime ) / 1000 + "s" );
+			{
+				LOG.debug("step {}: merging clusters <{},{}>", ( n - numClusters + 1 ), minI, minJ);
+				LOG.debug("time taken: {}s", (double)( endTime - startTime ) / 1000);
 			}
 
 			// print out non-empty clusters to stdout
-			LOG.info( "step " + ( n - numClusters + 1 ) + " - " + ( numClusters - 1 ) + " clusters left:" );
+			LOG.info("step {} - {} clusters left:", ( n - numClusters + 1 ), ( numClusters - 1 ));
 			for ( int i = 0; i < n; i++ ) {
 				if ( clusters[i].size() != 0 ) {
 					System.out.print( '\t' );
@@ -217,7 +214,7 @@ public class AgglomerativeClustering {
 					LOG.info( "" );
 				}
 			}
-			LOG.info( "***" );
+			LOG.info("***");
 
 			// update cluster count
 			numClusters--;

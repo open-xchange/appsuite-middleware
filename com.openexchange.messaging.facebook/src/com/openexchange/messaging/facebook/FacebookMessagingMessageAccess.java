@@ -55,6 +55,7 @@ import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -68,7 +69,6 @@ import org.json.JSONObject;
 import org.scribe.model.OAuthRequest;
 import org.scribe.model.Response;
 import org.scribe.model.Verb;
-import org.slf4j.Logger;
 import org.w3c.dom.Element;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -866,9 +866,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
          */
         if (!safetyCheck.isEmpty()) {
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(FacebookMessagingMessageAccess.class);
-            if (logger.isWarnEnabled()) {
-                logger.warn("Information of following Facebook " + (group ? "groups" : "users") + " are missing: " + Arrays.toString(safetyCheck.toArray()));
-            }
+            logger.warn("Information of following Facebook {} are missing: {}", (group ? "groups" : "users"), Arrays.toString(safetyCheck.toArray()));
             if (retrySafetyCheck) {
                 for (final TLongIterator iter = safetyCheck.iterator(); iter.hasNext();) {
                     final long missingId = iter.next();
@@ -890,9 +888,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                         /*
                          * Entity not visible
                          */
-                        if (logger.isWarnEnabled()) {
-                            logger.warn("FQL query delivered no result(s):\n" + fqlQuery.getCharSequence());
-                        }
+                        logger.warn("FQL query delivered no result(s):\n{}", fqlQuery.getCharSequence());
                         /*
                          * Remove corresponding messages.
                          */

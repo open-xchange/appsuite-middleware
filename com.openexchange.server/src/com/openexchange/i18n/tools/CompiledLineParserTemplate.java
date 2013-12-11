@@ -170,8 +170,7 @@ public abstract class CompiledLineParserTemplate extends AbstractTemplate {
         }
 
         if (open != null) {
-            LOG.error("Parser Error: Seems that the bracket opened on line " + open[0] + " column " + open[1]
-                    + " is never closed.", new Throwable());
+            LOG.error("Parser Error: Seems that the bracket opened on line {} column {} is never closed.", open[0], open[1], new Throwable());
             return new int[0][];
         }
 

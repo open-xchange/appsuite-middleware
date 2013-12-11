@@ -55,9 +55,9 @@ import static com.openexchange.kerberos.impl.ConfigurationProperty.KRB5_CONF;
 import static com.openexchange.kerberos.impl.ConfigurationProperty.MODULE_NAME;
 import static com.openexchange.kerberos.impl.ConfigurationProperty.USER_MODULE_NAME;
 import java.io.File;
+import java.text.MessageFormat;
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.Configuration;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 
 /**
@@ -82,7 +82,7 @@ public final class KerberosConfiguration {
         if (krb5Conf.exists() && krb5Conf.isFile() && krb5Conf.canRead()) {
             System.setProperty("java.security.krb5.conf", krb5ConfPath);
         } else {
-            LOG.error("Cannot read krb5.conf configuration file stated to be here: \"" + krb5ConfPath + "\".");
+            LOG.error("Cannot read krb5.conf configuration file stated to be here: \"{}\".", krb5ConfPath);
             configured = false;
         }
 

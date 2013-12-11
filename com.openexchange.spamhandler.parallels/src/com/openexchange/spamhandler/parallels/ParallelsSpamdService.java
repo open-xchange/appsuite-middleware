@@ -52,6 +52,7 @@ package com.openexchange.spamhandler.parallels;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.text.MessageFormat;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -202,7 +203,7 @@ public class ParallelsSpamdService implements SpamdService {
 
             // spamd port from configuration
             int spamd_provider_port = config.getPort();
-            LOG.debug("Using port " + spamd_provider_port + " for connections to spamd service");
+            LOG.debug("Using port {} for connections to spamd service", spamd_provider_port);
 
             // get the user object from the OX API to retrieve users primary mail address
             final User oxuser = getUser(session);
@@ -213,7 +214,7 @@ public class ParallelsSpamdService implements SpamdService {
             final java.net.URI tp = new java.net.URI(oxuser.getSmtpServer());// this will always be the smtp://host:port of the user
             final String xmlrpc_server = tp.getHost();
             int xml_rpc_port = config.getXmlPort();
-            LOG.debug("Using port " + xml_rpc_port + " for connections to xmlrpc service");
+            LOG.debug("Using port {} for connections to xmlrpc service", xml_rpc_port);
 
             final String URL_to_xmlrpc = "http://" +xmlrpc_server+":"+xml_rpc_port;
             post_method.setURI(new URI(URL_to_xmlrpc));
@@ -221,8 +222,8 @@ public class ParallelsSpamdService implements SpamdService {
             post_method.setRequestBody(getXmlRpcRequestBody(xml_rpc_prim_email));
 
             if(LOG.isDebugEnabled()){
-                LOG.debug("Using "+URL_to_xmlrpc+" to connect to xmlrpc service");
-                LOG.debug("Using email address "+xml_rpc_prim_email+" for xmlrpc request");
+                LOG.debug("Using {} to connect to xmlrpc service", URL_to_xmlrpc);
+                LOG.debug("Using email address {} for xmlrpc request", xml_rpc_prim_email);
             }
 
 
@@ -272,15 +273,11 @@ public class ParallelsSpamdService implements SpamdService {
                         if((textFNList.item(0)).getNodeValue().trim().equals("server")){
                             // server ip ==
                             response_server = (textFNList_.item(0)).getNodeValue().trim();
-                            if(LOG.isDebugEnabled()){
-                                LOG.debug("Returning "+response_server+" as host to spamhandler");
-                            }
+                                LOG.debug("Returning {} as host to spamhandler", response_server);
                         }else{
                             // username ==
                             response_user = (textFNList_.item(0)).getNodeValue().trim();
-                            if(LOG.isDebugEnabled()){
-                                LOG.debug("Returning "+response_user+" as userame to spamhandler");
-                            }
+                            LOG.debug("Returning {} as userame to spamhandler", response_user);
                         }
 
                     }

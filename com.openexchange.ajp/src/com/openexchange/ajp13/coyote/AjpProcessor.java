@@ -64,6 +64,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URLEncoder;
 import java.nio.charset.UnsupportedCharsetException;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -77,7 +78,6 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.ajp13.AJPv13Response;
@@ -928,7 +928,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                             if (remoteIP.isEmpty()) {
                                 if (LOG.isDebugEnabled()) {
                                     forHeaderValue = forHeaderValue == null ? "" : forHeaderValue;
-                                    LOG.debug("Could not detect a valid remote ip in " + AJPv13Config.getForHeader() + ": [" + forHeaderValue + "], falling back to default");
+                                    LOG.debug("Could not detect a valid remote ip in {}: [{}], falling back to default", AJPv13Config.getForHeader(), forHeaderValue);
                                 }
                                 remoteIP = request.getRemoteAddr();
                             }
@@ -1480,7 +1480,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             case Constants.SC_A_JVM_ROUTE: {
                 final String jvmRoute = requestHeaderMessage.getString(temp);
                 if (DEBUG && !AJPv13Config.getJvmRoute().equals(jvmRoute)) {
-                    LOG.debug("JVM route mismatch. Expected \"" + AJPv13Config.getJvmRoute() + "\", but is \"" + jvmRoute + "\".");
+                    LOG.debug("JVM route mismatch. Expected \"{}\", but is \"{}\".", AJPv13Config.getJvmRoute(), jvmRoute);
                 }
                 request.setInstanceId(jvmRoute);
             }

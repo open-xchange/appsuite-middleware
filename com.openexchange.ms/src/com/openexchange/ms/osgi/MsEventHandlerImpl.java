@@ -99,7 +99,7 @@ public final class MsEventHandlerImpl implements EventHandler {
         } catch (final Exception e) {
             // Ignore
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MsActivator.class);
-            logger.warn(MessageFormat.format("Could not handle event with topic ''{0}'': \"{1}\"", event.getTopic(), e.getMessage()), e);
+            logger.warn("Could not handle event with topic ''{}'': \"{}\"", event.getTopic(), e.getMessage(), e);
         }
     }
 

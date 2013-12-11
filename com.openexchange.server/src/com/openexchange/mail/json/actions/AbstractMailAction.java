@@ -288,9 +288,9 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                 }
                 addrs.removeAll(validAddrs);
             } catch (final AddressException e) {
-                LOG.warn(MessageFormat.format("Contact collector could not be triggered: {0}", e.getMessage()), e);
+                LOG.warn("Contact collector could not be triggered: {}", e.getMessage(), e);
             } catch (final JSONException e) {
-                LOG.warn(MessageFormat.format("Contact collector could not be triggered: {0}", e.getMessage()), e);
+                LOG.warn("Contact collector could not be triggered: {}", e.getMessage(), e);
             }
             if (!addrs.isEmpty()) {
                 // Add addresses

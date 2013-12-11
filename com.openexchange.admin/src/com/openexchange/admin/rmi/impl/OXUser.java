@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.i;
 import java.io.UnsupportedEncodingException;
 import java.rmi.RemoteException;
 import java.security.NoSuchAlgorithmException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -148,9 +149,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
 
-        if (log.isDebugEnabled()) {
-            log.debug(ctx + " - " + user + " - "+ (null == capsToAdd ? "" : capsToAdd.toString())+" | "+(null == capsToRemove ? "" : capsToRemove.toString()) + " - " + auth);
-        }
+        log.debug("{} - {} - {} | {} - {}", ctx, user, (null == capsToAdd ? "" : capsToAdd.toString()), (null == capsToRemove ? "" : capsToRemove.toString()), auth);
 
         try {
             basicauth.doAuthentication(auth, ctx);
@@ -470,10 +469,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw invalidDataException;
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug(ctx + " - " + user + " - " + access_combination_name
-                + " - " + auth);
-        }
+        log.debug("{} - {} - {} - {}", ctx, user, access_combination_name, auth);
 
         try {
             basicauth.doAuthentication(auth, ctx);
@@ -563,10 +559,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw e3;
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug(ctx + " - " + usrdata + " - " + access_combination_name
-                + " - " + auth);
-        }
+        log.debug("{} - {} - {} - {}", ctx, usrdata, access_combination_name, auth);
 
         basicauth.doAuthentication(auth, ctx);
 

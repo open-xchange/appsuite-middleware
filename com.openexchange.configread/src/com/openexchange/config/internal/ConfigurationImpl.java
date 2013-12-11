@@ -234,7 +234,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     private synchronized void processDirectory(final File dir, final FileFilter fileFilter, final FileProcessor processor) {
         final File[] files = dir.listFiles(fileFilter);
         if (files == null) {
-            LOG.info(MessageFormat.format("Can't read {0}. Skipping.", dir));
+            LOG.info("Can't read {}. Skipping.", dir);
             return;
         }
         for (final File file : files) {

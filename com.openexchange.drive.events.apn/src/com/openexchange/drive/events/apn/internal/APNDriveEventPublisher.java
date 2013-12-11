@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.events.apn.internal;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import javapns.Push;
@@ -157,7 +158,7 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
         } else {
             LOG.debug("No devices to unregister received from feedback service.");
         }
-        LOG.info("Finished processing APN feedback for '" + getServiceID() + "' after " + (System.currentTimeMillis() - start) + " ms.");
+        LOG.info("Finished processing APN feedback for ''{}'' after {} ms.", getServiceID(), (System.currentTimeMillis() - start));
     }
 
     private List<PayloadPerDevice> getPayloads(DriveEvent event, List<Subscription> subscriptions) {

@@ -51,6 +51,7 @@ package com.openexchange.pop3.storage.mailaccount;
 
 import static com.openexchange.pop3.storage.mailaccount.util.Utility.prependPath2Fullname;
 import static com.openexchange.pop3.storage.mailaccount.util.Utility.stripPathFromFullname;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -295,14 +296,14 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
                         if (StorageUtility.INDEX_CONFIRMED_HAM == i) {
                             if (spamHandler.isCreateConfirmedHam()) {
                                 setDefaultMailFolder(i, checkDefaultFolder(realFullname, storage.getSeparator()));
-                            } else if (LOG.isDebugEnabled()) {
-                                LOG.debug("Skipping check for " + defaultFolderNames[i] + " due to SpamHandler.isCreateConfirmedHam()=false");
+                            } else {
+                                LOG.debug("Skipping check for {} due to SpamHandler.isCreateConfirmedHam()=false", defaultFolderNames[i]);
                             }
                         } else if (StorageUtility.INDEX_CONFIRMED_SPAM == i) {
                             if (spamHandler.isCreateConfirmedSpam()) {
                                 setDefaultMailFolder(i, checkDefaultFolder(realFullname, storage.getSeparator()));
-                            } else if (LOG.isDebugEnabled()) {
-                                LOG.debug("Skipping check for " + defaultFolderNames[i] + " due to SpamHandler.isCreateConfirmedSpam()=false");
+                            } else {
+                                LOG.debug("Skipping check for {} due to SpamHandler.isCreateConfirmedSpam()=false", defaultFolderNames[i]);
                             }
                         } else {
                             setDefaultMailFolder(i, checkDefaultFolder(realFullname, storage.getSeparator()));

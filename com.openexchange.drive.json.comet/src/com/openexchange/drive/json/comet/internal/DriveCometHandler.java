@@ -104,10 +104,7 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
     @Override
     public void onEvent(CometEvent event) throws IOException {
         try {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(this + ": Got EVENT after " + String.valueOf(System.currentTimeMillis() - initializationTime) + "ms: " +
-                    event.getType() + " [" + event.attachment() + "]");
-            }
+            LOG.debug("{}: Got EVENT after {}ms: {} [{}]", this, String.valueOf(System.currentTimeMillis() - initializationTime), event.getType(), event.attachment());
             /*
              * create and return resulting actions if available
              */
@@ -130,9 +127,7 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
     @Override
     public void onTerminate(CometEvent event) throws IOException {
         try {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(this + ": Got TERMINATE after " + String.valueOf(System.currentTimeMillis() - initializationTime) + "ms.");
-            }
+            LOG.trace("{}: Got TERMINATE after {}ms.", this, String.valueOf(System.currentTimeMillis() - initializationTime));
         } finally {
             resume(event.getCometContext());
         }
@@ -145,9 +140,7 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
     @Override
     public void onInterrupt(CometEvent event) throws IOException {
         try {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(this + ": Got INTERRUPT after " + String.valueOf(System.currentTimeMillis() - initializationTime) + "ms.");
-            }
+            LOG.trace("{}: Got INTERRUPT after {}ms.", this, String.valueOf(System.currentTimeMillis() - initializationTime));
             CometContext cometContext = event.getCometContext();
             if (null != cometContext && cometContext.isActive(this)) {
                 LOG.debug("{}: Comet context still active, returning empty drive actions.", this);

@@ -53,6 +53,7 @@ import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.java.Strings.toLowerCase;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import java.text.MessageFormat;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -714,9 +715,7 @@ public final class CSSMatcher {
             cssBuilder.append(tail);
             return modified;
         } catch (final RuntimeException unchecked) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Unchecked exception while processing CSS content:" + System.getProperty("line.separator") + css, unchecked);
-            }
+            LOG.debug("Unchecked exception while processing CSS content:{}{}", System.getProperty("line.separator"), css, unchecked);
             throw unchecked;
         }
     }

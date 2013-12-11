@@ -2220,33 +2220,25 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 final DeleteEvent delev = new DeleteEvent(this, user_id, DeleteEvent.TYPE_USER, ctx.getId());
                 DeleteRegistry.getInstance().fireDeleteEvent(delev, write_ox_con, write_ox_con);
-                if (log.isDebugEnabled()) {
-                    log.debug("Delete user " + user_id + "(" + ctx.getId() + ") from login2user...");
-                }
+                log.debug("Delete user {}({}) from login2user...", user_id, ctx.getId());
                 stmt = write_ox_con.prepareStatement("DELETE FROM login2user WHERE cid = ? AND id = ?");
                 stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, user_id);
                 stmt.executeUpdate();
                 stmt.close();
-                if (log.isDebugEnabled()) {
-                    log.debug("Delete user " + user_id + "(" + ctx.getId() + ") from groups member...");
-                }
+                log.debug("Delete user {}({}) from groups member...", user_id, ctx.getId());
                 stmt = write_ox_con.prepareStatement("DELETE FROM groups_member WHERE cid = ? AND member = ?");
                 stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, user_id);
                 stmt.executeUpdate();
                 stmt.close();
-                if (log.isDebugEnabled()) {
-                    log.debug("Delete user " + user_id + "(" + ctx.getId() + ") from user attribute ...");
-                }
+                log.debug("Delete user {}({}) from user attribute ...", user_id, ctx.getId());
                 stmt = write_ox_con.prepareStatement("DELETE FROM user_attribute WHERE cid = ? AND id = ?");
                 stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, user_id);
                 stmt.executeUpdate();
                 stmt.close();
-                if (log.isDebugEnabled()) {
-                    log.debug("Delete user " + user_id + "(" + ctx.getId() + ") from user mail setting...");
-                }
+                log.debug("Delete user {}({}) from user mail setting...", user_id, ctx.getId());
                 stmt = write_ox_con.prepareStatement("DELETE FROM user_setting_mail WHERE cid = ? AND user = ?");
                 stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, user_id);
@@ -2273,18 +2265,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 // when table ready, enable this
                 createRecoveryData(ctx, user_id, write_ox_con);
-                if (log.isDebugEnabled()) {
-                    log.debug("Delete user " + user_id + "(" + ctx.getId() + ") from user ...");
-                }
+                log.debug("Delete user {}({}) from user ...", user_id, ctx.getId());
                 stmt = write_ox_con.prepareStatement("DELETE FROM user WHERE cid = ? AND id = ?");
                 stmt.setInt(1, ctx.getId());
                 stmt.setInt(2, user_id);
                 stmt.executeUpdate();
                 stmt.close();
 
-                if (log.isDebugEnabled()) {
-                    log.debug("Delete user " + user_id + "(" + ctx.getId() + ") from contacts via groupware API ...");
-                }
+                log.debug("Delete user {}({}) from contacts via groupware API ...", user_id, ctx.getId());
 
                 if (is_admin) {
                     Contacts.deleteContact(getContactIdByUserId(ctx.getId(), user_id, write_ox_con), ctx.getId(), write_ox_con, true);
@@ -2327,9 +2315,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
                 // End of JCS
 
-                if (log.isInfoEnabled()) {
-                    log.info("Deleted user " + user_id + "(" + ctx.getId() + ") ...");
-                }
+                log.info("Deleted user {}({}) ...", user_id, ctx.getId());
 
             }
         } catch (final SQLException sqle) {

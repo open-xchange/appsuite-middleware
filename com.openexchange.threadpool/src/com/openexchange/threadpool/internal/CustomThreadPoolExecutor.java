@@ -1030,7 +1030,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                     }
                 }
             } catch (final Exception e) {
-                LOG.error(MessageFormat.format("{0} thread aborted execution due to an exception! TimerService is no more active!", currentThread.getName()), e);
+                LOG.error("{} thread aborted execution due to an exception! TimerService is no more active!", currentThread.getName(), e);
             }
         }
     }

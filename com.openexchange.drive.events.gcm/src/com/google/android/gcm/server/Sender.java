@@ -25,6 +25,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -94,10 +95,7 @@ public class Sender {
     boolean tryAgain;
     do {
       attempt++;
-      if (logger.isDebugEnabled()) {
-        logger.debug("Attempt #" + attempt + " to send message " +
-            message + " to regIds " + registrationId);
-      }
+      logger.debug("Attempt #{} to send message {} to regIds {}", attempt, message, registrationId);
       result = sendNoRetry(message, registrationId);
       tryAgain = result == null && attempt <= retries;
       if (tryAgain) {
@@ -152,14 +150,14 @@ public class Sender {
       String key = entry.getKey();
       String value = entry.getValue();
       if (key == null || value == null) {
-        logger.warn("Ignoring payload entry thas has null: " + entry);
+        logger.warn("Ignoring payload entry thas has null: {}", entry);
       } else {
         key = PARAM_PAYLOAD_PREFIX + key;
         addParameter(body, key, URLEncoder.encode(value, UTF8));
       }
     }
     String requestBody = body.toString();
-    logger.trace("Request body: " + requestBody);
+    logger.trace("Request body: {}", requestBody);
     HttpURLConnection conn;
     int status;
     try {
@@ -170,14 +168,14 @@ public class Sender {
       return null;
     }
     if (status / 100 == 5) {
-      logger.debug("GCM service is unavailable (status " + status + ")");
+      logger.debug("GCM service is unavailable (status {})", status);
       return null;
     }
     String responseBody;
     if (status != 200) {
       try {
         responseBody = getAndClose(conn.getErrorStream());
-        logger.trace("Plain post error response: " + responseBody);
+        logger.trace("Plain post error response: {}", responseBody);
       } catch (IOException e) {
         // ignore the exception since it will thrown an InvalidRequestException
         // anyways
@@ -213,12 +211,12 @@ public class Sender {
         if (token.equals(TOKEN_CANONICAL_REG_ID)) {
           builder.canonicalRegistrationId(value);
         } else {
-          logger.warn("Invalid response from GCM: " + responseBody);
+          logger.warn("Invalid response from GCM: {}", responseBody);
         }
       }
       Result result = builder.build();
       if (logger.isDebugEnabled()) {
-        logger.debug("Message created succesfully (" + result + ")");
+        logger.debug("Message created succesfully ({})", result);
       }
       return result;
     } else if (token.equals(TOKEN_ERROR)) {
@@ -263,19 +261,17 @@ public class Sender {
       multicastResult = null;
       attempt++;
       if (logger.isDebugEnabled()) {
-        logger.debug("Attempt #" + attempt + " to send message " +
-            message + " to regIds " + unsentRegIds);
+        logger.debug("Attempt #{} to send message {} to regIds {}", attempt, message, unsentRegIds);
       }
       try {
         multicastResult = sendNoRetry(message, unsentRegIds);
       } catch(IOException e) {
         // no need for WARNING since exception might be already logged
-        logger.trace("IOException on attempt " + attempt, e);
+        logger.trace("IOException on attempt {}", attempt, e);
       }
       if (multicastResult != null) {
         long multicastId = multicastResult.getMulticastId();
-        logger.debug("multicast_id on attempt # " + attempt + ": " +
-            multicastId);
+        logger.debug("multicast_id on attempt # {}: {}", attempt, multicastId);
         multicastIds.add(Long.valueOf(multicastId));
         unsentRegIds = updateStatus(unsentRegIds, results, multicastResult);
         tryAgain = !unsentRegIds.isEmpty() && attempt <= retries;
@@ -381,7 +377,7 @@ public class Sender {
       jsonRequest.put(JSON_PAYLOAD, payload);
     }
     String requestBody = JSONValue.toJSONString(jsonRequest);
-    logger.trace("JSON request: " + requestBody);
+    logger.trace("JSON request: {}", requestBody);
     HttpURLConnection conn;
     int status;
     try {
@@ -395,7 +391,7 @@ public class Sender {
     if (status != 200) {
       try {
         responseBody = getAndClose(conn.getErrorStream());
-        logger.trace("JSON error response: " + responseBody);
+        logger.trace("JSON error response: {}", responseBody);
       } catch (IOException e) {
         // ignore the exception since it will thrown an InvalidRequestException
         // anyways
@@ -410,7 +406,7 @@ public class Sender {
       logger.warn("IOException reading response", e);
       return null;
     }
-    logger.trace("JSON response: " + responseBody);
+    logger.trace("JSON response: {}", responseBody);
     JSONParser parser = new JSONParser();
     JSONObject jsonResponse;
     try {
@@ -533,10 +529,10 @@ public class Sender {
       throw new IllegalArgumentException("arguments cannot be null");
     }
     if (!url.startsWith("https://")) {
-      logger.warn("URL does not use https: " + url);
+      logger.warn("URL does not use https: {}", url);
     }
-    logger.debug("Sending POST to " + url);
-    logger.trace("POST body: " + body);
+    logger.debug("Sending POST to {}", url);
+    logger.trace("POST body: {}", body);
     byte[] bytes = body.getBytes();
     HttpURLConnection conn = getConnection(url);
     conn.setDoOutput(true);

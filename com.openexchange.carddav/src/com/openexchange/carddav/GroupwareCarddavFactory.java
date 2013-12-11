@@ -49,6 +49,7 @@
 
 package com.openexchange.carddav;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -632,7 +633,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		        try {
 					treeID = factory.getConfigValue(FOLDER_TRRE_ID_PROPERTY, FolderStorage.REAL_TREE_ID);
 				} catch (OXException e) {
-					LOG.warn("falling back to tree id '" + FolderStorage.REAL_TREE_ID +"'.", e);
+					LOG.warn("falling back to tree id ''{}''.", FolderStorage.REAL_TREE_ID, e);
 					treeID = FolderStorage.REAL_TREE_ID;
 				}
 	    	}

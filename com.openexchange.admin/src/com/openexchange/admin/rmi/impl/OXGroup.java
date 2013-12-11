@@ -57,7 +57,6 @@ import java.util.List;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.slf4j.Logger;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXGroupPluginInterface;
@@ -684,9 +683,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
         final int grp_id = grp.getId().intValue();
 
-        if (log.isDebugEnabled()) {
-            log.debug(ctx + " - " + grp_id + " - " + auth);
-        }
+        log.debug("{} - {} - {}", ctx, grp_id, auth);
         checkContextAndSchema(ctx);
 
         if (!tool.existsGroup(ctx, grp_id)) {
@@ -859,9 +856,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         }
         final int grp_id = grp.getId().intValue();
 
-        if (log.isDebugEnabled()) {
-            log.debug(ctx + " - " + grp_id + " - " + auth);
-        }
+        log.debug("{} - {} - {}", ctx, grp_id, auth);
 
         checkContextAndSchema(ctx);
 
@@ -960,10 +955,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         try {
             doNullCheck(grp, members);
         } catch (final InvalidDataException e3) {
-            log
-                    .error(
-                            "One of the given arguments for removeMember is null",
-                            e3);
+            log.error("One of the given arguments for removeMember is null", e3);
             throw e3;
         }
 
@@ -980,10 +972,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             throw new NoSuchGroupException(e);
         }
         final int grp_id = grp.getId().intValue();
-        if (log.isDebugEnabled()) {
-            log.debug(ctx + " - " + grp_id + " - " + Arrays.toString(members)
-                + " - " + auth);
-        }
+        log.debug("{} - {} - {} - {}", ctx, grp_id, Arrays.toString(members), auth);
 
         checkContextAndSchema(ctx);
 

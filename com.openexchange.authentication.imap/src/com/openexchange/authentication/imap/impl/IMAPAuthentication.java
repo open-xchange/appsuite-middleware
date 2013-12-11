@@ -56,6 +56,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.text.MessageFormat;
 import java.util.Properties;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
@@ -268,7 +269,7 @@ public class IMAPAuthentication implements AuthenticationService {
 	            host = IDNA.toASCII(defaultMailAccount.getMailServer());
 	            port = defaultMailAccount.getMailPort();
 	            USE_IMAPS = defaultMailAccount.isMailSecure();
-	            LOG.debug("Parsed IMAP Infos: " + (USE_IMAPS ? "imaps" : "imap") + " " + host + " " + port + "  (" + userId + "@" + ctxId + ")");
+	            LOG.debug("Parsed IMAP Infos: {} {} {}  ({}@{})", (USE_IMAPS ? "imaps" : "imap"), host, port, userId, ctxId);
 
 
             } else {
@@ -333,7 +334,7 @@ public class IMAPAuthentication implements AuthenticationService {
              * full login was configured, we assume that only 1 context is in the system which is named "defaultcontext".
              */
             if (use_full_login) {
-                LOG.debug("Using domain: " + splitted[0] + " as context name!");
+                LOG.debug("Using domain: {} as context name!", splitted[0]);
             } else {
                 LOG.debug("Using \"defaultcontext\" as context name!");
                 splitted[0] = "defaultcontext";

@@ -176,9 +176,8 @@ public final class MALPollActivator extends HousekeepingActivator {
                     try {
                         period = Long.parseLong(tmp.trim());
                     } catch (final NumberFormatException e) {
-                        LOG.error(MessageFormat.format(
-                            "Unable to parse com.openexchange.push.malpoll.period: {0}. Using default 300000 (5 Minutes) instead.",
-                            tmp));
+                        LOG.error("Unable to parse com.openexchange.push.malpoll.period: {}. Using default 300000 (5 Minutes) instead.",
+                            tmp);
                         period = 300000L;
                     }
                 }

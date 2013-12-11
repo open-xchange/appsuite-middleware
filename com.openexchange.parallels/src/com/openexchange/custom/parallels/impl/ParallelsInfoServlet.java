@@ -54,6 +54,7 @@ package com.openexchange.custom.parallels.impl;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.MessageFormat;
 import java.util.Arrays;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -212,10 +213,7 @@ public final class ParallelsInfoServlet extends PermissionServlet {
 
         // load suffix for branding string dynamically in loginmappings
         final String suffix_branded = configservice.getProperty(ParallelsOptions.PROPERTY_BRANDING_SUFFIX);
-        // for debugging purposes
-        if(LOG.isDebugEnabled()){
-            LOG.debug("Loaded loginmappings "+Arrays.toString(login_mappings)+" for context "+ctx.getContextId());
-        }
+        LOG.debug("Loaded loginmappings {} for context {}", Arrays.toString(login_mappings), ctx.getContextId());
         boolean found_host = false;
         if( null != suffix_branded && suffix_branded.length() != 0) {
             for (final String login_mapping : login_mappings) {
@@ -229,12 +227,10 @@ public final class ParallelsInfoServlet extends PermissionServlet {
                      */
                     final String[] URL_ = login_mapping.split("\\|\\|"); // perhaps replace with substring(start,end) if would be faster
                     if(URL_.length!=3){
-                        LOG.error("getBrandingHostFromLoginMappings: Could not split up branded host "+login_mapping+" login mapping for context "+ctx.getContextId());
+                        LOG.error("getBrandingHostFromLoginMappings: Could not split up branded host {} login mapping for context {}", login_mapping, ctx.getContextId());
                     }else{
                         branded_host = URL_[2];
-                        if(LOG.isDebugEnabled()){
-                            LOG.debug("Successfully resolved HOST to "+branded_host+" for branded context "+ctx.getContextId());
-                        }
+                        LOG.debug("Successfully resolved HOST to {} for branded context {}", branded_host, ctx.getContextId());
                     }
                 }
             }

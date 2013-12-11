@@ -428,9 +428,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
 
         final int resource_id = res.getId().intValue();
 
-        if (log.isDebugEnabled()) {
-            log.debug(ctx + " - " + resource_id + " - " + auth);
-        }
+        log.debug("{} - {} - {}", ctx, resource_id, auth);
 
         checkContextAndSchema(ctx);
 

@@ -50,6 +50,7 @@
 
 package com.openexchange.hazelcast.osgi;
 
+import java.text.MessageFormat;
 import java.util.concurrent.atomic.AtomicReference;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
@@ -132,8 +133,7 @@ public class HazelcastActivator extends HousekeepingActivator {
         long hzStart = infoEnabled ? System.currentTimeMillis() : 0L;
         HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance(config);
         if (infoEnabled) {
-            LOG.info(lf + "Hazelcast:" + lf +
-                "    New hazelcast instance successfully created in " + (System.currentTimeMillis() - hzStart) + " msec." + lf);
+            LOG.info("{}Hazelcast:{}    New hazelcast instance successfully created in {} msec.{}", lf, lf, (System.currentTimeMillis() - hzStart), lf);
         }
         /*
          * Register instance
@@ -141,7 +141,7 @@ public class HazelcastActivator extends HousekeepingActivator {
         registerService(HazelcastInstance.class, hazelcastInstance);
         REF_HAZELCAST_INSTANCE.set(hazelcastInstance);
         if (infoEnabled) {
-            LOG.info(lf + "Hazelcast:" + lf + "    Started in " + (System.currentTimeMillis() - bundleStart) + " msec." + lf);
+            LOG.info("{}Hazelcast:{}    Started in {} msec.{}", lf, lf, (System.currentTimeMillis() - bundleStart), lf);
         }
         /*
          * Register management mbean dynamically
@@ -165,7 +165,7 @@ public class HazelcastActivator extends HousekeepingActivator {
         }
         if (LOG.isInfoEnabled()) {
             String lf = Strings.getLineSeparator();
-            LOG.info(lf + "Hazelcast:" + lf + "    Shutdown completed after " + (System.currentTimeMillis() - start) + " msec." + lf);
+            LOG.info("{}Hazelcast:{}    Shutdown completed after {} msec.{}", lf, lf, (System.currentTimeMillis() - start), lf);
         }
         super.stopBundle();
     }

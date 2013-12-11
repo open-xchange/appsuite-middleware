@@ -96,7 +96,7 @@ public final class WebDAVSessionEventHandler implements EventHandler {
                 // Nothing to do for an added session
             }
         } catch (final Exception e) {
-            LOG.error(MessageFormat.format("Error while handling SessionD event \"{0}\": {1}", topic, e.getMessage()), e);
+            LOG.error("Error while handling SessionD event \"{}\": {}", topic, e.getMessage(), e);
         }
     }
 }

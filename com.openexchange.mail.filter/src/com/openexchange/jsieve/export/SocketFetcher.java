@@ -84,7 +84,7 @@ public final class SocketFetcher {
             try {
                 cl = Thread.currentThread().getContextClassLoader();
             } catch (final SecurityException ex) {
-                logger.error(ex.getMessage(), ex);
+                logger.error("", ex);
             }
             return cl;
         }

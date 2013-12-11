@@ -370,7 +370,7 @@ public class AdminDaemon {
                             try {
                                 return clazz.cast(obj);
                             } catch (final ClassCastException e) {
-                                LOG.error("Service " + serviceName + "(" + ((null != obj) ? obj.getClass().getName() : "null") + ") in bundle " + bundleSymbolicName + " cannot be cast to an instance of " + clazz.getName());
+                                LOG.error("Service {}({}) in bundle {} cannot be cast to an instance of {}", serviceName, ((null != obj) ? obj.getClass().getName() : "null"), bundleSymbolicName, clazz.getName());
                                 return null;
                             }
                         }

@@ -60,6 +60,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1243,7 +1244,7 @@ public final class MimeMessageConverter {
                     try {
                         mailMessage.addHeader(h.getName(), h.getValue());
                     } catch (final Exception exc) {
-                        logger.warn(exc.getMessage(), exc);
+                        logger.warn("", exc);
                     }
                 }
             }
@@ -1566,7 +1567,7 @@ public final class MimeMessageConverter {
                     try {
                         mailMessage.addHeader(h.getName(), h.getValue());
                     } catch (final Exception exc) {
-                        logger.warn(exc.getMessage(), exc);
+                        logger.warn("", exc);
                     }
                 }
             }
@@ -1591,7 +1592,7 @@ public final class MimeMessageConverter {
                     /*
                      * Cannot occur
                      */
-                    LOG1.error("Invalid content type: " + msg.getContentType(), e);
+                    LOG1.error(MessageFormat.format("Invalid content type: {0}", msg.getContentType()), e);
                     try {
                         ct = new ContentType(MimeTypes.MIME_DEFAULT);
                     } catch (final OXException e1) {

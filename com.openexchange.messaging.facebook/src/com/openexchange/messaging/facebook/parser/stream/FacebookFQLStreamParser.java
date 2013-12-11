@@ -51,6 +51,7 @@ package com.openexchange.messaging.facebook.parser.stream;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -59,6 +60,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -425,7 +427,8 @@ public final class FacebookFQLStreamParser {
                             throw e;
                         }
                         // Something went wrong loading URL content... Ignore it
-                        org.slf4j.LoggerFactory.getLogger(FacebookFQLStreamParser.class).debug("Couldn't load URL: " + sourceURL, e);
+                        Logger logger = org.slf4j.LoggerFactory.getLogger(FacebookFQLStreamParser.class);
+                        logger.debug("Couldn''t load URL: {}", sourceURL, e);
                     }
                 }
 
@@ -636,7 +639,8 @@ public final class FacebookFQLStreamParser {
                         if ("attachment".equals(localName)) {
                             attachmentNode = item;
                         } else {
-                            org.slf4j.LoggerFactory.getLogger(FacebookFQLStreamParser.class).warn("Un-handled item: " + localName);
+                            Logger logger = org.slf4j.LoggerFactory.getLogger(FacebookFQLStreamParser.class);
+                            logger.warn("Un-handled item: {}", localName);
                         }
                     } else {
                         itemHandler.handleItem(item, message);
@@ -652,7 +656,8 @@ public final class FacebookFQLStreamParser {
             /*
              * Empty message... ignore it!
              */
-            org.slf4j.LoggerFactory.getLogger(FacebookFQLStreamParser.class).warn("Empty Facebook message detected:\n" + streamElement);
+            Logger logger = org.slf4j.LoggerFactory.getLogger(FacebookFQLStreamParser.class);
+            logger.warn("Empty Facebook message detected:\n{}", streamElement);
             return null;
         }
         /*
@@ -674,8 +679,8 @@ public final class FacebookFQLStreamParser {
                         final AttachmentHandler attachmentHandler = ATTACH_HANDLERS.get(type);
                         if (null == attachmentHandler) {
                             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(FacebookFQLStreamParser.class);
-                            logger.warn("Unknown attachment type: " + type);
-                            logger.debug("Stream element:\n" + Utility.prettyPrintXML(streamElement));
+                            logger.warn("Unknown attachment type: {}", type);
+                            logger.debug("Stream element:\n{}", Utility.prettyPrintXML(streamElement));
                         } else {
                             attachmentHandler.handleAttachment(attachmentChildNodes, len, message, multipartProvider);
                         }
@@ -702,8 +707,8 @@ public final class FacebookFQLStreamParser {
                             final AttachmentHandler attachmentHandler = ATTACH_HANDLERS.get(sType);
                             if (null == attachmentHandler) {
                                 final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(FacebookFQLStreamParser.class);
-                                logger.warn("Unknown attachment type: " + sType);
-                                logger.debug("Stream element:\n" + Utility.prettyPrintXML(streamElement));
+                                logger.warn("Unknown attachment type: {}", sType);
+                                logger.debug("Stream element:\n{}", Utility.prettyPrintXML(streamElement));
                             } else {
                                 attachmentHandler.handleAttachment(attachmentChildNodes, len, message, multipartProvider);
                             }
@@ -723,7 +728,7 @@ public final class FacebookFQLStreamParser {
          */
         if (size <= 0 && !attachmentHandlerFound) {
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(FacebookFQLStreamParser.class);
-            logger.debug("Stream element lead to empty message:\n" + Utility.prettyPrintXML(streamElement));
+            logger.debug("Stream element lead to empty message:\n{}", Utility.prettyPrintXML(streamElement));
         }
         message.setSize(size);
         final String htmlContent;

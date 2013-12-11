@@ -65,6 +65,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -476,7 +477,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         if (LOG.isDebugEnabled()) {
             start = System.currentTimeMillis();
         }
-        LOG.debug("Move of data for context " + ctx.getId() + " is now starting to target database " + target_database_id + "!");
+        LOG.debug("Move of data for context {} is now starting to target database {}!", ctx.getId(), target_database_id);
 
         Connection ox_db_write_con = null;
         Connection configdb_write_con = null;
@@ -547,7 +548,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
 
             // now insert all data to target db
-            LOG.debug("Now filling target database system " + target_database_id + " with data of context " + ctx.getId() + "!");
+            LOG.debug("Now filling target database system {} with data of context {}!", target_database_id, ctx.getId());
             try {
                 target_ox_db_con = cache.getConnectionForContextNoTimeout(ctx.getId().intValue());
                 target_ox_db_con.setAutoCommit(false);
@@ -562,7 +563,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 throw new TargetDatabaseException("" + pexp.getMessage());
             }
 
-            LOG.debug("Filling completed for target database system " + target_database_id + " with data of context " + ctx.getId() + "!");
+            LOG.debug("Filling completed for target database system {} with data of context {}!", target_database_id, ctx.getId());
 
             // now delete from old database schema all the data
             // For delete from database we loop recursive
@@ -729,7 +730,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             end = System.currentTimeMillis();
             double time_ = end - start;
             time_ = time_ / 1000;
-            LOG.debug("Data moving for context " + ctx.getId() + " to target database system " + target_database_id + " completed in " + time_ + " seconds!");
+            LOG.debug("Data moving for context {} to target database system {} completed in {} seconds!", ctx.getId(), target_database_id, time_);
         }
     }
 
@@ -1446,11 +1447,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             final ResultSet rs = stmt.executeQuery();
             if (!rs.next()) {
                 // no contexts found on this scheme and db, DROP scheme from db
-                LOG.debug("NO remaining contexts found in scheme " + scheme + " on pool with id " + source_database_id + "!");
-                LOG.debug("NOW dropping scheme " + scheme + " on pool with id " + source_database_id + "!");
+                LOG.debug("NO remaining contexts found in scheme {} on pool with id {}!", scheme, source_database_id);
+                LOG.debug("NOW dropping scheme {} on pool with id {}!", scheme, source_database_id);
                 dropstmt = ox_db_write_con.prepareStatement("DROP DATABASE if exists `" + scheme + "`");
                 dropstmt.executeUpdate();
-                LOG.debug("Scheme " + scheme + " on pool with id " + source_database_id + " dropped successfully!");
+                LOG.debug("Scheme {} on pool with id {} dropped successfully!", scheme, source_database_id);
             }
             rs.close();
         } finally {
@@ -1690,7 +1691,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             // ResultSet table_references =
             // dbmetadata.getCrossReference("%",null,table_name,getCatalogName(),null,getCatalogName());
             final ResultSet table_references = dbmeta.getImportedKeys(db_catalog, null, table_name);
-            LOG.debug("Table " + table_name + " has pk reference to table-column:");
+            LOG.debug("Table {} has pk reference to table-column:", table_name);
             while (table_references.next()) {
                 final String pk = table_references.getString("PKTABLE_NAME");
                 final String pkc = table_references.getString("PKCOLUMN_NAME");
@@ -1698,7 +1699,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 to.addCrossReferenceTable(pk);
                 final int pos_in_list = tableListContainsObject(pk, tableObjects);
                 if (pos_in_list != -1) {
-                    LOG.debug("Found referenced by " + table_name + "<->" + pk + "->" + pkc);
+                    LOG.debug("Found referenced by {}<->{}->{}", table_name, pk, pkc);
                     final TableObject edit_me = tableObjects.get(pos_in_list);
                     edit_me.addReferencedBy(table_name);
                 }

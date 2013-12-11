@@ -88,7 +88,7 @@ public final class HttpMessengerEventHandler implements EventHandler {
         final Member localMember = hzInstance.getCluster().getLocalMember();
         final String thisUuid = localMember.getUuid();
         if (null == map.putIfAbsent(TALKINGSTICK, thisUuid)) {
-            LOG.info(MessageFormat.format("{0} will handle events for {1}", getHostNameFrom(localMember), HttpMessengerEventHandler.class.getName()));
+            LOG.info("{} will handle events for {}", getHostNameFrom(localMember), HttpMessengerEventHandler.class.getName());
         }
     }
 
@@ -118,7 +118,7 @@ public final class HttpMessengerEventHandler implements EventHandler {
                 talkingStickHolder = map.putIfAbsent(TALKINGSTICK, thisUuid);
                 if (null == talkingStickHolder) {
                     talkingStickHolder = thisUuid;
-                    LOG.info(MessageFormat.format("{0} will handle events for {1}", getHostNameFrom(localMember), HttpMessengerEventHandler.class.getName()));
+                    LOG.info("{} will handle events for {}", getHostNameFrom(localMember), HttpMessengerEventHandler.class.getName());
                 }
             }
             if (talkingStickHolder.equals(thisUuid)) {
@@ -130,7 +130,7 @@ public final class HttpMessengerEventHandler implements EventHandler {
 
             }
         } catch (final Exception e) {
-            LOG.warn(MessageFormat.format("Could not handle event {0}. Reason: {1}", event.getTopic(), e.getMessage()), e);
+            LOG.warn("Could not handle event {}. Reason: {}", event.getTopic(), e.getMessage(), e);
         }
     }
 

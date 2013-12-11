@@ -50,6 +50,7 @@
 package com.openexchange.mobile.configuration.json.action.sms.impl;
 
 import java.net.MalformedURLException;
+import java.text.MessageFormat;
 import java.util.Map;
 import org.apache.xmlrpc.XmlRpcException;
 import com.openexchange.config.ConfigurationService;
@@ -86,7 +87,7 @@ public class ActionSMS implements ActionService {
 			smssend.setSMSNumber(to_formatted);
 
 		} catch (final Exception e) {
-			LOG.error("Invalid recipient detected. SMS to recipient "+ to_formatted + " (unformatted nr:" + to+ ") could not be send for user " + userid + " in context "+ cid, e);
+			LOG.error("Invalid recipient detected. SMS to recipient {} (unformatted nr:{}) could not be send for user {} in context {}", to_formatted, to, userid, cid, e);
 			provisioningResponse.setMessage("Invalid recipient number detected.");
 			provisioningResponse.setSuccess(false);
 		}
@@ -96,8 +97,8 @@ public class ActionSMS implements ActionService {
 		smssend.setSipgateuser(getFromConfig("com.openexchange.mobile.configuration.json.action.sms.sipgat.api.username"));
 		smssend.setSipgatepass(getFromConfig("com.openexchange.mobile.configuration.json.action.sms.sipgat.api.password"));
 		if(LOG.isDebugEnabled()){
-			LOG.debug("Using API URL: "+getFromConfig("com.openexchange.mobile.configuration.json.action.sms.sipgat.api.url") +" ");
-			LOG.debug("Using API Username: "+getFromConfig("com.openexchange.mobile.configuration.json.action.sms.sipgat.api.username") +" ");
+			LOG.debug("Using API URL: {} ", getFromConfig("com.openexchange.mobile.configuration.json.action.sms.sipgat.api.url"));
+			LOG.debug("Using API Username: {} ", getFromConfig("com.openexchange.mobile.configuration.json.action.sms.sipgat.api.username"));
 		}
 
 		// set prov. URL in SMS
@@ -109,19 +110,19 @@ public class ActionSMS implements ActionService {
 			if(smssend.wasSuccessfull()){
 				provisioningResponse.setMessage("SMS sent successfully...");
 				provisioningResponse.setSuccess(true);
-				LOG.info("SMS to recipient " + to_formatted + " (unformatted nr:" + to+ ") sent successfully for user " + userid + " in context "+ cid);
+				LOG.info("SMS to recipient {} (unformatted nr:{}) sent successfully for user {} in context {}", to_formatted, to, userid, cid);
 			}else{
 				smssend.getErrorMessage();
 				provisioningResponse.setMessage("SMS could not be sent. Details: "+smssend.getErrorMessage());
 				provisioningResponse.setSuccess(false);
-				LOG.error("API error occured while sending sms to recipient " + to_formatted + " (unformatted nr:" + to+ ")  for user " + userid + " in context "+ cid);
+				LOG.error("API error occured while sending sms to recipient {} (unformatted nr:{})  for user {} in context {}", to_formatted, to, userid, cid);
 			}
 		} catch (final MalformedURLException e) {
-			LOG.error("internal error occured while sending sms to recipient " + to_formatted + " (unformatted nr:" + to+ ")  for user " + userid + " in context "+ cid,e);
+			LOG.error("internal error occured while sending sms to recipient {} (unformatted nr:{})  for user {} in context {}", to_formatted, to, userid, cid,e);
 			provisioningResponse.setMessage("Internal error occured while sending SMS...");
 			provisioningResponse.setSuccess(false);
 		} catch (final XmlRpcException e) {
-			LOG.error("internal error occured while sending sms to recipient " + to_formatted + " (unformatted nr:" + to+ ")  for user " + userid + " in context "+ cid,e);
+			LOG.error("internal error occured while sending sms to recipient {} (unformatted nr:{})  for user {} in context {}", to_formatted, to, userid, cid,e);
 			provisioningResponse.setMessage("Internal error occured while sending SMS...");
 			provisioningResponse.setSuccess(false);
 		}

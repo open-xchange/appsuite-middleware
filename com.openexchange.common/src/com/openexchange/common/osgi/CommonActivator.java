@@ -53,7 +53,6 @@ import javax.activation.MailcapCommandMap;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.mailcap.OXMailcapCommandMap;
 
@@ -102,7 +101,7 @@ public final class CommonActivator implements BundleActivator {
                 mailcapRegistration = context.registerService(MailcapCommandMap.class, new OXMailcapCommandMap(mailcap), null);
             }
         } catch (final Exception e) {
-            logger.info("Starting bundle 'com.openexchange.common' failed: " + e.getMessage(), e);
+            logger.error("Starting bundle ''com.openexchange.common'' failed", e);
             throw e;
         }
     }
@@ -120,7 +119,7 @@ public final class CommonActivator implements BundleActivator {
             }
             com.mysql.jdbc.AbandonedConnectionCleanupThread.shutdown();
         } catch (final Exception e) {
-            logger.info("Stopping bundle 'com.openexchange.common' failed: " + e.getMessage(), e);
+            logger.error("Stopping bundle 'com.openexchange.common' failed", e);
             throw e;
         }
     }

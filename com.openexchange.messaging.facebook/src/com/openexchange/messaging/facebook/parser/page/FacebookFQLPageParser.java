@@ -146,7 +146,7 @@ public final class FacebookFQLPageParser {
             if (null != localName) {
                 final ItemHandler itemHandler = ITEM_HANDLERS.get(localName);
                 if (null == itemHandler) {
-                    org.slf4j.LoggerFactory.getLogger(FacebookFQLPageParser.class).warn("Un-handled item: " + localName);
+                    org.slf4j.LoggerFactory.getLogger(FacebookFQLPageParser.class).warn("Un-handled item: {}", localName);
                 } else {
                     itemHandler.handleItem(item, page);
                 }

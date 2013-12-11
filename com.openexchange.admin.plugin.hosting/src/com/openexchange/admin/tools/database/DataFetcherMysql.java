@@ -54,6 +54,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.Vector;
 
 /**
@@ -266,7 +267,7 @@ public class DataFetcherMysql implements DataFetcher{
             String table_name = to.getName();
             //ResultSet table_references = dbmetadata.getCrossReference("%",null,table_name,getCatalogName(),null,getCatalogName());
             ResultSet table_references = dbmetadata.getImportedKeys(getCatalogName(),null,table_name);
-            log.debug("Table "+table_name+" has pk reference to table-column:");
+            log.debug("Table {} has pk reference to table-column:", table_name);
             while(table_references.next()){
                 String pk = table_references.getString("PKTABLE_NAME");
                 String pkc = table_references.getString("PKCOLUMN_NAME");
@@ -274,7 +275,7 @@ public class DataFetcherMysql implements DataFetcher{
                 to.addCrossReferenceTable(pk);
                 int pos_in_list = tableListContainsObject(pk);
                 if(pos_in_list!=-1){
-                    log.debug("Found referenced by "+table_name+"<->"+pk+"->"+pkc);
+                    log.debug("Found referenced by {}<->{}->{}", table_name, pk, pkc);
                     TableObject edit_me = tableObjects.get(pos_in_list);
                     edit_me.addReferencedBy(table_name);
                 }

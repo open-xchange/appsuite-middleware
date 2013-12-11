@@ -49,6 +49,7 @@
 
 package com.openexchange.imap;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -369,8 +370,8 @@ public class IMAPDefaultFolderChecker {
                         spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
                         modified,
                         mailSessionCache);
-                } else if (DEBUG) {
-                    LOG.debug("Skipping check for " + names[index] + " due to SpamHandler.isCreateConfirmedHam()=false");
+                } else {
+                    LOG.debug("Skipping check for {} due to SpamHandler.isCreateConfirmedHam()=false", names[index]);
                 }
             } else if (StorageUtility.INDEX_CONFIRMED_SPAM == index) {
                 if (spamHandler.isCreateConfirmedSpam()) {
@@ -384,8 +385,8 @@ public class IMAPDefaultFolderChecker {
                         spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
                         modified,
                         mailSessionCache);
-                } else if (DEBUG) {
-                    LOG.debug("Skipping check for " + names[index] + " due to SpamHandler.isCreateConfirmedSpam()=false");
+                } else {
+                    LOG.debug("Skipping check for {} due to SpamHandler.isCreateConfirmedSpam()=false", names[index]);
                 }
             } else {
                 performTaskFor(index, prefix, fullName, names[index], sep, type, 1, modified, mailSessionCache);

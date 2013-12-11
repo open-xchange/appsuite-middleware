@@ -51,6 +51,7 @@ package com.openexchange.caching.internal;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -169,8 +170,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
                         }
                     }
                     this.localOnly = localOnly;
-                    LOG.info("Cache '" + cache.getCacheAttributes().getCacheName() + "' is operating in " +
-                        (localOnly.booleanValue() ? "local-only" : "distributed") + " mode");
+                    LOG.info("Cache ''{}'' is operating in {} mode", cache.getCacheAttributes().getCacheName(), (localOnly.booleanValue() ? "local-only" : "distributed"));
                 }
             }
         }

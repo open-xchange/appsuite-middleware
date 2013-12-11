@@ -50,6 +50,7 @@
 package com.openexchange.contact.storage.ldap.internal;
 
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -344,8 +345,7 @@ public class LdapContactCache {
             }
             if (0 < updated || 0 < deleted) {
                 this.lastModified = newLastModified;
-                LOG.debug("Contacts refreshed, got " + updated + " modified and " + deleted +
-                    " deleted contacts in "  + (new Date().getTime() - start.getTime()) + "ms.");
+                LOG.debug("Contacts refreshed, got {} modified and {} deleted contacts in {}ms.", updated, deleted, (new Date().getTime() - start.getTime()));
             } else {
                 LOG.debug("No changes detected, check took " + (new Date().getTime() - start.getTime()) + "ms.");
             }
@@ -370,7 +370,7 @@ public class LdapContactCache {
                 Tools.close(contacts);
             }
             this.lastModified = newLastModified;
-            LOG.debug("Contacts reloaded, got " + added + " entries in " + (new Date().getTime() - start.getTime()) + "ms.");
+            LOG.debug("Contacts reloaded, got {} entries in {}ms.", added, (new Date().getTime() - start.getTime()));
         }
 
         private Date getLatestModified(Date lastModified, Contact contact) {

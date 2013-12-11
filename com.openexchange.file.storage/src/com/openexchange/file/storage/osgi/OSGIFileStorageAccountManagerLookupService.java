@@ -49,13 +49,13 @@
 
 package com.openexchange.file.storage.osgi;
 
+import java.text.MessageFormat;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
@@ -146,9 +146,7 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
             if (null == accountManager) {
                 final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OSGIFileStorageAccountManagerLookupService.class);
                 final String ls = System.getProperty("line.separator");
-                logger.warn(ls + "    There is no file storage service available that provides account \"" + accountId + "\"." + ls +
-                            "    Please ensure the appropriate " + FileStorageService.class.getSimpleName() + " is up and running." + ls +
-                            "    Refer to /opt/open-xchange/sbin/listservices");
+                logger.warn("{}    There is no file storage service available that provides account \"{}\".{}    Please ensure the appropriate {} is up and running.{}    Refer to /opt/open-xchange/sbin/listservices", ls, accountId, ls, FileStorageService.class.getSimpleName(), ls);
                 return null;
             }
             session.setParameter(paramName, accountManager);

@@ -55,6 +55,7 @@ import java.net.URL;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.text.MessageFormat;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -192,7 +193,7 @@ public abstract class OXSOAPRMIMapper {
                     } catch (final java.rmi.ConnectException e) {
                         rmistub = null;
                         log.info("OXSOAPRMIMapper.reconnect: Connection problem");
-                        log.info("waiting " + CONNECT_ATTEMPTS_DELAY_TIME + " seconds and try again");
+                        log.info("waiting {} seconds and try again", CONNECT_ATTEMPTS_DELAY_TIME);
                         try {
                             Thread.sleep(delay);
                         } catch (final InterruptedException e1) {

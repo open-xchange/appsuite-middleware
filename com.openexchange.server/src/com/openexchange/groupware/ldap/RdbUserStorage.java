@@ -71,6 +71,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -898,8 +899,8 @@ public class RdbUserStorage extends UserStorage {
                     }
                     if (!onlyLoginsFailed) {
                         final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
-                        LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, changed), e);
-                        LOG.error("Expected lines: " + size1 + " Updated lines: " + lines1);
+                        LOG.error("Old: {}, New: {}, Added: {}, Removed: {}, Changed: {}.", oldAttributes, attributes, added, removed, changed, e);
+                        LOG.error("Expected lines: {} Updated lines: {}", size1, lines1);
                         final TIntObjectMap<UserImpl> map = createSingleUserMap(userId);
                         loadAttributes(contextId, con, map, false);
                         for (int i : map.keys()) {
@@ -921,8 +922,8 @@ public class RdbUserStorage extends UserStorage {
                     }
                     if (!onlyLoginsFailed) {
                         final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
-                        LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, changed), e);
-                        LOG.error("Expected lines: " + size2 + " Updated lines: " + lines2);
+                        LOG.error("Old: {}, New: {}, Added: {}, Removed: {}, Changed: {}.", oldAttributes, attributes, added, removed, changed, e);
+                        LOG.error("Expected lines: {} Updated lines: {}", size2, lines2);
                         final TIntObjectMap<UserImpl> map = createSingleUserMap(userId);
                         loadAttributes(contextId, con, map, false);
                         for (int i : map.keys()) {

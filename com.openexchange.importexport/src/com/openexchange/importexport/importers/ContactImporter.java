@@ -49,6 +49,7 @@
 
 package com.openexchange.importexport.importers;
 
+import java.text.MessageFormat;
 import java.util.List;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
@@ -101,7 +102,7 @@ public abstract class ContactImporter extends AbstractImporter {
             } catch (OXException e) {
                 if (retryCount < MAX_RETRIES && handle(e, contact)) {
                     // try again
-                    LOG.debug(e.getMessage() + " - trying again (" + retryCount + "/" + MAX_RETRIES + ")", e);
+                    LOG.debug("{} - trying again ({}/{})", e.getMessage(), retryCount, MAX_RETRIES, e);
                     continue;
                 } else {
                     // re-throw

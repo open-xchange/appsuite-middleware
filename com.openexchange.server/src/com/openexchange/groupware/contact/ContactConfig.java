@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.contact;
 
+import java.text.MessageFormat;
 import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
 
@@ -98,7 +99,7 @@ public class ContactConfig {
         try {
             maxImageSize = Long.parseLong(getString(Property.MAX_IMAGE_SIZE));
         } catch (NumberFormatException e) {
-            LOG.error("Unable to parse value of property " + Property.MAX_IMAGE_SIZE.propertyName + " in " + FILENAME + '.', e);
+            LOG.error("Unable to parse value of property {} in {}{}", Property.MAX_IMAGE_SIZE.propertyName, FILENAME, '.', e);
             maxImageSize = 33750000;
         }
     }

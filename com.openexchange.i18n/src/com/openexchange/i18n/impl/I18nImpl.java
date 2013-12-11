@@ -49,6 +49,7 @@
 
 package com.openexchange.i18n.impl;
 
+import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -80,9 +81,7 @@ public class I18nImpl implements I18nService {
         try {
             return serverBundle.getString(key);
         } catch (final MissingResourceException x) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Missing key " + key + " for locale " + getLocale() + ". Using default.");
-            }
+            LOG.info("Missing key {} for locale {}. Using default.", key, getLocale());
             return key;
         }
     }

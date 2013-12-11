@@ -471,7 +471,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
         final AttributeGetter getter = GETTERS.get(attributeName);
         if (null == getter) {
             if (LOG.isInfoEnabled()) {
-                LOG.info(MessageFormat.format("No getter for field: {0}", attributeName));
+                LOG.info("No getter for field: {}", attributeName);
             }
             return null;
         }
@@ -492,7 +492,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
         final AttributeGetter getter = GETTERS.get(attributeName);
         if (null == getter) {
             if (LOG.isInfoEnabled()) {
-                LOG.info(MessageFormat.format("No getter for field: {0}", attributeName));
+                LOG.info("No getter for field: {}", attributeName);
             }
             return null;
         }

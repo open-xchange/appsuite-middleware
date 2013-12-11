@@ -59,6 +59,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.UnsupportedCharsetException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -218,9 +219,7 @@ public class SieveHandler {
 
     private void measureEnd(final String method) {
         this.mEnd = System.currentTimeMillis();
-        if (log.isDebugEnabled()) {
-            log.debug("SieveHandler." + method + "() took " + (this.mEnd - this.mStart) + "ms to perform");
-        }
+        log.debug("SieveHandler.{}() took {}ms to perform", method, (this.mEnd - this.mStart));
     }
 
     /**

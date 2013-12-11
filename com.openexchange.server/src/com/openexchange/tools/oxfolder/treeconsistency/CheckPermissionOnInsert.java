@@ -54,6 +54,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
@@ -125,22 +126,12 @@ public final class CheckPermissionOnInsert extends CheckPermission {
                     final ToDoPermission toDoPermission = it.value();
                     final int[] users = toDoPermission.getUsers();
                     for (int j = 0; j < users.length; j++) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Auto-Insert system-folder-read permission for user " + UserStorage.getStorageUser(users[j], ctx).getDisplayName() + " to folder " + folderId);
-                        }
+                        LOG.debug("Auto-Insert system-folder-read permission for user {} to folder {}", UserStorage.getStorageUser(users[j], ctx).getDisplayName(), folderId);
                         addSystemFolderReadPermission(folderId, users[j], false);
                     }
                     final int[] groups = toDoPermission.getGroups();
                     for (int j = 0; j < groups.length; j++) {
-                        if (LOG.isDebugEnabled()) {
-                            try {
-                                LOG.debug("Auto-Insert system-folder-read permission for group " + GroupStorage.getInstance().getGroup(
-                                    groups[j],
-                                    ctx).getDisplayName() + " to folder " + folderId);
-                            } catch (final OXException e) {
-                                LOG.trace("Logging failed", e);
-                            }
-                        }
+                        LOG.debug("Auto-Insert system-folder-read permission for group {} to folder {}", GroupStorage.getInstance().getGroup(groups[j], ctx).getDisplayName(), folderId);
                         addSystemFolderReadPermission(folderId, groups[j], true);
                     }
                     /*
