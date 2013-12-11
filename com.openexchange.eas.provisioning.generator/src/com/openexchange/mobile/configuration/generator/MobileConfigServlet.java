@@ -71,7 +71,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.AllocatingStringWriter;
@@ -224,7 +223,7 @@ public class MobileConfigServlet extends HttpServlet {
                 }
             }
         } catch (final ConfigurationException e) {
-            LOG.error("A configuration exception occurred, which should not happen: " + e.getMessage(), e);
+            LOG.error("A configuration exception occurred, which should not happen", e);
             printError(req, resp, ErrorMessage.MSG_INTERNAL_ERROR);
             return;
         }
@@ -254,7 +253,7 @@ public class MobileConfigServlet extends HttpServlet {
                     return;
                 } else {
                     printError(req, resp, ErrorMessage.MSG_NO_SUPPORTED_DEVICE_FOUND);
-                    LOG.info("Unsupported device header: \"" + header + "\"");
+                    LOG.info("Unsupported device header: \"{}\"", header);
                     return;
                 }
             }
@@ -262,11 +261,11 @@ public class MobileConfigServlet extends HttpServlet {
             try {
                 generateConfig(req, resp, login, device);
             } catch (final OXException e) {
-                LOG.error("A template exception occurred, which should not happen: " + e.getMessage(), e);
+                LOG.error("A template exception occurred, which should not happen: {}", e.getMessage(), e);
                 printError(req, resp, ErrorMessage.MSG_INTERNAL_ERROR);
                 return;
             } catch (final IOException e) {
-                LOG.error("A template exception occurred, which should not happen: " + e.getMessage(), e);
+                LOG.error("A template exception occurred, which should not happen: {}", e.getMessage(), e);
                 printError(req, resp, ErrorMessage.MSG_INTERNAL_ERROR);
                 return;
             }
@@ -316,7 +315,7 @@ public class MobileConfigServlet extends HttpServlet {
         try {
             writer = getWriterFromOutputStream(resp.getOutputStream());
         } catch (final IOException e) {
-            LOG.error("Unable to get output stream to write error message: " + e.getMessage(), e);
+            LOG.error("Unable to get output stream to write error message: {}", e.getMessage(), e);
             return;
         }
         if (ErrorMessage.MSG_PARAMETER_LOGIN_IS_MISSING.equals(msg)) {

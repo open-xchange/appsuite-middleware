@@ -137,7 +137,7 @@ public class ActionSMS implements ActionService {
 			configservice = ActionServiceRegistry.getServiceRegistry().getService(ConfigurationService.class, true);
 			retval = configservice.getProperty(key);
 		} catch (final OXException e) {
-			LOG.error("value for key " + key + " was not found for ACTIONSMS configuration");
+			LOG.error("value for key {} was not found for ACTIONSMS configuration", key);
 		}
 		return retval;
 	}

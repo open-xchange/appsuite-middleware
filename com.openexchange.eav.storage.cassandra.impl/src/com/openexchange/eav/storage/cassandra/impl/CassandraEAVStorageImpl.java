@@ -165,7 +165,7 @@ public class CassandraEAVStorageImpl implements EAVStorage {
 		KeyspaceDefinition kDef = cluster.describeKeyspace(keyspaceName);
 
 		if (kDef == null) {
-			log.error("Keyspace '" + keyspaceName + "' does not exist. Creating...");
+			log.error("Keyspace '{}' does not exist. Creating...", keyspaceName);
 			createSchema();
 			log.info("done.");
 		}

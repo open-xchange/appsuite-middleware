@@ -81,7 +81,7 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
 	@Override
 	protected void handleAvailability(final Class<?> clazz) {
 		if (LOG.isWarnEnabled()) {
-			LOG.warn("Absent service: " + clazz.getName());
+			LOG.warn("Absent service: {}", clazz.getName());
 		}
 		final Object service = getService(clazz);
 		if (service instanceof HttpService) {
@@ -91,11 +91,11 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
                 try {
                     ((HttpService) service).registerServlet(alias, new MobilityProvisioningServlet(), null, null);
                 } catch (final ServletException e) {
-                    LOG.error("Unable to register servlet for " + alias, e);
+                    LOG.error("Unable to register servlet for {}", alias, e);
                 } catch (final NamespaceException e) {
-                    LOG.error("Unable to register servlet for " + alias, e);
+                    LOG.error("Unable to register servlet for {}", alias, e);
                 } catch (final Exception e) {
-                    LOG.error("Unable to register servlet for " + alias, e);
+                    LOG.error("Unable to register servlet for {}", alias, e);
                 }
 		    }
 		}
@@ -105,7 +105,7 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
 	@Override
 	protected void handleUnavailability(final Class<?> clazz) {
 		if (LOG.isInfoEnabled()) {
-			LOG.info("Re-available service: " + clazz.getName());
+			LOG.info("Re-available service: {}", clazz.getName());
 		}
 		if (HttpService.class.equals(clazz)) {
 		    final HttpService service = getService(HttpService.class);
@@ -139,7 +139,7 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
             track(ActionService.class, new ActionServiceListener(context));
             openTrackers();
 		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
+			LOG.error("", t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}
 
@@ -160,7 +160,7 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
             getInstance().clearRegistry();
             getInstance().clearActionServices();
 		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
+			LOG.error("", t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}
 	}

@@ -80,15 +80,15 @@ public class ActionServiceListener implements ServiceTrackerCustomizer<ActionSer
         {
             final Object identifier = serviceReference.getProperty("action");
             if (null == identifier) {
-                LOG.error("Missing identifier in action service: " + serviceReference.getClass().getName());
+                LOG.error("Missing identifier in action service: {}", serviceReference.getClass().getName());
                 return service;
             }
             if (getInstance().getActionService((ActionTypes)identifier) != null) {
-                LOG.error("A action service is already registered for identifier: " + identifier.toString());
+                LOG.error("A action service is already registered for identifier: {}", identifier);
                 return service;
             }
             getInstance().putActionService((ActionTypes)identifier, service);
-            LOG.info(new StringBuilder(64).append("Action service for identifier '").append(identifier.toString()).append("' successfully registered").toString());
+            LOG.info("Action service for identifier '{}' successfully registered", identifier);
         }
         return service;
     }
@@ -102,11 +102,11 @@ public class ActionServiceListener implements ServiceTrackerCustomizer<ActionSer
             {
                 final Object identifier = reference.getProperty("action");
                 if (null == identifier) {
-                    LOG.error("Missing identifier in action service: " + service.getClass().getName());
+                    LOG.error("Missing identifier in action service: {}", service.getClass().getName());
                     return;
                 }
                 getInstance().removeActionService((ActionTypes)identifier);
-                LOG.info(new StringBuilder(64).append("Action service for identifier '").append(identifier.toString()).append("' successfully unregistered").toString());
+                LOG.info("Action service for identifier '{}' successfully unregistered", identifier);
             }
         } finally {
             context.ungetService(reference);
