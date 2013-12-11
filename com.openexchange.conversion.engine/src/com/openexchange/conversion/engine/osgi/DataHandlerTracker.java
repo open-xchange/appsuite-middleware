@@ -90,7 +90,7 @@ public final class DataHandlerTracker implements ServiceTrackerCustomizer<DataHa
         }
         final String identifier = (String) reference.getProperty(PROP_IDENTIFIER);
         if (null == identifier) {
-            LOG.error("Missing identifier in data handler: " + addedService.getClass().getName());
+            LOG.error("Missing identifier in data handler: {}", addedService.getClass().getName());
             context.ungetService(reference);
             return null;
         }
@@ -101,7 +101,7 @@ public final class DataHandlerTracker implements ServiceTrackerCustomizer<DataHa
                 return null;
             }
             registry.putDataHandler(identifier, addedService);
-            LOG.info(new StringBuilder(64).append("Data handler for identifier '").append(identifier).append("' successfully registered").toString());
+            LOG.info("Data handler for identifier '{}' successfully registered", identifier);
         }
         return addedService;
     }
@@ -119,11 +119,11 @@ public final class DataHandlerTracker implements ServiceTrackerCustomizer<DataHa
         try {
             final String identifier = (String) reference.getProperty(PROP_IDENTIFIER);
             if (null == identifier) {
-                LOG.error("Missing identifier in data handler: " + service.getClass().getName());
+                LOG.error("Missing identifier in data handler: {}", service.getClass().getName());
                 return;
             }
             getInstance().removeDataHandler(identifier);
-            LOG.info(new StringBuilder(64).append("Data handler for identifier '").append(identifier).append("' successfully unregistered").toString());
+            LOG.info("Data handler for identifier '{}' successfully unregistered", identifier);
         } finally {
             context.ungetService(reference);
         }

@@ -192,7 +192,7 @@ public final class CollectionCharsetProvider extends CharsetProvider {
     private void putCharset(final String name, final Charset charset) {
         if (charsetMap.containsKey(name)) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Discarding duplicate charset: " + name);
+                LOG.debug("Discarding duplicate charset: {}", name);
             }
             return;
         }

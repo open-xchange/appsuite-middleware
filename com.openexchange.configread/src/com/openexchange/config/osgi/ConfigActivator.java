@@ -114,7 +114,7 @@ public final class ConfigActivator extends HousekeepingActivator {
                 openTrackers();
             }
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
     }
@@ -133,7 +133,7 @@ public final class ConfigActivator extends HousekeepingActivator {
             cleanUp();
             FileWatcher.dropTimer();
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
         }
     }
 

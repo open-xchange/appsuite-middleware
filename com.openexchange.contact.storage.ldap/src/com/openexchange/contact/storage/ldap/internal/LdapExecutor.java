@@ -113,7 +113,7 @@ public class LdapExecutor  {
             do {
                 this.context.setRequestControls(factory.createRequestControls(sortKeys, cookie, deleted));
                 Date start = new Date();
-                LOG.debug("Search [" + baseDN + "]: " + filter);
+                LOG.debug("Search [{}]: {}", baseDN, filter);
                 List<LdapResult> ldapResults = LdapResult.getResults(context.search(baseDN, filter, searchControls));
                 LOG.debug("Got " + ldapResults.size() + " results, " + (new Date().getTime() - start.getTime()) + "ms eleapsed.");
                 results.addAll(ldapResults);

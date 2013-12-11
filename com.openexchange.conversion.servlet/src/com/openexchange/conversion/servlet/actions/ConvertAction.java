@@ -156,7 +156,7 @@ public final class ConvertAction extends AbstractConversionAction {
                     final String key = elem.keys().next();
                     dataArguments.put(key, elem.getString(key));
                 } else {
-                    LOG.warn("Corrupt data argument in JSON object: " + elem.toString());
+                    LOG.warn("Corrupt data argument in JSON object: {}", elem);
                 }
             }
             return dataArguments;

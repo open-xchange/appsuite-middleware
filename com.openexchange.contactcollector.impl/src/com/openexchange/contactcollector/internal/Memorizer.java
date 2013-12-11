@@ -187,7 +187,7 @@ public class Memorizer implements Runnable {
                 try {
                     memorizeContact(address, ctx, userConfig);
                 } catch (final OXException e) {
-                    LOG.warn("Contact collector run aborted for address: " + address.toUnicodeString(), e);
+                    LOG.warn("Contact collector run aborted for address: {}", address.toUnicodeString(), e);
                 }
             }
         }

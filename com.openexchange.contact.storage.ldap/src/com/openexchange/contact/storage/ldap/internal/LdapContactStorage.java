@@ -211,7 +211,7 @@ public class LdapContactStorage extends DefaultContactStorage {
     @Override
     public SearchIterator<Contact> searchByBirthday(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
         if (null == mapper.opt(ContactField.BIRTHDAY)) {
-            LOG.warn("No LDAP mapping for " + ContactField.BIRTHDAY + ", unable to search contacts by birthday.");
+            LOG.warn("No LDAP mapping for {}, unable to search contacts by birthday.", ContactField.BIRTHDAY);
             return getSearchIterator(null);
         } else {
             // use default implementation for now
@@ -222,7 +222,7 @@ public class LdapContactStorage extends DefaultContactStorage {
     @Override
     public SearchIterator<Contact> searchByAnniversary(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
         if (null == mapper.opt(ContactField.ANNIVERSARY)) {
-            LOG.warn("No LDAP mapping for " + ContactField.ANNIVERSARY + ", unable to search contacts by anniversary.");
+            LOG.warn("No LDAP mapping for {}, unable to search contacts by anniversary.", ContactField.ANNIVERSARY);
             return getSearchIterator(null);
         } else {
             // use default implementation for now
@@ -369,7 +369,7 @@ public class LdapContactStorage extends DefaultContactStorage {
                 try {
                     result = executor.getAttributes(member.getDisplayname(), distlistAttributeNames);
                 } catch (OXException e) {
-                    LOG.warn("Error resolving distribution list member " + member.getDisplayname(), e);
+                    LOG.warn("Error resolving distribution list member {}", member.getDisplayname(), e);
                 }
                 if (null != result) {
                     Contact referencedContact = this.createContact(executor, idResolver, mapper, result, DISTLISTMEMBER_FIELDS);
@@ -468,7 +468,7 @@ public class LdapContactStorage extends DefaultContactStorage {
         if (contact.getMarkAsDistribtuionlist()) {
             resolveDistList(executor, idResolver, contact);
             if (config.isExcludeEmptyLists() && (null == contact.getDistributionList() || 0 == contact.getDistributionList().length)) {
-                LOG.debug("Skipping empty distribution list '" + result + "'.");
+                LOG.debug("Skipping empty distribution list '{}'.", result);
                 return null;
             }
             if (false == contact.containsSurName() && contact.containsDisplayName()) {

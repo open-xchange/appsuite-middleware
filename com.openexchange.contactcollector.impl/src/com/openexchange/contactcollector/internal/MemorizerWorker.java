@@ -368,7 +368,7 @@ public final class MemorizerWorker {
                 try {
                     memorizeContact(address, session, ctx, userConfig);
                 } catch (final OXException e) {
-                    LOG.warn("Contact collector run aborted for address: " + address.toUnicodeString(), e);
+                    LOG.warn("Contact collector run aborted for address: {}", address.toUnicodeString(), e);
                 }
             }
         }

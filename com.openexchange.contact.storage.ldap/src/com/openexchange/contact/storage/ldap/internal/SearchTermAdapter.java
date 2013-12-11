@@ -109,7 +109,7 @@ public class SearchTermAdapter {
          */
         LdapMapping<? extends Object> ldapMapping = mapper.getMapping(term);
         if (null == ldapMapping || null == ldapMapping.getLdapAttributeName(true)) {
-            LOG.debug("No LDAP attribute mapping for term '" + term.toString() + "' available, excluding from search filter.");
+            LOG.debug("No LDAP attribute mapping for term '{}' available, excluding from search filter.", term);
             return null;
         }
         /*

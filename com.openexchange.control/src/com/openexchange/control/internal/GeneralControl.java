@@ -100,7 +100,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 
     @Override
     public void start(final String name) throws MBeanException {
-        LOG.info("control command: start bundle " + name);
+        LOG.info("control command: start bundle {}", name);
         final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
         try {
             if (bundle != null) {
@@ -109,13 +109,13 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
                 throw new MBeanException(null, "bundle " + name + " not found");
             }
         } catch (final BundleException exc) {
-            LOG.error("cannot start bundle: " + name, exc);
+            LOG.error("cannot start bundle: {}", name, exc);
         }
     }
 
     @Override
     public void stop(final String name) throws MBeanException {
-        LOG.info("control command: stop bundle " + name);
+        LOG.info("control command: stop bundle {}", name);
         final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
         try {
             if (bundle != null) {
@@ -124,7 +124,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
                 throw new MBeanException(null, "bundle " + name + " not found");
             }
         } catch (final BundleException exc) {
-            LOG.error("cannot stop bundle: " + name, exc);
+            LOG.error("cannot stop bundle: {}", name, exc);
         }
     }
 
@@ -136,11 +136,11 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 
     @Override
     public void install(final String location) {
-        LOG.info("install bundle: " + location);
+        LOG.info("install bundle: {}", location);
         try {
             bundleContext.installBundle(location);
         } catch (final BundleException exc) {
-            LOG.error("cannot install bundle: " + location, exc);
+            LOG.error("cannot install bundle: {}", location, exc);
         }
     }
 
@@ -155,13 +155,13 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
                 throw new MBeanException(null, "bundle " + name + " not found");
             }
         } catch (final BundleException exc) {
-            LOG.error("cannot uninstall bundle: " + name, exc);
+            LOG.error("cannot uninstall bundle: {}", name, exc);
         }
     }
 
     @Override
     public void update(final String name, final boolean autofresh) throws MBeanException {
-        LOG.info("control command: update bundle: " + name);
+        LOG.info("control command: update bundle: {}", name);
         final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
         try {
             if (bundle != null) {
@@ -173,7 +173,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
                 throw new MBeanException(null, "bundle " + name + " not found");
             }
         } catch (final BundleException exc) {
-            LOG.error("cannot update bundle: " + name, exc);
+            LOG.error("cannot update bundle: {}", name, exc);
         }
     }
 
@@ -278,7 +278,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
                 }
             }
         } catch (final InvalidSyntaxException exc) {
-            LOG.error(exc.getMessage(), exc);
+            LOG.error("", exc);
         }
 
         return serviceList;
@@ -312,7 +312,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
     @Override
     public void postRegister(final Boolean registrationDone) {
         if (LOG.isTraceEnabled()) {
-            LOG.trace(new StringBuilder("postRegister() with ").append(registrationDone).toString());
+            LOG.trace("postRegister() with {}", registrationDone);
         }
     }
 

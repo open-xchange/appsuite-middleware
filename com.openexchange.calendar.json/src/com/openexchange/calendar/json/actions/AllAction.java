@@ -231,7 +231,7 @@ public final class AllAction extends AppointmentAction {
 
                             appointmentList.add(appointment);
                         } else {
-                            LOG.warn("cannot load first recurring appointment from appointment object: " + appointment.getRecurrenceType() + " / " + appointment.getObjectID() + "\n\n\n");
+                            LOG.warn("cannot load first recurring appointment from appointment object: {} / {}\n\n\n", appointment.getRecurrenceType(), appointment.getObjectID());
                         }
                     } else {
                         // Commented this because this is done in CalendarOperation.next():726 that calls extractRecurringInformation()

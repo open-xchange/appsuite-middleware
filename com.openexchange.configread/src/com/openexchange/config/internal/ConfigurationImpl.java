@@ -279,7 +279,7 @@ public final class ConfigurationImpl implements ConfigurationService {
                 propertiesFiles.put(propName, propFilePath);
             }
         } catch (final IOException e) {
-            LOG.warn("An error occurred while processing property file \"" + propFile + "\".", e);
+            LOG.warn("An error occurred while processing property file \"{}\".", propFile, e);
         }
     }
 
@@ -446,7 +446,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             fileWatcher.startFileWatcher(10000);
             return true;
         } else {
-            LOG.error("Unable to watch missing property: " + name);
+            LOG.error("Unable to watch missing property: {}", name);
             return false;
         }
     }
@@ -520,7 +520,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         if ((pos = fileName.lastIndexOf('/')) >= 0 || (pos = fileName.lastIndexOf('\\')) >= 0) {
             fn = fileName.substring(pos + 1);
         } else {
-            LOG.warn("No such file: " + fileName);
+            LOG.warn("No such file: {}", fileName);
             return null;
         }
         for (final String dir : getDirectories()) {
@@ -529,7 +529,7 @@ public final class ConfigurationImpl implements ConfigurationService {
                 return f;
             }
         }
-        LOG.warn("No such file: " + fileName);
+        LOG.warn("No such file: {}", fileName);
         return null;
     }
 
@@ -567,7 +567,7 @@ public final class ConfigurationImpl implements ConfigurationService {
                 return fdir;
             }
         }
-        LOG.warn("No such directory: " + directoryName);
+        LOG.warn("No such directory: {}", directoryName);
         return null;
     }
 
@@ -657,7 +657,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
             return builder.toString();
         } catch (final IOException x) {
-            LOG.error("Can't read file: " + file);
+            LOG.error("Can't read file: {}", file);
             return null;
         } finally {
             Streams.close(reader);

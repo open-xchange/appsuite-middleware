@@ -99,7 +99,7 @@ public final class PropertyMapManagement {
     public void dropFor(final int contextId) {
         map.remove(Integer.valueOf(contextId));
         if (LOG.isDebugEnabled()) {
-            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned user-sensitive property cache for context ").append(contextId).toString());
+            LOG.debug("Cleaned user-sensitive property cache for context {}", contextId);
         }
     }
 
@@ -114,8 +114,7 @@ public final class PropertyMapManagement {
             contextMap.remove(Integer.valueOf(session.getUserId()));
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned user-sensitive property cache for user ").append(
-                session.getUserId()).append(" in context ").append(session.getContextId()).toString());
+            LOG.debug("Cleaned user-sensitive property cache for user {} in context {}", session.getUserId(), session.getContextId());
         }
     }
 
@@ -131,8 +130,7 @@ public final class PropertyMapManagement {
             contextMap.remove(Integer.valueOf(userId));
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned user-sensitive property cache for user ").append(userId).append(
-                " in context ").append(contextId).toString());
+            LOG.debug("Cleaned user-sensitive property cache for user {} in context {}", userId, contextId);
         }
     }
 

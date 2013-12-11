@@ -2706,7 +2706,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, String value) {
-                LOG.debug("Ignoring request to set 'image_url' in contact to '" + value + "'.");
+                LOG.debug("Ignoring request to set 'image_url' in contact to '{}'.", value);
             }
 
             @Override

@@ -113,7 +113,7 @@ public class CorrectNumberOfImagesTask extends UpdateTaskAdapter {
             statement = connnection.prepareStatement(UPDATE);
             updated = statement.executeUpdate();
             connnection.commit();
-            LOG.info("Corrected number of images in prg_contacts, " + updated + " rows affected.");
+            LOG.info("Corrected number of images in prg_contacts, {} rows affected.", updated);
         } catch (SQLException e) {
             rollback(connnection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());

@@ -177,7 +177,7 @@ public class CopyAction extends ContactAction {
                         folderId,
                         ctx.getContextId());
                 } else {
-                    LOG.error("Invalid link retrieved from Links.getAllLinksFromObject()." + " Neither first nor second ID matches!");
+                    LOG.error("Invalid link retrieved from Links.getAllLinksFromObject(). Neither first nor second ID matches!");
                     continue;
                 }
                 Links.performLinkStorage(copy, user.getId(), user.getGroups(), session, writeCon);

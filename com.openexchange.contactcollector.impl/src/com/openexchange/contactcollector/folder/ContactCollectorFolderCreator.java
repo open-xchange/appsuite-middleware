@@ -151,7 +151,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
                     System.currentTimeMillis()).getObjectID();
         } catch (final OXException folderException) {
             if (folderException.isPrefix("FLD") && folderException.getCode() == OXFolderExceptionCode.NO_DUPLICATE_FOLDER.getNumber()) {
-                LOG.info(new StringBuilder("Found Folder with name of contact collect folder. Guess this is the dedicated folder.").toString());
+                LOG.info("Found Folder with name of contact collect folder. Guess this is the dedicated folder.");
                 collectFolderID = OXFolderSQL.lookUpFolder(parent, folderName, FolderObject.CONTACT, con, ctx);
             }
         }
@@ -165,8 +165,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
         serverUserSetting.setContactCollectOnMailAccess(cid, userId, serverUserSetting.isContactCollectOnMailAccess(cid, userId).booleanValue());
         serverUserSetting.setContactCollectOnMailTransport(cid, userId, serverUserSetting.isContactCollectOnMailTransport(cid, userId).booleanValue());
         if (LOG.isInfoEnabled()) {
-            LOG.info(new StringBuilder("Contact collector folder (id=").append(collectFolderID).append(
-                ") successfully created for user ").append(userId).append(" in context ").append(cid).toString());
+            LOG.info("Contact collector folder (id={}) successfully created for user {} in context {}", collectFolderID, userId, cid);
         }
     }
 

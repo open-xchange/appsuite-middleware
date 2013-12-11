@@ -128,7 +128,7 @@ public class SearchFilter {
          */
         LdapMapping<? extends Object> mapping = LdapMapper.GENERIC.getMapping(term);
         if (null == mapping) {
-            LOG.debug("No mapping for term '" + term.toString() + "' available, excluding from search filter.");
+            LOG.debug("No mapping for term '{}' available, excluding from search filter.", term);
             return true;
         }
         /*
