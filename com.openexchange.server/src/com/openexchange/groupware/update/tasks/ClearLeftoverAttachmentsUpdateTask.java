@@ -56,6 +56,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -166,7 +167,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         try {
             fs.deleteFile(fileId);
         } catch (final OXException x) {
-            LOG.warn("Could not delete "+fileId+ "in context "+ctx_id+". The file might be gone already.");
+            LOG.warn("Could not delete {}in context {}. The file might be gone already.", fileId, ctx_id);
         }
     }
 
@@ -186,7 +187,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
             rs = stmt.executeQuery();
 
             if(!rs.next()) {
-                LOG.error("Context "+ctx_id+" doesn't seem to have a proper filestore");
+                LOG.error("Context {} doesn''t seem to have a proper filestore", ctx_id);
                 return null;
             }
 
@@ -203,7 +204,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
             rs = stmt.executeQuery();
 
             if(!rs.next()) {
-                LOG.error("Context "+ctx_id+" doesn't seem to have a proper filestore");
+                LOG.error("Context {} doesn''t seem to have a proper filestore", ctx_id);
                 return null;
             }
             final String uri_string = rs.getString(1);

@@ -3,7 +3,7 @@ package com.openexchange.spamhandler.spamexperts.impl;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-
+import java.text.MessageFormat;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -18,7 +18,6 @@ import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -203,9 +202,7 @@ public final class MyServletRequest  {
 		String authid_attribute = getAuthIDAttribute();
 		if(authid_attribute==null || authid_attribute.trim().length()==0){
 			authid_attribute = AUTH_ID_MAIL;
-			if(LOG.isDebugEnabled()){
-				LOG.debug("Using "+authid_attribute+" from user "+getCurrentUserUsername()+" in context "+getCurrentUserContextID()+" as authentication attribute against panel API");
-			}
+			LOG.debug("Using {} from user {} in context {} as authentication attribute against panel API", authid_attribute, getCurrentUserUsername(), getCurrentUserContextID());
 		}
 
 		if(authid_attribute.equals(AUTH_ID_IMAP_LOGIN)){
@@ -220,9 +217,7 @@ public final class MyServletRequest  {
 			authid = this.user.getMail();
 		}
 
-		if(LOG.isDebugEnabled()){
-			LOG.debug("Using {} as authID string from user {} in context {} to authenticate against panel API", authid, getCurrentUserUsername(), getCurrentUserContextID());
-		}
+		LOG.debug("Using {} as authID string from user {} in context {} to authenticate against panel API", authid, getCurrentUserUsername(), getCurrentUserContextID());
 
 		// call the API to retrieve the URL to access panel
         final GetMethod GET = new GetMethod(getPanelApiURL()+authid);
@@ -243,9 +238,7 @@ public final class MyServletRequest  {
 			}
 
 			final String resp = reponse2String(GET);
-			if(LOG.isDebugEnabled()){
-				LOG.debug("Got response for user {} in context {} from  panel API: \n{}", getCurrentUserUsername(), getCurrentUserContextID(), resp);
-			}
+			LOG.debug("Got response for user {} in context {} from  panel API: \n{}", getCurrentUserUsername(), getCurrentUserContextID(), resp);
 
 			if(resp.indexOf("ERROR")!=-1){
 				// ERROR DETECTED

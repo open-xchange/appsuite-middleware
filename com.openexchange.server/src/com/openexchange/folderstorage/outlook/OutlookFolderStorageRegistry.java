@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.outlook;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -56,7 +57,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.slf4j.Logger;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
@@ -125,9 +125,7 @@ public final class OutlookFolderStorageRegistry implements FolderStorageDiscover
                 } else {
                     // No, already present
                     final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OutlookFolderStorageRegistry.class);
-                    if (log.isErrorEnabled()) {
-                        log.error("Duplicate folder storage for content type \"" + contentTypes[j].toString() + "\"", new Throwable());
-                    }
+                    log.error("Duplicate folder storage for content type \"{}\"", contentTypes[j].toString()), new Throwable();
                     success = false;
                 }
             }

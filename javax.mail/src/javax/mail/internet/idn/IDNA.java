@@ -168,7 +168,7 @@ public final class IDNA {
             }
             return b.toString();
         } catch (final IDNAException e) {
-            LoggerFactory.getLogger(IDNA.class).warn("Couldn't create ASCII representation for host name: " + unicodeHostName, e);
+            LoggerFactory.getLogger(IDNA.class).warn("Couldn''t create ASCII representation for host name: {}", unicodeHostName, e);
             return unicodeHostName;
         }
     }

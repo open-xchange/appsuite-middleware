@@ -56,6 +56,7 @@ import static com.openexchange.tools.update.Tools.dropIndex;
 import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -117,8 +118,7 @@ public class CorrectIndexes implements UpdateTask {
         try {
             final String index2Drop = existsIndex(con, table, oldcolumns1);
             if (null != index2Drop) {
-                LOG.info("Dropping old index " + index2Drop
-                    + " on table " + table + ".");
+                LOG.info("Dropping old index {} on table {}.", index2Drop, table);
                 dropIndex(con, table, index2Drop);
             }
             final String index2Create = existsIndex(con, table, newcolumns1);
@@ -134,8 +134,7 @@ public class CorrectIndexes implements UpdateTask {
         try {
             final String index2Drop = existsIndex(con, table, oldcolumns2);
             if (null != index2Drop) {
-                LOG.info("Dropping old index " + index2Drop + " on table "
-                    + table + ".");
+                LOG.info("Dropping old index {} on table {}.", index2Drop, table);
                 dropIndex(con, table, index2Drop);
             }
             final String index2Create = existsIndex(con, table, newcolumns2);
@@ -164,8 +163,7 @@ public class CorrectIndexes implements UpdateTask {
         try {
             final String index2Drop = existsIndex(con, table, oldcolumns);
             if (null != index2Drop) {
-                LOG.info("Dropping old index " + index2Drop
-                    + " on table " + table + ".");
+                LOG.info("Dropping old index {} on table {}.", index2Drop, table);
                 dropIndex(con, table, index2Drop);
             }
         } catch (final SQLException e) {
@@ -179,24 +177,22 @@ public class CorrectIndexes implements UpdateTask {
         try {
             final String index2Drop = existsIndex(con, table1, oldcolumns1);
             if (null != index2Drop) {
-                LOG.info("Dropping old index " + index2Drop
-                    + " on table " + table1 + ".");
+                LOG.info("Dropping old index {} on table {}.", index2Drop, table1);
                 dropIndex(con, table1, index2Drop);
             }
         } catch (final SQLException e) {
-            LOG.error("Problem correcting indexes on table " + table1 + ".", e);
+            LOG.error("Problem correcting indexes on table {}.", table1, e);
         }
         final String table2 = "groups_member";
         final String[] oldcolumns2 = new String[] { "cid", "id" };
         try {
             final String index2Drop = existsIndex(con, table2, oldcolumns2);
             if (null != index2Drop) {
-                LOG.info("Dropping old index " + index2Drop
-                    + " on table " + table2 + ".");
+                LOG.info("Dropping old index {} on table {}.", index2Drop, table2);
                 dropIndex(con, table2, index2Drop);
             }
         } catch (final SQLException e) {
-            LOG.error("Problem correcting indexes on table " + table2 + ".", e);
+            LOG.error("Problem correcting indexes on table {}.", table2, e);
         }
     }
 
@@ -206,8 +202,7 @@ public class CorrectIndexes implements UpdateTask {
         try {
             final String index2Drop = existsIndex(con, table, oldcolumns);
             if (null != index2Drop) {
-                LOG.info("Dropping old index " + index2Drop
-                    + " on table " + table + ".");
+                LOG.info("Dropping old index {} on table {}.", index2Drop, table);
                 dropIndex(con, table, index2Drop);
             }
         } catch (final SQLException e) {

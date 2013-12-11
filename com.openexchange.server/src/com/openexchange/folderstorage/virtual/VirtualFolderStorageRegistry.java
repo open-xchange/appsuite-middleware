@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.virtual;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -56,7 +57,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import org.slf4j.Logger;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
@@ -124,9 +124,7 @@ public final class VirtualFolderStorageRegistry implements FolderStorageDiscover
                 } else {
                     // No, already present
                     final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(VirtualFolderStorageRegistry.class);
-                    if (log.isErrorEnabled()) {
-                        log.error("Duplicate folder storage for content type \"" + contentTypes[j].toString() + "\"", new Throwable());
-                    }
+                    log.error("Duplicate folder storage for content type \"{}\"", contentTypes[j].toString()), new Throwable();
                     success = false;
                 }
             }

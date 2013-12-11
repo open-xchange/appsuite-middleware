@@ -58,6 +58,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -287,7 +288,7 @@ public abstract class Consistency implements ConsistencyMBean {
             }
         }
     }
-    
+
     @Override
     public List<String> checkOrRepairConfigDB(final boolean repair) throws MBeanException {
         if( repair ) {
@@ -295,7 +296,7 @@ public abstract class Consistency implements ConsistencyMBean {
         } else {
             LOG.info("List inconsistent configdb");
         }
-        
+
         Connection confCon = null;
         Connection poolCon = null;
         PreparedStatement stmt = null;
@@ -341,7 +342,7 @@ public abstract class Consistency implements ConsistencyMBean {
                     for(final Integer ctx : ctxs) {
                         if( repair ) {
                             LOG.info("Deleting inconsistent entry for context {} from configdb", ctx);
-                            deleteContextFromConfigDB(confCon, ctx.intValue()); 
+                            deleteContextFromConfigDB(confCon, ctx.intValue());
                             ret.add("Deleted inconsistent entry for context " + ctx + " from configdb");
                         } else {
                             LOG.info("Context {} does not exist anymore", ctx);
@@ -813,8 +814,8 @@ public abstract class Consistency implements ConsistencyMBean {
                     final int changed =
                         database.modifyDocument(old_identifier, identifier, "\nCaution! The file has changed", "text/plain", ctx);
                     database.commit();
-                    if (changed == 1 && LOG1.isInfoEnabled()) {
-                        LOG1.info("Modified entry for identifier " + old_identifier + " in context " + ctx.getContextId() + " to new " + "dummy identifier " + identifier);
+                    if (changed == 1) {
+                        LOG1.info(MessageFormat.format("Modified entry for identifier {0} in context {1} to new dummy identifier {2}", old_identifier, ctx.getContextId(), identifier));
                     }
                 } catch (final OXException e) {
                     LOG1.error("", e);
@@ -876,8 +877,8 @@ public abstract class Consistency implements ConsistencyMBean {
                     final int changed =
                         attachments.modifyAttachment(old_identifier, identifier, "\nCaution! The file has changed", "text/plain", ctx);
                     attachments.commit();
-                    if (changed == 1 && LOG1.isInfoEnabled()) {
-                        LOG1.info("Created dummy entry for: " + old_identifier + ". New identifier is: " + identifier);
+                    if (changed == 1) {
+                        LOG1.info(MessageFormat.format("Created dummy entry for: {0}. New identifier is: {1}", old_identifier, identifier));
                     }
                 } catch (final OXException e) {
                     LOG1.error("", e);
@@ -993,8 +994,8 @@ public abstract class Consistency implements ConsistencyMBean {
         public void solve(final Context ctx, final Set<String> problems) throws OXException {
             try {
                 for (final String identifier : problems) {
-                    if (storage.deleteFile(identifier) && LOG1.isInfoEnabled()) {
-                        LOG1.info("Deleted identifier: " + identifier);
+                    if (storage.deleteFile(identifier)) {
+                        LOG1.info(MessageFormat.format("Deleted identifier: {0}", identifier));
                     }
                 }
                 /*
@@ -1033,11 +1034,11 @@ public abstract class Consistency implements ConsistencyMBean {
                     database.setRequestTransactional(true);
                     final int[] numbers = database.removeDocument(identifier, ctx);
                     database.commit();
-                    if (numbers[0] == 1 && LOG1.isInfoEnabled()) {
-                        LOG1.info("Have to change infostore version number " + "for entry: " + identifier);
+                    if (numbers[0] == 1) {
+                        LOG1.info(MessageFormat.format("Have to change infostore version number for entry: {0}", identifier));
                     }
-                    if (numbers[1] == 1 && LOG1.isInfoEnabled()) {
-                        LOG1.info("Deleted entry " + identifier + " from " + "infostore_documents.");
+                    if (numbers[1] == 1) {
+                        LOG1.info(MessageFormat.format("Deleted entry {0} from infostore_documents.", identifier));
                     }
                 } catch (final OXException e) {
                     LOG1.error("", e);
@@ -1085,11 +1086,11 @@ public abstract class Consistency implements ConsistencyMBean {
                     attachments.startTransaction();
                     final int[] numbers = attachments.removeAttachment(identifier, ctx);
                     attachments.commit();
-                    if (numbers[0] == 1 && LOG1.isInfoEnabled()) {
-                        LOG1.info("Inserted entry for identifier " + identifier + " and Context " + ctx.getContextId() + " in " + "del_attachments");
+                    if (numbers[0] == 1) {
+                        LOG1.info(MessageFormat.format("Inserted entry for identifier {0} and Context {1} in del_attachments", identifier, ctx.getContextId()));
                     }
-                    if (numbers[1] == 1 && LOG1.isInfoEnabled()) {
-                        LOG1.info("Removed attachment database entry for: " + identifier);
+                    if (numbers[1] == 1) {
+                        LOG1.info(MessageFormat.format("Removed attachment database entry for: {0}", identifier));
                     }
                 } catch (final OXException e) {
                     LOG1.debug("", e);
@@ -1333,8 +1334,8 @@ public abstract class Consistency implements ConsistencyMBean {
                         database.startTransaction();
                         final int[] numbers = database.saveDocumentMetadata(identifier, document, user, ctx);
                         database.commit();
-                        if (numbers[2] == 1 && LOG1.isInfoEnabled()) {
-                            LOG1.info("Dummy entry for " + identifier + " in database " + "created. The admin of this context has now " + "a new document");
+                        if (numbers[2] == 1) {
+                            LOG1.info(MessageFormat.format("Dummy entry for {0} in database created. The admin of this context has now a new document", identifier));
                         }
                     } catch (final OXException e) {
                         LOG1.error("", e);
@@ -1384,5 +1385,5 @@ public abstract class Consistency implements ConsistencyMBean {
         }
         return retval;
     }
-    
+
 }

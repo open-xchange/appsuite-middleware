@@ -58,6 +58,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.rmi.RemoteException;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -349,9 +350,7 @@ public final class MyServletRequest  {
                 LOG.debug("Found and now using the upsell mail template at {}", fulltemplatepath);
                 return getFileContents(templateFile);
             } else {
-                LOG.error("Could not find an upsell mail template at "
-                    + fulltemplatepath + ", using "
-                    + PROPERTY_METHOD_EMAIL_SUBJECT + " as mail body.");
+                LOG.error("Could not find an upsell mail template at {}, using {} as mail body.", fulltemplatepath, PROPERTY_METHOD_EMAIL_SUBJECT);
                 return null;
             }
         } else {

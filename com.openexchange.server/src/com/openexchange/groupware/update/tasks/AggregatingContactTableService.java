@@ -54,6 +54,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -106,9 +107,7 @@ public class AggregatingContactTableService  extends AbstractCreateTableImpl imp
         final int contextId = params.getContextId();
         createTable(AGGREGATING_CONTACTS, getTableSQL(), contextId);
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AggregatingContactTableService.class);
-        if (logger.isInfoEnabled()) {
-            logger.info("UpdateTask '" + AggregatingContactTableService.class.getSimpleName() + "' successfully performed!");
-        }
+        logger.info("UpdateTask ''{}'' successfully performed!", AggregatingContactTableService.class.getSimpleName());
     }
 
     @Override

@@ -52,6 +52,7 @@ package com.openexchange.groupware.update.tasks;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.MessageFormat;
 import org.slf4j.Logger;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -138,8 +139,7 @@ public class TaskModifiedByNotNull implements UpdateTask {
             final int updated = stmt.executeUpdate("UPDATE " + table
                 + " SET " + changed_from + '=' + created_from + " WHERE "
                 + changed_from + " IS NULL");
-            LOG.info("Updated in " + updated + " rows " + changed_from + " to "
-                + created_from + " in table " + table);
+            LOG.info("Updated in {} rows {} to {} in table {}", updated, changed_from, created_from, table);
         } finally {
             DBUtils.closeSQLStuff(null, stmt);
         }
@@ -152,8 +152,7 @@ public class TaskModifiedByNotNull implements UpdateTask {
             stmt = con.createStatement();
             stmt.execute("ALTER TABLE " + table + " MODIFY " + changed_from
                 + " INT4 UNSIGNED NOT NULL");
-            LOG.info("Altered table " + table + " changed " + changed_from
-                + " to NOT NULL.");
+            LOG.info("Altered table {} changed {} to NOT NULL.", table, changed_from);
         } finally {
             DBUtils.closeSQLStuff(null, stmt);
         }

@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update.internal;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.databaseold.Database;
@@ -110,7 +111,7 @@ public final class UpdateExecutor {
     }
 
     private void runUpdates(final boolean blocking) throws OXException {
-        LOG.info("Starting " + (blocking ? "blocking" : "background") + " updates on schema " + state.getSchema());
+        LOG.info("Starting {} updates on schema {}", (blocking ? "blocking" : "background"), state.getSchema());
         try {
             lockSchema(blocking);
         } catch (final OXException e) {
@@ -163,7 +164,7 @@ public final class UpdateExecutor {
                 }
                 addExecutedTask(task.getClass().getName(), success, poolId, state.getSchema());
             }
-            LOG.info("Finished " + (blocking ? "blocking" : "background") + " updates on schema " + state.getSchema());
+            LOG.info("Finished {} updates on schema {}", (blocking ? "blocking" : "background"), state.getSchema());
         } catch (final OXException e) {
             throw e;
         } catch (final Throwable t) {

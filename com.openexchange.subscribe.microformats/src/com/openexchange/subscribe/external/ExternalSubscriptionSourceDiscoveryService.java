@@ -52,6 +52,7 @@ package com.openexchange.subscribe.external;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.MalformedURLException;
+import java.text.MessageFormat;
 import java.util.List;
 import org.apache.commons.httpclient.HttpException;
 import com.openexchange.exception.OXException;
@@ -162,7 +163,7 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
 
             final MapToObjectTransformer transformer = getTransformer(external.getFolderModule());
             if(transformer == null) {
-                LOG.error("We don't support subscription sources of type "+Module.getModuleString(external.getFolderModule(), -1)+" yet");
+                LOG.error("We don''t support subscription sources of type {} yet", Module.getModuleString(external.getFolderModule(), -1));
                 return null;
             }
             final MicroformatSubscribeService subscribeService = new MicroformatSubscribeService() {
