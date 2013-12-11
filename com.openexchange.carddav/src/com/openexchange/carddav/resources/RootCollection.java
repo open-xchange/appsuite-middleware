@@ -101,7 +101,7 @@ public class RootCollection extends AbstractCollection {
     	this.factory = factory;
     	this.url = new WebdavPath();
         includeProperties(new DummySyncToken());
-        LOG.debug(getUrl() + ": initialized.");
+        LOG.debug("{}: initialized.", getUrl());
     }
 
     protected WebdavProtocolException protocolException(Throwable t) {
@@ -109,7 +109,7 @@ public class RootCollection extends AbstractCollection {
     }
 
     protected WebdavProtocolException protocolException(Throwable t, int statusCode) {
-        LOG.error(t.getMessage(), t);
+        LOG.error("", t);
         return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), statusCode, t);
     }
 
@@ -137,7 +137,7 @@ public class RootCollection extends AbstractCollection {
 			 * add the aggregated collection as child resource
 			 */
 			children.add(new AggregatedCollection(factory, constructPathForChildResource(AGGREGATED_FOLDER_ID), AGGREGATED_DISPLAY_NAME));
-			LOG.debug(getUrl() + ": adding aggregated collection as child resource.");
+			LOG.debug("{}: adding aggregated collection as child resource.", getUrl());
 		}
 		if (isUseFolderCollections()) {
 			/*
@@ -146,13 +146,13 @@ public class RootCollection extends AbstractCollection {
 			try {
 				for (UserizedFolder folder : factory.getState().getFolders()) {
 					children.add(new FolderCollection(factory, constructPathForChildResource(folder), folder));
-					LOG.debug(getUrl() + ": adding folder collection for folder '" + folder.getName() + "' as child resource.");
+					LOG.debug("{}: adding folder collection for folder '{}' as child resource.", getUrl(), folder.getName());
 				}
 			} catch (OXException e) {
 				throw protocolException(e);
 			}
 		}
-		LOG.debug(getUrl() + ": got " + children.size() + " child resources.");
+		LOG.debug("{}: got {} child resources.", getUrl(), children.size());
 		return children;
 	}
 
@@ -260,7 +260,7 @@ public class RootCollection extends AbstractCollection {
             try {
                 regex = factory.getConfigValue(USER_AGENT_FOR_AGGREGATED_COLLECTION_PROPERTY, regex);
             } catch (OXException e) {
-                LOG.error("error getting exposed collections from config, falling back to '" + regex + "'", e);
+                LOG.error("error getting exposed collections from config, falling back to '{}'", regex, e);
             }
             userAgentForAggregatedCollection = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
         }

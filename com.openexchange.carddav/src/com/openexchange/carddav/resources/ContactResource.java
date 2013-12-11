@@ -126,12 +126,12 @@ public class ContactResource extends CardDAVResource {
 	             * Insert contact
 	             */
 	            this.factory.getContactService().createContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), contact);
-	            LOG.debug(this.getUrl() + ": created.");
+	            LOG.debug("{}: created.", this.getUrl());
 		    } else {
 	            /*
 	             * Insert & delete not supported contact (next sync cleans up the client)
 	             */
-                LOG.warn(this.getUrl() + ": contact groups not supported, performing immediate deletion of this resource.");
+                LOG.warn("{}: contact groups not supported, performing immediate deletion of this resource.", this.getUrl());
 		        contact.removeDistributionLists();
 		        contact.removeNumberOfDistributionLists();
                 this.factory.getContactService().createContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), contact);
@@ -161,7 +161,7 @@ public class ContactResource extends CardDAVResource {
     		 */
         	this.factory.getContactService().deleteContact(factory.getSession(), Integer.toString(contact.getParentFolderID()),
         			Integer.toString(contact.getObjectID()), contact.getLastModified());
-            LOG.debug(this.getUrl() + ": deleted.");
+            LOG.debug("{}: deleted.", this.getUrl());
             this.contact = null;
         } catch (OXException e) {
         	if (handle(e)) {
@@ -181,7 +181,7 @@ public class ContactResource extends CardDAVResource {
         	 */
         	this.factory.getContactService().updateContact(factory.getSession(), Integer.toString(contact.getParentFolderID()),
         			Integer.toString(contact.getObjectID()), contact, contact.getLastModified());
-            LOG.debug(this.getUrl() + ": saved.");
+            LOG.debug("{}: saved.", this.getUrl());
         } catch (OXException e) {
         	if (handle(e)) {
         		save();
@@ -256,7 +256,7 @@ public class ContactResource extends CardDAVResource {
 	                	 * the WebDAV path and the UID field in the vCard, so we need to store this UID in the contact
 	                	 * resource, too, to recognize later updates on the resource.
 	                	 */
-	            		LOG.debug(getUrl() + ": Storing WebDAV resource name in filename.");
+	            		LOG.debug("{}: Storing WebDAV resource name in filename.", getUrl());
 	            		newContact.setFilename(extractedUID);
 	            	}
 	    		}
@@ -332,7 +332,7 @@ public class ContactResource extends CardDAVResource {
     		/*
     		 * image problem, handle by create without image
     		 */
-        	LOG.warn(this.getUrl() + ": " + e.getMessage() + " - removing image and trying again.");
+        	LOG.warn("{}: {} - removing image and trying again.", this.getUrl(), e.getMessage());
         	this.contact.removeImage1();
         	retry = true;
     	} else if (Tools.isDataTruncation(e)) {
@@ -340,15 +340,15 @@ public class ContactResource extends CardDAVResource {
     		 * handle by trimming truncated fields
     		 */
         	if (this.trimTruncatedAttributes(e)) {
-        		LOG.warn(this.getUrl() + ": " + e.getMessage() + " - trimming fields and trying again.");
+        		LOG.warn("{}: {} - trimming fields and trying again.", this.getUrl(), e.getMessage());
         		retry = true;
         	}
     	} else if (Category.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
     		/*
     		 * handle by overriding sync-token
     		 */
-    		LOG.debug(this.getUrl() + ": " + e.getMessage());
-        	LOG.debug(this.getUrl() + ": overriding next sync token for client recovery.");
+    		LOG.debug("{}: {}", this.getUrl(), e.getMessage());
+        	LOG.debug("{}: overriding next sync token for client recovery.", this.getUrl());
 			this.factory.overrideNextSyncToken();
     	} else if (Category.CATEGORY_CONFLICT.equals(e.getCategory())) {
     		throw super.protocolException(e, HttpServletResponse.SC_CONFLICT);
@@ -368,7 +368,7 @@ public class ContactResource extends CardDAVResource {
 		try {
 			return MappedTruncation.truncate(e.getProblematics(), this.contact);
 		} catch (OXException x) {
-			LOG.warn(getUrl() + ": error trying to handle truncated attributes", x);
+			LOG.warn("{}: error trying to handle truncated attributes", getUrl(), x);
 			return false;
 		}
 	}

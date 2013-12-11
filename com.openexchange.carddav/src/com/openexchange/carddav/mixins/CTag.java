@@ -97,9 +97,9 @@ public class CTag extends SingleXMLPropertyMixin {
 				if (null != token) {
 					try {
 						this.timestamp = Long.parseLong(token);
-						LOG.debug("Overriding CTag property to '" + timestamp + "' for user '" + factory.getUser() + "'.");
+						LOG.debug("Overriding CTag property to '{}' for user '{}'.", timestamp, factory.getUser());
 					} catch (NumberFormatException e) {
-						LOG.warn("Invalid sync token: '" + token + "'.");
+						LOG.warn("Invalid sync token: '{}'.", token);
 					}
 				}
 				if (-1 == this.timestamp) {

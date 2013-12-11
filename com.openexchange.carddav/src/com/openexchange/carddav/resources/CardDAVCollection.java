@@ -107,7 +107,7 @@ public abstract class CardDAVCollection extends AbstractCollection {
         this.factory = factory;
         this.url = url;
         super.includeProperties(new SupportedReportSet(), new CTag(factory, this), new SyncToken(this));
-        LOG.debug(getUrl() + ": initialized.");
+        LOG.debug("{}: initialized.", getUrl());
     }
 
     protected WebdavProtocolException protocolException(Throwable t) {
@@ -115,7 +115,7 @@ public abstract class CardDAVCollection extends AbstractCollection {
     }
 
     protected WebdavProtocolException protocolException(Throwable t, int statusCode) {
-        LOG.error(this.getUrl() + ": " + t.getMessage(), t);
+        LOG.error("{}: {}", this.getUrl(), t.getMessage(), t);
         return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), statusCode, t);
     }
 
@@ -205,7 +205,7 @@ public abstract class CardDAVCollection extends AbstractCollection {
             for (Contact contact : this.getContacts()) {
             	children.add(new ContactResource(contact, this.factory, constructPathForChildResource(contact)));
             }
-          	LOG.debug(this.getUrl() + ": added " + children.size() + " contact resources.");
+          	LOG.debug("{}: added {} contact resources.", this.getUrl(), children.size());
             return children;
 		} catch (OXException e) {
             throw protocolException(e);
@@ -246,12 +246,12 @@ public abstract class CardDAVCollection extends AbstractCollection {
 			if (null != overrrideSyncToken && 0 < overrrideSyncToken.length()) {
 				factory.setOverrideNextSyncToken(null);
 				token = overrrideSyncToken;
-				LOG.debug("Overriding sync token to '" + token + "' for user '" + this.factory.getUser() + "'.");
+				LOG.debug("Overriding sync token to '{}' for user '{}'.", token, this.factory.getUser());
 			}
 			try {
 				since = Long.parseLong(token);
 			} catch (NumberFormatException e) {
-				LOG.warn("Invalid sync token: '" + token + "', falling back to '0'.");
+				LOG.warn("Invalid sync token: '{}', falling back to '0'.", token);
 			}
 		}
 		Syncstatus<WebdavResource> syncStatus = null;
@@ -359,8 +359,7 @@ public abstract class CardDAVCollection extends AbstractCollection {
      */
 	public CardDAVResource getChild(String name) throws WebdavProtocolException {
 		if (null != extractLegacyFolderID(name)) {
-			LOG.info(getUrl() + ": client requests legacy simulated group resource '" + name +
-					"', overriding next sync token to '11' for recovery.");
+			LOG.info("{}: client requests legacy simulated group resource '{}', overriding next sync token to '11' for recovery.", getUrl(), name);
 			this.factory.setOverrideNextSyncToken("11");
 			throw protocolException(new Throwable("child resource '" + name + "' not found"), HttpServletResponse.SC_NOT_FOUND);
 		}
@@ -368,10 +367,10 @@ public abstract class CardDAVCollection extends AbstractCollection {
         	String uid = Tools.extractUID(name);
     		Contact contact = this.factory.getState().load(uid);
     		if (null != contact) {
-              	LOG.debug(this.getUrl() + ": found child resource by name '" + name + "'");
+              	LOG.debug("{}: found child resource by name '{}'", this.getUrl(), name);
     			return new ContactResource(contact, this.factory, constructPathForChildResource(contact));
     		} else {
-              	LOG.debug(this.getUrl() + ": child resource '" + name + "' not found, creating placeholder resource");
+              	LOG.debug("{}: child resource '{}' not found, creating placeholder resource", this.getUrl(), name);
     			return new ContactResource(factory, constructPathForChildResource(uid), getFolderID());
     		}
     	} catch (OXException e) {

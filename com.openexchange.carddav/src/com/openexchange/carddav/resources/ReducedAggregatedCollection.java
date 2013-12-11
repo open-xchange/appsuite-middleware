@@ -72,7 +72,7 @@ public class ReducedAggregatedCollection extends AggregatedCollection {
 
     public ReducedAggregatedCollection(GroupwareCarddavFactory factory, WebdavPath url, String displayName) throws WebdavProtocolException {
         super(factory, url, displayName);
-        LOG.debug(getUrl() + ": initialized.");
+        LOG.debug("{}: initialized.", getUrl());
     }
 
 	@Override

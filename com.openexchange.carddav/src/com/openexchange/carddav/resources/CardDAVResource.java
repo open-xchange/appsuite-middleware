@@ -96,7 +96,7 @@ public abstract class CardDAVResource extends AbstractResource {
         super();
         this.factory = factory;
         this.url = url;
-        LOG.debug(getUrl() + ": initialized.");
+        LOG.debug("{}: initialized.", getUrl());
     }
 
     protected WebdavProtocolException protocolException(Throwable t) {
@@ -111,7 +111,7 @@ public abstract class CardDAVResource extends AbstractResource {
     	if (null == t) {
     		t = new Throwable();
     	}
-        LOG.error(t.getMessage(), t);
+        LOG.error("", t);
         return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), statusCode, t);
     }
 

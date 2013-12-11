@@ -80,7 +80,7 @@ public class AggregatedCollection extends CardDAVCollection {
 		} catch (OXException e) {
 			throw protocolException(e);
 		}
-        LOG.debug(getUrl() + ": initialized.");
+        LOG.debug("{}: initialized.", getUrl());
     }
 
 	@Override

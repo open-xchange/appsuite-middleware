@@ -289,7 +289,7 @@ public class CarddavPerformer implements SessionHolder {
             sess.setParameter("user-agent", req.getHeader("user-agent"));
             session.set(sess);
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Executing " + action);
+                LOG.debug("Executing {}", action);
             }
             actions.get(action).perform(webdavRequest, webdavResponse);
         } catch (final WebdavProtocolException x) {
