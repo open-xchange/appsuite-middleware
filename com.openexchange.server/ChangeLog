@@ -1,3 +1,7 @@
+* 2013-08-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26597: Apply default charset if multipart/form-data POST request misses mail-safe encoding for non-ascii words
+
 * 2013-10-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 29412: Escape HTML content prior to writing to output writer
