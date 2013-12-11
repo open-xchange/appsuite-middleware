@@ -114,12 +114,9 @@ responseDescription = "Object ID of the newly created/moved mail.")
 public final class NewAction extends AbstractMailAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NewAction.class);
-    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static final String FLAGS = MailJSONField.FLAGS.getKey();
     private static final String FROM = MailJSONField.FROM.getKey();
-    private static final String ATTACHMENTS = MailJSONField.ATTACHMENTS.getKey();
-    private static final String CONTENT = MailJSONField.CONTENT.getKey();
     private static final String UPLOAD_FORMFIELD_MAIL = AJAXServlet.UPLOAD_FORMFIELD_MAIL;
 
     /**

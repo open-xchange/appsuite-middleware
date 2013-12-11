@@ -98,8 +98,6 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ListPerformer.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     protected static final FolderType FOLDER_TYPE_MAIL = MailFolderType.getInstance();
 
     /**
@@ -175,7 +173,6 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, parentId);
         }
-        final long start = DEBUG ? System.currentTimeMillis() : 0L;
         final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
         if (folderStorage.startTransaction(storageParameters, false)) {
             openedStorages.add(folderStorage);
@@ -190,10 +187,6 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
              */
             for (final FolderStorage fs : openedStorages) {
                 fs.commitTransaction(storageParameters);
-            }
-            if (DEBUG) {
-                final long duration = System.currentTimeMillis() - start;
-                LOG.debug("List.doList() took {}msec for parent folder: {}", duration, parentId);
             }
             return ret;
         } catch (final OXException e) {

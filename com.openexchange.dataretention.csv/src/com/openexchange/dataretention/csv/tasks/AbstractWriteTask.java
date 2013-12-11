@@ -81,8 +81,6 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractWriteTask.class);
 
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
-
     /**
      * The character indicating a header record.
      */
@@ -252,9 +250,7 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
         // Write CSV line to file
         final FileOutputStream fos = new FileOutputStream(csvFile.getFile(), true);
         try {
-            if (DEBUG_ENABLED) {
-                LOG.debug("Writing CSV line: {}", csvLine);
-            }
+            LOG.debug("Writing CSV line: {}", csvLine);
             fos.write(Charsets.toAsciiBytes(csvLine));
             fos.flush();
         } finally {

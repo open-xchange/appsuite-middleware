@@ -79,7 +79,6 @@ import com.openexchange.tools.stream.CountingInputStream;
 public final class CountingHttpServletRequest implements HttpServletRequest, Parameterizable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CountingHttpServletRequest.class);
-    private static final boolean INFO = LOG.isInfoEnabled();
 
     private static final String LINE_SEP = System.getProperty("line.separator");
 
@@ -109,9 +108,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
     public CountingHttpServletRequest(final HttpServletRequest servletRequest, final long max) {
         super();
         if (!checkRequest(servletRequest)) {
-            if (INFO) {
-                LOG.info("Request with IP '{}' to path '{}' has been rate limited.{}", servletRequest.getRemoteAddr(), servletRequest.getServletPath(), LINE_SEP);
-            }
+            LOG.info("Request with IP '{}' to path '{}' has been rate limited.{}", servletRequest.getRemoteAddr(), servletRequest.getServletPath(), LINE_SEP);
             throw new RateLimitedException("429 Too Many Requests");
         }
         this.max = max;

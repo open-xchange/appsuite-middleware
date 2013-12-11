@@ -93,10 +93,7 @@ public final class MessageUtility {
 
     private static final String STR_EMPTY = "";
 
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(MessageUtility.class);
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MessageUtility.class);
 
     private static abstract class AbstractInputStreamProvider implements InputStreamProvider {
 
@@ -406,9 +403,7 @@ public final class MessageUtility {
              * Detect the charset
              */
             final String detectedCharset = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
-            if (DEBUG) {
-                LOG.debug("Mapped \"GB2312\" charset to \"{}\".", detectedCharset);
-            }
+            LOG.debug("Mapped \"GB2312\" charset to \"{}\".", detectedCharset);
             if (isBig5(detectedCharset)) {
                 return readBig5Bytes(bytes);
             }
@@ -435,9 +430,7 @@ public final class MessageUtility {
         }
         final byte[] bytes = getBytesFrom(streamProvider.getInputStream());
         final String detectedCharset = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
-        if (DEBUG) {
-            LOG.debug("Mapped \"{}\" charset to \"{}\".", charset, detectedCharset);
-        }
+        LOG.debug("Mapped \"{}\" charset to \"{}\".", charset, detectedCharset);
         return new String(bytes, detectedCharset);
     }
 
@@ -485,9 +478,7 @@ public final class MessageUtility {
              * Detect the charset
              */
             final String detectedCharset = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
-            if (DEBUG) {
-                LOG.debug("Mapped \"GB2312\" charset to \"{}\".", detectedCharset);
-            }
+            LOG.debug("Mapped \"GB2312\" charset to \"{}\".", detectedCharset);
             if (isBig5(detectedCharset)) {
                 return readBig5Bytes(bytes);
             }
@@ -523,9 +514,7 @@ public final class MessageUtility {
          * Detect the charset
          */
         final String detectedCharset = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
-        if (DEBUG) {
-            LOG.debug("Mapped \"GB18030\" charset to \"{}\".", detectedCharset);
-        }
+        LOG.debug("Mapped \"GB18030\" charset to \"{}\".", detectedCharset);
         if (isBig5(detectedCharset)) {
             return readBig5Bytes(bytes);
         }

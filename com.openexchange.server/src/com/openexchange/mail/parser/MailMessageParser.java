@@ -117,8 +117,6 @@ public final class MailMessageParser {
 
     private static final String APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
 
-    private static final boolean WARN_ENABLED = LOG.isWarnEnabled();
-
     private static final String HDR_CONTENT_DISPOSITION = MessageHeaders.HDR_CONTENT_DISPOSITION;
 
     private static final String HDR_CONTENT_TYPE = MessageHeaders.HDR_CONTENT_TYPE;
@@ -553,9 +551,7 @@ public final class MailMessageParser {
                     try {
                         mp = ReadReceiptHandler.convert(message);
                     } catch (final RuntimeException e) {
-                        if (WARN_ENABLED) {
-                            LOG.warn("Invalid TNEF read receipt", e);
-                        }
+                        LOG.warn("Invalid TNEF read receipt", e);
                         return;
                     }
                     parseMailContent(new MimeMailPart(mp), handler, prefix, partCount);
@@ -772,9 +768,7 @@ public final class MailMessageParser {
                     }
                 }
             } catch (final IOException tnefExc) {
-                if (WARN_ENABLED) {
-                    LOG.warn("", tnefExc);
-                }
+                LOG.warn("", tnefExc);
                 if (!mailPart.containsSequenceId()) {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));
                 }

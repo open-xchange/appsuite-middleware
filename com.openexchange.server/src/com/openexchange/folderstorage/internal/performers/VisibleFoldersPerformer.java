@@ -94,8 +94,6 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(VisibleFoldersPerformer.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     /**
      * Initializes a new {@link VisibleFoldersPerformer} from given session.
      *
@@ -177,7 +175,6 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType);
         }
-        final long start = DEBUG ? System.currentTimeMillis() : 0L;
         final boolean started = folderStorage.startTransaction(storageParameters, false);
         try {
             final List<SortableId> allSubfolderIds;
@@ -364,10 +361,6 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
              */
             if (started) {
                 folderStorage.commitTransaction(storageParameters);
-            }
-            if (DEBUG) {
-                final long duration = System.currentTimeMillis() - start;
-                LOG.debug("VisibleSubfoldersPerformer.doVisibleSubfolders() took {}msec", duration);
             }
             return ret;
         } catch (final OXException e) {

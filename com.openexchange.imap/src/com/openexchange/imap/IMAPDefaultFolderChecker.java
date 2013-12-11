@@ -49,7 +49,6 @@
 
 package com.openexchange.imap;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -86,7 +85,6 @@ import com.openexchange.session.Session;
 import com.openexchange.spamhandler.NoSpamHandler;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
-import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
@@ -99,8 +97,6 @@ import com.sun.mail.imap.IMAPStore;
 public class IMAPDefaultFolderChecker {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPDefaultFolderChecker.class);
-
-    static final boolean DEBUG = LOG.isDebugEnabled();
 
     protected static final String INBOX = "INBOX";
 
@@ -235,14 +231,6 @@ public class IMAPDefaultFolderChecker {
                         return null;
                     }
                     try {
-                        if (DEBUG) {
-                            final StringBuilder sb = new StringBuilder(2048);
-                            sb.append("\n\nDefault folder check for account ").append(accountId).append(" (");
-                            sb.append(imapConfig.getServer()).append(")\n");
-                            new Throwable().printStackTrace(new java.io.PrintWriter(new UnsynchronizedStringWriter(sb)));
-                            sb.append('\n');
-                            LOG.debug(sb.toString());
-                        }
                         /*
                          * Get INBOX folder
                          */
@@ -354,7 +342,6 @@ public class IMAPDefaultFolderChecker {
          * Sequentially check folders
          */
         final AtomicBoolean modified = new AtomicBoolean(false);
-        final long start = DEBUG ? System.currentTimeMillis() : 0L;
         for (int i = 0; i < names.length; i++) {
             final String fullName = fullNames[i];
             final int index = i;
@@ -392,9 +379,6 @@ public class IMAPDefaultFolderChecker {
                 performTaskFor(index, prefix, fullName, names[index], sep, type, 1, modified, mailSessionCache);
             }
         } // End of for loop
-        if (DEBUG) {
-            LOG.debug("Default folders check for account {} took {}msec", accountId, System.currentTimeMillis() - start);
-        }
         /*
          * Check for modifications
          */
@@ -633,7 +617,6 @@ public class IMAPDefaultFolderChecker {
          * Check default folder
          */
         final StringBuilder tmp = new StringBuilder(32);
-        final long st = DEBUG ? System.currentTimeMillis() : 0L;
         final int prefixLen = prefix.length();
         final String fullName = prefixLen == 0 ? qualifiedName : tmp.append(prefix).append(qualifiedName).toString();
         {
@@ -654,12 +637,6 @@ public class IMAPDefaultFolderChecker {
                         IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, false);
                         modified.set(true);
                     }
-                }
-                if (DEBUG) {
-                    tmp.setLength(0);
-                    final long dur = System.currentTimeMillis() - st;
-                    LOG.debug(tmp.append("Default folder \"").append(fullName).append("\" successfully checked for IMAP account ").append(
-                        accountId).append(" (").append(imapConfig.getServer()).append(") in ").append(dur).append("msec.").toString());
                 }
                 return fullName;
             }
@@ -785,12 +762,6 @@ public class IMAPDefaultFolderChecker {
                 IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, false);
                 modified.set(true);
             }
-        }
-        if (DEBUG) {
-            final long dur = System.currentTimeMillis() - st;
-            LOG.debug(tmp.append("Default folder \"").append(f.getFullName()).append("\" successfully checked for IMAP account ").append(
-                accountId).append(" (").append(imapConfig.getServer()).append(") in ").append(dur).append("msec.").toString());
-            tmp.setLength(0);
         }
         return f.getFullName();
     }

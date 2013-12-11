@@ -49,7 +49,6 @@
 
 package com.openexchange.messaging.facebook.session;
 
-import java.text.MessageFormat;
 import java.util.Map;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
@@ -69,11 +68,6 @@ public final class FacebookEventHandler implements EventHandler {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FacebookEventHandler.class);
 
     /**
-     * Whether logger allows debug.
-     */
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
-    /**
      * Initializes a new {@link FacebookEventHandler}.
      */
     public FacebookEventHandler() {
@@ -87,7 +81,7 @@ public final class FacebookEventHandler implements EventHandler {
             if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
                 // A single session was removed
                 final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                if (!session.isTransient() && FacebookOAuthAccessRegistry.getInstance().removeSessionIfLast(session.getContextId(), session.getUserId()) && DEBUG) {
+                if (!session.isTransient() && FacebookOAuthAccessRegistry.getInstance().removeSessionIfLast(session.getContextId(), session.getUserId())) {
                     LOG.debug("Facebook session removed for user {} in context {}", session.getUserId(), session.getContextId());
                 }
             } else if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
@@ -97,7 +91,7 @@ public final class FacebookEventHandler implements EventHandler {
                 // For each session
                 final FacebookOAuthAccessRegistry sessionRegistry = FacebookOAuthAccessRegistry.getInstance();
                 for (final Session session : sessionContainer.values()) {
-                    if (!session.isTransient() && sessionRegistry.removeSessionIfLast(session.getContextId(), session.getUserId()) && DEBUG) {
+                    if (!session.isTransient() && sessionRegistry.removeSessionIfLast(session.getContextId(), session.getUserId())) {
                         LOG.debug("Facebook session removed for user {} in context {}", session.getUserId(), session.getContextId());
                     }
                 }

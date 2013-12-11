@@ -182,8 +182,6 @@ public class MimeMessageFiller {
     private static final String HDR_X_MAILER = MessageHeaders.HDR_X_MAILER;
     private static final String HDR_MIME_VERSION = MessageHeaders.HDR_MIME_VERSION;
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     private static final String PREFIX_PART = "part";
 
     private static final String EXT_EML = ".eml";
@@ -332,11 +330,7 @@ public class MimeMessageFiller {
                     mimeMessage.setHeader(HDR_ORGANIZATION, encoded);
                 }
             } catch (final Exception e) {
-                if (DEBUG) { // Include stack trace as well
-                    LOG.warn("Header \"Organization\" could not be set", e);
-                } else {
-                    LOG.warn("Header \"Organization\" could not be set.");
-                }
+                LOG.warn("Header \"Organization\" could not be set", e);
             }
         }
         /*
@@ -367,9 +361,7 @@ public class MimeMessageFiller {
              */
             final String localIp = session.getLocalIp();
             if (isLocalhost(localIp)) {
-                if (DEBUG) {
-                    LOG.debug("Session provides localhost as client IP address: {}", localIp);
-                }
+                LOG.debug("Session provides localhost as client IP address: {}", localIp);
                 // Prefer request's remote address if local IP seems to denote local host
                 String clientIp = LogProperties.getLogProperty(LogProperties.Name.AJP_REQUEST_IP);
                 if (null == clientIp) {

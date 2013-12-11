@@ -177,8 +177,6 @@ public final class CalendarCollection implements CalendarCollectionService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarCollection.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     public CalendarCollection() {
         super();
         fieldMap.put(Integer.valueOf(CalendarObject.TITLE), "field01");
@@ -297,51 +295,37 @@ public final class CalendarCollection implements CalendarCollectionService {
         }
         if (cdao.getRecurrenceType() == CalendarObject.DAILY) {
             if (cdao.getInterval() < 1) {
-                if (DEBUG) {
                     LOG.debug("Auto correction (daily), set interval to 1, the given interval was: {}", cdao.getInterval());
-                }
                 cdao.setInterval(1);
             }
         } else if (cdao.getRecurrenceType() == CalendarObject.WEEKLY) {
             if (cdao.getInterval() < 1) {
-                if (DEBUG) {
                     LOG.debug("Auto correction (weekly), set interval to 1, the given interval was: {}", cdao.getInterval());
-                }
                 cdao.setInterval(1);
             }
             if (cdao.getDays() < 1) {
-                if (DEBUG) {
                     LOG.debug("Auto correction (weekly), set day to CalendarDataObject.MONDAY, the given day was: {}", cdao.getDays());
-                }
                 cdao.setDays(CalendarObject.MONDAY);
             }
         } else if (cdao.getRecurrenceType() == CalendarObject.MONTHLY) {
             if (cdao.getInterval() < 1) {
-                if (DEBUG) {
                     LOG.debug("Auto correction (montly), set interval to 1, the given interval was: {}", cdao.getInterval());
-                }
                 cdao.setInterval(1);
             }
             if (cdao.containsDays() && cdao.getDays() != 0 && (getDay(cdao.getDays()) == -1)) {
                 //if (getDay(cdao.getDays()) == -1) {
-                if (DEBUG) {
                     LOG.debug("Auto correction (monthly), set day to CalendarDataObject.MONDAY, the given day was: {}", cdao.getDays());
-                }
                 cdao.setDays(CalendarObject.MONDAY);
                 //}
             }
         } else if (cdao.getRecurrenceType() == CalendarObject.YEARLY) {
             if (cdao.getMonth() < 0 || cdao.getMonth() > 12) {
-                if (DEBUG) {
                     LOG.debug("Auto correction (monthy), set month to 1, the given interval was: {}", cdao.getMonth());
-                }
                 cdao.setMonth(Calendar.JANUARY);
             }
             if (cdao.containsDays() && (getDay(cdao.getDays()) == -1)) {
                 //if (getDay(cdao.getDays()) == -1) {
-                if (DEBUG) {
                     LOG.debug("Auto correction (yearly), set day to CalendarDataObject.MONDAY, the given day was: {}", cdao.getDays());
-                }
                 cdao.setDays(CalendarObject.MONDAY);
                 //}
             }
@@ -1736,11 +1720,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
                 }
             }
         } catch (final OXException e) {
-            if (DEBUG) {
-                LOG.warn("ERROR getting read permissions: {}", e.getMessage(), e);
-            } else {
-                LOG.warn("ERROR getting read permissions: {}", e.getMessage());
-            }
+            LOG.warn("ERROR getting read permissions: {}", e.getMessage(), e);
             return false;
         } catch (final RuntimeException e) {
             LOG.error("ERROR getting read permissions", e);
@@ -2165,14 +2145,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
 
     @Override
     public void debugRecurringResult(final RecurringResultInterface rr) {
-        if (DEBUG) {
-            LOG.debug(Integer.toString(rr.getPosition()));
-            LOG.debug(" : ");
-            LOG.debug(StringCollection.date2String(new Date(rr.getStart())));
-            LOG.debug(" ");
-            LOG.debug(StringCollection.date2String(new Date(rr.getEnd())));
-            LOG.debug("");
-        }
+        LOG.debug("{} : {} {}", Integer.toString(rr.getPosition()), StringCollection.date2String(new Date(rr.getStart())), StringCollection.date2String(new Date(rr.getEnd())));
     }
 
     @Override

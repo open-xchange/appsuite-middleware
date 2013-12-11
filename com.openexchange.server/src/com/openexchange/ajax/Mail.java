@@ -107,7 +107,6 @@ import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.parser.SearchTermParser;
-import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.Category;
@@ -208,8 +207,6 @@ import com.openexchange.tools.versit.utility.VersitUtility;
 public class Mail extends PermissionServlet implements UploadListener {
 
     private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Mail.class);
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static final long ZERO = 0L;
 
@@ -709,7 +706,6 @@ public class Mail extends PermissionServlet implements UploadListener {
         /*
          * Start response
          */
-        final long start = DEBUG ? System.currentTimeMillis() : ZERO;
         jsonWriter.array();
         SearchIterator<MailMessage> it = null;
         try {
@@ -824,10 +820,6 @@ public class Mail extends PermissionServlet implements UploadListener {
          * Close response and flush print writer
          */
         jsonWriter.endArray();
-        if (DEBUG) {
-            final long d = System.currentTimeMillis() - start;
-            LOG.debug("{}mail?action=all performed in {}msec", DefaultDispatcherPrefixService.getInstance().getPrefix(), d);
-        }
         response.setData(jsonWriter.getObject());
         response.setTimestamp(null);
         return response;
@@ -1058,7 +1050,6 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private final Response actionGetStructure(final ServerSession session, final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg) {
-        final long s = DEBUG ? System.currentTimeMillis() : ZERO;
         /*
          * Some variables
          */
@@ -1169,10 +1160,6 @@ public class Mail extends PermissionServlet implements UploadListener {
          */
         response.setData(data);
         response.setTimestamp(null);
-        if (DEBUG) {
-            final long d = System.currentTimeMillis() - s;
-            LOG.debug("{}mail?action=get performed in {}msec", DefaultDispatcherPrefixService.getInstance().getPrefix(), d);
-        }
         return response;
     }
 
@@ -1271,7 +1258,6 @@ public class Mail extends PermissionServlet implements UploadListener {
             /*
              * Get message
              */
-            final long s = DEBUG ? System.currentTimeMillis() : ZERO;
             MailServletInterface mailInterface = mailInterfaceArg;
             boolean closeMailInterface = false;
             try {
@@ -1479,10 +1465,6 @@ public class Mail extends PermissionServlet implements UploadListener {
                         } catch (final OXException e) {
                             LOG.warn("Contact collector could not be triggered.", e);
                         }
-                    }
-                    if (DEBUG) {
-                        final long d = System.currentTimeMillis() - s;
-                        LOG.debug("{}mail?action=get performed in {}msec served from message storage", DefaultDispatcherPrefixService.getInstance().getPrefix(), d);
                     }
                 }
             } finally {
@@ -2810,11 +2792,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         } catch (final OXException e) {
             if (MimeMailExceptionCode.INVALID_EMAIL_ADDRESS.equals(e)) {
                 e.setCategory(Category.CATEGORY_USER_INPUT);
-                if (DEBUG) {
-                    LOG.warn("", e);
-                } else {
-                    LOG.warn(e.getMessage());
-                }
+                LOG.warn("", e);
             } else {
                 LOG.error("", e);
             }
@@ -3183,7 +3161,6 @@ public class Mail extends PermissionServlet implements UploadListener {
         /*
          * Start response
          */
-        final long start = DEBUG ? System.currentTimeMillis() : ZERO;
         jsonWriter.array();
         try {
             final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
@@ -3208,9 +3185,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 /*
                  * Request body is an empty JSON array
                  */
-                if (DEBUG) {
-                    LOG.debug("Empty JSON array detected in request body.", new Throwable());
-                }
+                LOG.debug("Empty JSON array detected in request body.", new Throwable());
                 final Response r = new Response(session);
                 r.setData(EMPTY_JSON_ARR);
                 return r;
@@ -3262,10 +3237,6 @@ public class Mail extends PermissionServlet implements UploadListener {
          * Close response and flush print writer
          */
         jsonWriter.endArray();
-        if (DEBUG) {
-            final long d = System.currentTimeMillis() - start;
-            LOG.debug("{}mail?action=list performed in {}msec", DefaultDispatcherPrefixService.getInstance().getPrefix(), d);
-        }
         response.setData(jsonWriter.getObject());
         response.setTimestamp(null);
         return response;

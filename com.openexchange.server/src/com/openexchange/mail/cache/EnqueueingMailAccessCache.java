@@ -87,11 +87,6 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EnqueueingMailAccessCache.class);
 
     /**
-     * The flag whether debug logging is enabled.
-     */
-    protected static final boolean DEBUG = LOG.isDebugEnabled();
-
-    /**
      * Drop those queues of which all elements timed-out.
      */
     private static final boolean DROP_TIMED_OUT_QUEUES = false;
@@ -214,9 +209,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
             }
             final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = pooledMailAccess.getMailAccess();
             mailAccess.setCached(false);
-            if (DEBUG) {
-                LOG.debug("Remove&Get for {}", key);
-            }
+            LOG.debug("Remove&Get for {}", key);
             return mailAccess;
         }
     }
@@ -261,18 +254,6 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
             idleSeconds = accessQueue.isEmpty() ? idleSeconds : (idleSeconds >> 1);
             if (accessQueue.offer(PooledMailAccess.valueFor(mailAccess, idleSeconds * 1000L))) {
                 mailAccess.setCached(true);
-                if (DEBUG) {
-                    final int size = accessQueue.size();
-                    if (size == 1) {
-                        LOG.debug("Queued ONE mail access for {}", key);
-                    } else if (size > accessQueue.getCapacity()) {
-                        LOG.debug("\n\tExceeded queue capacity! Detected {} mail access(es) for {}{}", size, key, '\n');
-                    } else if (size == accessQueue.getCapacity()) {
-                        LOG.debug("\n\tReached queue capacity! Queued {} mail access(es) for {}{}", size, key, '\n');
-                    } else {
-                        LOG.debug("Queued {} mail access(es) for {}", size, key);
-                    }
-                }
                 return true;
             }
             return false;
@@ -327,9 +308,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
             PooledMailAccess pooledMailAccess;
             while (null != (pooledMailAccess = accessQueue.poll())) {
                 final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = pooledMailAccess.getMailAccess();
-                if (DEBUG) {
-                    LOG.debug("Dropping: {}", mailAccess);
-                }
+                LOG.debug("Dropping: {}", mailAccess);
                 mailAccess.setCached(false);
                 mailAccess.close(false);
             }
@@ -392,12 +371,10 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
                             final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
                                 pooledMailAccess.getMailAccess();
                             mailAccess.setCached(false);
-                            if (DEBUG) {
-                                LOG.debug("Timed-out mail access for {}", entry.getKey());
-                            }
-                            
+                            LOG.debug("Timed-out mail access for {}", entry.getKey());
+
                             //System.out.println(new com.openexchange.java.StringAllocator("Timed-out mail access for ").append(entry.getKey()).toString());
-                            
+
                             mailAccess.close(false);
                         }
                         if (dropQueue && accessQueue.isEmpty()) {
@@ -405,9 +382,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
                              * Current queue is empty. Mark as deprecated
                              */
                             accessQueue.markDeprecated();
-                            if (DEBUG) {
-                                LOG.debug("Dropped queue for {}", entry.getKey());
-                            }
+                            LOG.debug("Dropped queue for {}", entry.getKey());
                             iterator.remove();
                         }
                     }

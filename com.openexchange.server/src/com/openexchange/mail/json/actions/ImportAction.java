@@ -110,8 +110,6 @@ public final class ImportAction extends AbstractMailAction {
     private static final org.slf4j.Logger LOG =
         org.slf4j.LoggerFactory.getLogger(ImportAction.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     /**
      * Initializes a new {@link ImportAction}.
      *

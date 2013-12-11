@@ -117,8 +117,6 @@ public final class HtmlServiceImpl implements HtmlService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HtmlServiceImpl.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     private static final String CHARSET_UTF_8 = "UTF-8";
 
     // private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
@@ -537,7 +535,6 @@ public final class HtmlServiceImpl implements HtmlService {
     @Override
     public String sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified, final String cssPrefix) {
         try {
-            final long st = DEBUG ? System.currentTimeMillis() : 0L;
             String html = htmlContent;
             // Perform one-shot sanitizing
             html = replaceHexEntities(html);
@@ -569,10 +566,6 @@ public final class HtmlServiceImpl implements HtmlService {
                 sanitized[0] = false;
                 // Start sanitizing round
                 html = SaneScriptTags.saneScriptTags(html, sanitized);
-            }
-            if (DEBUG) {
-                final long dur = System.currentTimeMillis() - st;
-                LOG.debug("\tHTMLServiceImpl.sanitize() took {}msec.", dur);
             }
             return html;
         } catch (final ParsingDeniedException e) {

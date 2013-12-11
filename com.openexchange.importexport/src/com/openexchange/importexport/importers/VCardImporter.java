@@ -96,13 +96,11 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 public class VCardImporter extends ContactImporter implements OXExceptionConstants {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(VCardImporter.class);
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-    
-    
+
     public VCardImporter(ServiceLookup services) {
         super(services);
     }
-    
+
     @Override
     public boolean canImport(final ServerSession session, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
         if (!format.equals(Format.VCARD)) {
@@ -208,9 +206,9 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                     final VersitDefinition.Reader versitReader = def.getReader(new UnsynchronizedByteArrayInputStream(chunk.getContent()), "UTF-8");
                     try {
                         final VersitObject versitObject = def.parse(versitReader);
-                        
+
                         if (limit <= 0 || count <= limit) {
-                            
+
                             importResult.setFolder(String.valueOf(contactFolderId));
 
                             final Contact contactObj = oxContainerConverter.convertContact(versitObject);
@@ -234,13 +232,13 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                             throw ImportExportExceptionCodes.LIMIT_EXCEEDED.create(limit);
                         }
                     } catch (final VersitException e) {
-                        LOG.error(generateErrorMessage(e, DEBUG ? new String(chunk.getContent(), Charsets.UTF_8) : null), e);
+                        LOG.error(generateErrorMessage(e, LOG.isDebugEnabled() ? new String(chunk.getContent(), Charsets.UTF_8) : null), e);
                         importResult.setException(ImportExportExceptionCodes.VCARD_PARSING_PROBLEM.create(e, e.getMessage()));
                     } catch (final ConverterException e) {
-                        LOG.error(generateErrorMessage(e, DEBUG ? new String(chunk.getContent(), Charsets.UTF_8) : null), e);
+                        LOG.error(generateErrorMessage(e, LOG.isDebugEnabled() ? new String(chunk.getContent(), Charsets.UTF_8) : null), e);
                         importResult.setException(ImportExportExceptionCodes.VCARD_CONVERSION_PROBLEM.create(e, e.getMessage()));
                     } catch (final RuntimeException e) {
-                        LOG.error(generateErrorMessage(e, DEBUG ? new String(chunk.getContent(), Charsets.UTF_8) : null), e);
+                        LOG.error(generateErrorMessage(e, LOG.isDebugEnabled() ? new String(chunk.getContent(), Charsets.UTF_8) : null), e);
                         importResult.setException(ImportExportExceptionCodes.VCARD_CONVERSION_PROBLEM.create(e, e.getMessage()));
                     }
                 }

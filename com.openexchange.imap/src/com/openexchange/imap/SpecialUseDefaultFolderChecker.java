@@ -51,7 +51,6 @@ package com.openexchange.imap;
 
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -169,7 +168,6 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
          * Sequentially check folders
          */
         final AtomicBoolean modified = new AtomicBoolean(false);
-        final long start = DEBUG ? System.currentTimeMillis() : 0L;
         for (int i = 0; i < names.length; i++) {
             final String fullName = fullNames[i];
             final int index = i;
@@ -209,9 +207,6 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
                 }
             }
         } // End of for loop
-        if (DEBUG) {
-            LOG.debug("Default folders check for account {} took {}msec", accountId, System.currentTimeMillis() - start);
-        }
         /*
          * Check for modifications
          */
@@ -239,7 +234,6 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
          * Check default folder
          */
         final StringBuilder tmp = new StringBuilder(32);
-        final long st = DEBUG ? System.currentTimeMillis() : 0L;
         final int prefixLen = prefix.length();
         final String fullName = prefixLen == 0 ? qualifiedName : tmp.append(prefix).append(qualifiedName).toString();
         {
@@ -273,12 +267,6 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
                             LOG.error("", e);
                         }
                     }
-                }
-                if (DEBUG) {
-                    tmp.setLength(0);
-                    final long dur = System.currentTimeMillis() - st;
-                    LOG.debug(tmp.append("Default folder \"").append(fullName).append("\" successfully checked for IMAP account ").append(
-                        accountId).append(" (").append(imapConfig.getServer()).append(") in ").append(dur).append("msec.").toString());
                 }
                 return fullName;
             }
@@ -456,12 +444,6 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
                     modified.set(true);
                 }
             }
-        }
-        if (DEBUG) {
-            final long dur = System.currentTimeMillis() - st;
-            LOG.debug(tmp.append("Default folder \"").append(f.getFullName()).append("\" successfully checked for IMAP account ").append(
-                accountId).append(" (").append(imapConfig.getServer()).append(") in ").append(dur).append("msec.").toString());
-            tmp.setLength(0);
         }
         return f.getFullName();
     }

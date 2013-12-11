@@ -74,7 +74,6 @@ import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 public final class ConditionTreeMapManagement {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConditionTreeMapManagement.class);
-    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static volatile ConditionTreeMapManagement instance;
 
@@ -232,33 +231,15 @@ public final class ConditionTreeMapManagement {
      * Drops elapsed maps.
      */
     protected void shrink() {
-        if (DEBUG) {
-            final long st = System.currentTimeMillis();
-            final long maxStamp = System.currentTimeMillis() - TIME2LIVE;
-            for (final Iterator<Future<ConditionTreeMap>> it = context2maps.values().iterator(); it.hasNext();) {
-                final Future<ConditionTreeMap> future = it.next();
-                if (null != future) {
-                    try {
-                        final ConditionTreeMap map = getFrom(future);
-                        map.trim(maxStamp);
-                    } catch (final Exception e) {
-                        // Ignore
-                    }
-                }
-            }
-            final long dur = System.currentTimeMillis() - st;
-            LOG.debug("ConditionTreeMapManagement.shrink() took {}msec.", dur);
-        } else {
-            final long maxStamp = System.currentTimeMillis() - TIME2LIVE;
-            for (final Iterator<Future<ConditionTreeMap>> it = context2maps.values().iterator(); it.hasNext();) {
-                final Future<ConditionTreeMap> future = it.next();
-                if (null != future) {
-                    try {
-                        final ConditionTreeMap map = getFrom(future);
-                        map.trim(maxStamp);
-                    } catch (final Exception e) {
-                        // Ignore
-                    }
+        final long maxStamp = System.currentTimeMillis() - TIME2LIVE;
+        for (final Iterator<Future<ConditionTreeMap>> it = context2maps.values().iterator(); it.hasNext();) {
+            final Future<ConditionTreeMap> future = it.next();
+            if (null != future) {
+                try {
+                    final ConditionTreeMap map = getFrom(future);
+                    map.trim(maxStamp);
+                } catch (final Exception e) {
+                    // Ignore
                 }
             }
         }

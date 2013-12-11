@@ -86,8 +86,6 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CreatePerformer.class);
 
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
-
     private static final String CONTENT_TYPE_MAIL = MailContentType.getInstance().toString();
 
     private static final String CONTENT_TYPE_INFOSTORE = InfostoreContentType.getInstance().toString();
@@ -143,7 +141,6 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
         if (null == parentId) {
             throw FolderExceptionErrorMessage.MISSING_PARENT_ID.create(new Object[0]);
         }
-        final long start = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         final String treeId = toCreate.getTreeID();
         if (null == treeId) {
             throw FolderExceptionErrorMessage.MISSING_TREE_ID.create(new Object[0]);
@@ -279,13 +276,6 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                 }
             }
 
-            /*
-             * Debug out
-             */
-            if (DEBUG_ENABLED) {
-                final long duration = System.currentTimeMillis() - start;
-                LOG.debug("Create.doCreate() took {}msec for folder: {}", duration, newId);
-            }
             return newId;
         } catch (final OXException e) {
             for (final FolderStorage folderStorage : openedStorages) {

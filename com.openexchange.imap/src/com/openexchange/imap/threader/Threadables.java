@@ -105,7 +105,6 @@ import com.sun.mail.imap.protocol.UID;
 public final class Threadables {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Threadables.class);
-    private static final boolean INFO = LOG.isInfoEnabled();
 
     /**
      * Initializes a new {@link Threadables}.
@@ -195,8 +194,6 @@ public final class Threadables {
          */
         final ThreadableCacheEntry entry = ThreadableCache.getInstance().getEntry(imapFolder.getFullName(), accountId, session);
         synchronized (entry) {
-            final boolean logIt = INFO; // TODO: Switch to DEBUG
-            final long st = logIt ? System.currentTimeMillis() : 0L;
             TLongCollection uids = null;
             if (null == entry.getThreadable() || sorted != entry.isSorted()) {
                 Threadable threadable = getAllThreadablesFrom(imapFolder, limit);
@@ -208,10 +205,6 @@ public final class Threadables {
                     }
                 }
                 entry.set(new TLongHashSet(IMAPCommandsCollection.getUIDCollection(imapFolder)), threadable, sorted);
-                if (logIt) {
-                    final long dur = System.currentTimeMillis() - st;
-                    LOG.info("\tNew ThreadableCacheEntry queried for \"{}\" in {}msec", imapFolder.getFullName(), dur);
-                }
             } else if (entry.reconstructNeeded((uids = IMAPCommandsCollection.getUIDCollection(imapFolder)))) {
                 final TLongHashSet uidsSet = new TLongHashSet(uids);
                 if (cache) {
@@ -239,10 +232,6 @@ public final class Threadables {
                         }
                     };
                     ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(task));
-                    if (INFO) {
-                        final long dur = System.currentTimeMillis() - st;
-                        LOG.info("\tExisting ThreadableCacheEntry queried for \"{}\" in {}msec. Reconstruct performed ansynchronously separate thread.", imapFolder.getFullName(), dur);
-                    }
                     return new ThreadableResult((Threadable) retval.clone(), true);
                 }
                 Threadable threadable = getAllThreadablesFrom(imapFolder, limit);
@@ -254,13 +243,6 @@ public final class Threadables {
                     }
                 }
                 entry.set(uidsSet, threadable, sorted);
-                if (logIt) {
-                    final long dur = System.currentTimeMillis() - st;
-                    LOG.info("\tNew ThreadableCacheEntry queried for \"{}\" in {}msec", imapFolder.getFullName(), dur);
-                }
-            } else if (INFO) {
-                final long dur = System.currentTimeMillis() - st;
-                LOG.info("\tExisting ThreadableCacheEntry queried for \"{}\" in {}msec", imapFolder.getFullName(), dur);
             }
         }
         return new ThreadableResult((Threadable) entry.getThreadable().clone(), false);

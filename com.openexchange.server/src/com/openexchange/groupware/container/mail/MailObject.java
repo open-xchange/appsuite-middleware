@@ -106,8 +106,6 @@ public class MailObject {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailObject.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     private static volatile String staticHostName;
 
     private static volatile UnknownHostException warnSpam;

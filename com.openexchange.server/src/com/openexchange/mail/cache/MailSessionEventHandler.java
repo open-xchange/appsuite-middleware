@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.cache;
 
-import java.text.MessageFormat;
 import java.util.Map;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
@@ -75,11 +74,6 @@ public final class MailSessionEventHandler implements EventHandler {
      * The logger constant.
      */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailSessionEventHandler.class);
-
-    /**
-     * Whether logger allows debug.
-     */
-    static final boolean DEBUG = LOG.isDebugEnabled();
 
     /**
      * Gets the topics.
@@ -156,9 +150,7 @@ public final class MailSessionEventHandler implements EventHandler {
             } catch (final OXException e) {
                 LOG.error("", e);
             }
-            if (DEBUG) {
-                LOG.debug("All session-related caches cleared for removed session {}", session.getSessionID());
-            }
+            LOG.debug("All session-related caches cleared for removed session {}", session.getSessionID());
             /*
              * Pooled events: Last session removed?
              */
@@ -167,9 +159,7 @@ public final class MailSessionEventHandler implements EventHandler {
                 final EventPool eventPool = EventPool.getInstance();
                 if (null != eventPool) {
                     eventPool.removeByUser(userId, contextId);
-                    if (DEBUG) {
-                        LOG.debug("Removed all pooled mail events for user {} in context {}", userId, contextId);
-                    }
+                    LOG.debug("Removed all pooled mail events for user {} in context {}", userId, contextId);
                 }
             }
         }

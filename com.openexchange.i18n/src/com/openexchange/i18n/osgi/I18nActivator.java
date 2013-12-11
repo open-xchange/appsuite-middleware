@@ -79,8 +79,6 @@ public class I18nActivator extends HousekeepingActivator {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(I18nActivator.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     /**
      * {@link I18nServiceHolderListener} - Properly registers all I18n services defined through property <code>"i18n.language.path"</code>
      * when configuration service is available
@@ -217,9 +215,7 @@ public class I18nActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        if (DEBUG) {
-            LOG.debug("I18n Starting");
-        }
+        LOG.debug("I18n Starting");
         try {
             csh = ConfigurationServiceHolder.newInstance();
 
@@ -233,16 +229,12 @@ public class I18nActivator extends HousekeepingActivator {
             throw e instanceof Exception ? (Exception) e : new Exception(e);
         }
 
-        if (DEBUG) {
-            LOG.debug("I18n Started");
-        }
+        LOG.debug("I18n Started");
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        if (DEBUG) {
-            LOG.debug("Stopping I18n");
-        }
+        LOG.debug("Stopping I18n");
 
         try {
             csh.removeServiceHolderListenerByName(listener.getClass().getName());
@@ -263,9 +255,7 @@ public class I18nActivator extends HousekeepingActivator {
             LOG.error("I18nActivator: stop: ", e);
             throw e instanceof Exception ? (Exception) e : new Exception(e);
         }
-        if (DEBUG) {
-            LOG.debug("I18n stopped");
-        }
+        LOG.debug("I18n stopped");
     }
 
 }

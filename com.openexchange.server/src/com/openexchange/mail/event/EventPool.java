@@ -92,8 +92,6 @@ public final class EventPool implements Runnable {
      */
     private static final long MIN_TASK_DELAY = 5000L;
 
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
-
     private static volatile EventPool instance;
 
     /**
@@ -317,9 +315,7 @@ public final class EventPool implements Runnable {
         } else {
             eventAdmin.sendEvent(event);
         }
-        if (DEBUG_ENABLED) {
-            LOG.debug("Notified {}-wise changed folder \"{}\" in account {} of user {} in context {}", pooledEvent.isContentRelated() ? "content-related" : "hierarchical", pooledEvent.getFullname(), pooledEvent.getAccountId(), pooledEvent.getUserId(), pooledEvent.getContextId());
-        }
+        LOG.debug("Notified {}-wise changed folder \"{}\" in account {} of user {} in context {}", pooledEvent.isContentRelated() ? "content-related" : "hierarchical", pooledEvent.getFullname(), pooledEvent.getAccountId(), pooledEvent.getUserId(), pooledEvent.getContextId());
     }
 
 }

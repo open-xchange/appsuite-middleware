@@ -98,8 +98,6 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ValidateAction.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     public static final String ACTION = AJAXServlet.ACTION_VALIDATE;
 
     /**
@@ -244,9 +242,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         // Get the appropriate transport provider by transport server URL
         final TransportProvider transportProvider = TransportProviderRegistry.getTransportProviderByURL(transportServerURL);
         if (null == transportProvider) {
-            if (DEBUG) {
-                LOG.debug("Validating mail account failed. No transport provider found for URL: {}", transportServerURL);
-            }
+            LOG.debug("Validating mail account failed. No transport provider found for URL: {}", transportServerURL);
             return false;
         }
         // Create a transport access instance
@@ -280,9 +276,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             mailTransport.ping();
             close = true;
         } catch (final OXException e) {
-            if (DEBUG) {
-                LOG.debug("Validating transport account failed.", e);
-            }
+            LOG.debug("Validating transport account failed.", e);
             Throwable cause = e.getCause();
             while ((null != cause) && (cause instanceof OXException)) {
                 cause = cause.getCause();

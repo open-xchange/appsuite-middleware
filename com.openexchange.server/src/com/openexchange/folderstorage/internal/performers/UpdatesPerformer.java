@@ -92,8 +92,6 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdatesPerformer.class);
 
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
-
     /**
      * Initializes a new {@link UpdatesPerformer}.
      *
@@ -156,7 +154,6 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
         for (final FolderStorage folderStorage : realFolderStorages) {
             checkOpenedStorage(folderStorage, false, openedStorages);
         }
-        final long start = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         try {
             final UserPermissionBits userPermissionBits;
             {
@@ -440,10 +437,6 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
              */
             for (final FolderStorage folderStorage : openedStorages) {
                 folderStorage.commitTransaction(storageParameters);
-            }
-            if (DEBUG_ENABLED) {
-                final long duration = System.currentTimeMillis() - start;
-                LOG.debug("Updates.doUpdates() took {}msec.", duration);
             }
             /*
              * Return result

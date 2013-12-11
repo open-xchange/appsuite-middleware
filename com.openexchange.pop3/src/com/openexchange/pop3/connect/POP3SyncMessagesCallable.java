@@ -73,8 +73,6 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(POP3SyncMessagesCallable.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     private final POP3Access pop3Access;
 
     private final POP3Storage pop3Storage;
@@ -150,18 +148,14 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
                 LOG.warn("Refresh rate of {}sec is lower than minimum allowed seconds between logins ({}sec)", refreshRate / 1000, min);
             }
         }
-        if (DEBUG) {
-            LOG.debug("\n\tSynchronizing messages with POP3 account: {}", server, new Throwable());
-        }
+        LOG.debug("\n\tSynchronizing messages with POP3 account: {}", server, new Throwable());
         /*
          * Check default folders since INBOX folder must be present prior to appending to it
          */
         folderStorage.checkDefaultFolders();
-        /*
+        /*-
          * Sync messages
-         */
-        final long st = DEBUG ? System.currentTimeMillis() : 0L;
-        /*
+         *
          * Access POP3 account and synchronize
          */
         pop3Storage.syncMessages(isExpungeOnQuit(), lastAccessed);
@@ -170,11 +164,6 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
          */
         final long stamp = System.currentTimeMillis();
         pop3StorageProperties.addProperty(POP3StoragePropertyNames.PROPERTY_LAST_ACCESSED, Long.toString(stamp));
-        if (DEBUG) {
-            final long dur = stamp - st;
-            final Session session = pop3Access.getSession();
-            LOG.debug("\n\tSynchronization successfully performed for POP3 account \"{}\" (user={}, context={})in: {}msec", server, session.getUserId(), session.getContextId(), dur);
-        }
         return null;
     }
 

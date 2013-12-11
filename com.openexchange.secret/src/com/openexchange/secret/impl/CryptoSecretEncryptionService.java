@@ -71,8 +71,6 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CryptoSecretEncryptionService.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     private final TokenList tokenList;
 
     private final SecretEncryptionStrategy<T> strategy;
@@ -205,16 +203,12 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
          * Try to decrypt "the old way"
          */
         if (decrypted == null) {
-            if (DEBUG) {
-                LOG.debug("Failed to decrypt password with 'secrets' token list. Retrying with former crypt mechanism");
-            }
+            LOG.debug("Failed to decrypt password with 'secrets' token list. Retrying with former crypt mechanism");
             if (customizationNote instanceof Decrypter) {
                 try {
                     final Decrypter decrypter = (Decrypter) customizationNote;
                     decrypted = decrypter.getDecrypted(session, toDecrypt);
-                    if (DEBUG) {
-                        LOG.debug("Decrypted password with former crypt mechanism");
-                    }
+                    LOG.debug("Decrypted password with former crypt mechanism");
                 } catch (final OXException x) {
                     // Ignore and try other
                 }
@@ -266,18 +260,14 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
             return null;
         }
         final String decrypted = crypto.decrypt(toDecrypt, secret);
-        if (DEBUG) {
-            LOG.debug("Decrypted password with former crypt mechanism");
-        }
+        LOG.debug("Decrypted password with former crypt mechanism");
         return decrypted;
     }
 
     private String decrypthWithSecretService(final String toDecrypt, final Session session) throws OXException {
         final String secret = secretService.getSecret(session);
         final String decrypted = crypto.decrypt(toDecrypt, secret);
-        if (DEBUG) {
-            LOG.debug("Decrypted password with former crypt mechanism");
-        }
+        LOG.debug("Decrypted password with former crypt mechanism");
         return decrypted;
     }
 

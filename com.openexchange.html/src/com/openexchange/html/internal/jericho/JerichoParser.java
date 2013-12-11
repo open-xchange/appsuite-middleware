@@ -80,8 +80,6 @@ public final class JerichoParser {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JerichoParser.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     public static final class ParsingDeniedException extends RuntimeException {
 
         private static final long serialVersionUID = 150733382242549446L;
@@ -196,7 +194,6 @@ public final class JerichoParser {
      * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
      */
     public void parse(final String html, final JerichoHandler handler) {
-        final long st = DEBUG ? System.currentTimeMillis() : 0L;
         StreamedSource streamedSource = null;
         try {
             streamedSource = checkBody(html);
@@ -217,10 +214,6 @@ public final class JerichoParser {
                  * Handle current segment
                  */
                 handleSegment(handler, segment);
-            }
-            if (DEBUG) {
-                final long dur = System.currentTimeMillis() - st;
-                LOG.debug("\tJerichoParser.parse() took {}msec.", dur);
             }
         } catch (final StackOverflowError parserOverflow) {
             throw new ParsingDeniedException("Parser overflow detected.", parserOverflow);

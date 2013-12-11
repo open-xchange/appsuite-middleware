@@ -108,8 +108,6 @@ public final class OXFolderIteratorSQL {
     private static final org.slf4j.Logger LOG =
         org.slf4j.LoggerFactory.getLogger(OXFolderIteratorSQL.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     private static final String OXFOLDER_PERMISSIONS = "oxfolder_permissions";
 
     private static final String OXFOLDER_TREE = "oxfolder_tree";
@@ -622,11 +620,6 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
-            }
-
             rs = executeQuery(stmt);
         } catch (final SQLException e) {
             closeResources(rs, stmt, readCon, true, ctx);
@@ -749,11 +742,6 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
-            }
-
             rs = executeQuery(stmt);
             /*
              * Ensure ordering of private default folder follows: calendar, contacts, tasks
@@ -851,11 +839,6 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
-
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
-            }
 
             rs = executeQuery(stmt);
             return new SQLStuff(stmt, rs, readCon, closeCon);
@@ -958,11 +941,6 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
-            }
-
             rs = executeQuery(stmt);
         } catch (final SQLException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
@@ -1052,11 +1030,6 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
-            }
-
             rs = executeQuery(stmt);
             return rs.next();
         } catch (final SQLException e) {
@@ -1141,11 +1114,6 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
-
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
-            }
 
             rs = executeQuery(stmt);
             if (!rs.next()) {
@@ -1272,11 +1240,6 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
-            }
-
             rs = executeQuery(stmt);
         } catch (final SQLException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
@@ -1379,11 +1342,6 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
-            }
-
             rs = executeQuery(stmt);
             if (!rs.next()) {
                 closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
@@ -1449,11 +1407,6 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
-
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
-            }
 
             rs = executeQuery(stmt);
             if (!rs.next()) {
@@ -1589,11 +1542,6 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
-
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
-            }
 
             rs = executeQuery(stmt);
             /*
@@ -1970,11 +1918,6 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
-            }
-
             rs = executeQuery(stmt);
         } catch (final SQLException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
@@ -2063,11 +2006,6 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
-            }
-
             rs = executeQuery(stmt);
         } catch (final SQLException e) {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
@@ -2147,11 +2085,6 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
-            }
-
             rs = executeQuery(stmt);
         } catch (final SQLException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
@@ -2210,11 +2143,6 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
-
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug("\nFolderSQL Query: {}", sql.substring(sql.indexOf(": ") + 2));
-            }
 
             rs = executeQuery(stmt);
         } catch (final SQLException e) {

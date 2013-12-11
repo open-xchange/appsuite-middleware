@@ -88,8 +88,6 @@ public class HeaderCollection implements Serializable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HeaderCollection.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     private static final String ERR_HEADER_NAME_IS_INVALID = "Header name is invalid";
 
     private static final long serialVersionUID = 6939560514144351286L;
@@ -439,11 +437,7 @@ public class HeaderCollection implements Serializable {
 
     private final void putHeader(final String name, final String value, final boolean clear) {
         if (isInvalid(name, true)) {
-            if (DEBUG) {
-                final IllegalArgumentException tmp =
-                    new IllegalArgumentException(new com.openexchange.java.StringAllocator(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
-                LOG.debug("", tmp);
-            }
+            LOG.debug("{0}: {1}", ERR_HEADER_NAME_IS_INVALID, name, new IllegalArgumentException());
             // Do nothing...
             return;
         }

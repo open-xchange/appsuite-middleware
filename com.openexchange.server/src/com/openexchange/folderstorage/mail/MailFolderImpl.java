@@ -103,7 +103,6 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     private static final long serialVersionUID = 6445442372690458946L;
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailFolderImpl.class);
-    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static final String PROTOCOL_UNIFIED_INBOX = UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX;
 
@@ -475,14 +474,10 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             }
             return mailAccess.getMessageStorage().getUnreadMessages(ensureFullName(fullName), MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID, -1).length;
         } catch (final OXException e) {
-            if (DEBUG) {
-                LOG.debug("Cannot return up-to-date unread counter.", e);
-            }
+            LOG.debug("Cannot return up-to-date unread counter.", e);
             return super.getUnread();
         } catch (final Exception e) {
-            if (DEBUG) {
-                LOG.debug("Cannot return up-to-date unread counter.", e);
-            }
+            LOG.debug("Cannot return up-to-date unread counter.", e);
             return super.getUnread();
         } finally {
             closeMailAccess(mailAccess);
@@ -506,14 +501,10 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             }
             return mailAccess.getMessageStorage().searchMessages(ensureFullName(fullName), IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS_ID).length;
         } catch (final OXException e) {
-            if (DEBUG) {
-                LOG.debug("Cannot return up-to-date total counter.", e);
-            }
+            LOG.debug("Cannot return up-to-date total counter.", e);
             return super.getTotal();
         } catch (final Exception e) {
-            if (DEBUG) {
-                LOG.debug("Cannot return up-to-date total counter.", e);
-            }
+            LOG.debug("Cannot return up-to-date total counter.", e);
             return super.getTotal();
         } finally {
             closeMailAccess(mailAccess);
@@ -535,14 +526,10 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                 mailAccess.connect(false);
                 return totalAndUnread(mailAccess);
             } catch (final OXException e) {
-                if (DEBUG) {
-                    LOG.debug("Cannot return up-to-date total counter.", e);
-                }
+                LOG.debug("Cannot return up-to-date total counter.", e);
                 return null;
             } catch (final Exception e) {
-                if (DEBUG) {
-                    LOG.debug("Cannot return up-to-date total counter.", e);
-                }
+                LOG.debug("Cannot return up-to-date total counter.", e);
                 return null;
             } finally {
                 closeMailAccess(mailAccess);
@@ -553,14 +540,10 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailAccess(optParams);
             return totalAndUnread(mailAccess);
         } catch (final OXException e) {
-            if (DEBUG) {
-                LOG.debug("Cannot return up-to-date total counter.", e);
-            }
+            LOG.debug("Cannot return up-to-date total counter.", e);
             return null;
         } catch (final Exception e) {
-            if (DEBUG) {
-                LOG.debug("Cannot return up-to-date total counter.", e);
-            }
+            LOG.debug("Cannot return up-to-date total counter.", e);
             return null;
         }
     }

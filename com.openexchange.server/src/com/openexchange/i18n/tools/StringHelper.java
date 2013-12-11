@@ -66,8 +66,6 @@ public class StringHelper {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StringHelper.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     private static final ConcurrentMap<Locale, StringHelper> CACHE = new ConcurrentHashMap<Locale, StringHelper>();
 
     private static final Locale DEFAULT_LOCALE = Locale.US;
@@ -117,16 +115,12 @@ public class StringHelper {
         try {
             final I18nService tool = I18nServices.getInstance().getService(locale);
             if (tool == null) {
-                if (DEBUG) {
-                    LOG.debug("No service for {}  found. Using default for bundle ", locale);
-                }
+                LOG.debug("No service for {}  found. Using default for bundle ", locale);
                 return key;
             }
             return tool.getLocalized(key);
         } catch (final MissingResourceException x) {
-            if (DEBUG) {
-                LOG.debug("MissingResource for {}. Using default for bundle ", locale, x);
-            }
+            LOG.debug("MissingResource for {}. Using default for bundle ", locale, x);
             return key;
         }
     }

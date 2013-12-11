@@ -59,8 +59,6 @@ import java.util.Locale;
 public class I18nTranslator implements Translator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(I18nTranslator.class);
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
-    private static final boolean WARN_ENABLED = LOG.isWarnEnabled();
 
     private final I18nService service;
 
@@ -79,12 +77,8 @@ public class I18nTranslator implements Translator {
         if (!service.hasKey(toTranslate)) {
             final Locale locale = service.getLocale();
             if (isEnUs(locale)) {
-                if (DEBUG_ENABLED) {
-                    final String message = new com.openexchange.java.StringAllocator(64).append("I18n service for locale ").append(locale).append(
-                        " has no translation for \"").append(toTranslate).append("\".").toString();
-                    LOG.warn(message, new Throwable(message));
-                }
-            } else if (WARN_ENABLED) {
+                LOG.warn("I18n service for locale {} has no translation for \"{}\".", locale, toTranslate, new Throwable());
+            } else {
                 LOG.warn("I18n service for locale {} has no translation for \"{}\".", locale, toTranslate);
             }
             return toTranslate;

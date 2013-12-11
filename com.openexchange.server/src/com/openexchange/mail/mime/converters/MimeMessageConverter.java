@@ -140,8 +140,6 @@ public final class MimeMessageConverter {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeMessageConverter.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     private static final EnumSet<MailField> ENUM_SET_FULL = EnumSet.complementOf(EnumSet.of(
         MailField.BODY,
         MailField.FULL,
@@ -1421,9 +1419,7 @@ public final class MimeMessageConverter {
             final MailMessageFieldFiller filler = FILLER_MAP_EXT.get(field);
             if (filler == null) {
                 if (MailField.BODY.equals(field) || MailField.FULL.equals(field) || MailField.ACCOUNT_NAME.equals(field)) {
-                    if (DEBUG) {
-                        LOG.debug("Ignoring mail field {}", field);
-                    }
+                    LOG.debug("Ignoring mail field {}", field);
                     fillers[i] = null;
                 } else {
                     throw MailExceptionCode.INVALID_FIELD.create(field.toString());
@@ -1819,9 +1815,7 @@ public final class MimeMessageConverter {
                         }
                     };
                 } else if (MailField.BODY.equals(field) || MailField.FULL.equals(field) || MailField.ACCOUNT_NAME.equals(field)) {
-                    if (DEBUG) {
-                        LOG.debug("Ignoring mail field {}", field);
-                    }
+                    LOG.debug("Ignoring mail field {}", field);
                     fillers[i] = null;
                 } else {
                     throw MailExceptionCode.INVALID_FIELD.create(field.toString());
@@ -2509,9 +2503,7 @@ public final class MimeMessageConverter {
             }
             throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e, new Object[0]);
         } catch (final MessagingException e) {
-            if (DEBUG) {
-                LOG.debug("JavaMail API failed to load part's headers. Using own routine.", e);
-            }
+            LOG.debug("JavaMail API failed to load part's headers. Using own routine.", e);
             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_MESSAGE_SIZE);
             try {
                 part.writeTo(out);
@@ -2531,9 +2523,7 @@ public final class MimeMessageConverter {
                 headers = new HeaderCollection(0);
             }
         } catch (final RuntimeException e) {
-            if (DEBUG) {
-                LOG.debug("JavaMail API failed to load part's headers. Using own routine.", e);
-            }
+            LOG.debug("JavaMail API failed to load part's headers. Using own routine.", e);
             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_MESSAGE_SIZE);
             try {
                 part.writeTo(out);
@@ -2855,10 +2845,7 @@ public final class MimeMessageConverter {
             }
             return addressList.toArray(new InternetAddress[addressList.size()]);
         } catch (final AddressException e) {
-            if (DEBUG) {
-                LOG.debug("Internet addresses could not be properly parsed: \"{}\". Using plain addresses' string representation instead.", e.getMessage(),
-                    e);
-            }
+            LOG.debug("Internet addresses could not be properly parsed: \"{}\". Using plain addresses' string representation instead.", e.getMessage(), e);
             return getAddressesOnParseError(addressArray);
         }
     }
@@ -2873,10 +2860,7 @@ public final class MimeMessageConverter {
         try {
             return QuotedInternetAddress.parseHeader(addresses, true);
         } catch (final AddressException e) {
-            if (DEBUG) {
-                LOG.debug("Internet addresses could not be properly parsed: \"{}\". Using plain addresses' string representation instead.", e.getMessage(),
-                    e);
-            }
+            LOG.debug("Internet addresses could not be properly parsed: \"{}\". Using plain addresses' string representation instead.", e.getMessage(), e);
             return new InternetAddress[] { new PlainTextAddress(addresses) };
         }
     }
@@ -2944,9 +2928,7 @@ public final class MimeMessageConverter {
             try {
                 priority = Integer.parseInt(tmp[0]);
             } catch (final NumberFormatException nfe) {
-                if (DEBUG) {
-                    LOG.debug("Assuming priority NORMAL due to strange X-Priority header: {}", priorityStr);
-                }
+                LOG.debug("Assuming priority NORMAL due to strange X-Priority header: {}", priorityStr);
                 priority = MailMessage.PRIORITY_NORMAL;
             }
         }
@@ -2969,9 +2951,7 @@ public final class MimeMessageConverter {
             } else if ("High".equalsIgnoreCase(imp)) {
                 priority = MailMessage.PRIORITY_HIGHEST;
             } else {
-                if (DEBUG) {
-                    LOG.debug("Assuming priority NORMAL due to strange Importance header: {}", importance);
-                }
+                LOG.debug("Assuming priority NORMAL due to strange Importance header: {}", importance);
                 priority = MailMessage.PRIORITY_NORMAL;
             }
         }

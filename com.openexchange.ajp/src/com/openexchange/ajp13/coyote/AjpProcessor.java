@@ -64,7 +64,6 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URLEncoder;
 import java.nio.charset.UnsupportedCharsetException;
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -115,10 +114,6 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AjpProcessor.class);
-
-    private static final boolean TRACE = LOG.isTraceEnabled();
-
-    protected static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static final AtomicLong NUMBER = new AtomicLong();
 
@@ -475,9 +470,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          * Cause loading of HexUtils
          */
         final int foo = HexUtils.DEC[0];
-        if (TRACE) {
-            LOG.trace(Integer.toString(foo));
-        }
+        LOG.trace(Integer.toString(foo));
     }
 
     /**
@@ -657,9 +650,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         try {
             s.close();
         } catch (final Exception e) {
-            if (DEBUG) {
-                LOG.debug("Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe).", e);
-            }
+            LOG.debug("Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe).", e);
         }
     }
 
@@ -733,7 +724,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
              */
             LogProperties.putProperties(LogProperties.Name.AJP_THREAD_NAME, thread.getName(), LogProperties.Name.AJP_REMOTE_PORT, Integer.valueOf(socket.getPort()), LogProperties.Name.AJP_REMOTE_ADDRESS, socket.getInetAddress().getHostAddress());
 
-            final boolean debug = LOG.isDebugEnabled();
             try {
                 stage = Stage.STAGE_AWAIT;
                 listenerMonitor.incrementNumWaiting();
@@ -764,11 +754,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                  * not regular request processing
                  */
                 final int type = requestHeaderMessage.getByte();
-                if (debug) {
-                    final String ajpReqName =
-                        Constants.JK_AJP13_CPING_REQUEST == type ? "CPing" : (Constants.JK_AJP13_FORWARD_REQUEST == type ? "Forward-Request" : "unknown");
-                    LOG.debug("First {} AJP message successfully read from stream.", ajpReqName);
-                }
+
                 if (type == Constants.JK_AJP13_CPING_REQUEST && 1 == requestHeaderMessage.getLen()) {
                     mainLock.lock();
                     try {
@@ -787,9 +773,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                      *
                      * Usually the servlet didn't read the previous request body
                      */
-                    if (debug) {
-                        LOG.debug("Unexpected message: {}", type);
-                    }
+                    LOG.debug("Unexpected message: {}", type);
                     continue;
                 }
                 /*
@@ -806,11 +790,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 break;
             } catch (final Throwable t) {
                 // 400 - Bad Request
-                if (debug) {
-                    LOG.warn("400 - Bad Request: Parsing forward-request failed", t);
-                } else {
-                    LOG.warn("400 - Bad Request: Parsing forward-request failed");
-                }
+                LOG.warn("400 - Bad Request: Parsing forward-request failed", t);
                 response.setStatus(400);
                 error = true;
             } finally {
@@ -832,7 +812,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                      *
                      * Usually the servlet didn't read the previous request body
                      */
-                    if (debug) {
+                    if (LOG.isDebugEnabled()) {
                         requestHeaderMessage.dump("Invalid forward-request detected");
                     }
                     continue;
@@ -1008,9 +988,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     finish();
                 } catch (final IOException e) {
                     // Lost connection
-                    if (debug) {
-                        LOG.debug("Lost connection to web server.", e);
-                    }
+                    LOG.debug("Lost connection to web server.", e);
                     error = true;
                 } catch (final Throwable t) {
                     ExceptionUtils.handleThrowable(t);
@@ -1137,9 +1115,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         output.write(flushMessageArray);
                         lastWriteAccess = System.currentTimeMillis();
                         output.flush();
-                        if (DEBUG) {
-                            LOG.debug("Performed keep-alive through a flush package.");
-                        }
+                        LOG.debug("Performed keep-alive through a flush package.");
                     } else {
                         /*
                          * Not committed, yet. Write an empty GET-BODY-CHUNK package.
@@ -1185,9 +1161,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                                 request.appendToBuffer(chunk);
                             }
                         }
-                        if (DEBUG) {
-                            LOG.debug("Performed keep-alive through an empty get-body-chunk package (and received requested chunk).");
-                        }
+                        LOG.debug("Performed keep-alive through an empty get-body-chunk package (and received requested chunk).");
                     }
                 } catch (final IOException e) {
                     // Set error flag
@@ -1471,7 +1445,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 request.setQueryString(queryString);
                 {
                     parseQueryString(queryString);
-                    if (DEBUG && isEASPingCommand()) {
+                    if (isEASPingCommand()) {
                         LOG.debug("Incoming long-running EAS ping request.");
                     }
                 }
@@ -1479,7 +1453,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 break;
             case Constants.SC_A_JVM_ROUTE: {
                 final String jvmRoute = requestHeaderMessage.getString(temp);
-                if (DEBUG && !AJPv13Config.getJvmRoute().equals(jvmRoute)) {
+                if (!AJPv13Config.getJvmRoute().equals(jvmRoute)) {
                     LOG.debug("JVM route mismatch. Expected \"{}\", but is \"{}\".", AJPv13Config.getJvmRoute(), jvmRoute);
                 }
                 request.setInstanceId(jvmRoute);
@@ -1809,9 +1783,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                             /*
                              * Different JVM route detected -> Discard
                              */
-                            if (DEBUG) {
-                                LOG.debug("\n\tDifferent JVM route detected. Removing JSESSIONID cookie: {}", id);
-                            }
+                            LOG.debug("\n\tDifferent JVM route detected. Removing JSESSIONID cookie: {}", id);
                             current.setPath("/");
                             final String domain = extractDomainValue(id);
                             if (null != domain) {
@@ -1835,9 +1807,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                             /*
                              * Invalid cookie
                              */
-                            if (DEBUG) {
-                                LOG.debug("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: {}", current.getValue());
-                            }
+                            LOG.debug("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: {}", current.getValue());
                             current.setPath("/");
                             final String domain = extractDomainValue(id);
                             if (null != domain) {
@@ -1867,9 +1837,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                             /*
                              * But this host defines a JVM route
                              */
-                            if (DEBUG) {
-                                LOG.debug("\n\tMissing JVM route in JESSIONID cookie{}", current.getValue());
-                            }
+                            LOG.debug("\n\tMissing JVM route in JESSIONID cookie{}", current.getValue());
                             current.setPath("/");
                             final String domain = extractDomainValue(id);
                             if (null != domain) {
@@ -1893,9 +1861,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                             /*
                              * Invalid cookie
                              */
-                            if (DEBUG) {
-                                LOG.debug("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: {}", current.getValue());
-                            }
+                            LOG.debug("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: {}", current.getValue());
                             current.setPath("/");
                             final String domain = extractDomainValue(id);
                             if (null != domain) {
@@ -2465,9 +2431,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     ajpProcessor.action(ActionCode.CLIENT_PING, null);
                 }
             } catch (final Exception e) {
-                if (DEBUG) {
-                    LOG.error("AJP KEEP-ALIVE failed.", e);
-                }
+                 LOG.error("AJP KEEP-ALIVE failed.", e);
             }
         }
 

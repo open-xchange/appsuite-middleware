@@ -96,8 +96,6 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AllAction.class);
 
-    protected static final boolean DEBUG = LOG.isDebugEnabled();
-
     /**
      * Initializes a new {@link AllAction}.
      *
@@ -113,7 +111,6 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
         if (cache && CACHABLE_FORMATS.contains(req.getRequest().getFormat())) {
             final JsonCacheService jsonCache = JsonCaches.getCache();
             if (null != jsonCache) {
-                final long st = DEBUG ? System.currentTimeMillis() : 0L;
                 final String sha1Sum = getSha1For(req);
                 final String id = "com.openexchange.mail." + sha1Sum;
                 final ServerSession session = req.getSession();
@@ -139,10 +136,6 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                 } else {
                     result = new AJAXRequestResult(jsonValue, "json");
                     result.setResponseProperty("cached", Boolean.TRUE);
-                    if (DEBUG) {
-                        final long dur = System.currentTimeMillis() - st;
-                        LOG.debug("\tAllAction.perform(): JSON cache look-up took {}msec", dur);
-                    }
                 }
                 /*-
                  * Update cache with separate thread
@@ -165,14 +158,9 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                                 return;
                             }
                             locked = true;
-                            final long st = DEBUG ? System.currentTimeMillis() : 0L;
                             mailInterface = MailServletInterface.getInstance(session);
                             final AJAXRequestResult requestResult = perform0(mailRequest, mailInterface, true);
                             MailConverter.getInstance().convert(mailRequest.getRequest(), requestResult, session, null);
-                            if (DEBUG) {
-                                final long dur = System.currentTimeMillis() - st;
-                                LOG.debug("\tAllAction.perform(): JSON cache update took {}msec", dur);
-                            }
                         } catch (final Exception e) {
                             // Something went wrong
                             try {

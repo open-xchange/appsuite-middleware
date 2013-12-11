@@ -76,7 +76,6 @@ import com.openexchange.server.ServiceLookup;
 public final class ListAction extends JSlobAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ListAction.class);
-    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     /**
      * Initializes a new {@link ListAction}.

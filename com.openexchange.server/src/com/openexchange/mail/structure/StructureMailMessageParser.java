@@ -113,8 +113,6 @@ public final class StructureMailMessageParser {
     private static final org.slf4j.Logger LOG =
         org.slf4j.LoggerFactory.getLogger(StructureMailMessageParser.class);
 
-    private static final boolean WARN_ENABLED = LOG.isWarnEnabled();
-
     private static final int BUF_SIZE = 8192;
 
     private static Iterator<Entry<String, String>> EMPTY_ITER = new Iterator<Entry<String, String>>() {
@@ -547,9 +545,7 @@ public final class StructureMailMessageParser {
                     try {
                         mp = ReadReceiptHandler.convert(message);
                     } catch (final RuntimeException e) {
-                        if (WARN_ENABLED) {
-                            LOG.warn("Invalid TNEF read receipt", e);
-                        }
+                        LOG.warn("Invalid TNEF read receipt", e);
                         return;
                     }
                     parseMailContent(new MimeMailPart(mp), handler, prefix, partCount);
@@ -689,9 +685,7 @@ public final class StructureMailMessageParser {
                     }
                 }
             } catch (final IOException tnefExc) {
-                if (WARN_ENABLED) {
-                    LOG.warn("", tnefExc);
-                }
+                LOG.warn("", tnefExc);
                 if (!mailPart.containsSequenceId()) {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));
                 }
@@ -700,9 +694,7 @@ public final class StructureMailMessageParser {
                     return;
                 }
             } catch (final MessagingException e) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error("", e);
-                }
+                LOG.error("", e);
                 if (!mailPart.containsSequenceId()) {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));
                 }
@@ -872,9 +864,7 @@ public final class StructureMailMessageParser {
         } catch (final java.io.CharConversionException e) {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "US-ASCII";
-            if (WARN_ENABLED) {
-                LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback, e);
-            }
+            LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback, e);
             return MessageUtility.readMailPart(mailPart, fallback);
         }
     }
@@ -884,23 +874,13 @@ public final class StructureMailMessageParser {
         if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();
             if (!CharsetDetector.isValid(cs)) {
-                com.openexchange.java.StringAllocator sb = null;
                 if (null != cs) {
-                    sb = new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
                     mailInterfaceMonitor.addUnsupportedEncodingExceptions(cs);
                 }
                 if (contentType.startsWith(PRIMARY_TEXT)) {
                     cs = CharsetDetector.detectCharset(mailPart.getInputStream());
-                    if (WARN_ENABLED && null != sb) {
-                        sb.append(" Using auto-detected encoding: \"").append(cs).append('"');
-                        LOG.warn(sb.toString());
-                    }
                 } else {
                     cs = MailProperties.getInstance().getDefaultMimeCharset();
-                    if (WARN_ENABLED && null != sb) {
-                        sb.append(" Using fallback encoding: \"").append(cs).append('"');
-                        LOG.warn(sb.toString());
-                    }
                 }
             }
             charset = cs;

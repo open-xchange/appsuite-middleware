@@ -66,8 +66,6 @@ public class DefaultSecretInconsistencyDetector implements SecretInconsistencyDe
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultSecretInconsistencyDetector.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     private final List<SecretConsistencyCheck> checks;
     private volatile SecretService secretService;
 
@@ -84,9 +82,7 @@ public class DefaultSecretInconsistencyDetector implements SecretInconsistencyDe
         for (final SecretConsistencyCheck secretConsistencyCheck : getChecks()) {
             final String reason = secretConsistencyCheck.checkSecretCanDecryptStrings(session, getSecretService().getSecret(session));
             if (reason != null) {
-                if (DEBUG) {
-                    LOG.debug("{} \"{}\" indicates need for re-decryption: {}", SecretConsistencyCheck.class.getSimpleName(), secretConsistencyCheck.getClass().getName(), reason);
-                }
+                LOG.debug("{} \"{}\" indicates need for re-decryption: {}", SecretConsistencyCheck.class.getSimpleName(), secretConsistencyCheck.getClass().getName(), reason);
                 return reason;
             }
         }

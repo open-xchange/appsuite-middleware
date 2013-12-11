@@ -152,9 +152,6 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 public final class MimeMessageUtility {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeMessageUtility.class);
-    private static final boolean TRACE = LOG.isTraceEnabled();
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-    private static final boolean WARN = LOG.isWarnEnabled();
 
     private static final Set<HeaderName> ENCODINGS;
 
@@ -1218,9 +1215,7 @@ public final class MimeMessageUtility {
                 final List<InternetAddress> addrList = new ArrayList<InternetAddress>(sAddrs.size());
                 for (final String sAddr : sAddrs) {
                     final QuotedInternetAddress tmp = new QuotedInternetAddress(sAddr, strict);
-                    if (TRACE) {
-                        LOG.trace(tmp.toString());
-                    }
+                    LOG.trace(tmp.toString());
                     addrList.add(tmp);
                 }
                 // Hm... single parse did not fail, throw original exception instead
@@ -1229,9 +1224,7 @@ public final class MimeMessageUtility {
                 if (failOnError) {
                     for (final String sAddr : sAddrs) {
                         final QuotedInternetAddress tmp = new QuotedInternetAddress(sAddr, strict);
-                        if (TRACE) {
-                            LOG.trace(tmp.toString());
-                        }
+                        LOG.trace(tmp.toString());
                     }
                     // Hm... single parse did not fail, throw original exception instead
                     throw e;
@@ -2004,9 +1997,7 @@ public final class MimeMessageUtility {
         if (mailPart.containsHeader(HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();
             if (!CharsetDetector.isValid(cs)) {
-                com.openexchange.java.StringAllocator sb = null;
                 if (null != cs) {
-                    sb = new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
                     mailInterfaceMonitor.addUnsupportedEncodingExceptions(cs);
                 }
                 if (contentType.startsWith(PRIMARY_TEXT)) {
@@ -2014,16 +2005,8 @@ public final class MimeMessageUtility {
                     if ("US-ASCII".equalsIgnoreCase(cs)) {
                         cs = "ISO-8859-1";
                     }
-                    if (DEBUG && null != sb) {
-                        sb.append(" Using auto-detected encoding: \"").append(cs).append('"');
-                        LOG.warn(sb.toString());
-                    }
                 } else {
                     cs = MailProperties.getInstance().getDefaultMimeCharset();
-                    if (DEBUG && null != sb) {
-                        sb.append(" Using fallback encoding: \"").append(cs).append('"');
-                        LOG.warn(sb.toString());
-                    }
                 }
             }
             charset = cs;
@@ -2065,10 +2048,7 @@ public final class MimeMessageUtility {
         } catch (final java.io.CharConversionException e) {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "ISO-8859-1";
-            if (WARN) {
-                LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback,
-                    e);
-            }
+            LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback, e);
             return MessageUtility.readMailPart(mailPart, fallback);
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {

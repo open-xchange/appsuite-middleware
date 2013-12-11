@@ -51,7 +51,6 @@ package com.openexchange.webdav.xml;
 
 import java.io.OutputStream;
 import java.math.BigDecimal;
-import java.text.MessageFormat;
 import java.util.Date;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
@@ -72,8 +71,6 @@ import com.openexchange.webdav.xml.fields.DataFields;
 public class DataWriter {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DataWriter.class);
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     public static final int ACTION_MODIFIED = 1;
 
@@ -205,9 +202,7 @@ public class DataWriter {
             /*
              * null is not a legal XML value, transform to an empty string
              */
-            if (DEBUG) {
-                LOG.debug("null is not a legal XML value");
-            }
+            LOG.debug("null is not a legal XML value");
             return "";
         }
         /*
@@ -236,10 +231,10 @@ public class DataWriter {
                         } else {
                             LOG.debug("0x{} is not a legal XML character", Integer.toHexString(ch));
                         }
-                    } else if (DEBUG) {
+                    } else {
                         LOG.debug("illegal surrogate pair");
                     }
-                } else if (DEBUG) {
+                } else {
                     LOG.debug("truncated surrogate pair");
                 }
             } else {

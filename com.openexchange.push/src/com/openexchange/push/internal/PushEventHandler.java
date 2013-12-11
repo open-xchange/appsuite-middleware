@@ -49,7 +49,6 @@
 
 package com.openexchange.push.internal;
 
-import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -73,8 +72,6 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 public final class PushEventHandler implements EventHandler {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushEventHandler.class);
-
-    protected static final boolean DEBUG = LOG.isDebugEnabled();
 
     public PushEventHandler() {
         super();
@@ -129,7 +126,7 @@ public final class PushEventHandler implements EventHandler {
                             final PushManagerService pushManager = pushManagersIterator.next();
                             // Stop listener for session
                             final boolean stopped = pushManager.stopListener(session);
-                            if (DEBUG && stopped) {
+                            if (stopped) {
                                 LOG.debug("Stopped push listener for user {} in context {} by push manager \"{}{}", session.getUserId(), session.getContextId(), pushManager, '"');
                             }
                         } catch (final OXException e) {
@@ -160,7 +157,7 @@ public final class PushEventHandler implements EventHandler {
                                         return;
                                     }
                                     final boolean stopped = pushManager.stopListener(session);
-                                    if (DEBUG && stopped) {
+                                    if (stopped) {
                                         LOG.debug("Stopped push listener for user {} in context {} by push manager \"{}{}", session.getUserId(), session.getContextId(), pushManager, '"');
                                     }
                                 }
@@ -191,7 +188,7 @@ public final class PushEventHandler implements EventHandler {
                             final PushManagerService pushManager = pushManagersIterator.next();
                             // Initialize a new push listener for session
                             final PushListener pl = pushManager.startListener(session);
-                            if (DEBUG && null != pl) {
+                            if (null != pl) {
                                 LOG.debug("Started push listener for user {} in context {} by push manager \"{}{}", session.getUserId(), session.getContextId(), pushManager, '"');
                             }
                         } catch (final OXException e) {

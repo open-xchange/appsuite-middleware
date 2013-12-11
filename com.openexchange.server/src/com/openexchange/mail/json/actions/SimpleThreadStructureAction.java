@@ -91,8 +91,6 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
 
     protected static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SimpleThreadStructureAction.class);
 
-    protected static final boolean DEBUG = LOG.isDebugEnabled();
-
     /**
      * Initializes a new {@link SimpleThreadStructureAction}.
      *
@@ -113,7 +111,6 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
         if (cache && CACHABLE_FORMATS.contains(req.getRequest().getFormat())) {
             final JsonCacheService jsonCache = JsonCaches.getCache();
             if (jsonCache != null) {
-                final long st = DEBUG ? System.currentTimeMillis() : 0L;
                 final String sha1Sum = getSha1For(req);
                 final String id = "com.openexchange.mail." + sha1Sum;
                 final ServerSession session = req.getSession();
@@ -144,10 +141,6 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                 } else {
                     result = new AJAXRequestResult(jsonValue, "json");
                     result.setResponseProperty("cached", Boolean.TRUE);
-                    if (DEBUG) {
-                        final long dur = System.currentTimeMillis() - st;
-                        LOG.debug("\tSimpleThreadStructureAction.perform(): JSON cache look-up took {}msec", dur);
-                    }
                 }
                 /*-
                  * Update cache with separate thread
@@ -170,14 +163,9 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                                 return;
                             }
                             locked = true;
-                            final long st = DEBUG ? System.currentTimeMillis() : 0L;
                             mailInterface = MailServletInterface.getInstance(session);
                             final AJAXRequestResult requestResult = perform0(mailRequest, mailInterface, true);
                             MailConverter.getInstance().convert(mailRequest.getRequest(), requestResult, session, null);
-                            if (DEBUG) {
-                                final long dur = System.currentTimeMillis() - st;
-                                LOG.debug("\tSimpleThreadStructureAction.perform(): JSON cache update took {}msec", dur);
-                            }
                         } catch (final Exception e) {
                             // Something went wrong
                             try {

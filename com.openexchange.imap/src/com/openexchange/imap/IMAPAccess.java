@@ -144,16 +144,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      */
     protected static final AtomicLong FAILED_AUTH_TIMEOUT = new AtomicLong();
 
-    /**
-     * Whether info logging is enabled for this class.
-     */
-    private static final boolean INFO = LOG.isInfoEnabled();
-
-    /**
-     * Whether debug logging is enabled for this class.
-     */
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     private static final String KERBEROS_SESSION_SUBJECT = "kerberosSubject";
 
     /**
@@ -677,11 +667,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 final String ip = session.getLocalIp();
                 if (!isEmpty(ip)) {
                     clientIp = ip;
-                } else if (DEBUG) {
-                    LOG.debug("\n\n\tMissing client IP in session \"{}\" of user {} in context {}.\n", session.getSessionID(), session.getUserId(), session.getContextId());
                 }
-            } else if (DEBUG && MailAccount.DEFAULT_ID == accountId) {
-                LOG.debug("\n\n\tPropagating client IP address disabled on Open-Xchange server \"{}\"\n", Services.getService(ConfigurationService.class).getProperty("com.openexchange.server.backendRoute"));
             }
             /*
              * Get connected store
@@ -694,15 +680,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             maxCount = getMaxCount();
             try {
                 imapStore = connectIMAPStore(maxCount);
-                if (DEBUG) {
-                    final String lineSeparator = System.getProperty("line.separator");
-                    final StringAllocator sb = new StringAllocator(1024);
-                    sb.append(lineSeparator).append(lineSeparator);
-                    sb.append("IMAP login performed...").append(lineSeparator);
-                    sb.append("Queued in cache: ").append(MailAccess.getMailAccessCache().numberOfMailAccesses(session, accountId));
-                    sb.append(lineSeparator).append(lineSeparator);
-                    LOG.debug(sb.toString(), new Throwable());
-                }
             } catch (final AuthenticationFailedException e) {
                 throw e;
             } catch (final MessagingException e) {
@@ -728,13 +705,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * This call is re-invoked during IMAPNotifierTask's run
                  */
-                if (IMAPNotifierRegistry.getInstance().addTaskFor(accountId, session) && INFO) {
-                    final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator("\n\tStarted IMAP notifier for server \"").append(config.getServer());
-                    tmp.append("\" with login \"").append(user);
-                    tmp.append("\" (user=").append(session.getUserId());
-                    tmp.append(", context=").append(session.getContextId()).append(").");
-                    LOG.info(tmp.toString());
-                }
+                IMAPNotifierRegistry.getInstance().addTaskFor(accountId, session);
             }
             /*
              * Add folder listener
@@ -822,7 +793,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     private static final String PROTOCOL = IMAPProvider.PROTOCOL_IMAP.getName();
 
     private IMAPStore connectIMAPStore(final int maxCount, final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw, final String clientIp) throws MessagingException, OXException {
-        final long st = DEBUG ? System.currentTimeMillis() : 0L;
         /*
          * Propagate client IP address
          */
@@ -879,15 +849,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         int retryCount = 0;
         while (retryCount++ < maxRetryCount) {
             try {
-                IMAPStore imapStore = newConnectedImapStore(imapSession, server, port, login, pw);
-                /*
-                 * Done
-                 */
-                if (DEBUG) {
-                    final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("IMAPAccess.connectIMAPStore() took {}msec.", dur);
-                }
-                return imapStore;
+                return newConnectedImapStore(imapSession, server, port, login, pw);
             } catch (final MessagingException e) {
                 if (!(e.getNextException() instanceof ConnectQuotaExceededException)) {
                     throw e;

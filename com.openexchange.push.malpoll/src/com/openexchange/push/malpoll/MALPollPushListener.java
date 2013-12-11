@@ -81,8 +81,6 @@ public final class MALPollPushListener implements PushListener {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MALPollPushListener.class);
 
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
-
     private static final MailField[] FIELDS = new MailField[] { MailField.ID };
 
     /**
@@ -237,9 +235,7 @@ public final class MALPollPushListener implements PushListener {
             /*
              * Still in process...
              */
-            if (DEBUG_ENABLED) {
-                LOG.debug("Listener still in process for user {} in context {}. Return immediately.", userId, contextId);
-            }
+            LOG.debug("Listener still in process for user {} in context {}. Return immediately.", userId, contextId);
             return;
         }
         final ContextService contextService = MALPollServiceRegistry.getServiceRegistry().getService(ContextService.class, true);
@@ -261,7 +257,6 @@ public final class MALPollPushListener implements PushListener {
     }
 
     private void firstRun(final MailService mailService) throws OXException, OXException {
-        final long s = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         /*
          * First run
          */
@@ -279,14 +274,9 @@ public final class MALPollPushListener implements PushListener {
          * Synchronize
          */
         synchronizeIDs(mailService, hash, loadDBIDs);
-        if (DEBUG_ENABLED) {
-            final long d = System.currentTimeMillis() - s;
-            LOG.debug("First run took {}msec", d);
-        }
     }
 
     private void subsequentRun(final MailService mailService) throws OXException, OXException {
-        final long s = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         /*
          * Subsequent run
          */
@@ -295,10 +285,6 @@ public final class MALPollPushListener implements PushListener {
             return;
         }
         synchronizeIDs(mailService, hash, true);
-        if (DEBUG_ENABLED) {
-            final long d = System.currentTimeMillis() - s;
-            LOG.debug("Subsequent run took {}msec", d);
-        }
     }
 
     private void synchronizeIDs(final MailService mailService, final UUID hash, final boolean loadDBIDs) throws OXException, OXException {

@@ -92,7 +92,6 @@ import com.openexchange.tx.TransactionException;
 public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStorageIgnorableVersionFileAccess/*, FileStorageSequenceNumberProvider*/ {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CIFSFileAccess.class);
-    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private final FileStorageAccountAccess accountAccess;
 
@@ -694,14 +693,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              */
             SmbFile[] subFiles;
             try {
-                if (DEBUG) {
-                    final long st = System.currentTimeMillis();
-                    subFiles = smbFolder.canRead() ? smbFolder.listFiles(FILE_FILTER) : new SmbFile[0];
-                    final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("CIFSFileAccess.getFileList() - SmbFile.listFiles() took {}msec.", dur);
-                } else {
-                    subFiles = smbFolder.canRead() ? smbFolder.listFiles(FILE_FILTER) : new SmbFile[0];
-                }
+                subFiles = smbFolder.canRead() ? smbFolder.listFiles(FILE_FILTER) : new SmbFile[0];
             } catch (final SmbException e) {
                 if (!indicatesNotReadable(e)) {
                     throw e;

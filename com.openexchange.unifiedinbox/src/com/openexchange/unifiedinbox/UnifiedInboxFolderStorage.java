@@ -102,7 +102,6 @@ import com.openexchange.user.UserService;
 public final class UnifiedInboxFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced2 {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UnifiedInboxFolderStorage.class);
-    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     // private final UnifiedINBOXAccess access;
 
@@ -210,9 +209,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                 for (int i = 0; i < length; i++) {
                     completionService.take().get();
                 }
-                if (DEBUG) {
-                    LOG.debug("Expunging folder \"{}\" took {}msec.", fullName, completionService.getDuration());
-                }
+                LOG.debug("Expunging folder \"{}\" took {}msec.", fullName, completionService.getDuration());
                 // Return
                 return;
             } catch (final InterruptedException e) {
@@ -317,9 +314,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                     count += arr[0];
                     unreadCount += arr[1];
                 }
-                if (DEBUG) {
-                    LOG.debug("Retrieving total message count from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
-                }
+                LOG.debug("Retrieving total message count from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
                 // Return
                 return new int[] { count, unreadCount };
             } catch (final InterruptedException e) {
@@ -406,9 +401,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                 for (int i = 0; i < length; i++) {
                     count += (completionService.take().get()).intValue();
                 }
-                if (DEBUG) {
-                    LOG.debug("Retrieving total message count from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
-                }
+                LOG.debug("Retrieving total message count from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
                 // Return
                 return count;
             } catch (final InterruptedException e) {
@@ -485,9 +478,8 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                 for (int i = 0; i < length; i++) {
                     count += (completionService.take().get()).intValue();
                 }
-                if (DEBUG) {
-                    LOG.debug("Retrieving new message count from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
-                }
+                LOG.debug("Retrieving new message count from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
+
                 // Return
                 return count;
             } catch (final InterruptedException e) {
@@ -565,9 +557,8 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                 for (int i = 0; i < length; i++) {
                     count += (completionService.take().get()).intValue();
                 }
-                if (DEBUG) {
-                    LOG.debug("Retrieving unread message count from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
-                }
+                LOG.debug("Retrieving unread message count from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
+
                 // Return
                 return count;
             } catch (final InterruptedException e) {

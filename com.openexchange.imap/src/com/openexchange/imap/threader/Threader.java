@@ -64,7 +64,6 @@ import java.util.Map;
 public class Threader {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Threader.class);
-    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private ThreadContainer rootNode; // has kids, and no next
     private Map<String, ThreadContainer> idMap; // maps message IDs to ThreadContainers
@@ -122,7 +121,6 @@ public class Threader {
         if (threadableRoot == null) {
             return null;
         }
-        final long st = DEBUG ? System.currentTimeMillis() : 0L;
 
         idMap = new HashMap<String, ThreadContainer>();
 
@@ -163,11 +161,6 @@ public class Threader {
         // their underlying threadables.
         rootNode.flush();
         rootNode = null;
-
-        if (DEBUG && null != result) {
-            final long dur = System.currentTimeMillis() - st;
-            LOG.debug("Threader.thread() took {}msec for {}", dur, result.fullName);
-        }
 
         return result;
     }

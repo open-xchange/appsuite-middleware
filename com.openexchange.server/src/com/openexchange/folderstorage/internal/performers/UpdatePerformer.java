@@ -77,8 +77,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdatePerformer.class);
 
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
-
     /**
      * Initializes a new {@link UpdatePerformer} from given session.
      *
@@ -139,7 +137,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         if (null == storage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
-        final long start = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         if (null != timeStamp) {
             storageParameters.setTimeStamp(timeStamp);
         }
@@ -379,10 +376,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 }
             }
 
-            if (DEBUG_ENABLED) {
-                final long duration = System.currentTimeMillis() - start;
-                LOG.debug("UpdatePerformer.doUpdate() took {}msec for folder: {}", duration, folderId);
-            }
         } catch (final OXException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);

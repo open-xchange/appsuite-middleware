@@ -75,8 +75,6 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FastSecretInconsistencyDetector.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     private static final String PROPERTY = "com.openexchange.secret.recovery.fast.token";
 
     private final SecretService secretService;
@@ -131,11 +129,7 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
             } catch (final GeneralSecurityException inner) {
                 // Ignore
             }
-            if (DEBUG) {
-                final String message = "Could not decrypt fast-crypt token from user's attributes.";
-                final Throwable t = new Throwable(message);
-                LOG.debug(message, t);
-            }
+            LOG.debug("Could not decrypt fast-crypt token from user's attributes.", new Throwable());
             return false;
         }
     }
@@ -144,11 +138,7 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
         try {
             final String encrypted = cryptoService.encrypt(TEST_STRING, secret);
             userService.setAttribute(PROPERTY, encrypted, user.getId(), context);
-            if (DEBUG) {
-                final String message = "Saved fast-crypt token in user's attributes: " + encrypted;
-                final Throwable t = new Throwable(message);
-                LOG.debug(message, t);
-            }
+            LOG.debug("Saved fast-crypt token in user''s attributes: {}", encrypted, new Throwable());
         } catch (final OXException e) {
             LOG.error("", e);
         }

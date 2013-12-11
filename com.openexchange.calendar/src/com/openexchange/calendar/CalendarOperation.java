@@ -403,7 +403,6 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
     private boolean has_next;
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarOperation.class);
-    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private ResultSet co_rs;
 
@@ -467,7 +466,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 Participant[] participants = cimp.getParticipants(cdao, readcon).getList();
                 cdao.setParticipants(participants);
                 if (check_permissions && !recColl.checkPermissions(cdao, so, ctx, readcon, check_special_action, action_folder)) {
-                    if (DEBUG && action_folder != inFolder) {
+                    if (LOG.isDebugEnabled() && action_folder != inFolder) {
                         LOG.debug(StringCollection.convertArraytoString(new Object[] {
                             "Permission Exception 1 (fid!inFolder) for user:oid:fid:inFolder ", I(so.getUserId()), ":", I(oid), ":",
                             I(action_folder), ":", inFolder }));
@@ -510,14 +509,14 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 cdao.setUsers(cimp.getUserParticipants(cdao, readcon, so.getUserId()).getUsers());
                 if (check_permissions && cdao.getEffectiveFolderId() != inFolder) {
                     if (cdao.getFolderType() != FolderObject.SHARED && check_special_action == action) {
-                        if (DEBUG) {
+                        if (LOG.isDebugEnabled()) {
                             LOG.debug(StringCollection.convertArraytoString(new Object[] {
                                 "Permission Exception 2 (fid!inFolder) for user:oid:fid:inFolder ", I(so.getUserId()), ":", I(oid), ":",
                                 I(inFolder), ":", I(action) }));
                         }
                         throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.create();
                     } else if (action_folder != inFolder && check_special_action == action) {
-                        if (DEBUG) {
+                        if (LOG.isDebugEnabled()) {
                             LOG.debug(StringCollection.convertArraytoString(new Object[] {
                                 "Permission Exception 3 (fid!inFolder) for user:oid:fid:inFolder ", I(so.getUserId()), ":", I(oid), ":",
                                 I(inFolder), ":", I(action) }));
@@ -527,7 +526,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 }
                 if (check_permissions && action == UPDATE && inFolder != action_folder) {
                     if (!recColl.checkPermissions(cdao, so, ctx, readcon, DELETE, inFolder)) { // Move means to check delete
-                        if (DEBUG && inFolder != action_folder) {
+                        if (LOG.isDebugEnabled() && inFolder != action_folder) {
                             LOG.debug(StringCollection.convertArraytoString(new Object[] {
                                 "Permission Exception 4 (fid!inFolder) for user:oid:fid:inFolder ", I(so.getUserId()), ":", I(oid), ":",
                                 I(action_folder), ":", I(inFolder) }));
@@ -963,7 +962,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         Date until = cdao.getRecurrenceType() == CalendarDataObject.NO_RECURRENCE ? edao.getUntil() : cdao.getUntil();
         return calculateRealRecurringEndDate(null == until ? recColl.getMaxUntilDate(cdao) : until, cdao.getEndDate(), cdao.getFullTime());
     }
-    
+
     /**
      * Calclulates the start date of the first occurence of the series.
      * This might differ from the start_date if the series begin before the first occurrence.
@@ -1212,7 +1211,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 cdao.setActionFolder(check_folder_id);
 
                 if (!recColl.checkPermissions(cdao, so, c, readcon, CalendarOperation.READ, check_folder_id)) {
-                    if (DEBUG) {
+                    if (LOG.isDebugEnabled()) {
                         final com.openexchange.java.StringAllocator colss = new com.openexchange.java.StringAllocator(cols.length << 3);
                         for (int a = 0; a < cols.length; a++) {
                             String fn = recColl.getFieldName(cols[a]);

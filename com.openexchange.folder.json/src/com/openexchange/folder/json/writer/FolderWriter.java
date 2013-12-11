@@ -94,7 +94,6 @@ import com.openexchange.tools.session.ServerSession;
 public final class FolderWriter {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderWriter.class);
-    static final boolean WARN = LOG.isWarnEnabled();
 
     /**
      * The default locale: en_US.
@@ -717,9 +716,7 @@ public final class FolderWriter {
     private static FolderFieldWriter getPropertyByField(final int field, final TIntObjectMap<com.openexchange.folderstorage.FolderField> fields) {
         final com.openexchange.folderstorage.FolderField fieldNamePair = fields.get(field);
         if (null == fieldNamePair) {
-            if (WARN) {
-                LOG.warn("Unknown field: {}", field, new Throwable());
-            }
+            LOG.warn("Unknown field: {}", field, new Throwable());
             return UNKNOWN_FIELD_FFW;
         }
         PropertyFieldWriter pw = PROPERTY_WRITERS.get(field);

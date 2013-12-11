@@ -201,8 +201,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailServletInterfaceImpl.class);
 
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
-
     /*-
      * ++++++++++++++ Fields ++++++++++++++
      */
@@ -2889,9 +2887,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             mailAccess.getMessageStorage().updateMessageFlags(sentFullname, uidArr, MailMessage.FLAG_SEEN, true);
         }
         final MailPath retval = new MailPath(mailAccess.getAccountId(), sentFullname, uidArr[0]);
-        if (DEBUG_ENABLED) {
-            LOG.debug("Mail copy ({}) appended in {}msec", retval, System.currentTimeMillis() - start);
-        }
+        LOG.debug("Mail copy ({}) appended in {}msec", retval, System.currentTimeMillis() - start);
         return retval;
     }
 

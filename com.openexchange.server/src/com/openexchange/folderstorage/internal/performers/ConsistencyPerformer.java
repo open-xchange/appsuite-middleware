@@ -66,8 +66,6 @@ public final class ConsistencyPerformer extends AbstractPerformer {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConsistencyPerformer.class);
 
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
-
     /**
      * Initializes a new {@link ConsistencyPerformer}.
      *
@@ -116,7 +114,6 @@ public final class ConsistencyPerformer extends AbstractPerformer {
      */
     public void doConsistencyCheck(final String treeId) throws OXException {
         final FolderStorage[] folderStorages = folderStorageDiscoverer.getFolderStoragesForTreeID(treeId);
-        final long start = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         for (final FolderStorage folderStorage : folderStorages) {
             final boolean started = folderStorage.startTransaction(storageParameters, true);
             try {
@@ -135,10 +132,6 @@ public final class ConsistencyPerformer extends AbstractPerformer {
                 }
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
-        }
-        if (DEBUG_ENABLED) {
-            final long duration = System.currentTimeMillis() - start;
-            LOG.debug("ConsistencyPerformer.doConsistencyCheck() took {}msec for tree: {}", duration, treeId);
         }
     }
 

@@ -66,8 +66,6 @@ public class FacebookMessagingResource implements MessagingResource {
     protected static final org.slf4j.Logger LOG =
         org.slf4j.LoggerFactory.getLogger(FacebookMessagingResource.class);
 
-    protected static final boolean DEBUG = LOG.isDebugEnabled();
-
     /**
      * The messaging account.
      */

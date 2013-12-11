@@ -26,7 +26,6 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -44,8 +43,6 @@ import cern.colt.list.IntArrayList;
 public class AgglomerativeClustering {
     private static final org.slf4j.Logger LOG =
         org.slf4j.LoggerFactory.getLogger(AgglomerativeClustering.class);
-	/** Enable debugging? */
-	private static final boolean DEBUG = LOG.isDebugEnabled();
 	/** Default buffer size. */
 	private static final int BUFFER_SIZE = 16 * 1024;
 
@@ -96,9 +93,7 @@ public class AgglomerativeClustering {
 
 		path = args[0];
 
-		if ( DEBUG ) {
-            LOG.debug("loading language models from files in {}", path);
-        }
+		LOG.debug("loading language models from files in {}", path);
 
 		final File[] files = new File( path ).listFiles();
 		final int n = files.length;
@@ -119,9 +114,7 @@ public class AgglomerativeClustering {
 
 			lm[i] = lc.createLanguageModel( input );
 		}
-		if ( DEBUG ) {
-            LOG.debug( "all language-models loaded" );
-        }
+		LOG.debug( "all language-models loaded" );
 
 		// list of pointers to the clusters at the i-th step of the algorithm
 		final List currentClusters = new ArrayList();
@@ -157,9 +150,7 @@ public class AgglomerativeClustering {
 					clusters[i] = new IntArrayList();
 					clusters[i].add( i );
 				}
-				if ( DEBUG ) {
-                    LOG.debug( "all distances initialized" );
-                }
+				LOG.debug( "all distances initialized" );
 			}
 
 			// find the two most similar clusters...

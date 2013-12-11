@@ -89,8 +89,6 @@ public final class TwitterServiceImpl implements TwitterService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TwitterServiceImpl.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     /**
      * Initializes a new {@link TwitterServiceImpl}.
      */
@@ -229,9 +227,7 @@ public final class TwitterServiceImpl implements TwitterService {
                 final int size = forms.size();
                 for (int i = 0; null == loginForm && i < size; i++) {
                     final HtmlForm form = iter.next();
-                    if (DEBUG) {
-                        LOG.debug("Forms action attribute / index is : {} / {}, should be {} / {}", form.getActionAttribute(), i, actionOfLoginForm, formIndex);
-                    }
+                    LOG.debug("Forms action attribute / index is : {} / {}, should be {} / {}", form.getActionAttribute(), i, actionOfLoginForm, formIndex);
                     if (formIndex == i) {
                         if ((actionOfLoginForm.equals(form.getActionAttribute()) || idOfLoginForm.equals(form.getId())) && form.getInputsByName(nameOfUserField) != null) {
                             loginForm = form;
@@ -256,9 +252,7 @@ public final class TwitterServiceImpl implements TwitterService {
                  * Find PIN in page's content
                  */
                 final Matcher matcher = PATTERN_PIN.matcher(pageWithPinString);
-                if (DEBUG) {
-                    LOG.debug(pageWithPinString);
-                }
+                LOG.debug(pageWithPinString);
                 if (matcher.find()) {
                     /*
                      * Assign found PIN

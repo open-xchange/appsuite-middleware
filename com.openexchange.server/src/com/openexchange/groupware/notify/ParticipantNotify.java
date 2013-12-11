@@ -167,8 +167,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ParticipantNotify.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     public static ParticipantNotify messageSender = new ParticipantNotify();
 
     /**
@@ -191,7 +189,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     }
 
     protected void sendMessage(final MailMessage msg, final ServerSession session, final CalendarObject obj, final State state, final boolean suppressOXReminderHeader) {
-        if (DEBUG) {
+        if (LOG.isDebugEnabled()) {
             String message;
             if (Multipart.class.isInstance(msg.message)) {
                 try {
@@ -467,19 +465,12 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
          * Check if notification shall be dropped
          */
         if (newObj.containsNotification() && !newObj.getNotification() && newObj.getCreatedBy() == serverSession.getUserId() && !forceNotifyOthers) {
-            if (DEBUG) {
-                LOG.debug("Dropping notification for {}{} ({}) since it indicates to discard its notification", (state.getModule() == Types.APPOINTMENT ? "appointment " : "task "), title, newObj.getObjectID());
-            }
+            LOG.debug("Dropping notification for {}{} ({}) since it indicates to discard its notification", (state.getModule() == Types.APPOINTMENT ? "appointment " : "task "), title, newObj.getObjectID());
             return;
         }
         if (newObj.getParticipants() == null) {
             if (oldObj == null || oldObj.getParticipants() == null) {
-                if (DEBUG) {
-                    final StringBuilder builder = new StringBuilder(256).append("Dropping notification for ").append(
-                        (state.getModule() == Types.APPOINTMENT ? "appointment " : "task ")).append(title).append(" (").append(
-                            newObj.getObjectID()).append(") since it contains NO participants");
-                    LOG.debug(builder.toString());
-                }
+                LOG.debug("Dropping notification for {}{} ({}) since it contains NO participants", (state.getModule() == Types.APPOINTMENT ? "appointment " : "task "), title, newObj.getObjectID());
                 return;
             }
             /*
@@ -688,9 +679,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                          */
                         NotificationPool.getInstance().put(
                             new PooledNotification(p, title, state, locale, (RenderMap) renderMap.clone(), session, newObj));
-                        if (DEBUG) {
-                            LOG.debug("{} update (id = {}) notification added to pool for receiver {}", (Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task"), newObj.getObjectID(), p.email);
-                        }
+                        LOG.debug("{} update (id = {}) notification added to pool for receiver {}", (Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task"), newObj.getObjectID(), p.email);
                     } else {
                         /*
                          * Compose message
@@ -714,9 +703,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                         }
                         if (null != message) {
                             messages.add(message);
-                            if (DEBUG) {
-                                LOG.debug("{} (id = {}) \"{}\" notification message generated for receiver {}", (Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task"), newObj.getObjectID(), EmailableParticipant.STATE_NEW == p.state ? "New" : (EmailableParticipant.STATE_REMOVED == p.state ? "Deleted" : state.getType().toString()), p.email);
-                            }
+                            LOG.debug("{} (id = {}) \"{}\" notification message generated for receiver {}", (Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task"), newObj.getObjectID(), EmailableParticipant.STATE_NEW == p.state ? "New" : (EmailableParticipant.STATE_REMOVED == p.state ? "Deleted" : state.getType().toString()), p.email);
                         }
                     }
                 }
@@ -1101,9 +1088,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                                     MimeMessageUtility.foldContentDisposition(cd.toString()));
                             }
                             bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
-                            if (DEBUG) {
-                                LOG.debug("Added file attachment to notification message: {}", fileName);
-                            }
+                            LOG.debug("Added file attachment to notification message: {}", fileName);
                             /*
                              * Append body part
                              */
@@ -2270,15 +2255,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 final Date endDate = calendarObj.getEndDate();
                 if (endDate != null) {
                     if (Types.APPOINTMENT == module && endDate.getTime() < now) {
-                        if (DEBUG) {
-                            LOG.debug("Ignoring notification(s) for single appointment object {} since its end date is in the past", calendarObj.getObjectID());
-                        }
+                        LOG.debug("Ignoring notification(s) for single appointment object {} since its end date is in the past", calendarObj.getObjectID());
                         return false;
                     }
                     if (Types.TASK == module && !compare2Date(endDate.getTime(), now)) {
-                        if (DEBUG) {
                             LOG.debug("Ignoring notification(s) for single task object {} since its end date is in the past", calendarObj.getObjectID());
-                        }
                         return false;
                     }
                 }
@@ -2287,15 +2268,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             final Date untilDate = calendarObj.getUntil();
             if (null != untilDate) {
                 if (Types.APPOINTMENT == module && untilDate.getTime() < now) {
-                    if (DEBUG) {
                         LOG.debug("Ignoring notification(s) for recurring appointment object {} since its until date is in the past", calendarObj.getObjectID());
-                    }
                     return false;
                 }
                 if (Types.TASK == module && !compare2Date(untilDate.getTime(), now)) {
-                    if (DEBUG) {
                         LOG.debug("Ignoring notification(s) for recurring task object {} since its until date is in the past", calendarObj.getObjectID());
-                    }
                     return false;
                 }
             }

@@ -49,11 +49,9 @@
 
 package com.openexchange.file.storage.dropbox.session;
 
-import java.text.MessageFormat;
 import java.util.Map;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-import org.slf4j.Logger;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 
@@ -70,11 +68,6 @@ public final class DropboxEventHandler implements EventHandler {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DropboxEventHandler.class);
 
     /**
-     * Whether logger allows debug.
-     */
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
-    /**
      * Initializes a new {@link DropboxEventHandler}.
      */
     public DropboxEventHandler() {
@@ -88,7 +81,7 @@ public final class DropboxEventHandler implements EventHandler {
             if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic) || SessiondEventConstants.TOPIC_STORED_SESSION.equals(topic)) {
                 // A single session was removed
                 final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                if (!session.isTransient() && DropboxOAuthAccessRegistry.getInstance().removeSessionIfLast(session.getContextId(), session.getUserId()) && DEBUG) {
+                if (!session.isTransient() && DropboxOAuthAccessRegistry.getInstance().removeSessionIfLast(session.getContextId(), session.getUserId())) {
                     LOG.debug("Dropbox session removed for user {} in context {}", session.getUserId(), session.getContextId());
                 }
             } else if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
@@ -98,7 +91,7 @@ public final class DropboxEventHandler implements EventHandler {
                 // For each session
                 final DropboxOAuthAccessRegistry sessionRegistry = DropboxOAuthAccessRegistry.getInstance();
                 for (final Session session : sessionContainer.values()) {
-                    if (!session.isTransient() && sessionRegistry.removeSessionIfLast(session.getContextId(), session.getUserId()) && DEBUG) {
+                    if (!session.isTransient() && sessionRegistry.removeSessionIfLast(session.getContextId(), session.getUserId())) {
                         LOG.debug("Dropbox session removed for user {} in context {}", session.getUserId(), session.getContextId());
                     }
                 }

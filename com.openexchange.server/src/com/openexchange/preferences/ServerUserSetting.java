@@ -77,8 +77,6 @@ public class ServerUserSetting {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServerUserSetting.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     private static final Attribute<Boolean> CONTACT_COLLECT_ENABLED = new Attribute<Boolean>() {
 
         @Override
@@ -591,9 +589,7 @@ public class ServerUserSetting {
             UUID uuid = UUID.randomUUID();
             byte[] uuidBinary = UUIDs.toByteArray(uuid);
             stmt.setBytes(pos, uuidBinary);
-            if (DEBUG) {
-                LOG.debug("INSERTing user settings: {}", DBUtils.getStatementString(stmt));
-            }
+            LOG.debug("INSERTing user settings: {}", DBUtils.getStatementString(stmt));
             stmt.execute();
         } catch (final SQLException e) {
             throw SettingExceptionCodes.SQL_ERROR.create(e);

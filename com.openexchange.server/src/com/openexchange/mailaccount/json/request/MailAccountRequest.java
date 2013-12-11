@@ -99,8 +99,6 @@ public final class MailAccountRequest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccountRequest.class);
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     private final ServerSession session;
 
     private Date timestamp;
@@ -345,9 +343,7 @@ public final class MailAccountRequest {
                 mailAccess.getMailConfig());
             return root;
         } catch (final OXException e) {
-            if (DEBUG) {
-                LOG.debug("Composing mail account's folder tree failed.", e);
-            }
+            LOG.debug("Composing mail account's folder tree failed.", e);
             // TODO: How to indicate error if folder tree requested?
             return null;
         } finally {
@@ -397,9 +393,7 @@ public final class MailAccountRequest {
         // Get the appropriate mail provider by mail server URL
         final MailProvider mailProvider = MailProviderRegistry.getMailProviderByURL(mailServerURL);
         if (null == mailProvider) {
-            if (DEBUG) {
-                LOG.debug("Validating mail account failed. No mail provider found for URL: {}", mailServerURL);
-            }
+            LOG.debug("Validating mail account failed. No mail provider found for URL: {}", mailServerURL);
             return null;
         }
         // Set marker
@@ -455,9 +449,7 @@ public final class MailAccountRequest {
         // Get the appropriate transport provider by transport server URL
         final TransportProvider transportProvider = TransportProviderRegistry.getTransportProviderByURL(transportServerURL);
         if (null == transportProvider) {
-            if (DEBUG) {
-                LOG.debug("Validating mail account failed. No transport provider found for URL: {}", transportServerURL);
-            }
+            LOG.debug("Validating mail account failed. No transport provider found for URL: {}", transportServerURL);
             return false;
         }
         // Create a transport access instance
@@ -502,9 +494,7 @@ public final class MailAccountRequest {
             mailTransport.ping();
             close = true;
         } catch (final OXException e) {
-            if (DEBUG) {
-                LOG.debug("Validating transport account failed.", e);
-            }
+            LOG.debug("Validating transport account failed.", e);
             validated = false;
         } finally {
             if (close) {
