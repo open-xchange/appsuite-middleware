@@ -56,6 +56,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -64,9 +66,10 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import com.openexchange.test.mock.MockUtils;
+
 /**
  * Unit tests for {@link com.openexchange.logging.osgi.Activator}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4.2
  */
@@ -102,8 +105,8 @@ public class ActivatorTest {
 
         activator.overrideLoggerLevels();
 
-        Mockito.verify(activatorLogger, Mockito.atLeast(1)).warn(Matchers.anyString());
         Mockito.verify(loggerContext, Mockito.atLeast(1)).getLogger(Matchers.anyString());
+        Mockito.verify(activatorLogger, Mockito.atLeast(1)).warn(Matchers.anyString(), Matchers.any());
     }
 
     @Test
@@ -117,13 +120,16 @@ public class ActivatorTest {
 
     @Test
     public void testStartBundle_ensureOverrideLoggerLevelsCalled_Successfull() throws Exception {
-        Activator activatorSpy = Mockito.spy(new Activator());
+        BundleContext bundleContext = PowerMockito.mock(BundleContext.class);
+        Bundle bundle = PowerMockito.mock(Bundle.class);
+        Mockito.when(bundleContext.getBundle()).thenReturn(bundle);
+
+        Activator activatorSpy = Mockito.spy(activator);
         Mockito.doNothing().when(activatorSpy).overrideLoggerLevels();
         Mockito.doNothing().when(activatorSpy).configureJavaUtilLogging();
-        Mockito.doNothing().when(activatorSpy).registerLoggingConfigurationMBean();
-        Mockito.doNothing().when(activatorSpy).addExceptionCategoryFilter();
+        Mockito.doNothing().when(activatorSpy).registerLoggingConfigurationMBean(bundleContext);
 
-        activatorSpy.startBundle();
+        activatorSpy.start(bundleContext);
 
         Mockito.verify(activatorSpy, Mockito.times(1)).overrideLoggerLevels();
     }

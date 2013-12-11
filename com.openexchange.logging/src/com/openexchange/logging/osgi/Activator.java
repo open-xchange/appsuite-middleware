@@ -49,11 +49,14 @@
 
 package com.openexchange.logging.osgi;
 
-import java.text.MessageFormat;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -61,13 +64,9 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.logging.mbean.CategoryPropertyListener;
-import com.openexchange.logging.mbean.ExceptionCategoryFilter;
 import com.openexchange.logging.mbean.LogbackConfiguration;
 import com.openexchange.logging.mbean.LogbackConfigurationMBean;
 import com.openexchange.management.ManagementService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
  * {@link Activator}
@@ -75,7 +74,7 @@ import com.openexchange.osgi.SimpleRegistryListener;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Activator extends HousekeepingActivator {
+public class Activator implements BundleActivator {
 
     protected static final String LOGIN_PERFORMER = "com.openexchange.login.internal.LoginPerformer";
 
@@ -85,49 +84,48 @@ public class Activator extends HousekeepingActivator {
 
     private final LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 
+    private ManagementService managementService;
+
     private ObjectName logbackConfObjName;
 
     private LogbackConfigurationMBean logbackConfMBean;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        logger.info("starting bundle com.openexchange.logging");
-        configureJavaUtilLogging();
-        overrideLoggerLevels();
-        registerLoggingConfigurationMBean();
-        addExceptionCategoryFilter();
-    }
-
-    protected void addExceptionCategoryFilter() {
-        String suppressedCategories = getService(ConfigurationService.class).getProperty("com.openexchange.log.suppressedCategories", "USER_INPUT", new CategoryPropertyListener());
-        ExceptionCategoryFilter.setCategories(suppressedCategories);
-        loggerContext.addTurboFilter(new ExceptionCategoryFilter());
-    }
-
     /*
-     * (non-Javadoc)
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
+     * Do not implement HousekeepingActivator, track services if you need them!
+     * This bundle must start as early as possible to configure the java.util.logging bridge.
      */
-    @Override
-    protected void stopBundle() throws Exception {
-        logger.info("stopping bundle com.openexchange.logging");
-        ManagementService managementService = LoggingServiceLookup.getService(ManagementService.class);
-        if (managementService != null && logbackConfObjName != null) {
-            managementService.unregisterMBean(logbackConfObjName);
-            logbackConfMBean = null;
-            logger.info("LoggingConfigurationMBean successfully unregistered.");
-        }
+    public Activator() {
+        super();
     }
 
     protected void configureJavaUtilLogging() {
         // We configure a special j.u.l handler that routes logging to slf4j
         SLF4JBridgeHandler.removeHandlersForRootLogger();
         SLF4JBridgeHandler.install();
+    }
+
+    @Override
+    public void start(BundleContext context) throws Exception {
+        logger.info("starting bundle com.openexchange.logging");
+        configureJavaUtilLogging();
+        overrideLoggerLevels();
+        registerLoggingConfigurationMBean(context);
+        logger.info("LoggingConfigurationMBean successfully registered.");
+        ServiceTracker<ConfigurationService, ConfigurationService> tracker = new ServiceTracker<ConfigurationService, ConfigurationService>(
+            context,
+            ConfigurationService.class,
+            new ExceptionCategoryFilterRegisterer(context));
+        tracker.open();
+    }
+
+    @Override
+    public void stop(BundleContext context) throws Exception {
+        logger.info("stopping bundle com.openexchange.logging");
+        if (managementService != null && logbackConfObjName != null) {
+            managementService.unregisterMBean(logbackConfObjName);
+            logbackConfMBean = null;
+            logger.info("LoggingConfigurationMBean successfully unregistered.");
+        }
     }
 
     /**
@@ -147,37 +145,53 @@ public class Activator extends HousekeepingActivator {
     /**
      * Register the LoggingConfigurationMBean
      */
-    protected void registerLoggingConfigurationMBean() {
+    protected void registerLoggingConfigurationMBean(final BundleContext context) {
         try {
-            logbackConfObjName = new ObjectName(LogbackConfigurationMBean.DOMAIN, LogbackConfigurationMBean.KEY, LogbackConfigurationMBean.VALUE);
+            logbackConfObjName = new ObjectName(
+                LogbackConfigurationMBean.DOMAIN,
+                LogbackConfigurationMBean.KEY,
+                LogbackConfigurationMBean.VALUE);
             logbackConfMBean = new LogbackConfiguration();
-            track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
 
-                @Override
-                public void added(ServiceReference<ManagementService> ref, ManagementService service) {
-                    try {
-                        service.registerMBean(logbackConfObjName, logbackConfMBean);
-                    } catch (OXException e) {
-                        logger.error("", e);
+            ServiceTracker<ManagementService, ManagementService> tracker = new ServiceTracker<ManagementService, ManagementService>(
+                context,
+                ManagementService.class,
+                new ServiceTrackerCustomizer<ManagementService, ManagementService>() {
+                    @Override
+                    public synchronized ManagementService addingService(ServiceReference<ManagementService> reference) {
+                        managementService = context.getService(reference);
+                        try {
+                            managementService.registerMBean(logbackConfObjName, logbackConfMBean);
+                        } catch (OXException e) {
+                            logger.error("Could not register LogbackConfigurationMBean", e);
+                        }
+                        return managementService;
                     }
-                }
 
-                @Override
-                public void removed(ServiceReference<ManagementService> ref, ManagementService service) {
-                    try {
-                        service.unregisterMBean(logbackConfObjName);
-                    } catch (OXException e) {
-                        logger.warn("", e);
+                    @Override
+                    public synchronized void modifiedService(ServiceReference<ManagementService> reference, ManagementService service) {
                     }
-                }
-            });
 
+                    @Override
+                    public synchronized void removedService(ServiceReference<ManagementService> reference, ManagementService service) {
+                        if (managementService != null) {
+                            try {
+                                managementService.unregisterMBean(logbackConfObjName);
+                                managementService = null;
+                            } catch (OXException e) {
+                                logger.warn("Could not unregister LogbackConfigurationMBean", e);
+                            }
+                        }
+                    }
+                });
+            tracker.open();
         } catch (MalformedObjectNameException e) {
-            logger.error("", e);
+            logger.error("Could not register LogbackConfigurationMBean", e);
         } catch (NullPointerException e) {
-            logger.error("", e);
+            logger.error("Could not register LogbackConfigurationMBean", e);
         } catch (NotCompliantMBeanException e) {
-            logger.error("", e);
+            logger.error("Could not register LogbackConfigurationMBean", e);
         }
     }
+
 }

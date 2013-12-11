@@ -53,16 +53,18 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.logging.osgi.ActivatorTest;
+import com.openexchange.logging.osgi.ExceptionCategoryFilterRegistererTest;
 
 /**
  * Unit tests for the bundle com.openexchange.logging
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4.2
  */
 @RunWith(Suite.class)
 @SuiteClasses({
- ActivatorTest.class
+ ActivatorTest.class,
+ ExceptionCategoryFilterRegistererTest.class
 })
 public class UnitTests {
 

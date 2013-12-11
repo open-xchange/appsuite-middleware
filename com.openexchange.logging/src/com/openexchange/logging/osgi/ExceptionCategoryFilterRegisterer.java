@@ -47,18 +47,60 @@
  *
  */
 
-package com.openexchange.logging.mbean;
+package com.openexchange.logging.osgi;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.LoggerFactory;
+import ch.qos.logback.classic.LoggerContext;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
-
+import com.openexchange.logging.mbean.ExceptionCategoryFilter;
 
 /**
- * {@link CategoryPropertyListener}
+ * {@link ExceptionCategoryFilterRegisterer}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class CategoryPropertyListener implements PropertyListener {
+public class ExceptionCategoryFilterRegisterer implements ServiceTrackerCustomizer<ConfigurationService, ConfigurationService>, PropertyListener {
+
+    private final LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+
+    private final BundleContext context;
+
+    private ExceptionCategoryFilter exceptionCategoryFilter = null;
+
+    public ExceptionCategoryFilterRegisterer(final BundleContext context) {
+        super();
+        this.context = context;
+    }
+
+    @Override
+    public ConfigurationService addingService(ServiceReference<ConfigurationService> reference) {
+        ConfigurationService service = context.getService(reference);
+        String suppressedCategories = service.getProperty(
+            "com.openexchange.log.suppressedCategories",
+            "USER_INPUT",
+            this);
+        ExceptionCategoryFilter.setCategories(suppressedCategories);
+
+        if (exceptionCategoryFilter == null) {
+            exceptionCategoryFilter = new ExceptionCategoryFilter();
+            loggerContext.addTurboFilter(exceptionCategoryFilter);
+        }
+
+        return service;
+    }
+
+    @Override
+    public void modifiedService(ServiceReference<ConfigurationService> reference, ConfigurationService service) {
+    }
+
+    @Override
+    public void removedService(ServiceReference<ConfigurationService> reference, ConfigurationService service) {
+    }
 
     @Override
     public void onPropertyChange(PropertyEvent event) {
