@@ -250,7 +250,8 @@ public class SyncSession {
                     trace("No temporary folder available for uploads.");
                     hasTempFolder = Boolean.FALSE;
                 } else if (null != tempFolder.getOwnPermission() &&
-                    FileStoragePermission.CREATE_OBJECTS_IN_FOLDER <= tempFolder.getOwnPermission().getFolderPermission()) {
+                    FileStoragePermission.CREATE_OBJECTS_IN_FOLDER <= tempFolder.getOwnPermission().getFolderPermission() &&
+                    FileStoragePermission.DELETE_ALL_OBJECTS <= tempFolder.getOwnPermission().getDeletePermission()) {
                     trace("Using folder '" + tempFolder + "' for temporary uploads.");
                     hasTempFolder = Boolean.TRUE;
                 } else {
