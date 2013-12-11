@@ -285,7 +285,7 @@ public class CPServlet extends PermissionServlet {
      * @throws IOException
      */
     private void writeException(final HttpServletResponse resp, final Throwable t) throws IOException {
-        LOG.error(t.getMessage(), t);
+        LOG.error("", t);
         final PrintWriter writer = resp.getWriter();
         writer.append(t.getMessage());
         // TODO Write HTML page as response
