@@ -161,7 +161,8 @@ public class ConvertJUL2LogbackCLT {
         for (String name : properties.stringPropertyNames()) {
             Element logger = document.createElement("logger");
             configuration.appendChild(logger);
-            logger.setAttribute(name, properties.getProperty(name));
+            logger.setAttribute("name", name.substring(0, name.length() - ".level".length()));
+            logger.setAttribute("level", properties.getProperty(name));
         }
     }
 

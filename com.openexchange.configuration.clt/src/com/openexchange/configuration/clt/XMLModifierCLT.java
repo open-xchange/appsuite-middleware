@@ -55,6 +55,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Iterator;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -110,6 +111,8 @@ public class XMLModifierCLT {
         options.addOption(createOption("o", "out", true, "Modified XML document is written to this file.", false));
         options.addOption(createOption("x", "xpath", true, "XPath to the element that should be modified.", false));
         options.addOption(createOption("a", "add", true, "XML file that should be added to the element denotes by the XPath. - can be used to read from STDIN.", false));
+        options.addOption(createOption("d", "id", true, "Defines the identifying attribute as XPath (relative to \"x\") to determine if an element should be ignored or replaced (-r)", true));
+        options.addOption(createOption("r", "replace", false, "Replaces existing elements.", false));
         CommandLineParser parser = new PosixParser();
         final CommandLine cmd;
         try {
@@ -146,7 +149,9 @@ public class XMLModifierCLT {
         try {
             // Modify
             XPath path = xf.newXPath();
-            XPathExpression expression = path.compile(cmd.getOptionValue('x'));
+            String xPath = cmd.getOptionValue('x');
+            String identifier = cmd.getOptionValue('d');
+            XPathExpression expression = path.compile(xPath);
             if (cmd.hasOption('a')) {
                 InputStream addIs = determineInput("-".equals(cmd.getOptionValue('a')), cmd.getOptionValue('a'));
                 final Document add;
@@ -155,16 +160,21 @@ public class XMLModifierCLT {
                 } finally {
                     addIs.close();
                 }
-                Element rootElement = add.getDocumentElement();
-                NodeList childNodes = rootElement.getChildNodes();
-                for (int i = 0; i < childNodes.getLength(); i++) {
-                    Node element2Add = childNodes.item(i);
-                    if (Node.ELEMENT_NODE != element2Add.getNodeType()) {
-                        continue;
+
+                NodeList toAddList = (NodeList) expression.evaluate(add, XPathConstants.NODESET);
+                for (int i = 0; i < toAddList.getLength(); i++) {
+                    Node toAdd = toAddList.item(i);
+                    Node id = (Node) path.compile(identifier).evaluate(toAdd, XPathConstants.NODE);
+                    Node original = (Node) path.compile(xPath + "[" + identifier + "='" + id.getNodeValue() + "']").evaluate(document, XPathConstants.NODE);
+                    Node imported = document.importNode(toAdd, true);
+                    Node destination = (Node) path.compile(xPath + "/..").evaluate(document, XPathConstants.NODE);
+                    if (original == null) {
+                            destination.appendChild(imported);
+                    } else {
+                        if (cmd.hasOption('r')) {
+                            original.getParentNode().replaceChild(imported, original);
+                        }
                     }
-                    Node imported = document.importNode(element2Add, true);
-                    Node element = (Node) expression.evaluate(document, XPathConstants.NODE);
-                    element.appendChild(imported);
                 }
             } else {
                 System.err.println("Unknown operation mode.");

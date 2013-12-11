@@ -7,8 +7,7 @@
 <listEntry value="1"/>
 </listAttribute>
 <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
-<stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/java-7-oracle"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.openexchange.configuration.clt.XMLModifierCLT"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-i ${workspace_loc:/com.openexchange.logback.configuration/conf/logback.xml} -a ${workspace_loc:/com.openexchange.configuration.clt/add.xml} -x /configuration"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-i ${workspace_loc:/com.openexchange.logback.configuration/conf/logback.xml} -a ${workspace_loc:/com.openexchange.configuration.clt/add.xml} -x /configuration/logger -d @name"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.openexchange.configuration.clt"/>
 </launchConfiguration>
