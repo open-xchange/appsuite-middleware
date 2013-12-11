@@ -115,19 +115,21 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
                 /*
                  * send chunk
                  */
-                MulticastResult result = null;
-                try {
-                    result = sender.sendNoRetry(getMessage(event), registrationIDs);
-                } catch (IOException e) {
-                    LOG.warn("error publishing drive event", e);
+                if (0 < registrationIDs.size()) {
+                    MulticastResult result = null;
+                    try {
+                        result = sender.sendNoRetry(getMessage(event), registrationIDs);
+                    } catch (IOException e) {
+                        LOG.warn("error publishing drive event", e);
+                    }
+                    if (null != result && LOG.isDebugEnabled()) {
+                        LOG.debug(result);
+                    }
+                    /*
+                     * process resulst
+                     */
+                    processResult(event.getContextID(), registrationIDs, result);
                 }
-                if (null != result && LOG.isDebugEnabled()) {
-                    LOG.debug(result);
-                }
-                /*
-                 * process resulst
-                 */
-                processResult(event.getContextID(), registrationIDs, result);
             }
         }
     }
