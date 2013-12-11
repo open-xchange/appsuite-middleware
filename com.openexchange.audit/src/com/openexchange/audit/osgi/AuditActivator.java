@@ -78,14 +78,14 @@ public class AuditActivator extends HousekeepingActivator {
     @Override
     protected void handleAvailability(final Class<?> clazz) {
         if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
+            LOG.warn("Absent service: {}", clazz.getName());
         }
     }
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
         if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
+            LOG.info("Re-available service: {}", clazz.getName());
         }
     }
 
@@ -97,7 +97,7 @@ public class AuditActivator extends HousekeepingActivator {
             serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { "com/openexchange/groupware/*", FileStorageEventConstants.ALL_TOPICS });
             registerService(EventHandler.class, new AuditEventHandler(), serviceProperties);
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
 
@@ -109,7 +109,7 @@ public class AuditActivator extends HousekeepingActivator {
             cleanUp();
             Services.setServiceLookup(null);
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
     }

@@ -92,7 +92,7 @@ public final class KerberosUtils {
                         final PasswordCallback passCallback = (PasswordCallback) callback;
                         passCallback.setPassword(password.toCharArray());
                     } else {
-                        LOG.error("Unknown callback class: " + callback.getClass().getName() + '#' + callback.toString());
+                        LOG.error("Unknown callback class: {}{}{}", callback.getClass().getName(), '#', callback);
                     }
                 }
             }

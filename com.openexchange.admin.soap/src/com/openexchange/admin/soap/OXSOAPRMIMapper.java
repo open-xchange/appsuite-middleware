@@ -180,7 +180,7 @@ public abstract class OXSOAPRMIMapper {
         try {
             if( rmistub == null || force ) {
                 final String rmihost = RMI_HOSTNAME + clazz.getDeclaredField("RMI_NAME").get(this);
-                log.info("reconnecting to " + rmihost);
+                log.info("reconnecting to {}", rmihost);
                 boolean doloop = true;
                 int count = MAX_RMI_CONNECT_ATTEMPTS;
                 final int delay = CONNECT_ATTEMPTS_DELAY_TIME*1000;

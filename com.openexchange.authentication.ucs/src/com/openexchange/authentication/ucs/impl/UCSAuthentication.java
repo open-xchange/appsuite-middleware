@@ -125,7 +125,7 @@ public class UCSAuthentication implements AuthenticationService {
 
             final String[] splitted = split(loginInfo.getUsername());
 
-            LOG.debug("Splitted:" + Arrays.toString(splitted));
+            LOG.debug("Splitted:{}", Arrays.toString(splitted));
 
 
             if (splitted[0] == null || splitted[0].length() == 0 || splitted[0].equals("defaultcontext")){
@@ -134,7 +134,7 @@ public class UCSAuthentication implements AuthenticationService {
 
             final String context_or_domain = splitted[0];
 
-            LOG.debug("Context is "+context_or_domain);
+            LOG.debug("Context is {}", context_or_domain);
 
             final String uid = splitted[1];
             final String password = loginInfo.getPassword();
@@ -166,14 +166,14 @@ public class UCSAuthentication implements AuthenticationService {
                 while(result.hasMoreElements()){
                     final SearchResult sr = result.next();
                     user_part = sr.getName();
-                    LOG.debug("User found : " + sr.getName());
+                    LOG.debug("User found : {}", sr.getName());
                     user_dn = sr.getName()+","+(String) props.get("LDAP_BASE");
                     count++;
                 }
 
                 if(count!=1){
                     // found more than 1 user or no user , this is not good :)
-                    LOG.debug("User "+uid+" not found in LDAP");
+                    LOG.debug("User {} not found in LDAP", uid);
                     throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                 }
                 if (null != ctx) {
@@ -241,12 +241,12 @@ public class UCSAuthentication implements AuthenticationService {
                 }else{
                     final String[] data  = ((String)emailattrib.get()).split("@");
                     if(data.length!=2){
-                        LOG.error("FATAL! Email address "+(String)emailattrib.get()+" could be splitted correctly!!");
+                        LOG.error("FATAL! Email address {} could be splitted correctly!!", (String)emailattrib.get());
                         throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                     }else{
                         splitted[0] = data[1];
                         splitted[1] = uid;
-                        LOG.debug("Returning "+Arrays.toString(splitted)+" to OX API!");
+                        LOG.debug("Returning {} to OX API!", Arrays.toString(splitted));
                         // return username AND context-name to the OX API
                         return new Authenticated() {
                             @Override

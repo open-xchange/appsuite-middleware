@@ -76,9 +76,9 @@ public class PropertyHandlerExtended extends PropertyHandler {
         try {
             addpropsfromfile(configfile.toString());
         } catch (final FileNotFoundException e) {
-            log.error("Unable to read file: " + configfile);
+            log.error("Unable to read file: {}", configfile);
         } catch (final IOException e) {
-            log.error("Problems reading file: " + configfile);
+            log.error("Problems reading file: {}", configfile);
         }
     }
 

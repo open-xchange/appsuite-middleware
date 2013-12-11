@@ -91,7 +91,7 @@ public final class KerberosConfiguration {
         if (jaasConf.exists() && jaasConf.isFile() && jaasConf.canRead()) {
             System.setProperty("java.security.auth.login.config", jaasConfPath);
         } else {
-            LOG.error("Cannot read JAAS configuration file state to be here: \"" + jaasConfPath + "\".");
+            LOG.error("Cannot read JAAS configuration file state to be here: \"{}\".", jaasConfPath);
             configured = false;
         }
 

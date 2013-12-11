@@ -207,9 +207,9 @@ public class IMAPAuthentication implements AuthenticationService {
                 port = Integer.parseInt((String) props.get(PropertyNames.IMAP_PORT.name));
             }
 
-            LOG.debug("Using imap server: " + host);
-            LOG.debug("Using imap port: " + port);
-            LOG.debug("Using full login info: " + use_full_login);
+            LOG.debug("Using imap server: {}", host);
+            LOG.debug("Using imap port: {}", port);
+            LOG.debug("Using full login info: {}", use_full_login);
 
             // set imap username
             if (use_full_login) {
@@ -326,7 +326,7 @@ public class IMAPAuthentication implements AuthenticationService {
             imapconnection = session.getStore("imap");
             // try to connect with the credentials set above
             imapconnection.connect(host, port, user, password);
-            LOG.info("Imap authentication for user " + user + " successful on host " + host + ":" + port);
+            LOG.info("Imap authentication for user {} successful on host {}:{}", user, host, port);
 
             /*
              * Set the context of the user, If full login was configured, we use the domain part as the context name/mapping entry. If NO
@@ -346,11 +346,11 @@ public class IMAPAuthentication implements AuthenticationService {
             LOG.error("Error setup initial imap envorinment!", e);
             throw LoginExceptionCodes.COMMUNICATION.create(e);
         } catch (final AuthenticationFailedException e) {
-            LOG.info("Authentication error on host " + host + ":" + port + " for user " + user, e);
+            LOG.info("Authentication error on host {}:{} for user {}", host, port, user, e);
             LOG.debug("Debug imap authentication", e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
         } catch (final MessagingException e) {
-            LOG.info("Messaging error on host " + host + ":" + port + " for user " + user, e);
+            LOG.info("Messaging error on host {}:{} for user {}", host, port, user, e);
             LOG.debug("Debug imap error", e);
             throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
         } finally {

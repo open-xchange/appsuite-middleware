@@ -154,7 +154,7 @@ public class LDAPAuthentication implements AuthenticationService {
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
         }
         final String returnstring = bind(uid, password);
-        LOG.info("User " + uid + " successful authenticated.");
+        LOG.info("User {} successful authenticated.", uid);
         return new AuthenticatedImpl(returnstring, splitted);
     }
 
@@ -194,7 +194,7 @@ public class LDAPAuthentication implements AuthenticationService {
                 final Properties aprops = (Properties)props.clone();
                 aprops.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
                 if( bindDN != null && bindDN.length() > 0 ) {
-                    LOG.debug("Using bindDN=" + bindDN);
+                    LOG.debug("Using bindDN={}", bindDN);
                     aprops.put(Context.SECURITY_PRINCIPAL, bindDN);
                     aprops.put(Context.SECURITY_CREDENTIALS, bindDNPassword);
                 } else {
@@ -202,8 +202,8 @@ public class LDAPAuthentication implements AuthenticationService {
                 }
                 context = new InitialLdapContext(aprops, null);
                 final String filter = "(&" + searchFilter + "(" + uidAttribute + "=" + uid + "))";
-                LOG.debug("Using filter=" + filter);
-                LOG.debug("BaseDN      =" + baseDN);
+                LOG.debug("Using filter={}", filter);
+                LOG.debug("BaseDN      ={}", baseDN);
                 SearchControls cons = new SearchControls();
                 cons.setSearchScope(SearchControls.SUBTREE_SCOPE);
                 cons.setCountLimit(0);
@@ -270,7 +270,7 @@ public class LDAPAuthentication implements AuthenticationService {
                             puser = (String)searchProxy.next().getAttributes().get(ldapReturnField).get();
                         }
                     } else {
-                        LOG.error("No user with displayname " + uid + " found.");
+                        LOG.error("No user with displayname {} found.", uid);
                         throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                     }
                 } else {
@@ -285,10 +285,10 @@ public class LDAPAuthentication implements AuthenticationService {
             }
             return null;
         } catch (InvalidNameException e) {
-            LOG.error("Login failed for dn " + dn + ":",e);
+            LOG.error("Login failed for dn {}:", dn,e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
         } catch (AuthenticationException e) {
-            LOG.error("Login failed for dn " + dn + ":",e);
+            LOG.error("Login failed for dn {}:", dn,e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
         } catch (NamingException e) {
             LOG.error("", e);
