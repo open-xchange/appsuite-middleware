@@ -186,7 +186,7 @@ public final class ListAction extends AppointmentAction {
                         try {
                             recuResults = recColl.calculateFirstRecurring(appointment);
                         } catch (final OXException e) {
-                            LOG.error("Can not calculate recurrence " + appointment.getObjectID() + ":" + req.getSession().getContextId(), e);
+                            LOG.error("Can not calculate recurrence {}:{}", appointment.getObjectID(), req.getSession().getContextId(), e);
                             appointmentList.add(appointment);
                         }
 
@@ -196,7 +196,7 @@ public final class ListAction extends AppointmentAction {
 
                             appointmentList.add(appointment);
                         } else {
-                            LOG.warn("cannot load first recurring appointment from appointment object: " + +appointment.getRecurrenceType() + " / " + appointment.getObjectID() + "\n\n\n");
+                            LOG.warn("cannot load first recurring appointment from appointment object: {} / {}\n\n\n", appointment.getRecurrenceType(), appointment.getObjectID());
                         }
                     } else {
                         // Commented this because this is done in CalendarOperation.next():726 that calls extractRecurringInformation()
@@ -230,7 +230,7 @@ public final class ListAction extends AppointmentAction {
                             try {
                                 recuResults = recColl.calculateFirstRecurring(appointment);
                             } catch (final OXException e) {
-                                LOG.error("Can not calculate recurrence " + appointment.getObjectID() + ":" + req.getSession().getContextId(), e);
+                                LOG.error("Can not calculate recurrence {}:{}", appointment.getObjectID(), req.getSession().getContextId(), e);
                                 appointmentList.add(appointment);
                             }
                             if (recuResults != null && recuResults.size() > 0) {

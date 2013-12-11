@@ -137,11 +137,11 @@ public final class SearchAction extends AppointmentAction {
                     try {
                         recuResults = recColl.calculateFirstRecurring(appointment);
                     } catch (final OXException x) {
-                        LOG.error("Can not calculate recurrence for appointment " + appointment.getObjectID() + " in context " + req.getSession().getContextId(), x);
+                        LOG.error("Can not calculate recurrence for appointment {} in context {}", appointment.getObjectID(), req.getSession().getContextId(), x);
                         appointmentList.add(appointment);
                     }
                     if (recuResults != null && recuResults.size() != 1) {
-                        LOG.warn("Can not load first recurring appointment from appointment object " + appointment.getObjectID());
+                        LOG.warn("Can not load first recurring appointment from appointment object {}", appointment.getObjectID());
                         appointmentList.add(appointment);
                     } else if (recuResults != null) {
                         appointment.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));

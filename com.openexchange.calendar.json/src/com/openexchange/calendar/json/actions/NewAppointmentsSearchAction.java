@@ -158,7 +158,7 @@ public final class NewAppointmentsSearchAction extends AppointmentAction {
                         recuResults = recColl.calculateRecurring(appointmentobject, startUTC.getTime(), endUTC.getTime(), 0);
                         processed = true;
                     } catch (final OXException x) {
-                        LOG.error("Can not calculate recurrence " + appointmentobject.getObjectID() + ":" + req.getSession().getContextId(), x);
+                        LOG.error("Can not calculate recurrence {}:{}", appointmentobject.getObjectID(), req.getSession().getContextId(), x);
                     }
                     if (recuResults != null && recuResults.size() > 0) {
                         final RecurringResultInterface result = recuResults.getRecurringResult(0);
