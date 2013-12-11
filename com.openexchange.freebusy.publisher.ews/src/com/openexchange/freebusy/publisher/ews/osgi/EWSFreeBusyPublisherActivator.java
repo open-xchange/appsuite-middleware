@@ -95,8 +95,7 @@ public class EWSFreeBusyPublisherActivator extends HousekeepingActivator {
             int delay = Tools.getConfigPropertyInt("com.openexchange.freebusy.publisher.ews.delay", 15);
             publishTask = EWSFreeBusyPublisherLookup.getService(TimerService.class).scheduleWithFixedDelay(
                 new Publisher(), initialDelay, delay, TimeUnit.MINUTES);
-            LOG.info("Scheduled first publication cycle to run in " + initialDelay +
-                " minutes, then repeating with a delay of " + delay + " minutes.");
+            LOG.info("Scheduled first publication cycle to run in {} minutes, then repeating with a delay of {} minutes.", initialDelay, delay);
         } catch (Exception e) {
             LOG.error("error starting com.openexchange.freebusy.publisher.ews", e);
             throw e;

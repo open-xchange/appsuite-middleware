@@ -221,7 +221,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             final FileStorageServiceRegistry registry = getService(FileStorageServiceRegistry.class);
             if (!registry.containsFileStorageService(serviceId)) {
                 // No such file storage service known
-                LOG.warn("Unknown file storage service: " + serviceId);
+                LOG.warn("Unknown file storage service: {}", serviceId);
                 return null;
             }
             final FileStorageService fsService = registry.getFileStorageService(serviceId);

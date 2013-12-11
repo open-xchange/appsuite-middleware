@@ -200,7 +200,7 @@ public class FileMetadataWriter {
                 try {
                     o.put(field.getName(), JSON.handle(field, file, timezone));
                 } catch (final JSONException e) {
-                    LOG.error("Error writing field: "+field.getName()+": "+e.getMessage(), e);
+                    LOG.error("Error writing field: {}: {}", field.getName(), e.getMessage(), e);
                 }
                 return o;
             }

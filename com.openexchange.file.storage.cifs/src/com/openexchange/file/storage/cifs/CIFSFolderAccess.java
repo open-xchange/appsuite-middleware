@@ -270,7 +270,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
                     }
                     if (DEBUG) {
                         final long dur = System.currentTimeMillis() - st;
-                        LOG.debug("CIFSFolderAccess.getHomeDirectory() took " + dur + "msec.");
+                        LOG.debug("CIFSFolderAccess.getHomeDirectory() took {}msec.", dur);
                     }
                     this.homeDirPath = homeDirPath;
                 }
@@ -428,7 +428,7 @@ public final class CIFSFolderAccess extends AbstractCIFSAccess implements FileSt
                     final long st = System.currentTimeMillis();
                     subFiles = smbFolder.canRead() ? smbFolder.listFiles(DICTIONARY_FILTER) : new SmbFile[0];
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("CIFSFolderAccess.getSubfolders() - SmbFile.listFiles() took " + dur + "msec.");
+                    LOG.debug("CIFSFolderAccess.getSubfolders() - SmbFile.listFiles() took {}msec.", dur);
                 } else {
                     subFiles = smbFolder.canRead() ? smbFolder.listFiles(DICTIONARY_FILTER) : new SmbFile[0];
                 }

@@ -698,7 +698,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
                     final long st = System.currentTimeMillis();
                     subFiles = smbFolder.canRead() ? smbFolder.listFiles(FILE_FILTER) : new SmbFile[0];
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("CIFSFileAccess.getFileList() - SmbFile.listFiles() took " + dur + "msec.");
+                    LOG.debug("CIFSFileAccess.getFileList() - SmbFile.listFiles() took {}msec.", dur);
                 } else {
                     subFiles = smbFolder.canRead() ? smbFolder.listFiles(FILE_FILTER) : new SmbFile[0];
                 }

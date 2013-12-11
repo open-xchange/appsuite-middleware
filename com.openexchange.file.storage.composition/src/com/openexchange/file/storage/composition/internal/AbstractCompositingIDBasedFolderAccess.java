@@ -442,11 +442,11 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
         EventAdmin eventAdmin = getEventAdmin();
         if (null != eventAdmin) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Publishing: " + dump(event));
+                LOG.debug("Publishing: {}", dump(event));
             }
             eventAdmin.postEvent(event);
         } else if (LOG.isWarnEnabled()) {
-            LOG.warn("Unable to access event admin, unable to publish event " + dump(event));
+            LOG.warn("Unable to access event admin, unable to publish event {}", dump(event));
         }
     }
 

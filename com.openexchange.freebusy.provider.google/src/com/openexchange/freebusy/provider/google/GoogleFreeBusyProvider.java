@@ -119,7 +119,7 @@ public class GoogleFreeBusyProvider implements FreeBusyProvider {
                 List<FreeBusyData> freeBusyDataList = client.getFreeBusy(filteredParticipants, from, until);
                 for (FreeBusyData freeBusyData : freeBusyDataList) {
                     if (false == freeBusyInformation.containsKey(freeBusyData.getParticipant())) {
-                        LOG.warn("Got data for non-requested participant '" + freeBusyData.getParticipant() + "', skipping.");
+                        LOG.warn("Got data for non-requested participant '{}', skipping.", freeBusyData.getParticipant());
                         continue;
                     }
                     freeBusyInformation.get(freeBusyData.getParticipant()).add(freeBusyData);

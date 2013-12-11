@@ -190,7 +190,7 @@ public class Publisher implements Runnable {
             }
             FolderIdType folderId = getFreeBusySubfolderId(legacyExchangeDN);
             if (null == folderId) {
-                LOG.warn("No free/busy subfolder for " + legacyExchangeDN + ", skipping.");
+                LOG.warn("No free/busy subfolder for {}, skipping.", legacyExchangeDN);
                 continue;
             } else if (LOG.isTraceEnabled()) {
                 LOG.trace("Using free/busy subfolder " + folderId + " for user " + users[i].getLoginInfo() + ":\n" + freeBusyData);
@@ -206,7 +206,7 @@ public class Publisher implements Runnable {
          */
         for (Entry<FolderIdType, List<PostItemType>> entry : messagesPerFolder.entrySet()) {
             ews.getItems().createItems(entry.getKey(), entry.getValue(), MessageDispositionType.SAVE_ONLY);
-            LOG.debug("Successfully published " + entry.getValue().size() + " free/busy messages.");
+            LOG.debug("Successfully published {} free/busy messages.", entry.getValue().size());
         }
     }
 

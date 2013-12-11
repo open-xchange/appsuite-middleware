@@ -165,7 +165,7 @@ public final class CMISFolder extends DefaultFileStorageFolder {
                         if (null != values && 1 == values.size()) {
                             props.put(entry.getId(), values.get(0));
                         } else {
-                            LOG.debug("CMIS folder property \"" + entry.getId() + "\" is a multiple: " + values);
+                            LOG.debug("CMIS folder property \"{}\" is a multiple: {}", entry.getId(), values);
                         }
                     }
                     if (!props.isEmpty()) {

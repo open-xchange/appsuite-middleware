@@ -390,7 +390,7 @@ public final class FolderWriter {
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final String[] obj = folder.getSubfolderIDs();
                 if (null == obj) {
-                    LOG.warn("Got null as subfolders for folder " + folder.getID() + ". Marking this folder to hold subfolders...");
+                    LOG.warn("Got null as subfolders for folder {}. Marking this folder to hold subfolders...", folder.getID());
                     jsonPutter.put(FolderField.SUBFOLDERS.getName(), Boolean.TRUE);
                 } else {
                     jsonPutter.put(FolderField.SUBFOLDERS.getName(), Boolean.valueOf(obj.length > 0));
@@ -718,7 +718,7 @@ public final class FolderWriter {
         final com.openexchange.folderstorage.FolderField fieldNamePair = fields.get(field);
         if (null == fieldNamePair) {
             if (WARN) {
-                LOG.warn("Unknown field: " + field, new Throwable());
+                LOG.warn("Unknown field: {}", field, new Throwable());
             }
             return UNKNOWN_FIELD_FFW;
         }

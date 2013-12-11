@@ -90,7 +90,7 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
         if (null != mapConfigs && !mapConfigs.isEmpty()) {
             for (String mapName : mapConfigs.keySet()) {
                 if (mapName.startsWith("distributedFiles-")) {
-                    LOG.info("Using distributed map '" + mapName + "'.");
+                    LOG.info("Using distributed map '{}'.", mapName);
                     return mapName;
                 }
             }

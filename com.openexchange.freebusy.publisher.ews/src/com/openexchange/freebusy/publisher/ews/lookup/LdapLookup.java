@@ -120,7 +120,7 @@ public class LdapLookup extends Lookup {
                 try {
                     legacyExchangeDNs[i] = searchLegacyExchangeDN(context, users[i]);
                 } catch (OXException e) {
-                    LOG.warn("Error looking up legacyExchangeDN for user " + users[i].getLoginInfo(), e);
+                    LOG.warn("Error looking up legacyExchangeDN for user {}", users[i].getLoginInfo(), e);
                 }
             }
             return legacyExchangeDNs;
