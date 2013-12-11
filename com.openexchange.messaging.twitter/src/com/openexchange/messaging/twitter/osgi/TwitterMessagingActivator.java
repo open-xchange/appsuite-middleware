@@ -50,7 +50,6 @@
 package com.openexchange.messaging.twitter.osgi;
 
 import static com.openexchange.messaging.twitter.services.TwitterMessagingServiceRegistry.getServiceRegistry;
-import java.text.MessageFormat;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.service.event.EventConstants;
@@ -95,9 +94,7 @@ public final class TwitterMessagingActivator extends HousekeepingActivator {
     @Override
     protected void handleAvailability(final Class<?> clazz) {
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(TwitterMessagingActivator.class);
-        if (logger.isInfoEnabled()) {
-            logger.info("Re-available service: " + clazz.getName());
-        }
+        logger.info("Re-available service: {}", clazz.getName());
         getServiceRegistry().addService(clazz, getService(clazz));
     }
 

@@ -115,9 +115,7 @@ public final class MessagingGenericCreateTableTask extends AbstractCreateTableIm
         final int contextId = params.getContextId();
         createTable("messagingAccount", getMessagingAccountTable(), contextId);
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MessagingGenericCreateTableTask.class);
-        if (logger.isInfoEnabled()) {
-            logger.info("UpdateTask '" + MessagingGenericCreateTableTask.class.getSimpleName() + "' successfully performed!");
-        }
+        logger.info("UpdateTask ''{}'' successfully performed!", MessagingGenericCreateTableTask.class.getSimpleName());
     }
 
     @Override
