@@ -51,12 +51,11 @@ package com.openexchange.upsell.multiple.osgi;
 
 import static com.openexchange.upsell.multiple.osgi.MyServiceRegistry.getServiceRegistry;
 import java.rmi.Remote;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -72,7 +71,7 @@ import com.openexchange.user.UserService;
 
 public class MyActivator extends HousekeepingActivator {
 
-    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MyActivator.class));
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(MyActivator.class);
 
     public MyActivator() {
         super();
@@ -86,20 +85,15 @@ public class MyActivator extends HousekeepingActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
 
         getServiceRegistry().addService(clazz, getService(clazz));
     }
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         getServiceRegistry().removeService(clazz);
-
     }
 
     @Override

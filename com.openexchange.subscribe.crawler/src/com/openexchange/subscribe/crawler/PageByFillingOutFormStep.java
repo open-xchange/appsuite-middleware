@@ -86,7 +86,7 @@ public class PageByFillingOutFormStep extends AbstractStep<Page, HtmlPage> {
         for (final HtmlForm form : input.getForms()) {
             Pattern pattern = Pattern.compile(actionOfForm);
             Matcher matcher = pattern.matcher(form.getActionAttribute());
-            LOG.debug("Forms action attribute / number is : " + form.getActionAttribute() + ", should be : "+ actionOfForm);
+            LOG.debug("Forms action attribute / number is : {}, should be : {}", form.getActionAttribute(), actionOfForm);
             if (matcher.matches()) {
                 theForm = form;
             }
@@ -99,7 +99,7 @@ public class PageByFillingOutFormStep extends AbstractStep<Page, HtmlPage> {
                 } else {
                     output = theForm.submit(null);
                 }
-                LOG.debug("Page after submitting the form : \n" + output.getWebResponse().getContentAsString());
+                LOG.debug("Page after submitting the form : \n{}", output.getWebResponse().getContentAsString());
                 executedSuccessfully = true;
             } catch (IOException e) {
                 LOG.error(e.toString());

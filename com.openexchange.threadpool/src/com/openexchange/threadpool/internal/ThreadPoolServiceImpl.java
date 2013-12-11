@@ -182,10 +182,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
     private static int getCorePoolSize(final int desiredCorePoolSize) {
         final int minCorePoolSize = Runtime.getRuntime().availableProcessors() + 1;
         if (desiredCorePoolSize < minCorePoolSize) {
-            LOG.warn(new com.openexchange.java.StringAllocator(128).append("\n\n\tConfigured pool size of ").append(desiredCorePoolSize).append(
-                " through property \"com.openexchange.threadpool.corePoolSize\" does not obey the rule\n\tfor minimum core pool size: ").append(
-                Runtime.getRuntime().availableProcessors()).append(" (number of CPUs) + 1 = ").append(minCorePoolSize).append(". Using ").append(
-                minCorePoolSize).append(" as core pool size.\n").toString());
+            LOG.warn("\n\n\tConfigured pool size of {} through property \"com.openexchange.threadpool.corePoolSize\" does not obey the rule\n\tfor minimum core pool size: {} (number of CPUs) + 1 = {}. Using {} as core pool size.\n", desiredCorePoolSize, Runtime.getRuntime().availableProcessors(), minCorePoolSize, minCorePoolSize);
             return minCorePoolSize;
         }
         return desiredCorePoolSize;
@@ -281,9 +278,9 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
                     try {
                         f.get();
                     } catch (final CancellationException ignore) {
-                        LOG.debug(ignore.getMessage(), ignore);
+                        LOG.debug("", ignore);
                     } catch (final ExecutionException ignore) {
-                        LOG.debug(ignore.getMessage(), ignore);
+                        LOG.debug("", ignore);
                     }
                 }
             }
@@ -338,9 +335,9 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
                     try {
                         f.get(nanos, TimeUnit.NANOSECONDS);
                     } catch (final CancellationException ignore) {
-                        LOG.debug(ignore.getMessage(), ignore);
+                        LOG.debug("", ignore);
                     } catch (final ExecutionException ignore) {
-                        LOG.debug(ignore.getMessage(), ignore);
+                        LOG.debug("", ignore);
                     } catch (final TimeoutException toe) {
                         return futures;
                     }

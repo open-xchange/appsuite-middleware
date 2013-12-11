@@ -79,7 +79,7 @@ public class LocalServerFactory implements RMIServerSocketFactory {
             return new ServerSocket(port, 0, null);
         }
         if (LOG.isInfoEnabled()) {
-            LOG.info("Admindaemon will listen on " + hostname + "!");
+            LOG.info("Admindaemon will listen on {}!", hostname);
         }
         return new ServerSocket(port, 0, InetAddress.getByName(hostname));
     }

@@ -88,7 +88,7 @@ public class SpamSettingsServletRegisterer {
         try {
             final String alias = PREFIX.get().getPrefix() + SERVLET_PATH_APPENDIX;
             http_service.registerServlet(alias, new SpamSettingsServlet(), null, null);
-            LOG.info("Servlet " + alias + " registered.");
+            LOG.info("Servlet {} registered.", alias);
             SpamSettingsModulePreferences.setModule(true);
         } catch (final ServletException e) {
             LOG.error("Error registering spam settings servlet!", e);
@@ -107,7 +107,7 @@ public class SpamSettingsServletRegisterer {
         }
         final String alias = PREFIX.get().getPrefix() + SERVLET_PATH_APPENDIX;
         http_service.unregister(alias);
-        LOG.info("Servlet " + alias + "unregistered.");
+        LOG.info("Servlet {}unregistered.", alias);
     }
 
 }

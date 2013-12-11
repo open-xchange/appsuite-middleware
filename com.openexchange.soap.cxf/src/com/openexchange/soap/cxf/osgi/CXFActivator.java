@@ -158,9 +158,9 @@ public class CXFActivator extends HousekeepingActivator {
                                 }
                                 // Registration
                                 httpService.registerServlet(alias, cxfServlet, config, null);
-                                log.info("Registered CXF Servlet under: " + alias);
+                                log.info("Registered CXF Servlet under: {}", alias);
                                 httpService.registerServlet(alias2, cxfServlet, config, null);
-                                log.info("Registered CXF Servlet under: " + alias2);
+                                log.info("Registered CXF Servlet under: {}", alias2);
                                 servletRegistered = true;
                             }
                             /*
@@ -193,9 +193,9 @@ public class CXFActivator extends HousekeepingActivator {
                              */
                             return httpService;
                         } catch (final ServletException e) {
-                            log.error("Couldn't register CXF Servlet: " + e.getMessage(), e);
+                            log.error("Couldn't register CXF Servlet: {}", e.getMessage(), e);
                         } catch (final NamespaceException e) {
-                            log.error("Couldn't register CXF Servlet: " + e.getMessage(), e);
+                            log.error("Couldn't register CXF Servlet: {}", e.getMessage(), e);
                         } catch (final RuntimeException e) {
                             if (servletRegistered) {
                                 try {
@@ -216,7 +216,7 @@ public class CXFActivator extends HousekeepingActivator {
                                     this.collector = null;
                                 }
                             }
-                            log.error("Couldn't register CXF Servlet: " + e.getMessage(), e);
+                            log.error("Couldn't register CXF Servlet: {}", e.getMessage(), e);
                         }
                         context.ungetService(reference);
                         return null;

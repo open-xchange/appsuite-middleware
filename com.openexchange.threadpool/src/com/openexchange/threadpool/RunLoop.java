@@ -119,7 +119,7 @@ public abstract class RunLoop<E> implements Runnable {
                 LOG.info("Returning from RunLoop due to interruption");
                 return;
             } catch (Throwable t) {
-                LOG.error(t.getMessage(), t);
+                LOG.error("", t);
             } finally {
                 handleLock.unlock();
             }

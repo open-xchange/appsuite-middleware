@@ -417,10 +417,7 @@ public class Links {
         final LinksSql lms = new LinksMySql();
         final List<int[]> resp = new ArrayList<int[]>();
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder("Fetching rights for Module: " + type + " id:" + id + " folder:" + folder
-                    + " user:" + user + " group:" + Arrays.toString(group)).toString());
-        }
+        LOG.debug("Fetching rights for Module: {} id:{} folder:{} user:{} group:{}", type, id, folder, user, Arrays.toString(group));
 
         if (!modules.get(Integer.valueOf(type)).isReadable(id, folder, user, group, so)) {
             for (final int[] tmp : data) {

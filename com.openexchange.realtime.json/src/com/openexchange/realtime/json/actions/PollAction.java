@@ -89,7 +89,7 @@ public class PollAction extends RTAction {
         if(!stateManager.isConnected(id)) {
             RealtimeException stateMissingException = RealtimeExceptionCodes.STATE_MISSING.create();
             if(LOG.isDebugEnabled()) {
-                LOG.debug(stateMissingException.getMessage(), stateMissingException);
+                LOG.debug("", stateMissingException);
             }
             Map<String, Object> errorMap = getErrorMap(stateMissingException, session);
             return new AJAXRequestResult(errorMap, "native");

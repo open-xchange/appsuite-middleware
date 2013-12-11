@@ -186,7 +186,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
              */
             openTrackers();
         } catch (final Exception e) {
-            LOG.error("Failed start-up of bundle com.openexchange.threadpool: " + e.getMessage(), e);
+            LOG.error("Failed start-up of bundle com.openexchange.threadpool: {}", e.getMessage(), e);
             throw e;
         }
     }
@@ -217,7 +217,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
                 }
             }
         } catch (final Exception e) {
-            LOG.error("Failed shut-down of bundle com.openexchange.threadpool: " + e.getMessage(), e);
+            LOG.error("Failed shut-down of bundle com.openexchange.threadpool: {}", e.getMessage(), e);
             throw e;
         }
     }
@@ -231,7 +231,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
     protected void handleAvailability(final Class<?> clazz) {
         final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolActivator.class);
         if (LOG.isInfoEnabled()) {
-            LOG.info("Appeared service: " + clazz.getName());
+            LOG.info("Appeared service: {}", clazz.getName());
         }
     }
 
@@ -239,7 +239,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
     protected void handleUnavailability(final Class<?> clazz) {
         final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolActivator.class);
         if (LOG.isInfoEnabled()) {
-            LOG.info("Disappeared service: " + clazz.getName());
+            LOG.info("Disappeared service: {}", clazz.getName());
         }
     }
 

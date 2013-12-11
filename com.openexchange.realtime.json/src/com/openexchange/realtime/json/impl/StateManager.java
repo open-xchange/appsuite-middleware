@@ -130,7 +130,7 @@ public class StateManager {
         for (RTClientState state : new ArrayList<RTClientState>(states.values())) {
             if (state.isTimedOut(timestamp)) {
                 if(LOG.isDebugEnabled()) {
-                    LOG.debug("State for id " + state.getId() + " is timed out. Last seen: " + state.getLastSeen());
+                    LOG.debug("State for id {} is timed out. Last seen: {}", state.getId(), state.getLastSeen());
                 }
                 state.getId().dispose(this, null);
             } else {

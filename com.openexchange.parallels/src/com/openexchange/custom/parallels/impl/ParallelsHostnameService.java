@@ -54,7 +54,7 @@ package com.openexchange.custom.parallels.impl;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.custom.parallels.osgi.ParallelsServiceRegistry;
@@ -74,7 +74,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
  */
 public final class ParallelsHostnameService implements HostnameService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ParallelsHostnameService.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ParallelsHostnameService.class);
 
     @Override
     public String getHostname(final int userId, final int contextId) {

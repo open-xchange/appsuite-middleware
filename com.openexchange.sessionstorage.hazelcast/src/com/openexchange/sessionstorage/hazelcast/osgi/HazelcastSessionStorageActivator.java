@@ -207,7 +207,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
         if (null != mapConfigs && 0 < mapConfigs.size()) {
             for (String mapName : mapConfigs.keySet()) {
                 if (mapName.startsWith("sessions-")) {
-                    LOG.info("Using distributed map '" + mapName + "'.");
+                    LOG.info("Using distributed map '{}'.", mapName);
                     return mapName;
                 }
             }

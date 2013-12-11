@@ -77,7 +77,7 @@ public final class URLMailAttachmentActivator extends HousekeepingActivator {
 
     @Override
     public void startBundle() throws Exception {
-        LOG.info("starting bundle: " + name);
+        LOG.info("starting bundle: {}", name);
         try {
             /*
              * Register data sources
@@ -86,18 +86,18 @@ public final class URLMailAttachmentActivator extends HousekeepingActivator {
             props.put("identifier", name);
             registerService(DataSource.class, new URLMailAttachmentDataSource(), props);
         } catch (final Exception e) {
-            LOG.error("starting bundle failed: " + name, e);
+            LOG.error("starting bundle failed: {}", name, e);
             throw e;
         }
     }
 
     @Override
     public void stopBundle() throws Exception {
-        LOG.info("stopping bundle: " + name);
+        LOG.info("stopping bundle: {}", name);
         try {
             unregisterServices();
         } catch (final Exception e) {
-            LOG.error("stopping bundle failed: " + name, e);
+            LOG.error("stopping bundle failed: {}", name, e);
             throw e;
         }
     }

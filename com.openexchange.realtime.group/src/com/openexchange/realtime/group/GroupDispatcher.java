@@ -302,7 +302,7 @@ public class GroupDispatcher implements ComponentHandle {
         } while (!idsRef.compareAndSet(expected, ids));
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("joining:" + id.toString());
+            LOG.debug("joining:{}", id);
         }
 
         stamps.put(id, stamp);
@@ -323,7 +323,7 @@ public class GroupDispatcher implements ComponentHandle {
         beforeLeave(id);
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("leaving:" + id.toString());
+            LOG.debug("leaving:{}", id);
         }
 
         id.off("dispose", LEAVE);
@@ -479,7 +479,7 @@ public class GroupDispatcher implements ComponentHandle {
      */
     protected void defaultAction(Stanza stanza) {
         if (LOG.isErrorEnabled()) {
-            LOG.error("Couldn't find matching handler for " + stanza.toString() + ". \nUse default");
+            LOG.error("Couldn't find matching handler for {}. \nUse default", stanza);
         }
     }
 
@@ -490,7 +490,7 @@ public class GroupDispatcher implements ComponentHandle {
             try {
                 leave(id);
             } catch (OXException e) {
-                LOG.error("Error while handling LEAVE for ID:" + id, e);
+                LOG.error("Error while handling LEAVE for ID:{}", id, e);
             }
         }
     };

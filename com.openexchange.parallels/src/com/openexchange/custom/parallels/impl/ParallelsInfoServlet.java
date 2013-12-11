@@ -61,6 +61,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.framework.ServiceException;
+import org.slf4j.Logger;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -75,27 +76,23 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * 
+ *
  * Servlet which returns needed Data for the Parallels direct links manipulation
  * and also returns some data like username,password etc.
- * 
+ *
  * Also does jobs for the other GUI Plugins
- * 
+ *
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
- * 
+ *
  */
 public final class ParallelsInfoServlet extends PermissionServlet {
 
-
-
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -6454818806420432111L;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ParallelsInfoServlet.class);
-
-
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ParallelsInfoServlet.class);
 
     /**
      * Initializes
@@ -124,19 +121,19 @@ public final class ParallelsInfoServlet extends PermissionServlet {
 
     /**
      * Performs the GET request!
-     * 
+     *
      * This will return a Json Object with username,password,context
      * name,context-id,branding-url. Can then be used in IFRAME Plugins and
      * for manipulating direct urls.
-     * 
+     *
      * obj.put("login"
 		obj.put("password",
 		obj.put("context_id"
 		obj.put("context_name"
 		obj.put("mail"
 		obj.put("branding_host"
-     * 
-     * 
+     *
+     *
      * @param req
      *            The servlet request
      * @param resp
@@ -224,11 +221,11 @@ public final class ParallelsInfoServlet extends PermissionServlet {
             for (final String login_mapping : login_mappings) {
                 if(login_mapping.startsWith(suffix_branded)){
                     /**
-                     * 
+                     *
                      *  We found our mapping which contains the branded host!
-                     * 
+                     *
                      *  Now split up the string to get the host part
-                     * 
+                     *
                      */
                     final String[] URL_ = login_mapping.split("\\|\\|"); // perhaps replace with substring(start,end) if would be faster
                     if(URL_.length!=3){

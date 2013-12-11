@@ -124,7 +124,7 @@ public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Ob
             LOG.error("", e);
         } catch (final ServiceException e) {
             LOG.error(e.toString());
-            LOG.error("User with id=" + workflow.getSubscription().getUserId() + " and context=" + workflow.getSubscription().getContext() + " failed to subscribe source=" + workflow.getSubscription().getSource().getDisplayName() + " with display_name=" + workflow.getSubscription().getDisplayName());
+            LOG.error("User with id={} and context={} failed to subscribe source={} with display_name={}", workflow.getSubscription().getUserId(), workflow.getSubscription().getContext(), workflow.getSubscription().getSource().getDisplayName(), workflow.getSubscription().getDisplayName());
             throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
         }
 
@@ -157,9 +157,9 @@ public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Ob
                     oxEvent.setEndDate(endDate);
                 }
                 final String recurrenceLine = recurrenceMatcher.group(1);
-                LOG.debug("Event title : " + oxEvent.getTitle());
-                LOG.debug("Start Date : " + oxEvent.getStartDate());
-                LOG.debug("End   Date : " + oxEvent.getEndDate());
+                LOG.debug("Event title : {}", oxEvent.getTitle());
+                LOG.debug("Start Date : {}", oxEvent.getStartDate());
+                LOG.debug("End   Date : {}", oxEvent.getEndDate());
                 LOG.debug(recurrenceLine);
                 // Frequency information will be set here
                 final Pattern frequencyPattern = Pattern.compile("FREQ=([^;]*);");
@@ -168,22 +168,22 @@ public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Ob
                     final String freq = frequencyMatcher.group(1);
                     if (freq.equals("DAILY")) {
                         oxEvent.setRecurrenceType(CalendarObject.DAILY);
-                        LOG.debug("Frequence : " + freq);
+                        LOG.debug("Frequence : {}", freq);
                     } else if (freq.equals("WEEKLY")) {
                         oxEvent.setRecurrenceType(CalendarObject.WEEKLY);
-                        LOG.debug("Frequence : " + freq);
+                        LOG.debug("Frequence : {}", freq);
                     } else if (freq.equals("MONTHLY") && startDate != null) {
                         oxEvent.setRecurrenceType(CalendarObject.MONTHLY);
-                        LOG.debug("Frequence : " + freq);
+                        LOG.debug("Frequence : {}", freq);
                         // oxEvent.setDayInMonth(startDate.getDate());
-                        // LOG.debug("***** Day : " + startDate.getDay());
+                        // LOG.debug("***** Day : {}", startDate.getDay());
                     } else if (freq.equals("YEARLY") && startDate != null) {
-                        LOG.debug("Frequence : " + freq);
+                        LOG.debug("Frequence : {}", freq);
                         oxEvent.setRecurrenceType(CalendarObject.YEARLY);
                         oxEvent.setDayInMonth(startDate.getDate());
                         oxEvent.setMonth(startDate.getMonth());
-                        LOG.debug("Month : " + startDate.getMonth());
-                        LOG.debug("Day in Month : " + startDate.getDate());
+                        LOG.debug("Month : {}", startDate.getMonth());
+                        LOG.debug("Day in Month : {}", startDate.getDate());
                     }
                 }
                 // WeekDay information will be set here
@@ -191,7 +191,7 @@ public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Ob
                 final Matcher weekDayMatcher = weekDayPattern.matcher(recurrenceLine);
                 if (weekDayMatcher.find()) {
                     final String weekDay = weekDayMatcher.group(1);
-                    LOG.debug("Weekday : " + weekDay);
+                    LOG.debug("Weekday : {}", weekDay);
                     if (weekDay.equals("MO")) {
                         oxEvent.setDays(CalendarObject.MONDAY);
                     } else if (weekDay.equals("TU")) {
@@ -213,14 +213,14 @@ public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Ob
                 final Matcher monthDayMatcher = monthDayPattern.matcher(recurrenceLine);
                 if (monthDayMatcher.find()) {
                     oxEvent.setDayInMonth(Integer.parseInt(monthDayMatcher.group(1)));
-                    LOG.debug("MonthDay : " + Integer.parseInt(monthDayMatcher.group(1)));
+                    LOG.debug("MonthDay : {}", Integer.parseInt(monthDayMatcher.group(1)));
                 }
                 // interval information will be set here (e.g. "every X days/weeks/months/years")
                 final Pattern intervalPattern = Pattern.compile("INTERVAL=([0-9]{1})");
                 final Matcher intervalMatcher = intervalPattern.matcher(recurrenceLine);
                 if (intervalMatcher.find()) {
                     oxEvent.setInterval(Integer.parseInt(intervalMatcher.group(1)));
-                    LOG.debug("Interval : " + Integer.parseInt(intervalMatcher.group(1)));
+                    LOG.debug("Interval : {}", Integer.parseInt(intervalMatcher.group(1)));
                 } else {
                     // if there is no interval given we need to set it to 1
                     oxEvent.setInterval(1);
@@ -236,7 +236,7 @@ public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Ob
                     final SimpleDateFormat untilDateFormat = new SimpleDateFormat("yyyyMMdd");
                     final Date untilDate = untilDateFormat.parse(untilYear + untilMonth + untilDay);
                     oxEvent.setUntil(untilDate);
-                    LOG.debug("Until-Date : " + untilDate);
+                    LOG.debug("Until-Date : {}", untilDate);
                 }
             }
         } catch (final ParseException e) {

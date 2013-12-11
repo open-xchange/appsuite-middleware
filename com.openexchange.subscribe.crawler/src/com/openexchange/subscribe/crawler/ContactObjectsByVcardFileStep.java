@@ -96,7 +96,7 @@ public class ContactObjectsByVcardFileStep extends AbstractStep<Contact[], Page>
         final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
 
         String pageString = input.getWebResponse().getContentAsString();
-        LOG.debug("The page to scan for vCards is : " + pageString);
+        LOG.debug("The page to scan for vCards is : {}", pageString);
 
         while (pageString.contains("BEGIN:VCARD")) {
             final int beginIndex = pageString.indexOf("BEGIN:VCARD");

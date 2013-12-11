@@ -116,7 +116,7 @@ private final Activator activator;
                 if (subscription.getConfiguration().get("account") != null){
                     subscription.getConfiguration().put("account", subscription.getConfiguration().get("account").toString());
                 }else {
-                    LOG.error("subscription.getConfiguration().get(\"account\") is null. Complete configuration is : "+subscription.getConfiguration());
+                    LOG.error("subscription.getConfiguration().get(\"account\") is null. Complete configuration is : {}", subscription.getConfiguration());
                 }
             } else {
                 LOG.error("subscription.getConfiguration() is null");

@@ -111,7 +111,7 @@ public class ContactsByCsvFileStep extends AbstractStep<Contact[], TextPage> {
                     try {
                         contact = Mappings.translateMapToContact(resultMap);
                     } catch (final ConverterException e) {
-                        LOG.error(e.getMessage() + " for Context : " + workflow.getSubscription().getContext().getContextId() + ", User : " + workflow.getSubscription().getUserId() + ", Folder : " + workflow.getSubscription().getFolderId() + ".");
+                        LOG.error("{} for Context : {}, User : {}, Folder : {}.", e.getMessage(), workflow.getSubscription().getContext().getContextId(), workflow.getSubscription().getUserId(), workflow.getSubscription().getFolderId());
 
                         exception = e;
                     }

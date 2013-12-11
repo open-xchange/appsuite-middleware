@@ -182,7 +182,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         } finally {
             if (LOG.isDebugEnabled()) {
                 long diff = System.currentTimeMillis() - start;
-                LOG.debug("Core start lastet " + diff + "ms.");
+                LOG.debug("Core start lastet {}ms.", diff);
             }
         }
     }
@@ -238,7 +238,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         } finally {
             commit(solrServer, commit);
             if (LOG.isDebugEnabled() && response != null) {
-                LOG.debug("Add took " + response.getElapsedTime() + "ms for 1 document.");
+                LOG.debug("Add took {}ms for 1 document.", response.getElapsedTime());
             }
         }
     }
@@ -266,7 +266,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         } finally {
             commit(solrServer, commit);
             if (LOG.isDebugEnabled() && response != null) {
-                LOG.debug("Add took " + response.getElapsedTime() + "ms for " + documents.size() + " documents.");
+                LOG.debug("Add took {}ms for {} documents.", response.getElapsedTime(), documents.size());
             }
         }
     }
@@ -294,7 +294,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         } finally {
             commit(solrServer, commit);
             if (LOG.isDebugEnabled() && response != null) {
-                LOG.debug("Delete by id took " + response.getElapsedTime() + "ms.");
+                LOG.debug("Delete by id took {}ms.", response.getElapsedTime());
             }
         }
     }
@@ -322,7 +322,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         } finally {
             commit(solrServer, commit);
             if (LOG.isDebugEnabled() && response != null) {
-                LOG.debug("Delete by query took " + response.getElapsedTime() + "ms.");
+                LOG.debug("Delete by query took {}ms.", response.getElapsedTime());
             }
         }
     }
@@ -346,7 +346,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
             throw new OXException(e);
         } finally {
             if (LOG.isDebugEnabled() && response != null) {
-                LOG.debug("Commit took " + response.getElapsedTime() + "ms.");
+                LOG.debug("Commit took {}ms.", response.getElapsedTime());
             }
         }
     }
@@ -370,7 +370,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
             throw new OXException(e);
         } finally {
             if (LOG.isDebugEnabled() && response != null) {
-                LOG.debug("Commit took " + response.getElapsedTime() + "ms.");
+                LOG.debug("Commit took {}ms.", response.getElapsedTime());
             }
         }
     }
@@ -394,7 +394,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
             throw new OXException(e);
         } finally {
             if (LOG.isDebugEnabled() && response != null) {
-                LOG.debug("Rollback took " + response.getElapsedTime() + "ms.");
+                LOG.debug("Rollback took {}ms.", response.getElapsedTime());
             }
         }
     }
@@ -418,7 +418,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
             throw new OXException(e);
         } finally {
             if (LOG.isDebugEnabled() && response != null) {
-                LOG.debug("Optimize took " + response.getElapsedTime() + "ms.");
+                LOG.debug("Optimize took {}ms.", response.getElapsedTime());
             }
         }
     }
@@ -442,7 +442,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
             throw new OXException(e);
         } finally {
             if (LOG.isDebugEnabled() && response != null) {
-                LOG.debug("Optimize took " + response.getElapsedTime() + "ms.");
+                LOG.debug("Optimize took {}ms.", response.getElapsedTime());
             }
         }
     }
@@ -466,7 +466,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
             throw new OXException(e);
         } finally {
             if (LOG.isDebugEnabled() && response != null) {
-                LOG.debug("Optimize took " + response.getElapsedTime() + "ms.");
+                LOG.debug("Optimize took {}ms.", response.getElapsedTime());
             }
         }
     }
@@ -490,7 +490,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
             throw new OXException(e);
         } finally {
             if (LOG.isDebugEnabled() && response != null) {
-                LOG.debug("Query took " + response.getElapsedTime() + "ms.");
+                LOG.debug("Query took {}ms.", response.getElapsedTime());
             }
         }
     }
@@ -529,7 +529,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
             } finally {
                 if (LOG.isDebugEnabled()) {
                     long diff = System.currentTimeMillis() - start;
-                    LOG.debug("Commit lasted " + diff + "ms.");
+                    LOG.debug("Commit lasted {}ms.", diff);
                 }
             }
         }
@@ -545,7 +545,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
         } finally {
             if (LOG.isDebugEnabled()) {
                 long diff = System.currentTimeMillis() - start;
-                LOG.debug("Rollback lasted " + diff + "ms.");
+                LOG.debug("Rollback lasted {}ms.", diff);
             }
         }
     }
@@ -573,7 +573,7 @@ public class EmbeddedSolrAccessImpl implements SolrAccessService {
      */
     private void handleThrowable(final Throwable t) {
         if (t instanceof ThreadDeath) {
-            LOG.error(MARKER + "Thread death" + MARKER, t);
+            LOG.error("{}Thread death{}", MARKER, MARKER, t);
             throw (ThreadDeath) t;
         }
         if (t instanceof VirtualMachineError) {

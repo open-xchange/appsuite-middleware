@@ -315,7 +315,7 @@ public class TemplateServiceImpl implements TemplateService {
             }
             // A file is accessed in a foreign directory
             final OXException e = TemplateErrorMessage.AccessDenied.create();
-            LOG.error(new StringBuilder(64).append(e.getErrorCode()).append(": Acces to file denied: \"").append(templatePath).append("\" exceptionID=").append(e.getExceptionId()).toString());
+            LOG.error("{}: Acces to file denied: \"{}\" exceptionID={}", e.getErrorCode(), templatePath, e.getExceptionId());
             throw e;
         } catch (final IOException e) {
             throw TemplateErrorMessage.IOException.create(e, e.getMessage());

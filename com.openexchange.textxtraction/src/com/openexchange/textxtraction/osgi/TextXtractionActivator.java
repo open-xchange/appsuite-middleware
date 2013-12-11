@@ -75,7 +75,7 @@ public class TextXtractionActivator extends HousekeepingActivator {
     public void startBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TextXtractionActivator.class);
         final String name = "com.openexchange.textxtraction";
-        log.info("Starting bundle: " + name);
+        log.info("Starting bundle: {}", name);
         try {
             final TikaTextXtractService tikaTextXtractService = new TikaTextXtractService();
             final BundleContext context = this.context;
@@ -107,7 +107,7 @@ public class TextXtractionActivator extends HousekeepingActivator {
             openTrackers();
             registerService(TextXtractService.class, tikaTextXtractService);
         } catch (final Exception e) {
-            log.info("Starting bundle failed: " + name, e);
+            log.info("Starting bundle failed: {}", name, e);
             throw e;
         }
     }
@@ -116,11 +116,11 @@ public class TextXtractionActivator extends HousekeepingActivator {
     public void stopBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TextXtractionActivator.class);
         final String name = "com.openexchange.textxtraction";
-        log.info("Stopping bundle: " + name);
+        log.info("Stopping bundle: {}", name);
         try {
             cleanUp();
         } catch (final Exception e) {
-            log.info("Stopping bundle failed: " + name, e);
+            log.info("Stopping bundle failed: {}", name, e);
             throw e;
         }
     }

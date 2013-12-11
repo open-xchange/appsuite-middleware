@@ -93,7 +93,7 @@ public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
                         try {
                             stanza.trace("Send to " + recipient.toString());
                             if (LOG.isDebugEnabled()) {
-                                LOG.debug("Sending Stanza: " + stanza + " to " + recipient.toString());
+                                LOG.debug("Sending Stanza: {} to {}", stanza, recipient);
                             }
                             channel.send(stanza, recipient);
                         } catch (OXException e) {

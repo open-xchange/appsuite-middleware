@@ -148,7 +148,7 @@ public class PresencePublisher implements ChangeListener {
                     List<ID> subscribers = presenceSubscriptionService.getSubscribers(currentPresence.getFrom());
                     if (!subscribers.isEmpty()) {
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug("Pushing Presence to " + subscribers.size() + "subscriber(s)");
+                            LOG.debug("Pushing Presence to {}subscriber(s)", subscribers.size());
                         }
                         MessageDispatcher messageDispatcher = getMessageDispatcher();
                         for (ID subscriber : subscribers) {

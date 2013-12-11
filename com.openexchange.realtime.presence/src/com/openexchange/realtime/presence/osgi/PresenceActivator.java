@@ -71,7 +71,7 @@ public class PresenceActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("Starting bundle: " + getClass().getCanonicalName());
+        LOG.info("Starting bundle: {}", getClass().getCanonicalName());
         Services.setServiceLookup(this);
         ResourceDirectory resourceDirectory = getService(ResourceDirectory.class);
         if (resourceDirectory == null) {
@@ -96,7 +96,7 @@ public class PresenceActivator extends HousekeepingActivator {
 
     @Override
     public void stopBundle() throws Exception {
-        LOG.info("Stopping bundle: " + getClass().getCanonicalName());
+        LOG.info("Stopping bundle: {}", getClass().getCanonicalName());
         super.stopBundle();
         Services.setServiceLookup(null);
     }

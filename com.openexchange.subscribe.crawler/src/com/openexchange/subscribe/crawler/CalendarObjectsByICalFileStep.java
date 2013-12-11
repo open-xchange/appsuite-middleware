@@ -80,7 +80,7 @@ public class CalendarObjectsByICalFileStep extends AbstractStep<CalendarDataObje
 
         if (null != input) {
             try {
-                LOG.debug("This should be an iCal-File : \n" + input.getWebResponse().getContentAsString());
+                LOG.debug("This should be an iCal-File : \n{}", input.getWebResponse().getContentAsString());
                 String iCalFile = input.getWebResponse().getContentAsString();
                 ICalParser iCalParser = workflow.getActivator().getICalParser();
 

@@ -68,7 +68,7 @@ public class LongSessionContainerRotator implements Runnable {
         try {
             SessionHandler.cleanUpLongTerm();
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
         }
     }
 }

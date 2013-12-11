@@ -112,14 +112,14 @@ public abstract class RTAction implements AJAXActionService {
     protected List<JSONObject> pollStanzas(RTClientState state) throws OXException {
         try {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Locking RTClientState for ID: " + state.getId());
+                LOG.debug("Locking RTClientState for ID: {}", state.getId());
             }
             state.lock();
             state.touch();
             List<Stanza> stanzasToSend = state.getStanzasToSend();
             List<JSONObject> stanzas = new ArrayList<JSONObject>(stanzasToSend.size());
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Got " + stanzasToSend.size() + " Stanzas to send for client: " + state.getId());
+                LOG.debug("Got {} Stanzas to send for client: {}", stanzasToSend.size(), state.getId());
             }
             for (Stanza s : stanzasToSend) {
                 stanzas.add(stanzaWriter.write(s));
@@ -129,7 +129,7 @@ public abstract class RTAction implements AJAXActionService {
             // Increment TTL count even after failure as offending stanza might cause sending to fail. Incrementing will get rid of it.
             state.purge();
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Unlocking RTClientState for ID: " + state.getId());
+                LOG.debug("Unlocking RTClientState for ID: {}", state.getId());
             }
             state.unlock();
         }

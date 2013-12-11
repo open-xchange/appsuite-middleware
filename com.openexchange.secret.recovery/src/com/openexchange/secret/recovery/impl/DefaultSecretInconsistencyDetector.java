@@ -85,7 +85,7 @@ public class DefaultSecretInconsistencyDetector implements SecretInconsistencyDe
             final String reason = secretConsistencyCheck.checkSecretCanDecryptStrings(session, getSecretService().getSecret(session));
             if (reason != null) {
                 if (DEBUG) {
-                    LOG.debug(SecretConsistencyCheck.class.getSimpleName() + " \"" + secretConsistencyCheck.getClass().getName() + "\" indicates need for re-decryption: " + reason);
+                    LOG.debug("{} \"{}\" indicates need for re-decryption: {}", SecretConsistencyCheck.class.getSimpleName(), secretConsistencyCheck.getClass().getName(), reason);
                 }
                 return reason;
             }

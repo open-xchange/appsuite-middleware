@@ -265,8 +265,7 @@ public final class UnifiedInboxFolderConverter {
         if (LOG.isDebugEnabled()) {
             final long s = System.currentTimeMillis();
             retval = getAccountDefaultFolders0(accountId, session, fullnames);
-            LOG.debug(new StringBuilder(64).append("Getting account ").append(accountId).append(" default folders took ").append(
-                (System.currentTimeMillis() - s)).append("msec").toString());
+            LOG.debug("Getting account {} default folders took {}msec", accountId, (System.currentTimeMillis() - s));
         } else {
             retval = getAccountDefaultFolders0(accountId, session, fullnames);
         }
@@ -287,8 +286,7 @@ public final class UnifiedInboxFolderConverter {
                     retval[i] =
                         new int[] { mf.getMessageCount(), mf.getUnreadMessageCount(), mf.getDeletedMessageCount(), mf.getNewMessageCount() };
                 } else if (LOG.isDebugEnabled()) {
-                    LOG.debug(new StringBuilder(32).append("Missing folder \"").append(fullnames[i]).append("\" in account ").append(
-                        accountId).toString());
+                    LOG.debug("Missing folder \"{}\" in account {}", fullnames[i], accountId);
                 }
             }
         } catch (final OXException e) {

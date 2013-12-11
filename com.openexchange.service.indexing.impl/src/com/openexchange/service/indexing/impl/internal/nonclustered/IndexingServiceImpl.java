@@ -92,11 +92,7 @@ public class IndexingServiceImpl implements IndexingService {
         }
 
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Scheduling job " + info.toString() + " at " + startDate + "." +
-                "\n    Initial interval: " + initialInterval +
-                "\n    Progression rate: " + progressionRate +
-                "\n    Timeout: " + timeout +
-                "\n    Priority: " + priority);
+            LOG.trace("Scheduling job {} at {}.\n    Initial interval: {}\n    Progression rate: {}\n    Timeout: {}\n    Priority: {}", info, startDate, initialInterval, progressionRate, timeout, priority);
         }
 
         if (timeout <= 0) {
@@ -144,8 +140,7 @@ public class IndexingServiceImpl implements IndexingService {
         long diff = now - (lastRun + interval);
         if (diff > 0) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Job " + old.getJobInfo().toString() + " was misfired for " + diff +
-                    "ms. Re-adding trigger and job on session reactivation.");
+                LOG.debug("Job {} was misfired for {}ms. Re-adding trigger and job on session reactivation.", old.getJobInfo(), diff);
             }
             return true;
         }
@@ -189,7 +184,7 @@ public class IndexingServiceImpl implements IndexingService {
     public void scheduleJob(boolean async, final JobInfo info, final Date startDate, final long repeatInterval, final int priority) throws OXException {
         if (LOG.isTraceEnabled()) {
             String at = startDate == null ? "now" : startDate.toString();
-            LOG.trace("Scheduling job " + info.toString() + " at " + at + " with interval " + repeatInterval + " and priority " + priority + ".");
+            LOG.trace("Scheduling job {} at {} with interval {} and priority {}.", info, at, repeatInterval, priority);
         }
 
         Task<Object> task = new TaskAdapter(new ScheduleJobCallable(info, startDate, repeatInterval, priority));
@@ -202,7 +197,7 @@ public class IndexingServiceImpl implements IndexingService {
             }
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
         }
     }
 
@@ -229,7 +224,7 @@ public class IndexingServiceImpl implements IndexingService {
     @Override
     public void unscheduleAllForUser(boolean async, int contextId, int userId) throws OXException {
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Unscheduling all jobs for user " + userId + " in context " + contextId + ".");
+            LOG.trace("Unscheduling all jobs for user {} in context {}.", userId, contextId);
         }
 
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
@@ -243,7 +238,7 @@ public class IndexingServiceImpl implements IndexingService {
     @Override
     public void unscheduleAllForContext(boolean async, int contextId) throws OXException {
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Unscheduling all jobs for context " + contextId + ".");
+            LOG.trace("Unscheduling all jobs for context {}.", contextId);
         }
 
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);

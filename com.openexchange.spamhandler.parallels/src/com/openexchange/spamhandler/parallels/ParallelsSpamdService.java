@@ -293,7 +293,7 @@ public class ParallelsSpamdService implements SpamdService {
                 // return spamprovider to api
                 return sp_provider;
             }
-            LOG.error("got error response from xml-rpc service for primary mail "+xml_rpc_prim_email);
+            LOG.error("got error response from xml-rpc service for primary mail {}", xml_rpc_prim_email);
             LOG.error(xml_rpc_response);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create("got error response from xml-rpc service for primary mail "+xml_rpc_prim_email);
         } catch (final OXException e) {

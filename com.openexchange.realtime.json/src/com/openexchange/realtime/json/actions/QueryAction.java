@@ -146,7 +146,7 @@ public class QueryAction extends RTAction {
         if(!stateManager.isConnected(id)) {
             RealtimeException stateMissingException = RealtimeExceptionCodes.STATE_MISSING.create();
             if(LOG.isDebugEnabled()) {
-                LOG.debug(stateMissingException.getMessage(), stateMissingException);
+                LOG.debug("", stateMissingException);
             }
             Map<String, Object> errorMap = getErrorMap(stateMissingException, session);
             return new AJAXRequestResult(errorMap, "native");
@@ -174,16 +174,16 @@ public class QueryAction extends RTAction {
 
         final Lock sendLock = new ReentrantLock();
         try {
-            LOG.debug(Thread.currentThread()+ ": Trying to lock");
+            LOG.debug("{}: Trying to lock", Thread.currentThread());
             sendLock.lock();
-            LOG.debug(Thread.currentThread()+ ": Got lock");
+            LOG.debug("{}: Got lock", Thread.currentThread());
             final Condition handled = sendLock.newCondition();
             if(gate.handle(stanza, stanza.getTo(), new CustomGateAction() {
 
                 @Override
                 public void handle(final Stanza stanza, ID recipient) {
                     if(LOG.isDebugEnabled()) {
-                        LOG.debug("Handling stanza: " + stanza);
+                        LOG.debug("Handling stanza: {}", stanza);
                     }
                     try {
                         customActionResults.put("answer", services.getService(MessageDispatcher.class).sendSynchronously(stanza, request.isSet("timeout") ? request.getIntParameter("timeout") : TIMEOUT, TimeUnit.SECONDS));
@@ -191,7 +191,7 @@ public class QueryAction extends RTAction {
                         customActionResults.put("exception", e);
                     } catch (Throwable t) {
                         ExceptionUtils.handleThrowable(t);
-                        LOG.error(t.getMessage(), t);
+                        LOG.error("", t);
                         customActionResults.put("exception", new OXException(t));
                     }
                     customActionResults.put("done", Boolean.TRUE);
@@ -219,7 +219,7 @@ public class QueryAction extends RTAction {
             // If the sequence number isn't correct, wait for a given time until a valid sequence was constructed from incoming Stanzas
             if (!customActionResults.containsKey("done")) {
                 if(!handled.await(request.isSet("timeout") ? request.getIntParameter("timeout") : TIMEOUT, TimeUnit.SECONDS)) {
-                    LOG.debug("Timeout while waiting for correct sequence/handling Stanza:" + new StanzaWriter().write(stanza));
+                    LOG.debug("Timeout while waiting for correct sequence/handling Stanza:{}", new StanzaWriter().write(stanza));
                 }
             }
 
@@ -247,7 +247,7 @@ public class QueryAction extends RTAction {
         Object answer = customActionResults.get("answer");
         if (answer == null || !Stanza.class.isInstance(answer)) {
             RealtimeException noResponseException = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create("Request didn't yield any response.");
-            LOG.error(noResponseException.getMessage(), noResponseException);
+            LOG.error("", noResponseException);
             stanza.trace(noResponseException.getMessage(), noResponseException);
             queryActionResults.put(ERROR, exceptionToJSON(noResponseException, session));
         } else {

@@ -122,7 +122,7 @@ public class ProgressiveRecurringJob implements Job {
             long jobTimeout = infoWrapper.getJobTimeout();
             long lastUpdate = infoWrapper.getLastUpdate();
             if (System.currentTimeMillis() > (lastUpdate + jobTimeout)) {
-                LOG.info("Recurring job will be removed because of timeout: " + infoWrapper.getJobInfo().toString());
+                LOG.info("Recurring job will be removed because of timeout: {}", infoWrapper.getJobInfo());
                 return;
             }
             
@@ -149,11 +149,10 @@ public class ProgressiveRecurringJob implements Job {
                         scheduler.rescheduleJob(trigger.getKey(), triggerBuilder.build());
                         RecurringJobsManager.addOrUpdateJob(jobId, infoWrapper);
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug("Job was re-scheduled: " + infoWrapper.getJobInfo().toString() + ", nextStartTime: " +
-                                nextStartTime + ", newInterval: " + newInterval);
+                            LOG.debug("Job was re-scheduled: {}, nextStartTime: {}, newInterval: {}", infoWrapper.getJobInfo(), nextStartTime, newInterval);
                         }
                     } catch (SchedulerException e) {
-                        LOG.error("Could not re-schedule job: " + infoWrapper.getJobInfo().toString(), e);
+                        LOG.error("Could not re-schedule job: {}", infoWrapper.getJobInfo(), e);
                     }
                 }
             } catch (OXException e) {
@@ -174,7 +173,7 @@ public class ProgressiveRecurringJob implements Job {
         
         if (executor.equals(hazelcast.getCluster().getLocalMember())) {
             if (!isExecutionAllowed(jobInfo)) {
-                LOG.info("Execution of job " + jobInfo.toString() + " was not allowed. Skipping...");
+                LOG.info("Execution of job {} was not allowed. Skipping...", jobInfo);
                 return false;
             }
             
@@ -183,7 +182,7 @@ public class ProgressiveRecurringJob implements Job {
         }
         
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Rescheduling job " + jobInfo.toString() + " at member " + executor.toString() + ".");
+            LOG.debug("Rescheduling job {} at member {}.", jobInfo, executor);
         }
         
         FutureTask<Object> task = new DistributedTask<Object>(new ScheduleProgressiveRecurringJobCallable(jobInfo, trigger.getPriority()), executor);
@@ -205,7 +204,7 @@ public class ProgressiveRecurringJob implements Job {
         if (!modules.containsModule(jobInfo.getModule())) {
             if (LOG.isDebugEnabled()) {
                 OXException e = IndexExceptionCodes.INDEXING_NOT_ENABLED.create(jobInfo.getModule(), jobInfo.userId, jobInfo.contextId);
-                LOG.debug("Skipping job execution because: " + e.getMessage());
+                LOG.debug("Skipping job execution because: {}", e.getMessage());
             }
 
             return false;
@@ -214,7 +213,7 @@ public class ProgressiveRecurringJob implements Job {
         IndexManagementService managementService = Services.getService(IndexManagementService.class);
         if (managementService.isLocked(jobInfo.contextId, jobInfo.userId, jobInfo.getModule())) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Skipping job execution because corresponding index is locked. " + jobInfo.toString());
+                LOG.debug("Skipping job execution because corresponding index is locked. {}", jobInfo);
             }
 
             return false;
@@ -268,7 +267,7 @@ public class ProgressiveRecurringJob implements Job {
 
         try {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Executing job " + jobInfo.toString());
+                LOG.debug("Executing job {}", jobInfo);
             }
             indexingJob.execute(jobInfo);
         } catch (Throwable t) {

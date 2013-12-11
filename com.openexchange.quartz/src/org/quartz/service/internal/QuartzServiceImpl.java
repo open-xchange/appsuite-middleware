@@ -171,7 +171,7 @@ public final class QuartzServiceImpl implements QuartzService {
 //                    scheduler.shutdown(true);
 //                }
 //            } catch (SchedulerException e) {
-//                LOG.warn("Could not stop clustered scheduler '" + name + "'.", e);
+//                LOG.warn("Could not stop clustered scheduler '{}'.", name, e);
 //            }
 //        }
 //    }
@@ -193,7 +193,7 @@ public final class QuartzServiceImpl implements QuartzService {
                         scheduler.shutdown();
                     }
                 } catch (SchedulerException e) {
-                    LOG.warn("Could not stop clustered scheduler '" + name + "'.", e);
+                    LOG.warn("Could not stop clustered scheduler '{}'.", name, e);
                 }
             }
             namedSchedulers.clear();

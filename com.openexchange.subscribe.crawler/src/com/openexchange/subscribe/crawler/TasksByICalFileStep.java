@@ -80,7 +80,7 @@ private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Ta
         ArrayList<Task> tasks = new ArrayList<Task>();
 
         try {
-            LOG.debug("This should be an iCal-File : \n" + input.getWebResponse().getContentAsString());
+            LOG.debug("This should be an iCal-File : \n{}", input.getWebResponse().getContentAsString());
             String iCalFile = input.getWebResponse().getContentAsString();
             ICalParser iCalParser = workflow.getActivator().getICalParser();
 

@@ -123,7 +123,7 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
             HtmlForm loginForm = null;
             int numberOfFormCounter = 1;
             for (final HtmlForm form : loginPage.getForms()) {
-                LOG.debug("Forms action attribute / number is : " + form.getActionAttribute() + " / " + numberOfFormCounter + ", should be " + actionOfLoginForm + " / "+numberOfForm);
+                LOG.debug("Forms action attribute / number is : {} / {}, should be {} / {}", form.getActionAttribute(), numberOfFormCounter, actionOfLoginForm, numberOfForm);
                 if (form.getActionAttribute().startsWith(actionOfLoginForm) && numberOfForm == numberOfFormCounter && form.getInputsByName(nameOfUserField) != null) {
                     loginForm = form;
                 }
@@ -152,8 +152,8 @@ public class LoginPageByFormActionStep extends AbstractStep<HtmlPage, Object> im
                     }
                 }
                 if (!linkAvailable) {
-                    LOG.error("Login for url "+ url +" failed!");
-                    LOG.debug("Page that does not have the link to imply a successful login : " + output.getWebResponse().getContentAsString());
+                    LOG.error("Login for url {} failed!", url);
+                    LOG.debug("Page that does not have the link to imply a successful login : {}", output.getWebResponse().getContentAsString());
                     throw SubscriptionErrorMessage.INVALID_LOGIN.create();
                 }
                 executedSuccessfully = true;

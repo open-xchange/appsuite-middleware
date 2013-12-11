@@ -267,7 +267,7 @@ public class InfostoreCopyTask implements CopyUserTaskService {
                     try {
                         is = srcFileStorage.getFile(location);
                         if (is == null) {
-                            LOG.warn("Did not find file for infostore document " + master.getId() + " (" + master.getFileName() + ").");
+                            LOG.warn("Did not find file for infostore document {} ({}).", master.getId(), master.getFileName());
                             continue;
                         }
 

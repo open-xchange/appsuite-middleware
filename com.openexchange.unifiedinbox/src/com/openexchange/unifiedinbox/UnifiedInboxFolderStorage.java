@@ -211,7 +211,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                     completionService.take().get();
                 }
                 if (DEBUG) {
-                    LOG.debug(new StringBuilder(64).append("Expunging folder \"").append(fullName).append("\" took ").append(completionService.getDuration()).append("msec.").toString());
+                    LOG.debug("Expunging folder \"{}\" took {}msec.", fullName, completionService.getDuration());
                 }
                 // Return
                 return;
@@ -318,8 +318,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                     unreadCount += arr[1];
                 }
                 if (DEBUG) {
-                    LOG.debug(new StringBuilder(64).append("Retrieving total message count from folder \"").append(fullName).append("\" took ").append(
-                        completionService.getDuration()).append("msec.").toString());
+                    LOG.debug("Retrieving total message count from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
                 }
                 // Return
                 return new int[] { count, unreadCount };
@@ -408,8 +407,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                     count += (completionService.take().get()).intValue();
                 }
                 if (DEBUG) {
-                    LOG.debug(new StringBuilder(64).append("Retrieving total message count from folder \"").append(fullName).append("\" took ").append(
-                        completionService.getDuration()).append("msec.").toString());
+                    LOG.debug("Retrieving total message count from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
                 }
                 // Return
                 return count;
@@ -488,8 +486,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                     count += (completionService.take().get()).intValue();
                 }
                 if (DEBUG) {
-                    LOG.debug(new StringBuilder(64).append("Retrieving new message count from folder \"").append(fullName).append("\" took ").append(
-                        completionService.getDuration()).append("msec.").toString());
+                    LOG.debug("Retrieving new message count from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
                 }
                 // Return
                 return count;
@@ -569,8 +566,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                     count += (completionService.take().get()).intValue();
                 }
                 if (DEBUG) {
-                    LOG.debug(new StringBuilder(64).append("Retrieving unread message count from folder \"").append(fullName).append("\" took ").append(
-                        completionService.getDuration()).append("msec.").toString());
+                    LOG.debug("Retrieving unread message count from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
                 }
                 // Return
                 return count;
@@ -750,7 +746,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                 completed++;
             }
             if (LOG.isDebugEnabled()) {
-                LOG.debug(new StringBuilder("Retrieving root's subfolders took ").append(completionService.getDuration()).append("msec.").toString());
+                LOG.debug("Retrieving root's subfolders took {}msec.", completionService.getDuration());
             }
             // Merge them
             final String[] names = new String[5];
@@ -810,7 +806,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                 }
             }
             if (LOG.isDebugEnabled()) {
-                LOG.debug(new StringBuilder("Retrieving root's subfolders took ").append(completionService.getDuration()).append("msec.").toString());
+                LOG.debug("Retrieving root's subfolders took {}msec.", completionService.getDuration());
             }
             // Return them
             return retval;
@@ -895,8 +891,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                 }
             }
             if (LOG.isDebugEnabled()) {
-                LOG.debug(new StringBuilder("Retrieving subfolders of \"").append(parentFullname).append("\" took ").append(
-                    completionService.getDuration()).append("msec.").toString());
+                LOG.debug("Retrieving subfolders of \"{}\" took {}msec.", parentFullname, completionService.getDuration());
             }
             // Sort them
             Collections.sort(folders, new MailFolderNameComparator(getLocale()));

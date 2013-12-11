@@ -114,7 +114,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         } finally {
             if (LOG.isDebugEnabled()) {
                 long diff = System.currentTimeMillis() - start;
-                LOG.debug("Add took " + diff + "ms for 1 document.");
+                LOG.debug("Add took {}ms for 1 document.", diff);
             }
         }
     }
@@ -137,7 +137,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         } finally {
             if (LOG.isDebugEnabled()) {
                 long diff = System.currentTimeMillis() - start;
-                LOG.debug("Add took " + diff + "ms for " + documents.size() + " documents.");
+                LOG.debug("Add took {}ms for {} documents.", diff, documents.size());
             }
         }
     }
@@ -160,7 +160,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         } finally {
             if (LOG.isDebugEnabled()) {
                 long diff = System.currentTimeMillis() - start;
-                LOG.debug("Delete by id took " + diff + "ms.");
+                LOG.debug("Delete by id took {}ms.", diff);
             }
         }
     }
@@ -183,7 +183,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         } finally {
             if (LOG.isDebugEnabled()) {
                 long diff = System.currentTimeMillis() - start;
-                LOG.debug("Delete by query took " + diff + "ms.");
+                LOG.debug("Delete by query took {}ms.", diff);
             }
         }
     }
@@ -204,7 +204,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         } finally {
             if (LOG.isDebugEnabled()) {
                 long diff = System.currentTimeMillis() - start;
-                LOG.debug("Commit took " + diff + "ms.");
+                LOG.debug("Commit took {}ms.", diff);
             }
         }
     }
@@ -227,7 +227,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         } finally {
             if (LOG.isDebugEnabled()) {
                 long diff = System.currentTimeMillis() - start;
-                LOG.debug("Commit took " + diff + "ms.");
+                LOG.debug("Commit took {}ms.", diff);
             }
         }
     }
@@ -248,7 +248,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         } finally {
             if (LOG.isDebugEnabled()) {
                 long diff = System.currentTimeMillis() - start;
-                LOG.debug("Rollback took " + diff + "ms.");
+                LOG.debug("Rollback took {}ms.", diff);
             }
         }
     }
@@ -269,7 +269,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         } finally {
             if (LOG.isDebugEnabled()) {
                 long diff = System.currentTimeMillis() - start;
-                LOG.debug("Optimize took " + diff + "ms.");
+                LOG.debug("Optimize took {}ms.", diff);
             }
         }
     }
@@ -292,7 +292,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         } finally {
             if (LOG.isDebugEnabled()) {
                 long diff = System.currentTimeMillis() - start;
-                LOG.debug("Optimize took " + diff + "ms.");
+                LOG.debug("Optimize took {}ms.", diff);
             }
         }
     }
@@ -316,7 +316,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         } finally {
             if (LOG.isDebugEnabled()) {
                 long diff = System.currentTimeMillis() - start;
-                LOG.debug("Optimize took " + diff + "ms.");
+                LOG.debug("Optimize took {}ms.", diff);
             }
         }
     }
@@ -339,7 +339,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         } finally {
             if (LOG.isDebugEnabled()) {
                 long diff = System.currentTimeMillis() - start;
-                LOG.debug("Query took " + diff + "ms.");
+                LOG.debug("Query took {}ms.", diff);
             }
         }
     }
@@ -456,7 +456,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
             solrCores.unlock(identifier.toString());
             if (LOG.isDebugEnabled()) {
                 long diff = System.currentTimeMillis() - start;
-                LOG.debug("getDelegate() lasted " + diff + "ms.");
+                LOG.debug("getDelegate() lasted {}ms.", diff);
             }
         }
     }
@@ -549,7 +549,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
             } catch (RemoteException e) {
                 rmiAccess = updateRmiCache(server);
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Ping failed for remote access on " + server + ". Reconnect.");
+                    LOG.debug("Ping failed for remote access on {}. Reconnect.", server);
                 }
             } catch (RMISolrException e) {
                 OXException exception = new OXException(e.getErrorCode(), e.getMessage(), OXExceptionConstants.MESSAGE_ARGS_EMPTY);
@@ -559,7 +559,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
         }
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Returning remote solr access to server " + server + ".");
+            LOG.debug("Returning remote solr access to server {}.", server);
         }
         return new SolrAccessServiceRmiWrapper(rmiAccess);
     }

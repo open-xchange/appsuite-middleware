@@ -110,7 +110,7 @@ public class LoginPageByFormActionReturningStringStep extends AbstractStep<Strin
            HtmlForm loginForm = null;
            int numberOfFormCounter = 1;
            for (final HtmlForm form : loginPage.getForms()) {
-               LOG.debug("Forms action attribute / number is : " + form.getActionAttribute() + " / " + numberOfFormCounter + ", should be " + actionOfLoginForm + " / "+numberOfForm);
+               LOG.debug("Forms action attribute / number is : {} / {}, should be {} / {}", form.getActionAttribute(), numberOfFormCounter, actionOfLoginForm, numberOfForm);
                if (form.getActionAttribute().matches(actionOfLoginForm) && numberOfForm == numberOfFormCounter && form.getInputsByName(nameOfUserField) != null) {
                    loginForm = form;
                }
@@ -134,7 +134,7 @@ public class LoginPageByFormActionReturningStringStep extends AbstractStep<Strin
                if (matcher.find()){
                    output = matcher.group(0);
                } else {
-                   LOG.debug("Page that does not have the String to imply a successful login : " + pageAfterLogin.getWebResponse().getContentAsString());
+                   LOG.debug("Page that does not have the String to imply a successful login : {}", pageAfterLogin.getWebResponse().getContentAsString());
                    if (debuggingEnabled){
                        openPageInBrowser(pageAfterLogin);
                    }

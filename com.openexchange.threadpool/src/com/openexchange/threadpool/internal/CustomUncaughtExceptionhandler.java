@@ -82,7 +82,7 @@ final class CustomUncaughtExceptionhandler implements UncaughtExceptionHandler {
     @Override
     public void uncaughtException(final Thread t, final Throwable e) {
         final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CustomUncaughtExceptionhandler.class);
-        LOG.error("Thread terminated with exception: " + t.getName(), e);
+        LOG.error("Thread terminated with exception: {}", t.getName(), e);
         /*
          * Gather thread information
          */

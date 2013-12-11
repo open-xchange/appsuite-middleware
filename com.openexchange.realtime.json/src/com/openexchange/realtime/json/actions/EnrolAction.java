@@ -90,7 +90,7 @@ public class EnrolAction extends RTAction {
         final Map<String, Object> enrolActionResults = new HashMap<String, Object>();
         ID constructedId = constructID(requestData, session);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Enroling ID: " + constructedId);
+            LOG.debug("Enroling ID: {}", constructedId);
         }
         List<JSONObject> stanzas = new ArrayList<JSONObject>();
         
@@ -116,7 +116,7 @@ public class EnrolAction extends RTAction {
             resourceDirectory.set(constructedId, new DefaultResource());
         } catch (OXException e) {
             RealtimeException enrolException = RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
-            LOG.error(enrolException.getMessage(), enrolException);
+            LOG.error("", enrolException);
             enrolActionResults.put(ERROR, exceptionToJSON(enrolException, session));
         }
         if(LOG.isDebugEnabled()) {

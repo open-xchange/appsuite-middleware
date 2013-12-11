@@ -91,7 +91,7 @@ public class RTProtocolImpl implements RTProtocol {
      */
     @Override
     public void getReceived(RTClientState state, StanzaTransmitter transmitter) {
-        LOG.debug("Get received from " + state.getId());
+        LOG.debug("Get received from {}", state.getId());
         emptyBuffer(state, transmitter);
     }
 
@@ -208,16 +208,16 @@ public class RTProtocolImpl implements RTProtocol {
 
             List<Stanza> stanzasToSend = state.getStanzasToSend();
             if (stanzasToSend.isEmpty()) {
-                LOG.debug("No stanzas to send for " + state.getId() + ". Suspending transmitter.");
+                LOG.debug("No stanzas to send for {}. Suspending transmitter.", state.getId());
                 transmitter.suspend();
                 return;
             }
             try {
-                LOG.debug("Trying to send " + stanzasToSend.size() + " stanzas to " + state.getId() + ".");
+                LOG.debug("Trying to send {} stanzas to {}.", stanzasToSend.size(), state.getId());
                 transmitter.send(stanzasToSend);
             } catch (OXException e) {
                 if(LOG.isDebugEnabled()) {
-                    LOG.debug("Error while trying to send Stanza(s) to client: " + state.getId(), e);
+                    LOG.debug("Error while trying to send Stanza(s) to client: {}", state.getId(), e);
                 }
             }
         } finally {
@@ -271,14 +271,14 @@ public class RTProtocolImpl implements RTProtocol {
             }
             try {
                 MessageDispatcher messageDispatcher = JSONServiceRegistry.getInstance().getService(MessageDispatcher.class);
-                LOG.debug("Sending error message to client: "+ stanza);
+                LOG.debug("Sending error message to client: {}", stanza);
                 messageDispatcher.send(stanza);
             } catch (Exception e) {
-                LOG.error("Error while handling RealtimeException: " + stanza, e);
+                LOG.error("Error while handling RealtimeException: {}", stanza, e);
             }
 
         }
-        LOG.error(exception.getMessage(), exception);
+        LOG.error("", exception);
     }
 
 }

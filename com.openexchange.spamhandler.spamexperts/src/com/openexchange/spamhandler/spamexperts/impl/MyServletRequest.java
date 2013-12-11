@@ -154,10 +154,10 @@ public final class MyServletRequest  {
 
 			String sessionid = null;
 
-			LOG.debug("trying to create new spamexperts panel session for user "+getCurrentUserUsername()+" in context "+getCurrentUserContextID());
+			LOG.debug("trying to create new spamexperts panel session for user {} in context {}", getCurrentUserUsername(), getCurrentUserContextID());
 			// create complete new session id
 			sessionid = createPanelSessionID();
-			LOG.debug("new spamexperts panel session created for user "+getCurrentUserUsername()+" in context "+getCurrentUserContextID());
+			LOG.debug("new spamexperts panel session created for user {} in context {}", getCurrentUserUsername(), getCurrentUserContextID());
 
 
 			if(sessionid==null){
@@ -221,7 +221,7 @@ public final class MyServletRequest  {
 		}
 
 		if(LOG.isDebugEnabled()){
-			LOG.debug("Using "+authid+" as authID string from user "+getCurrentUserUsername()+" in context "+getCurrentUserContextID()+" to authenticate against panel API");
+			LOG.debug("Using {} as authID string from user {} in context {} to authenticate against panel API", authid, getCurrentUserUsername(), getCurrentUserContextID());
 		}
 
 		// call the API to retrieve the URL to access panel
@@ -238,13 +238,13 @@ public final class MyServletRequest  {
 			final int statusCode = HTTPCLIENT.executeMethod(GET);
 
 			if (statusCode != HttpStatus.SC_OK) {
-				LOG.error("HTTP request to create new spamexperts panel session failed with status: " +GET.getStatusLine());
+				LOG.error("HTTP request to create new spamexperts panel session failed with status: {}", GET.getStatusLine());
 				throw MyServletExceptionCode.SPAMEXPERTS_COMMUNICATION_ERROR.create("create panel authticket", GET.getStatusLine());
 			}
 
 			final String resp = reponse2String(GET);
 			if(LOG.isDebugEnabled()){
-				LOG.debug("Got response for user "+getCurrentUserUsername()+" in context "+getCurrentUserContextID()+" from  panel API: \n"+resp);
+				LOG.debug("Got response for user {} in context {} from  panel API: \n{}", getCurrentUserUsername(), getCurrentUserContextID(), resp);
 			}
 
 			if(resp.indexOf("ERROR")!=-1){

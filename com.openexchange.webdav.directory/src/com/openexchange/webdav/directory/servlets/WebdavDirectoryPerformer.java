@@ -236,7 +236,7 @@ public class WebdavDirectoryPerformer implements SessionHolder {
             final ServletWebdavResponse webdavResponse = new ServletWebdavResponse(resp);
 
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Executing " + action);
+                LOG.debug("Executing {}", action);
             }
             actions.get(action).perform(webdavRequest, webdavResponse);
         } catch (final WebdavProtocolException x) {

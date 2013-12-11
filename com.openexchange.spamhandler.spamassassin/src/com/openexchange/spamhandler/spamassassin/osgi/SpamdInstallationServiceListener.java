@@ -78,7 +78,7 @@ public class SpamdInstallationServiceListener implements ServiceTrackerCustomize
             ServiceRegistry.getInstance().addService(SpamdService.class, service);
         } else {
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SpamdInstallationServiceListener.class);
-            log.error("Duplicate SpamdInstallationService detected: " + serviceReference.getClass().getName());
+            log.error("Duplicate SpamdInstallationService detected: {}", serviceReference.getClass().getName());
         }
         return service;
     }

@@ -247,10 +247,10 @@ public class WebserviceCollector implements ServiceListener {
                 serverEndpoint.getOutInterceptors().add(new com.openexchange.soap.cxf.interceptor.LoggingOutInterceptor());
             }
             oldEndpoint = endpoints.replace(name, endpoint);
-            LOG.info("Publishing endpoint succeeded. Published \"" + name + "\" under address \"" + address + "\".");
+            LOG.info("Publishing endpoint succeeded. Published \"{}\" under address \"{}\".", name, address);
         } catch (final Throwable t) {
             ExceptionUtils.handleThrowable(t);
-            LOG.error("Publishing endpoint failed. Couldn't publish \"" + name + "\" under address \"" + address + "\".", t);
+            LOG.error("Publishing endpoint failed. Couldn't publish \"{}\" under address \"{}\".", name, address, t);
             oldEndpoint = null;
         }
         if (oldEndpoint != null) {

@@ -117,7 +117,7 @@ public class MonitoringMapConsistencyJob implements Job {
             }
             
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Removed " + removed + " jobs from monitoring map.");
+                LOG.debug("Removed {} jobs from monitoring map.", removed);
             }
         } catch (Throwable t) {
             LOG.warn("MonitoringMapConsistencyJob failed.", t);

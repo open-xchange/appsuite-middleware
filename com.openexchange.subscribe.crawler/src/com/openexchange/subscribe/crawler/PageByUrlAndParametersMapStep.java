@@ -88,7 +88,7 @@ public class PageByUrlAndParametersMapStep extends AbstractStep<HtmlPage, Object
             Object object = webClient.getPage(finalUrl);
             final HtmlPage pageByUrl = (HtmlPage) object;
             output = pageByUrl;
-            LOG.debug("Page : " + pageByUrl.getWebResponse().getContentAsString());
+            LOG.debug("Page : {}", pageByUrl.getWebResponse().getContentAsString());
             //openPageInBrowser(output);
             executedSuccessfully = true;
         } catch (final FailingHttpStatusCodeException e) {

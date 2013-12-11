@@ -144,7 +144,7 @@ public class SendAction extends RTAction  {
         if(!stateManager.isConnected(id)) {
             RealtimeException stateMissingException = RealtimeExceptionCodes.STATE_MISSING.create();
             if(LOG.isDebugEnabled()) {
-                LOG.debug(stateMissingException.getMessage(), stateMissingException);
+                LOG.debug("", stateMissingException);
             }
             Map<String, Object> errorMap = getErrorMap(stateMissingException, session);
             return new AJAXRequestResult(errorMap, "native");
@@ -162,7 +162,7 @@ public class SendAction extends RTAction  {
                     objects.add(array.getJSONObject(i));
                 } catch (JSONException e) {
                     RealtimeException malformedBodyException = RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(e.getMessage());
-                    LOG.error(malformedBodyException.getMessage(), malformedBodyException);
+                    LOG.error("", malformedBodyException);
                     Map<String, Object> errorAndStanzasMap = getErrorAndStanzasMap(malformedBodyException, session, clientState);
                     return new AJAXRequestResult(errorAndStanzasMap, "native");
                 }
@@ -171,11 +171,11 @@ public class SendAction extends RTAction  {
             objects = Arrays.asList((JSONObject) data);
         } else {
             RealtimeException malformedBodyException = RealtimeExceptionCodes.STANZA_BAD_REQUEST.create("Request body must be JSON");
-            LOG.error(malformedBodyException.getMessage(), malformedBodyException);
+            LOG.error("", malformedBodyException);
             Map<String, Object> errorAndStanzasMap = getErrorAndStanzasMap(malformedBodyException, session, clientState);
             return new AJAXRequestResult(errorAndStanzasMap, "native");
         }
-        LOG.debug("Messages arrived in SendAction: " + objects.toString());
+        LOG.debug("Messages arrived in SendAction: {}", objects);
 
 
         //handle incoming messages

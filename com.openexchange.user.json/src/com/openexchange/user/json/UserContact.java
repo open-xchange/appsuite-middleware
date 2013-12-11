@@ -168,7 +168,7 @@ public class UserContact {
     				continue;
     			}
 			}
-            LOG.warn("Unknown field: " + columnID, new Throwable());
+            LOG.warn("Unknown field: {}", columnID, new Throwable());
 			jsonArray.put(JSONObject.NULL);
 		}
 		if (null != attributeParameters && 0 < attributeParameters.size()) {

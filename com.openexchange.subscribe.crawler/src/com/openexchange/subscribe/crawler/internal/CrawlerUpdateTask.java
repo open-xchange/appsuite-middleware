@@ -159,7 +159,7 @@ public class CrawlerUpdateTask implements Runnable {
             CrawlerDescription currentCrawlerDescription = currentCrawlers.get(possibleNewCrawlerDescription.getId());
             // Check each file if it is compatible and of higher priority
             if (possibleNewCrawlerDescription != null) {
-                LOG.info("There is a possible new crawler description : " + ymlFilename);
+                LOG.info("There is a possible new crawler description : {}", ymlFilename);
                 // is it compatible to the installed API?
                 if (possibleNewCrawlerDescription.getCrawlerApiVersion() <= Activator.getCRAWLER_API_VERSION()) {
                     LOG.info("The API version fits");

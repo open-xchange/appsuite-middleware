@@ -103,7 +103,7 @@ public class UnscheduleAllJobsCallable implements Callable<Object>, Serializable
                     }
                     
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Unscheduled " + count + " triggers for " + jobKeys.size() + " jobs for user " + userId + " in context " + contextId + ".");
+                        LOG.debug("Unscheduled {} triggers for {} jobs for user {} in context {}.", count, jobKeys.size(), userId, contextId);
                     }
                 } else {
                     String jobGroup = Tools.generateJobGroup(contextId);
@@ -118,12 +118,12 @@ public class UnscheduleAllJobsCallable implements Callable<Object>, Serializable
                     }
                     
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Unscheduled " + count + " triggers for " + jobKeys.size() + " jobs for user " + userId + " in context " + contextId + ".");
+                        LOG.debug("Unscheduled {} triggers for {} jobs for user {} in context {}.", count, jobKeys.size(), userId, contextId);
                     }
                 }
             }
         } catch (Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
         }
         
         return null;

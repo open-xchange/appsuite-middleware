@@ -139,7 +139,7 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
                     String pageAsString = page.getWebResponse().getContentAsString() + additionalPageString;
                     final String pageString = StringEscapeUtils.unescapeHtml(pageAsString);
                     pageParts.setPage(pageString);
-                    LOG.debug("Page evaluated is : "+pageString);
+                    LOG.debug("Page evaluated is : {}", pageString);
                     final HashMap<String, String> map = pageParts.retrieveInformation();
 
                     final Contact contact = Mappings.translateMapToContact(map);
@@ -151,10 +151,7 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
             } catch (final VersitException e) {
                 exception = e;
             } catch (final ConverterException e) {
-                LOG.error(e.getMessage()
-                    + " for Context : " + workflow.getSubscription().getContext().getContextId()
-                    + ", User : " + workflow.getSubscription().getUserId()
-                    + ", Folder : " + workflow.getSubscription().getFolderId() + ".");
+                LOG.error("{} for Context : {}, User : {}, Folder : {}.", e.getMessage(), workflow.getSubscription().getContext().getContextId(), workflow.getSubscription().getUserId(), workflow.getSubscription().getFolderId());
 
                 exception = e;
             } catch (final IOException e) {

@@ -98,7 +98,7 @@ public class ContactObjectsByPageAndPagePartSequenceStep extends AbstractStep<Co
             try {
                 final String pageString = StringEscapeUtils.unescapeHtml(input.getWebResponse().getContentAsString());
                 pageParts.setPage(pageString);
-                LOG.debug("Page evaluated is : "+pageString);
+                LOG.debug("Page evaluated is : {}", pageString);
                 final Collection<HashMap<String, String>> maps = pageParts.retrieveMultipleInformation();
 
                 for (HashMap<String, String> map : maps){
@@ -108,10 +108,7 @@ public class ContactObjectsByPageAndPagePartSequenceStep extends AbstractStep<Co
                 }
 
             } catch (final ConverterException e) {
-                LOG.error(e.getMessage()
-                    + " for Context : " + workflow.getSubscription().getContext().getContextId()
-                    + ", User : " + workflow.getSubscription().getUserId()
-                    + ", Folder : " + workflow.getSubscription().getFolderId() + ".");
+                LOG.error("{} for Context : {}, User : {}, Folder : {}.", e.getMessage(), workflow.getSubscription().getContext().getContextId(), workflow.getSubscription().getUserId(), workflow.getSubscription().getFolderId());
 
                 exception = e;
             }

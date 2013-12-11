@@ -106,7 +106,7 @@ public class FolderCleanUpEventHandler implements EventHandler {
         try {
             context = contexts.getContext(commonEvent.getContextId());
         } catch (final OXException e) {
-            LOG.error("Could not delete all dependent subscriptions: " + e.getMessage(), e);
+            LOG.error("Could not delete all dependent subscriptions: {}", e.getMessage(), e);
             return;
         }
 
@@ -116,7 +116,7 @@ public class FolderCleanUpEventHandler implements EventHandler {
                 storage.forgetSubscription(subscription);
             }
         } catch (final OXException e) {
-            LOG.error("Could not delete all dependent subscriptions: " + e.getMessage(), e);
+            LOG.error("Could not delete all dependent subscriptions: {}", e.getMessage(), e);
         }
 
 

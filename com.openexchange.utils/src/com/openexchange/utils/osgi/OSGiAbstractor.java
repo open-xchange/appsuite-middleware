@@ -582,7 +582,7 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
         if (shutdownActivated.compareAndSet(false, true)) {
             final Bundle bundle = this.m_context.getBundle();
             final String bundleName = bundle.getSymbolicName();
-            LOG.error("Adding listener for shutting down bundle: " + bundleName);
+            LOG.error("Adding listener for shutting down bundle: {}", bundleName);
             final BundleListener listener = new BundleListener() {
 
                 @Override
@@ -594,7 +594,7 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
                             m_context.getBundle().stop();
                         } catch (final BundleException e) {
                             // Just log...
-                            LOG.error("Error while shutting down \"" + bundleName + "\" bundle: " + e.getMessage(), e);
+                            LOG.error("Error while shutting down \"{}\" bundle: {}", bundleName, e.getMessage(), e);
                         }
                     }
 
@@ -606,7 +606,7 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
                     bundle.stop();
                 } catch (final BundleException e) {
                     // Just log...
-                    LOG.error("Error while shutting down \"" + bundleName + "\" bundle: " + e.getMessage(), e);
+                    LOG.error("Error while shutting down \"{}\" bundle: {}", bundleName, e.getMessage(), e);
                 }
             }
             m_context.addBundleListener(listener);
@@ -716,7 +716,7 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
                                 PropertyHandler.check((ConfigurationService) addedService, propertyInterfaces,
                                     m_context.getBundle().getSymbolicName() + " bundle");
                             } catch (final OXException e) {
-                                LOG.error("Error while checking Properties: " + e.getMessage(), e);
+                                LOG.error("Error while checking Properties: {}", e.getMessage(), e);
                                 shutdownBundle();
                                 return addedService;
                             }
@@ -742,12 +742,12 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
                         registration = m_context.registerService(className, service, dictionary);
                         registeredServiceImplementations++;
                         checkStarted();
-                        LOG.info("Registered " + className + " service.");
+                        LOG.info("Registered {} service.", className);
                     } catch (final OXException e) {
-                        LOG.error("Error while setting required services in \"" + service.getClass().getCanonicalName() + "\": " + e.getMessage(), e);
+                        LOG.error("Error while setting required services in \"{}\": {}", service.getClass().getCanonicalName(), e.getMessage(), e);
                         shutdownBundle();
                     } catch (final RuntimeException e) {
-                        LOG.error("Error while setting required services in \"" + service.getClass().getCanonicalName() + "\": " + e.getMessage(), e);
+                        LOG.error("Error while setting required services in \"{}\": {}", service.getClass().getCanonicalName(), e.getMessage(), e);
                         shutdownBundle();
                     }
                 }
@@ -782,7 +782,7 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
                     lock.unlock();
                 }
                 if (null != unregister) {
-                    LOG.info("Unregistering " + className + " service.");
+                    LOG.info("Unregistering {} service.", className);
                     unregister.unregister();
                 }
                 m_context.ungetService(reference);
@@ -840,7 +840,7 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
                             }
                             return addedService;
                         } catch (final RuntimeException e) {
-                            LOG.error("A runtime exception occurred while addingService: " + e.getMessage(), e);
+                            LOG.error("A runtime exception occurred while addingService: {}", e.getMessage(), e);
                             shutdownBundle();
                             throw e;
                         }
@@ -858,14 +858,14 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
                                 if (entry.getClazz().isInstance(arg1)) {
                                     if (entry.isRequired()) {
                                         final Bundle bundle = m_context.getBundle();
-                                        LOG.error("The required service \"" + entry.getClazz().getName() + "\" was removed from OSGi system, shutting down " + bundle.getSymbolicName());
+                                        LOG.error("The required service \"{}\" was removed from OSGi system, shutting down {}", entry.getClazz().getName(), bundle.getSymbolicName());
                                         shutdownBundle();
                                     }
                                     registry.removeService(entry.getClazz());
                                 }
                             }
                         } catch (final RuntimeException e) {
-                            LOG.error("A runtime exception occurred while removedService: " + e.getMessage(), e);
+                            LOG.error("A runtime exception occurred while removedService: {}", e.getMessage(), e);
                             shutdownBundle();
                             throw e;
                         }

@@ -188,9 +188,9 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
         }
         if (null == sessionControl) {
             if ("unset".equalsIgnoreCase(sessionId)) {
-                LOG.debug("Session not found. ID: " + sessionId);
+                LOG.debug("Session not found. ID: {}", sessionId);
             } else {
-                LOG.info("Session not found. ID: " + sessionId);
+                LOG.info("Session not found. ID: {}", sessionId);
             }
             return null;
         }
@@ -212,7 +212,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
         }
         final SessionControl sessionControl = SessionHandler.getSessionByAlternativeId(altId);
         if (null == sessionControl) {
-            LOG.info("Session not found by alternative identifier. Alternative ID: " + altId);
+            LOG.info("Session not found by alternative identifier. Alternative ID: {}", altId);
             return null;
         }
         return sessionControl.touch().getSession();

@@ -79,7 +79,7 @@ public class SessiondInit implements Initialization {
     @Override
     public void start() throws OXException {
         if (started.get()) {
-            LOG.error(SessiondInit.class.getName() + " started");
+            LOG.error("{} started", SessiondInit.class.getName());
             return;
         }
         if (LOG.isInfoEnabled()) {
@@ -106,7 +106,7 @@ public class SessiondInit implements Initialization {
     @Override
     public void stop() {
         if (!started.get()) {
-            LOG.error(SessiondInit.class.getName() + " has not been started");
+            LOG.error("{} has not been started", SessiondInit.class.getName());
             return;
         }
         final Sessiond s = Sessiond.getInstance(config);

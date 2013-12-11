@@ -201,14 +201,14 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
                 }
             }
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Stanza Gate (" + name + ") : " + stanza.getSequencePrincipal() + ":" + stanza.getSequenceNumber() + ":" + threshold);
+                LOG.debug("Stanza Gate ({}) : {}:{}:{}", name, stanza.getSequencePrincipal(), stanza.getSequenceNumber(), threshold);
             }
             if (stanza.getSequenceNumber() == -1) {
                 threshold.set(-1);
             }
             if (threshold.compareAndSet(stanza.getSequenceNumber(), stanza.getSequenceNumber() + 1)) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Best case, Threshold: " + threshold.get());
+                    LOG.debug("Best case, Threshold: {}", threshold.get());
                 }
                 notifyManagementSequenceNumbers();
                 stanza.trace("Passing gate " + name);
@@ -258,7 +258,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
                 if (threshold.get() > stanza.getSequenceNumber()) {
                     stanza.trace("Discarded as this sequence number has already successfully passed this gate: " + stanza.getSequenceNumber());
                     if(LOG.isDebugEnabled()) {
-                        LOG.debug("Discarded as this sequence number has already successfully passed this gate: " + stanza.getSequenceNumber());
+                        LOG.debug("Discarded as this sequence number has already successfully passed this gate: {}", stanza.getSequenceNumber());
                     }
                     return true;
                 }
@@ -291,7 +291,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
                     if(!alreadyContained) {
                         stanza.trace("Not in sequence, enqueing");
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug("Stanzas not in sequence, Threshold: " + threshold.get() + " SequenceNumber: " + stanza.getSequenceNumber());
+                            LOG.debug("Stanzas not in sequence, Threshold: {} SequenceNumber: {}", threshold.get(), stanza.getSequenceNumber());
                         }
                         inbox.add(new StanzaWithCustomAction(stanza, customAction));
                         notifyManagementInboxes();
@@ -299,15 +299,14 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
                     } else {
                         stanza.trace("Not in sequence but already enqueued, discarding.");
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug("Stanzas not in sequence, Threshold: " + threshold.get() + " SequenceNumber: " + stanza.getSequenceNumber() + " but already buffered, discarding.");
+                            LOG.debug("Stanzas not in sequence, Threshold: {} SequenceNumber: {} but already buffered, discarding.", threshold.get(), stanza.getSequenceNumber());
                         }
                         return true;
                     }
                 } else {
                     stanza.trace("Buffer full, instructing client to reset sequence");
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Instructing client to reset sequence because stanza's not in sequence, but buffer is full. Threshold: "
-                            + threshold.get() + " SequenceNumber: " + stanza.getSequenceNumber());
+                        LOG.debug("Instructing client to reset sequence because stanza's not in sequence, but buffer is full. Threshold: {} SequenceNumber: {}", threshold.get(), stanza.getSequenceNumber());
                     }
                     throw RealtimeExceptionCodes.SEQUENCE_INVALID.create();
                 }

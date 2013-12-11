@@ -203,8 +203,7 @@ public final class ThreadPools {
                 if (null != f) {
                     ret.add(f.get());
                 } else if (LOG.isWarnEnabled()) {
-                    LOG.warn(new StringBuilder(32).append("Completion service's task elapsed time-out of ").append(timeoutMillis).append(
-                        "msec").toString());
+                    LOG.warn("Completion service's task elapsed time-out of {}msec", timeoutMillis);
                 }
             }
             return ret;

@@ -165,7 +165,7 @@ public class RealtimeConfig implements Initialization, ManagementAware<RealtimeC
     @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
-            LOG.error(this.getClass().getName() + " already started");
+            LOG.error("{} already started", this.getClass().getName());
             return;
         }
         init();
@@ -174,7 +174,7 @@ public class RealtimeConfig implements Initialization, ManagementAware<RealtimeC
     @Override
     public void stop() {
         if (!started.compareAndSet(true, false)) {
-            LOG.error(this.getClass().getName() + " cannot be stopped since it has no been started before");
+            LOG.error("{} cannot be stopped since it has no been started before", this.getClass().getName());
             return;
         }
         ConfigurationService configService = RealtimeServiceRegistry.getInstance().getService(ConfigurationService.class);

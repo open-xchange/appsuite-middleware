@@ -270,7 +270,7 @@ public class SolrServlet extends HttpServlet {
                         }
                     }
                 }
-                log.debug("no handler or core retrieved for " + path + ", follow through...");
+                log.debug("no handler or core retrieved for {}, follow through...", path);
             } catch (Throwable ex) {
                 sendError((HttpServletResponse) response, ex);
                 return;
@@ -364,7 +364,7 @@ public class SolrServlet extends HttpServlet {
 
             // non standard codes have undefined results with various servers
             if (code < 100) {
-                log.warn("invalid return code: " + code);
+                log.warn("invalid return code: {}", code);
                 code = 500;
             }
         }

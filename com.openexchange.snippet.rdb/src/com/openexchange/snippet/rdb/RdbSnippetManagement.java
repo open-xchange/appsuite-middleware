@@ -607,11 +607,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 stmt.setLong(++pos, contextId);
                 stmt.setLong(++pos, userId);
                 stmt.setString(++pos, Integer.toString(id));
-                if (LOG.isDebugEnabled()) {
-                    final String query = stmt.toString();
-                    LOG.debug(new com.openexchange.java.StringAllocator(query.length() + 32).append("Trying to perform SQL update query for attributes ").append(
-                        modifiableProperties).append(" :\n").append(query.substring(query.indexOf(':') + 1)).toString());
-                }
+                LOG.debug("Trying to perform SQL update query for attributes {} :\n{}", modifiableProperties, stmt.toString().substring(stmt.toString().indexOf(':') + 1));
                 stmt.executeUpdate();
                 closeSQLStuff(stmt);
                 stmt = null;

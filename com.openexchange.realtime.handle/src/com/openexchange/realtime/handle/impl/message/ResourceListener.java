@@ -92,9 +92,9 @@ public class ResourceListener implements ChangeListener {
     private void retrySendOrRestoreMessage(ID receiver, TimedStanza stanza, int retryCount, OXException exception) {
         if (retryCount == 0) {
             if (exception == null) {
-                LOG.warn("Could not send message to " + receiver.toString() + ". Message was put back to the store.");
+                LOG.warn("Could not send message to {}. Message was put back to the store.", receiver);
             } else {
-                LOG.warn("Could not send message to " + receiver.toString() + ". Message was put back to the store.", exception);
+                LOG.warn("Could not send message to {}. Message was put back to the store.", receiver, exception);
             }
             
             StanzaStorage stanzaStorage = Services.getService(StanzaStorage.class);

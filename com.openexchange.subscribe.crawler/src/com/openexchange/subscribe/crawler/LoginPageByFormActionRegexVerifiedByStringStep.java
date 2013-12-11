@@ -98,7 +98,7 @@ public class LoginPageByFormActionRegexVerifiedByStringStep extends AbstractStep
             for (final HtmlForm form : loginPage.getForms()) {
                 Pattern pattern = Pattern.compile(actionOfLoginForm);
                 Matcher matcher = pattern.matcher(form.getActionAttribute());
-                LOG.info("Forms action attribute / number is : " + form.getActionAttribute() + " / " + numberOfFormCounter + ", should be " + actionOfLoginForm + " / "+numberOfForm);
+                LOG.info("Forms action attribute / number is : {} / {}, should be {} / {}", form.getActionAttribute(), numberOfFormCounter, actionOfLoginForm, numberOfForm);
                 if (matcher.matches() && numberOfForm == numberOfFormCounter && form.getInputsByName(nameOfUserField) != null) {
                     loginForm = form;
                 }
@@ -117,7 +117,7 @@ public class LoginPageByFormActionRegexVerifiedByStringStep extends AbstractStep
                 Pattern pattern = Pattern.compile(stringAvailableAfterLogin);
                 Matcher matcher = pattern.matcher(pageString);
                 if (!matcher.find()) {
-                    LOG.debug("Page that does not have the link to imply a successful login : " + output.getWebResponse().getContentAsString());
+                    LOG.debug("Page that does not have the link to imply a successful login : {}", output.getWebResponse().getContentAsString());
 //                    if (isDebuggingEnabled()){
 //                        openPageInBrowser(output);
 //                    }

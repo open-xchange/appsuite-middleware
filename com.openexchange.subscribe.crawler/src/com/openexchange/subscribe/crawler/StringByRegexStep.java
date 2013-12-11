@@ -82,7 +82,7 @@ public class StringByRegexStep extends AbstractStep<String, Page> {
         if (matcher.find()){
             output = matcher.group(1);
             executedSuccessfully = true;
-            LOG.debug("String found : " + output);
+            LOG.debug("String found : {}", output);
         }
     }
 

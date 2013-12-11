@@ -173,7 +173,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             try {
                 HazelcastStoredSession removedSession = sessions().remove(sessionId);
                 if (null == removedSession) {
-                    LOG.debug("Session with ID '" + sessionId + "' not found, unable to remove from storage.");
+                    LOG.debug("Session with ID '{}' not found, unable to remove from storage.", sessionId);
                 }
             } catch (HazelcastException e) {
                 throw SessionStorageExceptionCodes.REMOVE_FAILED.create(e, sessionId);
@@ -213,7 +213,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                  if (null != removedSession) {
                      removedSessions.add(removedSession);
                  } else {
-                     LOG.debug("Session with ID '" + future.getKey() + "' not found, unable to remove from storage.");
+                     LOG.debug("Session with ID '{}' not found, unable to remove from storage.", future.getKey());
                  }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -250,7 +250,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             try {
                  HazelcastStoredSession removedSession = future.getValue().get();
                  if (null == removedSession) {
-                     LOG.debug("Session with ID '" + future.getKey() + "' not found, unable to remove from storage.");
+                     LOG.debug("Session with ID '{}' not found, unable to remove from storage.", future.getKey());
                  }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -506,9 +506,9 @@ public class HazelcastSessionStorageService implements SessionStorageService {
          * calling containsKey resets map entries idle-time
          */
         if (false == sessions().containsKey(sessionID)) {
-            LOG.debug("Ignoring keep-alive even for not found session ID: " + sessionID);
+            LOG.debug("Ignoring keep-alive even for not found session ID: {}", sessionID);
         } else {
-            LOG.debug("Received keep-alive for '" + sessionID + "'.");
+            LOG.debug("Received keep-alive for '{}'.", sessionID);
         }
     }
 

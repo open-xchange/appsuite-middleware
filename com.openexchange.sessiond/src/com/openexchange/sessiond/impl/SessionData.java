@@ -761,7 +761,7 @@ final class SessionData {
                     control = container.removeSessionById(sessionId);
                     if (null != control) {
                         sessionList.getFirst().putSessionControl(control);
-                        LOG.trace("Moved from container " + i + " to first one.");
+                        LOG.trace("Moved from container {} to first one.", i);
                     }
                 }
             }
@@ -771,7 +771,7 @@ final class SessionData {
                 } else {
                     // Session removed in the meantime
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Was not able to move the session " + sessionId + " into the most up-to-date container since it has already been removed in the meantime");
+                        LOG.debug("Was not able to move the session {} into the most up-to-date container since it has already been removed in the meantime", sessionId);
                     }
                 }
             }
@@ -801,7 +801,7 @@ final class SessionData {
                 sessionList.getFirst().putSessionControl(control);
                 final SessionImpl session = control.getSession();
                 longTermUserGuardian.remove(session.getUserId(), session.getContextId());
-                LOG.trace("Moved from long term container " + i + " to first one.");
+                LOG.trace("Moved from long term container {} to first one.", i);
                 movedSession = true;
             }
             if (!movedSession) {
@@ -955,7 +955,7 @@ final class SessionData {
                 removers.remove(randomToken);
                 removeRandomToken(randomToken);
             } catch (final Throwable t) {
-                LOG.error(t.getMessage(), t);
+                LOG.error("", t);
             }
         }
     }

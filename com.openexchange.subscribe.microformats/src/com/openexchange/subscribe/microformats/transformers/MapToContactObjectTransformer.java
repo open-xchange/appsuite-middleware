@@ -430,11 +430,10 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
             }
         } catch (final java.net.SocketTimeoutException e) {
             final String uri = url.toString();
-            LOG.warn(new StringBuilder(64 + uri.length()).append("Either connecting to or reading from an image's URI timed out: ").append(
-                uri).toString(), e);
+            LOG.warn("Either connecting to or reading from an image's URI timed out: {}", uri, e);
         } catch (final IOException e) {
             final String uri = url.toString();
-            LOG.warn(new StringBuilder(32 + uri.length()).append("Image  URI could not be loaded: ").append(uri).toString(), e);
+            LOG.warn("Image URI could not be loaded: {}", uri, e);
         }
         if (bytes != null) {
             contactContainer.setImage1(bytes);

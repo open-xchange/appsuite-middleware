@@ -88,7 +88,7 @@ public abstract class AbstractSubscriptionServlet extends PermissionServlet {
     }
 
     protected OXException wrapThrowable(final Throwable t) {
-        LOG.error(t.getMessage(), t);
+        LOG.error("", t);
         return SubscriptionJSONErrorMessages.THROWABLE.create(t, t.getMessage());
     }
 

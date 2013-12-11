@@ -103,7 +103,7 @@ public class InfostoreFolderJob implements IndexingJob {
         InfostoreJobInfo info = (InfostoreJobInfo) jobInfo;
         long start = System.currentTimeMillis();
         if (LOG.isDebugEnabled()) {
-            LOG.debug(this.getClass().getSimpleName() + " started performing. " + info.toString());
+            LOG.debug("{} started performing. {}", this.getClass().getSimpleName(), info);
         }
 
         checkJobInfo();
@@ -133,7 +133,7 @@ public class InfostoreFolderJob implements IndexingJob {
 
                 if (LOG.isDebugEnabled()) {
                     long diff = System.currentTimeMillis() - start;
-                    LOG.debug(this.getClass().getSimpleName() + " lasted " + diff + "ms. " + info.toString());
+                    LOG.debug("{} lasted {}ms. {}", this.getClass().getSimpleName(), diff, info);
                 }
             }
         }

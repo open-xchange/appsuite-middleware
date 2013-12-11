@@ -88,7 +88,7 @@ public class PageByFrameNumberStep extends AbstractStep<HtmlPage, HtmlPage> {
         for (FrameWindow frame : input.getFrames()){
             if (index == frameNumber){
                 output = (HtmlPage) frame.getEnclosedPage();
-                LOG.debug("Frame selected : " + frame.getName()+ "\n" + ((HtmlPage) frame.getEnclosedPage()).getWebResponse().getContentAsString());
+                LOG.debug("Frame selected : {}\n{}", frame.getName(), ((HtmlPage) frame.getEnclosedPage()).getWebResponse().getContentAsString());
             }
             index ++;
         }

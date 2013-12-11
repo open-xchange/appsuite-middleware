@@ -548,7 +548,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                     return workQueue.take();
                 } catch (final InterruptedException ignore) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug(ignore.getMessage(), ignore);
+                        LOG.debug("", ignore);
                     }
                 }
                 break;

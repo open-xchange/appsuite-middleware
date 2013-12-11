@@ -255,7 +255,7 @@ public class SyntheticChannel implements Channel, Runnable {
             try {
                 e.tick();
             } catch (OXException e1) {
-                LOG.error(e1.getMessage(), e1);
+                LOG.error("", e1);
             }
         }
     }
@@ -299,7 +299,7 @@ public class SyntheticChannel implements Channel, Runnable {
                      */
                     properties.put("veto", true);
                     if(LOG.isDebugEnabled()) {
-                        LOG.debug("Vetoed disposal of id: " + id);
+                        LOG.debug("Vetoed disposal of id: {}", id);
                     }
                     if(conjure(id)) {
                         ComponentHandle newHandle = handles.get(id);
@@ -308,18 +308,18 @@ public class SyntheticChannel implements Channel, Runnable {
                             messageDispatch.setHandle(newHandle);
                             boolean taken = newRunLoop.offer(messageDispatch);
                             if (!taken) {
-                                LOG.error("Queue refused offered Stanza for id: " + id);
+                                LOG.error("Queue refused offered Stanza for id: {}", id);
                             }
                         }
                         if(LOG.isDebugEnabled()) {
-                            LOG.debug("Migrated MessageDispatchs to new Handle for id: " + id);
+                            LOG.debug("Migrated MessageDispatchs to new Handle for id: {}", id);
                         }
                     } else {
-                        LOG.error("Unable to conjure ID and migrate MessageDispatchs to new handle for id: " + id);
+                        LOG.error("Unable to conjure ID and migrate MessageDispatchs to new handle for id: {}", id);
                     }
                 } else {
                     if(LOG.isDebugEnabled()) {
-                        LOG.debug("No MessageDispatchs to migrate for id: " + id);
+                        LOG.debug("No MessageDispatchs to migrate for id: {}", id);
                     }
                 }
             } finally {

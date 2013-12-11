@@ -147,17 +147,17 @@ public class RssAction implements AJAXActionService {
                         oxe.setCategory(Category.CATEGORY_WARNING);
                         warnings.add(oxe);
                     } catch (final FeedException e) {
-                        LOG.warn("Could not load RSS feed from: " + url, e);
+                        LOG.warn("Could not load RSS feed from: {}", url, e);
                     } catch (final FetcherException e) {
                         final int responseCode = e.getResponseCode();
                         if (responseCode <= 0) {
                             // No response code available
-                            LOG.warn("Could not load RSS feed from: " + url, e);
+                            LOG.warn("Could not load RSS feed from: {}", url, e);
                         }
                         if (NOT_FOUND == responseCode) {
-                            LOG.debug("Resource could not be found: " + url, e);
+                            LOG.debug("Resource could not be found: {}", url, e);
                         } else {
-                            LOG.warn("Could not load RSS feed from: " + url, e);
+                            LOG.warn("Could not load RSS feed from: {}", url, e);
                         }
                     }
                 }

@@ -55,7 +55,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -76,19 +76,19 @@ import com.openexchange.user.UserService;
  * The process is as following:
  * User enters a "loginstring" and password in the UIs
  * The plugins takes the "loginstring" and tries to resolve the ox-username and ox-context.
- * 
+ *
  * Here is how the resolving of context and username works:
- * 
+ *
  *  See code for detailed description!
- * 
- * 
- * 
+ *
+ *
+ *
  * @author Manuel Kraft
  *
  */
 public class ParallelsOXAuthentication implements AuthenticationService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ParallelsOXAuthentication.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ParallelsOXAuthentication.class);
 
     /**
      * Default constructor.
@@ -143,27 +143,27 @@ public class ParallelsOXAuthentication implements AuthenticationService {
 
             /**
              * Resolve context and username via sql query against configdb
-             * 
+             *
              * Contexts are provisioned by Parallels in following:
-             * 
+             *
              * A context has loginmappings containing loginstrings suffixed with "||<ox_username>":
-             * 
-             * 
-             * 
+             *
+             *
+             *
              * Example: test@gmail.com||test
-             * 
+             *
              * So we can make a SQL Query with the loginstring:
-             * 
+             *
              * Select cid,login_info from login2context where login_info like "<loginstringfromgui>||%"
-             * 
+             *
              * As result we get for example "1337" as cid and "test@gmail.com||test" as login_info
              * if we used "test@gmail.com" as loginstring in the OX ui.
-             * 
+             *
              * Now we have the cid for the groupware and we have to split up the "login_info" at the "||"
              * to get the actual username , which would be "test".
-             * 
+             *
              * Now we have all 2 infos to load the user from the system to authenticate the database
-             * 
+             *
              */
 
 

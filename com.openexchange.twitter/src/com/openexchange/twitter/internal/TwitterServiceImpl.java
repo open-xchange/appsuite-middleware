@@ -173,7 +173,7 @@ public final class TwitterServiceImpl implements TwitterService {
                 /*
                  * PIN could not be crawled
                  */
-                LOG.warn("PIN could no be read from authorization URL: " + requestToken.getAuthenticationURL());
+                LOG.warn("PIN could no be read from authorization URL: {}", requestToken.getAuthenticationURL());
                 return new TwitterAccessTokenImpl(twitter.getOAuthAccessToken(requestToken));
             }
             /*
@@ -230,8 +230,7 @@ public final class TwitterServiceImpl implements TwitterService {
                 for (int i = 0; null == loginForm && i < size; i++) {
                     final HtmlForm form = iter.next();
                     if (DEBUG) {
-                        LOG.debug(new StringBuilder(128).append("Forms action attribute / index is : ").append(form.getActionAttribute()).append(
-                            " / ").append(i).append(", should be ").append(actionOfLoginForm).append(" / ").append(formIndex).toString());
+                        LOG.debug("Forms action attribute / index is : {} / {}, should be {} / {}", form.getActionAttribute(), i, actionOfLoginForm, formIndex);
                     }
                     if (formIndex == i) {
                         if ((actionOfLoginForm.equals(form.getActionAttribute()) || idOfLoginForm.equals(form.getId())) && form.getInputsByName(nameOfUserField) != null) {
@@ -266,7 +265,7 @@ public final class TwitterServiceImpl implements TwitterService {
                      */
                     pin = matcher.group(1);
                 } else {
-                    LOG.warn("PIN not found in page content:\n" + pageWithPinString);
+                    LOG.warn("PIN not found in page content:\n{}", pageWithPinString);
                 }
             }
             /*

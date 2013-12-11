@@ -76,9 +76,9 @@ public class PageByUrlAndParameterStep extends AbstractStep<Page, String> {
     @Override
     public void execute(final WebClient webClient) throws OXException {
         try {
-            LOG.debug("Page to call : " + url + input);
+            LOG.debug("Page to call : {}{}", url, input);
             output = webClient.getPage(url + input);
-            LOG.debug("Page : " + output.getWebResponse().getContentAsString());
+            LOG.debug("Page : {}", output.getWebResponse().getContentAsString());
             // openPageInBrowser(output);
             executedSuccessfully = true;
         } catch (final FailingHttpStatusCodeException e) {

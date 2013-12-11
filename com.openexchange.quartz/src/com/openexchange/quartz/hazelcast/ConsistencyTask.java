@@ -145,7 +145,7 @@ public final class ConsistencyTask extends TimerTask {
         } finally {
             if (LOG.isDebugEnabled()) {
                 long diff = System.currentTimeMillis() - start;
-                LOG.debug("Restored " + restored + " triggers from job store in " + diff + "ms.");
+                LOG.debug("Restored {} triggers from job store in {}ms.", restored, diff);
             }
         }
     }

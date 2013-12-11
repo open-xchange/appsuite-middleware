@@ -121,9 +121,9 @@ public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
             final String coreDirPath = coreConfig.getCoreDirPath();
             final File coreDir = new File(coreDirPath);
             if (coreDir.exists()) {
-                LOG.warn("Core directory " + coreDir.getPath() + " already exists. Checking consistency...");
+                LOG.warn("Core directory {} already exists. Checking consistency...", coreDir.getPath());
                 if (structureIsConsistent(coreConfig, identifier.getModule())) {
-                    LOG.warn("Core directory " + coreDir.getPath() + " seems to be consistent.");
+                    LOG.warn("Core directory {} seems to be consistent.", coreDir.getPath());
                     return true;
                 }
                 /*

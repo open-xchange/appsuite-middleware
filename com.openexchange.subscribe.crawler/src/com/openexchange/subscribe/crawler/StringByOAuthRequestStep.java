@@ -154,7 +154,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
                 paramProps.setProperty("application_name", "Open-Xchange Contact Aggregator");
                 paramProps.setProperty("oauth_token", requestToken);
                 final OAuthMessage response = sendRequest(paramProps, oAuthAccessor.consumer.serviceProvider.userAuthorizationURL);
-                LOG.info("Successfully requested authorization-url: "+response.URL);
+                LOG.info("Successfully requested authorization-url: {}", response.URL);
 
                 // Fill out form / confirm the access otherwise
                 final LoginPageByFormActionRegexStep authorizeStep = new LoginPageByFormActionRegexStep("", response.URL,  username, password, "/uas/oauth/authorize/submit", nameOfUserField, nameOfPasswordField, ".*", 1, "");
@@ -162,8 +162,8 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
                 loginPage = authorizeStep.getLoginPage();
                 final HtmlPage pageWithVerifier = authorizeStep.getOutput();
                 final String pageString2 = pageWithVerifier.getWebResponse().getContentAsString();
-                LOG.debug("Page contains the verifier : " + pageString2.contains("access-code"));
-                LOG.debug("Cookie-Problem : " + pageString2.contains("Please make sure you have cookies"));
+                LOG.debug("Page contains the verifier : {}", pageString2.contains("access-code"));
+                LOG.debug("Cookie-Problem : {}", pageString2.contains("Please make sure you have cookies"));
 
                 // get the verifier
                 final Pattern pattern = Pattern.compile("access-code\">([0-9]*)<");
@@ -174,7 +174,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
                 } else {
                     LOG.error("Verifier not found");
                 }
-                LOG.debug("This is the verifier : " + verifier);
+                LOG.debug("This is the verifier : {}", verifier);
                 //openPageInBrowser(pageWithVerifier);
             } catch (final IOException e) {
                 LOG.error(e.toString());
@@ -212,7 +212,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
                 final String result = response.readBodyAsString();
                 LOG.info("Successfully executed an API-Request");
                 executedSuccessfully = true;
-                LOG.debug("This is the result of the whole operation : " + result);
+                LOG.debug("This is the result of the whole operation : {}", result);
                 output = result;
             } catch (final IOException e) {
                 LOG.error(e.toString());

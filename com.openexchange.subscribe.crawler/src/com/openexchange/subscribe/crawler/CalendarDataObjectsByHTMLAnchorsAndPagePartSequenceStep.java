@@ -92,7 +92,7 @@ public class CalendarDataObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abs
                 HtmlPage page = link.click();
                 final String pageString = StringEscapeUtils.unescapeHtml(page.getWebResponse().getContentAsString());
                 pageParts.setPage(pageString);
-                LOG.debug("Page evaluated is : "+pageString);
+                LOG.debug("Page evaluated is : {}", pageString);
                 final HashMap<String, String> map = pageParts.retrieveInformation();
 
                 final CalendarDataObject oxEvent = Mappings.translateMapToCalendarDataObject(map);

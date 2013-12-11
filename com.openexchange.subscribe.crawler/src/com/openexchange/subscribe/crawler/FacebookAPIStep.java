@@ -232,7 +232,7 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
                     try {
                         OXContainerConverter.loadImageFromURL(contact, user.getPic().getValue());
                     } catch (final ConverterException e) {
-                        LOG.error("No valid picture could be found at this URL : " + user.getPic().getValue());
+                        LOG.error("No valid picture could be found at this URL : {}", user.getPic().getValue());
                     }
                 }
                 contactObjects.add(contact);

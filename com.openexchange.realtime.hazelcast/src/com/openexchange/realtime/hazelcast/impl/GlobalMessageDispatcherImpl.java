@@ -180,7 +180,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
         List<FutureTask<Map<ID, OXException>>> futures = new ArrayList<FutureTask<Map<ID, OXException>>>();
         for (Member receiver : targets.keySet()) {
             Set<ID> ids = targets.get(receiver);
-            LOG.debug("Sending to '" + stanza.getTo() + "' @ " + receiver);
+            LOG.debug("Sending to '{}' @ {}", stanza.getTo(), receiver);
             stanza.trace("Sending to '" + stanza.getTo() + "' @ " + receiver);
             ensureSequence(stanza, receiver);
             FutureTask<Map<ID, OXException>> task = new DistributedTask<Map<ID, OXException>>(new StanzaDispatcher(stanza, ids) , receiver);
@@ -271,12 +271,12 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
                 AtomicLong otherNextNumber = peerMap.putIfAbsent(receiver.getUuid(), nextNumber);
                 nextNumber = (otherNextNumber != null) ? otherNextNumber : nextNumber;
                 if(LOG.isDebugEnabled()) {
-                    LOG.debug("nextNumber for receiver " + receiver.getUuid() + " was null, adding nextNumber: " + nextNumber);
+                    LOG.debug("nextNumber for receiver {} was null, adding nextNumber: {}", receiver.getUuid(), nextNumber);
                 }
             }
             Long ensuredSequence = nextNumber.incrementAndGet() - 1;
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Updating sequence number for " + receiver + ": " + ensuredSequence);
+                LOG.debug("Updating sequence number for {}: {}", receiver, ensuredSequence);
             }
             stanza.setSequenceNumber(ensuredSequence);
             stanza.trace("Updating sequence number for " + receiver + ": " + ensuredSequence);

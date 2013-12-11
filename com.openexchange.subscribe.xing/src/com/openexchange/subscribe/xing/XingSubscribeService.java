@@ -188,7 +188,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
                 if (accountId != null) {
                     subscription.getConfiguration().put("account", accountId.toString());
                 } else {
-                    LOG.error("subscription.getConfiguration().get(\"account\") is null. Complete configuration is : " + subscription.getConfiguration());
+                    LOG.error("subscription.getConfiguration().get(\"account\") is null. Complete configuration is : {}", subscription.getConfiguration());
                 }
             } else {
                 LOG.error("subscription.getConfiguration() is null");

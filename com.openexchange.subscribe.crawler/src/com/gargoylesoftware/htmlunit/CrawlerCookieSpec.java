@@ -73,8 +73,7 @@ public class CrawlerCookieSpec extends CookieSpecBase {
         boolean secure, final Cookie cookie)
         throws MalformedCookieException {
 
-        LOG.trace("enter CrawlerCookieSpec.validate("
-            + "String, port, path, boolean, Cookie)");
+        LOG.trace("enter CrawlerCookieSpec.validate(String, port, path, boolean, Cookie)");
         if (host == null) {
             throw new IllegalArgumentException(
                 "Host of origin may not be null");

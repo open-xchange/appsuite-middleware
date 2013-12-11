@@ -240,7 +240,7 @@ public class AttachmentCopyTask implements CopyUserTaskService {
             }
 
             if (mapping == null) {
-                LOG.warn("Unknown module " + module + " for attachment (" + attachment.getId() + "). Skipping ID exchange!");
+                LOG.warn("Unknown module {} for attachment ({}). Skipping ID exchange!", module, attachment.getId());
                 continue;
             }
 
@@ -263,7 +263,7 @@ public class AttachmentCopyTask implements CopyUserTaskService {
             try {
                 is = srcFileStorage.getFile(attachment.getFileId());
                 if (is == null) {
-                    LOG.warn("Did not find file for attachment " + attachment.getId() + " (" + attachment.getFileId() + ").");
+                    LOG.warn("Did not find file for attachment {} ({}).", attachment.getId(), attachment.getFileId());
                     continue;
                 }
 

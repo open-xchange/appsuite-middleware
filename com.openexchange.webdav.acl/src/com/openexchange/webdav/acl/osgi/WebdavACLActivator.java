@@ -85,7 +85,7 @@ public class WebdavACLActivator extends HousekeepingActivator {
             this.mixin = mixin;
             openTrackers();
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
         }
     }
 

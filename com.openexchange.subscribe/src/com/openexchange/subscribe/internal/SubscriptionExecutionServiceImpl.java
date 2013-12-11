@@ -233,7 +233,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         for (final Subscription subscription : subscriptionsToRefresh) {
             subscription.setSession(session);
             if (!subscription.isEnabled()) {
-                LOG.debug("Skipping subscription " + subscription.getDisplayName() + " because it is disabled");
+                LOG.debug("Skipping subscription {} because it is disabled", subscription.getDisplayName());
             } else {
                 final int subscriptionId = subscription.getId();
                 if (tryLock(subscriptionId, session)) {

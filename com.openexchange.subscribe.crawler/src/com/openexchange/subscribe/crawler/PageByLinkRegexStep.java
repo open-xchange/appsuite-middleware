@@ -101,9 +101,9 @@ public class PageByLinkRegexStep extends AbstractStep<HtmlPage, HtmlPage>{
             if (output != null) {
                 executedSuccessfully = true;
             } else {
-                LOG.error("The expected link was not on this page. Expectation was something matching this: "+ linkRegex);
+                LOG.error("The expected link was not on this page. Expectation was something matching this: {}", linkRegex);
                 for (final HtmlAnchor link : input.getAnchors()) {
-                    LOG.debug("Available Link : " + link.getHrefAttribute());
+                    LOG.debug("Available Link : {}", link.getHrefAttribute());
                 }
             }
 

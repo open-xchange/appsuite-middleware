@@ -88,9 +88,9 @@ public class PageByUrlStep extends AbstractStep<HtmlPage, Object> {
             Object object = webClient.getPage(url);
             final HtmlPage pageByUrl = (HtmlPage) object;
             output = pageByUrl;
-            LOG.debug("Page : " + pageByUrl.getWebResponse().getContentAsString());
+            LOG.debug("Page : {}", pageByUrl.getWebResponse().getContentAsString());
             if (debuggingEnabled){
-                LOG.info("Page : " + pageByUrl.getWebResponse().getContentAsString());
+                LOG.info("Page : {}", pageByUrl.getWebResponse().getContentAsString());
                 openPageInBrowser(output);
             }
             executedSuccessfully = true;

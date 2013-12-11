@@ -294,21 +294,21 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
             }
         } catch (final MalformedURLException e) {
             LOG.error(e.toString());
-            LOG.error("User with id=" + workflow.getSubscription().getUserId() + " and context=" + workflow.getSubscription().getContext() + " failed to subscribe source=" + workflow.getSubscription().getSource().getDisplayName() + " with display_name=" + workflow.getSubscription().getDisplayName());
+            LOG.error("User with id={} and context={} failed to subscribe source={} with display_name={}", workflow.getSubscription().getUserId(), workflow.getSubscription().getContext(), workflow.getSubscription().getSource().getDisplayName(), workflow.getSubscription().getDisplayName());
             throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
         } catch (final IOException e) {
             LOG.error(e.toString());
-            LOG.error("User with id=" + workflow.getSubscription().getUserId() + " and context=" + workflow.getSubscription().getContext() + " failed to subscribe source=" + workflow.getSubscription().getSource().getDisplayName() + " with display_name=" + workflow.getSubscription().getDisplayName());
+            LOG.error("User with id={} and context={} failed to subscribe source={} with display_name={}", workflow.getSubscription().getUserId(), workflow.getSubscription().getContext(), workflow.getSubscription().getSource().getDisplayName(), workflow.getSubscription().getDisplayName());
             throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
         } catch (final InvalidCredentialsException e) {
-            LOG.error("User with id=" + workflow.getSubscription().getUserId() + " and context=" + workflow.getSubscription().getContext() + " failed to subscribe source=" + workflow.getSubscription().getSource().getDisplayName() + " with display_name=" + workflow.getSubscription().getDisplayName());
+            LOG.error("User with id={} and context={} failed to subscribe source={} with display_name={}", workflow.getSubscription().getUserId(), workflow.getSubscription().getContext(), workflow.getSubscription().getSource().getDisplayName(), workflow.getSubscription().getDisplayName());
             throw SubscriptionErrorMessage.INVALID_LOGIN.create();
         } catch (final AuthenticationException e) {
-            LOG.error("User with id=" + workflow.getSubscription().getUserId() + " and context=" + workflow.getSubscription().getContext() + " failed to subscribe source=" + workflow.getSubscription().getSource().getDisplayName() + " with display_name=" + workflow.getSubscription().getDisplayName());
+            LOG.error("User with id={} and context={} failed to subscribe source={} with display_name={}", workflow.getSubscription().getUserId(), workflow.getSubscription().getContext(), workflow.getSubscription().getSource().getDisplayName(), workflow.getSubscription().getDisplayName());
             throw SubscriptionErrorMessage.INVALID_LOGIN.create();
         } catch (final ServiceException e) {
             LOG.error("", e);
-            LOG.error("User with id=" + workflow.getSubscription().getUserId() + " and context=" + workflow.getSubscription().getContext() + " failed to subscribe source=" + workflow.getSubscription().getSource().getDisplayName() + " with display_name=" + workflow.getSubscription().getDisplayName());
+            LOG.error("User with id={} and context={} failed to subscribe source={} with display_name={}", workflow.getSubscription().getUserId(), workflow.getSubscription().getContext(), workflow.getSubscription().getSource().getDisplayName(), workflow.getSubscription().getDisplayName());
             throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
         }
 

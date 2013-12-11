@@ -101,9 +101,9 @@ public class ScheduleJobCallable implements Callable<Object>, Serializable {
         if (LOG.isDebugEnabled()) {
             if (LOG.isTraceEnabled()) {
                 Exception exception = new Exception();
-                LOG.trace("Scheduling job: " + jobInfo.toString() + ".", exception);
+                LOG.trace("Scheduling job: {}.", jobInfo, exception);
             } else {
-                LOG.debug("Scheduling job: " + jobInfo.toString() + ".");
+                LOG.debug("Scheduling job: {}.", jobInfo);
             }
         }
 
@@ -153,13 +153,13 @@ public class ScheduleJobCallable implements Callable<Object>, Serializable {
                 scheduler.scheduleJob(trigger);
             } catch (SchedulerException e) {
                 if (e instanceof ObjectAlreadyExistsException) {
-                    LOG.info("Could not schedule trigger " + trigger.getKey() + ". It already exists.");
+                    LOG.info("Could not schedule trigger {}. It already exists.", trigger.getKey());
                 } else {
                     throw e;
                 }
             }
         } catch (Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
         }
         return null;
     }

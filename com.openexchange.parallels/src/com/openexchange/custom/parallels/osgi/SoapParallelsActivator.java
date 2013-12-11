@@ -2,11 +2,11 @@
 package com.openexchange.custom.parallels.osgi;
 
 import java.rmi.Remote;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import com.openexchange.admin.rmi.OXLoginInterface;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.config.ConfigurationService;
@@ -25,7 +25,7 @@ import com.openexchange.user.UserService;
 
 public class SoapParallelsActivator extends HousekeepingActivator {
 
-    private static transient final Log LOG = com.openexchange.log.Log.loggerFor(SoapParallelsActivator.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SoapParallelsActivator.class);
 
     public SoapParallelsActivator() {
         super();
@@ -83,7 +83,7 @@ public class SoapParallelsActivator extends HousekeepingActivator {
             getFromConfig(ParallelsOptions.PROPERTY_OPENAPI_SERVLET)));
         final BundleContext context = this.context;
         final ServiceTrackerCustomizer<Remote, Remote> trackerCustomizer = new ServiceTrackerCustomizer<Remote, Remote>() {
-            
+
             @Override
             public void removedService(final ServiceReference<Remote> reference, final Remote service) {
                 if (null != service) {
@@ -91,12 +91,12 @@ public class SoapParallelsActivator extends HousekeepingActivator {
                     context.ungetService(reference);
                 }
             }
-            
+
             @Override
             public void modifiedService(final ServiceReference<Remote> reference, final Remote service) {
                 // Ignore
             }
-            
+
             @Override
             public Remote addingService(final ServiceReference<Remote> reference) {
                 final Remote service = context.getService(reference);

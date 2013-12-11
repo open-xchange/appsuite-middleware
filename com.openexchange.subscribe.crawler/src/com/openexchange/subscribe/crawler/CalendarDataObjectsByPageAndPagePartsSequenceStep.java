@@ -88,7 +88,7 @@ public class CalendarDataObjectsByPageAndPagePartsSequenceStep extends AbstractS
 
         final String pageString = StringEscapeUtils.unescapeHtml(input.getWebResponse().getContentAsString());
         pageParts.setPage(pageString);
-        LOG.debug("Page evaluated is : "+pageString);
+        LOG.debug("Page evaluated is : {}", pageString);
         final Collection<HashMap<String, String>> maps = pageParts.retrieveMultipleInformation();
 
         for (HashMap<String, String> map : maps){

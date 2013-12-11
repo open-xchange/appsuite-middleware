@@ -91,7 +91,7 @@ public class ContactObjectsByStringAndPagePartSequenceStep extends AbstractStep<
     public void execute(WebClient webClient) throws OXException {
         final List<Contact> contactObjects = new ArrayList<Contact>();
             try {
-                LOG.debug("Page evaluated is : "+input);
+                LOG.debug("Page evaluated is : {}", input);
                 pageParts.setPage(input);
                 final Collection<HashMap<String, String>> maps = pageParts.retrieveMultipleInformationConstrainedByLimit();
 
@@ -102,10 +102,7 @@ public class ContactObjectsByStringAndPagePartSequenceStep extends AbstractStep<
                 }
 
             } catch (final ConverterException e) {
-                LOG.error(e.getMessage()
-                    + " for Context : " + workflow.getSubscription().getContext().getContextId()
-                    + ", User : " + workflow.getSubscription().getUserId()
-                    + ", Folder : " + workflow.getSubscription().getFolderId() + ".");
+                LOG.error("{} for Context : {}, User : {}, Folder : {}.", e.getMessage(), workflow.getSubscription().getContext().getContextId(), workflow.getSubscription().getUserId(), workflow.getSubscription().getFolderId());
 
                 exception = e;
             }

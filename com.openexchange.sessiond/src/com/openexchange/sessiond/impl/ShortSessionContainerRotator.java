@@ -68,7 +68,7 @@ public class ShortSessionContainerRotator implements Runnable {
         try {
             SessionHandler.cleanUp();
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
         }
     }
 }

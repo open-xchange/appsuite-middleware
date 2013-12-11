@@ -83,7 +83,7 @@ public final class CloudmarkSpamHandlerActivator extends HousekeepingActivator {
 	@Override
 	protected void handleUnavailability(final Class<?> clazz) {
 		if (LOG.isWarnEnabled()) {
-			LOG.warn("Absent service: " + clazz.getName());
+			LOG.warn("Absent service: {}", clazz.getName());
 		}
 		getServiceRegistry().removeService(clazz);
 	}
@@ -91,7 +91,7 @@ public final class CloudmarkSpamHandlerActivator extends HousekeepingActivator {
 	@Override
 	protected void handleAvailability(final Class<?> clazz) {
 		if (LOG.isInfoEnabled()) {
-			LOG.info("Re-available service: " + clazz.getName());
+			LOG.info("Re-available service: {}", clazz.getName());
 		}
 		getServiceRegistry().addService(clazz, getService(clazz));
 	}
@@ -125,7 +125,7 @@ public final class CloudmarkSpamHandlerActivator extends HousekeepingActivator {
 	        dictionary.put("name", CloudmarkSpamHandler.getInstance().getSpamHandlerName());
 	        registerService(SpamHandler.class, CloudmarkSpamHandler.getInstance(), dictionary);
 		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
+			LOG.error("", t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}
 
@@ -142,7 +142,7 @@ public final class CloudmarkSpamHandlerActivator extends HousekeepingActivator {
 			cleanUp();
 			getServiceRegistry().clearRegistry();
 		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
+			LOG.error("", t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		} finally {
 			started.set(false);

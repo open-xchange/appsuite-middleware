@@ -76,7 +76,6 @@ import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
@@ -222,10 +221,7 @@ public final class SessionHandler {
                 LOG.error("", e);
             }
         }
-        if (INFO) {
-            LOG.info(new StringAllocator(64).append(null != storageService ? "Remote" : "Local")
-                .append(" removal of user sessions: User=").append(userId).append(", Context=").append(contextId).toString());
-        }
+        LOG.info("{} removal of user sessions: User={}, Context={}", (null != storageService ? "Remote" : "Local"), userId, contextId);
         return merge(retval, retval2);
     }
 
@@ -246,7 +242,7 @@ public final class SessionHandler {
                 } catch (final OXException e) {
                     if (2 == e.getCode() && "CTX".equals(e.getPrefix())) { // See com.openexchange.groupware.contexts.impl.ContextExceptionCodes.NOT_FOUND
                         if (INFO) {
-                            LOG.info(new StringAllocator(64).append("No such context ").append(contextId).toString());
+                            LOG.info("No such context {}", contextId);
                         }
                         return;
                     }
@@ -285,8 +281,7 @@ public final class SessionHandler {
             }
         }
         if (INFO) {
-            LOG.info(new StringAllocator(64).append(null != storageService ? "Remote" : "Local")
-                .append(" removal of sessions: Context=").append(contextId).toString());
+            LOG.info("{} removal of sessions: Context={}", (null != storageService ? "Remote" : "Local"), contextId);
         }
     }
 
@@ -537,7 +532,7 @@ public final class SessionHandler {
                 // afterExecute itself in which case we don't
                 // want to call it again.
                 final OXException oxe = (ex instanceof OXException ? (OXException) ex : SessionExceptionCodes.SESSIOND_EXCEPTION.create(ex, ex.getMessage()));
-                LOG.warn(oxe.getMessage(), oxe);
+                LOG.warn("", oxe);
             }
         }
     }
@@ -674,7 +669,7 @@ public final class SessionHandler {
         }
         final SessionControl sessionControl = sessionData.clearSession(sessionid);
         if (null == sessionControl) {
-            LOG.debug("Cannot find session for given identifier to remove session <" + sessionid + '>');
+            LOG.debug("Cannot find session for given identifier to remove session <{}{}", sessionid, '>');
             return false;
         }
         postSessionRemoval(sessionControl.getSession());
@@ -695,7 +690,7 @@ public final class SessionHandler {
             return;
         }
         if (DEBUG) {
-            LOG.debug(new StringBuilder("changeSessionPassword <").append(sessionid).append('>').toString());
+            LOG.debug("changeSessionPassword <{}{}", sessionid, '>');
         }
         final SessionControl sessionControl = sessionData.getSession(sessionid);
         if (null == sessionControl) {
@@ -879,7 +874,7 @@ public final class SessionHandler {
             final Session session = sessionControl.getSession();
             final String oldIP = session.getLocalIp();
             if (!newIP.equals(oldIP)) {
-                LOG.info("Changing IP of session " + session.getSessionID() + " with authID: " + session.getAuthId() + " from " + oldIP + " to " + newIP + '.');
+                LOG.info("Changing IP of session {} with authID: {} from {} to {}{}", session.getSessionID(), session.getAuthId(), oldIP, newIP, '.');
                 session.setLocalIp(newIP);
             }
         }
@@ -921,7 +916,7 @@ public final class SessionHandler {
      */
     protected static SessionControl getSession(final String sessionId, final boolean considerSessionStorage) {
         if (DEBUG) {
-            LOG.debug(new StringBuilder("getSession <").append(sessionId).append('>').toString());
+            LOG.debug("getSession <{}{}", sessionId, '>');
         }
         final SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
@@ -977,7 +972,7 @@ public final class SessionHandler {
      */
     protected static SessionControl getSessionByAlternativeId(final String altId) {
         if (DEBUG) {
-            LOG.debug(new StringBuilder("getSessionByAlternativeId <").append(altId).append('>').toString());
+            LOG.debug("getSessionByAlternativeId <{}{}", altId, '>');
         }
         final SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
@@ -1018,7 +1013,7 @@ public final class SessionHandler {
      */
     public static SessionControl getCachedSession(final String sessionId) {
         if (DEBUG) {
-            LOG.debug(new StringBuilder("getCachedSession <").append(sessionId).append('>').toString());
+            LOG.debug("getCachedSession <{}{}", sessionId, '>');
         }
         final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
         if (storageService != null) {
@@ -1093,7 +1088,7 @@ public final class SessionHandler {
             if (LOG.isInfoEnabled()) {
                 final String message = "Session is moved to long life time container. All temporary session data will be cleaned up. ID: ";
                 for (final SessionControl sessionControl : controls) {
-                    LOG.info(message + sessionControl.getSession().getSessionID());
+                    LOG.info("{}{}", message, sessionControl.getSession().getSessionID());
                 }
             }
             postSessionDataRemoval(controls);
@@ -1101,7 +1096,7 @@ public final class SessionHandler {
             if (LOG.isInfoEnabled()) {
                 final String message = "Session timed out. ID: ";
                 for (final SessionControl sessionControl : controls) {
-                    LOG.info(message + sessionControl.getSession().getSessionID());
+                    LOG.info("{}{}", message, sessionControl.getSession().getSessionID());
                 }
             }
             postContainerRemoval(controls, true);
@@ -1117,7 +1112,7 @@ public final class SessionHandler {
         final List<SessionControl> controls = sessionData.rotateLongTerm();
         for (final SessionControl control : controls) {
             if (INFO) {
-                LOG.info("Session timed out. ID: " + control.getSession().getSessionID());
+                LOG.info("Session timed out. ID: {}", control.getSession().getSessionID());
             }
         }
         postContainerRemoval(controls, true);
@@ -1210,15 +1205,15 @@ public final class SessionHandler {
                             sessionStorageService.removeSession(session.getSessionID());
                         } catch (final OXException e) {
                             if (DEBUG) {
-                                LOG.warn("Session could not be removed from session storage: " + session.getSessionID(), e);
+                                LOG.warn("Session could not be removed from session storage: {}", session.getSessionID(), e);
                             } else {
-                                LOG.warn("Session could not be removed from session storage: " + session.getSessionID());
+                                LOG.warn("Session could not be removed from session storage: {}", session.getSessionID());
                             }
                         } catch (final RuntimeException e) {
                             if (DEBUG) {
-                                LOG.warn("Session could not be removed from session storage: " + session.getSessionID(), e);
+                                LOG.warn("Session could not be removed from session storage: {}", session.getSessionID(), e);
                             } else {
-                                LOG.warn("Session could not be removed from session storage: " + session.getSessionID());
+                                LOG.warn("Session could not be removed from session storage: {}", session.getSessionID());
                             }
                         }
                         return null;
@@ -1483,12 +1478,12 @@ public final class SessionHandler {
             try {
                 if (addIfAbsent) {
                     if (sessionStorageService.addSessionIfAbsent(obfuscator.wrap(session))) {
-                        LOG.info("Put session " + session.getSessionID() + " with auth Id " + session.getAuthId() + " into session storage.");
+                        LOG.info("Put session {} with auth Id {} into session storage.", session.getSessionID(), session.getAuthId());
                         postSessionStored(session);
                     }
                 } else {
                     sessionStorageService.addSession(obfuscator.wrap(session));
-                    LOG.info("Put session " + session.getSessionID() + " with auth Id " + session.getAuthId() + " into session storage.");
+                    LOG.info("Put session {} with auth Id {} into session storage.", session.getSessionID(), session.getAuthId());
                     postSessionStored(session);
                 }
             } catch (final Exception e) {
@@ -1572,7 +1567,7 @@ public final class SessionHandler {
             }
             throw new IllegalStateException("Not unchecked", t);
         } catch (final TimeoutException e) {
-            LOG.warn("Session " + sessionId + " could not be retrieved from session storage within " + tout + "msec.");
+            LOG.warn("Session {} could not be retrieved from session storage within {}msec.", sessionId, tout);
             return null;
         } catch (final CancellationException e) {
             return null;

@@ -277,7 +277,7 @@ public class WebdavPrincipalPerformer implements SessionHolder{
 
             session.set(sess);
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Executing " + action);
+                LOG.debug("Executing {}", action);
             }
             actions.get(action).perform(webdavRequest, webdavResponse);
         } catch (final WebdavProtocolException x) {

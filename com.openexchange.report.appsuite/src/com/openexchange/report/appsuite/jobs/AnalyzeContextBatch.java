@@ -138,7 +138,7 @@ public class AnalyzeContextBatch implements Runnable, Serializable {
                     Orchestration.getInstance().done(contextReport);
                 } catch (Throwable t) {
                     Orchestration.getInstance().abort(uuid, reportType, ctxId);
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
 
             }
@@ -149,7 +149,7 @@ public class AnalyzeContextBatch implements Runnable, Serializable {
             for (Integer ctxId: contextIds) {
                 Orchestration.getInstance().abort(uuid, reportType, ctxId);
             }
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
         }
         
     }

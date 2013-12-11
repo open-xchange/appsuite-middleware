@@ -194,7 +194,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
             consistencyTimer = new Timer(true);
             consistencyTimer.schedule(new ConsistencyTask(this, locallyAcquiredTriggers, locallyExecutingTriggers), new Date(System.currentTimeMillis() + 60000L * 5), 60000L * 5);
         } catch (IllegalStateException e) {
-            LOG.warn("Could not schedule consistency task: " + e.getMessage(), e);
+            LOG.warn("Could not schedule consistency task: {}", e.getMessage(), e);
         }
     }
 
@@ -224,7 +224,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
             consistencyTimer = new Timer(true);
             consistencyTimer.schedule(new ConsistencyTask(this, locallyAcquiredTriggers, locallyExecutingTriggers), new Date(System.currentTimeMillis() + 60000L * 5), 60000L * 5);
         } catch (IllegalStateException e) {
-            LOG.warn("Could not schedule consistency task: " + e.getMessage(), e);
+            LOG.warn("Could not schedule consistency task: {}", e.getMessage(), e);
         }
     }
 
@@ -787,7 +787,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
             for (TriggerStateWrapper stateWrapper : triggers) {
                 if (stateWrapper.getTrigger().getNextFireTime() == null || stateWrapper.getState() == TriggerStateWrapper.STATE_COMPLETE) {
                     if (LOG.isTraceEnabled()) {
-                        LOG.trace("Removing trigger " + stateWrapper.getTrigger().getKey().getName());
+                        LOG.trace("Removing trigger {}", stateWrapper.getTrigger().getKey().getName());
                     }
                     
                     removeTrigger(stateWrapper.getTrigger().getKey());
@@ -876,7 +876,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
     public void releaseAcquiredTrigger(OperableTrigger trigger) throws JobPersistenceException {
         lock.lock();
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Got lock. " + System.nanoTime());
+            LOG.trace("Got lock. {}", System.nanoTime());
         }
 
         try {
@@ -907,7 +907,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
         List<TriggerFiredResult> results = new ArrayList<TriggerFiredResult>();
         lock.lock();
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Got lock. " + System.nanoTime());
+            LOG.trace("Got lock. {}", System.nanoTime());
         }
 
         try {
@@ -995,7 +995,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
     public void triggeredJobComplete(OperableTrigger trigger, JobDetail jobDetail, CompletedExecutionInstruction triggerInstCode) throws JobPersistenceException {
         lock.lock();
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Got lock. " + System.nanoTime());
+            LOG.trace("Got lock. {}", System.nanoTime());
         }
 
         try {
@@ -1170,7 +1170,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
         }
 
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Applied misfire on trigger: " + stateWrapper.getTrigger().getKey().getName());
+            LOG.trace("Applied misfire on trigger: {}", stateWrapper.getTrigger().getKey().getName());
         }
         return true;
     }
