@@ -148,9 +148,7 @@ public abstract class AbstractMailJob implements IndexingJob {
                             attachments.addAll(handler.getAttachments());
                         } catch (Throwable t) {
                             ExceptionUtils.handleThrowable(t);
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Attachments will be skipped for mail {}.\nCause: {}\n{}", message.getMailId(), t.getMessage(), info);
-                            }
+                            LOG.debug("Attachments will be skipped for mail {}.\nCause: {}\n{}", message.getMailId(), t.getMessage(), info);
                         }
                     }
                 }

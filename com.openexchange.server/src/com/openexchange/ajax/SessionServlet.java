@@ -521,14 +521,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 }
             }
             if (LOG.isDebugEnabled() && !isWhitelistedFromIPCheck(actual, ranges) && !isWhitelistedClient(session, whitelist)) {
-                final StringBuilder sb = new StringBuilder(64);
-                sb.append("Session ");
-                sb.append(session.getSessionID());
-                sb.append(" requests now from ");
-                sb.append(actual);
-                sb.append(" but login came from ");
-                sb.append(session.getLocalIp());
-                LOG.debug(sb.toString());
+                LOG.debug("Session {} requests now from {} but login came from {}", session.getSessionID(), actual, session.getLocalIp());
             }
         }
     }

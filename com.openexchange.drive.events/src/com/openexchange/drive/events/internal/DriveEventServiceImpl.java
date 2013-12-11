@@ -172,9 +172,7 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
             LOG.trace(FileStorageEventHelper.createDebugMessage("event", event));
         }
         if (false == check(event)) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Unable to handle incomplete event: {}", event);
-            }
+            LOG.debug("Unable to handle incomplete event: {}", event);
             return;
         }
         /*
@@ -213,14 +211,14 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
 
     @Override
     public void registerPublisher(DriveEventPublisher publisher) {
-        if (publishers.add(publisher) && LOG.isDebugEnabled()) {
+        if (publishers.add(publisher)) {
             LOG.debug("Added drive event publisher: {}", publisher);
         }
     }
 
     @Override
     public void unregisterPublisher(DriveEventPublisher publisher) {
-        if (publishers.remove(publisher) && LOG.isDebugEnabled()) {
+        if (publishers.remove(publisher)) {
             LOG.debug("Removed drive event publisher: {}", publisher);
         }
     }

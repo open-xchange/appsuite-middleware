@@ -81,7 +81,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * The {@link QueryAction} delivers a message, waits for a result and sends the result back to the client along with the acks and Stanzas
  * addressed to the client.
- * 
+ *
  *     <li> Query action examples:
  *       <ol>
  *         <li> Join a room via PUT
@@ -145,9 +145,7 @@ public class QueryAction extends RTAction {
 
         if(!stateManager.isConnected(id)) {
             RealtimeException stateMissingException = RealtimeExceptionCodes.STATE_MISSING.create();
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("", stateMissingException);
-            }
+            LOG.debug("", stateMissingException);
             Map<String, Object> errorMap = getErrorMap(stateMissingException, session);
             return new AJAXRequestResult(errorMap, "native");
         }
@@ -182,9 +180,7 @@ public class QueryAction extends RTAction {
 
                 @Override
                 public void handle(final Stanza stanza, ID recipient) {
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("Handling stanza: {}", stanza);
-                    }
+                    LOG.debug("Handling stanza: {}", stanza);
                     try {
                         customActionResults.put("answer", services.getService(MessageDispatcher.class).sendSynchronously(stanza, request.isSet("timeout") ? request.getIntParameter("timeout") : TIMEOUT, TimeUnit.SECONDS));
                     } catch (OXException e) {
@@ -201,9 +197,7 @@ public class QueryAction extends RTAction {
                     } finally {
                         sendLock.unlock();
                     }
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("Done handling Stanza");
-                    }
+                    LOG.debug("Done handling Stanza");
                 }
 
             })) {
@@ -243,7 +237,7 @@ public class QueryAction extends RTAction {
             sendLock.unlock();
         }
 
-        //Add the result Object to the response data 
+        //Add the result Object to the response data
         Object answer = customActionResults.get("answer");
         if (answer == null || !Stanza.class.isInstance(answer)) {
             RealtimeException noResponseException = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create("Request didn't yield any response.");
@@ -260,9 +254,7 @@ public class QueryAction extends RTAction {
         //additionally check for Stanzas that are addressed to the client and add them to the response
         List<JSONObject> stanzas = pollStanzas(stateEntry.state);
         queryActionResults.put(STANZAS, stanzas);
-        if(LOG.isDebugEnabled()) {
-            LOG.debug(RTResultFormatter.format(queryActionResults));
-        }
+        LOG.debug("{}", new Object() { @Override public String toString() { return RTResultFormatter.format(queryActionResults);}});
         return new AJAXRequestResult(queryActionResults, "native");
     }
 

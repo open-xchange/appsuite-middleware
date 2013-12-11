@@ -49,7 +49,6 @@
 
 package com.openexchange.drive.events.apn.internal;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import javapns.Push;
@@ -117,9 +116,7 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
         if (null != notifications && 0 < notifications.size()) {
             for (PushedNotification notification : notifications) {
                 if (notification.isSuccessful()) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(notification.toString());
-                    }
+                    LOG.debug("{}", notification);
                 } else {
                     LOG.warn("Unsuccessful push notification: {}", notification);
                     if (null != notification.getResponse()) {

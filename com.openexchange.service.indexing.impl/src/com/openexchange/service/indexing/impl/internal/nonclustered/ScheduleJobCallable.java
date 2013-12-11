@@ -71,7 +71,7 @@ import com.openexchange.service.indexing.impl.internal.Tools;
 
 /**
  * {@link ScheduleJobCallable}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ScheduleJobCallable implements Callable<Object>, Serializable {
@@ -98,14 +98,7 @@ public class ScheduleJobCallable implements Callable<Object>, Serializable {
 
     @Override
     public Object call() throws Exception {
-        if (LOG.isDebugEnabled()) {
-            if (LOG.isTraceEnabled()) {
-                Exception exception = new Exception();
-                LOG.trace("Scheduling job: {}.", jobInfo, exception);
-            } else {
-                LOG.debug("Scheduling job: {}.", jobInfo);
-            }
-        }
+        LOG.debug("Scheduling job: {}.", jobInfo);
 
         try {
             JobDataMap jobData = new JobDataMap();

@@ -1231,20 +1231,21 @@ final class ListLsubCollection {
              * Dispatch remaining untagged responses
              */
             protocol.notifyResponseHandlers(r);
-            /*
-             * Debug logs
-             */
-            if (LOG.isDebugEnabled()) {
-                final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>();
-                tm.putAll(map);
-                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
-                sb.append((lsub ? "LSUB" : "LIST") + " cache contains after adding single entry \"");
-                sb.append(fullName).append("\":\n");
-                for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
-                    sb.append('"').append(entry.getKey()).append("\"=").append(entry.getValue()).append('\n');
+            LOG.debug("{}", new Object() {
+
+                @Override
+                public String toString() {
+                    final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>();
+                    tm.putAll(map);
+                    final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
+                    sb.append((lsub ? "LSUB" : "LIST") + " cache contains after adding single entry \"");
+                    sb.append(fullName).append("\":\n");
+                    for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
+                        sb.append('"').append(entry.getKey()).append("\"=").append(entry.getValue()).append('\n');
+                    }
+                    return sb.toString();
                 }
-                LOG.debug(sb.toString());
-            }
+            });
             return retval;
         }
         /*

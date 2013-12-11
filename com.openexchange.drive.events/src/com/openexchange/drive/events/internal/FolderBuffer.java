@@ -164,9 +164,7 @@ public class FolderBuffer {
                 folderIDs.add(folder.getId());
             }
         } catch (OXException e) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Error resolving path to rootfolder from event", e);
-            }
+            LOG.debug("Error resolving path to rootfolder from event", e);
         }
         return folderIDs;
     }

@@ -126,10 +126,8 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
             public void entryRemoved(EntryEvent<String, Map<String, Serializable>> event) {
                 ID id = new ID(event.getKey());
                 boolean removed = syntheticIDs.remove(id);
-                if (LOG.isDebugEnabled()) {
-                    if (removed) {
-                        LOG.debug("Removed id from refresh list: {}", id);
-                    }
+                if (removed) {
+                    LOG.debug("Removed id from refresh list: {}", id);
                 }
             }
 
@@ -144,18 +142,14 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                 Member member = event.getMember();
                 try {
                     if (getIDMapping().remove(new ID(id).toGeneralForm().toString(), id)) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Source {} on Member: {} fired event. Removing mapping for '{}' due to eviction of according resource.", source, member, id);
-                        }
+                        LOG.debug("Source {} on Member: {} fired event. Removing mapping for '{}' due to eviction of according resource.", source, member, id);
                     }
                 } catch (OXException e) {
                     LOG.warn("Could not handle eviction for id '{}'", id, e);
                 }
                 boolean removed = syntheticIDs.remove(new ID(id));
-                if (LOG.isDebugEnabled()) {
-                    if (removed) {
-                        LOG.debug("Removed id from refresh list: {}", id);
-                    }
+                if (removed) {
+                    LOG.debug("Removed id from refresh list: {}", id);
                 }
             }
         }, false);

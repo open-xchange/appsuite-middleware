@@ -111,12 +111,7 @@ public final class MsDriveEventHandler implements DriveEventPublisher, MessageLi
     @Override
     public void publish(DriveEvent event) {
         if (null != event && false == event.isRemote()) {
-            /*
-             * publish at distributed topic
-             */
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("publishing drive event: {} [{}]", event, senderId);
-            }
+            LOG.debug("publishing drive event: {} [{}]", event, senderId);
             try {
                 getTopic().publish(DriveEventWrapper.wrap(event));
             } catch (OXException e) {
@@ -130,9 +125,7 @@ public final class MsDriveEventHandler implements DriveEventPublisher, MessageLi
         if (null != message && message.isRemote()) {
             Map<String, Serializable> driveEvent = message.getMessageObject();
             if (null != driveEvent) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("onMessage: {} [{}]", message.getMessageObject(), message.getSenderId());
-                }
+                LOG.debug("onMessage: {} [{}]", message.getMessageObject(), message.getSenderId());
                 driveEventService.notifyPublishers(DriveEventWrapper.unwrap(driveEvent));
             } else {
                 LOG.warn("Discarding empty drive event message.");

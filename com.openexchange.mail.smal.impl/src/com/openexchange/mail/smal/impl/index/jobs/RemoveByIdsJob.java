@@ -76,10 +76,7 @@ public class RemoveByIdsJob extends AbstractMailJob {
             }
 
             MailJobInfo info = (MailJobInfo) jobInfo;
-            long start = System.currentTimeMillis();
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("{} started performing. {}", this.getClass().getSimpleName(), info);
-            }
+            LOG.debug("{} started performing. {}", this.getClass().getSimpleName(), info);
 
             checkJobInfo();
             IndexFacadeService indexFacade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
@@ -92,11 +89,6 @@ public class RemoveByIdsJob extends AbstractMailJob {
             } finally {
                 closeIndexAccess(mailIndex);
                 closeIndexAccess(attachmentIndex);
-
-                if (LOG.isDebugEnabled()) {
-                    long diff = System.currentTimeMillis() - start;
-                    LOG.debug("{} lasted {}ms. {}", this.getClass().getSimpleName(), diff, info);
-                }
             }
         } catch (Exception e) {
             throw new OXException(e);

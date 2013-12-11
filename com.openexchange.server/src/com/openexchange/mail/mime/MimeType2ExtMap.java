@@ -193,9 +193,7 @@ public final class MimeType2ExtMap {
                         }
 
                     }
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("MIMEType2ExtMap successfully initialized");
-                    }
+                    LOG.debug("MIMEType2ExtMap successfully initialized");
                 } catch (final IOException e) {
                     LOG.error("", e);
                 }

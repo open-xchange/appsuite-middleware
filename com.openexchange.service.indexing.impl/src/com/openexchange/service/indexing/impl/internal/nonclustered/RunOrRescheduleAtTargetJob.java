@@ -101,9 +101,7 @@ public class RunOrRescheduleAtTargetJob implements Job {
         }
 
         JobInfo jobInfo = (JobInfo) infoObject;
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Started execution of job {}. Trigger: {}", jobInfo, context.getTrigger().getKey());
-        }
+        LOG.debug("Started execution of job {}. Trigger: {}", jobInfo, context.getTrigger().getKey());
 
         try {
             SolrCoreIdentifier identifier = new SolrCoreIdentifier(jobInfo.contextId, jobInfo.userId, jobInfo.getModule());
@@ -153,9 +151,7 @@ public class RunOrRescheduleAtTargetJob implements Job {
 
                     IndexManagementService managementService = Services.getService(IndexManagementService.class);
                     if (managementService.isLocked(jobInfo.contextId, jobInfo.userId, jobInfo.getModule())) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Skipping job execution because corresponding index is locked. {}", jobInfo);
-                        }
+                        LOG.debug("Skipping job execution because corresponding index is locked. {}", jobInfo);
 
                         return;
                     }
@@ -174,9 +170,7 @@ public class RunOrRescheduleAtTargetJob implements Job {
                         priority = (Integer) prioObj;
                     }
 
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Rescheduling job {} at member {}.", jobInfo, owner);
-                    }
+                    LOG.debug("Rescheduling job {} at member {}.", jobInfo, owner);
                     FutureTask<Object> task = new DistributedTask<Object>(
                         new ScheduleJobCallable(jobInfo, new Date(), interval, priority),
                         executor);
@@ -209,9 +203,7 @@ public class RunOrRescheduleAtTargetJob implements Job {
         }
 
         try {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Executing job {}", jobInfo);
-            }
+            LOG.debug("Executing job {}", jobInfo);
             indexingJob.execute(jobInfo);
         } catch (Throwable t) {
             String msg = "Error during IndexingJob execution. " + jobInfo.toString();

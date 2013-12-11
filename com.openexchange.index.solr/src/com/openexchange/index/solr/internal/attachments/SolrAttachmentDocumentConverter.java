@@ -187,9 +187,7 @@ public class SolrAttachmentDocumentConverter extends AbstractDocumentConverter<A
                 setFieldInDocument(inputDocument, AttachmentIndexField.CONTENT, extractedText);
             } catch (Throwable t) {
                 ExceptionUtils.handleThrowable(t);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Error during text extraction. Skipping attachments content.\nCause: {}", t.getMessage());
-                }
+                LOG.debug("Error during text extraction. Skipping attachments content.\nCause: {}", t.getMessage());
             }
         }
 

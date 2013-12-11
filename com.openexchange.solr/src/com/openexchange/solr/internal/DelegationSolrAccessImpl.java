@@ -548,9 +548,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
                 rmiAccess.pingRmi(identifier);
             } catch (RemoteException e) {
                 rmiAccess = updateRmiCache(server);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Ping failed for remote access on {}. Reconnect.", server);
-                }
+                LOG.debug("Ping failed for remote access on {}. Reconnect.", server);
             } catch (RMISolrException e) {
                 OXException exception = new OXException(e.getErrorCode(), e.getMessage(), OXExceptionConstants.MESSAGE_ARGS_EMPTY);
                 exception.setPrefix("SOL");
@@ -558,9 +556,7 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
             }
         }
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Returning remote solr access to server {}.", server);
-        }
+        LOG.debug("Returning remote solr access to server {}.", server);
         return new SolrAccessServiceRmiWrapper(rmiAccess);
     }
 

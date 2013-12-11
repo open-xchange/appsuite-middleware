@@ -162,7 +162,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
     public void addAttachment(final MailPart attachment) throws OXException {
         if (doAction && !exceeded) {
             final long size = attachment.getSize();
-            if (size <= 0 && LOG.isDebugEnabled()) {
+            if (size <= 0) {
                 LOG.debug("Missing size: {}", size, new Throwable());
             }
             if (uploadQuotaPerFile > 0 && size > uploadQuotaPerFile) {

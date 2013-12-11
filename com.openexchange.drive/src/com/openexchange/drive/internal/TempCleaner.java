@@ -99,9 +99,7 @@ public class TempCleaner implements Runnable {
         Object parameter = session.getServerSession().getParameter(PARAM_LAST_CLEANER_RUN);
         if (null != parameter && Long.class.isInstance(parameter)) {
             long lastCleanerRun = ((Long)parameter).longValue();
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Last cleaner run for session {} at: {}", session, DriveConstants.LOG_DATE_FORMAT.get().format(new Date(lastCleanerRun)));
-            }
+            LOG.debug("Last cleaner run for session {} at: {}", session, DriveConstants.LOG_DATE_FORMAT.get().format(new Date(lastCleanerRun)));
             String intervalValue = configService.getProperty("com.openexchange.drive.cleaner.interval", "1D");
             long interval = TimeSpanParser.parseTimespan(intervalValue);
             if (MILLIS_PER_HOUR > interval) {
@@ -113,16 +111,12 @@ public class TempCleaner implements Runnable {
                 return;
             }
         } else {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("No previous cleaner run detected for session {}{}", session, '.');
-            }
+            LOG.debug("No previous cleaner run detected for session {}{}", session, '.');
         }
         try {
             final FileStorageFolder tempFolder = session.getStorage().optFolder(DriveConstants.TEMP_PATH, false);
             if (null == tempFolder) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("No '.drive' folder found, nothing to do.");
-                }
+                LOG.debug("No '.drive' folder found, nothing to do.");
                 return;
             }
             String maxAgeValue = configService.getProperty("com.openexchange.drive.cleaner.maxAge", "1D");
@@ -133,14 +127,10 @@ public class TempCleaner implements Runnable {
             }
             long minimumTimestamp = System.currentTimeMillis() - maxAge;
             if (null != tempFolder.getCreationDate() &&  minimumTimestamp <= tempFolder.getCreationDate().getTime()) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("'.drive' was created within 'max age' interval, nothing to do.");
-                }
+                LOG.debug("'.drive' was created within 'max age' interval, nothing to do.");
                 return;
             }
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Starting cleaner run for session {}{}", session, '.');
-            }
+            LOG.info("Starting cleaner run for session {}{}", session, '.');
             TempCleaner tempCleaner = new TempCleaner(
                 session.getServerSession(), session.getChecksumStore(), tempFolder, minimumTimestamp);
             ThreadPoolService threadPoolService = DriveServiceLookup.getService(ThreadPoolService.class);
@@ -232,12 +222,7 @@ public class TempCleaner implements Runnable {
                 }
             }
             if (deleteAll) {
-                /*
-                 * cleanup whole '.drive' folder, invalidate checksums
-                 */
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Detected all folders ({}) and files ({}) in temp folder being outdated, removing '.drive' folder completely.", foldersToDelete.size(), filesToDelete.size());
-                }
+                LOG.debug("Detected all folders ({}) and files ({}) in temp folder being outdated, removing '.drive' folder completely.", foldersToDelete.size(), filesToDelete.size());
                 String folderID = folderAccess.deleteFolder(tempFolder.getId());
                 checksumStore.removeFileChecksumsInFolder(new FolderID(folderID));
                 for (FileStorageFolder folder : foldersToDelete) {
@@ -246,12 +231,7 @@ public class TempCleaner implements Runnable {
                     checksumStore.removeDirectoryChecksum(id);
                 }
             } else if (0 < foldersToDelete.size() || 0 < filesToDelete.size()) {
-                /*
-                 * cleanup selected files and folders, invalidate checksums
-                 */
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Detected {} folder(s) and {} file(s) in temp folder being outdated, cleaning up.", foldersToDelete.size(), filesToDelete.size());
-                }
+                LOG.debug("Detected {} folder(s) and {} file(s) in temp folder being outdated, cleaning up.", foldersToDelete.size(), filesToDelete.size());
                 for (FileStorageFolder folder : foldersToDelete) {
                     FolderID id = new FolderID(folder.getId());
                     folderAccess.deleteFolder(folder.getId());

@@ -107,10 +107,7 @@ public class MailFolderJob extends AbstractMailJob {
             }
 
             MailJobInfo info = (MailJobInfo) jobInfo;
-            long start = System.currentTimeMillis();
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("{} started performing. {}", this.getClass().getSimpleName(), info);
-            }
+            LOG.debug("{} started performing. {}", this.getClass().getSimpleName(), info);
 
             checkJobInfo();
             MailField[] fields = new MailField[] {
@@ -162,27 +159,17 @@ public class MailFolderJob extends AbstractMailJob {
                             indexMails.put(msg.getMailId(), msg);
                         }
 
-                        if (LOG.isDebugEnabled()) {
-                            long diff = System.currentTimeMillis() - start;
-                            LOG.debug("{} Preparation lasted {}ms.", info, diff);
-                        }
                         deleteMails(info, indexMails.keySet(), storageMails.keySet(), mailIndex, attachmentIndex);
                         addMails(info, indexMails.keySet(), storageMails.keySet(), mailIndex, attachmentIndex, messageStorage);
                         changeMails(info, indexMails, storageMails, mailIndex, attachmentIndex, messageStorage);
                         IndexFolderManager.setTimestamp(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder, System.currentTimeMillis());
                     } else {
-                        if (LOG.isDebugEnabled()) {
-                            long diff = System.currentTimeMillis() - start;
-                            LOG.debug("{} Preparation lasted {}ms.", info, diff);
-                        }
                         addMails(info, Collections.<String> emptySet(), storageMails.keySet(), mailIndex, attachmentIndex, messageStorage);
                         IndexFolderManager.setIndexed(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder);
                         IndexFolderManager.setTimestamp(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder, System.currentTimeMillis());
                     }
                 } else {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Deleting folder from index: {}", info);
-                    }
+                    LOG.debug("Deleting folder from index: {}", info);
 
                     IndexFolderManager.deleteFolderEntry(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder);
                     mailIndex.deleteByQuery(mailAllQuery);
@@ -214,11 +201,6 @@ public class MailFolderJob extends AbstractMailJob {
                 SmalMailAccess.closeUnwrappedInstance(mailAccess);
                 closeIndexAccess(mailIndex);
                 closeIndexAccess(attachmentIndex);
-
-                if (LOG.isDebugEnabled()) {
-                    long diff = System.currentTimeMillis() - start;
-                    LOG.debug("{} lasted {}ms. {}", this.getClass().getSimpleName(), diff, info);
-                }
             }
         } catch (Exception e) {
             throw new OXException(e);

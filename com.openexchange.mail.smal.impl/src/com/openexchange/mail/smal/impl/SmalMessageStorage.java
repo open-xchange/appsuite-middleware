@@ -67,12 +67,10 @@ import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
-import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageBatch;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.ISimplifiedThreadStructure;
-import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -219,12 +217,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                 }
 
                 final QueryParameters parameters = builder.setHandler(SearchHandlers.CUSTOM).setSearchTerm(searchTerm).build();
-                final long start = System.currentTimeMillis();
                 final IndexResult<MailMessage> result = indexAccess.query(parameters, MailIndexField.getFor(fields));
-                if (LOG.isDebugEnabled()) {
-                    final long diff = System.currentTimeMillis() - start;
-                    LOG.debug("Index Query lasted {}ms.", diff);
-                }
 
                 List<IndexDocument<MailMessage>> documents = result.getResults();
                 List<MailMessage> mails;
@@ -485,9 +478,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
 
     private void submitJob(final JobInfo jobInfo) throws OXException {
         if (session instanceof FakeSession) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Session is a fake session. Job will not be submitted...");
-            }
+            LOG.debug("Session is a fake session. Job will not be submitted...");
             // FIXME: This is done to prevent loops here and needs a much better solution!
             return;
         }

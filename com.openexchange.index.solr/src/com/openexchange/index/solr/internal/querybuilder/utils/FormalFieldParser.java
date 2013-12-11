@@ -221,9 +221,7 @@ public class FormalFieldParser {
             }
         }
         b.append(')');
-        if (log.isDebugEnabled()) {
-            log.debug("[parseTerm]: result is \'{}\'", b);
-        }
+        log.debug("[parseTerm]: result is \'{}\'", b);
 
         return b.toString();
     }

@@ -178,9 +178,7 @@ public class ProgressiveRecurringJob implements Job {
             return true;
         }
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Rescheduling job {} at member {}.", jobInfo, executor);
-        }
+        LOG.debug("Rescheduling job {} at member {}.", jobInfo, executor);
 
         FutureTask<Object> task = new DistributedTask<Object>(new ScheduleProgressiveRecurringJobCallable(jobInfo, trigger.getPriority()), executor);
         ExecutorService executorService = hazelcast.getExecutorService();

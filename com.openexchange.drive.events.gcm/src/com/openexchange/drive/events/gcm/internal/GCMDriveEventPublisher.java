@@ -114,8 +114,8 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
                 } catch (IOException e) {
                     LOG.warn("error publishing drive event", e);
                 }
-                if (null != result && LOG.isDebugEnabled()) {
-                    LOG.debug(result.toString());
+                if (null != result) {
+                    LOG.debug("{}", result);
                 }
                 /*
                  * process resulst

@@ -200,9 +200,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
 
     @Override
     public void schedulerPaused() {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Scheduler was paused. Cancelling consistency task...");
-        }
+        LOG.debug("Scheduler was paused. Cancelling consistency task...");
 
         if (consistencyTimer != null) {
             consistencyTimer.cancel();
@@ -212,9 +210,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
 
     @Override
     public void schedulerResumed() {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Scheduler was resumed. Starting consistency task...");
-        }
+        LOG.debug("Scheduler was resumed. Starting consistency task...");
 
         try {
             if (consistencyTimer != null) {
@@ -230,9 +226,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
 
     @Override
     public void shutdown() {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Scheduler was stopped. Cancelling consistency task...");
-        }
+        LOG.debug("Scheduler was stopped. Cancelling consistency task...");
 
         if (consistencyTimer != null) {
             consistencyTimer.cancel();
@@ -746,7 +740,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
             logBuilder.append(startTime);
             logBuilder.append("\n");
         }
-        
+
         List<OperableTrigger> returnList = new ArrayList<OperableTrigger>();
         lock.lock();
         if (logBuilder != null) {
@@ -789,7 +783,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace("Removing trigger {}", stateWrapper.getTrigger().getKey().getName());
                     }
-                    
+
                     removeTrigger(stateWrapper.getTrigger().getKey());
                     continue;
                 }
@@ -832,7 +826,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
                     break;
                 }
             }
-            
+
             if (logBuilder != null) {
                 logBuilder.append("    Processing triggers took ");
                 long now = System.currentTimeMillis();
@@ -860,7 +854,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
                 for (OperableTrigger trigger : returnList) {
                     logBuilder.append("\n        Trigger: ").append(trigger.getKey().getName());
                 }
-                
+
                 LOG.trace(logBuilder.toString());
             }
         }

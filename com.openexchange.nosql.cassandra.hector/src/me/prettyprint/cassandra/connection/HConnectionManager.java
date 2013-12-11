@@ -1,5 +1,13 @@
 package me.prettyprint.cassandra.connection;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import me.prettyprint.cassandra.connection.client.HClient;
 import me.prettyprint.cassandra.connection.factory.HClientFactory;
 import me.prettyprint.cassandra.connection.factory.HClientFactoryProvider;
@@ -22,12 +30,7 @@ import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 import org.apache.cassandra.thrift.AuthenticationRequest;
 import org.apache.cassandra.thrift.Cassandra;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 public class HConnectionManager {
 
@@ -48,7 +51,7 @@ public class HConnectionManager {
   final ExceptionsTranslator exceptionsTranslator;
   private final CassandraClientMonitor monitor;
   private HOpTimer timer;
-  private ConnectionManagerListenersHandler listenerHandler = new ConnectionManagerListenersHandler();
+  private final ConnectionManagerListenersHandler listenerHandler = new ConnectionManagerListenersHandler();
 
   public HConnectionManager(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
 
@@ -283,12 +286,13 @@ public class HConnectionManager {
           retryable = op.failoverPolicy.shouldRetryFor(HTimedOutException.class);
 
           monitor.incCounter(Counter.RECOVERABLE_TIMED_OUT_EXCEPTIONS);
-          
+
           // client is initialized inside of the try/catch block, therefore in case of an exception
           // before initialization it remains null and can throw a nullpointer exception at this point.
-          if (client != null)	
-        	  client.close();
-          
+          if (client != null) {
+            client.close();
+        }
+
           // TODO timecheck on how long we've been waiting on timeouts here
           // suggestion per user moores on hector-users
         } else if ( he instanceof HPoolRecoverableException ) {
@@ -304,8 +308,9 @@ public class HConnectionManager {
           // that we don't add in time.
           retryable = false;
         }
-        if ( retries <= 0 || retryable == false)
-          throw he;
+        if ( retries <= 0 || retryable == false) {
+            throw he;
+        }
 
         log.warn("Could not fullfill request on this host {}", client);
         log.warn("Exception: ", he);
@@ -382,9 +387,7 @@ public class HConnectionManager {
   */
     private void sleepBetweenHostSkips(FailoverPolicy failoverPolicy) {
       if (failoverPolicy.sleepBetweenHostsMilli > 0) {
-        if ( log.isDebugEnabled() ) {
-          log.debug("Will sleep for {} millisec", failoverPolicy.sleepBetweenHostsMilli);
-        }
+        log.debug("Will sleep for {} millisec", failoverPolicy.sleepBetweenHostsMilli);
         try {
           Thread.sleep(failoverPolicy.sleepBetweenHostsMilli);
         } catch (InterruptedException e) {
@@ -401,7 +404,9 @@ public class HConnectionManager {
   }
 
   void releaseClient(HClient client) {
-    if ( client == null ) return;
+    if ( client == null ) {
+        return;
+    }
     HClientPool pool = hostPools.get(client.getCassandraHost());
     if ( pool == null ) {
       pool = suspendedHostPools.get(client.getCassandraHost());
@@ -429,8 +434,9 @@ public class HConnectionManager {
     if ( pool != null ) {
       log.error("Pool state on shutdown: {}", pool.getStatusAsString());
       pool.shutdown();
-      if ( cassandraHostRetryService != null )
+      if ( cassandraHostRetryService != null ) {
         cassandraHostRetryService.add(cassandraHost);
+    }
     }
   }
 
@@ -452,12 +458,15 @@ public class HConnectionManager {
 
   public void shutdown() {
     log.info("Shutdown called on HConnectionManager");
-    if ( cassandraHostRetryService != null )
-      cassandraHostRetryService.shutdown();
-    if ( nodeAutoDiscoverService != null )
-      nodeAutoDiscoverService.shutdown();
-    if ( hostTimeoutTracker != null )
-      hostTimeoutTracker.shutdown();
+    if ( cassandraHostRetryService != null ) {
+        cassandraHostRetryService.shutdown();
+    }
+    if ( nodeAutoDiscoverService != null ) {
+        nodeAutoDiscoverService.shutdown();
+    }
+    if ( hostTimeoutTracker != null ) {
+        hostTimeoutTracker.shutdown();
+    }
 
     for (HClientPool pool : hostPools.values()) {
       try {

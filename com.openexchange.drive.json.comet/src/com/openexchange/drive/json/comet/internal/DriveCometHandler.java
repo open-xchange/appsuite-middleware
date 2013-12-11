@@ -194,7 +194,7 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
             LOG.warn("{}: Unable to access comet context, unable to resume request.", this);
             return;
         }
-        if (cometContext.resumeCometHandler(this) && LOG.isDebugEnabled()) {
+        if (cometContext.resumeCometHandler(this)) {
             LOG.debug("{}: Resumed successfully.", this);
         }
     }

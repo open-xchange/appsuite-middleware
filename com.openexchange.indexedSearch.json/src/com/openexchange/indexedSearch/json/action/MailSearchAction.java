@@ -101,7 +101,6 @@ public abstract class MailSearchAction extends AbstractIndexAction {
 
     @Override
     protected AJAXRequestResult perform(IndexAJAXRequest req) throws OXException, JSONException {
-        long start = System.currentTimeMillis();
         ServerSession session = req.getSession();
         String searchTerm = req.checkParameter("searchTerm");
 
@@ -134,12 +133,6 @@ public abstract class MailSearchAction extends AbstractIndexAction {
             String subject = mail.getSubject();
             json.put(MailJSONField.SUBJECT.getKey(), subject == null ? JSONObject.NULL : subject);
             jsonResult.put(json);
-        }
-
-
-        if (LOG.isDebugEnabled()) {
-            long diff = System.currentTimeMillis() - start;
-            LOG.debug("Duration: {}ms.", diff);
         }
 
         return new AJAXRequestResult(jsonResult, "json");

@@ -116,9 +116,7 @@ public abstract class RTAction implements AJAXActionService {
             state.touch();
             List<Stanza> stanzasToSend = state.getStanzasToSend();
             List<JSONObject> stanzas = new ArrayList<JSONObject>(stanzasToSend.size());
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Got {} Stanzas to send for client: {}", stanzasToSend.size(), state.getId());
-            }
+            LOG.debug("Got {} Stanzas to send for client: {}", stanzasToSend.size(), state.getId());
             for (Stanza s : stanzasToSend) {
                 stanzas.add(stanzaWriter.write(s));
             }

@@ -305,9 +305,7 @@ public abstract class AbstractSMALStorage {
      */
     protected void submitFolderJob(String folder) throws OXException {
         if (session instanceof FakeSession) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Session is a fake session. Job will not be submitted...");
-            }
+            LOG.debug("Session is a fake session. Job will not be submitted...");
             // FIXME: This is done to prevent loops here and needs a much better solution!
             return;
         }

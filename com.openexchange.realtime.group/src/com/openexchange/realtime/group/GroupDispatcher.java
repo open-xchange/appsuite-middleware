@@ -319,9 +319,7 @@ public class GroupDispatcher implements ComponentHandle {
     public void leave(ID id) throws OXException {
         beforeLeave(id);
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("leaving:{}", id);
-        }
+        LOG.debug("leaving:{}", id);
 
         id.off("dispose", LEAVE);
 
