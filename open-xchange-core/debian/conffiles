@@ -7,7 +7,6 @@ opt/open-xchange/etc/contact.properties
 opt/open-xchange/etc/contactcollector.properties
 opt/open-xchange/etc/event.properties
 opt/open-xchange/etc/excludedupdatetasks.properties
-opt/open-xchange/etc/file-logging.properties
 opt/open-xchange/etc/filestorage.properties
 opt/open-xchange/etc/foldercache.properties
 opt/open-xchange/etc/folderjson.properties
