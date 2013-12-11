@@ -98,7 +98,7 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer<S, S> {
     public final S addingService(final ServiceReference<S> reference) {
         final S addedService = context.getService(reference);
         if (null == addedService) {
-            LOG.warn("added service is null! " + serviceClass.getName(), new Throwable());
+            LOG.warn("added service is null! {}", serviceClass.getName(), new Throwable());
         }
         if (serviceClass.isInstance(addedService)) {
             try {
@@ -121,7 +121,7 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer<S, S> {
      */
     protected void addingServiceInternal(final S service) {
         if (LOG.isTraceEnabled()) {
-            LOG.trace("BundleServiceTracker.addingServiceInternal(): " + service);
+            LOG.trace("BundleServiceTracker.addingServiceInternal(): {}", service);
         }
     }
 

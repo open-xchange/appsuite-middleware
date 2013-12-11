@@ -143,23 +143,22 @@ public class OSGiResourceHandler extends HttpHandler implements OSGiHandler {
     @Override
     public void service(Request request, Response response) throws Exception {
         String requestURI = request.getDecodedRequestURI();
-        LOG.debug(new StringBuilder(128).append("OSGiResourceHandler requestURI: ").append(requestURI).toString());
+        LOG.debug("OSGiResourceHandler requestURI: {}", requestURI);
         String path = requestURI.replaceFirst(alias, prefix);
         try {
             // authentication
             if (!authenticate(request, response, new OSGiServletContext(httpContext))) {
-                LOG.debug("OSGiResourceHandler Request not authenticated (" + requestURI + ").");
+                LOG.debug("OSGiResourceHandler Request not authenticated ({}).", requestURI);
                 return;
             }
         } catch (IOException e) {
-            LOG.warn("Error while authenticating request: " + request, e);
+            LOG.warn("Error while authenticating request: {}", request, e);
         }
 
         // find resource
         URL resource = httpContext.getResource(path);
         if (resource == null) {
-            LOG.debug(new StringBuilder(128).append("OSGiResourceHandler \'").append(alias).append("\' Haven't found '").append(path)
-                    .append("'.").toString());
+            LOG.debug("OSGiResourceHandler \'{}\' Haven't found '{}'.", alias, path);
             response.setStatus(404);
             return;
         } else {
@@ -190,7 +189,7 @@ public class OSGiResourceHandler extends HttpHandler implements OSGiHandler {
             os.flush();
             response.finish();
             if (total != length) {
-                LOG.warn("Was supposed to send " + length + ", but sent " + total);
+                LOG.warn("Was supposed to send {}, but sent {}", length, total);
             }
         } catch (IOException e) {
             LOG.warn("", e);

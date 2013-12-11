@@ -174,9 +174,9 @@ public final class ParallelsInfoServlet extends PermissionServlet {
 
             mail = userobject.getMail();
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final ServiceException e) {
-            LOG.error("Error resolving branded url for context "+contextid);
+            LOG.error("Error resolving branded url for context {}", contextid);
         }
 
         final JSONObject obj = new JSONObject();
@@ -252,7 +252,7 @@ public final class ParallelsInfoServlet extends PermissionServlet {
                 } catch (UnknownHostException e) { }
             }
             if( null == branded_host || branded_host.length() == 0 ) {
-                LOG.warn("getHostname: Unable to determine any hostname for context "+ctx.getContextId());
+                LOG.warn("getHostname: Unable to determine any hostname for context {}", ctx.getContextId());
             }
         }
 

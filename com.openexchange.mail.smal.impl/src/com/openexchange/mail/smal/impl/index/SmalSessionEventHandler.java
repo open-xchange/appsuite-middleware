@@ -119,7 +119,7 @@ public class SmalSessionEventHandler implements EventHandler {
                 if (!isIndexingPermitted(contextId, userId)) {
                     if (LOG.isDebugEnabled()) {
                         OXException e = IndexExceptionCodes.INDEXING_NOT_ENABLED.create(Types.EMAIL, userId, contextId);
-                        LOG.debug("Skipping event handling execution because: " + e.getMessage());
+                        LOG.debug("Skipping event handling execution because: {}", e.getMessage());
                     }
                     return;
                 }

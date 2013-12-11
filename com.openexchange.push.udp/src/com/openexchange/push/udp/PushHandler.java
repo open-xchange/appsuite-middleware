@@ -93,7 +93,7 @@ public class PushHandler implements EventHandler {
             try {
                 event = (CommonEvent) obj;
             } catch (final ClassCastException cce) {
-                LOG.warn("Unexpected type: " + cce.getMessage(), cce);
+                LOG.warn("Unexpected type: {}", cce.getMessage(), cce);
                 return;
             }
         }
@@ -105,7 +105,7 @@ public class PushHandler implements EventHandler {
             final ContextService contextService = PushServiceRegistry.getServiceRegistry().getService(ContextService.class);
             ctx = contextService.getContext(contextId);
         } catch (final OXException exc) {
-            LOG.error("cannot resolve context id: " + contextId, exc);
+            LOG.error("cannot resolve context id: {}", contextId, exc);
             return;
         }
 
@@ -140,7 +140,7 @@ public class PushHandler implements EventHandler {
             }
             break;
         default:
-            LOG.warn("Got event with unimplemented module: " + module);
+            LOG.warn("Got event with unimplemented module: {}", module);
         }
     }
 
@@ -153,7 +153,7 @@ public class PushHandler implements EventHandler {
         } catch (final OXException e) {
             LOG.error("", e);
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
         }
     }
 

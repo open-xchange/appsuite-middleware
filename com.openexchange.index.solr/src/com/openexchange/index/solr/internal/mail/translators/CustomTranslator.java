@@ -260,7 +260,7 @@ public class CustomTranslator implements QueryTranslator {
         private void appendFlag(MailIndexField mailField, boolean value) {
             Set<String> solrFields = fieldConfig.getSolrFields(mailField);
             if (solrFields == null || solrFields.isEmpty()) {
-                LOG.warn("Did not find index fields for parameter " + mailField.toString() + ". Skipping this field in search query...");
+                LOG.warn("Did not find index fields for parameter {}. Skipping this field in search query...", mailField);
                 return;
             }
 
@@ -272,7 +272,7 @@ public class CustomTranslator implements QueryTranslator {
         public void visit(SizeTerm term) {
             Set<String> solrFields = fieldConfig.getSolrFields(MailIndexField.SIZE);
             if (solrFields == null || solrFields.isEmpty()) {
-                LOG.warn("Did not find index fields for parameter " + MailIndexField.SIZE.toString() + ". Skipping this field in search query...");
+                LOG.warn("Did not find index fields for parameter {}. Skipping this field in search query...", MailIndexField.SIZE);
                 return;
             }
 
@@ -364,7 +364,7 @@ public class CustomTranslator implements QueryTranslator {
         private void appendStringTerm(IndexField indexField, SearchTerm<String> term) {
             Set<String> solrFields = fieldConfig.getSolrFields(indexField);
             if (solrFields == null || solrFields.isEmpty()) {
-                LOG.warn("Did not find index fields for field " + indexField.toString() + ". Skipping this field in search query...");
+                LOG.warn("Did not find index fields for field {}. Skipping this field in search query...", indexField);
                 return;
             }
 

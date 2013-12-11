@@ -166,7 +166,7 @@ public class GrizzlyConfig implements Initialization {
     @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
-            LOG.error(this.getClass().getName() + " already started");
+            LOG.error("{} already started", this.getClass().getName());
             return;
         }
         init();
@@ -175,7 +175,7 @@ public class GrizzlyConfig implements Initialization {
     @Override
     public void stop() {
         if (!started.compareAndSet(true, false)) {
-            LOG.error(this.getClass().getName() + " cannot be stopped since it has no been started before");
+            LOG.error("{} cannot be stopped since it has no been started before", this.getClass().getName());
             return;
         }
     }
@@ -378,7 +378,7 @@ public class GrizzlyConfig implements Initialization {
             List<String> erroneousIPs = IPTools.filterErroneousIPs(proxyCandidates);
             if(!erroneousIPs.isEmpty()) {
                 if(LOG.isWarnEnabled()) {
-                    LOG.warn("Falling back to empty list as com.openexchange.server.knownProxies contains malformed IPs: "+erroneousIPs);
+                    LOG.warn("Falling back to empty list as com.openexchange.server.knownProxies contains malformed IPs: {}", erroneousIPs);
                 }
             } else {
                 this.knownProxies = proxyCandidates;

@@ -87,7 +87,7 @@ public class PushMulticastSocket implements Runnable {
         try {
             if (config.isMultiCastEnabled()) {
                 if (LOG.isInfoEnabled()) {
-                    LOG.info("Starting Multicast Socket on Port: " + multicastPort);
+                    LOG.info("Starting Multicast Socket on Port: {}", multicastPort);
                 }
                 multicastSocket = new MulticastSocket(multicastPort);
                 multicastSocket.joinGroup(multicastAddress);
@@ -115,7 +115,7 @@ public class PushMulticastSocket implements Runnable {
                     final PushRequest serverRegisterRequest = new PushRequest();
                     serverRegisterRequest.init(datagramPacket);
                 } else {
-                    LOG.warn("recieved empty multicast package: " + datagramPacket);
+                    LOG.warn("recieved empty multicast package: {}", datagramPacket);
                 }
             } catch (final SocketException e) {
                 if (running) {
@@ -142,7 +142,7 @@ public class PushMulticastSocket implements Runnable {
                 LOG.error("", e);
             } catch (final ExecutionException e) {
                 final Throwable cause = e.getCause();
-                LOG.error(cause.getMessage(), cause);
+                LOG.error("", cause);
             }
             thread = null;
         }

@@ -149,9 +149,9 @@ public final class HzTopic<E> implements Topic<E> {
             } catch (final RuntimeException e) {
                 // Removing message listener failed
                 if (LOG.isDebugEnabled()) {
-                    LOG.warn("Couldn't remove message listener from Hazelcast topic \"" + name + "\".", e);
+                    LOG.warn("Couldn't remove message listener from Hazelcast topic \"{}\".", name, e);
                 } else {
-                    LOG.warn("Couldn't remove message listener from Hazelcast topic \"" + name + "\".");
+                    LOG.warn("Couldn't remove message listener from Hazelcast topic \"{}\".", name);
                 }
             }
         }

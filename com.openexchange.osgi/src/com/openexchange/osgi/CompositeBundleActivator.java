@@ -86,7 +86,7 @@ public abstract class CompositeBundleActivator implements BundleActivator {
                 if (null == first) {
                     first = e;
                 }
-                LOG.error("Exception while running activator " + activator.getClass().getName(), e);
+                LOG.error("Exception while running activator {}", activator.getClass().getName(), e);
             }
         }
         if (null != first) {
@@ -105,7 +105,7 @@ public abstract class CompositeBundleActivator implements BundleActivator {
                 if (null == first) {
                     first = e;
                 }
-                LOG.error("Exception while stopping activator " + activator.getClass().getName(), e);
+                LOG.error("Exception while stopping activator {}", activator.getClass().getName(), e);
             }
         }
         if (null != first) {

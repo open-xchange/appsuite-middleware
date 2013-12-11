@@ -516,7 +516,7 @@ final class ListLsubCollection {
                     }
                 } catch (final Exception e) {
                     // Swallow failed ACL command
-                    LOG.debug("ACL/MYRIGHTS command failed for " + imapFolder.getStore().toString(), e);
+                    LOG.debug("ACL/MYRIGHTS command failed for {}", imapFolder.getStore(), e);
                 }
             }
         }
@@ -832,7 +832,7 @@ final class ListLsubCollection {
             protocol.notifyResponseHandlers(r);
             if (debug) {
                 final long d = System.currentTimeMillis() - st;
-                LOG.debug(command + " cache filled within " + d + "msec.");
+                LOG.debug("{} cache filled within {}msec.", command, d);
             }
         } else {
             // Dispatch remaining untagged responses

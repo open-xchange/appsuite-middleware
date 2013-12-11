@@ -95,7 +95,7 @@ public abstract class ServiceHolder<S> {
                     for (final Iterator<ServiceProxy> proxyIter = q.keySet().iterator(); proxyIter.hasNext();) {
                         final ServiceProxy proxy = proxyIter.next();
                         if (proxy.isExceeded()) {
-                            LOG.error("Forced unget: Found non-ungetted service after " + serviceUsageTimeout + "msec that was acquired at:\n" + printStackTrace(proxy.trace));
+                            LOG.error("Forced unget: Found non-ungetted service after {}msec that was acquired at:\n{}", serviceUsageTimeout, printStackTrace(proxy.trace));
                             proxy.proxyService = null;
                             proxy.delegate = null;
                             proxy.propagateForcedUnget();
@@ -321,7 +321,7 @@ public abstract class ServiceHolder<S> {
              * Blocking OSGi framework is not allowed, but security mechanism built into this class ensures that an acquired service is
              * released in any case.
              */
-            LOG.error("Service counting for " + this.getClass().getName() + " is not zero: " + countActive.toString());
+            LOG.error("Service counting for {} is not zero: {}", this.getClass().getName(), countActive);
             if (waiting.compareAndSet(false, true)) {
                 synchronized (countActive) {
                     try {

@@ -124,7 +124,7 @@ public class DelayPushQueue implements Runnable {
         final List<DelayedPushMsObject> objects = new ArrayList<DelayedPushMsObject>(16);
         while (isRunning.get()) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Awaiting push objects from DelayQueue with current size: " + delayQueue.size());
+                LOG.debug("Awaiting push objects from DelayQueue with current size: {}", delayQueue.size());
             }
             try {
                 objects.clear();
@@ -145,12 +145,12 @@ public class DelayPushQueue implements Runnable {
                         // Publish
                         publishTopic.publish(delayedPushMsObject.getPushObject().writePojo());
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug("Published delayed PushMsObject: " + delayedPushMsObject.getPushObject());
+                            LOG.debug("Published delayed PushMsObject: {}", delayedPushMsObject.getPushObject());
                         }
                     }
                 }
             } catch (final Exception exc) {
-                LOG.error(exc.getMessage(), exc);
+                LOG.error("", exc);
             }
         }
     }

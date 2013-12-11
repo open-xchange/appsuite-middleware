@@ -141,7 +141,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
                 return service;
             } catch (final Exception e) {
                 context.ungetService(serviceReference);
-                LOG.warn("Adding service ("+service.getClass().getName()+") to listener failed. Service released.", e);
+                LOG.warn("Adding service ({}) to listener failed. Service released.", service.getClass().getName(), e);
                 return null;
             }
         }
@@ -345,7 +345,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      */
     protected <S> ServiceTracker<S, S> track(final Class<S> clazz) {
         if (clazz.isAssignableFrom(ServiceTrackerCustomizer.class)) {
-            LOG.warn("ServiceTracker/ServiceTrackerCustomizer \"" + clazz.getName() + "\" is tracked as a service! You probably wanted to call rememberTracker() and open it afterwards.");
+            LOG.warn("ServiceTracker/ServiceTrackerCustomizer \"{}\" is tracked as a service! You probably wanted to call rememberTracker() and open it afterwards.", clazz.getName());
         }
         return track(clazz, (ServiceTrackerCustomizer<S, S>) null);
     }

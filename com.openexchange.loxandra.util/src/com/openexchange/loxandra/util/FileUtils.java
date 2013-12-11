@@ -74,9 +74,9 @@ public class FileUtils {
 	 * @return the byte array representation of the file
 	 */
 	public static byte[] binToByteArray(String aInputFileName) {
-		log.info("Reading in binary file named : " + aInputFileName);
+		log.info("Reading in binary file named : {}", aInputFileName);
 		File file = new File(aInputFileName);
-		log.info("File size: " + file.length());
+		log.info("File size: {}", file.length());
 		byte[] result = new byte[(int) file.length()];
 		try {
 			InputStream input = null;
@@ -90,7 +90,7 @@ public class FileUtils {
 						totalBytesRead = totalBytesRead + bytesRead;
 					}
 				}
-				log.info("Num bytes read: " + totalBytesRead);
+				log.info("Num bytes read: {}", totalBytesRead);
 			} finally {
 				log.info("Closing input stream.");
 				if (input != null) {
@@ -100,7 +100,7 @@ public class FileUtils {
 		} catch (FileNotFoundException ex) {
 			log.error("File not found.");
 		} catch (IOException ex) {
-			log.error(ex.getMessage(), ex);
+			log.error("", ex);
 		}
 
 		return result;
@@ -125,7 +125,7 @@ public class FileUtils {
 	    } catch (FileNotFoundException ex) {
 	        log.error("File not found.");
 	    } catch (IOException ex) {
-	        log.error(ex.getMessage(), ex);
+	        log.error("", ex);
 	    }
 
 	    return result;
@@ -162,7 +162,7 @@ public class FileUtils {
 		} catch (FileNotFoundException ex) {
 			log.error("File not found.");
 		} catch (IOException ex) {
-			log.error(ex.getMessage(), ex);
+			log.error("", ex);
 		}
 	}
 

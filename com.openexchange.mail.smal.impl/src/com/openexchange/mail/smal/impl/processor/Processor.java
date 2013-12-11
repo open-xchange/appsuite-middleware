@@ -231,11 +231,11 @@ public class Processor {
                     documents.add(IndexDocumentHelper.documentFor(message, accountId));
                 }
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Starting addAttachments() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
+                    LOG.debug("Starting addAttachments() for {} documents from \"{}\" {}", documents.size(), folderInfo.getFullName(), new DebugInfo(mailAccess));
                     final long st = System.currentTimeMillis();
                     indexAccess.addDocuments(documents);
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("Performed addAttachments() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" in " + dur + "msec. " + new DebugInfo(
+                    LOG.debug("Performed addAttachments() for {} documents from \"{}\" in {}msec. {}", documents.size(), folderInfo.getFullName(), dur, new DebugInfo(
                         mailAccess));
                 } else {
                     indexAccess.addDocuments(documents);
@@ -253,11 +253,11 @@ public class Processor {
                     documents.add(IndexDocumentHelper.documentFor(message, accountId));
                 }
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Starting addContent() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
+                    LOG.debug("Starting addContent() for {} documents from \"{}\" {}", documents.size(), folderInfo.getFullName(), new DebugInfo(mailAccess));
                     final long st = System.currentTimeMillis();
                     indexAccess.addDocuments(documents);
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("Performed addContent() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" in " + dur + "msec. " + new DebugInfo(
+                    LOG.debug("Performed addContent() for {} documents from \"{}\" in {}msec. {}", documents.size(), folderInfo.getFullName(), dur, new DebugInfo(
                         mailAccess));
                 } else {
                     indexAccess.addDocuments(documents);
@@ -275,11 +275,11 @@ public class Processor {
                     documents.add(IndexDocumentHelper.documentFor(message, accountId));
                 }
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Starting addEnvelopeData() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
+                    LOG.debug("Starting addEnvelopeData() for {} documents from \"{}\" {}", documents.size(), folderInfo.getFullName(), new DebugInfo(mailAccess));
                     final long st = System.currentTimeMillis();
                     indexAccess.addDocuments(documents);
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("Performed addEnvelopeData() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" in " + dur + "msec. " + new DebugInfo(
+                    LOG.debug("Performed addEnvelopeData() for {} documents from \"{}\" in {}msec. {}", documents.size(), folderInfo.getFullName(), dur, new DebugInfo(
                         mailAccess));
                 } else {
                     indexAccess.addDocuments(documents);
@@ -308,7 +308,7 @@ public class Processor {
 //            folderJob.setStorageMails(null == storageMails ? null : new ArrayList<MailMessage>(storageMails));
 //            indexingService.addJob(folderJob);
 //            if (LOG.isDebugEnabled()) {
-//                LOG.debug("Scheduled new job for \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
+//                LOG.debug("Scheduled new job for \"{}\" {}", folderInfo.getFullName(), new DebugInfo(mailAccess));
 //            }
         }
     }

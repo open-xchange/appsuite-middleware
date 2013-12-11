@@ -139,7 +139,7 @@ public abstract class MailSearchAction extends AbstractIndexAction {
 
         if (LOG.isDebugEnabled()) {
             long diff = System.currentTimeMillis() - start;
-            LOG.debug("Duration: " + diff + "ms.");
+            LOG.debug("Duration: {}ms.", diff);
         }
 
         return new AJAXRequestResult(jsonResult, "json");

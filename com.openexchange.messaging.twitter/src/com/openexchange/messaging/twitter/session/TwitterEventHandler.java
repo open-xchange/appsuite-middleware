@@ -79,8 +79,7 @@ public final class TwitterEventHandler implements EventHandler {
                 // A single session was removed
                 final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
                 if (!session.isTransient() && TwitterAccessRegistry.getInstance().removeAccessIfLast(session.getContextId(), session.getUserId()) && DEBUG) {
-                    LOG.debug(new StringBuilder("Twitter access removed for user ").append(session.getUserId()).append(" in context ").append(
-                        session.getContextId()).toString());
+                    LOG.debug("Twitter access removed for user {} in context {}", session.getUserId(), session.getContextId());
                 }
             } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
                 // A session container was removed
@@ -90,8 +89,7 @@ public final class TwitterEventHandler implements EventHandler {
                 final TwitterAccessRegistry accessRegistry = TwitterAccessRegistry.getInstance();
                 for (final Session session : sessionContainer.values()) {
                     if (!session.isTransient() && accessRegistry.removeAccessIfLast(session.getContextId(), session.getUserId()) && DEBUG) {
-                        LOG.debug(new StringBuilder("Twitter access removed for user ").append(session.getUserId()).append(" in context ").append(
-                            session.getContextId()).toString());
+                        LOG.debug("Twitter access removed for user {} in context {}", session.getUserId(), session.getContextId());
                     }
                 }
             } else if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic)) {

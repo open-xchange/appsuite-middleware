@@ -87,7 +87,7 @@ public class PushChannels {
         try {
             if (config.isPushEnabled()) {
                 if (LOG.isInfoEnabled()) {
-                    LOG.info("Starting Push Register Socket on Port: " + serverRegisterPort);
+                    LOG.info("Starting Push Register Socket on Port: {}", serverRegisterPort);
                 }
 
                 if (senderAddress != null) {
@@ -151,7 +151,7 @@ public class PushChannels {
         try {
             getSocket(channel).send(datagramPackage);
         } catch (IOException x) {
-            LOG.error("Could not send package to "+host+":"+port+" Using "+channel+" socket.", x);
+            LOG.error("Could not send package to {}:{} Using {} socket.", host, port, channel, x);
         }
     }
 

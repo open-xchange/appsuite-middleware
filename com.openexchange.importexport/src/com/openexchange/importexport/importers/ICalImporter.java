@@ -480,7 +480,7 @@ public class ICalImporter extends AbstractImporter {
 					}
 				} catch (final OXException e) {
 					OXException ne = makeMoreInformative(e);
-					//LOG.error(ne.getMessage(), ne); //removed logging, because this would be a user error spamming our log.
+					//LOG.error("", ne); //removed logging, because this would be a user error spamming our log.
 					importResult.setException(ne);
 				}
 				final List<ConversionWarning> warningList = warningMap.get(index);

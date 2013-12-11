@@ -207,7 +207,7 @@ public final class FacebookOAuthAccess {
             final JSONObject error = object.getJSONObject("error");
             if ("OAuthException".equals(error.opt("type"))) {
                 final OXException e = OAuthExceptionCodes.TOKEN_EXPIRED.create(oauthAccount.getDisplayName());
-                LOG.error(e.getErrorCode() + " exceptionId=" + e.getExceptionId() + " JSON error object:\n" + error.toString(2));
+                LOG.error("{} exceptionId={} JSON error object:\n{}", e.getErrorCode(), e.getExceptionId(), error.toString(2));
                 throw e;
             }
             throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(object.getString("message"));

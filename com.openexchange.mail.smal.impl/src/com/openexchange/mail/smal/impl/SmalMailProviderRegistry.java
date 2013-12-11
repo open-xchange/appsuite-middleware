@@ -113,9 +113,7 @@ public final class SmalMailProviderRegistry {
         final String protocol;
         if (mailServerURL == null) {
             if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder(128).append("Missing mail server URL. Mail server URL not set in account ").append(accountId).append(
-                    " for user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).append(
-                    ". Using fallback protocol ").append(MailProperties.getInstance().getDefaultMailProvider()).toString());
+                LOG.warn("Missing mail server URL. Mail server URL not set in account {} for user {} in context {}. Using fallback protocol {}", accountId, session.getUserId(), session.getContextId(), MailProperties.getInstance().getDefaultMailProvider());
             }
             protocol = MailProperties.getInstance().getDefaultMailProvider();
         } else {
@@ -213,7 +211,7 @@ public final class SmalMailProviderRegistry {
         } catch (final OXException e) {
             throw e;
         } catch (final RuntimeException t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             return false;
         }
     }

@@ -235,7 +235,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             writer.flush();
         } catch (final Throwable t) {
             ExceptionUtils.handleThrowable(t);
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             final PrintWriter writer = resp.getWriter();
             writer.println("Publishing failed. Please try again later.");
             writer.flush();

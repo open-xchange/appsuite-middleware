@@ -135,7 +135,7 @@ public final class IMAPProtocol extends Protocol {
         try {
             return (null == concurrentMap.putIfAbsent(InetAddress.getByName(host), Integer.valueOf(maxCount)));
         } catch (final UnknownHostException e) {
-            LOG.warn("Couldn't resolve host name: " + host + ". Assume default max-count setting instead.", e);
+            LOG.warn("Couldn't resolve host name: {}. Assume default max-count setting instead.", host, e);
             return false;
         }
     }
@@ -153,7 +153,7 @@ public final class IMAPProtocol extends Protocol {
         try {
             concurrentMap.remove(InetAddress.getByName(host));
         } catch (final UnknownHostException e) {
-            LOG.warn("Couldn't remove max-count setting for: " + host, e);
+            LOG.warn("Couldn't remove max-count setting for: {}", host, e);
         }
     }
 
@@ -175,7 +175,7 @@ public final class IMAPProtocol extends Protocol {
             final Integer mc = concurrentMap.get(InetAddress.getByName(host));
             return mc == null ? (null == thisMaxCount ? -1 : thisMaxCount.intValue()) : minOf(mc.intValue(), thisMaxCount);
         } catch (final UnknownHostException e) {
-            LOG.warn("Couldn't resolve host name: " + host + ". Return default max-count setting instead.", e);
+            LOG.warn("Couldn't resolve host name: {}. Return default max-count setting instead.", host, e);
             return (null == thisMaxCount ? -1 : thisMaxCount.intValue());
         }
     }

@@ -131,8 +131,7 @@ public final class PushUtility {
              */
             eventAdmin.postEvent(event);
             if (LOG.isDebugEnabled()) {
-                LOG.debug(new StringBuilder(64).append("Notified new mails in folder \"").append(folder).append("\" for user ").append(
-                    userId).append(" in context ").append(contextId).toString());
+                LOG.debug("Notified new mails in folder \"{}\" for user {} in context {}", folder, userId, contextId);
             }
         } catch (final OXException e) {
             throw e;

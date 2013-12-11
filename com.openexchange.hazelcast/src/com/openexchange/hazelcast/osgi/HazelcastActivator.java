@@ -103,7 +103,7 @@ public class HazelcastActivator extends HousekeepingActivator {
         boolean infoEnabled = LOG.isInfoEnabled();
         String lf = Strings.getLineSeparator();
         if (infoEnabled) {
-            LOG.info(lf + "Hazelcast:" + lf + "    Starting..." + lf);
+            LOG.info("{}Hazelcast:{}    Starting...{}", lf, lf, lf);
         }
         long bundleStart = infoEnabled ? System.currentTimeMillis() : 0L;
         /*
@@ -112,8 +112,7 @@ public class HazelcastActivator extends HousekeepingActivator {
         HazelcastConfigurationService configService = getService(HazelcastConfigurationService.class);
         if (false == configService.isEnabled()) {
             if (infoEnabled) {
-                LOG.info(lf + "Hazelcast:" + lf +
-                    "    Startup of Hazelcast clustering and data distribution platform denied per configuration." + lf);
+                LOG.info("{}Hazelcast:{}    Startup of Hazelcast clustering and data distribution platform denied per configuration.{}", lf, lf, lf);
             }
             return;
         }
@@ -122,14 +121,12 @@ public class HazelcastActivator extends HousekeepingActivator {
          */
         Config config = configService.getConfig();
         if (infoEnabled) {
-            LOG.info(lf + "Hazelcast:" + lf + "    Creating new hazelcast instance..." + lf);
+            LOG.info("{}Hazelcast:{}    Creating new hazelcast instance...{}", lf, lf, lf);
             if (config.getNetworkConfig().getJoin().getMulticastConfig().isEnabled()) {
-                LOG.info(lf + "Hazelcast:" + lf +
-                    "    Using network join: " + config.getNetworkConfig().getJoin().getMulticastConfig() + lf);
+                LOG.info("{}Hazelcast:{}    Using network join: {}{}", lf, lf, config.getNetworkConfig().getJoin().getMulticastConfig(), lf);
             }
             if (config.getNetworkConfig().getJoin().getTcpIpConfig().isEnabled()) {
-                LOG.info(lf + "Hazelcast:" + lf +
-                    "    Using network join: " + config.getNetworkConfig().getJoin().getTcpIpConfig() + lf);
+                LOG.info("{}Hazelcast:{}    Using network join: {}{}", lf, lf, config.getNetworkConfig().getJoin().getTcpIpConfig(), lf);
             }
         }
         long hzStart = infoEnabled ? System.currentTimeMillis() : 0L;
@@ -158,7 +155,7 @@ public class HazelcastActivator extends HousekeepingActivator {
         boolean infoEnabled = LOG.isInfoEnabled();
         if (infoEnabled) {
             String lf = Strings.getLineSeparator();
-            LOG.info(lf + "Hazelcast:" + lf + "    Shutting down..." + lf);
+            LOG.info("{}Hazelcast:{}    Shutting down...{}", lf, lf, lf);
         }
         long start = infoEnabled ? System.currentTimeMillis() : 0L;
         HazelcastInstance instance = REF_HAZELCAST_INSTANCE.get();

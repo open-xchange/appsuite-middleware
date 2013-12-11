@@ -435,9 +435,9 @@ public class HTMLServiceActivator extends HousekeepingActivator {
                     Streams.close(in);
                 }
             } catch (final FileNotFoundException e) {
-                LOG.warn("Missing JTidy configuration file \"" + tidyConfigFilename + "\"");
+                LOG.warn("Missing JTidy configuration file \"{}\"", tidyConfigFilename);
             } catch (final IOException e) {
-                LOG.warn("I/O error while reading JTidy configuration from file \"" + tidyConfigFilename + "\"");
+                LOG.warn("I/O error while reading JTidy configuration from file \"{}\"", tidyConfigFilename);
             }
         }
         if (useDefaultConfig) {
@@ -500,7 +500,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
                 return new BufferedInputStream(new FileInputStream(tidyMessagesFilename));
             } catch (final IOException e) {
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn("File providing JTidy messages could not be found: " + tidyMessagesFilename, e);
+                    LOG.warn("File providing JTidy messages could not be found: {}", tidyMessagesFilename, e);
                 }
             }
         }

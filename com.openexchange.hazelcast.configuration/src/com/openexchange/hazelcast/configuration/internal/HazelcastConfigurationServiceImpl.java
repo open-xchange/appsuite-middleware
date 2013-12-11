@@ -318,8 +318,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
              */
             final String lf = Strings.getLineSeparator();
             if ("ox".equalsIgnoreCase(groupName)) {
-                LOG.warn(lf + "    The configuration value for \"com.openexchange.cluster.name\" has not been changed from it's default " +
-                        "value \"ox\". Please do so to make this warning disappear." + lf);
+                LOG.warn("{}    The configuration value for \"com.openexchange.cluster.name\" has not been changed from it's default value \"ox\". Please do so to make this warning disappear.{}", lf, lf);
             }
             config.getGroupConfig().setName(groupName).setPassword("YXV0b2JhaG4=");
             /*
@@ -493,14 +492,14 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
                     field.setAccessible(true);
                     field.set(dataConfig, stringParser.parse(properties.getProperty(propertyName), field.getType()));
                 } catch (SecurityException e) {
-                    LOG.warn("Unable to set field for '" + propertyName + "'", e);
+                    LOG.warn("Unable to set field for '{}'", propertyName, e);
                 } catch (IllegalArgumentException e) {
                     throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, propertyName);
                 } catch (IllegalAccessException e) {
-                    LOG.warn("Unable to set field for '" + propertyName + "'", e);
+                    LOG.warn("Unable to set field for '{}'", propertyName, e);
                 }
             } else {
-                LOG.debug("No matching field found for '" + propertyName + "', skipping.");
+                LOG.debug("No matching field found for '{}', skipping.", propertyName);
             }
         }
         return dataConfig;
@@ -574,9 +573,9 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
                 try {
                     return ConfigLoader.load(xmlConfigFile.getAbsolutePath());
                 } catch (RuntimeException e) {
-                   LOG.warn("Error loading configuration from file " + xmlConfigFile.getAbsolutePath(), e);
+                   LOG.warn("Error loading configuration from file {}", xmlConfigFile.getAbsolutePath(), e);
                 } catch (IOException e) {
-                    LOG.warn("Error loading configuration from file " + xmlConfigFile.getAbsolutePath(), e);
+                    LOG.warn("Error loading configuration from file {}", xmlConfigFile.getAbsolutePath(), e);
                 }
             }
         }

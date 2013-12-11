@@ -347,8 +347,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                     script = "";
                 }
                 if (log.isDebugEnabled()) {
-                    log.debug("The following sieve script will be parsed:\n"
-                        + script);
+                    log.debug("The following sieve script will be parsed:\n{}", script);
                 }
                 final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
                 final RuleListAndNextUid readScriptFromString = sieveTextFilter.readScriptFromString(script);
@@ -453,7 +452,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 }
                 final String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
                 if (log.isDebugEnabled()) {
-                    log.debug("The following sieve script will be written:\n" + writeback);
+                    log.debug("The following sieve script will be written:\n{}", writeback);
                 }
                 writeScript(sieveHandler, activeScript, writeback);
 
@@ -607,8 +606,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                         clientrulesandrequire, new HashSet<String>(
                             sieveHandler.getCapabilities().getSieve()));
                     if (log.isDebugEnabled()) {
-                        log.debug("The following sieve script will be written:\n"
-                            + writeback);
+                        log.debug("The following sieve script will be written:\n{}", writeback);
                     }
                     writeScript(sieveHandler, activeScript, writeback);
                 } else {

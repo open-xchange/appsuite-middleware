@@ -130,9 +130,7 @@ public final class PushEventHandler implements EventHandler {
                             // Stop listener for session
                             final boolean stopped = pushManager.stopListener(session);
                             if (DEBUG && stopped) {
-                                LOG.debug(new StringBuilder(64).append("Stopped push listener for user ").append(session.getUserId()).append(
-                                    " in context ").append(session.getContextId()).append(" by push manager \"").append(
-                                    pushManager.toString()).append('"').toString());
+                                LOG.debug("Stopped push listener for user {} in context {} by push manager \"{}{}", session.getUserId(), session.getContextId(), pushManager, '"');
                             }
                         } catch (final OXException e) {
                             LOG.error("Push error while stopping push listener.", e);
@@ -163,9 +161,7 @@ public final class PushEventHandler implements EventHandler {
                                     }
                                     final boolean stopped = pushManager.stopListener(session);
                                     if (DEBUG && stopped) {
-                                        LOG.debug(new StringBuilder(64).append("Stopped push listener for user ").append(session.getUserId()).append(
-                                            " in context ").append(session.getContextId()).append(" by push manager \"").append(
-                                            pushManager.toString()).append('"').toString());
+                                        LOG.debug("Stopped push listener for user {} in context {} by push manager \"{}{}", session.getUserId(), session.getContextId(), pushManager, '"');
                                     }
                                 }
                             } catch (final OXException e) {
@@ -196,9 +192,7 @@ public final class PushEventHandler implements EventHandler {
                             // Initialize a new push listener for session
                             final PushListener pl = pushManager.startListener(session);
                             if (DEBUG && null != pl) {
-                                LOG.debug(new StringBuilder(64).append("Started push listener for user ").append(session.getUserId()).append(
-                                    " in context ").append(session.getContextId()).append(" by push manager \"").append(
-                                    pushManager.toString()).append('"').toString());
+                                LOG.debug("Started push listener for user {} in context {} by push manager \"{}{}", session.getUserId(), session.getContextId(), pushManager, '"');
                             }
                         } catch (final OXException e) {
                             LOG.error("Push error while starting push listener.", e);

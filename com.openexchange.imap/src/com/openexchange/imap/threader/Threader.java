@@ -166,7 +166,7 @@ public class Threader {
 
         if (DEBUG && null != result) {
             final long dur = System.currentTimeMillis() - st;
-            LOG.debug("Threader.thread() took " + dur + "msec for " + result.fullName);
+            LOG.debug("Threader.thread() took {}msec for {}", dur, result.fullName);
         }
 
         return result;

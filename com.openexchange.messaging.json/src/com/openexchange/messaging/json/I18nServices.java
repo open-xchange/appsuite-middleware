@@ -76,13 +76,13 @@ public final class I18nServices {
 
     public void addService(final I18nService service) {
         if (null != services.put(service.getLocale(), service)) {
-            LOG.warn("Another i18n translation service discovered for " + service.getLocale());
+            LOG.warn("Another i18n translation service discovered for {}", service.getLocale());
         }
     }
 
     public void removeService(final I18nService service) {
         if (null == services.remove(service.getLocale())) {
-            LOG.warn("Unknown i18n translation service shut down for " + service.getLocale());
+            LOG.warn("Unknown i18n translation service shut down for {}", service.getLocale());
         }
     }
 
@@ -92,7 +92,7 @@ public final class I18nServices {
         final Locale loc = null == locale ? DEFAULT_LOCALE : locale;
         final I18nService retval = services.get(loc);
         if (null == retval && !"en".equalsIgnoreCase(loc.getLanguage())) {
-            LOG.warn("No i18n service for locale " + loc + ".");
+            LOG.warn("No i18n service for locale {}.", loc);
         }
         return retval;
     }

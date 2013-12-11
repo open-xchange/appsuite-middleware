@@ -224,7 +224,7 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		while (iterator.hasNext()) {
 			String key = iterator.next();
 			o.addOperationData(new String("unnamed:" + key), c.getUnnamedProperty(key));
-			log.info("UNNAMED PROPERTIES : " + key);
+			log.info("UNNAMED PROPERTIES : {}", key);
 		}
 	}
 
@@ -255,7 +255,7 @@ public final class CassandraEAVContactServiceImpl implements EAVContactService {
 		while (iterator.hasNext()) {
 			String key = iterator.next();
 			updater.setValue(new Composite("unnamed", key), c.getUnnamedProperty(key), ss);
-			log.info("UNNAMED PROPERTIES : " + key);
+			log.info("UNNAMED PROPERTIES : {}", key);
 		}
 	}
 

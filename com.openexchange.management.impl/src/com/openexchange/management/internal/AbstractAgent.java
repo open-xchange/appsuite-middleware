@@ -266,7 +266,7 @@ public abstract class AbstractAgent {
      */
     public void registerMBean(final ObjectName objectName, final Object mbean) throws OXException {
         if (mbs.isRegistered(objectName)) {
-            LOG.warn(objectName.getCanonicalName() + " already registered");
+            LOG.warn("{} already registered", objectName.getCanonicalName());
             return;
         }
         try {
@@ -278,7 +278,7 @@ public abstract class AbstractAgent {
         } catch (final NotCompliantMBeanException e) {
             throw ManagementExceptionCode.NOT_COMPLIANT_MBEAN.create(e, mbean.getClass().getName());
         }
-        LOG.debug(objectName.getCanonicalName() + " registered");
+        LOG.debug("{} registered", objectName.getCanonicalName());
     }
 
     /**
@@ -296,7 +296,7 @@ public abstract class AbstractAgent {
             } catch (final MBeanRegistrationException e) {
                 throw ManagementExceptionCode.MBEAN_REGISTRATION.create(e, objectName);
             }
-            LOG.debug(objectName.getCanonicalName() + " unregistered");
+            LOG.debug("{} unregistered", objectName.getCanonicalName());
         }
     }
 
@@ -375,7 +375,7 @@ public abstract class AbstractAgent {
                 registry.list();
             } catch (final RemoteException e) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("No responsive RMI registry found that listens on port " + port + ". A new one is going to be created", e);
+                    LOG.debug("No responsive RMI registry found that listens on port {}. A new one is going to be created", port, e);
                 }
                 /*
                  * Create a new one
@@ -384,8 +384,7 @@ public abstract class AbstractAgent {
             }
             registries.put(Integer.valueOf(port), registry);
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder(128).append("RMI registry created on port ").append(port).append(" and bind address ").append(
-                    bindAddr).toString());
+                LOG.info("RMI registry created on port {} and bind address {}", port, bindAddr);
             }
         } catch (final UnknownHostException e) {
             throw ManagementExceptionCode.UNKNOWN_HOST_ERROR.create(e, e.getMessage());
@@ -455,7 +454,7 @@ public abstract class AbstractAgent {
             cs.start();
             connectors.put(url, cs);
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder("JMX connector server on ").append(url).append(" started").toString());
+                LOG.info("JMX connector server on {} started", url);
             }
             return url;
         } catch (final IOException e) {
@@ -476,10 +475,10 @@ public abstract class AbstractAgent {
         try {
             connector.stop();
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder("JMX connector server on ").append(url).append(" stopped").toString());
+                LOG.info("JMX connector server on {} stopped", url);
             }
         } catch (final IOException e) {
-            LOG.error(new StringBuilder("JMX connector server on ").append(url).append(" could not be stopped").toString(), e);
+            LOG.error("JMX connector server on {} could not be stopped", url, e);
             return;
         }
     }

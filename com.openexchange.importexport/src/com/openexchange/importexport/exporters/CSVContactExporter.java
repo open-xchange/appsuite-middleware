@@ -223,14 +223,14 @@ public class CSVContactExporter implements Exporter {
                     }
                     ret.append(convertToLine(convertToList(current, cols)));
                 } catch (final SearchIteratorException e) {
-                    LOG.error("Could not retrieve contact from folder " + folder + " using a FolderIterator, exception was: ", e);
+                    LOG.error("Could not retrieve contact from folder {} using a FolderIterator, exception was: ", folder, e);
                 } catch (final OXException e) {
-                    LOG.error("Could not retrieve contact from folder " + folder + ", OXException was: ", e);
+                    LOG.error("Could not retrieve contact from folder {}, OXException was: ", folder, e);
                 }
 
             }
         } catch (final OXException e) {
-            LOG.error("Could not retrieve contact from folder " + folder + " using a FolderIterator, exception was: ", e);
+            LOG.error("Could not retrieve contact from folder {} using a FolderIterator, exception was: ", folder, e);
         }
         final byte[] bytes = Charsets.getBytes(ret.toString(), Charsets.UTF_8);
         return new SizedInputStream(new ByteArrayInputStream(bytes), bytes.length, Format.CSV);

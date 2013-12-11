@@ -1138,7 +1138,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 // Hm... Something weird with executed "UID FETCH" command; retry manually...
                 final int[] seqNums = IMAPCommandsCollection.uids2SeqNums(imapFolder, new long[] { msgUID });
                 if ((null == seqNums) || (0 == seqNums.length)) {
-                    LOG.warn("No message with UID '" + msgUID + "' found in folder '" + fullName + '\'', cause);
+                    LOG.warn("No message with UID '{}' found in folder '{}{}", msgUID, fullName, '\'', cause);
                     return null;
                 }
                 final int msgnum = seqNums[0];
@@ -1146,7 +1146,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     /*
                      * message-numbers start at 1
                      */
-                    LOG.warn("No message with UID '" + msgUID + "' found in folder '" + fullName + '\'', cause);
+                    LOG.warn("No message with UID '{}' found in folder '{}{}", msgUID, fullName, '\'', cause);
                     return null;
                 }
                 msg = (IMAPMessage) imapFolder.getMessage(msgnum);
@@ -1537,7 +1537,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             } else if (useReferenceOnlyThreader()) {
                 final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), true);
                 final boolean byEnvelope = byEnvelope();
-                LOG.debug("\tIMAPMessageStorage.getThreadSortedMessages(): Using built-in by-reference-only threader." + (byEnvelope ? " Preferring ENVELOPE." : ""));
+                LOG.debug("\tIMAPMessageStorage.getThreadSortedMessages(): Using built-in by-reference-only threader.{}", (byEnvelope ? " Preferring ENVELOPE." : ""));
                 /*
                  * Do list append
                  */
@@ -1668,7 +1668,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     merged = true;
                     if (logIt) {
                         final long dur = System.currentTimeMillis() - st;
-                        LOG.info("\tIMAPMessageStorage.getThreadSortedMessages(): In-application thread-sort (incl. sent messages) took " + dur + "msec for folder " + fullName);
+                        LOG.info("\tIMAPMessageStorage.getThreadSortedMessages(): In-application thread-sort (incl. sent messages) took {}msec for folder {}", dur, fullName);
                     }
                 } else {
                     final ThreadableResult threadableResult = getThreadableFor(imapFolder, false, cache, limit, accountId, session);
@@ -1678,7 +1678,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     cached = threadableResult.cached;
                     if (logIt) {
                         final long dur = System.currentTimeMillis() - st;
-                        LOG.info("\tIMAPMessageStorage.getThreadSortedMessages(): In-application thread-sort took " + dur + "msec for folder " + fullName);
+                        LOG.info("\tIMAPMessageStorage.getThreadSortedMessages(): In-application thread-sort took {}msec for folder {}", dur, fullName);
                     }
                 }
             }
@@ -1816,7 +1816,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             clearCache(imapFolder);
             if (debug) {
                 final long dur = System.currentTimeMillis() - timeStamp;
-                LOG.debug("\tIMAPMessageStorage.getThreadSortedMessages() for " + fullName + " took " + dur + "msec");
+                LOG.debug("\tIMAPMessageStorage.getThreadSortedMessages() for {} took {}msec", fullName, dur);
             }
         }
     }
@@ -1901,7 +1901,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
         if (logIt) {
             final long dur = System.currentTimeMillis() - st;
-            LOG.debug("\tMessage fetch took " + dur + "msec for folder " + fullName);
+            LOG.debug("\tMessage fetch took {}msec for folder {}", dur, fullName);
         }
         /*
          * Apply account identifier
@@ -3218,8 +3218,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, imapFolder.getFullName());
             }
             if (!UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId)) {
-                LOG.error(new com.openexchange.java.StringAllocator().append("Folder \"").append(imapFolder.getFullName()).append(
-                    "\" does not support user-defined flags. Update of color flag ignored.").toString());
+                LOG.error("Folder \"{}\" does not support user-defined flags. Update of color flag ignored.", imapFolder.getFullName());
                 return;
             }
             final OperationKey opKey = new OperationKey(Type.MSG_LABEL_UPDATE, accountId, new Object[] { fullName });
@@ -3295,8 +3294,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, imapFolder.getFullName());
             }
             if (!UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId)) {
-                LOG.error(new com.openexchange.java.StringAllocator().append("Folder \"").append(imapFolder.getFullName()).append(
-                    "\" does not support user-defined flags. Update of color flag ignored.").toString());
+                LOG.error("Folder \"{}\" does not support user-defined flags. Update of color flag ignored.", imapFolder.getFullName());
                 return;
             }
             final OperationKey opKey = new OperationKey(Type.MSG_LABEL_UPDATE, accountId, new Object[] { fullName });

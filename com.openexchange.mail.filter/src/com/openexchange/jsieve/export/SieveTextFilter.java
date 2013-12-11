@@ -347,12 +347,12 @@ public final class SieveTextFilter {
             final RuleComment ruleComment = rule.getRuleComment();
             if (null != ruleComment) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Added line number " + linenumber + " to comment " + ruleComment);
+                    LOG.debug("Added line number {} to comment {}", linenumber, ruleComment);
                 }
                 ruleComment.setLine(linenumber++);
             }
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Added line number " + linenumber + " to rule " + rule);
+                LOG.debug("Added line number {} to rule {}", linenumber, rule);
             }
             rule.setLinenumber(linenumber);
             // Here we add one because a space between two rules looks better
@@ -798,7 +798,7 @@ public final class SieveTextFilter {
     }
 
     private void printErrorForUser(final OXException mailfilterException) {
-        LOG.error("Error in mailfilter rules of user " + this.username + ": " + mailfilterException.getMessage(), mailfilterException);
+        LOG.error("Error in mailfilter rules of user {}: {}", this.username, mailfilterException.getMessage(), mailfilterException);
     }
 
     /**

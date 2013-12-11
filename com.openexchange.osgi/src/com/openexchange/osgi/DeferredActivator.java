@@ -455,7 +455,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                         startBundle();
                     } catch (final Throwable t) {
                         ExceptionUtils.handleThrowable(t);
-                        LOG.error(t.getMessage(), t);
+                        LOG.error("", t);
                     }
                 }
             };

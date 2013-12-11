@@ -156,7 +156,7 @@ public final class SocketFetcher {
             try {
                 clsSockFact = cl.loadClass(sfClass);
             } catch (final ClassNotFoundException cex) {
-                LOG.error(cex.getMessage(), cex);
+                LOG.error("", cex);
             }
         }
         if (clsSockFact == null) {

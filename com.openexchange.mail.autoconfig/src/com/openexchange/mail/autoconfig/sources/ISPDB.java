@@ -112,7 +112,7 @@ public class ISPDB extends AbstractConfigSource {
         try {
             javaURL = new URL(url);
         } catch (MalformedURLException e) {
-            LOG.warn("Unable to parse URL: " + url, e);
+            LOG.warn("Unable to parse URL: {}", url, e);
             return null;
         }
 
@@ -140,7 +140,7 @@ public class ISPDB extends AbstractConfigSource {
             int httpCode = client.executeMethod(getMethod);
 
             if (httpCode != 200) {
-                LOG.info("Could not retrieve config XML. Return code was: " + httpCode);
+                LOG.info("Could not retrieve config XML. Return code was: {}", httpCode);
                 return null;
             }
 

@@ -83,7 +83,7 @@ public class FormalFieldParser {
      */
     public String parse(String source) {
         StringBuffer b = new StringBuffer();
-        log.debug("[parse]: Parsing \'" + source + "\'");
+        log.debug("[parse]: Parsing \'{}\'", source);
         List<Token> termList = this.split(source);
 
         for (Token t : termList) {
@@ -92,7 +92,7 @@ public class FormalFieldParser {
                 b.append(this.parseTerm(t.getTerm(), formalFieldMap.get(s)) + " ");
             } else {
                 if (!(s.equalsIgnoreCase("AND") || s.equalsIgnoreCase("OR") || s.equalsIgnoreCase("NOT"))) {
-                    log.debug("[parse]: No mapping for field \'" + s + "\'");
+                    log.debug("[parse]: No mapping for field \'{}\'", s);
                 }
                 b.append(s + " ");
             }
@@ -108,12 +108,12 @@ public class FormalFieldParser {
         boolean escaped = false;
 
         StringBuilder b = new StringBuilder();
-        log.trace("[split]: Starting to split \'" + source + "\'");
+        log.trace("[split]: Starting to split \'{}\'", source);
 
         final int length = source.length();
         for (int i = 0; i < length; i++) {
             final char ch = source.charAt(i);
-            log.trace("[split]: \'" + ch + "\'");
+            log.trace("[split]: \'{}\'", ch);
             switch (ch) {
                 case '\\':
                     escaped = true;
@@ -142,7 +142,7 @@ public class FormalFieldParser {
                     if (!protectQuote) {
                         Token t = new Token(b.toString().trim(), TokenTypes.GENERIC);
                         termList.add(t);
-                        log.debug("[split]: add term \'" + t.getTerm() + "\'");
+                        log.debug("[split]: add term \'{}\'", t.getTerm());
                         b.delete(0, b.length());
                         protectQuote = false;
                         escaped = false;
@@ -156,7 +156,7 @@ public class FormalFieldParser {
                         Token t = new Token(b.toString().trim(), TokenTypes.GENERIC);
                         if (b.toString().trim().length() > 0) {
                             termList.add(t);
-                            log.debug("[split]: add term \'" + t.getTerm() + "\'");
+                            log.debug("[split]: add term \'{}\'", t.getTerm());
                         }
                         termList.add(new Token("(", TokenTypes.BRACKET));
                         log.debug("[split]: add term \'(\'");
@@ -174,7 +174,7 @@ public class FormalFieldParser {
                         Token t = new Token(b.toString().trim(), TokenTypes.GENERIC);
                         if (b.toString().trim().length() > 0) {
                             termList.add(t);
-                            log.debug("[split]: add term \'" + t.getTerm() + "\'");
+                            log.debug("[split]: add term \'{}\'", t.getTerm());
                         }
                         termList.add(new Token(")", TokenTypes.BRACKET));
                         log.debug("[split]: add term \')\'");
@@ -193,12 +193,12 @@ public class FormalFieldParser {
 
         Token t = new Token(b.toString().trim(), TokenTypes.GENERIC);
         termList.add(t);
-        log.trace("[split]: add term \'" + t.getTerm() + "\'");
+        log.trace("[split]: add term \'{}\'", t.getTerm());
         return termList;
     }
 
     private String parseTerm(String term, List<String> replacements) throws RuntimeException {
-        log.debug("[parseTerm]: Receiving search string \'" + term + "\'");
+        log.debug("[parseTerm]: Receiving search string \'{}\'", term);
         String searchTerm;
 
         int pos;
@@ -222,7 +222,7 @@ public class FormalFieldParser {
         }
         b.append(')');
         if (log.isDebugEnabled()) {
-            log.debug("[parseTerm]: result is \'" + b.toString() + "\'");
+            log.debug("[parseTerm]: result is \'{}\'", b);
         }
 
         return b.toString();
@@ -231,7 +231,7 @@ public class FormalFieldParser {
     private Map<String, List<String>> createMapping(Map<String, String> rawMap) {
         if (log.isTraceEnabled()) {
             for (String s : rawMap.keySet()) {
-                log.debug("[createMapping]: Received " + s + ":" + rawMap.get(s));
+                log.debug("[createMapping]: Received {}:{}", s, rawMap.get(s));
             }
         }
         Map<String, List<String>> fieldMappings = new HashMap<String, List<String>>();
@@ -261,7 +261,7 @@ public class FormalFieldParser {
                 for (String t : fieldMappings.get(s)) {
                     b.append(t + " ");
                 }
-                log.trace("[createMapping]: result is " + b.toString());
+                log.trace("[createMapping]: result is {}", b);
             }
         }
         return fieldMappings;

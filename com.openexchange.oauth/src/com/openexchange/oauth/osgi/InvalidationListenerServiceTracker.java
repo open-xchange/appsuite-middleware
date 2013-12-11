@@ -80,8 +80,7 @@ public class InvalidationListenerServiceTracker implements ServiceTrackerCustomi
         if (InvalidationListenerRegistry.getInstance().addInvalidationListener( addedService)) {
             return addedService;
         }
-        LOG.warn(new StringBuilder(64).append("Duplicate invalidation listener \"").append(addedService.getClass().getName()).append(
-            "\" is not be added to registry.").toString());
+        LOG.warn("Duplicate invalidation listener \"{}\" is not be added to registry.", addedService.getClass().getName());
         // This service needs not to be tracked, thus return null
         context.ungetService(reference);
         return null;

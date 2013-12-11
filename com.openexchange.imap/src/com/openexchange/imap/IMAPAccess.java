@@ -885,7 +885,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                  */
                 if (DEBUG) {
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("IMAPAccess.connectIMAPStore() took " + dur + "msec.");
+                    LOG.debug("IMAPAccess.connectIMAPStore() took {}msec.", dur);
                 }
                 return imapStore;
             } catch (final MessagingException e) {

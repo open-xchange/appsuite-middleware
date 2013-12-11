@@ -119,9 +119,9 @@ public final class HzQueue<E> implements Queue<E> {
             } catch (final RuntimeException e) {
                 // Removing message listener failed
                 if (LOG.isDebugEnabled()) {
-                    LOG.warn("Couldn't remove message listener from Hazelcast queue \"" + name + "\".", e);
+                    LOG.warn("Couldn't remove message listener from Hazelcast queue \"{}\".", name, e);
                 } else {
-                    LOG.warn("Couldn't remove message listener from Hazelcast queue \"" + name + "\".");
+                    LOG.warn("Couldn't remove message listener from Hazelcast queue \"{}\".", name);
                 }
             }
         }

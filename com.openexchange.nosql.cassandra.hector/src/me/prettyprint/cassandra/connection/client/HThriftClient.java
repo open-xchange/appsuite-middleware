@@ -121,12 +121,12 @@ public class HThriftClient implements HClient {
       try {
         transport.flush();
       } catch (Exception e) {
-        log.error("Could not flush transport (to be expected if the pool is shutting down) in close for client: " + toString(), e);
+        log.error("Could not flush transport (to be expected if the pool is shutting down) in close for client: {}", toString(), e);
       } finally {
         try {
           transport.close();
         } catch (Exception e) {
-          log.error("Error on transport close for client: " +toString(), e);
+          log.error("Error on transport close for client: {}", toString(), e);
         }
       }
     }
@@ -172,7 +172,7 @@ public class HThriftClient implements HClient {
       } catch (TTransportException e) {
         // Thrift exceptions aren't very good in reporting, so we have to catch the exception here and
         // add details to it.
-        log.debug("Unable to open transport to " + cassandraHost.getName());
+        log.debug("Unable to open transport to {}", cassandraHost.getName());
         //clientMonitor.incCounter(Counter.CONNECT_ERROR);
         throw new HectorTransportException("Unable to open transport to " + cassandraHost.getName() +" , " +
             e.getLocalizedMessage(), e);

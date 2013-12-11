@@ -79,7 +79,7 @@ public class Activator extends HousekeepingActivator {
     @Override
     protected void handleAvailability(final Class<?> clazz) {
         if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
+            LOG.warn("Absent service: {}", clazz.getName());
         }
 
         HostnameLDAPServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
@@ -88,7 +88,7 @@ public class Activator extends HousekeepingActivator {
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
         if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
+            LOG.info("Re-available service: {}", clazz.getName());
         }
 
         HostnameLDAPServiceRegistry.getServiceRegistry().removeService(clazz);
@@ -121,7 +121,7 @@ public class Activator extends HousekeepingActivator {
             registerService(HostnameService.class, hostnameservice, null);
 
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
 
@@ -137,7 +137,7 @@ public class Activator extends HousekeepingActivator {
 
             HostnameLDAPServiceRegistry.getServiceRegistry().clearRegistry();
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
     }

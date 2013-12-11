@@ -100,7 +100,7 @@ public final class MonitoringInit implements Initialization {
     @Override
     public void start() throws OXException {
         if (started.get()) {
-            LOG.error(MonitoringInit.class.getName() + " already started");
+            LOG.error("{} already started", MonitoringInit.class.getName());
             return;
         }
         /*
@@ -111,11 +111,11 @@ public final class MonitoringInit implements Initialization {
         try {
             managementAgent.registerMBean(getObjectName(), generalMonitorBean);
         } catch (final MalformedObjectNameException exc) {
-            LOG.error(exc.getMessage(), exc);
+            LOG.error("", exc);
         } catch (final NullPointerException exc) {
-            LOG.error(exc.getMessage(), exc);
+            LOG.error("", exc);
         } catch (final Exception exc) {
-            LOG.error(exc.getMessage(), exc);
+            LOG.error("", exc);
         }
         if (LOG.isInfoEnabled()) {
             LOG.info("JMX Monitor applied");
@@ -130,7 +130,7 @@ public final class MonitoringInit implements Initialization {
     @Override
     public void stop() throws OXException {
         if (!started.get()) {
-            LOG.error(MonitoringInit.class.getName() + " has not been started");
+            LOG.error("{} has not been started", MonitoringInit.class.getName());
             return;
         }
         final ManagementService managementAgent = MonitoringServiceRegistry.getServiceRegistry().getService(ManagementService.class);
@@ -138,11 +138,11 @@ public final class MonitoringInit implements Initialization {
             try {
                 managementAgent.unregisterMBean(getObjectName());
             } catch (final MalformedObjectNameException exc) {
-                LOG.error(exc.getMessage(), exc);
+                LOG.error("", exc);
             } catch (final NullPointerException exc) {
-                LOG.error(exc.getMessage(), exc);
+                LOG.error("", exc);
             } catch (final Exception exc) {
-                LOG.error(exc.getMessage(), exc);
+                LOG.error("", exc);
             }
             if (LOG.isInfoEnabled()) {
                 LOG.info("JMX Monitor removed");

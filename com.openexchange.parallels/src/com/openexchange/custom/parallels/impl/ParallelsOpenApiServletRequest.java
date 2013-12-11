@@ -99,7 +99,7 @@ public final class ParallelsOpenApiServletRequest  {
         try {
             this.user = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw new OXException(e);
         }
 
@@ -214,7 +214,7 @@ public final class ParallelsOpenApiServletRequest  {
                 }
             }
             if(LOG.isDebugEnabled()){
-                LOG.debug("Got the following items from openapi for list \""+list+"\" "+retval.toString());
+                LOG.debug("Got the following items from openapi for list \"{}\" {}", list, retval);
             }
             json_response.put("items", retval);
             return json_response;
@@ -239,7 +239,7 @@ public final class ParallelsOpenApiServletRequest  {
         config.setUserAgent("Open-Xchange Paralles Plugin");
         if(isOpenAPIAuthEnabled()){
             if(LOG.isDebugEnabled()){
-                LOG.debug("Using HTTP BASIC AUTH (Username: "+getOpenAPIAuthID()+") for sending XML-RPC requests to OpenAPI...");
+                LOG.debug("Using HTTP BASIC AUTH (Username: {}) for sending XML-RPC requests to OpenAPI...", getOpenAPIAuthID());
             }
             config.setBasicUserName(getOpenAPIAuthID());
             config.setBasicPassword(getOpenAPIAuthPassword());

@@ -106,7 +106,7 @@ public class POP3StorageProviderServiceTrackerCustomizer implements ServiceTrack
     public boolean addPOP3StorageProvider(final POP3StorageProvider provider) {
         final String providerName = provider.getPOP3StorageName();
         if (null == providerName) {
-            LOG.error("Missing provider name in storage provider instance: " + provider.getClass().getName());
+            LOG.error("Missing provider name in storage provider instance: {}", provider.getClass().getName());
             return false;
         }
         if (POP3StorageProviderRegistry.getInstance().addPOP3StorageProvider(providerName, provider)) {
@@ -117,12 +117,10 @@ public class POP3StorageProviderServiceTrackerCustomizer implements ServiceTrack
                 registrations.add(context.registerService(MailAccountDeleteListener.class, mailAccountDeleteListener, null));
             }
             registrationMap.put(provider.getPOP3StorageName(), registrations);
-            LOG.info(new StringBuilder(64).append("POP3 storage provider for name '").append(providerName).append(
-                "' successfully registered").toString());
+            LOG.info("POP3 storage provider for name '{}' successfully registered", providerName);
             return true;
         }
-        LOG.warn(new StringBuilder(64).append("POP3 storage provider for name '").append(providerName).append("' could not be added.").append(
-            " Another provider with the same name has already been registered.").toString());
+        LOG.warn("POP3 storage provider for name '{}' could not be added. Another provider with the same name has already been registered.", providerName);
         return false;
     }
 

@@ -106,7 +106,7 @@ public final class ServiceHolderInit implements Initialization {
             }
             final File sysPropFile = new File(propDir, "system.properties");
             if (!sysPropFile.exists() || !sysPropFile.isFile()) {
-                LOG.error(new com.openexchange.java.StringAllocator("Missing property file \"system.properties\" in properties path \"").append(propDir).append('"').toString());
+                LOG.error("Missing property file \"system.properties\" in properties path \"{}{}", propDir, '"');
                 throw ServiceExceptionCode.SERVICE_INITIALIZATION_FAILED.create();
             }
             try {
@@ -130,7 +130,7 @@ public final class ServiceHolderInit implements Initialization {
                     try {
                         serviceUsageTimeout = Integer.parseInt(serviceUsageTimeoutStr);
                     } catch (final NumberFormatException e) {
-                        LOG.error("Invalid property value for \"serviceUsageTimeout\": " + serviceUsageTimeoutStr);
+                        LOG.error("Invalid property value for \"serviceUsageTimeout\": {}", serviceUsageTimeoutStr);
                         serviceUsageTimeout = Integer.parseInt(DEFAULT_TIMEOUT);
                     }
                     ServiceHolder.enableServiceUsageInspection(serviceUsageTimeout);

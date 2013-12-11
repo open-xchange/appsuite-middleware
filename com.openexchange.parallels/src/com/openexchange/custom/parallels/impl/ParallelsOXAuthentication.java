@@ -179,7 +179,7 @@ public class ParallelsOXAuthentication implements AuthenticationService {
                 cid = rs.getString("cid");
                 loginmapping = rs.getString("login_info");
             }else{
-                LOG.error("Did not get any login_info mapping from configdb database for loginstring "+gui_loginstring);
+                LOG.error("Did not get any login_info mapping from configdb database for loginstring {}", gui_loginstring);
                 LOG.error("Hint: Account \""+gui_loginstring+"\" not yet provsioned in OX?");
                 LOG.error("This authentication request for loginstring "+gui_loginstring+" will fail");
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
@@ -189,7 +189,7 @@ public class ParallelsOXAuthentication implements AuthenticationService {
 
             // only if we get 2 strings out of the split , then proceed
             if(tmp_.length!=2){
-                LOG.error("handleLoginInfo: Could not split up login_info mapping correctly for mappingstring \""+loginmapping+"\" ");
+                LOG.error("handleLoginInfo: Could not split up login_info mapping correctly for mappingstring \"{}\" ", loginmapping);
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
             }
 

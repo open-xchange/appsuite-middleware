@@ -93,7 +93,7 @@ public final class WhitelistServiceTracker implements ServiceTrackerCustomizer<C
                 }
             }
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(WhitelistServiceTracker.class);
-            log.info("Built push client white-list from: " + property);
+            log.info("Built push client white-list from: {}", property);
         }
         return service;
     }

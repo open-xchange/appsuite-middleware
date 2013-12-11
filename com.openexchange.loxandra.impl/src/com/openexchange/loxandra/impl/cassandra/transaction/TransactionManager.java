@@ -312,7 +312,7 @@ public class TransactionManager {
 		 		q.add(tx);
 		 		queue.put(key, q);
 
-		 		log.info("waiting for lock " + key + " to be released");
+		 		log.info("waiting for lock {} to be released", key);
 
 		 		return lockAcquired;
 		 	}

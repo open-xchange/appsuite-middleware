@@ -135,7 +135,7 @@ public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
     @Override
     public void postRegister(final Boolean registrationDone) {
         if (LOG.isTraceEnabled()) {
-            LOG.trace(new StringBuilder("postRegister() with ").append(registrationDone).toString());
+            LOG.trace("postRegister() with {}", registrationDone);
         }
     }
 

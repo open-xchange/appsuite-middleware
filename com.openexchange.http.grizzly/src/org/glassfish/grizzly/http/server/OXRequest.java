@@ -193,7 +193,7 @@ public class OXRequest extends Request {
             String sessionId = createSessionID();
             registerNewSession(sessionId);
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Set new JSessionId Cookie: " + sessionId);
+                LOG.debug("Set new JSessionId Cookie: {}", sessionId);
             }
         }
         return session;
@@ -228,7 +228,7 @@ public class OXRequest extends Request {
      */
     private void removeInvalidSessionCookie(String invalidSessionId) {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Removing invalid JSessionId Cookie: " + invalidSessionId);
+            LOG.debug("Removing invalid JSessionId Cookie: {}", invalidSessionId);
         }
         for (Cookie cookie : cookies) {
             if (cookie.getName().startsWith(Globals.SESSION_COOKIE_NAME)) {

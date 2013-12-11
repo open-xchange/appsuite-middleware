@@ -139,7 +139,7 @@ public class SolrAttachmentSearchTermVisitor implements SearchTermVisitor {
     private void appendStringTerm(AttachmentIndexField field, SearchTerm<String> term) {
         Set<String> solrFields = fieldConfig.getSolrFields(field);
         if (solrFields == null || solrFields.isEmpty()) {
-            LOG.warn("Did not find index fields for parameter " + field.toString() + ". Skipping this field in search query...");
+            LOG.warn("Did not find index fields for parameter {}. Skipping this field in search query...", field);
             return;
         }
 

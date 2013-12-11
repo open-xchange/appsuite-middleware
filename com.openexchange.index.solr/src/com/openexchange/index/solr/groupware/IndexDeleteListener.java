@@ -106,7 +106,7 @@ public class IndexDeleteListener implements DeleteListener {
                     indexService.removeCoreEnvironment(identifier);
                 }
             } catch (Exception e) {
-                LOG.warn("Error during clean up of core environment for core " + identifier.toString() + ".", e);
+                LOG.warn("Error during clean up of core environment for core {}.", identifier, e);
             }
         }
     }

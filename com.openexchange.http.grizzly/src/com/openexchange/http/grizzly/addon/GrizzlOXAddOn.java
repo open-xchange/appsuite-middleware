@@ -85,14 +85,14 @@ public class GrizzlOXAddOn implements AddOn {
     public void setup(NetworkListener networkListener, FilterChainBuilder builder) {
         AddOn[] addOns = networkListener.getAddOns();
         for (AddOn addOn : addOns) {
-            LOG.info("Current Addon is: " + addOn.getClass());
+            LOG.info("Current Addon is: {}", addOn.getClass());
         }
         int httpServerFilterIdx = builder.indexOfType(OXHttpServerFilter.class);
         if (httpServerFilterIdx > 0) {
             builder.addAll(httpServerFilterIdx -1 , filters);
         }
         if(LOG.isDebugEnabled()) {
-            LOG.debug("FilterChain after adding Watchers:\n" + FilterChainUtils.formatFilterChainString(builder.build()));
+            LOG.debug("FilterChain after adding Watchers:\n{}", FilterChainUtils.formatFilterChainString(builder.build()));
         }
     }
 

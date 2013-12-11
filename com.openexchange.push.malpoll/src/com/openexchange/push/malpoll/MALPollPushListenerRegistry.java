@@ -210,7 +210,7 @@ public final class MALPollPushListenerRegistry {
             try {
                 MALPollDBUtility.dropMailIDs(key.cid, key.user);
             } catch (final OXException e) {
-                LOG.error("DB tables could not be cleansed for removed push listener. User=" + key.user + ", context=" + key.cid, e);
+                LOG.error("DB tables could not be cleansed for removed push listener. User={}, context={}", key.user, key.cid, e);
             }
         }
         return true;
@@ -224,7 +224,7 @@ public final class MALPollPushListenerRegistry {
         try {
             MALPollDBUtility.dropMailIDs(key.cid, key.user);
         } catch (final OXException e) {
-            LOG.error("DB tables could not be cleansed for removed push listener. User=" + key.user + ", context=" + key.cid, e);
+            LOG.error("DB tables could not be cleansed for removed push listener. User={}, context={}", key.user, key.cid, e);
         }
         return true;
     }

@@ -410,17 +410,17 @@ public class MimeMessagingPart implements MessagingPart {
             return clazz.cast(part.getContent());
         } catch (final IOException e) {
             if (DEBUG) {
-                LOG.debug(clazz.getSimpleName() + " content could not be obtained.", e);
+                LOG.debug("{} content could not be obtained.", clazz.getSimpleName(), e);
             }
             return null;
         } catch (final javax.mail.MessagingException e) {
             if (DEBUG) {
-                LOG.debug(clazz.getSimpleName() + " content could not be obtained.", e);
+                LOG.debug("{} content could not be obtained.", clazz.getSimpleName(), e);
             }
             return null;
         } catch (final ClassCastException e) {
             if (DEBUG) {
-                LOG.debug("Content is not a " + clazz.getName() + '.', e);
+                LOG.debug("Content is not a {}{}", clazz.getName(), '.', e);
             }
             return null;
         }

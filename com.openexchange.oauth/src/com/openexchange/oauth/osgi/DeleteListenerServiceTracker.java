@@ -80,8 +80,7 @@ public final class DeleteListenerServiceTracker implements ServiceTrackerCustomi
         if (DeleteListenerRegistry.getInstance().addDeleteListener(addedService)) {
             return addedService;
         }
-        LOG.warn(new StringBuilder(64).append("Duplicate delete listener \"").append(addedService.getClass().getName()).append(
-            "\" is not be added to registry.").toString());
+        LOG.warn("Duplicate delete listener \"{}\" is not be added to registry.", addedService.getClass().getName());
         // This service needs not to be tracked, thus return null
         context.ungetService(reference);
         return null;

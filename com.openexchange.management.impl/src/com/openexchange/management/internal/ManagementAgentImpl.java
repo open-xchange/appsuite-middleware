@@ -180,8 +180,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                 }
                 registries.put(Integer.valueOf(jmxPort), registry);
                 if (LOG.isInfoEnabled()) {
-                    LOG.info(new StringBuilder(128).append("RMI registry created on port ").append(jmxPort).append(" and bind address ").append(
-                        jmxBindAddr == null ? "*" : jmxBindAddr.trim()).toString());
+                    LOG.info("RMI registry created on port {} and bind address {}", jmxPort, jmxBindAddr == null ? "*" : jmxBindAddr.trim());
                 }
                 // Environment map.
                 //
@@ -276,7 +275,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                 cs.start();
                 connectors.put(url, cs);
                 if (LOG.isInfoEnabled()) {
-                    LOG.info(new StringBuilder("JMX connector server on ").append(url).append(" started").toString());
+                    LOG.info("JMX connector server on {} started", url);
                 }
                 jmxURL = url;
             } else {
@@ -304,8 +303,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                 jmxURL = addConnectorServer(jmxServiceURL, jmxLogin, jmxPassword);
             }
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder(128).append("\n\n\tUse JConsole or MC4J to connect to MBeanServer with this url: ").append(
-                    jmxURL).append("\n").toString());
+                LOG.info("\n\n\tUse JConsole or MC4J to connect to MBeanServer with this url: {}\n", jmxURL);
             }
             running.set(true);
         } catch (final MalformedURLException e) {

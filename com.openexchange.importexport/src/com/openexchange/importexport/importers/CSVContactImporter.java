@@ -135,7 +135,7 @@ public class CSVContactImporter extends AbstractImporter {
         }
         if (fo == null) {
             if (LOG.isInfoEnabled()) {
-                LOG.info("Folder does not exist: " + folder);
+                LOG.info("Folder does not exist: {}", folder);
             }
             return false;
         }

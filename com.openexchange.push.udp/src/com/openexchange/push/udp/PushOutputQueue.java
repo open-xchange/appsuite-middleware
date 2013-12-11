@@ -102,7 +102,7 @@ public class PushOutputQueue implements Runnable {
      */
     public static void add(final PushObject pushObject) throws OXException {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("add PushObject: " + pushObject);
+            LOG.debug("add PushObject: {}", pushObject);
         }
         if (!isEnabled) {
             return;
@@ -147,7 +147,7 @@ public class PushOutputQueue implements Runnable {
      */
     public static void add(final RegisterObject registerObject, final boolean noDelay) throws OXException {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("add RegisterObject: " + registerObject);
+            LOG.debug("add RegisterObject: {}", registerObject);
         }
 
         if (!isEnabled) {
@@ -423,7 +423,7 @@ public class PushOutputQueue implements Runnable {
     public void run() {
         while (isRunning) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("get push objects from queue: " + queue.size());
+                LOG.debug("get push objects from queue: {}", queue.size());
             }
 
             try {
@@ -441,7 +441,7 @@ public class PushOutputQueue implements Runnable {
                 // Thread.sleep(10000);
                 // }
             } catch (final Exception exc) {
-                LOG.error(exc.getMessage(), exc);
+                LOG.error("", exc);
             }
         }
     }

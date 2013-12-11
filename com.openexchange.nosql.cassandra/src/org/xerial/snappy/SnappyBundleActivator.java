@@ -70,7 +70,7 @@ public class SnappyBundleActivator implements BundleActivator {
     	String osName = System.getProperty("os.name");
     	String osArch = System.getProperty("os.arch");
     	String fileSeparator = System.getProperty("file.separator");
-    	log.info(osName + " " + osArch);
+    	log.info("{} {}", osName, osArch);
 
     	/*if (osName.equals("Linux")) {
     		if (osArch.equals("amd64")) {

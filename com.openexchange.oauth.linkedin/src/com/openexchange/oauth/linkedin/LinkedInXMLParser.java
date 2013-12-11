@@ -183,11 +183,11 @@ public class LinkedInXMLParser {
             	throw OXException.general(message);
             }
         } catch (final ParserConfigurationException pce) {
-            LOG.error(pce.getMessage(), pce);
+            LOG.error("", pce);
         } catch (final SAXException se) {
-            LOG.error(se.getMessage(), se);
+            LOG.error("", se);
         } catch (final IOException ioe) {
-            LOG.error(ioe.getMessage(), ioe);
+            LOG.error("", ioe);
         }
         return contacts;
     }
@@ -201,11 +201,11 @@ public class LinkedInXMLParser {
             final Contact contact = parse(root);
             return contact;
         } catch (final ParserConfigurationException pce) {
-            LOG.error(pce.getMessage(), pce);
+            LOG.error("", pce);
         } catch (final SAXException se) {
-            LOG.error(se.getMessage(), se);
+            LOG.error("", se);
         } catch (final IOException ioe) {
-            LOG.error(ioe.getMessage(), ioe);
+            LOG.error("", ioe);
         }
         return null;
     }
@@ -359,7 +359,7 @@ public class LinkedInXMLParser {
                 contacts.add(parse(persons.optJSONObject(i)));
             } catch (final RuntimeException e) {
                 // Ignore
-                LOG.warn("Runtime error occurred: " + e.getMessage(), e);
+                LOG.warn("Runtime error occurred: {}", e.getMessage(), e);
             }
         }
         return contacts;

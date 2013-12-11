@@ -80,13 +80,13 @@ public class SimpleTranslator implements QueryTranslator {
         handlerName = name.trim();
         translationDict = new HashMap<String, List<String>>();
 
-        log.info("[init]: initializing configuration for handler \'" + handlerName + "\'");
+        log.info("[init]: initializing configuration for handler \'{}\'", handlerName);
 
         for (String key : config.getKeys(handlerName)) {
             String scrubbedKey = key.substring(handlerName.length() + 1);
 
             translationDict.put(scrubbedKey, config.getIndexFields(key));
-            log.info("[init]: Added translation for \'" + scrubbedKey + "\'");
+            log.info("[init]: Added translation for \'{}\'", scrubbedKey);
         }
         parser = new FormalFieldParser(translationDict, true);
     }

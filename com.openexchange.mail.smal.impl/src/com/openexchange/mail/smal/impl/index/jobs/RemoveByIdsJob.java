@@ -78,7 +78,7 @@ public class RemoveByIdsJob extends AbstractMailJob {
             MailJobInfo info = (MailJobInfo) jobInfo;
             long start = System.currentTimeMillis();
             if (LOG.isDebugEnabled()) {
-                LOG.debug(this.getClass().getSimpleName() + " started performing. " + info.toString());
+                LOG.debug("{} started performing. {}", this.getClass().getSimpleName(), info);
             }
 
             checkJobInfo();
@@ -95,7 +95,7 @@ public class RemoveByIdsJob extends AbstractMailJob {
 
                 if (LOG.isDebugEnabled()) {
                     long diff = System.currentTimeMillis() - start;
-                    LOG.debug(this.getClass().getSimpleName() + " lasted " + diff + "ms. " + info.toString());
+                    LOG.debug("{} lasted {}ms. {}", this.getClass().getSimpleName(), diff, info);
                 }
             }
         } catch (Exception e) {

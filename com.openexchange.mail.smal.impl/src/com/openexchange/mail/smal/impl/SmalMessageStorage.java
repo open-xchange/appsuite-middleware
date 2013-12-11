@@ -223,7 +223,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                 final IndexResult<MailMessage> result = indexAccess.query(parameters, MailIndexField.getFor(fields));
                 if (LOG.isDebugEnabled()) {
                     final long diff = System.currentTimeMillis() - start;
-                    LOG.debug("Index Query lasted " + diff + "ms.");
+                    LOG.debug("Index Query lasted {}ms.", diff);
                 }
 
                 List<IndexDocument<MailMessage>> documents = result.getResults();
@@ -263,7 +263,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             try {
                 submitFolderJob(folder);
             } catch (final OXException e) {
-                LOG.warn("Could not schedule folder job for folder " + folder + '.', e);
+                LOG.warn("Could not schedule folder job for folder {}{}", folder, '.', e);
             }
         }
 
@@ -331,7 +331,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         try {
             submitFolderJob(folder);
         } catch (final OXException e) {
-            LOG.warn("Could not schedule folder job for folder " + folder + '.', e);
+            LOG.warn("Could not schedule folder job for folder {}{}", folder, '.', e);
         }
 
         return messages;

@@ -322,7 +322,7 @@ public final class InternalUtility {
         } catch (final NumberFormatException e) {
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Utility.class);
             if (log.isDebugEnabled()) {
-                log.debug("Inbvalid color label: " + cl, e);
+                log.debug("Inbvalid color label: {}", cl, e);
             }
             return defaultValue;
         }

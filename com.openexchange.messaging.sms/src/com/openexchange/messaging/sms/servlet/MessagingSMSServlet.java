@@ -128,7 +128,7 @@ public final class MessagingSMSServlet extends PermissionServlet {
             response.setException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e));
         } catch (final RuntimeException e) {
             final OXException create = SMSMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            LOG.error(create.getMessage(), create);
+            LOG.error("", create);
             response.setException(create);
         }
 

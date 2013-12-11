@@ -176,7 +176,7 @@ public class MLTAction extends AbstractIndexAction {
         responseObject.put("docs", docs);
 
         long diff = System.currentTimeMillis() - start;
-        LOG.warn("Duration: " + diff + "ms.");
+        LOG.warn("Duration: {}ms.", diff);
         
         JSONObject resultObject = new JSONObject();
         JSONObject responseHeader = new JSONObject();

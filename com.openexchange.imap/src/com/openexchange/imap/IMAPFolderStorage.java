@@ -925,7 +925,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", createMe.getFullName()));
                         }
                         if (LOG.isWarnEnabled()) {
-                            LOG.warn("IMAP folder creation failed due to unsupported type." + " Going to retry with fallback type HOLDS-MESSAGES.", e);
+                            LOG.warn("IMAP folder creation failed due to unsupported type. Going to retry with fallback type HOLDS-MESSAGES.", e);
                         }
                         if (!(created = createMe.create(Folder.HOLDS_MESSAGES))) {
                             throw IMAPException.create(IMAPException.Code.FOLDER_CREATION_FAILED, imapConfig, session, e, createMe.getFullName(), isParentDefault ? DEFAULT_FOLDER_ID : parent.getFullName());
@@ -1005,9 +1005,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         created = false;
                     }
                 } catch (final Throwable e2) {
-                    LOG.error(
-                        new com.openexchange.java.StringAllocator().append("Temporary created IMAP folder \"").append(createMe.getFullName()).append(
-                            "could not be deleted").toString(),
+                    LOG.error("Temporary created IMAP folder \"{}could not be deleted", createMe.getFullName(),
                         e2);
                 }
             }
@@ -1024,9 +1022,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             created = false;
                         }
                     } catch (final Throwable e2) {
-                        LOG.error(
-                            new com.openexchange.java.StringAllocator().append("Temporary created IMAP folder \"").append(createMe.getFullName()).append(
-                                "\" could not be deleted").toString(),
+                        LOG.error("Temporary created IMAP folder \"{}\" could not be deleted", createMe.getFullName(),
                             e2);
                     }
                 }
@@ -1040,9 +1036,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         created = false;
                     }
                 } catch (final Throwable e2) {
-                    LOG.error(
-                        new com.openexchange.java.StringAllocator().append("Temporary created IMAP folder \"").append(createMe.getFullName()).append(
-                            "\" could not be deleted").toString(),
+                    LOG.error("Temporary created IMAP folder \"{}\" could not be deleted", createMe.getFullName(),
                         e2);
                 }
             }
@@ -1055,9 +1049,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         created = false;
                     }
                 } catch (final Throwable e2) {
-                    LOG.error(
-                        new com.openexchange.java.StringAllocator().append("Temporary created IMAP folder \"").append(createMe.getFullName()).append(
-                            "\" could not be deleted").toString(),
+                    LOG.error("Temporary created IMAP folder \"{}\" could not be deleted", createMe.getFullName(),
                         e2);
                 }
             }
@@ -1756,7 +1748,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             try {
                 temporaryFolder.delete(true);
             } catch (final MessagingException e1) {
-                LOG.error("Temporary created folder could not be deleted: " + temporaryFolder.getFullName(), e1);
+                LOG.error("Temporary created folder could not be deleted: {}", temporaryFolder.getFullName(), e1);
             }
         }
     }
@@ -2248,7 +2240,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
             final String retvalPrefix = new com.openexchange.java.StringAllocator(isEmpty ? STR_INBOX : prefix).append(NamespaceFoldersCache.getPersonalSeparator()).toString();
             if (!retvalPrefix.equals(prefixByInferiors)) {
-                LOG.warn("The personal namespace indicated by NAMESPACE command does not match root folder's capabilities: " + retvalPrefix + " IS NOT " + prefixByInferiors);
+                LOG.warn("The personal namespace indicated by NAMESPACE command does not match root folder's capabilities: {} IS NOT {}", retvalPrefix, prefixByInferiors);
             }
             return retvalPrefix;
         } catch (final MessagingException e) {
@@ -2360,7 +2352,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                              * Custom parse routine failed, too
                              */
                             if (LOG.isWarnEnabled()) {
-                                LOG.warn(inner.getMessage(), inner);
+                                LOG.warn("", inner);
                             }
                             return com.openexchange.mail.Quota.getUnlimitedQuotas(types);
                         }

@@ -201,7 +201,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
 
                 if (def == null) {
                     // could not find appropriate parser for this part of the vcard file
-                    LOG.error("Could not recognize format of the following VCard data: " + Arrays.toString(chunk.getContent()));
+                    LOG.error("Could not recognize format of the following VCard data: {}", Arrays.toString(chunk.getContent()));
                     importResult.setDate(new Date(System.currentTimeMillis()));
                     importResult.setException(ImportExportExceptionCodes.UNKNOWN_VCARD_FORMAT.create(chunk.getContent()));
                 } else {
@@ -221,9 +221,9 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                                 count++;
                             } catch (final OXException oxEx) {
                                 if (CATEGORY_USER_INPUT.equals(oxEx.getCategory())) {
-                                    LOG.debug(oxEx.getMessage(), oxEx);
+                                    LOG.debug("", oxEx);
                                 } else {
-                                    LOG.error(oxEx.getMessage(), oxEx);
+                                    LOG.error("", oxEx);
                                 }
                                 importResult.setException(oxEx);
                                 LOG.debug("cannot import contact object", oxEx);

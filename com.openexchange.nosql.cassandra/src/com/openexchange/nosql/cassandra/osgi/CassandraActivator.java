@@ -115,7 +115,7 @@ public final class CassandraActivator extends HousekeepingActivator {
     	String osName = System.getProperty("os.name");
     	String osArch = System.getProperty("os.arch");
     	//String fileSeparator = System.getProperty("file.separator");
-    	log.info(osName + " " + osArch);
+    	log.info("{} {}", osName, osArch);
     	
     	String postfix = null;
     	if (osName.equals("Linux")) {

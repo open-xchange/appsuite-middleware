@@ -238,8 +238,7 @@ public final class MALPollPushListener implements PushListener {
              * Still in process...
              */
             if (DEBUG_ENABLED) {
-                LOG.debug(new StringBuilder(64).append("Listener still in process for user ").append(userId).append(" in context ").append(
-                    contextId).append(". Return immediately.").toString());
+                LOG.debug("Listener still in process for user {} in context {}. Return immediately.", userId, contextId);
             }
             return;
         }
@@ -282,7 +281,7 @@ public final class MALPollPushListener implements PushListener {
         synchronizeIDs(mailService, hash, loadDBIDs);
         if (DEBUG_ENABLED) {
             final long d = System.currentTimeMillis() - s;
-            LOG.debug("First run took " + d + "msec");
+            LOG.debug("First run took {}msec", d);
         }
     }
 
@@ -298,7 +297,7 @@ public final class MALPollPushListener implements PushListener {
         synchronizeIDs(mailService, hash, true);
         if (DEBUG_ENABLED) {
             final long d = System.currentTimeMillis() - s;
-            LOG.debug("Subsequent run took " + d + "msec");
+            LOG.debug("Subsequent run took {}msec", d);
         }
     }
 

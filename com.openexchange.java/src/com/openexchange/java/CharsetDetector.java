@@ -99,15 +99,15 @@ public final class CharsetDetector {
         try {
             return (null != charset && checkName(charset) && Charset.isSupported(charset));
         } catch (final RuntimeException rte) {
-            LOG.warn("RuntimeException while checking charset: " + charset, rte);
+            LOG.warn("RuntimeException while checking charset: {}", charset, rte);
             return false;
         } catch (final Error e) {
             handleThrowable(e);
-            LOG.warn("Error while checking charset: " + charset, e);
+            LOG.warn("Error while checking charset: {}", charset, e);
             return false;
         } catch (final Throwable t) {
             handleThrowable(t);
-            LOG.warn("Unexpected error while checking charset: " + charset, t);
+            LOG.warn("Unexpected error while checking charset: {}", charset, t);
             return false;
         }
     }

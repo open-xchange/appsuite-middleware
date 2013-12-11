@@ -327,7 +327,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                                         }
                                         sb.append(desc);
                                     } catch (final RuntimeException e) {
-                                        LOG.warn("Max. Number of External Connections: Invalid entry: " + desc, e);
+                                        LOG.warn("Max. Number of External Connections: Invalid entry: {}", desc, e);
                                     }
                                 }
                             }

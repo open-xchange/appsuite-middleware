@@ -133,7 +133,7 @@ public final class FileEmbeddedDocumentExtractor implements EmbeddedDocumentExtr
                 try {
                     name += config.getMimeRepository().forName(contentType).getExtension();
                 } catch (final MimeTypeException e) {
-                    LOG.debug("Invalid MIME type encountered: " + contentType, e);
+                    LOG.debug("Invalid MIME type encountered: {}", contentType, e);
                 }
                 if (name.indexOf('.') == -1) {
                     final byte[] bytes = Streams.stream2bytes(in);
@@ -141,7 +141,7 @@ public final class FileEmbeddedDocumentExtractor implements EmbeddedDocumentExtr
                     try {
                         name += config.getMimeRepository().forName(contentType).getExtension();
                     } catch (final MimeTypeException e) {
-                        LOG.debug("Invalid MIME type encountered: " + contentType, e);
+                        LOG.debug("Invalid MIME type encountered: {}", contentType, e);
                     }
                     in = Streams.newByteArrayInputStream(bytes);
                 }

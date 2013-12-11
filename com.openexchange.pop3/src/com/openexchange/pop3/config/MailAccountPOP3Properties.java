@@ -84,8 +84,7 @@ public final class MailAccountPOP3Properties extends MailAccountProperties imple
         }
 
         final String fallback = POP3Properties.getInstance().getPOP3AuthEnc();
-        LOG.error(new StringBuilder(64).append("POP3 Authentication Encoding: Unsupported charset \"").append(pop3AuthEncStr).append(
-            "\". Setting to fallback: ").append(fallback).append('\n').toString());
+        LOG.error("POP3 Authentication Encoding: Unsupported charset \"{}\". Setting to fallback: {}{}", pop3AuthEncStr, fallback, '\n');
         return fallback;
     }
 

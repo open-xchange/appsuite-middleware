@@ -191,7 +191,7 @@ public class ProxyServlet extends SessionServlet {
             for (final Restriction restriction : registration.getRestrictions()) {
                 if (!restriction.allow(response)) {
                     final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProxyServlet.class);
-                    log.info("Status code 403 (FORBIDDEN): Restriction failed: " + restriction.getDescription());
+                    log.info("Status code 403 (FORBIDDEN): Restriction failed: {}", restriction.getDescription());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Restriction failed: " + restriction.getDescription());
                     return;
                 }

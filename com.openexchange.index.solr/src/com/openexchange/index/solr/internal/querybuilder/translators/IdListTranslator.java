@@ -81,13 +81,13 @@ public class IdListTranslator implements QueryTranslator {
     public void init(String name, Configuration config, FieldConfiguration fieldConfig) throws TranslationException {
         handlerName = name.trim();
 
-        log.info("[init]: initializing configuration for handler \'" + handlerName + "\'");
+        log.info("[init]: initializing configuration for handler \'{}\'", handlerName);
 
         Set<String> keys = config.getKeys(handlerName);
         String key = handlerName + '.' + ID_FIELD;
         if (keys.contains(key)) {
             idKey = config.getRawMapping().get(key);
-            log.info("[init]: ID key is \'" + idKey + "\'");
+            log.info("[init]: ID key is \'{}\'", idKey);
             return;
         }
 

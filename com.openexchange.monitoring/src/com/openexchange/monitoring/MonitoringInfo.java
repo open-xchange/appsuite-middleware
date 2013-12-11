@@ -229,7 +229,7 @@ public class MonitoringInfo {
             retval = getCounter(connectionType).getCount();
             break;
         default:
-            LOG.error(new StringBuilder("MonitoringInfo.getNumberOfConnections(): Unknown connection type: ").append(connectionType).toString());
+            LOG.error("MonitoringInfo.getNumberOfConnections(): Unknown connection type: {}", connectionType);
         }
         return retval;
     }
@@ -286,7 +286,7 @@ public class MonitoringInfo {
             break;
         default:
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder("MonitoringInfo.changeNumberOfConnections(): Unknown connection type: ").append(connectionType).toString());
+                LOG.info("MonitoringInfo.changeNumberOfConnections(): Unknown connection type: {}", connectionType);
             }
         }
     }

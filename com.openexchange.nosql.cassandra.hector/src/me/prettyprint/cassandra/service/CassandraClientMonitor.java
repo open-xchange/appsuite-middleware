@@ -243,7 +243,7 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
         return false;
       }
     } catch (NumberFormatException e) {
-      log.error("Invalid number entered: " + retryDelay);
+      log.error("Invalid number entered: {}", retryDelay);
       return false;
     }
   }

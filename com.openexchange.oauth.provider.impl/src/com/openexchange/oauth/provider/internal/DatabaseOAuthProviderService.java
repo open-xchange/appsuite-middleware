@@ -339,7 +339,7 @@ public class DatabaseOAuthProviderService extends AbstractOAuthProviderService i
                         }
                         if (infoEnabled) {
                             final long dur = System.currentTimeMillis() - st;
-                            LOG.info("DatabaseOAuthProviderService.loadConsumers(): Loading accessors took " + dur + "msec");
+                            LOG.info("DatabaseOAuthProviderService.loadConsumers(): Loading accessors took {}msec", dur);
                         }
                     } catch (final Exception e) {
                         LOG.warn("Couldn't load OAuth accessors.", e);

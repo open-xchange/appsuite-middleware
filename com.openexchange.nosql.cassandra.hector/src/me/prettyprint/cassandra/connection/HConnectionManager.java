@@ -93,8 +93,7 @@ public class HConnectionManager {
     if (nodeAutoDiscoverService != null) {
       nodeAutoDiscoverService.doAddNodes();
     } else {
-      log.warn("unable to add nodes, nodeAutoDiscoverService was null.  " +
-              "CassandraHostConfigurator.autoDiscoverHosts is {}", cassandraHostConfigurator.getAutoDiscoverHosts());
+      log.warn("unable to add nodes, nodeAutoDiscoverService was null.  CassandraHostConfigurator.autoDiscoverHosts is {}", cassandraHostConfigurator.getAutoDiscoverHosts());
     }
   }
 

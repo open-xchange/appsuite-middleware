@@ -163,11 +163,11 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         boolean invoked = false;
         String alias = request.getDecodedRequestURI();
         String originalAlias = alias;
-        LOG.debug("Serviceing URI: " + alias);
+        LOG.debug("Serviceing URI: {}", alias);
         // first lookup needs to be done for full match.
         boolean cutOff = false;
         while (true) {
-            LOG.debug("CutOff: " + cutOff + ", alias: " + alias);
+            LOG.debug("CutOff: {}, alias: {}", cutOff, alias);
             alias = OSGiCleanMapper.map(alias, cutOff);
             if (alias == null) {
                 if (cutOff) {
@@ -358,8 +358,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
             if (mapper.isLocalyRegisteredAlias(alias)) {
                 mapper.doUnregister(alias, true);
             } else {
-                LOG.warn(new StringBuilder(128).append("Bundle: ").append(bundle).append(" tried to unregister not owned alias '").append(
-                    alias).append('\'').toString());
+                LOG.warn("Bundle: {} tried to unregister not owned alias '{}{}", bundle, alias, '\'');
                 throw new IllegalArgumentException(new StringBuilder(64).append("Alias '").append(alias).append(
                     "' was not registered by you.").toString());
             }
@@ -378,7 +377,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         lock.lock();
         try {
             for (String alias : mapper.getLocalAliases()) {
-                LOG.debug(new StringBuilder().append("Unregistering '").append(alias).append("'").toString());
+                LOG.debug("Unregistering '{}'", alias);
                 // remember not to call Servlet.destroy() owning bundle might be stopped already.
                 mapper.doUnregister(alias, false);
             }
@@ -399,7 +398,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
             Set<String> aliases = OSGiCleanMapper.getAllAliases();
             while (!aliases.isEmpty()) {
                 String alias = ((TreeSet<String>) aliases).first();
-                LOG.debug(new StringBuilder().append("Unregistering '").append(alias).append("'").toString());
+                LOG.debug("Unregistering '{}'", alias);
                 // remember not to call Servlet.destroy() owning bundle might be stopped already.
                 mapper.doUnregister(alias, false);
             }

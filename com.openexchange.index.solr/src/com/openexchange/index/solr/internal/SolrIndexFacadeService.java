@@ -166,7 +166,7 @@ public class SolrIndexFacadeService implements IndexFacadeService {
                         LOG.debug(sb.toString());
                     }
                 } catch (Throwable e) {
-                    LOG.error("Exception during timer task execution: " + e.getMessage(), e);
+                    LOG.error("Exception during timer task execution: {}", e.getMessage(), e);
                 }
 
             }

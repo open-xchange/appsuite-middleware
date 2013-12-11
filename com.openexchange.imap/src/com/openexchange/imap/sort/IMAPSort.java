@@ -169,7 +169,7 @@ public final class IMAPSort {
                 }
                 if (LOG.isWarnEnabled()) {
                     final OXException imapException = IMAPException.create(IMAPException.Code.IMAP_SORT_FAILED, e, e.getMessage());
-                    LOG.warn(imapException.getMessage(), imapException);
+                    LOG.warn("", imapException);
                 }
             }
         }
@@ -267,7 +267,7 @@ public final class IMAPSort {
                 }
                 if (LOG.isWarnEnabled()) {
                     final OXException imapException = IMAPException.create(IMAPException.Code.IMAP_SORT_FAILED, e, e.getMessage());
-                    LOG.warn(imapException.getMessage(), imapException);
+                    LOG.warn("", imapException);
                 }
                 applicationSort = true;
             }

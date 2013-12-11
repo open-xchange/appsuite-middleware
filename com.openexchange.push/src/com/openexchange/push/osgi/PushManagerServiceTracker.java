@@ -80,7 +80,7 @@ public final class PushManagerServiceTracker implements ServiceTrackerCustomizer
         final PushManagerService service = context.getService(reference);
         if (PushManagerRegistry.getInstance().addPushManager(service)) {
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PushManagerServiceTracker.class);
-            log.info("Registered push manager: " + service.getClass().getName());
+            log.info("Registered push manager: {}", service.getClass().getName());
             return service;
         }
         /*

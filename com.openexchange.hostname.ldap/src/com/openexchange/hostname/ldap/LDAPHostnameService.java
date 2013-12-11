@@ -132,7 +132,7 @@ public class LDAPHostnameService implements HostnameService {
                 final Attributes attributes = next.getAttributes();
                 final String attribute = getAttribute(ldapReturnField, attributes);
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Found result: " + attribute);
+                    LOG.debug("Found result: {}", attribute);
                 }
                 return attribute;
             }
@@ -218,7 +218,7 @@ public class LDAPHostnameService implements HostnameService {
             final String hostnameFromCache = instance.getHostnameFromCache(contextId);
             if (null == hostnameFromCache) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Hostname for context " + contextId + " is not contained in the cache any more, fetching from LDAP");
+                    LOG.debug("Hostname for context {} is not contained in the cache any more, fetching from LDAP", contextId);
                 }
                 final String hostname = fetchFromLdap(contextId);
                 if (null != hostname) {
@@ -227,19 +227,19 @@ public class LDAPHostnameService implements HostnameService {
                 return hostname;
             }
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Using hostname for context " + contextId + " from cache");
+                LOG.debug("Using hostname for context {} from cache", contextId);
             }
             return hostnameFromCache;
         } catch (final InvalidNameException e) {
-            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
+            LOG.error("Failed to fetch hostname for context id {}:", contextId, e);
         } catch (final AuthenticationException e) {
-            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
+            LOG.error("Failed to fetch hostname for context id {}:", contextId, e);
         } catch (final NamingException e) {
-            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
+            LOG.error("Failed to fetch hostname for context id {}:", contextId, e);
         } catch (final OXException e) {
-            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
+            LOG.error("Failed to fetch hostname for context id {}:", contextId, e);
         } catch (final RuntimeException e) {
-            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
+            LOG.error("Failed to fetch hostname for context id {}:", contextId, e);
         }
         return null;
     }

@@ -116,7 +116,7 @@ public class PushMsHandler implements EventHandler {
             try {
                 event = (CommonEvent) obj;
             } catch (final ClassCastException cce) {
-                LOG.warn("Unexpected type: " + cce.getMessage(), cce);
+                LOG.warn("Unexpected type: {}", cce.getMessage(), cce);
                 return;
             }
         }
@@ -127,7 +127,7 @@ public class PushMsHandler implements EventHandler {
             final ContextService contextService = Services.getService(ContextService.class);
             ctx = contextService.getContext(contextId);
         } catch (final OXException exc) {
-            LOG.error("cannot resolve context id: " + contextId, exc);
+            LOG.error("cannot resolve context id: {}", contextId, exc);
             return;
         }
 
@@ -165,7 +165,7 @@ public class PushMsHandler implements EventHandler {
             }
             break;
         default:
-            LOG.warn("Got event with unimplemented module: " + module);
+            LOG.warn("Got event with unimplemented module: {}", module);
         }
     }
 
@@ -175,7 +175,7 @@ public class PushMsHandler implements EventHandler {
             try {
                 publishTopic.publish(toPojo(e));
             } catch (final RuntimeException ex) {
-                LOG.error(ex.getMessage(), ex);
+                LOG.error("", ex);
             }
         }
     }
@@ -204,7 +204,7 @@ public class PushMsHandler implements EventHandler {
         try {
             publishTopic.publish(newPushMsObject(folderId, users, module, ctx, timestamp, e).writePojo());
         } catch (final RuntimeException ex) {
-            LOG.error(ex.getMessage(), ex);
+            LOG.error("", ex);
         }
     }
 

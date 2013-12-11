@@ -220,7 +220,7 @@ public final class JerichoParser {
             }
             if (DEBUG) {
                 final long dur = System.currentTimeMillis() - st;
-                LOG.debug("\tJerichoParser.parse() took " + dur + "msec.");
+                LOG.debug("\tJerichoParser.parse() took {}msec.", dur);
             }
         } catch (final StackOverflowError parserOverflow) {
             throw new ParsingDeniedException("Parser overflow detected.", parserOverflow);

@@ -238,7 +238,7 @@ class OSGiCleanMapper {
         if (containsAlias(alias)) {
             // should not happend, alias should be checked before.
             if(LOG.isWarnEnabled()){
-                LOG.warn("Alias \"" + alias + "\" already in use, this shouldn't happen");
+                LOG.warn("Alias \"{}\" already in use, this shouldn't happen", alias);
             }
         } else {
             registerAliasHandler(alias, handler);
@@ -318,7 +318,7 @@ class OSGiCleanMapper {
     public void addContext(HttpContext httpContext, ArrayList<OSGiServletHandler> servletHandlers) {
         contextServletHandlerMap.put(httpContext, servletHandlers);
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Adding another ServletHandler to the map. Now using "+contextServletHandlerMap.size()+" handlers");
+            LOG.debug("Adding another ServletHandler to the map. Now using {} handlers", contextServletHandlerMap.size());
             LOG.debug(prettyPrintServletHandlerMap());
         }
     }

@@ -103,13 +103,13 @@ public class ConfigServer extends AbstractConfigSource {
             // Execute GET request
             int statusCode = client.executeMethod(getMethod);
             if (statusCode != 200) {
-                LOG.info("Could not retrieve config XML from autoconfig server. Return code was: " + statusCode);
+                LOG.info("Could not retrieve config XML from autoconfig server. Return code was: {}", statusCode);
                 // Try 2nd URL
                 uri = new StringAllocator(64).append("http://").append(emailDomain).append("/.well-known/autoconfig/mail/config-v1.1.xml").toString();
                 getMethod.setURI(new URI(uri, false));
                 statusCode = client.executeMethod(getMethod);
                 if (statusCode != 200) {
-                    LOG.info("Could not retrieve config XML from main domain. Return code was: " + statusCode);
+                    LOG.info("Could not retrieve config XML from main domain. Return code was: {}", statusCode);
                     return null;
                 }
             }
@@ -125,12 +125,12 @@ public class ConfigServer extends AbstractConfigSource {
                 throw e;
             }
             // No valid XML received...
-            LOG.info("No valid XML received from URI: " + uri, e.getCause());
+            LOG.info("No valid XML received from URI: {}", uri, e.getCause());
         } catch (HttpException e) {
             LOG.warn("Could not retrieve config XML.", e);
         } catch (final java.net.UnknownHostException e) {
             // Obviously that host does not exist
-            LOG.debug("Could not retrieve config XML, because of an unknown host for URL: " + uri, e);
+            LOG.debug("Could not retrieve config XML, because of an unknown host for URL: {}", uri, e);
         } catch (final IOException e) {
             LOG.warn("Could not retrieve config XML.", e);
         }

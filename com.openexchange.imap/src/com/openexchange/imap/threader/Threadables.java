@@ -210,7 +210,7 @@ public final class Threadables {
                 entry.set(new TLongHashSet(IMAPCommandsCollection.getUIDCollection(imapFolder)), threadable, sorted);
                 if (logIt) {
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.info("\tNew ThreadableCacheEntry queried for \"" + imapFolder.getFullName() + "\" in " + dur + "msec");
+                    LOG.info("\tNew ThreadableCacheEntry queried for \"{}\" in {}msec", imapFolder.getFullName(), dur);
                 }
             } else if (entry.reconstructNeeded((uids = IMAPCommandsCollection.getUIDCollection(imapFolder)))) {
                 final TLongHashSet uidsSet = new TLongHashSet(uids);
@@ -241,7 +241,7 @@ public final class Threadables {
                     ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(task));
                     if (INFO) {
                         final long dur = System.currentTimeMillis() - st;
-                        LOG.info("\tExisting ThreadableCacheEntry queried for \"" + imapFolder.getFullName() + "\" in " + dur + "msec. Reconstruct performed ansynchronously separate thread.");
+                        LOG.info("\tExisting ThreadableCacheEntry queried for \"{}\" in {}msec. Reconstruct performed ansynchronously separate thread.", imapFolder.getFullName(), dur);
                     }
                     return new ThreadableResult((Threadable) retval.clone(), true);
                 }
@@ -256,11 +256,11 @@ public final class Threadables {
                 entry.set(uidsSet, threadable, sorted);
                 if (logIt) {
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.info("\tNew ThreadableCacheEntry queried for \"" + imapFolder.getFullName() + "\" in " + dur + "msec");
+                    LOG.info("\tNew ThreadableCacheEntry queried for \"{}\" in {}msec", imapFolder.getFullName(), dur);
                 }
             } else if (INFO) {
                 final long dur = System.currentTimeMillis() - st;
-                LOG.info("\tExisting ThreadableCacheEntry queried for \"" + imapFolder.getFullName() + "\" in " + dur + "msec");
+                LOG.info("\tExisting ThreadableCacheEntry queried for \"{}\" in {}msec", imapFolder.getFullName(), dur);
             }
         }
         return new ThreadableResult((Threadable) entry.getThreadable().clone(), false);
@@ -351,7 +351,7 @@ public final class Threadables {
                     r = protocol.command(command, null);
                     final long dur = System.currentTimeMillis() - start;
                     if (log.isDebugEnabled()) {
-                        log.debug('"' + command + "\" for \"" + imapFolder.getFullName() + "\" (" + imapFolder.getStore().toString() + ") took " + dur + "msec.");
+                        log.debug("{}{}\" for \"{}\" ({}) took {}msec.", '"', command, imapFolder.getFullName(), imapFolder.getStore(), dur);
                     }
                     mailInterfaceMonitor.addUseTime(dur);
                 }
@@ -491,7 +491,7 @@ public final class Threadables {
                     r = protocol.command(command, null);
                     final long dur = System.currentTimeMillis() - start;
                     if (log.isDebugEnabled()) {
-                        log.debug('"' + command + "\" for \"" + imapFolder.getFullName() + "\" (" + imapFolder.getStore().toString() + ") took " + dur + "msec.");
+                        log.debug("{}{}\" for \"{}\" ({}) took {}msec.", '"', command, imapFolder.getFullName(), imapFolder.getStore(), dur);
                     }
                     mailInterfaceMonitor.addUseTime(dur);
                 }

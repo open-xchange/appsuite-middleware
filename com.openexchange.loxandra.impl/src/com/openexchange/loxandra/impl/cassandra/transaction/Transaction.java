@@ -288,7 +288,7 @@ public class Transaction {
 			Operation o = operationsIterator.next();
 			Iterator<String> itColumnNames = o.getColumnNamesIterator();
 
-			log.info("Executing " + o.getAction() + " in " + o.getColumnFamilyName() + " with ROW KEY: " + o.getLockedObject());
+			log.info("Executing {} in {} with ROW KEY: {}", o.getAction(), o.getColumnFamilyName(), o.getLockedObject());
 
 			ColumnFamilyUpdater<UUID, Composite> transactionUpdater = transactionTemplate.createUpdater(txKey);
 

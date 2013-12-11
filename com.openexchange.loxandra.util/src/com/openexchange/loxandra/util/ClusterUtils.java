@@ -98,7 +98,7 @@ public class ClusterUtils {
 
         for (int i = 0; i < tokens.length; i++) {
             try {
-                log.info("Cleaning up " + nodes[i]);
+                log.info("Cleaning up {}", nodes[i]);
                 np = new NodeProbe(nodes[i], 7199);
                 np.forceTableCleanup("OX", new String[0]);
                 np.forceTableCleanup("OpsCenter", new String[0]);
@@ -119,7 +119,7 @@ public class ClusterUtils {
 
         for (int i = 0; i < tokens.length; i++) {
             try {
-                log.info("Cleaning up " + nodes[i]);
+                log.info("Cleaning up {}", nodes[i]);
                 np = new NodeProbe(nodes[i], 7199);
                 np.forceTableFlush("OX", new String[0]);
                 np.forceTableCleanup("OpsCenter", new String[0]);

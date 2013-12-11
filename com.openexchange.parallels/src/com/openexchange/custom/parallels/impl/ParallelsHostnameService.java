@@ -110,7 +110,7 @@ public final class ParallelsHostnameService implements HostnameService {
                             }else{
                                 hostname = URL_[1];
                                 if(LOG.isDebugEnabled()){
-                                    LOG.debug("getHostname: Successfully resolved HOST to "+hostname+" for branded context "+contextId);
+                                    LOG.debug("getHostname: Successfully resolved HOST to {} for branded context {}", hostname, contextId);
                                 }
                                 found_host = true;
                             }
@@ -127,16 +127,16 @@ public final class ParallelsHostnameService implements HostnameService {
                         } catch (UnknownHostException e) { }
                     }
                     if( null == hostname || hostname.length() == 0 ) {
-                        LOG.warn("getHostname: Unable to determine any hostname for context "+contextId);
+                        LOG.warn("getHostname: Unable to determine any hostname for context {}", contextId);
                     }
                 }
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
 
             return hostname;
         }else{
-            LOG.error("getHostname: Got context with id "+contextId+", dont generating any hostname");
+            LOG.error("getHostname: Got context with id {}, dont generating any hostname", contextId);
             return null;
         }
 

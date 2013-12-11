@@ -144,7 +144,7 @@ public class WrappingFilter implements Filter {
 
             if(!isValidProtocol(protocol)) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Could not detect a valid protocol header value in " + protocol + ", falling back to default");
+                    LOG.debug("Could not detect a valid protocol header value in {}, falling back to default", protocol);
                 }
                  protocol = httpServletRequest.getScheme();
             }
@@ -152,7 +152,7 @@ public class WrappingFilter implements Filter {
             if (remoteIP.isEmpty()) {
                 if (LOG.isDebugEnabled()) {
                     forHeaderValue = forHeaderValue == null ? "" : forHeaderValue;
-                    LOG.debug("Could not detect a valid remote ip in " + forHeader + ": [" + forHeaderValue + "], falling back to default");
+                    LOG.debug("Could not detect a valid remote ip in {}: [{}], falling back to default", forHeader, forHeaderValue);
                 }
                 remoteIP = httpServletRequest.getRemoteAddr();
             }

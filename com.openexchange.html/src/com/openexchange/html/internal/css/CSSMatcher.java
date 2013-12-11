@@ -347,7 +347,7 @@ public final class CSSMatcher {
         }
         final int diff = pos - off;
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Next '{' is " + diff + " characters away -- " + (diff <= 2048 ? "Continue" : "Abort"));
+            LOG.debug("Next '{' is {} characters away -- {}", diff, (diff <= 2048 ? "Continue" : "Abort"));
         }
         return diff <= MAX_ALLOWED_CSS_SELECTOR_SIZE;
     }
@@ -470,7 +470,7 @@ public final class CSSMatcher {
                 if (!ran) {
                     task.afterExecute(ex);
                 }
-                LOG.error(ex.getMessage(), ex);
+                LOG.error("", ex);
                 cssBuilder.setLength(0);
                 return false;
             }
@@ -490,7 +490,7 @@ public final class CSSMatcher {
             return false;
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
-            LOG.error(cause.getMessage(), cause);
+            LOG.error("", cause);
             cssBuilder.setLength(0);
             f.cancel(true);
             return false;

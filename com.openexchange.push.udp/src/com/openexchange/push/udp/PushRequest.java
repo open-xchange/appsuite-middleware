@@ -128,7 +128,7 @@ public class PushRequest {
                 registerObj = new RegisterObject(userId, contextId, hostAddress.getHostAddress(), port, false);
 
                 if (DEBUG) {
-                    LOG.debug("register package: user id=" + userId + ",host address=" + hostAddress + ",port=" + port);
+                    LOG.debug("register package: user id={},host address={},port={}", userId, hostAddress, port);
                 }
 
                 RegisterHandler.addRegisterObject(registerObj);
@@ -148,7 +148,7 @@ public class PushRequest {
                 registerObj = new RegisterObject(userId, contextId, hostAddress.getHostAddress(), port, true);
 
                 if (DEBUG) {
-                    LOG.debug("register sync package: " + registerObj);
+                    LOG.debug("register sync package: {}", registerObj);
                 }
 
                 RegisterHandler.addRegisterObject(registerObj);
@@ -168,7 +168,7 @@ public class PushRequest {
                 final PushObject pushObject = new PushObject(folderId, module, contextId, users, true, timestamp);
 
                 if (DEBUG) {
-                    LOG.debug("push sync package: " + pushObject);
+                    LOG.debug("push sync package: {}", pushObject);
                 }
 
                 PushOutputQueue.add(pushObject);
@@ -190,7 +190,7 @@ public class PushRequest {
                 remoteHostObject.setPort(port);
 
                 if (DEBUG) {
-                    LOG.debug("remost host register request: " + remoteHostObject);
+                    LOG.debug("remost host register request: {}", remoteHostObject);
                 }
 
                 PushOutputQueue.addRemoteHostObject(remoteHostObject);
@@ -199,11 +199,11 @@ public class PushRequest {
                 throw PushUDPExceptionCode.INVALID_TYPE.create(null, Integer.valueOf(type));
             }
         } catch (final OXException e) {
-            LOG.error("PushRequest: " + e, e);
+            LOG.error("PushRequest: {}", e, e);
         } catch (final UnknownHostException e) {
-            LOG.error("PushRequest: Remote host registration failed: " + e.getMessage(), e);
+            LOG.error("PushRequest: Remote host registration failed: {}", e.getMessage(), e);
         } catch (final Exception e) {
-            LOG.error("PushRequest: " + e, e);
+            LOG.error("PushRequest: {}", e, e);
         }
     }
 
@@ -220,7 +220,7 @@ public class PushRequest {
         final String data = new String(b);
 
         if (DEBUG) {
-            LOG.debug("push request data: " + data);
+            LOG.debug("push request data: {}", data);
         }
 
         /*

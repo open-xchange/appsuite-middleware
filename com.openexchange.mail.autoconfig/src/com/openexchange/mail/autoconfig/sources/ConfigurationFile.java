@@ -106,7 +106,7 @@ public class ConfigurationFile extends AbstractConfigSource {
         try {
             fis = new FileInputStream(files[0]);
         } catch (FileNotFoundException e) {
-            LOG.warn("Unable to find file: " + files[0], e);
+            LOG.warn("Unable to find file: {}", files[0], e);
             return null;
         }
         ClientConfig clientConfig = new AutoconfigParser().getConfig(fis);

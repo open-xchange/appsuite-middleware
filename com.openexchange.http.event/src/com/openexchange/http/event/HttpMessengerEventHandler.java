@@ -124,7 +124,7 @@ public final class HttpMessengerEventHandler implements EventHandler {
             if (talkingStickHolder.equals(thisUuid)) {
                 // It is about us to handle this event
 
-                LOG.info("Handling event " + event.getTopic());
+                LOG.info("Handling event {}", event.getTopic());
 
                 // TODO: Pass event to registered HTTP listeners
 

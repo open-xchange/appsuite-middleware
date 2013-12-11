@@ -413,7 +413,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
                  */
                 final Throwable rootCause = e.getRootCause();
                 if (null != rootCause) {
-                    LOG.error(rootCause.getMessage(), rootCause);
+                    LOG.error("", rootCause);
                 }
                 /*
                  * Now log actual UploadServletException...
@@ -484,7 +484,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
                 for (Filter currentFilter : filters) {
                     if (currentFilter != null && currentFilter.getClass().equals(filter.getClass())) {
                         isAlreadyAdded = true;
-                        LOG.error("Tried to add Filter " + filter + " multiple times.");
+                        LOG.error("Tried to add Filter {} multiple times.", filter);
                         break;
                     }
                 }

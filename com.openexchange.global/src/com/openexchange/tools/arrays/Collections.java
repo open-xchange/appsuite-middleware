@@ -390,7 +390,7 @@ public final class Collections {
             LOG.error("", e);
             return null;
         } catch (final ClassNotFoundException cnfe) {
-            LOG.error(cnfe.getMessage(), cnfe);
+            LOG.error("", cnfe);
             return null;
         } finally {
             Streams.close(out);

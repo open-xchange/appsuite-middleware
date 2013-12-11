@@ -85,8 +85,7 @@ public class I18nTranslator implements Translator {
                     LOG.warn(message, new Throwable(message));
                 }
             } else if (WARN_ENABLED) {
-                LOG.warn(new com.openexchange.java.StringAllocator(64).append("I18n service for locale ").append(locale).append(" has no translation for \"").append(
-                    toTranslate).append("\".").toString());
+                LOG.warn("I18n service for locale {} has no translation for \"{}\".", locale, toTranslate);
             }
             return toTranslate;
         }

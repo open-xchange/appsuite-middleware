@@ -172,7 +172,7 @@ public class XMLBasedFieldConfiguration implements FieldConfiguration {
                             indexField = (IndexField) Enum.valueOf(casted, enumValue);
                         }
                     } catch (Throwable e) {
-                        LOG.warn("Could not instantiate Enum value " + enumValue + " for class " + enumClass, e);
+                        LOG.warn("Could not instantiate Enum value {} for class {}", enumValue, enumClass, e);
                     }
                 }
 

@@ -96,7 +96,7 @@ public class CSVImportAction extends AbstractImportAction implements AJAXActionS
 
             final File dir = new File(path);
             if (dir == null || !dir.isDirectory()) {
-                LOG.error("Directory " + path + " supposedly containing import mappers information wasn't actually a directory, defaulting to deprecated mappers as fallback.");
+                LOG.error("Directory {} supposedly containing import mappers information wasn't actually a directory, defaulting to deprecated mappers as fallback.", path);
                 return imp;
             }
             final File[] files = dir.listFiles();
@@ -118,7 +118,7 @@ public class CSVImportAction extends AbstractImportAction implements AJAXActionS
                 mapperAmount++;
             }
             if (mapperAmount == 0) {
-                LOG.error("Did not load any CSV importer mappings from directory " + path +  ".");
+                LOG.error("Did not load any CSV importer mappings from directory {}.", path);
             }
         } catch (final IOException e) {
             LOG.error("Failed when trying to load CSV importer mappings.", e);

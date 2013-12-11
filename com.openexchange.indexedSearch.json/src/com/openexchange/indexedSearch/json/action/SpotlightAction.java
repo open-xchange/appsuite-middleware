@@ -165,7 +165,7 @@ public class SpotlightAction extends AbstractIndexAction {
         IndexResult<MailMessage> result = indexAccess.query(params, null);
         long diff = System.currentTimeMillis() - startTime;
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Spotlight search duration for field '" + field + "': " + diff + "ms.");
+            LOG.debug("Spotlight search duration for field '{}': {}ms.", field, diff);
         }
 
         SearchResult<MailMessage> searchResult = new SearchResult<MailMessage>(Types.EMAIL);

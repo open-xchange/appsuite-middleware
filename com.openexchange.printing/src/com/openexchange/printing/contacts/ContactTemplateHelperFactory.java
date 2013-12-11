@@ -86,7 +86,7 @@ public class ContactTemplateHelperFactory implements TemplateHelperFactory {
                 final Object resultObject = result.getResultObject();
                 if (!(resultObject instanceof Map)) {
                     map = Collections.emptyMap();
-                    LOG.warn(resultObject.getClass().getName() + " is not a " + Map.class.getName() + "!");
+                    LOG.warn("{} is not a {}!", resultObject.getClass().getName(), Map.class.getName());
                 } else {
                     @SuppressWarnings("unchecked")
                     Map<String, Object> tmp = (Map<String, Object>) resultObject;

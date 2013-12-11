@@ -238,7 +238,7 @@ public final class IMAPSearch {
             }
             if (LOG.isWarnEnabled()) {
                 final OXException imapException = IMAPException.Code.IMAP_SEARCH_FAILED.create(e, e.getMessage());
-                LOG.warn(imapException.getMessage(), imapException);
+                LOG.warn("", imapException);
             }
             return null;
         }

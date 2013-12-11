@@ -351,7 +351,7 @@ public final class IMAPCapabilityAndGreetingCache {
             try {
                 port = Integer.parseInt(serverUrl.substring(pos + 1).trim());
             } catch (final NumberFormatException e) {
-                LOG.error("Port cannot be parsed to integer: " + serverUrl, e);
+                LOG.error("Port cannot be parsed to integer: {}", serverUrl, e);
                 port = 143;
             }
         } else {

@@ -418,7 +418,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             if (null == itemHandler) {
                 itemHandler = getItemHandlerByItem(item);
                 if (null == itemHandler) {
-                    LOG.warn("Unknown FETCH item: " + item.getClass().getName());
+                    LOG.warn("Unknown FETCH item: {}", item.getClass().getName());
                 } else {
                     if (null != lastHandlers) {
                         lastHandlers.add(itemHandler);

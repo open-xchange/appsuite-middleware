@@ -109,18 +109,18 @@ public class PushConfigurationImpl extends AbstractConfigWrapper implements Push
 
         isPushEnabled = parseProperty(conf, "com.openexchange.push.udp.pushEnabled", isPushEnabled);
         if (DEBUG) {
-            LOG.debug("PushHandler property: com.openexchange.push.udp.pushEnabled=" + isPushEnabled);
+            LOG.debug("PushHandler property: com.openexchange.push.udp.pushEnabled={}", isPushEnabled);
         }
 
         registerPort = parseProperty(conf, "com.openexchange.push.udp.registerPort", registerPort);
         if (DEBUG) {
-            LOG.debug("PushHandler property: com.openexchange.push.udp.registerPort=" + registerPort);
+            LOG.debug("PushHandler property: com.openexchange.push.udp.registerPort={}", registerPort);
         }
 
         String[] remoteAddressAndPort = null;
         remoteAddressAndPort = parseProperty(conf, "com.openexchange.push.udp.remoteHost", remoteAddressAndPort);
         if (DEBUG) {
-            LOG.debug("PushHandler property: com.openexchange.push.udp.remoteHost=" + Arrays.toString(remoteAddressAndPort));
+            LOG.debug("PushHandler property: com.openexchange.push.udp.remoteHost={}", Arrays.toString(remoteAddressAndPort));
         }
 
         if (remoteAddressAndPort != null) {
@@ -136,7 +136,7 @@ public class PushConfigurationImpl extends AbstractConfigWrapper implements Push
                         remoteHostObject.setPort(Integer.parseInt(addressAndPort[1]));
                     }
                 } catch (final UnknownHostException exc) {
-                    LOG.error("problem with parsing remote host attribute: " + addressAndPort[0], exc);
+                    LOG.error("problem with parsing remote host attribute: {}", addressAndPort[0], exc);
                 }
 
                 remoteHost.add(remoteHostObject);
@@ -145,12 +145,12 @@ public class PushConfigurationImpl extends AbstractConfigWrapper implements Push
 
         registerTimeout = parseProperty(conf, "com.openexchange.push.udp.registerTimeout", registerTimeout);
         if (DEBUG) {
-            LOG.debug("PushHandler property: com.openexchange.push.udp.registerTimeout=" + registerTimeout);
+            LOG.debug("PushHandler property: com.openexchange.push.udp.registerTimeout={}", registerTimeout);
         }
 
         outputQueueDelay = parseProperty(conf, "com.openexchange.push.udp.outputQueueDelay", outputQueueDelay);
         if (DEBUG) {
-            LOG.debug("PushHandler property: com.openexchange.push.udp.outputQueueDelay=" + outputQueueDelay);
+            LOG.debug("PushHandler property: com.openexchange.push.udp.outputQueueDelay={}", outputQueueDelay);
         }
 
         isRegisterDistributionEnabled = parseProperty(
@@ -158,18 +158,18 @@ public class PushConfigurationImpl extends AbstractConfigWrapper implements Push
             "com.openexchange.push.udp.registerDistributionEnabled",
             isRegisterDistributionEnabled);
         if (DEBUG) {
-            LOG.debug("PushHandler property: com.openexchange.push.udp.registerDistributionEnabled=" + isRegisterDistributionEnabled);
+            LOG.debug("PushHandler property: com.openexchange.push.udp.registerDistributionEnabled={}", isRegisterDistributionEnabled);
         }
 
         isEventDistributionEnabled = parseProperty(conf, "com.openexchange.push.udp.eventDistributionEnabled", isEventDistributionEnabled);
         if (DEBUG) {
-            LOG.debug("PushHandler property: com.openexchange.push.udp.eventDistributionEnabled=" + isEventDistributionEnabled);
+            LOG.debug("PushHandler property: com.openexchange.push.udp.eventDistributionEnabled={}", isEventDistributionEnabled);
         }
 
         String senderAddressString = null;
         senderAddressString = parseProperty(conf, "com.openexchange.push.udp.senderAddress", senderAddressString);
         if (DEBUG) {
-            LOG.debug("PushHandler property: com.openexchange.push.udp.senderAddress=" + senderAddressString);
+            LOG.debug("PushHandler property: com.openexchange.push.udp.senderAddress={}", senderAddressString);
         }
 
         try {
@@ -177,44 +177,44 @@ public class PushConfigurationImpl extends AbstractConfigWrapper implements Push
                 senderAddress = InetAddress.getByName(senderAddressString);
             }
         } catch (final UnknownHostException exc) {
-            LOG.error("problem with parsing sender address: " + senderAddressString, exc);
+            LOG.error("problem with parsing sender address: {}", senderAddressString, exc);
         }
 
         remoteHostTimeOut = parseProperty(conf, "com.openexchange.push.udp.remoteHostTimeOut", remoteHostTimeOut);
         if (DEBUG) {
-            LOG.debug("PushHandler property: com.openexchange.push.udp.remoteHostTimeOut=" + remoteHostTimeOut);
+            LOG.debug("PushHandler property: com.openexchange.push.udp.remoteHostTimeOut={}", remoteHostTimeOut);
         }
 
         remoteHostRefresh = parseProperty(conf, "com.openexchange.push.udp.remoteHostRefresh", remoteHostRefresh);
         if (DEBUG) {
-            LOG.debug("PushHandler property: com.openexchange.push.udp.remoteHostRefresh=" + remoteHostRefresh);
+            LOG.debug("PushHandler property: com.openexchange.push.udp.remoteHostRefresh={}", remoteHostRefresh);
         }
 
         multicastEnabled = parseProperty(conf, "com.openexchange.push.udp.multicastEnabled", multicastEnabled);
         if (DEBUG) {
-            LOG.debug("PushHandler property: com.openexchange.push.udp.multicastEnabled=" + multicastEnabled);
+            LOG.debug("PushHandler property: com.openexchange.push.udp.multicastEnabled={}", multicastEnabled);
         }
 
         String multicastAddressString = null;
         multicastAddressString = parseProperty(conf, "com.openexchange.push.udp.multicastAddress", multicastAddressString);
         if (DEBUG) {
-            LOG.debug("PushHandler property: com.openexchange.push.udp.multicastAddress=" + multicastAddressString);
+            LOG.debug("PushHandler property: com.openexchange.push.udp.multicastAddress={}", multicastAddressString);
         }
 
         try {
             multicastAddress = InetAddress.getByName(multicastAddressString);
         } catch (final UnknownHostException exc) {
-            LOG.error("problem with parsing multicast address: " + multicastAddressString, exc);
+            LOG.error("problem with parsing multicast address: {}", multicastAddressString, exc);
         }
 
         multicastPort = parseProperty(conf, "com.openexchange.push.udp.multicastPort", multicastPort);
         if (DEBUG) {
-            LOG.debug("PushHandler property: com.openexchange.push.udp.multicastPort=" + multicastPort);
+            LOG.debug("PushHandler property: com.openexchange.push.udp.multicastPort={}", multicastPort);
         }
 
         String hostnameString = parseProperty(conf, "com.openexchange.push.udp.hostname", (String) null);
         if (DEBUG) {
-            LOG.debug("PushHandler property: com.openexchange.push.udp.hostname=" + hostnameString);
+            LOG.debug("PushHandler property: com.openexchange.push.udp.hostname={}", hostnameString);
         }
         try {
             if (null != hostnameString) {
@@ -223,9 +223,9 @@ public class PushConfigurationImpl extends AbstractConfigWrapper implements Push
                 hostname = InetAddress.getLocalHost();
             }
         } catch (UnknownHostException e) {
-            LOG.error("Unable to determine internet address for hostname: " + hostnameString, e);
+            LOG.error("Unable to determine internet address for hostname: {}", hostnameString, e);
         }
-        LOG.info("Using " + hostname.getHostAddress() + " for inter OX UDP communication.");
+        LOG.info("Using {} for inter OX UDP communication.", hostname.getHostAddress());
 
         isInit = true;
     }

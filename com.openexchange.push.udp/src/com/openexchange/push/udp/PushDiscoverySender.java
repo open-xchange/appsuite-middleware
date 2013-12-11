@@ -90,7 +90,7 @@ public class PushDiscoverySender implements Runnable {
     @Override
     public void run() {
         try {
-            LOG.debug("Sending multicast discovery package: \"" + packetData + "\".");
+            LOG.debug("Sending multicast discovery package: \"{}\".", packetData);
             final MulticastSocket multicastSocket = PushMulticastSocket.getPushMulticastSocket();
             final DatagramPacket datagramPacket = new DatagramPacket(packetBytes, packetBytes.length, multicastAddress, multicastPort);
             multicastSocket.send(datagramPacket);

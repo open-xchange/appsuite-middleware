@@ -386,7 +386,7 @@ public final class AllFetch {
                             return new MailMessage[0];
                         }
                     } catch (final MessagingException e) {
-                        LOG.warn("STATUS command failed. Throwing original exception: " + response.toString(), e);
+                        LOG.warn("STATUS command failed. Throwing original exception: {}", response, e);
                     }
                     throw new CommandFailedException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,

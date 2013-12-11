@@ -101,15 +101,15 @@ public class SimpleConfiguration implements Configuration {
                     }
                     String[] parts = patternSplit.split(line, 0);
                     if (parts.length != 2) {
-                        log.warn("[SimpleConfiguration]: Invalid line " + lineCount + ": " + line);
+                        log.warn("[SimpleConfiguration]: Invalid line {}: {}", lineCount, line);
                         continue;
                     }
                     rawMapping.put(parts[0].trim(), parts[1].trim());
                     if (parts[0].startsWith(translatorPrefix)) {
                         log.debug("[SimpleConfiguration]: Extracting translator ...");
                         String handlerName = parts[0].substring(parts[0].indexOf('.') + 1).trim();
-                        log.debug("[SimpleConfiguration]: Handler is " + handlerName);
-                        log.debug("[SimpleConfiguration]: Translator is " + parts[1].trim());
+                        log.debug("[SimpleConfiguration]: Handler is {}", handlerName);
+                        log.debug("[SimpleConfiguration]: Translator is {}", parts[1].trim());
                         translators.put(handlerName, parts[1].trim());
                         continue;
                     }
@@ -125,10 +125,10 @@ public class SimpleConfiguration implements Configuration {
                 }
             }
         } catch (FileNotFoundException e) {
-            log.error("[SimpleConfiguration]: Error during instantiation: " + e.getMessage());
+            log.error("[SimpleConfiguration]: Error during instantiation: {}", e.getMessage());
             throw new BuilderException(e);
         } catch (IOException e) {
-            log.error("[SimpleConfiguration]: Error during instantiation: " + e.getMessage());
+            log.error("[SimpleConfiguration]: Error during instantiation: {}", e.getMessage());
             throw new BuilderException(e);
         } finally {
             Streams.close(reader);

@@ -147,12 +147,11 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
              */
             final int min = parseLoginDelaySeconds(capabilities);
             if (min >= 0 && (min * 1000) > refreshRate) {
-                LOG.warn(new StringBuilder(64).append("Refresh rate of ").append(refreshRate / 1000).append(
-                    "sec is lower than minimum allowed seconds between logins (").append(min).append("sec)").toString());
+                LOG.warn("Refresh rate of {}sec is lower than minimum allowed seconds between logins ({}sec)", refreshRate / 1000, min);
             }
         }
         if (DEBUG) {
-            LOG.debug("\n\tSynchronizing messages with POP3 account: " + server, new Throwable());
+            LOG.debug("\n\tSynchronizing messages with POP3 account: {}", server, new Throwable());
         }
         /*
          * Check default folders since INBOX folder must be present prior to appending to it
@@ -174,7 +173,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
         if (DEBUG) {
             final long dur = stamp - st;
             final Session session = pop3Access.getSession();
-            LOG.debug("\n\tSynchronization successfully performed for POP3 account \"" + server + "\" (user=" + session.getUserId() + ", context=" + session.getContextId() + ")in: " + dur + "msec");
+            LOG.debug("\n\tSynchronization successfully performed for POP3 account \"{}\" (user={}, context={})in: {}msec", server, session.getUserId(), session.getContextId(), dur);
         }
         return null;
     }
@@ -202,9 +201,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
         final String frequencyStr = pop3StorageProperties.getProperty(POP3StoragePropertyNames.PROPERTY_REFRESH_RATE);
         if (null == frequencyStr) {
             // Fallback to 10 minutes
-            LOG.warn(
-                new StringBuilder(128).append("Missing POP3 property \"").append(POP3StoragePropertyNames.PROPERTY_REFRESH_RATE).append(
-                    '"').append(". Using fallback of ").append(FALLBACK_MINUTES).append(" minutes.").toString(),
+            LOG.warn("Missing POP3 property \"{}{}. Using fallback of {} minutes.", POP3StoragePropertyNames.PROPERTY_REFRESH_RATE, '"', FALLBACK_MINUTES,
                 new Throwable());
             return FALLBACK_MINUTES * 60L * 1000L;
         }
@@ -212,10 +209,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
         try {
             minutes = Integer.parseInt(frequencyStr);
         } catch (final NumberFormatException e) {
-            LOG.warn(
-                new StringBuilder(128).append("POP3 property \"").append(POP3StoragePropertyNames.PROPERTY_REFRESH_RATE).append(
-                    "\" is not a number: ``").append(frequencyStr).append("''. Using fallback of ").append(FALLBACK_MINUTES).append(
-                    " minutes.").toString(),
+            LOG.warn("POP3 property \"{}\" is not a number: ``{}''. Using fallback of {} minutes.", POP3StoragePropertyNames.PROPERTY_REFRESH_RATE, frequencyStr, FALLBACK_MINUTES,
                 e);
             minutes = FALLBACK_MINUTES;
         }

@@ -82,18 +82,16 @@ public final class SmalProviderServiceTracker implements ServiceTrackerCustomize
         final MailProvider addedService = context.getService(reference);
         final Object protocol = reference.getProperty("protocol");
         if (null == protocol) {
-            LOG.error("Missing protocol in mail provider service: " + addedService.getClass().getName());
+            LOG.error("Missing protocol in mail provider service: {}", addedService.getClass().getName());
             context.ungetService(reference);
             return null;
         }
         try {
             if (SmalMailProviderRegistry.registerMailProvider(protocol.toString(), addedService)) {
-                LOG.info(new StringBuilder(64).append("Mail provider for protocol '").append(protocol.toString()).append(
-                    "' successfully registered in SMAL registry.").toString());
+                LOG.info("Mail provider for protocol '{}' successfully registered in SMAL registry.", protocol);
             } else {
                 if (!Protocol.ALL.equals(protocol.toString())) {
-                    LOG.warn(new StringBuilder(64).append("Mail provider for protocol '").append(protocol.toString()).append(
-                        "' could not be added to SMAL registry.").append(" Another provider which supports the protocol has already been registered.").toString());
+                    LOG.warn("Mail provider for protocol '{}' could not be added to SMAL registry. Another provider which supports the protocol has already been registered.", protocol);
                     context.ungetService(reference);
                 }
                 context.ungetService(reference);
@@ -118,8 +116,7 @@ public final class SmalProviderServiceTracker implements ServiceTrackerCustomize
             try {
                 final MailProvider provider = service;
                 SmalMailProviderRegistry.unregisterMailProvider(provider);
-                LOG.info(new StringBuilder(64).append("Mail provider for protocol '").append(provider.getProtocol().toString()).append(
-                    "' successfully unregistered from SMAL registry.").toString());
+                LOG.info("Mail provider for protocol '{}' successfully unregistered from SMAL registry.", provider.getProtocol());
             } finally {
                 context.ungetService(reference);
             }

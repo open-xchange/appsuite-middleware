@@ -551,7 +551,7 @@ public class POP3StorageUtil {
         try {
             return Integer.parseInt(seconds.toString());
         } catch (final NumberFormatException e) {
-            LOG.warn("LOGIN-DELAY seconds cannot be parsed to an integer: " + capabilities, e);
+            LOG.warn("LOGIN-DELAY seconds cannot be parsed to an integer: {}", capabilities, e);
             return -1;
         }
     }

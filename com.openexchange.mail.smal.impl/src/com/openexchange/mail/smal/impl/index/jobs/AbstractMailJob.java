@@ -109,7 +109,7 @@ public abstract class AbstractMailJob implements IndexingJob {
             @Override
             public void perform(List<String> subList) throws OXException {
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace("Adding a chunk of mails of folder " + info.folder + ": " + info.toString());
+                    LOG.trace("Adding a chunk of mails of folder {}: {}", info.folder, info);
                 }
 
                 List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>();
@@ -149,7 +149,7 @@ public abstract class AbstractMailJob implements IndexingJob {
                         } catch (Throwable t) {
                             ExceptionUtils.handleThrowable(t);
                             if (LOG.isDebugEnabled()) {
-                                LOG.debug("Attachments will be skipped for mail " + message.getMailId() + ".\nCause: " + t.getMessage() + "\n" + info.toString());
+                                LOG.debug("Attachments will be skipped for mail {}.\nCause: {}\n{}", message.getMailId(), t.getMessage(), info);
                             }
                         }
                     }
@@ -175,7 +175,7 @@ public abstract class AbstractMailJob implements IndexingJob {
             @Override
             public void perform(List<String> subList) throws OXException {
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace("Deleting a chunk of mails in folder " + info.folder + ": " + info.toString());
+                    LOG.trace("Deleting a chunk of mails in folder {}: {}", info.folder, info);
                 }
 
                 SearchTerm<?>[] idTerms = new SearchTerm<?>[subList.size()];
@@ -215,7 +215,7 @@ public abstract class AbstractMailJob implements IndexingJob {
             @Override
             public void perform(List<String> subList) throws OXException {
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace("Adding a chunk of mails of folder " + info.folder + ": " + info.toString());
+                    LOG.trace("Adding a chunk of mails of folder {}: {}", info.folder, info);
                 }
 
                 List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>();

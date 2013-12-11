@@ -145,7 +145,7 @@ public final class MALPollModifyTableTask extends UpdateTaskAdapter {
             }
 
             con.commit(); // COMMIT
-            log.info("Update task " + MALPollModifyTableTask.class.getName() + " successfully performed.");
+            log.info("Update task {} successfully performed.", MALPollModifyTableTask.class.getName());
         } catch (final SQLException e) {
             rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
@@ -181,7 +181,7 @@ public final class MALPollModifyTableTask extends UpdateTaskAdapter {
     private void modifyHashColumn(final Connection con, final String table, final org.slf4j.Logger log) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            log.info("Modifying column hash from table " + table + ".");
+            log.info("Modifying column hash from table {}.", table);
             stmt = con.prepareStatement("ALTER TABLE " + table + " MODIFY COLUMN hash BINARY(16) NOT NULL");
             stmt.executeUpdate();
         } finally {
@@ -190,7 +190,7 @@ public final class MALPollModifyTableTask extends UpdateTaskAdapter {
     }
 
     private void createColumn(final Connection con, final String tableName, final String columnName, final org.slf4j.Logger log) throws SQLException {
-        log.info("Adding column " + columnName + " to table " + tableName + ".");
+        log.info("Adding column {} to table {}.", columnName, tableName);
         final PreparedStatement stmt =
             con.prepareStatement("ALTER TABLE " + tableName + " ADD COLUMN " + columnName + " INT4 unsigned NOT NULL");
         try {
@@ -201,13 +201,13 @@ public final class MALPollModifyTableTask extends UpdateTaskAdapter {
     }
 
     private void dropPrimaryKey(final Connection con, final String tableName, final org.slf4j.Logger log) throws SQLException {
-        log.info("Removing old primary key from table " + tableName + ".");
+        log.info("Removing old primary key from table {}.", tableName);
         Tools.dropPrimaryKey(con, tableName);
     }
 
     private void addPrimaryKey(final Connection con, final String tableName, final org.slf4j.Logger log) throws SQLException {
         final String[] columns = new String[] { "cid", "hash", "uid" };
-        log.info("Creating new primary key " + Arrays.toString(columns) + " on table " + tableName + ".");
+        log.info("Creating new primary key {} on table {}.", Arrays.toString(columns), tableName);
         Tools.createPrimaryKey(con, tableName, columns, new int[] {-1, -1, 32});
     }
 

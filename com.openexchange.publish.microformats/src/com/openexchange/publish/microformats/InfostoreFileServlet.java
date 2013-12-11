@@ -154,7 +154,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
             if(!startedWriting) {
                 t.printStackTrace(resp.getWriter());
             }
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
         }
 
     }

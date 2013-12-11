@@ -964,7 +964,7 @@ public class SieveHandler {
                 final OXSieveHandlerException oxSieveHandlerException = new OXSieveHandlerException("The " + description + " \""
                     + username
                     + "\" could not be transformed to punycode.", this.sieve_host, this.sieve_host_port, null);
-                log.error(oxSieveHandlerException.getMessage(), e);
+                log.error("", e);
                 throw oxSieveHandlerException;
             }
         } else {

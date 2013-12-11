@@ -88,7 +88,7 @@ public final class ACLExtensionInit implements Initialization {
     @Override
     public void start() throws OXException {
         if (started.get()) {
-            LOG.error(ACLExtensionInit.class.getName() + " already started");
+            LOG.error("{} already started", ACLExtensionInit.class.getName());
             return;
         }
         ACLExtensionFactory.createInstance();
@@ -115,7 +115,7 @@ public final class ACLExtensionInit implements Initialization {
                 implementingClass = className == null ? Class.forName(classNameProp).asSubclass(Entity2ACL.class)
                         : Class.forName(className).asSubclass(Entity2ACL.class);
                 if (LOG.isInfoEnabled()) {
-                    LOG.info("Used IMAP server implementation: " + implementingClass.getName());
+                    LOG.info("Used IMAP server implementation: {}", implementingClass.getName());
                 }
                 ACLExtensionFactory.getInstance().setACLExtensionInstance(implementingClass.newInstance());
             }
@@ -132,7 +132,7 @@ public final class ACLExtensionInit implements Initialization {
     @Override
     public void stop() throws OXException {
         if (!started.get()) {
-            LOG.error(ACLExtensionInit.class.getName() + " cannot be stopped since it has not been started before");
+            LOG.error("{} cannot be stopped since it has not been started before", ACLExtensionInit.class.getName());
             return;
         }
         ACLExtensionFactory.getInstance().resetACLExtensionFactory();

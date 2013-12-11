@@ -88,7 +88,7 @@ public class POTranslationsDiscoverer extends FileDiscoverer {
     public List<Translations> getTranslations() {
         final String[] files = getFilesFromLanguageFolder(".po");
         if (files.length == 0) {
-            LOG.info("No .po files found in directory \"" + getDirectory() + "\"");
+            LOG.info("No .po files found in directory \"{}\"", getDirectory());
             return Collections.emptyList();
         }
         final List<Translations> list = new ArrayList<Translations>(files.length);
@@ -98,7 +98,7 @@ public class POTranslationsDiscoverer extends FileDiscoverer {
             try {
                 final Locale l = getLocale(file);
                 if (null == l) {
-                    LOG.warn(".po file does not match name pattern: " + file);
+                    LOG.warn(".po file does not match name pattern: {}", file);
                 } else {
                     final File poFile = new File(directory, file);
                     input = new BufferedInputStream(new FileInputStream(poFile));
@@ -106,7 +106,7 @@ public class POTranslationsDiscoverer extends FileDiscoverer {
                     final Translations translations = new POParser().parse(input, poFile.getAbsolutePath());
                     translations.setLocale(l);
                     list.add(translations);
-                    LOG.info("Parsed .po file \"" + file + "\" for locale: " + l);
+                    LOG.info("Parsed .po file \"{}\" for locale: {}", file, l);
                 }
             } catch (final FileNotFoundException e) {
                 LOG.error("File disappeared?", e);

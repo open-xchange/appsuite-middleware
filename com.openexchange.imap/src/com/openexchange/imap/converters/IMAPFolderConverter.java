@@ -866,7 +866,7 @@ public final class IMAPFolderConverter {
                  */
                 return (Rights) RIGHTS_EMPTY.clone();
             } catch (final Throwable t) {
-                LOG.error(t.getMessage(), t);
+                LOG.error("", t);
                 /*
                  * Write empty string as rights. Nevertheless user may see folder!
                  */
@@ -891,7 +891,7 @@ public final class IMAPFolderConverter {
                 LOG.warn(IMAPException.getFormattedMessage(IMAPException.Code.FOLDER_NOT_FOUND, fullName), e);
             }
         } else {
-            LOG.debug("Failed MYRIGHTS for: " + fullName, e);
+            LOG.debug("Failed MYRIGHTS for: {}", fullName, e);
         }
     }
 

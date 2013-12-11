@@ -88,7 +88,7 @@ public class PushRegistryListenerThread extends Thread {
                     final PushRequest serverRegisterRequest = new PushRequest();
                     serverRegisterRequest.init(datagramPacket);
                 } else {
-                    LOG.warn("received empty udp package: " + datagramSocket);
+                    LOG.warn("received empty udp package: {}", datagramSocket);
                 }
             } catch (final SocketException e) {
                 LOG.error("", e);

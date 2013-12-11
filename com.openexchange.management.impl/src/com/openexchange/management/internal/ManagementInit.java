@@ -90,7 +90,7 @@ public final class ManagementInit implements Initialization {
     @Override
     public void start() throws OXException {
         if (started.get()) {
-            LOG.error(ManagementInit.class.getName() + " already started");
+            LOG.error("{} already started", ManagementInit.class.getName());
             return;
         }
         final ManagementAgentImpl agent = ManagementAgentImpl.getInstance();
@@ -138,7 +138,7 @@ public final class ManagementInit implements Initialization {
     @Override
     public void stop() throws OXException {
         if (!started.get()) {
-            LOG.error(ManagementInit.class.getName() + " has not been started");
+            LOG.error("{} has not been started", ManagementInit.class.getName());
             return;
         }
         final ManagementAgentImpl agent = ManagementAgentImpl.getInstance();

@@ -87,10 +87,10 @@ public class ResourceBundleDiscoverer extends FileDiscoverer {
                 list.add(rc);
 
             } catch (final java.util.MissingResourceException mr) {
-                LOG.error("Unable to init Language Bundle! This file seems to be broken: " + file);
+                LOG.error("Unable to init Language Bundle! This file seems to be broken: {}", file);
                 throw mr;
             } catch (final MalformedURLException e) {
-                LOG.error("Cannot load file: " + file);
+                LOG.error("Cannot load file: {}", file);
             }
         }
         return list;

@@ -117,7 +117,7 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
             if (searchHandler == null) {
                 throw new IllegalArgumentException("Parameter 'search handler' must not be null!");
             }
-            log.debug("[buildQuery]: Handler is \'" + searchHandler.toString() + "\'");
+            log.debug("[buildQuery]: Handler is \'{}\'", searchHandler);
 
             String handlerId = searchHandler.getHandlerName();
             String handlerName = config.getRawMapping().get(Configuration.HANDLER + '.' + handlerId);
@@ -178,12 +178,12 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
                 solrQuery.setQueryType(handlerName);
             }
 
-            log.debug("[buildQuery]: Search term is \'" + solrQuery.getQuery() + "\'");
+            log.debug("[buildQuery]: Search term is \'{}\'", solrQuery.getQuery());
             setSortAndOrder(parameters, solrQuery);
             addFilterQueries(parameters, solrQuery);
             return solrQuery;
         } catch (Exception e) {
-            log.warn("[buildQuery]: Exception occurred: " + e.getMessage());
+            log.warn("[buildQuery]: Exception occurred: {}", e.getMessage());
             throw new OXException(e);
         }
     }
@@ -197,16 +197,16 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
             qt.init(handler, config, fieldConfig);
             return qt;
         } catch (ClassNotFoundException e) {
-            log.warn("[SimpleQueryBuilder]: Could not find class for handler \'" + handler + "\': " + e.getMessage());
+            log.warn("[SimpleQueryBuilder]: Could not find class for handler \'{}\': {}", handler, e.getMessage());
             throw new BuilderException(e);
         } catch (InstantiationException e) {
-            log.warn("[SimpleQueryBuilder]: Could not instantiate translator: " + e.getMessage());
+            log.warn("[SimpleQueryBuilder]: Could not instantiate translator: {}", e.getMessage());
             throw new BuilderException(e);
         } catch (IllegalAccessException e) {
-            log.warn("[SimpleQueryBuilder]: Could not instantiate translator: " + e.getMessage());
+            log.warn("[SimpleQueryBuilder]: Could not instantiate translator: {}", e.getMessage());
             throw new BuilderException(e);
         } catch (TranslationException e) {
-            log.warn("[SimpleQueryBuilder]: Could not initialize translator: " + e.getMessage());
+            log.warn("[SimpleQueryBuilder]: Could not initialize translator: {}", e.getMessage());
             throw new BuilderException(e);
         }
     }

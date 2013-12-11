@@ -143,7 +143,7 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
         } catch (final Throwable t) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             t.printStackTrace(resp.getWriter());
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
         }
 
     }
