@@ -64,8 +64,6 @@ public final class AJPv13CPingRequest extends AbstractAJPv13Request {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AJPv13CPingRequest.class);
 
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
-
     /**
      * Initializes a new {@link AJPv13CPingRequest}
      *
@@ -77,9 +75,7 @@ public final class AJPv13CPingRequest extends AbstractAJPv13Request {
 
     @Override
     public void processRequest(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, IOException {
-        if (DEBUG_ENABLED) {
-            LOG.debug(STR_RECEIVED_CPING);
-        }
+        LOG.debug(STR_RECEIVED_CPING);
     }
 
     @Override
