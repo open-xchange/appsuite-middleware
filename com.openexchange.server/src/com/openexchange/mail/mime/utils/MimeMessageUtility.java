@@ -866,9 +866,7 @@ public final class MimeMessageUtility {
                      */
                     lastMatch = m.end();
                 } catch (final UnsupportedEncodingException e) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Unsupported character-encoding in encoded-word: {}", m.group(), e);
-                    }
+                    LOG.debug("Unsupported character-encoding in encoded-word: {}", m.group(), e);
                     sb.append(handleUnsupportedEncoding(m));
                     lastMatch = m.end();
                 } catch (final ParseException e) {
@@ -1229,10 +1227,7 @@ public final class MimeMessageUtility {
                     // Hm... single parse did not fail, throw original exception instead
                     throw e;
                 }
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Internet addresses could not be properly parsed, using plain addresses' string representation instead.",
-                        e);
-                }
+                LOG.debug("Internet addresses could not be properly parsed, using plain addresses' string representation instead.", e);
                 addrs = PlainTextAddress.getAddresses(splitAddrs(al).toArray(new String[0]));
             }
         }

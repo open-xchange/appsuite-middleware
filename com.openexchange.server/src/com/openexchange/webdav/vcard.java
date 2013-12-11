@@ -64,11 +64,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -155,9 +152,7 @@ public final class vcard extends PermissionServlet {
 
     @Override
     public void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("GET");
-        }
+        LOG.debug("GET");
 
         final OutputStream os = resp.getOutputStream();
 
@@ -316,9 +311,7 @@ public final class vcard extends PermissionServlet {
 
     @Override
     public void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("PUT");
-        }
+        LOG.debug("PUT");
 
         String content_type = null;
 
@@ -443,9 +436,7 @@ public final class vcard extends PermissionServlet {
                             try {
                                 object_id = Integer.parseInt(entries_db.get(client_id));
                             } catch (final NumberFormatException exc) {
-                                if (LOG.isDebugEnabled()) {
-                                    LOG.debug("object id is not an integer");
-                                }
+                                LOG.debug("object id is not an integer");
                             }
 
                             if (object_id > 0) {
@@ -479,9 +470,7 @@ public final class vcard extends PermissionServlet {
                                 addEntry(context, principal_id, contactObj.getObjectID(), client_id);
                             }
                         }
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("STATUS: OK");
-                        }
+                        LOG.debug("STATUS: OK");
                     } catch (final OXException exc) {
                         if (exc.isNotFound()) {
                             LOG.debug("object was already deleted on server: {}", object_id, exc);

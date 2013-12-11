@@ -218,9 +218,7 @@ public class RequestDBProvider implements DBProvider {
         }
 
         final Connection readCon = getProvider().getReadConnection(ctx);
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("---> {}", readCon);
-        }
+        LOG.debug("---> {}", readCon);
         if(tx != null) {
             tx.readConnection = readCon;
             rc++;
@@ -274,9 +272,7 @@ public class RequestDBProvider implements DBProvider {
             int rc = readCount.get();
             rc--;
             if(rc==0) {
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("<--- {}", con);
-                }
+                LOG.debug("<--- {}", con);
                 getProvider().releaseReadConnection(ctx,con);
                 tx.readConnection=null;
             }
@@ -286,9 +282,7 @@ public class RequestDBProvider implements DBProvider {
         if(tx != null) {
             return;
         }
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("<--- {}", con);
-        }
+        LOG.debug("<--- {}", con);
         getProvider().releaseReadConnection(ctx,con);
 
     }

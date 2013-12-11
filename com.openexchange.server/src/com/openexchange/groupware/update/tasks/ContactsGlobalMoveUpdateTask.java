@@ -142,9 +142,7 @@ public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
                 OXFolderAccess oxa = null;
                 resultSet = st.executeQuery(SQL_QUERY);
 
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("UPDATING WRONG GLOBAL ADDRESSBOOK CONTACTS: MOVING BACK TO OWNER'S PRIVATE ADDRESSBOOK");
-                }
+                LOG.debug("UPDATING WRONG GLOBAL ADDRESSBOOK CONTACTS: MOVING BACK TO OWNER'S PRIVATE ADDRESSBOOK");
 
                 while (resultSet.next()) {
                     final int creator  = resultSet.getInt(1);

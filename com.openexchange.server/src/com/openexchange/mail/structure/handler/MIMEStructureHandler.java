@@ -999,10 +999,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             }
             return addressList.toArray(new InternetAddress[addressList.size()]);
         } catch (final AddressException e) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Internet addresses could not be properly parsed: \"{}\". Using plain addresses' string representation instead.", e.getMessage(),
-                    e);
-            }
+            LOG.debug("Internet addresses could not be properly parsed: \"{}\". Using plain addresses' string representation instead.", e.getMessage(), e);
             return getAddressesOnParseError(addressStrings);
         }
     }

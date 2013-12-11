@@ -166,11 +166,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                         registry0 = LocateRegistry.getRegistry(jmxPort);
                         registry0.list();
                     } catch (final RemoteException e) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug(
-                                "No responsive RMI registry found that listens on port " + jmxPort + ". A new one is going to be created",
-                                e);
-                        }
+                        LOG.debug("No responsive RMI registry found that listens on port {}. A new one is going to be created", jmxPort, e);
                         /*
                          * Create a new one
                          */
@@ -179,9 +175,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                     registry = registry0;
                 }
                 registries.put(Integer.valueOf(jmxPort), registry);
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("RMI registry created on port {} and bind address {}", jmxPort, jmxBindAddr == null ? "*" : jmxBindAddr.trim());
-                }
+                LOG.info("RMI registry created on port {} and bind address {}", jmxPort, jmxBindAddr == null ? "*" : jmxBindAddr.trim());
                 // Environment map.
                 //
                 final Map<String, Object> env = new HashMap<String, Object>(4);
@@ -302,9 +296,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                 final JMXServiceURL jmxServiceURL = jmxServiceUrlFor(ip, jmxServerPort, jmxPort);
                 jmxURL = addConnectorServer(jmxServiceURL, jmxLogin, jmxPassword);
             }
-            if (LOG.isInfoEnabled()) {
-                LOG.info("\n\n\tUse JConsole or MC4J to connect to MBeanServer with this url: {}\n", jmxURL);
-            }
+            LOG.info("\n\n\tUse JConsole or MC4J to connect to MBeanServer with this url: {}\n", jmxURL);
             running.set(true);
         } catch (final MalformedURLException e) {
             LOG.error("", e);

@@ -111,14 +111,8 @@ public class LinksMySql implements LinksSql {
 	@Override
     public void iFDeleteLinkFromObject(final Statement del, final boolean second, final int id, final int type, final int folder, final int loadid, final int loadfolder, final int loadtype, final int cid) throws SQLException {
 		if (second){
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("{}", SQL_DELETE_START+id+SQL_AND_FIRSTMODULE+type+SQL_AND_FIRSTFOLDER+folder+SQL_AND_SECONDID+loadid+SQL_AND_SECONDMODULE+loadtype+SQL_AND_SECONDFOLDER+loadfolder+SQL_AND_CID+cid);
-			}
 			del.execute(new StringBuilder(200).append(SQL_DELETE_START).append(id).append(SQL_AND_FIRSTMODULE).append(type).append(SQL_AND_FIRSTFOLDER).append(folder).append(SQL_AND_SECONDID).append(loadid).append(SQL_AND_SECONDMODULE).append(loadtype).append(SQL_AND_SECONDFOLDER).append(loadfolder).append(SQL_AND_CID).append(cid).toString());
 		} else {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("{}", SQL_DELETE_START+loadid+SQL_AND_FIRSTMODULE+loadtype+SQL_AND_FIRSTFOLDER+loadfolder+SQL_AND_SECONDID+id+SQL_AND_SECONDMODULE+type+SQL_AND_SECONDFOLDER+folder+SQL_AND_CID+cid);
-			}
 			del.execute(new StringBuilder(200).append(SQL_DELETE_START).append(loadid).append(SQL_AND_FIRSTMODULE).append(loadtype).append(SQL_AND_FIRSTFOLDER).append(loadfolder).append(SQL_AND_SECONDID).append(id).append(SQL_AND_SECONDMODULE).append(type).append(SQL_AND_SECONDFOLDER).append(folder).append(SQL_AND_CID).append(cid).toString());
 		}
 	}

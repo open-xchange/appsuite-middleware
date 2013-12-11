@@ -186,9 +186,7 @@ public abstract class AbstractTwitterMessagingAccess {
             return true;
         } catch (final OXException e) {
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractTwitterMessagingAccess.class);
-            if (logger.isDebugEnabled()) {
-                logger.debug("", e);
-            }
+            logger.debug("", e);
             return false;
         }
     }

@@ -228,9 +228,7 @@ public final class Mp3ImageDataSource implements ImageDataSource {
         // Return
         final DataProperties properties = new DataProperties();
         if (imageBytes == null) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Requested a non-existing image in MP3 file: file-id={} folder={} context={} session-user={}\nReturning an empty image as fallback.", fileId, folderId, session.getContextId(), session.getUserId());
-            }
+            LOG.debug("Requested a non-existing image in MP3 file: file-id={} folder={} context={} session-user={}\nReturning an empty image as fallback.", fileId, folderId, session.getContextId(), session.getUserId());
             properties.put(DataProperties.PROPERTY_CONTENT_TYPE, mimeType);
             properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
             return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);

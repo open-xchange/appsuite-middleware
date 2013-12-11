@@ -92,9 +92,7 @@ public abstract class AbstractMailAccountTreeAction extends AbstractMailAccountA
                 session);
             return root;
         } catch (final OXException e) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Composing mail account's folder tree failed.", e);
-            }
+            LOG.debug("Composing mail account's folder tree failed.", e);
             // TODO: How to indicate error if folder tree requested?
             return null;
         } finally {

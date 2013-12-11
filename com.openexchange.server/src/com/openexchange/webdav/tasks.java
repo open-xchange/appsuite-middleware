@@ -147,9 +147,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
                 pendingInvocations.add(new QueuedTask(task, taskparser.getClientID(), DataParser.CONFIRM, lastModified, inFolder));
                 break;
             default:
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("invalid method: {}", method);
-                }
+                LOG.debug("invalid method: {}", method);
             }
         } else {
             parser.next();

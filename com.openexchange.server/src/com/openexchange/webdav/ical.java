@@ -164,9 +164,7 @@ public final class ical extends PermissionServlet {
      */
     @Override
     public void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("GET");
-        }
+        LOG.debug("GET");
         final Session sessionObj = getSession(req);
         try {
             final Context context = ContextStorage.getInstance().getContext(sessionObj.getContextId());

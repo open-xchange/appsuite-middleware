@@ -769,10 +769,7 @@ final class SessionData {
                 if (sessionList.getFirst().containsSessionId(sessionId)) {
                     LOG.warn("Somebody else moved session to most up-to-date container.");
                 } else {
-                    // Session removed in the meantime
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Was not able to move the session {} into the most up-to-date container since it has already been removed in the meantime", sessionId);
-                    }
+                    LOG.debug("Was not able to move the session {} into the most up-to-date container since it has already been removed in the meantime", sessionId);
                 }
             }
         } catch (final OXException e) {

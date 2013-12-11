@@ -483,10 +483,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                 }
                 h = new InternetHeaders();
                 if (null == headerStream) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug(new com.openexchange.java.StringAllocator(32).append("Cannot retrieve headers from message #").append(msg.getSeqnum()).append(
-                            " in folder ").append(msg.getFolder()).toString());
-                    }
+                    logger.debug("Cannot retrieve headers from message #{} in folder {}", msg.getSeqnum(), msg.getFolder());
                 } else {
                     h.load(headerStream);
                 }
@@ -503,9 +500,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                 try {
                     msg.addHeader(name, hdr.getValue());
                 } catch (final IllegalArgumentException illegalArgumentExc) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Ignoring invalid header.", illegalArgumentExc);
-                    }
+                    logger.debug("Ignoring invalid header.", illegalArgumentExc);
                 }
                 /*-
                  *
@@ -533,9 +528,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                 try {
                     msg.addHeader(name, hdr.getValue());
                 } catch (final IllegalArgumentException illegalArgumentExc) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Ignoring invalid header.", illegalArgumentExc);
-                    }
+                    logger.debug("Ignoring invalid header.", illegalArgumentExc);
                 }
                 /*-
                  *

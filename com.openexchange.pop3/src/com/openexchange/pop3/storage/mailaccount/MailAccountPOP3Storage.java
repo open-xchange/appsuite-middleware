@@ -813,9 +813,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         try {
             pop3MessageStorage.appendPOP3Messages(toAppend.toArray(new MailMessage[toAppend.size()]));
         } catch (final OXException e) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Batch append operation to POP3 storage failed: {}", e.getMessage(), e);
-            }
+            LOG.debug("Batch append operation to POP3 storage failed: {}", e.getMessage(), e);
             final Throwable cause = e.getCause();
             if ((cause instanceof MessagingException) && toLowerCase(cause.getMessage()).indexOf("quota") >= 0) {
                 /*

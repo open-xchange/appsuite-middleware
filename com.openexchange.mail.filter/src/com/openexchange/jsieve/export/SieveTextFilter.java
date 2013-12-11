@@ -327,9 +327,8 @@ public final class SieveTextFilter {
         }
         if (error) {
             return new ClientRulesAndRequire(retval, requires);
-        } else {
-            return new ClientRulesAndRequire(retval, new HashSet<String>());
         }
+        return new ClientRulesAndRequire(retval, new HashSet<String>());
     }
 
 
@@ -346,14 +345,10 @@ public final class SieveTextFilter {
             final Rule rule = finalrules.get(i);
             final RuleComment ruleComment = rule.getRuleComment();
             if (null != ruleComment) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Added line number {} to comment {}", linenumber, ruleComment);
-                }
+                LOG.debug("Added line number {} to comment {}", linenumber, ruleComment);
                 ruleComment.setLine(linenumber++);
             }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Added line number {} to rule {}", linenumber, rule);
-            }
+            LOG.debug("Added line number {} to rule {}", linenumber, rule);
             rule.setLinenumber(linenumber);
             // Here we add one because a space between two rules looks better
             final ArrayList<Command> commands = rule.getCommands();

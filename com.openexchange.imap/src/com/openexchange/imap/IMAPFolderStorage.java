@@ -1989,9 +1989,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     if (backup) {
                         imapAccess.getMessageStorage().notifyIMAPFolderModification(trashFullname);
                     }
-                    final StringBuilder debug = LOG.isDebugEnabled() ? new StringBuilder(128) : null;
                     final int blockSize = imapConfig.getIMAPProperties().getBlockSize();
-                    final long startClear = System.currentTimeMillis();
                     if (blockSize > 0) {
                         /*
                          * Block-wise deletion
@@ -2002,16 +2000,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                              */
                             if (backup) {
                                 try {
-                                    if (null != debug) {
-                                        final long startCopy = System.currentTimeMillis();
-                                        new CopyIMAPCommand(f, 1, blockSize, trashFullname).doCommand();
-                                        final long time = System.currentTimeMillis() - startCopy;
-                                        debug.setLength(0);
-                                        LOG.debug(debug.append("\"Soft Clear\": ").append("Messages copied to default trash folder \"").append(
-                                            trashFullname).append("\" in ").append(time).append(STR_MSEC).toString());
-                                    } else {
-                                        new CopyIMAPCommand(f, 1, blockSize, trashFullname).doCommand();
-                                    }
+                                    new CopyIMAPCommand(f, 1, blockSize, trashFullname).doCommand();
                                 } catch (final MessagingException e) {
                                     if (e.getMessage().indexOf("Over quota") > -1) {
                                         /*
@@ -2041,23 +2030,12 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             /*
                              * ... and perform EXPUNGE
                              */
-                            final long startExpunge = System.currentTimeMillis();
                             try {
                                 IMAPCommandsCollection.fastExpunge(f);
-                                if (null != debug) {
-                                    debug.setLength(0);
-                                    LOG.debug(debug.append("EXPUNGE command executed on \"").append(f.getFullName()).append("\" in ").append(
-                                        (System.currentTimeMillis() - startExpunge)).append(STR_MSEC).toString());
-                                }
                             } catch (final FolderClosedException e) {
                                 /*
                                  * Not possible to retry since connection is broken
                                  */
-                                if (null != debug) {
-                                    debug.setLength(0);
-                                    LOG.debug(debug.append("EXPUNGE command timed out in ").append(
-                                        (System.currentTimeMillis() - startExpunge)).append(STR_MSEC).toString());
-                                }
                                 throw IMAPException.create(
                                     IMAPException.Code.CONNECT_ERROR,
                                     imapConfig,
@@ -2069,11 +2047,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                                 /*
                                  * Not possible to retry since connection is broken
                                  */
-                                if (null != debug) {
-                                    debug.setLength(0);
-                                    LOG.debug(debug.append("EXPUNGE command timed out in ").append(
-                                        (System.currentTimeMillis() - startExpunge)).append(STR_MSEC).toString());
-                                }
                                 throw IMAPException.create(
                                     IMAPException.Code.CONNECT_ERROR,
                                     imapConfig,
@@ -2096,13 +2069,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     }
                     if (backup) {
                         try {
-                            final long startCopy = System.currentTimeMillis();
                             new CopyIMAPCommand(f, trashFullname).doCommand();
-                            if (null != debug) {
-                                debug.setLength(0);
-                                LOG.debug(debug.append("\"Soft Clear\": ").append("Messages copied to default trash folder \"").append(
-                                    trashFullname).append("\" in ").append((System.currentTimeMillis() - startCopy)).append(STR_MSEC).toString());
-                            }
                         } catch (final MessagingException e) {
                             if (e.getNextException() instanceof CommandFailedException) {
                                 final CommandFailedException exc = (CommandFailedException) e.getNextException();
@@ -2126,11 +2093,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     final long start = System.currentTimeMillis();
                     IMAPCommandsCollection.fastExpunge(f);
                     mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                    if (null != debug) {
-                        debug.setLength(0);
-                        LOG.info(debug.append("Folder '").append(fullName).append("' cleared in ").append(
-                            System.currentTimeMillis() - startClear).append(STR_MSEC).toString());
-                    }
                 } finally {
                     closeSafe(f);
                     if (marked) {

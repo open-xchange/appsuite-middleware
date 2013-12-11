@@ -445,14 +445,10 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                     continue Run;
                 }
                 if (shutdown) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.info("IDLE: Listener has been shut down for user {} in context {}", userId, contextId);
-                    }
+                    LOG.info("IDLE: Listener has been shut down for user {} in context {}", userId, contextId);
                     return;
                 }
-                if (LOG.isDebugEnabled()) {
-                    LOG.info("IDLE: Orderly left checkNewMail() method for user {} in context {}", userId, contextId);
-                }
+                LOG.info("IDLE: Orderly left checkNewMail() method for user {} in context {}", userId, contextId);
             }
         } catch (final Exception e) {
             LOG.error("IDLE: Unexpectedly left run() method for user {} in context {}", userId, contextId, e);

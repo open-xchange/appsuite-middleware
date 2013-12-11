@@ -70,9 +70,7 @@ public class SoapParallelsActivator extends HousekeepingActivator {
         }
 
         // register the http info/sso servlet
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Trying to register POA info servlet");
-        }
+        LOG.debug("Trying to register POA info servlet");
         rememberTracker(new HTTPServletRegistration(
             context,
             new com.openexchange.custom.parallels.impl.ParallelsInfoServlet(),
@@ -110,26 +108,16 @@ public class SoapParallelsActivator extends HousekeepingActivator {
         };
         track(Remote.class, trackerCustomizer);
         openTrackers();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Successfully registered POA info servlet");
-        }
+        LOG.debug("Successfully registered POA info servlet");
 
         // register auth plugin
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Trying to register POA authentication plugin");
-        }
+        LOG.debug("Trying to register POA authentication plugin");
         registerService(AuthenticationService.class.getName(), new ParallelsOXAuthentication(), null);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Successfully registered POA authentication plugin");
-        }
+        LOG.debug("Successfully registered POA authentication plugin");
         // regitser hostname service to modify hostnames in directlinks
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Trying to register POA hostname/directlinks plugin");
-        }
+        LOG.debug("Trying to register POA hostname/directlinks plugin");
         registerService(HostnameService.class.getName(), new ParallelsHostnameService(), null);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Successfully registered POA hostname/directlinks plugin");
-        }
+        LOG.debug("Successfully registered POA hostname/directlinks plugin");
         // Register SOAP service
         final OXServerServicePortTypeImpl soapService = new OXServerServicePortTypeImpl();
         registerService(OXServerServicePortType.class, soapService);

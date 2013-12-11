@@ -289,9 +289,7 @@ public abstract class MailMessage extends MailPart {
         try {
             return Integer.parseInt(cl.substring('$' == cl.charAt(0) ? COLOR_LABEL_PREFIX.length() : COLOR_LABEL_PREFIX_OLD.length()));
         } catch (final NumberFormatException e) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Invalid color label: {}", cl, e);
-            }
+            LOG.debug("Invalid color label: {}", cl, e);
             return defaultValue;
         }
     }

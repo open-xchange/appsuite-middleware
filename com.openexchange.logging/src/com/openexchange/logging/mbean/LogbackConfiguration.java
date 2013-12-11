@@ -77,41 +77,42 @@ import com.openexchange.management.MBeanMethodAnnotation;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class LogbackConfiguration extends StandardMBean implements LogbackConfigurationMBean {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(LogbackConfiguration.class);
-    
+
     private final LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-    
+
     private final JoranConfigurator configurator = new JoranConfigurator();
-    
+
     private final Map<String, TurboFilter> turboFilterCache = new HashMap<String, TurboFilter>();
-    
+
     private final Map<String, Level> dynamicallyModifiedLoggers = new HashMap<String, Level>();
-    
+
     private final Map<String, String> methodDescriptions = new HashMap<String, String>();
-    
+
     private final Map<String, String[]> methodParameters = new HashMap<String, String[]>();
-    
+
     private final Map<String, String[]> methodParameterDescriptions = new HashMap<String, String[]>();
-    
+
     /**
      * Initializes a new {@link LogbackConfiguration}.
-     * 
-     * Reads the MBean annotations and adds those to the method* maps. 
-     * 
-     * @throws NotCompliantMBeanException 
+     *
+     * Reads the MBean annotations and adds those to the method* maps.
+     *
+     * @throws NotCompliantMBeanException
      */
     public LogbackConfiguration() throws NotCompliantMBeanException {
         super(LogbackConfigurationMBean.class);
-        
-        if (loggerContext.getTurboFilterList().size() > 0)
+
+        if (loggerContext.getTurboFilterList().size() > 0) {
             loggerContext.getTurboFilterList().get(0).setName("DEFAULT");
-        
+        }
+
         configurator.setContext(loggerContext);
-        
+
         Class<?> [] interfaces = this.getClass().getInterfaces();
         if (interfaces.length == 1) { //just in case, should always be equals to 1
-            Method[] methods = interfaces[0].getMethods(); 
+            Method[] methods = interfaces[0].getMethods();
             for(Method m : methods) {
                 if (m.isAnnotationPresent(MBeanMethodAnnotation.class)) {
                     MBeanMethodAnnotation a = m.getAnnotation(MBeanMethodAnnotation.class);
@@ -125,44 +126,20 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.logging.mbean.LogbackLoggingConfigurationMBean#filterContext(int)
-     */
     @Override
     public void filterContext(int contextID) {
-        if (LOG.isDebugEnabled()) {
-            StringBuilder builder = new StringBuilder();
-            builder.append("New context filter created for context with ID \"")
-                   .append(contextID)
-                   .append("\" and policy \"")
-                   .append("ACCEPT")
-                   .append("\"");
-            LOG.debug(builder.toString());
-        }
-        
+        LOG.debug("New context filter created for context with ID \"{}\" and policy \"ACCEPT\"", contextID);
+
         createExtendedMDCFilter(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID), FilterReply.ACCEPT);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.logging.mbean.LogbackLoggingConfigurationMBean#filterUser(int, int)
-     */
     @Override
     public void filterUser(int userID, int contextID) {
-        if (LOG.isDebugEnabled()) {
-            StringBuilder builder = new StringBuilder();
-            builder.append("New user filter created for user with ID \"")
-                   .append(userID)
-                   .append("\", context with ID \"")
-                   .append(contextID)
-                   .append("\" and policy \"")
-                   .append("ACCEPT")
-                   .append("\"");
-            LOG.debug(builder.toString());
-        }
-        
+        LOG.debug("New user filter created for user with ID \"{}\", context with ID \"{}\" and policy \"ACCEPT\"", userID, contextID);
+
         StringBuilder builder = new StringBuilder();
-        builder.append(createKey(Name.SESSION_USER_ID.getName(), Integer.toString(userID)))
-               .append(":").append(createKey(Name.SESSION_CONTEXT_ID.getName(), (Integer.toString(contextID))));
+        builder.append(createKey(Name.SESSION_USER_ID.getName(), Integer.toString(userID))).append(":").append(
+            createKey(Name.SESSION_CONTEXT_ID.getName(), (Integer.toString(contextID))));
         String key = builder.toString();
 
         if (!turboFilterCache.containsKey(key)) {
@@ -171,77 +148,36 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
             filter.addTuple(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID));
             filter.setOnMatch(FilterReply.ACCEPT);
             filter.setName(key);
-            
+
             turboFilterCache.put(builder.toString(), filter);
             loggerContext.addTurboFilter(filter);
         } else {
-            if (LOG.isDebugEnabled()) {
-                builder.setLength(0);
-                builder.append("Duplicate user filter for user with ID \"")
-                        .append(userID)
-                       .append("\", context with ID \"")
-                       .append(contextID)
-                       .append("\" and policy \"")
-                       .append("ACCEPT")
-                       .append("\"");
-                LOG.debug(builder.toString());
-            }
+            LOG.debug("Duplicate user filter for user with ID \"{}\", context with ID \"{}\" and policy \"ACCEPT\"", userID, contextID);
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.logging.mbean.LogbackLoggingConfigurationMBean#filterSession(java.lang.String)
-     */
     @Override
     public void filterSession(String sessionID) {
-        if (LOG.isDebugEnabled()) {
-            StringBuilder builder = new StringBuilder();
-            builder.append("New session filter created for session with ID \"")
-                   .append(sessionID)
-                   .append("\" and policy \"")
-                   .append("ACCEPT")
-                   .append("\"");
-            LOG.debug(builder.toString());
-        }
-        createExtendedMDCFilter(Name.SESSION_SESSION_ID.getName(), sessionID, FilterReply.ACCEPT);        
+        LOG.debug("New session filter created for session with ID \"{}\" and policy \"ACCEPT\"", sessionID);
+        createExtendedMDCFilter(Name.SESSION_SESSION_ID.getName(), sessionID, FilterReply.ACCEPT);
     }
-    
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#setLogLevel(java.lang.String, java.lang.String[])
-     */
+
     @Override
     public void setLogLevel(String level, String[] loggers) {
         for (String s : loggers) {
             Level l = Level.valueOf(level);
             loggerContext.getLogger(s).setLevel(l);
             dynamicallyModifiedLoggers.put(s, l);
-            if (LOG.isDebugEnabled()) {
-                StringBuilder builder = new StringBuilder();
-                builder.append("Setting log level for \"")
-                        .append(s)
-                        .append("\" to \"").append(level).append("\"");
-                LOG.debug(builder.toString());
-            }
+            LOG.debug("Setting log level for \"{}\" to \"{}\"", s, level);
         }
     }
 
     @Override
     public void overrideExceptionCategories(String categories) {
-        if (LOG.isDebugEnabled()) {
-            StringBuilder builder = new StringBuilder();
-            builder.append("Setting suppressed Exception Categories to \"")
-                   .append(categories)
-                   .append("\"");
-            LOG.debug(builder.toString());
-        }
+        LOG.debug("Setting suppressed Exception Categories to \"{}\"", categories);
         ExceptionCategoryFilter.setCategories(categories);
     }
-    
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#listExceptionCategories()
-     */
+
     @Override
     public Set<String> listExceptionCategories() {
         Set<String> categories = new HashSet<String>();
@@ -251,54 +187,26 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         return categories;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#removeContextFilter(int)
-     */
     @Override
     public void removeContextFilter(int contextID) {
         removeFilter(createKey(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID)));
-        if (LOG.isDebugEnabled()) {
-            StringBuilder builder = new StringBuilder();
-            builder.append("Removed context filter with context ID \"")
-                   .append(contextID)
-                   .append("\"");
-            LOG.debug(builder.toString());
-        }
+        LOG.debug("Removed context filter with context ID \"{}\"", contextID);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#removeUserFilter(int, int)
-     */
     @Override
     public void removeUserFilter(int userID, int contextID) {
         StringBuilder builder = new StringBuilder();
-        builder.append(createKey(Name.SESSION_USER_ID.getName(), Integer.toString(userID)))
-               .append(":").append(createKey(Name.SESSION_CONTEXT_ID.getName(), (Integer.toString(contextID))));
+        builder.append(createKey(Name.SESSION_USER_ID.getName(), Integer.toString(userID))).append(":").append(
+            createKey(Name.SESSION_CONTEXT_ID.getName(), (Integer.toString(contextID))));
         removeFilter(builder.toString());
-        if (LOG.isDebugEnabled()) {
-            builder.setLength(0);
-            builder.append("Removed user filter for user with ID \"")
-                   .append(userID)
-                   .append("\", context with ID \"")
-                   .append(contextID)
-                   .append("\" and policy \"")
-                   .append("ACCEPT")
-                   .append("\"");
-            LOG.debug(builder.toString());
-        }
+        LOG.debug("Removed user filter for user with ID \"{}\", context with ID \"{}\" and policy \"ACCEPT\"", userID, contextID);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#removeSessionFilter(java.lang.String)
-     */
     @Override
     public void removeSessionFilter(String sessionID) {
-        removeFilter(createKey(Name.SESSION_SESSION_ID.getName(), sessionID));        
+        removeFilter(createKey(Name.SESSION_SESSION_ID.getName(), sessionID));
     }
-    
-    /* (non-Javadoc)
-     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#getLoggers()
-     */
+
     @Override
     public Set<String> listAllLoggers() {
         Set<String> loggers = new HashSet<String>();
@@ -308,9 +216,6 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         return loggers;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#getFilters()
-     */
     @Override
     public Set<String> listFilters() {
         Set<String> filters = new HashSet<String>();
@@ -319,29 +224,19 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         }
         return filters;
     }
-    
 
-    /* (non-Javadoc)
-     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#removeAllFilters()
-     */
+
     @Override
     public synchronized void removeAllFilters() {
         TurboFilterList list = loggerContext.getTurboFilterList();
         StringBuilder builder = new StringBuilder();
-        for(String key : turboFilterCache.keySet()) {
+        for (String key : turboFilterCache.keySet()) {
             list.remove(turboFilterCache.get(key));
-            if (LOG.isDebugEnabled()) {
-                builder.setLength(0);
-                builder.append("Removing filter ").append(key);
-                LOG.debug(builder.toString());
-            }
+            LOG.debug("Removing filter {0}", key);
         }
         turboFilterCache.clear();
     }
-    
-    /* (non-Javadoc)
-     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#getLevelForLogger(java.lang.String)
-     */
+
     @Override
     public Set<String> getLevelForLoggers(String[] loggers) {
         Set<String> l = new HashSet<String>();
@@ -350,11 +245,8 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         }
         return l;
     }
-    
 
-    /* (non-Javadoc)
-     * @see com.openexchange.logging.mbean.LogbackConfigurationMBean#listDynamicallyModifiedLoggers()
-     */
+
     @Override
     public Set<String> listDynamicallyModifiedLoggers() {
         Set<String> loggers = new HashSet<String>();
@@ -364,47 +256,31 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         }
         return loggers;
     }
-    
-    /*
-     * (non-Javadoc)
-     * @see javax.management.StandardMBean#getDescription(javax.management.MBeanOperationInfo)
-     */
+
     @Override
     protected final String getDescription(MBeanInfo info) {
         return DESCRIPTION;
     }
-    
-    
-    /*
-     * (non-Javadoc)
-     * @see javax.management.StandardMBean#getDescription(javax.management.MBeanOperationInfo)
-     */
+
+
     @Override
     protected final String getDescription(MBeanOperationInfo info) {
         return methodDescriptions.get(info.getName());
     }
-    
-    /*
-     * (non-Javadoc)
-     * @see javax.management.StandardMBean#getDescription(javax.management.MBeanOperationInfo, javax.management.MBeanParameterInfo, int)
-     */
+
     @Override
     protected final String getDescription(MBeanOperationInfo op, MBeanParameterInfo param, int sequence) {
         return getMBeanOperationInfo(methodParameterDescriptions, op, param, sequence);
     }
-    
-    /*
-     * (non-Javadoc)
-     * @see javax.management.StandardMBean#getParameterName(javax.management.MBeanOperationInfo, javax.management.MBeanParameterInfo, int)
-     */
+
     @Override
     protected final String getParameterName(MBeanOperationInfo op, MBeanParameterInfo param, int sequence) {
         return getMBeanOperationInfo(methodParameters, op, param, sequence);
     }
-    
+
     /**
      * Delegate method for MBeanOperationInfo
-     * 
+     *
      * @param map
      * @param op
      * @param param
@@ -413,11 +289,12 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
      */
     private final String getMBeanOperationInfo(Map<String, String[]> map, MBeanOperationInfo op, MBeanParameterInfo param, int sequence) {
         String[] v = map.get(op.getName());
-        if (v == null || v.length == 0 || sequence > v.length)
+        if (v == null || v.length == 0 || sequence > v.length) {
             return super.getDescription(op, param, sequence);
+        }
         return v[sequence];
     }
-    
+
     /**
      * Create an MDCFilter based on the specified key/value/filter
      * @param key
@@ -432,24 +309,14 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
             filter.addTuple(key, value);
             filter.setOnMatch(onMatch);
             filter.setName(k);
-        
+
             turboFilterCache.put(createKey(key, value), filter);
             loggerContext.addTurboFilter(filter);
         } else {
-            if (LOG.isDebugEnabled()) {
-                StringBuilder builder = new StringBuilder();
-                builder.append("Duplicate filter for \"")
-                        .append(key)
-                        .append("\" with ID \"")
-                        .append(value)
-                       .append("\" and policy \"")
-                       .append("ACCEPT")
-                       .append("\"");
-                LOG.debug(builder.toString());
-            }
+            LOG.debug("Duplicate filter for \"{}\" with ID \"{}\" and policy \"ACCEPT\"", key, value);
         }
     }
-    
+
     /**
      * Remove the specified filter
      * @param key
@@ -461,7 +328,7 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
             turboFilterCache.remove(key);
         }
     }
-    
+
     /**
      * Create key
      * @param key
@@ -473,10 +340,10 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         builder.append(key).append("=").append(value);
         return builder.toString();
     }
-    
+
     /**
      * Get a stringified version of logger name and level
-     * 
+     *
      * @param logger
      * @return
      */

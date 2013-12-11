@@ -87,9 +87,7 @@ public class WebdavLogAction extends AbstractAction {
 			b.append("exists: "); b.append(resource.exists()); b.append('\n');
 			b.append("isCollection: "); b.append(resource.isCollection()); b.append('\n');
 
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(b.toString());
-			}
+			LOG.debug(b.toString());
 
 			if(LOG.isTraceEnabled()) {
 				if(logBody) {
@@ -105,11 +103,9 @@ public class WebdavLogAction extends AbstractAction {
 			b = new StringBuilder();
 			b.append("DONE URL: "); b.append(req.getUrl()); b.append(' '); b.append(res.getStatus()); b.append('\n');
 
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(b.toString());
-			}
+			LOG.debug(b.toString());
 
-			if(LOG.isTraceEnabled() && logResponse) {
+			if(logResponse) {
 				LOG.trace(((CapturingWebdavResponse)res).getBodyAsString());
 			}
 
@@ -119,7 +115,7 @@ public class WebdavLogAction extends AbstractAction {
 			b.append("WebdavException: ");
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(b.toString(),x);
-			} else if(LOG.isErrorEnabled() && x.getStatus() == HttpServletResponse.SC_INTERNAL_SERVER_ERROR) {
+			} else if (x.getStatus() == HttpServletResponse.SC_INTERNAL_SERVER_ERROR) {
 				LOG.error("The request: {} caused an internal server error: {}", b, x.getMessage(),x);
 			}
 			throw x;

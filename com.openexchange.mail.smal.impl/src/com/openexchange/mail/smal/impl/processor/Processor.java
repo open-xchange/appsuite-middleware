@@ -71,7 +71,6 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.index.MailUtility;
-import com.openexchange.mail.smal.impl.DebugInfo;
 import com.openexchange.mail.smal.impl.SmalMailAccess;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.mail.smal.impl.index.IndexAccessAdapter;
@@ -230,16 +229,7 @@ public class Processor {
                 for (final MailMessage message : messages) {
                     documents.add(IndexDocumentHelper.documentFor(message, accountId));
                 }
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Starting addAttachments() for {} documents from \"{}\" {}", documents.size(), folderInfo.getFullName(), new DebugInfo(mailAccess));
-                    final long st = System.currentTimeMillis();
-                    indexAccess.addDocuments(documents);
-                    final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("Performed addAttachments() for {} documents from \"{}\" in {}msec. {}", documents.size(), folderInfo.getFullName(), dur, new DebugInfo(
-                        mailAccess));
-                } else {
-                    indexAccess.addDocuments(documents);
-                }
+                indexAccess.addDocuments(documents);
             } else if (strategy.addHeadersAndContent(messageCount, folderInfo)) { // headers + content
                 final MailMessage[] messages =
                     mailAccess.getMessageStorage().getAllMessages(
@@ -252,16 +242,7 @@ public class Processor {
                 for (final MailMessage message : messages) {
                     documents.add(IndexDocumentHelper.documentFor(message, accountId));
                 }
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Starting addContent() for {} documents from \"{}\" {}", documents.size(), folderInfo.getFullName(), new DebugInfo(mailAccess));
-                    final long st = System.currentTimeMillis();
-                    indexAccess.addDocuments(documents);
-                    final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("Performed addContent() for {} documents from \"{}\" in {}msec. {}", documents.size(), folderInfo.getFullName(), dur, new DebugInfo(
-                        mailAccess));
-                } else {
-                    indexAccess.addDocuments(documents);
-                }
+                indexAccess.addDocuments(documents);
             } else if (strategy.addHeadersOnly(messageCount, folderInfo)) { // headers only
                 final MailMessage[] messages =
                     mailAccess.getMessageStorage().getAllMessages(
@@ -274,16 +255,7 @@ public class Processor {
                 for (final MailMessage message : messages) {
                     documents.add(IndexDocumentHelper.documentFor(message, accountId));
                 }
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Starting addEnvelopeData() for {} documents from \"{}\" {}", documents.size(), folderInfo.getFullName(), new DebugInfo(mailAccess));
-                    final long st = System.currentTimeMillis();
-                    indexAccess.addDocuments(documents);
-                    final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("Performed addEnvelopeData() for {} documents from \"{}\" in {}msec. {}", documents.size(), folderInfo.getFullName(), dur, new DebugInfo(
-                        mailAccess));
-                } else {
-                    indexAccess.addDocuments(documents);
-                }
+                indexAccess.addDocuments(documents);
             } else {
                  submitJob(mailAccess);
             }

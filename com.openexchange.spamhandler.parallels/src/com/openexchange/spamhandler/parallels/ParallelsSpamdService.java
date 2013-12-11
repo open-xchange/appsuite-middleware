@@ -52,7 +52,6 @@ package com.openexchange.spamhandler.parallels;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.text.MessageFormat;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -221,20 +220,16 @@ public class ParallelsSpamdService implements SpamdService {
             post_method.setRequestHeader("Content-type", "text/xml;");
             post_method.setRequestBody(getXmlRpcRequestBody(xml_rpc_prim_email));
 
-            if(LOG.isDebugEnabled()){
-                LOG.debug("Using {} to connect to xmlrpc service", URL_to_xmlrpc);
-                LOG.debug("Using email address {} for xmlrpc request", xml_rpc_prim_email);
-            }
+            LOG.debug("Using {} to connect to xmlrpc service", URL_to_xmlrpc);
+            LOG.debug("Using email address {} for xmlrpc request", xml_rpc_prim_email);
 
 
             http_client.executeMethod(post_method);
 
             final String xml_rpc_response = post_method.getResponseBodyAsString();
 
-            if(LOG.isDebugEnabled()){
-                LOG.debug("Got response from xmlrpc service:");
-                LOG.debug(xml_rpc_response);
-            }
+            LOG.debug("Got response from xmlrpc service:");
+            LOG.debug(xml_rpc_response);
 
 
             // check if contains a "faultcode" part, if no, parse for data
@@ -284,9 +279,7 @@ public class ParallelsSpamdService implements SpamdService {
                 }
                 final SpamdProvider sp_provider = getSpamdProvider(response_server, spamd_provider_port, response_user);
 
-                if(LOG.isDebugEnabled()){
-                    LOG.debug("Returning spamprovider informations from xmlrpc response");
-                }
+                LOG.debug("Returning spamprovider informations from xmlrpc response");
                 // return spamprovider to api
                 return sp_provider;
             }

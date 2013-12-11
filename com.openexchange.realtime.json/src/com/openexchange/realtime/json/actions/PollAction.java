@@ -70,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
  * <pre>
  * data: { stanzas: [{stanza0}, {stanza1}, {stanza2}] }
  * </pre>
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class PollAction extends RTAction {
@@ -88,9 +88,7 @@ public class PollAction extends RTAction {
         ID id = constructID(requestData, session);
         if(!stateManager.isConnected(id)) {
             RealtimeException stateMissingException = RealtimeExceptionCodes.STATE_MISSING.create();
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("", stateMissingException);
-            }
+            LOG.debug("", stateMissingException);
             Map<String, Object> errorMap = getErrorMap(stateMissingException, session);
             return new AJAXRequestResult(errorMap, "native");
         }
@@ -98,12 +96,10 @@ public class PollAction extends RTAction {
         //check for Stanza that are addressed to the client and add them to the response
         StateEntry stateEntry = stateManager.retrieveState(id);
         List<JSONObject> stanzas = pollStanzas(stateEntry.state);
-        
+
         Map<String, Object> resultMap = new HashMap<String, Object>();
         resultMap.put(STANZAS, stanzas);
-        if(LOG.isDebugEnabled()) {
-            LOG.debug(RTResultFormatter.format(resultMap));
-        }
+        LOG.debug(RTResultFormatter.format(resultMap));
         return new AJAXRequestResult(resultMap, "native");
     }
 

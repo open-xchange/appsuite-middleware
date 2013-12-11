@@ -52,14 +52,11 @@ package com.openexchange.webdav;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.jdom2.output.XMLOutputter;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -155,9 +152,7 @@ public final class contacts extends XmlServlet<ContactService> {
                         lastModified, inFolder, session));
                 break;
             default:
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("invalid method: {}", method);
-                }
+                LOG.debug("invalid method: {}", method);
             }
         } else {
             parser.next();

@@ -83,7 +83,7 @@ import com.openexchange.timer.TimerService;
  * {@link HazelcastResourceDirectory} - Keeps mappings of general {@link ID}s to full {@link ID}s and full {@link ID}s to {@link Resource}.
  * New DefaultResources that are added to this directory are automatically converted to HazelcastResources and extended with the local
  * Hazelcast Member as routing info.
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -105,7 +105,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
 
     /**
      * Initializes a new {@link HazelcastResourceDirectory}.
-     * 
+     *
      * @param id_map the name of the apping of general IDs to full IDs e.g marc.arens@premium <-> ox://marc.arens@premuim/random
      * @param resource_map the name of the mapping of full IDs to the Resource e.g. ox://marc.arens@premuim/random <-> ResourceMap
      * @throws OXException
@@ -257,9 +257,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
 
     @Override
     protected IDMap<Resource> doRemove(Collection<ID> ids) throws OXException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Removing IDs from HazelcastResourceDirectory: {}", ids);
-        }
+        LOG.debug("Removing IDs from HazelcastResourceDirectory: {}", ids);
         IDMap<Resource> removedResources = new IDMap<Resource>();
         Set<ID> generalIds = new HashSet<ID>();
         Set<ID> resourceIds = new HashSet<ID>();
@@ -305,17 +303,13 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
             tx.rollback();
             throw new OXException(t);
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Removed Resource(s) from HazelcastResourceDirectory: {}", removedResources);
-        }
+        LOG.debug("Removed Resource(s) from HazelcastResourceDirectory: {}", removedResources);
         return removedResources;
     }
 
     @Override
     protected IDMap<Resource> doRemove(ID id) throws OXException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Removing ID from HazelcastResourceDirectory: {}", id);
-        }
+        LOG.debug("Removing ID from HazelcastResourceDirectory: {}", id);
         IDMap<Resource> removedResources = new IDMap<Resource>();
         MultiMap<String, String> idMapping = getIDMapping();
         IMap<String, Map<String, Serializable>> allResources = getResourceMapping();
@@ -355,9 +349,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                 throw new OXException(t);
             }
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Removed Resource(s) from HazelcastResourceDirectory: {}", removedResources);
-        }
+        LOG.debug("Removed Resource(s) from HazelcastResourceDirectory: {}", removedResources);
         return removedResources;
     }
 
@@ -375,9 +367,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
         IMap<String, Map<String, Serializable>> allResources = getResourceMapping();
         HazelcastResource previousResource = null;
         Transaction tx = newTransaction();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(String.format("Starting transaction: %1$s for resource: %2$s", tx, hazelcastResource));
-        }
+        LOG.debug(String.format("Starting transaction: %1$s for resource: %2$s", tx, hazelcastResource));
         tx.begin();
         try {
             idMapping.put(id.toGeneralForm().toString(), id.toString());
@@ -410,14 +400,10 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                 previousResource = HazelcastResourceWrapper.unwrap(previousResourceMap);
             }
 
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(String.format("Committing transaction %1$s for resource %2$s", tx, hazelcastResource));
-            }
+            LOG.debug(String.format("Committing transaction %1$s for resource %2$s", tx, hazelcastResource));
             tx.commit();
         } catch (Throwable t) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(String.format("Rolling back transaction: %1$s for resource: %2$s", tx, hazelcastResource));
-            }
+            LOG.debug(String.format("Rolling back transaction: %1$s for resource: %2$s", tx, hazelcastResource));
             tx.rollback();
             throw new OXException(t);
         }
@@ -446,7 +432,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
 
     /**
      * Try to create a new HazelcastResource for the given ID. One place where this is used is during creation of GroupDispatchers.
-     * 
+     *
      * @param id The ID used to reach a Resource
      * @return null if the HazelcastResource couldn't be created, otherwise the new Resource
      * @throws OXException
@@ -478,7 +464,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
 
     /**
      * Get the mapping of general IDs to full IDs e.g. marc.arens@premium <-> ox://marc.arens@premium/random.
-     * 
+     *
      * @return the map used for mapping general IDs to full IDs.
      * @throws OXException if the HazelcastInstance is missing.
      */
@@ -489,7 +475,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
 
     /**
      * Get the mapping of full IDs to the Resource e.g. ox://marc.arens@premuim/random <-> ResourceMap.
-     * 
+     *
      * @return the map used for mapping full IDs to ResourceMaps.
      * @throws OXException if the map couldn't be fetched from hazelcast
      */
@@ -558,9 +544,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
             if (source != HazelcastResourceDirectory.this) {
                 try {
                     IDMap<Resource> removed = removeWithoutDisposeEvent(id);
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Removed: {}", removed.entrySet());
-                    }
+                    LOG.debug("Removed: {}", removed.entrySet());
                 } catch (OXException e) {
                     LOG.error("", e);
                 }
@@ -584,9 +568,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                 getIDMapping().get(id.toGeneralForm().toString());
                 Map<String, Serializable> resourceWrap = getResourceMapping().get(id.toString());
                 if (resourceWrap == null) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Unable to refresh id, might have been removed in the meantime: {}", id);
-                    }
+                    LOG.debug("Unable to refresh id, might have been removed in the meantime: {}", id);
                     syntheticIDs.remove(id);
                 } else {
                     resourceWrap.put(HazelcastResourceWrapper.eviction_timestamp, System.currentTimeMillis());

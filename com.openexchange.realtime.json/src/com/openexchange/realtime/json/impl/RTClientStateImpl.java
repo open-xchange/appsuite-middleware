@@ -49,11 +49,11 @@
 
 package com.openexchange.realtime.json.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -71,9 +71,9 @@ import com.openexchange.realtime.packet.Stanza;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class RTClientStateImpl implements RTClientState {
-    
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SendAction.class);
-    
+
     private final ID id;
     private final Map<Long, EnqueuedStanza> resendBuffer = new HashMap<Long, EnqueuedStanza>();
     private final List<Stanza> nonsequenceStanzas = new ArrayList<Stanza>();
@@ -81,7 +81,7 @@ public class RTClientStateImpl implements RTClientState {
     private final Lock lock = new ReentrantLock();
     private long lastSeen;
     private long sequenceNumber = 0;
-        
+
     public RTClientStateImpl(ID concreteID) {
         this.id = concreteID;
         touch();
@@ -133,16 +133,16 @@ public class RTClientStateImpl implements RTClientState {
                 list.add(es.stanza);
             }
             list.addAll(nonsequenceStanzas);
-            
+
             Collections.sort(list, new Comparator<Stanza>() {
 
                 @Override
                 public int compare(Stanza s1, Stanza s2) {
                     return (int) (s1.getSequenceNumber() - s2.getSequenceNumber());
                 }
-                
+
             });
-            
+
             return list;
         } finally {
             unlock();
@@ -174,9 +174,7 @@ public class RTClientStateImpl implements RTClientState {
 
     @Override
     public void reset() {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Removing all sequenced and unsequenced Stanzas.");
-        }
+        LOG.debug("Removing all sequenced and unsequenced Stanzas.");
         try {
             lock();
             nonsequenceStanzas.clear();
@@ -195,7 +193,7 @@ public class RTClientStateImpl implements RTClientState {
     public void lock() {
         lock.lock();
     }
-    
+
     @Override
     public void unlock() {
         lock.unlock();
@@ -210,7 +208,7 @@ public class RTClientStateImpl implements RTClientState {
     public long getLastSeen() {
         return lastSeen;
     }
-    
+
     @Override
     public boolean isTimedOut(long timestamp) {
         return 30 * 60 * 1000 < (timestamp - lastSeen);
@@ -219,5 +217,5 @@ public class RTClientStateImpl implements RTClientState {
     public void setLastSeen(long lastSeen) {
         this.lastSeen = lastSeen;
     }
-    
+
 }

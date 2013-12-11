@@ -262,13 +262,7 @@ public final class UnifiedInboxFolderConverter {
      */
     public static int[][] getAccountDefaultFolders(final int accountId, final Session session, final String[] fullnames) throws OXException {
         final int[][] retval;
-        if (LOG.isDebugEnabled()) {
-            final long s = System.currentTimeMillis();
-            retval = getAccountDefaultFolders0(accountId, session, fullnames);
-            LOG.debug("Getting account {} default folders took {}msec", accountId, (System.currentTimeMillis() - s));
-        } else {
-            retval = getAccountDefaultFolders0(accountId, session, fullnames);
-        }
+        retval = getAccountDefaultFolders0(accountId, session, fullnames);
         return retval;
     }
 
@@ -285,7 +279,7 @@ public final class UnifiedInboxFolderConverter {
                     final MailFolder mf = mailAccess.getFolderStorage().getFolder(accountFullname);
                     retval[i] =
                         new int[] { mf.getMessageCount(), mf.getUnreadMessageCount(), mf.getDeletedMessageCount(), mf.getNewMessageCount() };
-                } else if (LOG.isDebugEnabled()) {
+                } else {
                     LOG.debug("Missing folder \"{}\" in account {}", fullnames[i], accountId);
                 }
             }

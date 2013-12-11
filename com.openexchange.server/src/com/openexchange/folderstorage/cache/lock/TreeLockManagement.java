@@ -106,9 +106,7 @@ public final class TreeLockManagement {
         final ConcurrentMap<Integer, ConcurrentMap<String, ReadWriteLock>> userMap = map.get(Integer.valueOf(session.getContextId()));
         if (null != userMap) {
             userMap.remove(Integer.valueOf(session.getUserId()));
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Cleaned folder locks for user {} in context {}", session.getUserId(), session.getContextId());
-            }
+            LOG.debug("Cleaned folder locks for user {} in context {}", session.getUserId(), session.getContextId());
         }
     }
 
@@ -119,9 +117,7 @@ public final class TreeLockManagement {
      */
     public void dropFor(final int contextId) {
         map.remove(Integer.valueOf(contextId));
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Cleaned folder locks for context {}", contextId);
-        }
+        LOG.debug("Cleaned folder locks for context {}", contextId);
     }
 
     /**

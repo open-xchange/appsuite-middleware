@@ -132,7 +132,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
     }
 
     @Override
-    public void handleEvent(Event event) {
+    public void handleEvent(final Event event) {
         if (FileStorageEventHelper.isInfostoreEvent(event)) {
             if (FileStorageEventHelper.isUpdateEvent(event)) {
                 try {
@@ -146,9 +146,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
                     LOG.debug("Error parsing numerical identifiers from event: {}. Skipping.", e.getMessage());
                 }
 
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(FileStorageEventHelper.createDebugMessage("UpdateEvent", event));
-                }
+                LOG.debug("{}", new Object() { @Override public String toString() { return FileStorageEventHelper.createDebugMessage("UpdateEvent", event);}});
             } else if (FileStorageEventHelper.isDeleteEvent(event)) {
                 try {
                     int id = Integer.parseInt(FileStorageEventHelper.extractObjectId(event));
@@ -161,9 +159,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
                     LOG.debug("Error parsing numerical identifiers from event: {}. Skipping.", e.getMessage());
                 }
 
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(FileStorageEventHelper.createDebugMessage("DebugEvent", event));
-                }
+                LOG.debug("{}", new Object() { @Override public String toString() { return FileStorageEventHelper.createDebugMessage("DebugEvent", event);}});
             }
         }
     }

@@ -101,9 +101,7 @@ public final class UserLockManagement {
         final ConcurrentMap<Integer, ReadWriteLock> userMap = map.remove(Integer.valueOf(session.getContextId()));
         if (null != userMap) {
             userMap.remove(Integer.valueOf(session.getUserId()));
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Cleaned folder locks for user {} in context {}", session.getUserId(), session.getContextId());
-            }
+            LOG.debug("Cleaned folder locks for user {} in context {}", session.getUserId(), session.getContextId());
         }
     }
 
@@ -114,9 +112,7 @@ public final class UserLockManagement {
      */
     public void dropFor(final int contextId) {
         map.remove(Integer.valueOf(contextId));
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Cleaned folder locks for context {}", contextId);
-        }
+        LOG.debug("Cleaned folder locks for context {}", contextId);
     }
 
     /**

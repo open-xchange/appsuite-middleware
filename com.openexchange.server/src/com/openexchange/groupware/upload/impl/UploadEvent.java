@@ -57,7 +57,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.java.StringAllocator;
 
 /**
  * Just a plain class that wraps information about an upload e.g. files, form fields, content type, size, etc.
@@ -369,9 +368,7 @@ public class UploadEvent {
             }
         }
         uploadFilesByFieldName.clear();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Upload event cleaned-up. All temporary stored files deleted.");
-        }
+        LOG.debug("Upload event cleaned-up. All temporary stored files deleted.");
     }
 
     /**

@@ -1493,9 +1493,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     @Override
     public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields) throws OXException {
-        final boolean debug = LOG.isDebugEnabled();
-        final long timeStamp = debug ? System.currentTimeMillis() : 0L;
-
         IMAPFolder sentFolder = null;
         try {
             final String sentFullName = imapFolderStorage.getSentFolder();
@@ -1639,8 +1636,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Need to use in-application Threader
                  */
-                final boolean logIt = debug;
-                final long st = logIt ? System.currentTimeMillis() : 0L;
                 if (mergeWithSent) {
                     final Future<ThreadableResult> future;
                     {
@@ -1666,20 +1661,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     cached = threadableResult.cached || sentThreadableResult.cached;
                     // Mark as merged
                     merged = true;
-                    if (logIt) {
-                        final long dur = System.currentTimeMillis() - st;
-                        LOG.info("\tIMAPMessageStorage.getThreadSortedMessages(): In-application thread-sort (incl. sent messages) took {}msec for folder {}", dur, fullName);
-                    }
                 } else {
                     final ThreadableResult threadableResult = getThreadableFor(imapFolder, false, cache, limit, accountId, session);
                     Threadable threadable = threadableResult.threadable;
                     threadable = applyThreaderTo(threadable);
                     threadList = Threadables.toNodeList(threadable);
                     cached = threadableResult.cached;
-                    if (logIt) {
-                        final long dur = System.currentTimeMillis() - st;
-                        LOG.info("\tIMAPMessageStorage.getThreadSortedMessages(): In-application thread-sort took {}msec for folder {}", dur, fullName);
-                    }
                 }
             }
             if (null == threadList) {
@@ -1814,10 +1801,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         } finally {
             closeSafe(sentFolder);
             clearCache(imapFolder);
-            if (debug) {
-                final long dur = System.currentTimeMillis() - timeStamp;
-                LOG.debug("\tIMAPMessageStorage.getThreadSortedMessages() for {} took {}msec", fullName, dur);
-            }
         }
     }
 
@@ -1848,8 +1831,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     private List<List<MailMessage>> threadedMessagesWithoutBody(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final IMAPFolder sentFolder, final int messageCount, final boolean mergeWithSent, final boolean merged, final boolean cached, final List<ThreadSortNode> threadList, final FetchProfile fetchProfile, final boolean descending, final int limit) throws MessagingException, OXException {
-        final boolean logIt = LOG.isDebugEnabled();
-        final long st = logIt ? System.currentTimeMillis() : 0L;
         Future<ThreadableMapping> submittedTask = null;
         final Map<MessageInfo, MailMessage> mapping;
         if (mergeWithSent && merged) {
@@ -1898,10 +1879,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     return true;
                 }
             });
-        }
-        if (logIt) {
-            final long dur = System.currentTimeMillis() - st;
-            LOG.debug("\tMessage fetch took {}msec for folder {}", dur, fullName);
         }
         /*
          * Apply account identifier
@@ -2301,7 +2278,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             // Nothing to do on empty ID array
             return;
         }
-        final com.openexchange.java.StringAllocator debug = LOG.isDebugEnabled() ? new com.openexchange.java.StringAllocator(128) : null;
         final long[] remain;
         final int blockSize = getIMAPProperties().getBlockSize();
         if (blockSize > 0 && msgUIDs.length > blockSize) {
@@ -2313,14 +2289,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             for (int len = msgUIDs.length; len > blockSize; len -= blockSize) {
                 System.arraycopy(msgUIDs, offset, tmp, 0, tmp.length);
                 offset += blockSize;
-                deleteByUIDs(trashFullname, backup, tmp, debug);
+                deleteByUIDs(trashFullname, backup, tmp);
             }
             remain = new long[msgUIDs.length - offset];
             System.arraycopy(msgUIDs, offset, remain, 0, remain.length);
         } else {
             remain = msgUIDs;
         }
-        deleteByUIDs(trashFullname, backup, remain, debug);
+        deleteByUIDs(trashFullname, backup, remain);
         /*
          * Close folder to force JavaMail-internal message cache update
          */
@@ -2328,7 +2304,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         resetIMAPFolder();
     }
 
-    private void deleteByUIDs(final String trashFullname, final boolean backup, final long[] uids, final com.openexchange.java.StringAllocator sb) throws OXException, MessagingException {
+    private void deleteByUIDs(final String trashFullname, final boolean backup, final long[] uids) throws OXException, MessagingException {
         if (backup) {
             /*
              * Copy messages to folder "TRASH"
@@ -2341,21 +2317,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 } else {
                     command = new CopyIMAPCommand(imapFolder, uids, trashFullname, false, true);
                 }
-                if (null != sb) {
-                    final long start = System.currentTimeMillis();
-                    command.doCommand();
-                    final long time = System.currentTimeMillis() - start;
-                    sb.reinitTo(0);
-                    if (supportsMove) {
-                        LOG.debug(sb.append("\"Move\": ").append(uids.length).append(" messages moved to default trash folder \"").append(
-                            trashFullname).append("\" in ").append(time).append(STR_MSEC).toString());
-                    } else {
-                        LOG.debug(sb.append("\"Soft Delete\": ").append(uids.length).append(" messages copied to default trash folder \"").append(
-                            trashFullname).append("\" in ").append(time).append(STR_MSEC).toString());
-                    }
-                } else {
-                    command.doCommand();
-                }
+                command.doCommand();
             } catch (final MessagingException e) {
                 final String err = toLowerCase(e.getMessage());
                 if (err.indexOf("[nonexistent]") >= 0) {
@@ -2384,16 +2346,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         /*
          * Mark messages as \DELETED...
          */
-        if (null != sb) {
-            final long start = System.currentTimeMillis();
-            new FlagsIMAPCommand(imapFolder, uids, FLAGS_DELETED, true, true, false).doCommand();
-            final long dur = System.currentTimeMillis() - start;
-            sb.reinitTo(0);
-            LOG.debug(sb.append(uids.length).append(" messages marked as deleted (through system flag \\DELETED) in ").append(dur).append(
-                STR_MSEC).toString());
-        } else {
-            new FlagsIMAPCommand(imapFolder, uids, FLAGS_DELETED, true, true, false).doCommand();
-        }
+        new FlagsIMAPCommand(imapFolder, uids, FLAGS_DELETED, true, true, false).doCommand();
         /*
          * ... and perform EXPUNGE
          */
@@ -2534,7 +2487,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  */
                 final long[] result = new long[mailIds.length];
                 final int blockSize = getIMAPProperties().getBlockSize();
-                final StringBuilder debug = LOG.isDebugEnabled() ? new StringBuilder(128) : null;
                 int offset = 0;
                 final long[] remain;
                 if (blockSize > 0 && mailIds.length > blockSize) {
@@ -2544,7 +2496,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     final long[] tmp = new long[blockSize];
                     for (int len = mailIds.length; len > blockSize; len -= blockSize) {
                         System.arraycopy(mailIds, offset, tmp, 0, tmp.length);
-                        final long[] uids = copyOrMoveByUID(move, fast, destFullName, tmp, debug);
+                        final long[] uids = copyOrMoveByUID(move, fast, destFullName, tmp);
                         /*
                          * Append UIDs
                          */
@@ -2556,7 +2508,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 } else {
                     remain = mailIds;
                 }
-                final long[] uids = copyOrMoveByUID(move, fast, destFullName, remain, debug);
+                final long[] uids = copyOrMoveByUID(move, fast, destFullName, remain);
                 System.arraycopy(uids, 0, result, offset, uids.length);
                 if (move) {
                     /*
@@ -2609,7 +2561,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private long[] copyOrMoveByUID(final boolean move, final boolean fast, final String destFullName, final long[] tmp, final StringBuilder sb) throws MessagingException, OXException, IMAPException {
+    private long[] copyOrMoveByUID(final boolean move, final boolean fast, final String destFullName, final long[] tmp) throws MessagingException, OXException, IMAPException {
         final boolean supportsMove = move && imapConfig.asMap().containsKey("MOVE");
         final AbstractIMAPCommand<long[]> command;
         if (supportsMove) {
@@ -2617,20 +2569,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         } else {
             command = new CopyIMAPCommand(imapFolder, tmp, destFullName, false, fast);
         }
-        long[] uids;
-        if (null != sb) {
-            final long start = System.currentTimeMillis();
-            uids = command.doCommand();
-            final long time = System.currentTimeMillis() - start;
-            sb.setLength(0);
-            if (supportsMove) {
-                LOG.debug(sb.append(tmp.length).append(" messages moved in ").append(time).append(STR_MSEC).toString());
-            } else {
-                LOG.debug(sb.append(tmp.length).append(" messages copied in ").append(time).append(STR_MSEC).toString());
-            }
-        } else {
-            uids = command.doCommand();
-        }
+        long[] uids = command.doCommand();
         if (!fast && ((uids == null) || noUIDsAssigned(uids, tmp.length))) {
             /*
              * Invalid UIDs
@@ -2641,16 +2580,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             return uids;
         }
         if (move) {
-            if (null != sb) {
-                final long start = System.currentTimeMillis();
-                new FlagsIMAPCommand(imapFolder, tmp, FLAGS_DELETED, true, true, false).doCommand();
-                final long time = System.currentTimeMillis() - start;
-                sb.setLength(0);
-                LOG.debug(sb.append(tmp.length).append(" messages marked as expunged (through system flag \\DELETED) in ").append(time).append(
-                    STR_MSEC).toString());
-            } else {
-                new FlagsIMAPCommand(imapFolder, tmp, FLAGS_DELETED, true, true, false).doCommand();
-            }
+            new FlagsIMAPCommand(imapFolder, tmp, FLAGS_DELETED, true, true, false).doCommand();
             try {
                 IMAPCommandsCollection.uidExpungeWithFallback(imapFolder, tmp, imapConfig.getImapCapabilities().hasUIDPlus());
             } catch (final FolderClosedException e) {
@@ -3228,17 +3158,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Remove all old color label flag(s) and set new color label flag
                  */
                 imapFolderStorage.removeFromCache(fullName);
-                final boolean debug = LOG.isDebugEnabled();
-                long start = debug ? System.currentTimeMillis() : 0L;
                 IMAPCommandsCollection.clearAllColorLabels(imapFolder, msgUIDs);
-                if (debug) {
-                    LOG.debug("All color flags cleared from {} messages in {}{}", msgUIDs.length, (System.currentTimeMillis() - start), STR_MSEC);
-                }
-                start = debug ? System.currentTimeMillis() : 0L;
                 IMAPCommandsCollection.setColorLabel(imapFolder, msgUIDs, MailMessage.getColorLabelStringValue(colorLabel));
-                if (debug) {
-                    LOG.debug("All color flags set in {} messages in {}{}", msgUIDs.length, (System.currentTimeMillis() - start), STR_MSEC);
-                }
                 /*
                  * Force JavaMail's cache update through folder closure
                  */
@@ -3304,17 +3225,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Remove all old color label flag(s) and set new color label flag
                  */
                 imapFolderStorage.removeFromCache(fullName);
-                final boolean debug = LOG.isDebugEnabled();
-                long start = debug ? System.currentTimeMillis() : 0L;
                 IMAPCommandsCollection.clearAllColorLabels(imapFolder, null);
-                if (debug) {
-                    LOG.debug("All color flags cleared from all messages in {}{}", (System.currentTimeMillis() - start), STR_MSEC);
-                }
-                start = debug ? System.currentTimeMillis() : 0L;
                 IMAPCommandsCollection.setColorLabel(imapFolder, null, MailMessage.getColorLabelStringValue(colorLabel));
-                if (debug) {
-                    LOG.debug("All color flags set in all messages in {}{}", (System.currentTimeMillis() - start), STR_MSEC);
-                }
                 /*
                  * Force JavaMail's cache update through folder closure
                  */
@@ -3504,14 +3416,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             if (allFetch) {
                 lowCostFields.add(MailField.RECEIVED_DATE);
-                final AllFetch.LowCostItem[] lowCostItems = getLowCostItems(lowCostFields);
-                final boolean debug = LOG.isDebugEnabled();
-                final long start = debug ? System.currentTimeMillis() : 0L;
-                retval = AllFetch.fetchLowCost(imapFolder, lowCostItems, OrderDirection.ASC.equals(order), imapConfig, session);
-                if (debug) {
-                    LOG.debug("{}: IMAP all fetch >>>FETCH 1:* ({})<<< took {}{}", fullName, AllFetch.getFetchCommand(lowCostItems), (System.currentTimeMillis() - start), STR_MSEC,
-                        new Throwable());
-                }
+                retval = AllFetch.fetchLowCost(imapFolder, getLowCostItems(lowCostFields), OrderDirection.ASC.equals(order), imapConfig, session);
             }
         }
         if (retval == null || retval.length == 0) {

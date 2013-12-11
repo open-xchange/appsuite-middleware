@@ -200,16 +200,12 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
                     threshold = meantime;
                 }
             }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Stanza Gate ({}) : {}:{}:{}", name, stanza.getSequencePrincipal(), stanza.getSequenceNumber(), threshold);
-            }
+            LOG.debug("Stanza Gate ({}) : {}:{}:{}", name, stanza.getSequencePrincipal(), stanza.getSequenceNumber(), threshold);
             if (stanza.getSequenceNumber() == -1) {
                 threshold.set(-1);
             }
             if (threshold.compareAndSet(stanza.getSequenceNumber(), stanza.getSequenceNumber() + 1)) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Best case, Threshold: {}", threshold.get());
-                }
+                LOG.debug("Best case, Threshold: {}", threshold.get());
                 notifyManagementSequenceNumbers();
                 stanza.trace("Passing gate " + name);
                 if (customAction != null) {
@@ -251,15 +247,11 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
 
                 return true;
             } else { // We didn't hit the best case, either the Stanza was already received or the sequence number is too high
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug(String.format("Expected sequence %d but got %d", threshold.get(), stanza.getSequenceNumber()));
-                }
+                LOG.debug(String.format("Expected sequence %d but got %d", threshold.get(), stanza.getSequenceNumber()));
                 /* Stanzas got out of sync, enqueue until we receive the Stanza matching threshold */
                 if (threshold.get() > stanza.getSequenceNumber()) {
                     stanza.trace("Discarded as this sequence number has already successfully passed this gate: " + stanza.getSequenceNumber());
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("Discarded as this sequence number has already successfully passed this gate: {}", stanza.getSequenceNumber());
-                    }
+                    LOG.debug("Discarded as this sequence number has already successfully passed this gate: {}", stanza.getSequenceNumber());
                     return true;
                 }
 
@@ -275,9 +267,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
                     //We see no reason to buffer if the gap in the sequence numbers is too big. instruct the client to reset the sequence
                     if(stanza.getSequenceNumber() > threshold.get() + BUFFER_SIZE) {
                         stanza.trace("Threshold == 0 and stanza not in sequence, instructing client to reset sequence.");
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Threshold == 0 and stanza not in sequence, instructing client to reset sequence.");
-                        }
+                        LOG.debug("Threshold == 0 and stanza not in sequence, instructing client to reset sequence.");
                         throw RealtimeExceptionCodes.SEQUENCE_INVALID.create();
                     }
                     //Try to buffer up a valid sequence of Stanzas
@@ -290,24 +280,18 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
                     }
                     if(!alreadyContained) {
                         stanza.trace("Not in sequence, enqueing");
-                        if (LOG.isDebugEnabled()) {
                             LOG.debug("Stanzas not in sequence, Threshold: {} SequenceNumber: {}", threshold.get(), stanza.getSequenceNumber());
-                        }
                         inbox.add(new StanzaWithCustomAction(stanza, customAction));
                         notifyManagementInboxes();
                         return true;
                     } else {
                         stanza.trace("Not in sequence but already enqueued, discarding.");
-                        if (LOG.isDebugEnabled()) {
                             LOG.debug("Stanzas not in sequence, Threshold: {} SequenceNumber: {} but already buffered, discarding.", threshold.get(), stanza.getSequenceNumber());
-                        }
                         return true;
                     }
                 } else {
                     stanza.trace("Buffer full, instructing client to reset sequence");
-                    if (LOG.isDebugEnabled()) {
                         LOG.debug("Instructing client to reset sequence because stanza's not in sequence, but buffer is full. Threshold: {} SequenceNumber: {}", threshold.get(), stanza.getSequenceNumber());
-                    }
                     throw RealtimeExceptionCodes.SEQUENCE_INVALID.create();
                 }
             }

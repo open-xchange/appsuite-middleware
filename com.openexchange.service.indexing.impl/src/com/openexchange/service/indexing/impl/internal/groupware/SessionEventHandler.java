@@ -160,9 +160,7 @@ public class SessionEventHandler implements EventHandler {
                 }
             } catch (Exception e) {
                 if ((e instanceof OXException) && (IndexExceptionCodes.INDEX_LOCKED.equals((OXException) e) || IndexExceptionCodes.INDEXING_NOT_ENABLED.equals((OXException) e))) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Can not trigger infostore indexing jobs. Infostore index is disabled for user {} in context {}.", session.getUserId(), session.getContextId());
-                    }
+                    LOG.debug("Can not trigger infostore indexing jobs. Infostore index is disabled for user {} in context {}.", session.getUserId(), session.getContextId());
                 } else {
                     LOG.warn("Error while triggering infostore indexing jobs.", e);
                 }

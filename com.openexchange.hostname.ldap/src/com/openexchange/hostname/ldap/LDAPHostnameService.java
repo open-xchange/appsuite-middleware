@@ -108,37 +108,18 @@ public class LDAPHostnameService implements HostnameService {
                 context.reconnect(null);
             }
 
-            if (LOG.isDebugEnabled()) {
-                final StringBuilder sb = new StringBuilder(128).append('\n');
-                sb.append("LDAP search triggered with:\n");
-                sb.append("Filter: ");
-                sb.append(ownFilter);
-                sb.append('\n');
-                sb.append("BaseDN: ");
-                sb.append(ownBaseDN);
-                sb.append('\n');
-                sb.append("Scope: ");
-                sb.append(scope);
-                sb.append('\n');
-                sb.append("ldapReturnField: ");
-                sb.append(ldapReturnField);
-                sb.append('\n');
-                LOG.debug(sb.toString());
-            }
+            LOG.debug("\nLDAP search triggered with:\nFilter: {}BaseDN: {}Scope: {}ldapReturnField: {}\n", ownFilter, ownBaseDN, scope, ldapReturnField);
+
             final NamingEnumeration<SearchResult> search = context.search(ownBaseDN, ownFilter, getSearchControls(ldapReturnField, scope));
             // We will only catch the first element...
             while (null != search && search.hasMoreElements()) {
                 final SearchResult next = search.next();
                 final Attributes attributes = next.getAttributes();
                 final String attribute = getAttribute(ldapReturnField, attributes);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Found result: {}", attribute);
-                }
+                LOG.debug("Found result: {}", attribute);
                 return attribute;
             }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("No result found");
-            }
+            LOG.debug("No result found");
             return null;
         } finally {
             if( context != null ) {
@@ -153,12 +134,10 @@ public class LDAPHostnameService implements HostnameService {
             if (1 < attribute.size()) {
                 // If we have multi-value attributes we only pick up the first one
                 return (String) attribute.get(0);
-            } else {
-                return (String) attribute.get();
             }
-        } else {
-            return null;
+            return (String) attribute.get();
         }
+        return null;
     }
 
     private static Hashtable<String, String> getBasicLDAPProperties(String uri) {
@@ -217,18 +196,14 @@ public class LDAPHostnameService implements HostnameService {
         try {
             final String hostnameFromCache = instance.getHostnameFromCache(contextId);
             if (null == hostnameFromCache) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Hostname for context {} is not contained in the cache any more, fetching from LDAP", contextId);
-                }
+                LOG.debug("Hostname for context {} is not contained in the cache any more, fetching from LDAP", contextId);
                 final String hostname = fetchFromLdap(contextId);
                 if (null != hostname) {
                     instance.addHostnameToCache(contextId, hostname);
                 }
                 return hostname;
             }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Using hostname for context {} from cache", contextId);
-            }
+            LOG.debug("Using hostname for context {} from cache", contextId);
             return hostnameFromCache;
         } catch (final InvalidNameException e) {
             LOG.error("Failed to fetch hostname for context id {}:", contextId, e);

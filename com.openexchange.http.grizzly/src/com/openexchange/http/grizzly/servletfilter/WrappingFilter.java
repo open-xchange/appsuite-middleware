@@ -143,17 +143,12 @@ public class WrappingFilter implements Filter {
             String protocol = httpServletRequest.getHeader(protocolHeader);
 
             if(!isValidProtocol(protocol)) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Could not detect a valid protocol header value in {}, falling back to default", protocol);
-                }
+                LOG.debug("Could not detect a valid protocol header value in {}, falling back to default", protocol);
                  protocol = httpServletRequest.getScheme();
             }
 
             if (remoteIP.isEmpty()) {
-                if (LOG.isDebugEnabled()) {
-                    forHeaderValue = forHeaderValue == null ? "" : forHeaderValue;
-                    LOG.debug("Could not detect a valid remote ip in {}: [{}], falling back to default", forHeader, forHeaderValue);
-                }
+                LOG.debug("Could not detect a valid remote ip in {}: [{}], falling back to default", forHeader, forHeaderValue == null ? "" : forHeaderValue);
                 remoteIP = httpServletRequest.getRemoteAddr();
             }
 

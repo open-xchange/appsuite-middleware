@@ -274,9 +274,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             }
             return set;
         } catch (final SQLException e) {
-            if (null != stmt && LOG.isDebugEnabled()) {
+            if (null != stmt) {
                 final String sql = stmt.toString();
-                LOG.debug("\n\tFailed mail account statement:\n\t{}", sql.substring(sql.indexOf(": ") + 2));
+                LOG.debug("\n\tFailed mail account statement:\n\t{}", new Object() { @Override public String toString() { return sql.substring(sql.indexOf(": ") + 2);}});
             }
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -380,9 +380,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
              */
             fillProperties(mailAccount, cid, user, id, con);
         } catch (final SQLException e) {
-            if (null != stmt && LOG.isDebugEnabled()) {
+            if (null != stmt) {
                 final String sql = stmt.toString();
-                LOG.debug("\n\tFailed mail account statement:\n\t{}", sql.substring(sql.indexOf(": ") + 2));
+                LOG.debug("\n\tFailed mail account statement:\n\t{}", new Object() { @Override public String toString() { return sql.substring(sql.indexOf(": ") + 2);}});
             }
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -439,9 +439,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 mailAccount.setTransportServer((String) null);
             }
         } catch (final SQLException e) {
-            if (null != stmt && LOG.isDebugEnabled()) {
+            if (null != stmt) {
                 final String sql = stmt.toString();
-                LOG.debug("\n\tFailed mail account statement:\n\t{}", sql.substring(sql.indexOf(": ") + 2));
+                LOG.debug("\n\tFailed mail account statement:\n\t{}", new Object() { @Override public String toString() { return sql.substring(sql.indexOf(": ") + 2);}});
             }
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -629,9 +629,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             rs = stmt.executeQuery();
             return rs.next() ? rs.getString(1) : null;
         } catch (final SQLException e) {
-            if (null != stmt && LOG.isDebugEnabled()) {
+            if (null != stmt) {
                 final String sql = stmt.toString();
-                LOG.debug("\n\tFailed mail account statement:\n\t{}", sql.substring(sql.indexOf(": ") + 2));
+                LOG.debug("\n\tFailed mail account statement:\n\t{}", new Object() { @Override public String toString() { return sql.substring(sql.indexOf(": ") + 2);}});
             }
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -1357,9 +1357,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     updateProperty(cid, user, mailAccount.getId(), "pop3.path", properties.get("pop3.path"), con);
                 }
             } catch (final SQLException e) {
-                if (null != stmt && LOG.isDebugEnabled()) {
+                if (null != stmt) {
                     final String sql = stmt.toString();
-                    LOG.debug("\n\tFailed mail account statement:\n\t{}", sql.substring(sql.indexOf(": ") + 2));
+                    LOG.debug("\n\tFailed mail account statement:\n\t{}", new Object() { @Override public String toString() { return sql.substring(sql.indexOf(": ") + 2);}});
                 }
                 throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
@@ -1388,9 +1388,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.setInt(pos++, user);
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            if (null != stmt && LOG.isDebugEnabled()) {
+            if (null != stmt) {
                 final String sql = stmt.toString();
-                LOG.debug("\n\tFailed mail account statement:\n\t{}", sql.substring(sql.indexOf(": ") + 2));
+                LOG.debug("\n\tFailed mail account statement:\n\t{}", new Object() { @Override public String toString() { return sql.substring(sql.indexOf(": ") + 2);}});
             }
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {

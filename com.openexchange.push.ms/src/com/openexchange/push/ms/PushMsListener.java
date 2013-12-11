@@ -89,11 +89,8 @@ public class PushMsListener implements MessageListener<Map<String, Object>> {
         final Map<String, Object> m = message.getMessageObject();
         final PushMsObject pushObj = PushMsObject.valueFor(m);
         if (null != pushObj) {
-            final boolean debug = LOG.isDebugEnabled();
             if (!getHostname().equals(pushObj.getHostname())) {
-                if (debug) {
-                    LOG.debug("{} received PushMsObject: {}", getHostname(), pushObj);
-                }
+                LOG.debug("{} received PushMsObject: {}", getHostname(), pushObj);
                 final ServiceLookup registry = Services.getServiceLookup();
                 final EventAdmin eventAdmin = registry.getService(EventAdmin.class);
                 final EventFactoryService eventFactoryService = registry.getService(EventFactoryService.class);
@@ -124,12 +121,10 @@ public class PushMsListener implements MessageListener<Map<String, Object>> {
                         final Dictionary<String, RemoteEvent> ht = new Hashtable<String, RemoteEvent>(1);
                         ht.put(RemoteEvent.EVENT_KEY, remEvent);
                         eventAdmin.postEvent(new Event(topicName, ht));
-                        if (debug) {
-                            LOG.debug("Posted remote event to user {} in context {}: {}", user, pushObj.getContextId(), remEvent);
-                        }
+                        LOG.debug("Posted remote event to user {} in context {}: {}", user, pushObj.getContextId(), remEvent);
                     }
                 }
-            } else if (debug) {
+            } else {
                 LOG.debug("Recieved PushMsObject's host name is equal to this listener's host name: {}. Ignore...", getHostname());
             }
         } else if (message.isRemote() && m.containsKey("__pure")) {

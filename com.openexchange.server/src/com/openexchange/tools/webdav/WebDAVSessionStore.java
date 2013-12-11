@@ -131,28 +131,20 @@ public class WebDAVSessionStore {
     }
 
     private static Session login(LoginRequest loginRequest) throws OXException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("WebDAV Login: {}...", loginRequest.getLogin());
-        }
+        LOG.debug("WebDAV Login: {}...", loginRequest.getLogin());
         Session session = LoginPerformer.getInstance().doLogin(loginRequest).getSession();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Added WebDAV session {}", session);
-        }
+        LOG.debug("Added WebDAV session {}", session);
         return session;
     }
 
     private static void logout(Session session) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("WebDAV Logout: {}...", session);
-        }
+        LOG.debug("WebDAV Logout: {}...", session);
         try {
             Session removedSession = LoginPerformer.getInstance().doLogout(session.getSessionID());
-            if (LOG.isDebugEnabled()) {
-                if (null != removedSession) {
-                    LOG.debug("Removed WebDAV session {}", removedSession);
-                } else {
-                    LOG.debug("WebDAV session {} not removed.", session);
-                }
+            if (null != removedSession) {
+                LOG.debug("Removed WebDAV session {}", removedSession);
+            } else {
+                LOG.debug("WebDAV session {} not removed.", session);
             }
         } catch (OXException e) {
             LOG.warn("Error removing WebDAV session", e);

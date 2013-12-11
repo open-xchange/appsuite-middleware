@@ -444,10 +444,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
     private InputStream getRawInputStream(final Exception e) throws MessagingException, OXException {
         try {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Part's input stream could not be obtained: {}. Trying to read from part's raw input stream instead", e.getMessage() == null ? "<no error message given>" : e.getMessage(),
-                    e);
-            }
+            LOG.debug("Part's input stream could not be obtained. Trying to read from part's raw input stream instead", e);
             final Part part = this.part;
             if (part instanceof MimeBodyPart) {
                 return ((MimeBodyPart) part).getRawInputStream();

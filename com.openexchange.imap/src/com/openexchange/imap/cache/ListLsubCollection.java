@@ -762,8 +762,6 @@ final class ListLsubCollection {
         }
         final Response response = r[r.length - 1];
         if (response.isOK()) {
-            final boolean debug = LOG.isDebugEnabled();
-            final long st = debug ? System.currentTimeMillis() : -1L;
             final ConcurrentMap<String, ListLsubEntryImpl> map = lsub ? lsubMap : listMap;
             final Map<String, List<ListLsubEntryImpl>> parentMap = new HashMap<String, List<ListLsubEntryImpl>>(4);
             final ListLsubEntryImpl rootEntry = map.get(ROOT_FULL_NAME);
@@ -830,10 +828,6 @@ final class ListLsubCollection {
 
             // Dispatch remaining untagged responses
             protocol.notifyResponseHandlers(r);
-            if (debug) {
-                final long d = System.currentTimeMillis() - st;
-                LOG.debug("{} cache filled within {}msec.", command, d);
-            }
         } else {
             // Dispatch remaining untagged responses
             protocol.notifyResponseHandlers(r);

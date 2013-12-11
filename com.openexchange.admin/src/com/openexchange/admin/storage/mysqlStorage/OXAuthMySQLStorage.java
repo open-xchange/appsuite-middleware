@@ -224,12 +224,9 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                 // now check via our crypt mech the password
                 if ( GenericChecks.authByMech(pwcrypt, authdata.getPassword(), pwmech) ) {
                     return true;
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Password for ser \"{}\" did not match!", authdata.getLogin());
-                    }
-                    return false;
                 }
+                log.debug("Password for ser \"{}\" did not match!", authdata.getLogin());
+                return false;
             } catch (final SQLException sql) {
                 log.error("", sql);
                 throw new StorageException(sql.toString());

@@ -307,9 +307,6 @@ public final class ContactDeleteListener implements DeleteListener {
             new StringBuilder("UPDATE prg_contacts SET changed_from = ").append(ct.getMailadmin()).append(", created_from = ").append(
                 ct.getMailadmin()).append(", changing_date = ").append(System.currentTimeMillis()).append(", fid = ").append(admin_fid).append(
                 " WHERE intfield01 = ").append(oid).append(" and cid = ").append(ct.getContextId());
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(tmp.toString());
-        }
         smt.execute(tmp.toString());
     }
 
@@ -319,31 +316,19 @@ public final class ContactDeleteListener implements DeleteListener {
 
         if (delete) {
             tmp.append("DELETE from prg_dlist where intfield01 = ").append(oid).append(" AND cid = ").append(cid);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(tmp.toString());
-            }
             del.execute(tmp.toString());
 
             tmp.setLength(0);
             tmp.append("DELETE from prg_contacts_linkage where (intfield01 = ").append(oid).append(" OR intfield02 = ").append(oid).append(
                 ") AND cid = ").append(cid);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(tmp.toString());
-            }
             del.execute(tmp.toString());
 
             tmp.setLength(0);
             tmp.append("DELETE from prg_contacts_image where intfield01 = ").append(oid).append(" AND cid = ").append(cid);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(tmp.toString());
-            }
             del.execute(tmp.toString());
 
             tmp.setLength(0);
             tmp.append("DELETE from prg_contacts WHERE cid = ").append(cid).append(" AND intfield01 = ").append(oid);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(tmp.toString());
-            }
             // FIXME quick fix. deleteRow doesn't work because del.execute
             // creates new resultset
             del.execute(tmp.toString());
@@ -370,9 +355,6 @@ public final class ContactDeleteListener implements DeleteListener {
             tmp.append("UPDATE prg_contacts SET changed_from = ").append(ctx.getMailadmin()).append(", created_from = ").append(
                 ctx.getMailadmin()).append(", changing_date = ").append(System.currentTimeMillis()).append(" WHERE intfield01 = ").append(
                 oid).append(" AND cid = ").append(cid);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(tmp.toString());
-            }
             del.execute(tmp.toString());
 
         }
@@ -381,9 +363,6 @@ public final class ContactDeleteListener implements DeleteListener {
     private static void iFtrashAllUserContactsDeletedEntriesFromAdmin(final Statement del, final int cid, final int uid) throws SQLException {
         final StringBuilder tmp =
             new StringBuilder("DELETE FROM del_contacts WHERE created_from = ").append(uid).append(" and cid = ").append(cid);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(tmp.toString());
-        }
         del.execute(tmp.toString());
     }
 
@@ -392,9 +371,6 @@ public final class ContactDeleteListener implements DeleteListener {
             new StringBuilder("UPDATE del_contacts SET changed_from = ").append(ct.getMailadmin()).append(", created_from = ").append(
                 ct.getMailadmin()).append(", changing_date = ").append(System.currentTimeMillis()).append(" WHERE created_from = ").append(
                 uid).append(" and cid = ").append(cid);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(tmp.toString());
-        }
         del.execute(tmp.toString());
     }
 

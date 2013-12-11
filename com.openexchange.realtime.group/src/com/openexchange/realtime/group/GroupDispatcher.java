@@ -61,7 +61,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.Component;
 import com.openexchange.realtime.Component.EvictionPolicy;
@@ -301,9 +300,7 @@ public class GroupDispatcher implements ComponentHandle {
             added = ids.add(id);
         } while (!idsRef.compareAndSet(expected, ids));
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("joining:{}", id);
-        }
+        LOG.debug("joining:{}", id);
 
         stamps.put(id, stamp);
         id.on(ID.Events.DISPOSE, LEAVE);

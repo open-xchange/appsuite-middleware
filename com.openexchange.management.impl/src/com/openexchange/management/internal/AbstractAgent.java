@@ -374,9 +374,7 @@ public abstract class AbstractAgent {
                 registry = LocateRegistry.getRegistry(port);
                 registry.list();
             } catch (final RemoteException e) {
-                if (LOG.isDebugEnabled()) {
                     LOG.debug("No responsive RMI registry found that listens on port {}. A new one is going to be created", port, e);
-                }
                 /*
                  * Create a new one
                  */

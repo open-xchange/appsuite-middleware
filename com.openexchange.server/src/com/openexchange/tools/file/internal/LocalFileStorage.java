@@ -638,9 +638,7 @@ public class LocalFileStorage extends DefaultFileStorage {
             } catch (final IOException e) {
                 // Try again to create the file.
                 ioe = e;
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("", e);
-                }
+                LOG.debug("", e);
             }
             if (!created) {
                 try {

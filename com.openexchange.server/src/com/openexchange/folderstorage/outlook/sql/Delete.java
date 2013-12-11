@@ -54,7 +54,6 @@ import static com.openexchange.folderstorage.outlook.sql.Utility.getDatabaseServ
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import org.slf4j.Logger;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -179,9 +178,7 @@ public final class Delete {
                  */
                 debugSQL(stmt);
                 final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Delete.class);
-                if (log.isDebugEnabled()) {
-                    log.debug("Backup failed.", e);
-                }
+                log.debug("Backup failed.", e);
             } finally {
                 DBUtils.closeSQLStuff(stmt);
             }
@@ -201,9 +198,7 @@ public final class Delete {
             } catch (final SQLException e) {
                 debugSQL(stmt);
                 final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Delete.class);
-                if (log.isDebugEnabled()) {
-                    log.debug("Backup failed.", e);
-                }
+                log.debug("Backup failed.", e);
             } finally {
                 DBUtils.closeSQLStuff(stmt);
             }
@@ -223,9 +218,7 @@ public final class Delete {
             } catch (final SQLException e) {
                 debugSQL(stmt);
                 final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Delete.class);
-                if (log.isDebugEnabled()) {
-                    log.debug("Backup failed.", e);
-                }
+                log.debug("Backup failed.", e);
             } finally {
                 DBUtils.closeSQLStuff(stmt);
             }

@@ -76,8 +76,8 @@ import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.DBPool;
-import com.openexchange.version.Version;
 import com.openexchange.session.Session;
+import com.openexchange.version.Version;
 import com.openexchange.webdav.xml.DataWriter;
 import com.openexchange.webdav.xml.GroupUserWriter;
 import com.openexchange.webdav.xml.XmlServlet;
@@ -113,9 +113,7 @@ public final class groupuser extends PermissionServlet {
 
     @Override
     public void doPropFind(final HttpServletRequest req, final HttpServletResponse resp) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("PROPFIND");
-        }
+        LOG.debug("PROPFIND");
 
         String s_user = null;
         String s_group = null;
@@ -410,9 +408,7 @@ public final class groupuser extends PermissionServlet {
 
     public void doError(final HttpServletResponse resp, final int code, final String msg) {
         try {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("status: {} message: {}", code, msg);
-            }
+            LOG.debug("status: {} message: {}", code, msg);
 
             resp.setStatus(code);
             resp.setContentType("text/html");

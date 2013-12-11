@@ -94,9 +94,7 @@ public abstract class AbstractAttachmentHandler implements IAttachmentHandler {
         if (usm.getUploadQuota() >= 0) {
             this.uploadQuota = usm.getUploadQuota();
         } else {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Upload quota is less than zero. Using global server property \"MAX_UPLOAD_SIZE\" instead.");
-            }
+            LOG.debug("Upload quota is less than zero. Using global server property \"MAX_UPLOAD_SIZE\" instead.");
             long tmp;
             try {
                 tmp = ServerConfig.getInt(ServerConfig.Property.MAX_UPLOAD_SIZE);

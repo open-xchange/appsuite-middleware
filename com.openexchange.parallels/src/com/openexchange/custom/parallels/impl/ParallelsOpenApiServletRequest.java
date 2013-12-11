@@ -214,9 +214,7 @@ public final class ParallelsOpenApiServletRequest  {
                     retval.put(addy.toString());
                 }
             }
-            if(LOG.isDebugEnabled()){
-                LOG.debug("Got the following items from openapi for list \"{}\" {}", list, retval);
-            }
+            LOG.debug("Got the following items from openapi for list \"{}\" {}", list, retval);
             json_response.put("items", retval);
             return json_response;
         } catch (final XmlRpcException e) {
@@ -239,9 +237,7 @@ public final class ParallelsOpenApiServletRequest  {
         config.setServerURL(new URL(getOpenAPIInterfaceURL()));
         config.setUserAgent("Open-Xchange Paralles Plugin");
         if(isOpenAPIAuthEnabled()){
-            if(LOG.isDebugEnabled()){
-                LOG.debug("Using HTTP BASIC AUTH (Username: {}) for sending XML-RPC requests to OpenAPI...", getOpenAPIAuthID());
-            }
+            LOG.debug("Using HTTP BASIC AUTH (Username: {}) for sending XML-RPC requests to OpenAPI...", getOpenAPIAuthID());
             config.setBasicUserName(getOpenAPIAuthID());
             config.setBasicPassword(getOpenAPIAuthPassword());
         }

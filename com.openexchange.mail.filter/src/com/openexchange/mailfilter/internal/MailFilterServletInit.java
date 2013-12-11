@@ -104,14 +104,10 @@ public class MailFilterServletInit implements Initialization {
 		}
 
 		// adding parser to ParserFactory
-		if (LOG.isDebugEnabled()) {
 			LOG.debug("add action parser implementations");
-		}
 
 		// adding writer to WriterFactory
-		if (LOG.isDebugEnabled()) {
 			LOG.debug("add action writer implementations");
-		}
 
 
 		final HttpService httpService = MailFilterServletServiceRegistry.getServiceRegistry().getService(HttpService.class);

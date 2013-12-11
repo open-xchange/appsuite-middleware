@@ -279,7 +279,7 @@ public class VCardExporter implements Exporter {
 
         //final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
         ContactField[] fields = ContactMapper.getInstance().getFields(null == fieldsToBeExported ? _contactFields : fieldsToBeExported, null, (ContactField[])null);
-        
+
         if (null == objectId) {
             if (EnumSet.copyOf(Arrays.asList(fields)).contains(ContactField.IMAGE1)) {
                 // Contact by contact
@@ -307,9 +307,7 @@ public class VCardExporter implements Exporter {
                 }
             } else {
                 final SearchIterator<Contact> searchIterator = ImportExportServices.getContactService().getAllContacts(session, folderId, fields);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Going to export {} contacts (user={}, context={})", searchIterator.size(), session.getUserId(), session.getContextId());
-                }
+                LOG.debug("Going to export {} contacts (user={}, context={})", searchIterator.size(), session.getUserId(), session.getContextId());
                 try {
                     while (searchIterator.hasNext()) {
                         exportContact(oxContainerConverter, contactDef, versitWriter, searchIterator.next());

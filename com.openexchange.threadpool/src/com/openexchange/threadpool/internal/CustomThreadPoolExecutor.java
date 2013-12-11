@@ -49,7 +49,6 @@
 
 package com.openexchange.threadpool.internal;
 
-import java.text.MessageFormat;
 import java.util.AbstractCollection;
 import java.util.Arrays;
 import java.util.Collection;
@@ -83,7 +82,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
-import org.slf4j.Logger;
 import org.slf4j.MDC;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.threadpool.AbstractTask;
@@ -547,9 +545,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 try {
                     return workQueue.take();
                 } catch (final InterruptedException ignore) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("", ignore);
-                    }
+                    LOG.debug("", ignore);
                 }
                 break;
             }

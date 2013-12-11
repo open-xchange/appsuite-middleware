@@ -101,9 +101,7 @@ public class PushOutputQueue implements Runnable {
      * @throws OXException If an event exception occurs
      */
     public static void add(final PushObject pushObject) throws OXException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("add PushObject: {}", pushObject);
-        }
+        LOG.debug("add PushObject: {}", pushObject);
         if (!isEnabled) {
             return;
         }
@@ -146,9 +144,7 @@ public class PushOutputQueue implements Runnable {
      * @throws OXException If an event exception occurs
      */
     public static void add(final RegisterObject registerObject, final boolean noDelay) throws OXException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("add RegisterObject: {}", registerObject);
-        }
+        LOG.debug("add RegisterObject: {}", registerObject);
 
         if (!isEnabled) {
             return;
@@ -360,18 +356,14 @@ public class PushOutputQueue implements Runnable {
         final AbstractPushObject abstractPushObject = pushDelayedObject.getPushObject();
 
         if (abstractPushObject instanceof PushObject) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Send Push Object");
-            }
+            LOG.debug("Send Push Object");
 
             final PushObject pushObject = (PushObject) abstractPushObject;
             existingPushObjects.remove(pushObject);
 
             createAndDeliverPushPackage(pushObject);
         } else if (abstractPushObject instanceof RegisterObject) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Send Register Object");
-            }
+            LOG.debug("Send Register Object");
 
             createAndDeliverRegisterPackage((RegisterObject) abstractPushObject);
         }
@@ -422,9 +414,7 @@ public class PushOutputQueue implements Runnable {
     @Override
     public void run() {
         while (isRunning) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("get push objects from queue: {}", queue.size());
-            }
+            LOG.debug("get push objects from queue: {}", queue.size());
 
             try {
                 // Breaks IBM Java < 1.5.0_sr9

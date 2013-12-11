@@ -1374,9 +1374,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 final StringBuilder sb = new StringBuilder(html);
                 final String cs;
                 if (null == charset) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.warn("Missing charset. Using fallback \"UTF-8\" instead.");
-                    }
+                    LOG.warn("Missing charset. Using fallback \"UTF-8\" instead.");
                     cs = CHARSET_UTF_8;
                 } else {
                     cs = charset;

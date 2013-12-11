@@ -158,9 +158,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
 
             }
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Cleaned user-sensitive attachment tokens for user {} in context {}", userId, contextId);
-        }
+        LOG.debug("Cleaned user-sensitive attachment tokens for user {} in context {}", userId, contextId);
     }
 
     /**

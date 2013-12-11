@@ -53,7 +53,6 @@ import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.java.Strings.toLowerCase;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import java.text.MessageFormat;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -347,9 +346,7 @@ public final class CSSMatcher {
             return false;
         }
         final int diff = pos - off;
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Next '{' is {} characters away -- {}", diff, (diff <= 2048 ? "Continue" : "Abort"));
-        }
+        LOG.debug("Next '{' is {} characters away -- {}", diff, (diff <= 2048 ? "Continue" : "Abort"));
         return diff <= MAX_ALLOWED_CSS_SELECTOR_SIZE;
     }
 

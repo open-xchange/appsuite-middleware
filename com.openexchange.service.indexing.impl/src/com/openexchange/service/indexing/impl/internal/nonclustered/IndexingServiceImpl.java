@@ -139,9 +139,7 @@ public class IndexingServiceImpl implements IndexingService {
         long now = System.currentTimeMillis();
         long diff = now - (lastRun + interval);
         if (diff > 0) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Job {} was misfired for {}ms. Re-adding trigger and job on session reactivation.", old.getJobInfo(), diff);
-            }
+            LOG.debug("Job {} was misfired for {}ms. Re-adding trigger and job on session reactivation.", old.getJobInfo(), diff);
             return true;
         }
 

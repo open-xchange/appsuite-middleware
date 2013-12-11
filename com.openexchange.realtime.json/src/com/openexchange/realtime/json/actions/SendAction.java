@@ -143,9 +143,7 @@ public class SendAction extends RTAction  {
         ID id = constructID(request, session);
         if(!stateManager.isConnected(id)) {
             RealtimeException stateMissingException = RealtimeExceptionCodes.STATE_MISSING.create();
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("", stateMissingException);
-            }
+            LOG.debug("", stateMissingException);
             Map<String, Object> errorMap = getErrorMap(stateMissingException, session);
             return new AJAXRequestResult(errorMap, "native");
         }
@@ -183,15 +181,13 @@ public class SendAction extends RTAction  {
         protocolHandler.handleIncomingMessages(id, session, stateEntry, objects, acknowledgements);
 
         //add resulting acks to response
-        Map<String, Object> resultMap = new HashMap<String, Object>();
+        final Map<String, Object> resultMap = new HashMap<String, Object>();
         resultMap.put(ACKS, acknowledgements);
 
         //additionally check for Stanza that are addressed to the client and add them to the response
         List<JSONObject> stanzas = pollStanzas(clientState);
         resultMap.put(STANZAS, stanzas);
-        if(LOG.isDebugEnabled()) {
-            LOG.debug(RTResultFormatter.format(resultMap));
-        }
+        LOG.debug("{}", new Object() { @Override public String toString() { return RTResultFormatter.format(resultMap);}});
         return new AJAXRequestResult(resultMap, "native");
     }
 

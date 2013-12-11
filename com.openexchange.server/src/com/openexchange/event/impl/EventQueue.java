@@ -262,9 +262,7 @@ public final class EventQueue {
             LOG.info("Shutting down event system, so no events are accepted. Throwing Invalid State Exception");
             throw new OXException().setLogMessage("Event system is being shut down and therefore does not accept new events.");
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("add EventObject: {}", eventObj);
-        }
+        LOG.debug("add EventObject: {}", eventObj);
 
         if (!isEnabled) {
             return;

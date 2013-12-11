@@ -376,9 +376,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
                 throw HandleExceptionCode.DIRECT_PRESENCE_FAILED.create(presence.getTo().toGeneralForm());
             }
         } catch (OXException oxe) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(oxe.toString(), oxe);
-            }
+            LOG.debug(oxe.toString(), oxe);
             handleError(presence, oxe);
         }
     }

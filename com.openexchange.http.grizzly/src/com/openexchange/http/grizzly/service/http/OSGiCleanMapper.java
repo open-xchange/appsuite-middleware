@@ -317,10 +317,8 @@ class OSGiCleanMapper {
 
     public void addContext(HttpContext httpContext, ArrayList<OSGiServletHandler> servletHandlers) {
         contextServletHandlerMap.put(httpContext, servletHandlers);
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Adding another ServletHandler to the map. Now using {} handlers", contextServletHandlerMap.size());
-            LOG.debug(prettyPrintServletHandlerMap());
-        }
+        LOG.debug("Adding another ServletHandler to the map. Now using {} handlers", contextServletHandlerMap.size());
+        LOG.debug("{}", new Object() { @Override public String toString() { return prettyPrintServletHandlerMap();}});
     }
 
     private static boolean registerAliasHandler(String alias, HttpHandler httpHandler) {

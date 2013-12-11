@@ -101,7 +101,7 @@ public class PropertyCleaner implements FolderEventInterface, EventHandler {
 	}
 
     @Override
-    public void handleEvent(Event event) {
+    public void handleEvent(final Event event) {
         if (FileStorageEventHelper.isInfostoreEvent(event) && FileStorageEventHelper.isUpdateEvent(event)) {
             try {
                 ServerSession session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
@@ -122,9 +122,7 @@ public class PropertyCleaner implements FolderEventInterface, EventHandler {
                 }
             }
 
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(FileStorageEventHelper.createDebugMessage("UpdateEvent", event));
-            }
+            LOG.debug("{}",new Object() { @Override public String toString() { return FileStorageEventHelper.createDebugMessage("UpdateEvent", event);}});
         }
     }
 }

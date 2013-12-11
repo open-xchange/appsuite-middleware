@@ -170,9 +170,7 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
                 pendingInvocations.add(new QueuedFolder(folderobject, folderparser.getClientID(), method, lastModified));
                 break;
             default:
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(_invalidMethodError);
-                }
+                LOG.debug(_invalidMethodError);
             }
         } else {
             parser.next();

@@ -72,7 +72,7 @@ import com.openexchange.realtime.util.StanzaSequenceGate;
  */
 public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LocalMessageDispatcherImpl.class);
+    static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LocalMessageDispatcherImpl.class);
 
     private final Map<String, Channel> channels = new ConcurrentHashMap<String, Channel>();
 
@@ -88,28 +88,24 @@ public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
                 if (channel == null) {
                     stanza.trace("Didn't find channel for protocol: " + protocol);
                     throw DispatchExceptionCode.UNKNOWN_CHANNEL.create(protocol);
-                } else {
-                    if (channel.isConnected(recipient)) {
-                        try {
-                            stanza.trace("Send to " + recipient.toString());
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Sending Stanza: {} to {}", stanza, recipient);
-                            }
-                            channel.send(stanza, recipient);
-                        } catch (OXException e) {
-                            if (RealtimeExceptionCodes.RESOURCE_NOT_AVAILABLE.equals(e)) {
-                                throw DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString());
-                            } else {
-                                throw e;
-                            }
-                        } catch (RuntimeException e) {
-                            stanza.trace(e.toString(), e);
-                            throw DispatchExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
+                if (channel.isConnected(recipient)) {
+                    try {
+                        stanza.trace("Send to " + recipient.toString());
+                        LOG.debug("Sending Stanza: {} to {}", stanza, recipient);
+                        channel.send(stanza, recipient);
+                    } catch (OXException e) {
+                        if (RealtimeExceptionCodes.RESOURCE_NOT_AVAILABLE.equals(e)) {
+                            throw DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString());
                         }
-                    } else {
-                        LOG.error(DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString()).toString());
-                        throw DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString());
+                        throw e;
+                    } catch (RuntimeException e) {
+                        stanza.trace(e.toString(), e);
+                        throw DispatchExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
                     }
+                } else {
+                    LOG.error(DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString()).toString());
+                    throw DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString());
                 }
             }
         };

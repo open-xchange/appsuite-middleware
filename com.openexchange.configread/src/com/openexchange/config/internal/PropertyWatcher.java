@@ -176,9 +176,7 @@ public final class PropertyWatcher implements FileListener {
         try {
             fis = new BufferedInputStream(new FileInputStream(file));
         } catch (final FileNotFoundException e) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("", e);
-            }
+            LOG.debug("", e);
             /*
              * Obviously file does no more exist
              */

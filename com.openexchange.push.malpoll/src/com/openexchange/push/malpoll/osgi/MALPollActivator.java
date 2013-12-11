@@ -50,7 +50,6 @@
 package com.openexchange.push.malpoll.osgi;
 
 import static com.openexchange.push.malpoll.services.MALPollServiceRegistry.getServiceRegistry;
-import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.concurrent.Executor;
 import org.osgi.service.event.EventAdmin;
@@ -313,9 +312,7 @@ public final class MALPollActivator extends HousekeepingActivator {
                             starter.start(l);
                         }
                     }
-                    if (log.isDebugEnabled()) {
-                        log.debug("Global run for checking new mails done.");
-                    }
+                    log.debug("Global run for checking new mails done.");
                 } catch (final Exception e) {
                     log.error("", e);
                 }

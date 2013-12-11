@@ -297,9 +297,7 @@ public final class Conversations {
                     final long start = System.currentTimeMillis();
                     r = protocol.command(command, null);
                     final long dur = System.currentTimeMillis() - start;
-                    if (log.isDebugEnabled()) {
-                        log.debug("{}{}\" for \"{}\" ({}) took {}msec.", '"', command, imapFolder.getFullName(), imapFolder.getStore(), dur);
-                    }
+                    log.debug("{}{}\" for \"{}\" ({}) took {}msec.", '"', command, imapFolder.getFullName(), imapFolder.getStore(), dur);
                     mailInterfaceMonitor.addUseTime(dur);
                 }
                 final int len = r.length - 1;

@@ -91,9 +91,7 @@ public class GrizzlOXAddOn implements AddOn {
         if (httpServerFilterIdx > 0) {
             builder.addAll(httpServerFilterIdx -1 , filters);
         }
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("FilterChain after adding Watchers:\n{}", FilterChainUtils.formatFilterChainString(builder.build()));
-        }
+        LOG.debug("FilterChain after adding Watchers:\n{}", FilterChainUtils.formatFilterChainString(builder.build()));
     }
 
 }

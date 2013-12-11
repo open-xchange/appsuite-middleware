@@ -492,17 +492,13 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         OSGiServletHandler osgiServletHandler;
 
         if (mapper.containsContext(httpContext)) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Reusing ServletHandler");
-            }
+            LOG.debug("Reusing ServletHandler");
             // new servlet handler for same configuration, different servlet and alias
             List<OSGiServletHandler> servletHandlers = mapper.getContext(httpContext);
             osgiServletHandler = servletHandlers.get(0).newServletHandler(servlet);
             servletHandlers.add(osgiServletHandler);
         } else {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Creating new ServletHandler");
-            }
+            LOG.debug("Creating new ServletHandler");
             HashMap<String, String> params;
             if (initparams != null) {
                 params = new HashMap<String, String>(initparams.size());

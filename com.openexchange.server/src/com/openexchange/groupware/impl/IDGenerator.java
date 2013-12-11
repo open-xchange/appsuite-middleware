@@ -446,9 +446,7 @@ public final class IDGenerator {
                     newId = result.getInt(1);
                 }
             } catch (final SQLException e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("SQL Problem: {}", stmt);
-                }
+                LOG.debug("SQL Problem: {}", stmt);
                 throw e;
             } finally {
                 closeSQLStuff(result, stmt);
@@ -476,9 +474,7 @@ public final class IDGenerator {
                     newId = result.getInt(1);
                 }
             } catch (final SQLException e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("SQL Problem: {}", stmt);
-                }
+                LOG.debug("SQL Problem: {}", stmt);
                 throw e;
             } finally {
                 closeSQLStuff(result, stmt);
@@ -577,9 +573,7 @@ public final class IDGenerator {
                     newId = result.getInt(1);
                 }
             } catch (final SQLException e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("SQL Problem: {}", stmt);
-                }
+                LOG.debug("SQL Problem: {}", stmt);
                 throw e;
             } finally {
                 closeSQLStuff(result, stmt);
@@ -606,9 +600,7 @@ public final class IDGenerator {
                     newId = result.getInt(1);
                 }
             } catch (final SQLException e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("SQL Problem: {}", stmt);
-                }
+                LOG.debug("SQL Problem: {}", stmt);
                 throw e;
             } finally {
                 closeSQLStuff(result, stmt);

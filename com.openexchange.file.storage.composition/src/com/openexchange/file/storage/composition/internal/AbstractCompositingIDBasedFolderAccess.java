@@ -438,19 +438,17 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
 //        return properties;
 //    }
 
-    private void fire(Event event) {
+    private void fire(final Event event) {
         EventAdmin eventAdmin = getEventAdmin();
         if (null != eventAdmin) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Publishing: {}", dump(event));
-            }
+            LOG.debug("Publishing: {}", new Object() { @Override public String toString() { return dump(event);} });
             eventAdmin.postEvent(event);
         } else if (LOG.isWarnEnabled()) {
             LOG.warn("Unable to access event admin, unable to publish event {}", dump(event));
         }
     }
 
-    private static String dump(Event event) {
+    static String dump(Event event) {
         if (null != event) {
             return new StringAllocator().append(event.getTopic())
                 .append(": folderId=").append(event.getProperty(FileStorageEventConstants.FOLDER_ID))

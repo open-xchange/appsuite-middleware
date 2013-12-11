@@ -69,18 +69,18 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link RTAction} - RTActions implement the functionality of the realtime http api. The response has the form:
- * 
+ *
  * <pre>
  * data: {
- *   acks: [0,1] 
+ *   acks: [0,1]
  *   result:{}
  *   stanzas: [{stanza0},{stanza1},{stanza2}]
  *   error: {prefix: "thePrefix", code: theCode, ...}
  * }
  * </pre>
- * 
+ *
  * where the not all data fields will be returned for every {@link RTAction}.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -104,16 +104,14 @@ public abstract class RTAction implements AJAXActionService {
 
     /**
      * Get buffered messages addressed to the client
-     * 
+     *
      * @param state The client state
      * @return The list of Stanzas that are addressed to the client, may be empty
      * @throws OXException
      */
     protected List<JSONObject> pollStanzas(RTClientState state) throws OXException {
         try {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Locking RTClientState for ID: {}", state.getId());
-            }
+            LOG.debug("Locking RTClientState for ID: {}", state.getId());
             state.lock();
             state.touch();
             List<Stanza> stanzasToSend = state.getStanzasToSend();
@@ -128,16 +126,14 @@ public abstract class RTAction implements AJAXActionService {
         } finally {
             // Increment TTL count even after failure as offending stanza might cause sending to fail. Incrementing will get rid of it.
             state.purge();
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Unlocking RTClientState for ID: {}", state.getId());
-            }
+            LOG.debug("Unlocking RTClientState for ID: {}", state.getId());
             state.unlock();
         }
     }
 
     /**
      * Convert a Stanza from native to JSON representation
-     * 
+     *
      * @param stanza The stanza to convert
      * @return The converted Stanza
      * @throws OXException If the conversion fails
@@ -148,7 +144,7 @@ public abstract class RTAction implements AJAXActionService {
 
     /**
      * Convert a RealtimeException from native to JSON representation
-     * 
+     *
      * @param ex The exception to convert
      * @param serverSession The ServerSession to use for the conversion process
      * @return The converted RealtimeException
@@ -163,7 +159,7 @@ public abstract class RTAction implements AJAXActionService {
 
     /**
      * Get a result map containing the error.
-     * 
+     *
      * @param exception The exception to log
      * @param serverSession The ServerSession
      * @throws OXException If the exception could be converted to JSON
@@ -173,10 +169,10 @@ public abstract class RTAction implements AJAXActionService {
         resultMap.put(ERROR, exceptionToJSON(exception, serverSession));
         return resultMap;
     }
-    
+
     /**
      * Get a result map containing the error and remaining stanzas addressed to the client
-     * 
+     *
      * @param exception The exception to log
      * @param serverSession The ServerSession
      * @param clientState The state if the connected client

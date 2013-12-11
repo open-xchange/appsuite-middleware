@@ -150,9 +150,7 @@ public final class SmbFileMapManagement {
      */
     public void dropFor(final int contextId) {
         map.get(Integer.valueOf(contextId));
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Cleaned user-sensitive SMB file cache for context {}", contextId);
-        }
+        LOG.debug("Cleaned user-sensitive SMB file cache for context {}", contextId);
     }
 
     /**
@@ -168,9 +166,7 @@ public final class SmbFileMapManagement {
                 smbFileMap.clear();
             }
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Cleaned user-sensitive SMB file cache for user {} in context {}", session.getUserId(), session.getContextId());
-        }
+        LOG.debug("Cleaned user-sensitive SMB file cache for user {} in context {}", session.getUserId(), session.getContextId());
     }
 
     /**
@@ -187,9 +183,7 @@ public final class SmbFileMapManagement {
                 smbFileMap.clear();
             }
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Cleaned user-sensitive SMB file cache for user {} in context {}", userId, contextId);
-        }
+        LOG.debug("Cleaned user-sensitive SMB file cache for user {} in context {}", userId, contextId);
     }
 
     /**

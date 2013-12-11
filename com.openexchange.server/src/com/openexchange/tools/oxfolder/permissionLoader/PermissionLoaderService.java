@@ -372,7 +372,7 @@ public final class PermissionLoaderService implements Runnable {
                 @Override
                 public boolean execute(final List<Pair> pairs) {
                     try {
-                        handlePairs(pairs, LOG.isDebugEnabled());
+                        handlePairs(pairs);
                     } catch (final InterruptedException e) {
                         // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
                         Thread.currentThread().interrupt();
@@ -443,38 +443,38 @@ public final class PermissionLoaderService implements Runnable {
      * @param groupedPairs The equally-grouped pairs
      * @throws InterruptedException If thread is interrupted
      */
-    protected void handlePairs(final List<Pair> groupedPairs, final boolean debug) throws InterruptedException {
+    protected void handlePairs(final List<Pair> groupedPairs) throws InterruptedException {
         final int size = groupedPairs.size();
         final int configuredBlockSize = MAX_FILLER_CHUNK;
         if (size <= configuredBlockSize) {
-            handlePairsSublist(groupedPairs, simpleName, debug);
+            handlePairsSublist(groupedPairs, simpleName);
         } else {
             int fromIndex = 0;
             while (fromIndex < size) {
                 final int toIndex = fromIndex + configuredBlockSize;
                 if (toIndex > size) {
-                    schedulePairsSublist(groupedPairs.subList(fromIndex, size), debug);
+                    schedulePairsSublist(groupedPairs.subList(fromIndex, size));
                     fromIndex = size;
                 } else {
-                    schedulePairsSublist(groupedPairs.subList(fromIndex, toIndex), debug);
+                    schedulePairsSublist(groupedPairs.subList(fromIndex, toIndex));
                     fromIndex = toIndex;
                 }
             }
         }
     }
 
-    private void schedulePairsSublist(final List<Pair> groupedPairsSublist, final boolean debug) throws InterruptedException {
+    private void schedulePairsSublist(final List<Pair> groupedPairsSublist) throws InterruptedException {
         final ThreadPoolService threadPool = this.threadPool;
         if (null == threadPool) {
             /*
              * Caller runs because thread pool is absent
              */
-            handlePairsSublist(groupedPairsSublist, simpleName, debug);
+            handlePairsSublist(groupedPairsSublist, simpleName);
         } else if (null == concurrentFutures) {
             /*
              * Submit without check for a free slot
              */
-            final PairHandlerTask task = new PairHandlerTask(groupedPairsSublist, debug);
+            final PairHandlerTask task = new PairHandlerTask(groupedPairsSublist);
             threadPool.submit(ThreadPools.task(task));
             task.start(null);
         } else {
@@ -492,17 +492,13 @@ public final class PermissionLoaderService implements Runnable {
                         }
                     } else if (sf.getStamp() < earliestStamp) { // Elapsed
                         sf.getFuture().cancel(true);
-                        if (debug) {
-                            LOG.debug("Cancelled elapsed task running for " + (System.currentTimeMillis() - sf.getStamp()) + "msec.");
-                        }
+                        LOG.debug("Cancelled elapsed task running for {}msec.", (System.currentTimeMillis() - sf.getStamp()));
                         if (concurrentFutures.compareAndSet(i, sf, placeHolder)) {
                             index = i; // Found a slot with an elapsed task
                         }
                     }
                 }
-                if (debug) {
-                    LOG.debug(index < 0 ? "Awaiting a free/elapsed slot..." : "Found a free/elapsed slot...");
-                }
+                LOG.debug(index < 0 ? "Awaiting a free/elapsed slot..." : "Found a free/elapsed slot...");
                 if (index < 0) {
                     synchronized (placeHolder) {
                         placeHolder.wait(WAIT_TIME);
@@ -512,7 +508,7 @@ public final class PermissionLoaderService implements Runnable {
             /*
              * Submit to a free worker thread
              */
-            final PairHandlerTask task = new IndexedPairHandlerTask(groupedPairsSublist, index, debug);
+            final PairHandlerTask task = new IndexedPairHandlerTask(groupedPairsSublist, index);
             final Future<Object> f = threadPool.submit(ThreadPools.task(task));
             final StampedFuture sf = new StampedFuture(f);
             concurrentFutures.set(index, sf);
@@ -526,12 +522,11 @@ public final class PermissionLoaderService implements Runnable {
      * @param pairsChunk The chunk of equally-grouped pairs
      * @param threadDesc The thread description
      */
-    protected void handlePairsSublist(final List<Pair> pairsChunk, final String threadDesc, final boolean debug) {
+    protected void handlePairsSublist(final List<Pair> pairsChunk, final String threadDesc) {
         if (pairsChunk.isEmpty()) {
             return;
         }
         try {
-            final long st = debug ? System.currentTimeMillis() : 0L;
             /*
              * Handle fillers in chunks
              */
@@ -547,25 +542,21 @@ public final class PermissionLoaderService implements Runnable {
                 readConWrapper = pooledCons.putIfAbsent(key, nw);
                 if (null != readConWrapper) {
                     // Wasn't able to put connection; work with newly fetched connection
-                    if (debug) {
-                        LOG.debug("Using \"un-shared\" connection.");
-                    }
+                    LOG.debug("Using \"un-shared\" connection.");
                     try {
                         for (final Pair pair : pairsChunk) {
                             permsMap.put(pair, loadFolderPermissions(pair.folderId, contextId, newReadCon), 60);
                         }
                     } finally {
                         Database.backNoTimeout(contextId, false, newReadCon);
-                        if (debug) {
-                            LOG.debug("Released \"un-shared\" connection.");
-                        }
+                        LOG.debug("Released \"un-shared\" connection.");
                     }
                     // Leave
                     return;
                 }
                 // "Shared" connection
                 readConWrapper = nw;
-            } else if (debug) {
+            } else {
                 LOG.debug("Using \"shared\" connection.");
             }
             // Working with "shared" connection
@@ -582,7 +573,7 @@ public final class PermissionLoaderService implements Runnable {
                         }
                     }
                 } else {
-                    handlePairsSublist(pairsChunk, threadDesc, debug);
+                    handlePairsSublist(pairsChunk, threadDesc);
                     return;
                 }
             } finally {
@@ -590,15 +581,6 @@ public final class PermissionLoaderService implements Runnable {
                     readConWrapper.release();
                 }
                 rlock.unlock();
-            }
-            if (debug) {
-                final long dur = System.currentTimeMillis() - st;
-                final StringBuilder tmp = new StringBuilder(64).append("Handled ").append(pairsChunk.size()).append(" pairs");
-                if (null != threadDesc) {
-                    tmp.append(" with thread \"").append(threadDesc).append('"');
-                }
-                tmp.append(" in ").append(dur).append("msec.");
-                LOG.debug(tmp.toString());
             }
         } catch (final OXException e) {
             LOG.error("Failed loading permissions.", e);
@@ -724,14 +706,10 @@ public final class PermissionLoaderService implements Runnable {
     private class PairHandlerTask implements Task<Object> {
 
         protected final List<Pair> pairs;
-
         protected final CountDownLatch startSignal;
 
-        protected final boolean debug;
-
-        protected PairHandlerTask(final List<Pair> pairs, final boolean debug) {
+        protected PairHandlerTask(final List<Pair> pairs) {
             super();
-            this.debug = debug;
             this.startSignal = new CountDownLatch(1);
             this.pairs = pairs;
         }
@@ -763,7 +741,7 @@ public final class PermissionLoaderService implements Runnable {
         @Override
         public Object call() throws Exception {
             startSignal.await();
-            handlePairsSublist(pairs, null, debug);
+            handlePairsSublist(pairs, null);
             return null;
         }
 
@@ -775,8 +753,8 @@ public final class PermissionLoaderService implements Runnable {
 
         private volatile StampedFuture sf;
 
-        protected IndexedPairHandlerTask(final List<Pair> pairs, final int indexPos, final boolean debug) {
-            super(pairs, debug);
+        protected IndexedPairHandlerTask(final List<Pair> pairs, final int indexPos) {
+            super(pairs);
             this.indexPos = indexPos;
         }
 
@@ -799,7 +777,7 @@ public final class PermissionLoaderService implements Runnable {
                 if (null != sf) {
                     sf.setStamp(System.currentTimeMillis());
                 }
-                handlePairsSublist(pairs, String.valueOf(indexPos + 1), debug);
+                handlePairsSublist(pairs, String.valueOf(indexPos + 1));
                 return null;
             } finally {
                 concurrentFutures.set(indexPos, null);

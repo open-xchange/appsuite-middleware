@@ -62,7 +62,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
-import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
@@ -468,9 +467,7 @@ public abstract class OXServlet extends WebDavServlet {
     private static LoginRequest parseLogin(final HttpServletRequest req, final Interface face) throws OXException {
         final String auth = req.getHeader(Header.AUTH_HEADER);
         if (null == auth) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Authorization header missing.");
-            }
+            LOG.debug("Authorization header missing.");
             throw WebdavExceptionCode.MISSING_HEADER_FIELD.create("Authorization");
         }
         if (com.openexchange.tools.servlet.http.Authorization.checkForBasicAuthorization(auth)) {
@@ -514,9 +511,7 @@ public abstract class OXServlet extends WebDavServlet {
          */
         final int pos = auth.indexOf(' ');
         final String mech = pos > 0 ? auth.substring(0, pos) : auth;
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Unsupported Authentication header.");
-        }
+        LOG.debug("Unsupported Authentication header.");
         throw WebdavExceptionCode.UNSUPPORTED_AUTH_MECH.create(mech);
     }
 

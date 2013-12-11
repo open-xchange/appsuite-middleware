@@ -260,17 +260,7 @@ public final class IMAPSearch {
          * JavaMail already searches dependent on whether pattern contains non-ascii characters. If yes a charset is used:
          * SEARCH CHARSET UTF-8 <one or more search criteria>
          */
-        if (!LOG.isDebugEnabled()) {
-            return search(term, imapFolder);
-        }
-        final long start = System.currentTimeMillis();
-        /*-
-         * JavaMail already searches dependent on whether pattern contains non-ascii characters. If yes a charset is used:
-         * SEARCH CHARSET UTF-8 <one or more search criteria>
-         */
-        final int[] seqNums = search(term, imapFolder);
-        LOG.debug("IMAP search took {}msec", (System.currentTimeMillis() - start));
-        return seqNums;
+        return search(term, imapFolder);
     }
 
     /**

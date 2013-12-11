@@ -1751,9 +1751,7 @@ public final class OXFolderSQL {
          * Finally deliver it
          */
         eventAdmin.sendEvent(event);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Notified content-related-wise changed folder \"{} in context {}", fuid, contextId);
-        }
+        LOG.debug("Notified content-related-wise changed folder \"{} in context {}", fuid, contextId);
     }
 
     private static final String SQL_DELETE_PERMS = "DELETE FROM " + TMPL_PERM_TABLE + " WHERE cid = ? AND fuid = ? AND permission_id = ?";

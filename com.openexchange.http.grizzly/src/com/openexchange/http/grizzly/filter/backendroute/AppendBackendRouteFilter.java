@@ -252,8 +252,6 @@ public class AppendBackendRouteFilter extends BaseFilter {
      * @param logValue the String that should be logged
      */
     private static void writeToDebugLog(String logValue) {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug(logValue);
-        }
+        LOG.debug(logValue);
     }
 }

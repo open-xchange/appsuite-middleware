@@ -164,9 +164,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
 
     @Override
     public void doPropPatch(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("PROPPATCH");
-        }
+        LOG.debug("PROPPATCH");
 
         XmlPullParser parser = null;
         final PendingInvocations<I> pendingInvocations = new PendingInvocations<I>(new LinkedList<QueuedAction<I>>(), new LastModifiedCache());
@@ -214,9 +212,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
     @Override
     public void doPropFind(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
             IOException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("PROPFIND");
-        }
+        LOG.debug("PROPFIND");
 
         Document input_doc = null;
 
@@ -375,9 +371,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
     public void doError(final HttpServletRequest req, final HttpServletResponse resp, final int code, final String msg)
             throws ServletException {
         try {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("STATUS: {}: ({}{}", msg, code, ')');
-            }
+            LOG.debug("STATUS: {}: ({})", msg, code);
 
             resp.sendError(code, msg);
             resp.setContentType("text/html");
@@ -515,9 +509,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
     protected void writeResponse(final DataObject dataobject, final int status, final String message,
             final String client_id, final OutputStream os, final XMLOutputter xo, final Appointment[] conflicts)
             throws IOException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("{}{}{}", message, ':', status);
-        }
+        LOG.debug("{}:{}", message, status);
 
         final Element e_response = new Element("response", dav);
         e_response.addNamespaceDeclaration(NS);

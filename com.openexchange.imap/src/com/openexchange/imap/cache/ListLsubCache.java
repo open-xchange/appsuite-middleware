@@ -151,9 +151,7 @@ public final class ListLsubCache {
      */
     public static void dropFor(final Session session) {
         MAP.remove(keyFor(session));
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Cleaned user-sensitive LIST/LSUB cache for user {} in context {}", session.getUserId(), session.getContextId());
-        }
+        LOG.debug("Cleaned user-sensitive LIST/LSUB cache for user {} in context {}", session.getUserId(), session.getContextId());
     }
 
     /**

@@ -296,9 +296,7 @@ public final class MALPollPushListener implements PushListener {
                 fetchedUids = gatherUIDs(mailService);
             } catch (final OXException e) {
                 if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("", e);
-                    }
+                    LOG.debug("", e);
                     /*
                      * Nothing to synchronize
                      */

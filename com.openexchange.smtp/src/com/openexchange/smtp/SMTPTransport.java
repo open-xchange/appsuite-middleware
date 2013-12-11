@@ -759,7 +759,6 @@ public final class SMTPTransport extends MailTransport {
             /*
              * Fill message dependent on send type
              */
-            final long startPrep = System.currentTimeMillis();
             final SMTPMessageFiller smtpFiller = new SMTPMessageFiller(smtpConfig.getSMTPProperties(), session, ctx, usm);
             smtpFiller.setAccountId(accountId);
             composedMail.setFiller(smtpFiller);
@@ -785,9 +784,6 @@ public final class SMTPTransport extends MailTransport {
                  * Drop special "x-original-headers" header
                  */
                 smtpMessage.removeHeader("x-original-headers");
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("SMTP mail prepared for transport in {}msec", System.currentTimeMillis() - startPrep);
-                }
                 final long start = System.currentTimeMillis();
                 final Transport transport = getSMTPSession().getTransport(SMTP);
                 try {

@@ -58,7 +58,6 @@ import java.util.Arrays;
 import java.util.List;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-import org.slf4j.Logger;
 import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventHelper;
@@ -100,16 +99,14 @@ public class ChecksumEventListener implements EventHandler {
     }
 
     @Override
-    public void handleEvent(Event event) {
+    public void handleEvent(final Event event) {
         try {
             Session session = FileStorageEventHelper.extractSession(event);
             if (null == session || isDriveSession(session)) {
                 // skip
                 return;
             }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(FileStorageEventHelper.createDebugMessage("event", event));
-            }
+            LOG.debug("{}", new Object() { @Override public String toString() { return FileStorageEventHelper.createDebugMessage("event", event);}});
             RdbChecksumStore checksumStore = new RdbChecksumStore(session.getContextId());
             String topic = event.getTopic();
             if (DELETE_TOPIC.equals(topic) || UPDATE_TOPIC.equals(topic) || CREATE_TOPIC.equals(topic)) {

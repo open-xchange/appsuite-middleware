@@ -90,7 +90,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
 
     private static final long serialVersionUID = 5779820324953825111L;
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(calendar.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(calendar.class);
 
     /**
      * Initializes a new {@link calendar}.
@@ -159,9 +159,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                 }
                 break;
             case DataParser.DELETE:
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("delete appointment: {} in folder: {}", appointmentobject.getObjectID(), inFolder);
-                }
+                LOG.debug("delete appointment: {} in folder: {}", appointmentobject.getObjectID(), inFolder);
 
                 pendingInvocations.add(new QueuedAppointment(appointmentobject, ap.getClientID(),
                         DataParser.DELETE, lastModified, inFolder));
@@ -171,9 +169,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                         DataParser.CONFIRM, lastModified, inFolder));
                 break;
             default:
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("invalid method: {}", method);
-                }
+                LOG.debug("invalid method: {}", method);
             }
         } else {
             parser.next();
@@ -310,9 +306,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                     }
                     break;
                 case DataParser.DELETE:
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("delete appointment: {} in folder: {}", appointmentobject.getObjectID(), inFolder);
-                    }
+                    LOG.debug("delete appointment: {} in folder: {}", appointmentobject.getObjectID(), inFolder);
 
                     if (lastModified == null) {
                         throw WebdavExceptionCode.MISSING_FIELD.create(DataFields.LAST_MODIFIED);

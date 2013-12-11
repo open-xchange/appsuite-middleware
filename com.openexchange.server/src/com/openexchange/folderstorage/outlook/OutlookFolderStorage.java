@@ -501,11 +501,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                             }
                         }
                     } catch (final OXException oxe) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.warn("Checking consistency failed for folder {} in tree {}", folderId, treeId, oxe);
-                        } else {
-                            LOG.warn("Checking consistency failed for folder {} in tree {}:\n{}", folderId, treeId, oxe.getMessage());
-                        }
+                        LOG.warn("Checking consistency failed for folder {} in tree {}", folderId, treeId, oxe);
                     }
                 }
                 // Commit
@@ -516,20 +512,12 @@ public final class OutlookFolderStorage implements FolderStorage {
                 for (final FolderStorage folderStorage : storages) {
                     folderStorage.rollback(storageParameters);
                 }
-                if (LOG.isDebugEnabled()) {
-                    LOG.warn("Checking consistency failed in tree {}", treeId, e);
-                } else {
-                    LOG.warn("Checking consistency failed in tree {}:\n{}", treeId, e.getMessage());
-                }
+                LOG.warn("Checking consistency failed in tree {}", treeId, e);
             } catch (final RuntimeException e) {
                 for (final FolderStorage folderStorage : storages) {
                     folderStorage.rollback(storageParameters);
                 }
-                if (LOG.isDebugEnabled()) {
-                    LOG.warn("Checking consistency failed for in tree {}", treeId, e);
-                } else {
-                    LOG.warn("Checking consistency failed for in tree {}:\n{}", treeId, e.getMessage());
-                }
+                LOG.warn("Checking consistency failed for in tree {}", treeId, e);
             }
         }
     }
@@ -2436,36 +2424,28 @@ public final class OutlookFolderStorage implements FolderStorage {
                     }
                 } catch (final OXException e) {
                     if (MailExceptionCode.UNKNOWN_PROTOCOL.equals(e)) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("", e);
-                        }
+                        LOG.debug("", e);
                         parameters.addWarning(e);
                         /*
                          * Return empty map
                          */
                         return new TreeMap<String, List<String>>(comparator);
                     } else if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("", e);
-                        }
+                        LOG.debug("", e);
                         parameters.addWarning(e);
                         /*
                          * Return empty map
                          */
                         return new TreeMap<String, List<String>>(comparator);
                     } else if (MimeMailExceptionCode.INVALID_CREDENTIALS.equals(e) || MimeMailExceptionCode.LOGIN_FAILED.equals(e)) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("", e);
-                        }
+                        LOG.debug("", e);
                         parameters.addWarning(e);
                         /*
                          * Return empty map
                          */
                         return new TreeMap<String, List<String>>(comparator);
                     } else if (MimeMailExceptionCode.CONNECT_ERROR.equals(e) || MimeMailExceptionCode.UNKNOWN_HOST.equals(e)) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("", e);
-                        }
+                        LOG.debug("", e);
                         parameters.addWarning(e);
                         /*
                          * Return empty map

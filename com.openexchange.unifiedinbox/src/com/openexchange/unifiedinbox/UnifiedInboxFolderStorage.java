@@ -736,9 +736,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                 list.add(completionService.take().get());
                 completed++;
             }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Retrieving root's subfolders took {}msec.", completionService.getDuration());
-            }
+            LOG.debug("Retrieving root's subfolders took {}msec.", completionService.getDuration());
             // Merge them
             final String[] names = new String[5];
             names[0] = getLocalizedName(UnifiedInboxAccess.INBOX);
@@ -796,9 +794,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                     }
                 }
             }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Retrieving root's subfolders took {}msec.", completionService.getDuration());
-            }
+            LOG.debug("Retrieving root's subfolders took {}msec.", completionService.getDuration());
             // Return them
             return retval;
         } catch (final InterruptedException e) {
@@ -881,9 +877,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
                     folders.add(f);
                 }
             }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Retrieving subfolders of \"{}\" took {}msec.", parentFullname, completionService.getDuration());
-            }
+            LOG.debug("Retrieving subfolders of \"{}\" took {}msec.", parentFullname, completionService.getDuration());
             // Sort them
             Collections.sort(folders, new MailFolderNameComparator(getLocale()));
             // Return as array

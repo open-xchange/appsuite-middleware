@@ -182,7 +182,7 @@ public class RTProtocolImpl implements RTProtocol {
                 stanza.trace("We have no state about this client " + stanza.getFrom()+ " sending nextSequence message");
                 enqueueNextSequence(stanza.getFrom(), state, transmitter);
             }
-            //Remember the original sequence as it might get changed for local or remote delivery 
+            //Remember the original sequence as it might get changed for local or remote delivery
             long sequenceNumber = stanza.getSequenceNumber();
             if (gate.handle(stanza, stanza.getTo())) {
                 stanza.trace("Adding receipt for client message " + sequenceNumber + " to acknowledgement list");
@@ -216,9 +216,7 @@ public class RTProtocolImpl implements RTProtocol {
                 LOG.debug("Trying to send {} stanzas to {}.", stanzasToSend.size(), state.getId());
                 transmitter.send(stanzasToSend);
             } catch (OXException e) {
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("Error while trying to send Stanza(s) to client: {}", state.getId(), e);
-                }
+                LOG.debug("Error while trying to send Stanza(s) to client: {}", state.getId(), e);
             }
         } finally {
             //Increment TTL count even after failure as offending stanza might cause sending to fail. Incrementing will get rid of it.

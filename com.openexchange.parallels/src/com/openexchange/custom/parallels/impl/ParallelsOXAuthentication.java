@@ -55,7 +55,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 import org.slf4j.Logger;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
@@ -137,10 +136,7 @@ public class ParallelsOXAuthentication implements AuthenticationService {
             }
 
 
-            // if we reach here, we are successfully authed at the versatel imap service
-            if(LOG.isDebugEnabled()){
-                LOG.debug("Now trying to resolve ox-username and ox-context...");
-            }
+            LOG.debug("Now trying to resolve ox-username and ox-context...");
 
             /**
              * Resolve context and username via sql query against configdb

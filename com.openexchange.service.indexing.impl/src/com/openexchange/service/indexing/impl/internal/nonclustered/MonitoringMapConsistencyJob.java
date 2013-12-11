@@ -71,24 +71,22 @@ import com.openexchange.service.indexing.impl.internal.Services;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class MonitoringMapConsistencyJob implements Job {
-    
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MonitoringMapConsistencyJob.class);
-    
+
     public static final String NODE_NAME = "nodeName";
-    
+
     public static final String JOB_MAP = "jobMap";
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         try {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Started run of MonitoringMapConsistencyJob");
-            }
-            
+            LOG.debug("Started run of MonitoringMapConsistencyJob");
+
             JobDataMap data = context.getMergedJobDataMap();
             String nodeName = data.getString(NODE_NAME);
             String jobMap = data.getString(JOB_MAP);
-            
+
             Scheduler scheduler = context.getScheduler();
             Set<String> localJobs = new HashSet<String>();
             List<String> groups = scheduler.getTriggerGroupNames();
@@ -98,7 +96,7 @@ public class MonitoringMapConsistencyJob implements Job {
                     localJobs.add(k.toString());
                 }
             }
-            
+
             HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
             MultiMap<String, String> monitoredJobs = hazelcast.getMultiMap(jobMap);
             Collection<String> collection = monitoredJobs.get(nodeName);
@@ -111,14 +109,12 @@ public class MonitoringMapConsistencyJob implements Job {
                     monitoredJobs.remove(nodeName, job);
                 }
             }
-            
+
             for (String job : localJobs) {
                 monitoredJobs.put(nodeName, job);
             }
-            
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Removed {} jobs from monitoring map.", removed);
-            }
+
+            LOG.debug("Removed {} jobs from monitoring map.", removed);
         } catch (Throwable t) {
             LOG.warn("MonitoringMapConsistencyJob failed.", t);
         }

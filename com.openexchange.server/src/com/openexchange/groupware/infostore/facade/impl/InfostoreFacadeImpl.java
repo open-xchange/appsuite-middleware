@@ -2030,9 +2030,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     IndexAccess<DocumentMetadata> infostoreIndex = null;
                     IndexAccess<Attachment> attachmentIndex = null;
                     try {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Deleting infostore document");
-                        }
+                        LOG.debug("Deleting infostore document");
 
                         infostoreIndex = indexFacade.acquireIndexAccess(Types.INFOSTORE, userId, context.getContextId());
                         attachmentIndex = indexFacade.acquireIndexAccess(Types.ATTACHMENT, userId, context.getContextId());
@@ -2053,9 +2051,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                         }
                     } catch (Exception e) {
                         if ((e instanceof OXException) && (IndexExceptionCodes.INDEX_LOCKED.equals((OXException) e) || IndexExceptionCodes.INDEXING_NOT_ENABLED.equals((OXException) e))) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Could not remove document from infostore index.");
-                            }
+                            LOG.debug("Could not remove document from infostore index.");
                         } else {
                             LOG.error("Error while deleting documents from index.", e);
                         }
@@ -2095,9 +2091,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     IndexAccess<DocumentMetadata> infostoreIndex = null;
                     IndexAccess<Attachment> attachmentIndex = null;
                     try {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Indexing infostore document");
-                        }
+                        LOG.debug("Indexing infostore document");
 
                         infostoreIndex = indexFacade.acquireIndexAccess(Types.INFOSTORE, userId, context.getContextId());
                         attachmentIndex = indexFacade.acquireIndexAccess(Types.ATTACHMENT, userId, context.getContextId());
@@ -2134,9 +2128,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                         }
                     } catch (Exception e) {
                         if ((e instanceof OXException) && (IndexExceptionCodes.INDEX_LOCKED.equals((OXException) e) || IndexExceptionCodes.INDEXING_NOT_ENABLED.equals((OXException) e))) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Could index document to infostore index.");
-                            }
+                            LOG.debug("Could index document to infostore index.");
                         } else {
                             LOG.error("Error while indexing document.", e);
                         }

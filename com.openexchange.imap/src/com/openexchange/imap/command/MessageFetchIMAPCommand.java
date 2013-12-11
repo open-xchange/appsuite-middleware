@@ -637,10 +637,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
                 }
                 h = new InternetHeaders();
                 if (null == headerStream) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug(new com.openexchange.java.StringAllocator(32).append("Cannot retrieve headers from message #").append(msg.getMessageNumber()).append(
-                            " in folder ").append(msg.getFullname()).toString());
-                    }
+                    logger.debug("Cannot retrieve headers from message #{} in folder {}", msg.getMessageNumber(), msg.getFullname());
                 } else {
                     h.load(headerStream);
                 }

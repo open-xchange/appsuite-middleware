@@ -98,9 +98,7 @@ public final class PropertyMapManagement {
      */
     public void dropFor(final int contextId) {
         map.remove(Integer.valueOf(contextId));
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Cleaned user-sensitive property cache for context {}", contextId);
-        }
+        LOG.debug("Cleaned user-sensitive property cache for context {}", contextId);
     }
 
     /**
@@ -113,9 +111,7 @@ public final class PropertyMapManagement {
         if (null != contextMap) {
             contextMap.remove(Integer.valueOf(session.getUserId()));
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Cleaned user-sensitive property cache for user {} in context {}", session.getUserId(), session.getContextId());
-        }
+        LOG.debug("Cleaned user-sensitive property cache for user {} in context {}", session.getUserId(), session.getContextId());
     }
 
     /**
@@ -129,9 +125,7 @@ public final class PropertyMapManagement {
         if (null != contextMap) {
             contextMap.remove(Integer.valueOf(userId));
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Cleaned user-sensitive property cache for user {} in context {}", userId, contextId);
-        }
+        LOG.debug("Cleaned user-sensitive property cache for user {} in context {}", userId, contextId);
     }
 
     /**

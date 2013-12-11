@@ -173,11 +173,7 @@ public abstract class AbstractCIFSAccess {
             return true;
         } else if (message.startsWith("0x")) {
             // Unspecified error occurred
-            if (LOG.isDebugEnabled()) {
-                LOG.warn(format("Unspecified error received from CIFS/SMB server \"{0}\" for login {1}: {2}", rootUrl, auth.getUsername() ,message), e);
-            } else {
-                LOG.warn(format("Unspecified error received from CIFS/SMB server \"{0}\" for login {1}: {2}", rootUrl, auth.getUsername() ,message));
-            }
+            LOG.warn(format("Unspecified error received from CIFS/SMB server \"{0}\" for login {1}: {2}", rootUrl, auth.getUsername() ,message), e);
             return true;
         }
         return false;

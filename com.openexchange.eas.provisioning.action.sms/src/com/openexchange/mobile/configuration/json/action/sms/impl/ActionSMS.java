@@ -50,7 +50,6 @@
 package com.openexchange.mobile.configuration.json.action.sms.impl;
 
 import java.net.MalformedURLException;
-import java.text.MessageFormat;
 import java.util.Map;
 import org.apache.xmlrpc.XmlRpcException;
 import com.openexchange.config.ConfigurationService;
@@ -96,10 +95,9 @@ public class ActionSMS implements ActionService {
 		smssend.setServerUrl(getFromConfig("com.openexchange.mobile.configuration.json.action.sms.sipgat.api.url"));
 		smssend.setSipgateuser(getFromConfig("com.openexchange.mobile.configuration.json.action.sms.sipgat.api.username"));
 		smssend.setSipgatepass(getFromConfig("com.openexchange.mobile.configuration.json.action.sms.sipgat.api.password"));
-		if(LOG.isDebugEnabled()){
-			LOG.debug("Using API URL: {} ", getFromConfig("com.openexchange.mobile.configuration.json.action.sms.sipgat.api.url"));
-			LOG.debug("Using API Username: {} ", getFromConfig("com.openexchange.mobile.configuration.json.action.sms.sipgat.api.username"));
-		}
+
+		LOG.debug("Using API URL: {} ", new Object() { @Override public String toString() { return getFromConfig("com.openexchange.mobile.configuration.json.action.sms.sipgat.api.url");}});
+		LOG.debug("Using API Username: {} ", new Object() { @Override public String toString() { return getFromConfig("com.openexchange.mobile.configuration.json.action.sms.sipgat.api.username");}});
 
 		// set prov. URL in SMS
 		smssend.setText(provisioningInformation.getUrl());
@@ -131,7 +129,7 @@ public class ActionSMS implements ActionService {
 		return provisioningResponse;
 	}
 
-	private String getFromConfig(final String key) {
+	protected String getFromConfig(final String key) {
 		ConfigurationService configservice;
 		String retval = null;
 		try {

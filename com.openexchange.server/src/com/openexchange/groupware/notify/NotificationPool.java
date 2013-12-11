@@ -149,15 +149,11 @@ public final class NotificationPool {
             if (prev == null) {
                 map.put(pooledNotification, pooledNotification);
                 queue.offer(pooledNotification);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("New pooled notification added for receiver {}", pooledNotification.getParticipant().email);
-                }
+                LOG.debug("New pooled notification added for receiver {}", pooledNotification.getParticipant().email);
             } else {
                 prev.merge(pooledNotification);
                 prev.touch();
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Pooled notification merged for receiver {}", pooledNotification.getParticipant().email);
-                }
+                LOG.debug("Pooled notification merged for receiver {}", pooledNotification.getParticipant().email);
             }
         } finally {
             readLock.unlock();
@@ -270,10 +266,7 @@ public final class NotificationPool {
 
         private void handlePooledNotification(final PooledNotification cur, final StringBuilder b) {
             final EmailableParticipant p = cur.getParticipant();
-            if (logger.isDebugEnabled()) {
-                logger.debug(b.append("Found elapsed pooled notification for receiver ").append(p.email).toString());
-                b.setLength(0);
-            }
+            logger.debug("Found elapsed pooled notification for receiver {}", p.email);
             final RenderMap renderMap = cur.getRenderMap();
             renderMap.applyLocale(cur.getLocale());
             renderMap.applyTimeZone(p.timeZone == null ? TimeZone.getDefault() : p.timeZone);
@@ -315,12 +308,11 @@ public final class NotificationPool {
                             true,
                             b);
                 }
-                if (logger.isDebugEnabled()) {
-                    logger.debug(b.append("Pooled ").append((Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task")).append(
-                        " (id = ").append(calendarObject.getObjectID()).append(") notification message generated for receiver ").append(
-                        p.email).toString());
-                    b.setLength(0);
-                }
+                logger.debug(
+                    "Pooled {} (id = {}) notification message generated for receiver {}",
+                    (Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task"),
+                    calendarObject.getObjectID(),
+                    p.email);
                 /*
                  * Send notification
                  */
