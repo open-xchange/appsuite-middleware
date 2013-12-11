@@ -128,6 +128,7 @@ public class DriveServiceImpl implements DriveService {
          */
         if (session.getApiVersion() < DriveConfig.getInstance().getMinApiVersion()) {
             OXException error = DriveExceptionCodes.CLIENT_OUTDATED.create();
+            LOG.warn("Client synchronization aborted for " + session, error);
             List<AbstractAction<DirectoryVersion>> actionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(1);
             actionsForClient.add(new ErrorDirectoryAction(null, null, null, error, false, true));
             return new DefaultSyncResult<DirectoryVersion>(actionsForClient, error.getLogMessage());
@@ -137,6 +138,7 @@ public class DriveServiceImpl implements DriveService {
             DriveClientVersion hardVersionLimit = DriveConfig.getInstance().getHardMinimumVersion(session.getClientType());
             if (0 > clientVersion.compareTo(hardVersionLimit)) {
                 OXException error = DriveExceptionCodes.CLIENT_VERSION_OUTDATED.create(clientVersion, hardVersionLimit);
+                LOG.warn("Client synchronization aborted for " + session, error);
                 List<AbstractAction<DirectoryVersion>> actionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(1);
                 actionsForClient.add(new ErrorDirectoryAction(null, null, null, error, false, true));
                 return new DefaultSyncResult<DirectoryVersion>(actionsForClient, error.getLogMessage());
@@ -178,7 +180,8 @@ public class DriveServiceImpl implements DriveService {
                     continue;
                 }
                 driveSession.trace("Got exception during execution of server actions (" + e.getMessage() + ")");
-                LOG.debug("Got exception during execution of server actions (" + e.getMessage() + ")", e);
+                LOG.warn("Got exception during execution of server actions (" + e.getMessage() + ")\n" +
+                    "Previous sync result:\n" + syncResult, e);
                 throw e;
             }
             /*
@@ -194,6 +197,7 @@ public class DriveServiceImpl implements DriveService {
                 DriveClientVersion softVersionLimit = DriveConfig.getInstance().getSoftMinimumVersion(session.getClientType());
                 if (0 > clientVersion.compareTo(softVersionLimit)) {
                     OXException error = DriveExceptionCodes.CLIENT_VERSION_UPDATE_AVAILABLE.create(clientVersion, softVersionLimit);
+                    LOG.trace("Client upgrade available for " + session, error);
                     syncResult.addActionForClient(new ErrorDirectoryAction(null, null, null, error, false, false));
                 }
             }
@@ -302,6 +306,9 @@ public class DriveServiceImpl implements DriveService {
         try {
             createdFile = new UploadHelper(driveSession).perform(path, originalVersion, newVersion, uploadStream, contentType, offset, totalLength, created, modified);
         } catch (OXException e) {
+            LOG.warn("Got exception during upload (" + e.getMessage() + ")\n" + "Session: " + driveSession + ", path: " + path +
+                ", original version: " + originalVersion + ", new version: " + newVersion + ", offset: " + offset + ", total length: " +
+                totalLength);
             if ("FLS-0024".equals(e.getErrorCode())) {
                 /*
                  * quota reached
