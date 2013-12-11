@@ -109,7 +109,7 @@ public class CometListener implements LongPollingListener {
                 /*
                  * wait for event inside comet handler
                  */
-                LOG.debug("Registering new comet handler for " + session + " ...");
+                LOG.debug("Registering new comet handler for {} ...", session);
                 cometHandler = new DriveCometHandler(session);
                 cometContext.addCometHandler(cometHandler);
                 /*
@@ -122,7 +122,7 @@ public class CometListener implements LongPollingListener {
                 /*
                  * consume available event directly
                  */
-                LOG.debug("Stored event available for " + session + ", no need to wait.");
+                LOG.debug("Stored event available for {}, no need to wait.", session);
                 AJAXRequestResult result = createResult(this.event);
                 this.event = null;
                 return result;
@@ -148,7 +148,7 @@ public class CometListener implements LongPollingListener {
     @Override
     public void onEvent(DriveEvent event) {
         if (false == isInteresting(event)) {
-            LOG.debug("Skipping uninteresting event: " + event);
+            LOG.debug("Skipping uninteresting event: {}", event);
             return;
         }
         lock.lock();

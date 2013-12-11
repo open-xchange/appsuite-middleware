@@ -86,7 +86,7 @@ public class SubscribeActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("starting bundle: " + context.getBundle().getSymbolicName());
+        LOG.info("starting bundle: {}", context.getBundle().getSymbolicName());
         SubscribeServiceLookup.set(this);
         registerService(CreateTableService.class, new DriveEventSubscriptionsCreateTableService());
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DriveEventSubscriptionsCreateTableTask()));
@@ -96,7 +96,7 @@ public class SubscribeActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: " + context.getBundle().getSymbolicName());
+        LOG.info("stopping bundle: {}", context.getBundle().getSymbolicName());
         SubscribeServiceLookup.set(null);
         super.stopBundle();
     }

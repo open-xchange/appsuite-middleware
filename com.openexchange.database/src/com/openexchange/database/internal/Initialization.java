@@ -124,7 +124,7 @@ public final class Initialization {
         Server.setConfigDatabaseService(configDatabaseService);
         Server.start(configurationService);
         try {
-            LOG.info("Resolved server name \"" + Server.getServerName() + "\" to identifier " + Server.getServerId());
+            LOG.info("Resolved server name \"{}\" to identifier {}", Server.getServerName(), Server.getServerId());
         } catch (OXException e) {
             LOG.warn("Resolving server name to an identifier failed. This is normal until a server has been registered.", e);
         }

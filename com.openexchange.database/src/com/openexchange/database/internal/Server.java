@@ -95,7 +95,7 @@ public final class Server {
                 if (-1 == serverId) {
                     throw DBPoolingExceptionCodes.NOT_RESOLVED_SERVER.create(getServerName());
                 }
-                LOG.trace("Got server id: " + serverId);
+                LOG.trace("Got server id: {}", serverId);
             }
         }
         return serverId;

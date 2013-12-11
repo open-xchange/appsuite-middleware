@@ -115,7 +115,7 @@ public class ListenerRegistrar implements DriveEventPublisher  {
                     LongPollingListener listener = notification.getValue();
                     listenersPerFolder.remove(getFolderKey(listener.getSession()), notification.getKey());
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Unregistered listener: " + listener);
+                        LOG.debug("Unregistered listener: {}", listener);
                     }
                 }
             })
@@ -140,7 +140,7 @@ public class ListenerRegistrar implements DriveEventPublisher  {
                 LongPollingListener listener = createListener(session);
                 listenersPerFolder.put(getFolderKey(session), sessionID);
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Registered new listener: " + listener);
+                    LOG.debug("Registered new listener: {}", listener);
                 }
                 return listener;
             }

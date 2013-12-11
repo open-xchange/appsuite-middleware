@@ -102,7 +102,7 @@ public class DriveActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("starting bundle: " + context.getBundle().getSymbolicName());
+        LOG.info("starting bundle: {}", context.getBundle().getSymbolicName());
         DriveServiceLookup.set(this);
         BucketInputStream.setTokenBucket(new DriveTokenBucket());
         registerService(DriveService.class, new ThrottlingDriveService(new DriveServiceImpl()));
@@ -116,7 +116,7 @@ public class DriveActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: " + context.getBundle().getSymbolicName());
+        LOG.info("stopping bundle: {}", context.getBundle().getSymbolicName());
         DriveServiceLookup.set(null);
         BucketInputStream.setTokenBucket(null);
         super.stopBundle();

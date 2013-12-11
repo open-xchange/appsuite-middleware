@@ -103,7 +103,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
             con.close();
         } catch (SQLException e) {
             OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
         } finally {
             LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, null);
         }

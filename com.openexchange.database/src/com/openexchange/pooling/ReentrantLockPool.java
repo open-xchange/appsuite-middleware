@@ -218,7 +218,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             LOG.trace("Destroying object.");
             lifecycle.destroy(metaData.getPooled());
         }
-        LOG.trace("Back time: " + getWaitTime(startTime));
+        LOG.trace("Back time: {}", getWaitTime(startTime));
         return !destroy;
     }
 
@@ -264,7 +264,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                             final PoolingException warn = new PoolingException("Thread " + threadName
                                 + " is sent to sleep until an object in the pool is available. " + data.numActive()
                                 + " objects are already in use.");
-                            LOG.warn(warn.getMessage(), warn);
+                            LOG.warn("", warn);
                         }
                         final long sleepStartTime = System.currentTimeMillis();
                         boolean timedOut = false;
@@ -277,12 +277,12 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                         } catch (final InterruptedException e) {
                             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
                             Thread.currentThread().interrupt();
-                            LOG.error("Thread " + threadName + " was interrupted.", e);
+                            LOG.error("Thread {} was interrupted.", threadName, e);
                         }
                         if (writeWarning) {
                             final PoolingException warn = new PoolingException("Thread " + threadName + " slept for "
                                 + (System.currentTimeMillis() - sleepStartTime) + "ms.");
-                            LOG.warn(warn.getMessage(), warn);
+                            LOG.warn("", warn);
                         }
                         if (timedOut) {
                             idleAvailable.signal();
@@ -360,7 +360,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                 }
             }
             if (LOG.isTraceEnabled()) {
-                LOG.trace("Get time: " + getWaitTime(startTime) + ", Created: " + created);
+                LOG.trace("Get time: {}, Created: {}", getWaitTime(startTime), created);
             }
             return retval.getPooled();
         }
@@ -611,7 +611,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         } catch (final PoolingException e) {
             LOG.error("Problem creating the minimum number of connections.", e);
         }
-        LOG.trace("Clean run ending. Time: " + getWaitTime(startTime));
+        LOG.trace("Clean run ending. Time: {}", getWaitTime(startTime));
     }
 
     public static class Config implements Cloneable {

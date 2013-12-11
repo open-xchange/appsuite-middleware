@@ -130,7 +130,7 @@ public final class Pools implements Runnable {
                 Pools.this.run();
                 thread.setName(origName);
             } catch (final Throwable t) {
-                LOG.error(t.getMessage(), t);
+                LOG.error("", t);
             }
         }
     };

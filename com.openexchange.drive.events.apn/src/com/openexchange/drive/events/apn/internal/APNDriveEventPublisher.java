@@ -96,7 +96,7 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
             subscriptions = Services.getService(DriveSubscriptionStore.class, true).getSubscriptions(
                 event.getContextID(), new String[] { getServiceID() }, event.getFolderIDs());
         } catch (OXException e) {
-            LOG.error("unable to get subscriptions for service " + getServiceID(), e);
+            LOG.error("unable to get subscriptions for service {}", getServiceID(), e);
         }
         if (null != subscriptions && 0 < subscriptions.size()) {
             List<PayloadPerDevice> payloads = getPayloads(event, subscriptions);
@@ -120,13 +120,13 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
                         LOG.debug(notification.toString());
                     }
                 } else {
-                    LOG.warn("Unsuccessful push notification: " + notification);
+                    LOG.warn("Unsuccessful push notification: {}", notification);
                     if (null != notification.getResponse()) {
                         int status = notification.getResponse().getStatus();
                         if (STATUS_INVALID_TOKEN == status || STATUS_INVALID_TOKEN_SIZE == status) {
                             Device device = notification.getDevice();
                             int removed = removeSubscriptions(device);
-                            LOG.info("Removed " + removed + " subscriptions for device with token: " + device.getToken() + ".");
+                            LOG.info("Removed {} subscriptions for device with token: {}.", removed, device.getToken());
                         }
                     }
                 }
@@ -138,7 +138,7 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
      * Queries the feedback service and processes the received results, removing reported tokens from the subscription store if needed.
      */
     public void queryFeedbackService() {
-        LOG.info("Querying APN feedback service for '" + getServiceID() + "'...");
+        LOG.info("Querying APN feedback service for '{}'...", getServiceID());
         long start = System.currentTimeMillis();
         List<Device> devices = null;
         try {
@@ -150,9 +150,9 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
         }
         if (null != devices && 0 < devices.size()) {
             for (Device device : devices) {
-                LOG.debug("Got feedback for device with token: " + device.getToken() + ", last registered: " + device.getLastRegister());
+                LOG.debug("Got feedback for device with token: {}, last registered: {}", device.getToken(), device.getLastRegister());
                 int removed = removeSubscriptions(device);
-                LOG.info("Removed " + removed + " subscriptions for device with token: " + device.getToken() + ".");
+                LOG.info("Removed {} subscriptions for device with token: {}.", removed, device.getToken());
             }
         } else {
             LOG.debug("No devices to unregister received from feedback service.");
@@ -174,7 +174,7 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
             } catch (JSONException e) {
                 LOG.warn("error constructing payload", e);
             } catch (InvalidDeviceTokenFormatException e) {
-                LOG.warn("Invalid device token: '" + subscription.getToken() + "', removing from subscription store.", e);
+                LOG.warn("Invalid device token: '{}', removing from subscription store.", subscription.getToken(), e);
                 removeSubscription(subscription);
             }
         }
@@ -199,7 +199,7 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
                 LOG.error("Error removing subscription", e);
             }
         } else {
-            LOG.warn("Unsufficient device information to remove subscriptions for: " + device);
+            LOG.warn("Unsufficient device information to remove subscriptions for: {}", device);
         }
         return 0;
     }

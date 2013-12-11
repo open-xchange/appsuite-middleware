@@ -115,7 +115,7 @@ public class DocumentationProcessor {
         } else if (ModuleDescription.class.isInstance(service)) {
             this.remove(((ModuleDescription)service));
         } else {
-            LOG.warn("Unable to get extract documentation from " + service);
+            LOG.warn("Unable to get extract documentation from {}", service);
         }
 	}
 

@@ -100,24 +100,21 @@ public class TempCleaner implements Runnable {
         if (null != parameter && Long.class.isInstance(parameter)) {
             long lastCleanerRun = ((Long)parameter).longValue();
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Last cleaner run for session " + session + " at: " +
-                    DriveConstants.LOG_DATE_FORMAT.get().format(new Date(lastCleanerRun)));
+                LOG.debug("Last cleaner run for session {} at: {}", session, DriveConstants.LOG_DATE_FORMAT.get().format(new Date(lastCleanerRun)));
             }
             String intervalValue = configService.getProperty("com.openexchange.drive.cleaner.interval", "1D");
             long interval = TimeSpanParser.parseTimespan(intervalValue);
             if (MILLIS_PER_HOUR > interval) {
-                LOG.warn("The configured interval of '" + intervalValue +
-                    "' is smaller than the allowed minimum of one hour. Falling back to '1h' instead.");
+                LOG.warn("The configured interval of '{}' is smaller than the allowed minimum of one hour. Falling back to '1h' instead.", intervalValue);
                 interval = MILLIS_PER_HOUR;
             }
             if (System.currentTimeMillis() - lastCleanerRun < interval) {
-                LOG.debug("Cleaner interval time of '" + intervalValue +
-                    "' not yet exceeded, not starting new run for session " + session);
+                LOG.debug("Cleaner interval time of '{}' not yet exceeded, not starting new run for session {}", intervalValue, session);
                 return;
             }
         } else {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("No previous cleaner run detected for session " + session + '.');
+                LOG.debug("No previous cleaner run detected for session {}{}", session, '.');
             }
         }
         try {
@@ -131,8 +128,7 @@ public class TempCleaner implements Runnable {
             String maxAgeValue = configService.getProperty("com.openexchange.drive.cleaner.maxAge", "1D");
             long maxAge = TimeSpanParser.parseTimespan(maxAgeValue);
             if (MILLIS_PER_HOUR > maxAge) {
-                LOG.warn("The configured maximum age of '" + maxAgeValue +
-                    "' is smaller than the allowed minimum of one hour. Falling back to '1h' instead.");
+                LOG.warn("The configured maximum age of '{}' is smaller than the allowed minimum of one hour. Falling back to '1h' instead.", maxAgeValue);
                 maxAge = MILLIS_PER_HOUR;
             }
             long minimumTimestamp = System.currentTimeMillis() - maxAge;
@@ -143,7 +139,7 @@ public class TempCleaner implements Runnable {
                 return;
             }
             if (LOG.isInfoEnabled()) {
-                LOG.info("Starting cleaner run for session " + session + '.');
+                LOG.info("Starting cleaner run for session {}{}", session, '.');
             }
             TempCleaner tempCleaner = new TempCleaner(
                 session.getServerSession(), session.getChecksumStore(), tempFolder, minimumTimestamp);
@@ -240,8 +236,7 @@ public class TempCleaner implements Runnable {
                  * cleanup whole '.drive' folder, invalidate checksums
                  */
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Detected all folders (" + foldersToDelete.size() + ") and files (" + filesToDelete.size() +
-                        ") in temp folder being outdated, removing '.drive' folder completely.");
+                    LOG.debug("Detected all folders ({}) and files ({}) in temp folder being outdated, removing '.drive' folder completely.", foldersToDelete.size(), filesToDelete.size());
                 }
                 String folderID = folderAccess.deleteFolder(tempFolder.getId());
                 checksumStore.removeFileChecksumsInFolder(new FolderID(folderID));
@@ -255,8 +250,7 @@ public class TempCleaner implements Runnable {
                  * cleanup selected files and folders, invalidate checksums
                  */
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Detected " + foldersToDelete.size() + " folder(s) and " + filesToDelete.size() +
-                        " file(s) in temp folder being outdated, cleaning up.");
+                    LOG.debug("Detected {} folder(s) and {} file(s) in temp folder being outdated, cleaning up.", foldersToDelete.size(), filesToDelete.size());
                 }
                 for (FileStorageFolder folder : foldersToDelete) {
                     FolderID id = new FolderID(folder.getId());

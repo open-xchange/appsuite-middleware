@@ -253,7 +253,7 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
         final FileOutputStream fos = new FileOutputStream(csvFile.getFile(), true);
         try {
             if (DEBUG_ENABLED) {
-                LOG.debug(new StringBuilder("Writing CSV line: ").append(csvLine).toString());
+                LOG.debug("Writing CSV line: {}", csvLine);
             }
             fos.write(Charsets.toAsciiBytes(csvLine));
             fos.flush();

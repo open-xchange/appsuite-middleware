@@ -301,7 +301,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 }
             }
             if (icalP == null) {
-                LOG.warn("Should not be possible to find a user ("+user.getMail()+") by their alias and then be unable to remove that alias  from list");
+                LOG.warn("Should not be possible to find a user ({}) by their alias and then be unable to remove that alias  from list", user.getMail());
             } else {
                 if (icalP.message != null) {
                     up.setConfirmMessage(icalP.message);

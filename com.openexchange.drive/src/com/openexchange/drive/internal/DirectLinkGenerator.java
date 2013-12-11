@@ -274,12 +274,12 @@ public class DirectLinkGenerator {
         if (false == Strings.isEmpty(value)) {
             int idx = value.indexOf('x');
             if (1 > idx) {
-                LOG.warn("Invalid value for " + propertyName + ", falling back to defaults.");
+                LOG.warn("Invalid value for {}, falling back to defaults.", propertyName);
             } else {
                 try {
                     return new int[] { Integer.parseInt(value.substring(0, idx)), Integer.parseInt(value.substring(idx + 1)) };
                 } catch (NumberFormatException e) {
-                    LOG.warn("Invalid value for " + propertyName + ", falling back to defaults.", e);
+                    LOG.warn("Invalid value for {}, falling back to defaults.", propertyName, e);
                 }
             }
         }

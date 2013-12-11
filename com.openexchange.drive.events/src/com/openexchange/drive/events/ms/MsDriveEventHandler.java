@@ -115,7 +115,7 @@ public final class MsDriveEventHandler implements DriveEventPublisher, MessageLi
              * publish at distributed topic
              */
             if (LOG.isDebugEnabled()) {
-                LOG.debug("publishing drive event: " + event + " [" + senderId + "]");
+                LOG.debug("publishing drive event: {} [{}]", event, senderId);
             }
             try {
                 getTopic().publish(DriveEventWrapper.wrap(event));
@@ -131,7 +131,7 @@ public final class MsDriveEventHandler implements DriveEventPublisher, MessageLi
             Map<String, Serializable> driveEvent = message.getMessageObject();
             if (null != driveEvent) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("onMessage: " + message.getMessageObject() + " [" + message.getSenderId() + "]");
+                    LOG.debug("onMessage: {} [{}]", message.getMessageObject(), message.getSenderId());
                 }
                 driveEventService.notifyPublishers(DriveEventWrapper.unwrap(driveEvent));
             } else {

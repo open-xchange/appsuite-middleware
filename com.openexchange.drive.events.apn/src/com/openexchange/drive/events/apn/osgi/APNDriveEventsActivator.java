@@ -131,7 +131,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
                     }
                 }, interval, interval);
             } else {
-                LOG.warn("Ignoring too small value '" + feedbackQueryInterval + " for APN feedback query interval.");
+                LOG.warn("Ignoring too small value '{} for APN feedback query interval.", feedbackQueryInterval);
             }
         }
     }

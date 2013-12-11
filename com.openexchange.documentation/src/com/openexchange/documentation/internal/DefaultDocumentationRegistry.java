@@ -119,7 +119,7 @@ public class DefaultDocumentationRegistry implements DocumentationRegistry {
         if (this.modules.containsKey(module.getName())) {
             throw DocumentationExceptionCode.MODULE_ALREADY_REGISTERED.create(module.getName());
         }
-        LOG.debug("Adding module: " + module.getName());
+        LOG.debug("Adding module: {}", module.getName());
         this.modules.put(module.getName(), module);
         final ContainerDescription[] containers = module.getContainers();
         if (null != containers) {

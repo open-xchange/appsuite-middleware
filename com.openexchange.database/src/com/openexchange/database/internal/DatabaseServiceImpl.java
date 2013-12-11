@@ -101,7 +101,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
             con.close();
         } catch (final SQLException e) {
             final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
         } finally {
             LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, null);
         }
@@ -122,7 +122,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
             con.close();
         } catch (final SQLException e) {
             final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
         } finally {
             LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, null);
         }
@@ -213,7 +213,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
             try {
                 pools.getPool(poolId).back(con);
             } catch (final PoolingException e1) {
-                LOG.error(e1.getMessage(), e1);
+                LOG.error("", e1);
             }
             throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
         }
@@ -236,7 +236,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
             try {
                 pools.getPool(poolId).back(con);
             } catch (final PoolingException e1) {
-                LOG.error(e1.getMessage(), e1);
+                LOG.error("", e1);
             }
             throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
         }
@@ -289,7 +289,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
             pools.getPool(poolId).back(con);
         } catch (final PoolingException e) {
             final OXException e2 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
-            LOG.error(e2.getMessage(), e2);
+            LOG.error("", e2);
         } catch (final OXException e) {
             LOG.error("", e);
         }

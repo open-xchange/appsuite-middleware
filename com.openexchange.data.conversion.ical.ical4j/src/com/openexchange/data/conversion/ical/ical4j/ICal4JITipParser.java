@@ -155,7 +155,7 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
                     }
 
                 } catch (ConversionError conversionError) {
-                    LOG.error(conversionError.getMessage(), conversionError);
+                    LOG.error("", conversionError);
                     errors.add(conversionError);
                 }
             }

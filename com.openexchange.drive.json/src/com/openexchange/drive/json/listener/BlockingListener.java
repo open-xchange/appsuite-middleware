@@ -105,7 +105,7 @@ public class BlockingListener implements LongPollingListener {
         lock.lock();
         try {
             if (null == this.event) {
-                LOG.debug("Awaiting events for max. " + timeout + "ms...");
+                LOG.debug("Awaiting events for max. {}ms...", timeout);
                 hasEvent.await(timeout, TimeUnit.MILLISECONDS);
             } else {
                 LOG.debug("Stored event available, no need to wait.");
@@ -121,7 +121,7 @@ public class BlockingListener implements LongPollingListener {
         if (null == data) {
             LOG.debug("No event available.");
         } else {
-            LOG.debug("Available event: " + data);
+            LOG.debug("Available event: {}", data);
         }
         return createResult(data);
     }
@@ -142,7 +142,7 @@ public class BlockingListener implements LongPollingListener {
     @Override
     public void onEvent(DriveEvent event) {
         if (false == isInteresting(event)) {
-            LOG.debug("Skipping uninteresting event: " + event);
+            LOG.debug("Skipping uninteresting event: {}", event);
             return;
         }
         lock.lock();

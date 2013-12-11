@@ -107,8 +107,7 @@ public class FolderBuffer {
         long now = System.currentTimeMillis();
         long timeSinceFirstEvent = now - firstEventTime;
         if (LOG.isTraceEnabled()) {
-            LOG.trace("isDue(): now=" + now + ", firstEventTime=" + firstEventTime + ", lastEventTime=" + lastEventTime +
-                ", timeSinceFirstEvent=" + timeSinceFirstEvent + ", timeSinceLastEvent=" + (now - lastEventTime));
+            LOG.trace("isDue(): now={}, firstEventTime={}, lastEventTime={}, timeSinceFirstEvent={}, timeSinceLastEvent={}", now, firstEventTime, lastEventTime, timeSinceFirstEvent, (now - lastEventTime));
         }
         if (timeSinceFirstEvent > maxDelayTime) {
             return true; // max delay time exceeded

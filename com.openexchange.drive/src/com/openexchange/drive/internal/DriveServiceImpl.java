@@ -165,7 +165,7 @@ public class DriveServiceImpl implements DriveService {
                     continue;
                 }
                 driveSession.trace("Got exception during execution of server actions (" + e.getMessage() + ")");
-                LOG.debug("Got exception during execution of server actions (" + e.getMessage() + ")", e);
+                LOG.debug("Got exception during execution of server actions ({})", e.getMessage(), e);
                 throw e;
             }
             /*
@@ -236,7 +236,7 @@ public class DriveServiceImpl implements DriveService {
         DriveVersionValidator.validateFileVersion(fileVersion);
         SyncSession driveSession = new SyncSession(session);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Handling download: file version: " + fileVersion + ", offset: " + offset + ", length: " + length);
+            LOG.debug("Handling download: file version: {}, offset: {}, length: {}", fileVersion, offset, length);
         }
         IFileHolder fileHolder = new DownloadHelper(driveSession).perform(path, fileVersion, offset, length);
         /*
@@ -343,11 +343,11 @@ public class DriveServiceImpl implements DriveService {
     public DriveQuota getQuota(DriveSession session) throws OXException {
         final SyncSession driveSession = new SyncSession(session);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Handling get-quota for root folder '" + session.getRootFolderID() + "'");
+            LOG.debug("Handling get-quota for root folder '{}'", session.getRootFolderID());
         }
         final Quota[] quota = driveSession.getStorage().getQuota();
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Got quota for root folder '" + session.getRootFolderID() + "': " + quota);
+            LOG.debug("Got quota for root folder '{}': {}", session.getRootFolderID(), quota);
         }
         final String manageLink = new DirectLinkGenerator(driveSession).getQuotaLink();
         return new DriveQuota() {

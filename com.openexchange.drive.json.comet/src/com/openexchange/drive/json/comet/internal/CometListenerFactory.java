@@ -74,7 +74,7 @@ public class CometListenerFactory implements LongPollingListenerFactory {
     public CometListenerFactory(CometContext<DriveEvent> cometContext) {
         super();
         this.cometContext = cometContext;
-        LOG.info("CometListenerFactory initialized, using comet context @ topic \"" + cometContext.getTopic() + "\".");
+        LOG.info("CometListenerFactory initialized, using comet context @ topic \"{}\".", cometContext.getTopic());
     }
 
     @Override

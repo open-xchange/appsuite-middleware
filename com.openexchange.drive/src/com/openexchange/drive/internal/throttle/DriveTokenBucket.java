@@ -155,7 +155,7 @@ public class DriveTokenBucket implements TokenBucket {
             if (0 < permits) {
                 overallBucket.release(permits);
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace("Released " + permits + " permits for 'overall' bucket.");
+                    LOG.trace("Released {} permits for 'overall' bucket.", permits);
                 }
             }
         }
@@ -172,12 +172,12 @@ public class DriveTokenBucket implements TokenBucket {
                 if (0 < permits) {
                     bucket.release(permits);
                     if (LOG.isTraceEnabled()) {
-                        LOG.trace("Released " + permits + " permits for bucket semaphore of session " + entry.getKey());
+                        LOG.trace("Released {} permits for bucket semaphore of session {}", permits, entry.getKey());
                     }
                 } else {
                     iterator.remove();
                     if (LOG.isTraceEnabled()) {
-                        LOG.trace("Removed bucket semaphore for session " + entry.getKey());
+                        LOG.trace("Removed bucket semaphore for session {}", entry.getKey());
                     }
                 }
             }
@@ -199,7 +199,7 @@ public class DriveTokenBucket implements TokenBucket {
             if (null == bucket) {
                 bucket = newBucket;
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace("Created new bucket for " + sessionID);
+                    LOG.trace("Created new bucket for {}", sessionID);
                 }
             }
         }

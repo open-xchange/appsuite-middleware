@@ -97,7 +97,7 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
     public void onInitialize(CometEvent event) throws IOException {
         initializationTime = System.currentTimeMillis();
         if (LOG.isTraceEnabled()) {
-            LOG.trace(this + ": initialized.");
+            LOG.trace("{}: initialized.", this);
         }
     }
 
@@ -150,7 +150,7 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
             }
             CometContext cometContext = event.getCometContext();
             if (null != cometContext && cometContext.isActive(this)) {
-                LOG.debug(this + ": Comet context still active, returning empty drive actions.");
+                LOG.debug("{}: Comet context still active, returning empty drive actions.", this);
                 write(EMPTY_ACTIONS);
             }
         } finally {
@@ -166,7 +166,7 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
     private void write(List<DriveAction<? extends DriveVersion>> actions) {
         Writer responseWriter = null != getResponse() ? getResponse().getWriter() : null;
         if (null == responseWriter) {
-            LOG.warn(this + ": Unable to access response writer, unable to write JSON result");
+            LOG.warn("{}: Unable to access response writer, unable to write JSON result", this);
         }
         try {
             JSONObject jsonObject = new JSONObject();
@@ -198,11 +198,11 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
          * resume comet request
          */
         if (null == cometContext) {
-            LOG.warn(this + ": Unable to access comet context, unable to resume request.");
+            LOG.warn("{}: Unable to access comet context, unable to resume request.", this);
             return;
         }
         if (cometContext.resumeCometHandler(this) && LOG.isDebugEnabled()) {
-            LOG.debug(this + ": Resumed successfully.");
+            LOG.debug("{}: Resumed successfully.", this);
         }
     }
 
