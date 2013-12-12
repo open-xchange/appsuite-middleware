@@ -1839,7 +1839,7 @@ public class MimeMessageFiller {
                     /*
                      * Replace "src" attribute
                      */
-                    String iTag = imageTag.replaceFirst("(?i)src=\"[^\"]*\"", com.openexchange.java.Strings.quoteReplacement("src=\"cid:" + processLocalImage(imageProvider, iid, appendBodyPart, tmp, mp) + "\""));
+                    String iTag = imageTag.replaceFirst("(?i)src=\"[^\"]*\"", com.openexchange.java.Strings.quoteReplacement("src=\"cid:" + processLocalImage(imageProvider, iid, appendBodyPart, mp) + "\""));
                     iTag = iTag.replaceFirst("(?i)id=\"[^\"]*@" + VERSION_NAME + "\"", "");
                     m.appendLiteralReplacement(sb, iTag);
                 } else {
@@ -1889,7 +1889,7 @@ public class MimeMessageFiller {
      * @throws MessagingException If appending as body part fails
      * @throws OXException If a mail error occurs
      */
-    private final static String processLocalImage(final ImageProvider imageProvider, final String id, final boolean appendBodyPart, final StringBuilder tmp, final Multipart mp) throws MessagingException, OXException {
+    private final static String processLocalImage(final ImageProvider imageProvider, final String id, final boolean appendBodyPart, final Multipart mp) throws MessagingException, OXException {
         /*
          * Determine filename
          */
@@ -1919,6 +1919,7 @@ public class MimeMessageFiller {
         /*
          * ... and cid
          */
+        final StringBuilder tmp = new StringBuilder(32);
         final String cid;
         {
             if (imageProvider.isLocalFile()) {
