@@ -154,9 +154,7 @@ public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
                     oxa = new OXFolderAccess(writeCon, ct);
                     des = oxa.getDefaultFolder(creator, FolderObject.CONTACT);
 
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn("UPDATING OPBJECT {} IN CONTEXT {} MOVING TO {}", id, cid, des.getObjectID());
-                    }
+                    LOG.warn("UPDATING OPBJECT {} IN CONTEXT {} MOVING TO {}", id, cid, des.getObjectID());
 
                     final StringBuilder sb = new StringBuilder("UPDATE prg_contacts SET fid = ");
                     sb.append(des.getObjectID());

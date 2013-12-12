@@ -209,7 +209,7 @@ public final class HttpManagersInit implements Initialization {
             }
             if (servletConstructorMap.containsKey(name)) {
                 final boolean isEqual = servletConstructorMap.get(name).toString().indexOf(className) != -1;
-                if (!isEqual && LOG.isWarnEnabled()) {
+                if (!isEqual) {
                     final OXException e = OXServletException.Code.ALREADY_PRESENT.create(name, servletConstructorMap.get(name), className);
                     LOG.warn("", e);
                 }
@@ -217,20 +217,14 @@ public final class HttpManagersInit implements Initialization {
                 servletConstructorMap.put(name, Class.forName(className).getConstructor(CLASS_ARR));
             }
         } catch (final SecurityException e) {
-            if (LOG.isWarnEnabled()) {
-                final OXException se = OXServletException.Code.SECURITY_ERR.create(e, className);
-                LOG.warn("", se);
-            }
+            final OXException se = OXServletException.Code.SECURITY_ERR.create(e, className);
+            LOG.warn("", se);
         } catch (final ClassNotFoundException e) {
-            if (LOG.isWarnEnabled()) {
-                final OXException se = OXServletException.Code.CLASS_NOT_FOUND.create(e, className);
-                LOG.warn("", se);
-            }
+            final OXException se = OXServletException.Code.CLASS_NOT_FOUND.create(e, className);
+            LOG.warn("", se);
         } catch (final NoSuchMethodException e) {
-            if (LOG.isWarnEnabled()) {
-                final OXException se = OXServletException.Code.NO_DEFAULT_CONSTRUCTOR.create(e, className);
-                LOG.warn("", se);
-            }
+            final OXException se = OXServletException.Code.NO_DEFAULT_CONSTRUCTOR.create(e, className);
+            LOG.warn("", se);
         }
     }
 

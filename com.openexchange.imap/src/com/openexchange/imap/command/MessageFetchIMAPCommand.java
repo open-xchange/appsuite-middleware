@@ -467,9 +467,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
                 if (null == itemHandler) {
                     itemHandler = getItemHandlerByItem(item, loadBody);
                     if (null == itemHandler) {
-                        if (LOG.isWarnEnabled()) {
-                            LOG.warn("Unknown FETCH item: {}", item.getClass().getName());
-                        }
+                        LOG.warn("Unknown FETCH item: {}", item.getClass().getName());
                     } else {
                         itemHandler.handleItem(item, msg, LOG);
                     }
@@ -725,9 +723,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
             try {
                 msg.setContentType(new ContentType(sb.toString()));
             } catch (final OXException e) {
-                if (logger.isWarnEnabled()) {
-                    logger.warn("", e);
-                }
+                logger.warn("", e);
                 msg.setContentType(new ContentType(MimeTypes.MIME_DEFAULT));
             }
             msg.setHasAttachment(bs.isMulti() && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bs.subtype) || MimeMessageUtility.hasAttachments(bs)));
@@ -759,10 +755,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
                 msgStream = ((BODY) item).getByteArrayInputStream();
             }
             if (null == msgStream) {
-                if (logger.isWarnEnabled()) {
-                    logger.warn(new com.openexchange.java.StringAllocator(32).append("Cannot retrieve body from message #").append(msg.getMessageNumber()).append(
-                        " in folder ").append(msg.getFullname()).toString());
-                }
+                logger.warn("Cannot retrieve body from message #{} in folder {}", msg.getMessageNumber(), msg.getFullname());
             } else {
                 msg.parseStream(msgStream);
             }

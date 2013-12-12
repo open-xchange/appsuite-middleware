@@ -296,9 +296,7 @@ public final class MimeProcessingUtility {
         } catch (final java.io.CharConversionException e) {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "US-ASCII";
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback, e);
-            }
+            LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback, e);
             return MessageUtility.readMailPart(mailPart, fallback);
         }
     }

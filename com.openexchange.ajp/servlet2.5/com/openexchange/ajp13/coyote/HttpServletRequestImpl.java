@@ -90,7 +90,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.DefaultHashKeyGenerator;
 import com.openexchange.java.HashKeyGenerator;
 import com.openexchange.java.HashKeyMap;
-import com.openexchange.log.Log;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -1000,9 +999,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest, Paramet
 
     @Override
     public boolean isUserInRole(final String role) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Method isUserInRole() is not implemented in HttpServletRequestWrapper, yet!");
-        }
+        LOG.warn("Method isUserInRole() is not implemented in HttpServletRequestWrapper, yet!");
         return false;
     }
 

@@ -57,7 +57,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -193,11 +192,7 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
                     return service;
                 }
                 final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OSGiMetaDataRegistry.Customizer.class);
-                if (logger.isWarnEnabled()) {
-                    logger.warn(new StringBuilder(128).append("OAuth service meta data ").append(addMe.getDisplayName()).append(
-                        " could not be added to registry. Another service meta data is already registered with identifier: ").append(
-                        addMe.getId()).toString());
-                }
+                logger.warn("OAuth service meta data {} could not be added to registry. Another service meta data is already registered with identifier: {}", addMe.getDisplayName(), addMe.getId());
             }
             /*
              * Adding to registry failed
@@ -215,10 +210,8 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
         public void removedService(final ServiceReference<OAuthServiceMetaData> reference, final OAuthServiceMetaData service) {
             if (null != service) {
                 try {
-                    {
-                        final OAuthServiceMetaData removeMe = service;
-                        map.remove(removeMe.getId());
-                    }
+                    final OAuthServiceMetaData removeMe = service;
+                    map.remove(removeMe.getId());
                 } finally {
                     context.ungetService(reference);
                 }

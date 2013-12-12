@@ -167,9 +167,7 @@ public class DataParser {
             try {
                 return Integer.parseInt(s);
             } catch (final NumberFormatException e) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("Value is not a number: {}", s, e);
-                }
+                LOG.warn("Value is not a number: {}", s, e);
             }
         }
         return 0;

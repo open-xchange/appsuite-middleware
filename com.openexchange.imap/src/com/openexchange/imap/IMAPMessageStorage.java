@@ -2249,10 +2249,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
                 final String trashFullname = imapAccess.getFolderStorage().getTrashFolder();
                 if (null == trashFullname) {
-                    // TODO: Bug#8992 -> What to do if trash folder is null
-                    if (LOG.isErrorEnabled()) {
-                        LOG.error("\n\tDefault trash folder is not set: aborting delete operation");
-                    }
+                    LOG.error("\n\tDefault trash folder is not set: aborting delete operation");
                     throw IMAPException.create(IMAPException.Code.MISSING_DEFAULT_FOLDER_NAME, imapConfig, session, "trash");
                 }
                 final boolean backup = (!isSubfolderOf(fullName, trashFullname, getSeparator(imapFolder)));
@@ -2785,7 +2782,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * 1. Find the marker in folder's messages
                  * 2. Get the UIDs from found message's position
                  */
-                if (hasUIDPlus && LOG.isWarnEnabled()) {
+                if (hasUIDPlus) {
                     /*
                      * Missing UID information in APPENDUID response
                      */

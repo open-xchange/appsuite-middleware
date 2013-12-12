@@ -77,9 +77,7 @@ public class ServletActivator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: {}", clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
 
         SpamSettingsServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
         servletRegisterer.registerServlet();
@@ -88,9 +86,7 @@ public class ServletActivator extends DeferredActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: {}", clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         servletRegisterer.unregisterServlet();
         SpamSettingsModulePreferences.setModule(false);
         SpamSettingsServiceRegistry.getServiceRegistry().removeService(clazz);

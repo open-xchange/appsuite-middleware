@@ -241,9 +241,7 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
                 CalendarCollectionService.MAX_OCCURRENCESE,
                 true);
             if (recuResults.size() == 0) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("No occurrence at position {}", recurrencePosition);
-                }
+                LOG.warn("No occurrence at position {}", recurrencePosition);
                 throw OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION.create(Integer.valueOf(recurrencePosition));
             }
             final RecurringResultInterface resultInterface = recuResults.getRecurringResult(0);

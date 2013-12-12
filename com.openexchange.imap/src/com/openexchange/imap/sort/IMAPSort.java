@@ -60,7 +60,6 @@ import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
-import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
@@ -165,10 +164,7 @@ public final class IMAPSort {
                         throw ((FolderClosedException) cause);
                     }
                 }
-                if (LOG.isWarnEnabled()) {
-                    final OXException imapException = IMAPException.create(IMAPException.Code.IMAP_SORT_FAILED, e, e.getMessage());
-                    LOG.warn("", imapException);
-                }
+                LOG.warn("", IMAPException.create(IMAPException.Code.IMAP_SORT_FAILED, e, e.getMessage()));
             }
         }
         return null;
@@ -259,10 +255,7 @@ public final class IMAPSort {
                         throw ((FolderClosedException) cause);
                     }
                 }
-                if (LOG.isWarnEnabled()) {
-                    final OXException imapException = IMAPException.create(IMAPException.Code.IMAP_SORT_FAILED, e, e.getMessage());
-                    LOG.warn("", imapException);
-                }
+                LOG.warn("", IMAPException.create(IMAPException.Code.IMAP_SORT_FAILED, e, e.getMessage()));
                 applicationSort = true;
             }
         }

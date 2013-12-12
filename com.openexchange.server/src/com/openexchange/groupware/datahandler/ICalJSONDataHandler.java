@@ -58,7 +58,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -240,9 +239,7 @@ public final class ICalJSONDataHandler implements DataHandler {
                                 CalendarCollectionService.MAX_OCCURRENCESE,
                                 true);
                         if (recuResults.size() == 0) {
-                            if (LOG.isWarnEnabled()) {
-                                LOG.warn("No occurrence at position {}", recurrencePosition);
-                            }
+                            LOG.warn("No occurrence at position {}", recurrencePosition);
                             OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION.create(Integer.valueOf(recurrencePosition));
                         }
                         final RecurringResultInterface result = recuResults.getRecurringResult(0);

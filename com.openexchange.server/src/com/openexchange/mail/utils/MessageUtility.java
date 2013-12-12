@@ -126,16 +126,12 @@ public final class MessageUtility {
     public static String checkCharset(final MailPart p, final ContentType ct) throws OXException {
         String cs = ct.getCharsetParameter();
         if (!CharsetDetector.isValid(cs)) {
-            com.openexchange.java.StringAllocator sb = null;
             if (cs != null) {
-                sb = new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(cs);
             }
+            final String prev = cs;
             cs = CharsetDetector.detectCharset(p.getInputStream());
-            if (null != sb && LOG.isWarnEnabled()) {
-                sb.append(" Using auto-detected encoding: \"").append(cs).append('"');
-                LOG.warn(sb.toString());
-            }
+            LOG.warn("Illegal or unsupported encoding \"{}\". Using auto-detected encoding: \"{}\"", prev, cs);
         }
         return cs;
     }
@@ -150,16 +146,12 @@ public final class MessageUtility {
     public static String checkCharset(final Part p, final ContentType ct) {
         String cs = ct.getCharsetParameter();
         if (!CharsetDetector.isValid(cs)) {
-            com.openexchange.java.StringAllocator sb = null;
             if (cs != null) {
-                sb = new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(cs);
             }
+            final String prev = cs;
             cs = CharsetDetector.detectCharset(getPartInputStream(p));
-            if (null != sb && LOG.isWarnEnabled()) {
-                sb.append(" Using auto-detected encoding: \"").append(cs).append('"');
-                LOG.warn(sb.toString());
-            }
+            LOG.warn("Illegal or unsupported encoding \"{}\". Using auto-detected encoding: \"{}\"", prev, cs);
         }
         return cs;
     }

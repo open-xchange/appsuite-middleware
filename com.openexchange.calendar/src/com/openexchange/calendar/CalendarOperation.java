@@ -1279,9 +1279,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                         final long exc = Long.parseLong(cdao.getExceptions());
                         cdao.setRecurrenceDatePosition(new Date(exc));
                     } catch (final NumberFormatException nfe) {
-                        if (LOG.isWarnEnabled()) {
-                            LOG.warn("Unable to calculate exception oid:context:exceptions {}:{}:{}", cdao.getObjectID(), cdao.getContextID(), cdao.getExceptions());
-                        }
+                        LOG.warn("Unable to calculate exception oid:context:exceptions {}:{}:{}", cdao.getObjectID(), cdao.getContextID(), cdao.getExceptions());
                     }
                 }
             }

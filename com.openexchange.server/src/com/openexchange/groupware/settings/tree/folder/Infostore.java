@@ -141,10 +141,7 @@ public class Infostore implements PreferencesItemService {
                         }
                     }
                 } catch (final OXException e) {
-                    // Unable to retrieve default folder
-                    if (LOG.isErrorEnabled()) {
-                        LOG.error("Infostore default folder could not be applied to user configuration.", e);
-                    }
+                    LOG.error("Infostore default folder could not be applied to user configuration.", e);
                 }
                 // All failed
                 setting.setSingleValue(Integer.valueOf(new OXFolderAccess(ctx).getDefaultFolder(

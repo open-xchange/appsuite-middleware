@@ -173,9 +173,7 @@ public final class DBUtils {
             try {
                 rs.close();
             } catch (final SQLException e) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error("", e);
-                }
+                LOG.error("", e);
             }
         }
         /*
@@ -185,9 +183,7 @@ public final class DBUtils {
             try {
                 stmt.close();
             } catch (final SQLException e) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error("", e);
-                }
+                LOG.error("", e);
             }
         }
         /*

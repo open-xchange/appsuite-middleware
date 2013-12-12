@@ -236,10 +236,7 @@ class OSGiCleanMapper {
      */
     public void addHttpHandler(String alias, HttpHandler handler) {
         if (containsAlias(alias)) {
-            // should not happend, alias should be checked before.
-            if(LOG.isWarnEnabled()){
-                LOG.warn("Alias \"{}\" already in use, this shouldn't happen", alias);
-            }
+            LOG.warn("Alias \"{}\" already in use, this shouldn't happen", alias);
         } else {
             registerAliasHandler(alias, handler);
             if (handler instanceof OSGiServletHandler) {

@@ -19,7 +19,6 @@
 
 package org.apache.jsieve;
 
-import java.text.MessageFormat;
 import org.slf4j.Logger;
 
 
@@ -89,9 +88,7 @@ public final class ScriptCoordinate {
      * appended to the message, not null
      */
     public SyntaxException syntaxException(CharSequence message) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn(message.toString());
-        }
+        LOG.warn(message.toString());
         logDiagnosticsInfo(LOG);
         final String fullMessage = addStartLineAndColumn(message);
         final SyntaxException result = new SyntaxException(fullMessage);

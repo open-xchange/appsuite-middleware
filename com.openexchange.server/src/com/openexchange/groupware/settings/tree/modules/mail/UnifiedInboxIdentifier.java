@@ -104,9 +104,7 @@ public class UnifiedInboxIdentifier implements PreferencesItemService {
                         setting.setSingleValue("null");
                     }
                 } catch (final OXException e) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn("", e);
-                    }
+                    LOG.warn("", e);
                     setting.setSingleValue("null");
                     return;
                 }

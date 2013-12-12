@@ -1751,7 +1751,6 @@ public class MimeMessageFiller {
             final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class);
             final Session session = msgFiller.session;
-            final StringBuilder tmp = new StringBuilder(128);
             do {
                 final String imageTag = m.group();
                 if (MimeMessageUtility.isValidImageUri(imageTag)) {
@@ -1761,16 +1760,10 @@ public class MimeMessageFiller {
                         try {
                             imageProvider = new ManagedFileImageProvider(mfm.getByID(id));
                         } catch (final OXException e) {
-                            if (LOG.isWarnEnabled()) {
-                                tmp.setLength(0);
-                                LOG.warn(
-                                    tmp.append("Image with id \"").append(id).append("\" could not be loaded. Referenced image is skipped.").toString(),
-                                    e);
-                            }
+                            LOG.warn("Image with id \"{}\" could not be loaded. Referenced image is skipped.", id, e);
                             /*
                              * Anyway, replace image tag
                              */
-                            tmp.setLength(0);
                             m.appendLiteralReplacement(sb, blankSrc(imageTag));
                             continue;
                         }
@@ -1802,28 +1795,19 @@ public class MimeMessageFiller {
                             }
                         }
                         if (null == imageLocation) {
-                            if (LOG.isWarnEnabled()) {
-                                tmp.setLength(0);
-                                LOG.warn(tmp.append("No image found with id \"").append(m.getImageId()).append("\". Referenced image is skipped.").toString());
-                            }
+                            LOG.warn("Image with id \"{}\" could not be loaded. Referenced image is skipped.", m.getImageId());
                             /*
                              * Anyway, replace image tag
                              */
-                            tmp.setLength(0);
                             m.appendLiteralReplacement(sb, null == blankImageTag ? blankSrc(imageTag) : blankImageTag);
                             continue;
                         }
                         final ImageDataSource dataSource = (ImageDataSource) conversionService.getDataSource(imageLocation.getRegistrationName());
                         if (null == dataSource) {
-                            if (LOG.isWarnEnabled()) {
-                                tmp.setLength(0);
-                                LOG.warn(tmp.append("No image data source found with id \"").append(imageLocation.getRegistrationName()).append(
-                                    "\". Referenced image is skipped.").toString());
-                            }
+                            LOG.warn("No image data source found with id \"{}\". Referenced image is skipped.", imageLocation.getRegistrationName());
                             /*
                              * Anyway, replace image tag
                              */
-                            tmp.setLength(0);
                             m.appendLiteralReplacement(sb, blankSrc(imageTag));
                             continue;
                         }
@@ -1831,14 +1815,12 @@ public class MimeMessageFiller {
                             imageProvider = new ImageDataImageProvider(dataSource, imageLocation, session);
                         } catch (final OXException e) {
                             if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e) || isFolderNotFound(e)) {
-                                tmp.setLength(0);
                                 m.appendLiteralReplacement(sb, blankSrc(imageTag));
                                 continue;
                             }
                             throw e;
                         } catch (final RuntimeException rte) {
                             LOG.warn("Couldn't load image data", rte);
-                            tmp.setLength(0);
                             m.appendLiteralReplacement(sb, blankSrc(imageTag));
                             continue;
                         }

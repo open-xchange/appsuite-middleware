@@ -98,10 +98,10 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
     private final int optTtl;
 
 
-    
+
     /**
      * Initializes a new {@link ManagedFileImpl}.
-     * 
+     *
      * @param id The unique ID
      * @param file The kept file
      */
@@ -184,7 +184,7 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
                     frl.removePerformed(file);
                 }
             }
-            if (!file.delete() && LOG.isWarnEnabled()) {
+            if (!file.delete()) {
                 LOG.warn("Temporary file could not be deleted: {}", file.getPath());
             }
         }

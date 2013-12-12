@@ -558,9 +558,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             try {
                 rs.close();
             } catch (final SQLException e) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error("", e);
-                }
+                LOG.error("", e);
                 error = SearchIteratorExceptionCodes.SQL_ERROR.create(e, e.getMessage()).setPrefix("FLD");
             }
             rs = null;
@@ -572,9 +570,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             try {
                 stmt.close();
             } catch (final SQLException e) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error("", e);
-                }
+                LOG.error("", e);
                 if (error == null) {
                     error = SearchIteratorExceptionCodes.SQL_ERROR.create(e, e.getMessage()).setPrefix("FLD");
                 }

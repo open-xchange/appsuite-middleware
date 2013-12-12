@@ -190,9 +190,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
             if (data.getTimeDiff() > 2000) {
                 final OXException dbe = DBPoolingExceptionCodes.TOO_LONG.create(L(data.getTimeDiff()));
                 addTrace(dbe, data);
-                if (ConnectionPool.LOG.isWarnEnabled()) {
-                    ConnectionPool.LOG.warn("", dbe);
-                }
+                ConnectionPool.LOG.warn("", dbe);
             }
         } catch (final SQLException e) {
             retval = false;

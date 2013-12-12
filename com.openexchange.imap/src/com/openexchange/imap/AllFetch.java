@@ -169,9 +169,7 @@ public final class AllFetch {
                 try {
                     m.setContentType(new ContentType(sb.toString()));
                 } catch (final OXException e) {
-                    if (logger.isWarnEnabled()) {
-                        logger.warn("", e);
-                    }
+                    logger.warn("", e);
                     m.setContentType(new ContentType(MimeTypes.MIME_DEFAULT));
                 }
                 m.setHasAttachment(bs.isMulti() && ("MIXED".equalsIgnoreCase(bs.subtype) || MimeMessageUtility.hasAttachments(bs)));

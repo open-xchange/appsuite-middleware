@@ -664,7 +664,7 @@ public final class FolderWriter extends DataWriter {
                     break Fields;
                 default:
 
-                    if (!this.fields.knows(field) && LOG.isWarnEnabled()) {
+                    if (!this.fields.knows(field)) {
                         LOG.warn("Unknown folder field: {}", field);
                     }
 

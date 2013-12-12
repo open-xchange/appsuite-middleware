@@ -771,9 +771,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                 msg.setContentType(new ContentType(contentType));
                 msg.addHeader("Content-Type", contentType);
             } catch (final OXException e) {
-                if (logger.isWarnEnabled()) {
-                    logger.warn("", e);
-                }
+                logger.warn("", e);
                 msg.setContentType(new ContentType(MimeTypes.MIME_DEFAULT));
                 msg.addHeader("Content-Type", MimeTypes.MIME_DEFAULT);
             }

@@ -388,12 +388,7 @@ public final class POP3CapabilityCache {
                                 sb.append(c);
                             }
                         }
-                        /*
-                         * Assume default capabilities: USER, PASS, STAT, LIST, RETR, DELE, NOOP, RSET, QUIT
-                         */
-                        if (LOG.isWarnEnabled()) {
-                            LOG.warn(sb.insert(0, "POP3 CAPA command failed: ").toString());
-                        }
+                        LOG.warn(sb.insert(0, "POP3 CAPA command failed: ").toString());
                         return DEFAULT_CAPABILITIES;
                     } else if ('+' == pre) {
                         sb.append(pre);
@@ -413,9 +408,7 @@ public final class POP3CapabilityCache {
                         }
                         final String responseCode = sb.toString();
                         if (!responseCode.toUpperCase().startsWith("+OK")) {
-                            if (LOG.isWarnEnabled()) {
-                                LOG.warn("POP3 CAPA command failed: {}", responseCode);
-                            }
+                            LOG.warn("POP3 CAPA command failed: {}", responseCode);
                             return DEFAULT_CAPABILITIES;
                         }
                         sb.setLength(0);
@@ -454,12 +447,10 @@ public final class POP3CapabilityCache {
                         }
                         capabilities = sb.toString();
                     } else {
-                        if (LOG.isWarnEnabled()) {
-                            if (Character.isDefined(pre)) {
-                                LOG.warn("Unexpected CAPA response start: {}", pre);
-                            } else {
-                                LOG.warn("Invalid unicode character: {}", ((int) pre));
-                            }
+                        if (Character.isDefined(pre)) {
+                            LOG.warn("Unexpected CAPA response start: {}", pre);
+                        } else {
+                            LOG.warn("Invalid unicode character: {}", ((int) pre));
                         }
                         return DEFAULT_CAPABILITIES;
                     }

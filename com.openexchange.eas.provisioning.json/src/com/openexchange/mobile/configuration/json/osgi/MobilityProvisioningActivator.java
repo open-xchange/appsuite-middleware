@@ -80,9 +80,7 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
 
 	@Override
 	protected void handleAvailability(final Class<?> clazz) {
-		if (LOG.isWarnEnabled()) {
-			LOG.warn("Absent service: {}", clazz.getName());
-		}
+		LOG.warn("Absent service: {}", clazz.getName());
 		final Object service = getService(clazz);
 		if (service instanceof HttpService) {
 		    final DispatcherPrefixService dispatcherPrefixService = getService(DispatcherPrefixService.class);
@@ -104,9 +102,7 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
 
 	@Override
 	protected void handleUnavailability(final Class<?> clazz) {
-		if (LOG.isInfoEnabled()) {
-			LOG.info("Re-available service: {}", clazz.getName());
-		}
+		LOG.info("Re-available service: {}", clazz.getName());
 		if (HttpService.class.equals(clazz)) {
 		    final HttpService service = getService(HttpService.class);
 		    final DispatcherPrefixService dispatcherPrefixService = getService(DispatcherPrefixService.class);

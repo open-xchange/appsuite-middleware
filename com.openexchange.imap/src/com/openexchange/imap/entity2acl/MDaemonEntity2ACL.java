@@ -155,15 +155,10 @@ public final class MDaemonEntity2ACL extends Entity2ACL {
         Arrays.sort(ids);
         final int pos = Arrays.binarySearch(ids, sessionUser);
         if (pos >= 0) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Found multiple users with login \"{}\" subscribed to IMAP server \"{}\": {}\nThe session user's ID is returned.", pattern, serverUrl, Arrays.toString(ids));
-            }
+            LOG.warn("Found multiple users with login \"{}\" subscribed to IMAP server \"{}\": {}\nThe session user's ID is returned.", pattern, serverUrl, Arrays.toString(ids));
             return ids[pos];
         }
-        // Just select first user ID
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Found multiple users with login \"{}\" subscribed to IMAP server \"{}\": {}\nThe first found user is returned.", pattern, serverUrl, Arrays.toString(ids));
-        }
+        LOG.warn("Found multiple users with login \"{}\" subscribed to IMAP server \"{}\": {}\nThe first found user is returned.", pattern, serverUrl, Arrays.toString(ids));
         return ids[0];
     }
 

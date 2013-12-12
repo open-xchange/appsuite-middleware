@@ -206,9 +206,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 
     @Override
     public boolean isUserInRole(final String role) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Method isUserInRole() is not implemented in HttpServletRequestWrapper, yet!");
-        }
+        LOG.warn("Method isUserInRole() is not implemented in HttpServletRequestWrapper, yet!");
         return false;
     }
 

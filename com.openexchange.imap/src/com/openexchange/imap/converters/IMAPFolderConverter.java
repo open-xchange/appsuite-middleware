@@ -500,9 +500,7 @@ public final class IMAPFolderConverter {
                         try {
                             applyACL2Permissions(imapFolder, listEntry, session, imapConfig, mailFolder, ownRights, ctx);
                         } catch (final OXException e) {
-                            if (LOG.isWarnEnabled()) {
-                                LOG.warn("ACLs could not be parsed", e);
-                            }
+                            LOG.warn("ACLs could not be parsed", e);
                             mailFolder.removePermissions();
                             addOwnACL(mailFolder);
                         }
@@ -884,12 +882,7 @@ public final class IMAPFolderConverter {
     private static void handleCommandFailedException(final com.sun.mail.iap.CommandFailedException e, final String fullName) {
         final String msg = e.getMessage().toLowerCase(Locale.ENGLISH);
         if (msg.indexOf("Mailbox doesn't exist") >= 0 || msg.indexOf("Mailbox does not exist") >= 0) {
-            /*
-             * This occurs when requesting MYRIGHTS on a shared or somehow non-existent folder. Just log a warning!
-             */
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(IMAPException.getFormattedMessage(IMAPException.Code.FOLDER_NOT_FOUND, fullName), e);
-            }
+            LOG.warn(IMAPException.getFormattedMessage(IMAPException.Code.FOLDER_NOT_FOUND, fullName), e);
         } else {
             LOG.debug("Failed MYRIGHTS for: {}", fullName, e);
         }

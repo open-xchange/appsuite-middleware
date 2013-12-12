@@ -203,9 +203,7 @@ public class DatabaseFolder extends AbstractFolder {
         case FolderObject.UNBOUND:
             return UnboundContentType.getInstance();
         default:
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Unknown database folder content type: {}", module);
-            }
+            LOG.warn("Unknown database folder content type: {}", module);
             return SystemContentType.getInstance();
         }
     }

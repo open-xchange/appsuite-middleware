@@ -59,7 +59,6 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -385,12 +384,8 @@ public class MailAttachment extends AJAXServlet {
      * @return The wrapping {@link AbstractOXException}
      */
     protected static final OXException getWrappingOXException(final Exception cause) {
-        if (LOG.isWarnEnabled()) {
-            final StringBuilder warnBuilder = new StringBuilder(140);
-            warnBuilder.append("An unexpected exception occurred, which is going to be wrapped for proper display.\n");
-            warnBuilder.append("For safety reason its original content is display here.");
-            LOG.warn(warnBuilder.toString(), cause);
-        }
+        final String lineSeparator = System.getProperty("line.separator");
+        LOG.warn("An unexpected exception occurred, which is going to be wrapped for proper display.{}For safety reason its original content is displayed here.", lineSeparator, cause);
         return new OXException(cause);
     }
 

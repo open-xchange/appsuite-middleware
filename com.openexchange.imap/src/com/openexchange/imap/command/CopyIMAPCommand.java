@@ -231,9 +231,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
          */
         int pos = resp.indexOf(COPYUID);
         if (pos < 0) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Missing COPYUID response code: {}", resp);
-            }
+            LOG.warn("Missing COPYUID response code: {}", resp);
             return true;
         }
         /*

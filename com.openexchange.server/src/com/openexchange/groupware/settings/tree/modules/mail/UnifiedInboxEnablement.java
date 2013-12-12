@@ -100,9 +100,7 @@ public class UnifiedInboxEnablement implements PreferencesItemService {
                 try {
                     management = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class, true);
                 } catch (final OXException e) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn("", e);
-                    }
+                    LOG.warn("", e);
                     return Boolean.FALSE;
                 }
                 try {
@@ -120,9 +118,7 @@ public class UnifiedInboxEnablement implements PreferencesItemService {
                 try {
                     management = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class, true);
                 } catch (final OXException e) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn("{} of Unified Mail for user {} in context {} aborted: {}", enable ? "Enabling" : "Disabling", settings.getUserId(), settings.getCid(), e.getMessage(), e);
-                    }
+                    LOG.warn("{} of Unified Mail for user {} in context {} aborted: {}", enable ? "Enabling" : "Disabling", settings.getUserId(), settings.getCid(), e.getMessage(), e);
                     return;
                 }
                 try {

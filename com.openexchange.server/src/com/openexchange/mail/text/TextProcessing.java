@@ -322,10 +322,7 @@ public final class TextProcessing {
         } catch (final java.io.CharConversionException e) {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "US-ASCII";
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback,
-                    e);
-            }
+            LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback, e);
             return MessageUtility.readMailPart(mailPart, fallback);
         }
     }
@@ -335,22 +332,13 @@ public final class TextProcessing {
         if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();
             if (!CharsetDetector.isValid(cs)) {
-                com.openexchange.java.StringAllocator sb = null;
-                if (null != cs) {
-                    sb = new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
-                }
+                final String prev = cs;
                 if (contentType.startsWith("text/")) {
                     cs = CharsetDetector.detectCharset(mailPart.getInputStream());
-                    if (LOG.isWarnEnabled() && null != sb) {
-                        sb.append(" Using auto-detected encoding: \"").append(cs).append('"');
-                        LOG.warn(sb.toString());
-                    }
+                    LOG.warn("Illegal or unsupported encoding \"{}\". Using auto-detected encoding: \"{}\"", prev, cs);
                 } else {
                     cs = MailProperties.getInstance().getDefaultMimeCharset();
-                    if (LOG.isWarnEnabled() && null != sb) {
-                        sb.append(" Using fallback encoding: \"").append(cs).append('"');
-                        LOG.warn(sb.toString());
-                    }
+                    LOG.warn("Illegal or unsupported encoding \"{}\". Using fallback encoding: \"{}\"", prev, cs);
                 }
             }
             charset = cs;

@@ -345,9 +345,7 @@ public class Attachment extends PermissionServlet {
             }
 
         } catch (final JSONException e) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("", e);
-            }
+            LOG.error("", e);
         }
     }
 

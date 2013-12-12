@@ -155,9 +155,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         public void decorate(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException {
             final Object resultObject = result.getResultObject();
             if (null == resultObject) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("Result object is null.");
-                }
+                LOG.warn("Result object is null.");
                 result.setResultObject(JSONObject.NULL, "json");
                 return;
             }
@@ -230,9 +228,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                         return ContactImageDataSource.getInstance().generateUrl(imageLocation, session);
                     }
                 } catch (OXException e) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn("Error generating contact image URL", e);
-                    }
+                    LOG.warn("Error generating contact image URL", e);
                 }
             }
             return null;

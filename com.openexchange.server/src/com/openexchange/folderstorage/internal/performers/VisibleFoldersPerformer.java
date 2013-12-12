@@ -254,12 +254,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                                     addWarning(warnings.iterator().next());
                                 }
                             } catch (final OXException e) {
-                                /*
-                                 * Batch-load failed...
-                                 */
-                                if (log.isWarnEnabled()) {
-                                    log.warn("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
-                                }
+                                log.warn("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
                                 folders = null;
                             }
                             if (null == folders) {

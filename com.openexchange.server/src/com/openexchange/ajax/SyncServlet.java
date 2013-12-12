@@ -215,13 +215,7 @@ public class SyncServlet extends PermissionServlet {
 						try {
 							delFolderObj = access.getFolderObject(delFolderId);
 						} catch (final OXException exc) {
-							/*
-							 * Folder could not be found and therefore need not
-							 * to be deleted
-							 */
-							if (LOG.isWarnEnabled()) {
-								LOG.warn("", exc);
-							}
+							LOG.warn("", exc);
 							continue NextId;
 						}
 						if (delFolderObj.getLastModified().getTime() > timestamp.getTime()) {

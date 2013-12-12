@@ -57,7 +57,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
 import com.openexchange.chat.ChatExceptionCodes;
 import com.openexchange.chat.ChatService;
 import com.openexchange.chat.ChatServiceRegistry;
@@ -145,10 +144,7 @@ public class OSGiChatServiceRegistry implements ChatServiceRegistry {
                 return service;
             }
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OSGiChatServiceRegistry.Customizer.class);
-            if (logger.isWarnEnabled()) {
-                logger.warn(new StringBuilder(128).append("Chat service ").append(service.getDisplayName()).append(
-                    " could not be added to registry. Another service is already registered with identifier: ").append(service.getId()).toString());
-            }
+            logger.warn("Chat service {} could not be added to registry. Another service is already registered with identifier: {}", service.getDisplayName(), service.getId());
             context.ungetService(reference);
             return null;
         }

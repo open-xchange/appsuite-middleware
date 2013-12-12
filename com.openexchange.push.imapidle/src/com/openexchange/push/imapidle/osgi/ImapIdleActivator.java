@@ -95,9 +95,7 @@ public final class ImapIdleActivator extends HousekeepingActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: {}", clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         getServiceRegistry().addService(clazz, getService(clazz));
         if (ThreadPoolService.class == clazz) {
             ImapIdlePushListenerRegistry.getInstance().openAll();
@@ -106,9 +104,7 @@ public final class ImapIdleActivator extends HousekeepingActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: {}", clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
         if (ThreadPoolService.class == clazz) {
             ImapIdlePushListenerRegistry.getInstance().closeAll();
         }

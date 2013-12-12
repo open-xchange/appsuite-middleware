@@ -76,7 +76,7 @@ public final class AJPv13RequestBody extends AbstractAJPv13Request {
                     /*
                      * Hmm... we actually expect more data
                      */
-                    if (LOG.isWarnEnabled()) {
+                    {
                         final AJPv13Exception ajpExc = new AJPv13Exception(
                             AJPCode.UNEXPECTED_EMPTY_DATA_PACKAGE,
                             true,

@@ -56,7 +56,6 @@ import java.util.concurrent.ConcurrentMap;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXResultDecorator;
 import com.openexchange.ajax.requesthandler.AJAXResultDecoratorRegistry;
 
@@ -103,10 +102,7 @@ public final class OSGiAJAXResultDecoratorRegistry implements AJAXResultDecorato
             return service;
         }
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OSGiAJAXResultDecoratorRegistry.class);
-        if (logger.isWarnEnabled()) {
-            logger.warn(new com.openexchange.java.StringAllocator(128).append("Another AJAXResultDecorator is already registered with identifier: ").append(
-                service.getIdentifier()).toString());
-        }
+        logger.warn("Another AJAXResultDecorator is already registered with identifier: {}", service.getIdentifier());
         context.ungetService(reference);
         return null;
     }

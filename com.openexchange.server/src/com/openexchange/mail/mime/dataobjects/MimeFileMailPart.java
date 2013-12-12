@@ -183,9 +183,7 @@ public abstract class MimeFileMailPart extends MailPart {
             if (charset == null) {
                 try {
                     charset = detectCharset(new FileInputStream(file));
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn("Uploaded file contains textual content but does not specify a charset. Assumed charset is: {}", charset);
-                    }
+                    LOG.warn("Uploaded file contains textual content but does not specify a charset. Assumed charset is: {}", charset);
                 } catch (final FileNotFoundException e) {
                     throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                 }

@@ -443,7 +443,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
         if (null != eventAdmin) {
             LOG.debug("Publishing: {}", new Object() { @Override public String toString() { return dump(event);} });
             eventAdmin.postEvent(event);
-        } else if (LOG.isWarnEnabled()) {
+        } else {
             LOG.warn("Unable to access event admin, unable to publish event {}", dump(event));
         }
     }

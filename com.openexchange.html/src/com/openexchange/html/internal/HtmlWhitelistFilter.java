@@ -544,9 +544,7 @@ public final class HtmlWhitelistFilter {
                 {
                     final File whitelist = ServiceRegistry.getInstance().getService(ConfigurationService.class).getFileByName("whitelist.properties");
                     if (null == whitelist) {
-                        if (LOG.isWarnEnabled()) {
-                            LOG.warn("Using default white list");
-                        }
+                        LOG.warn("Using default white list");
                         mapStr = new String(DEFAULT_WHITELIST);
                     } else {
                         BufferedReader reader = null;
@@ -564,9 +562,7 @@ public final class HtmlWhitelistFilter {
                             }
                             mapStr = sb.toString();
                         } catch (final Exception e) {
-                            if (LOG.isWarnEnabled()) {
-                                LOG.warn("Using default white list", e);
-                            }
+                            LOG.warn("Using default white list", e);
                             mapStr = new String(DEFAULT_WHITELIST);
                         } finally {
                             Streams.close(reader);

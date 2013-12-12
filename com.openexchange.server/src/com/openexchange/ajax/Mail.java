@@ -236,14 +236,8 @@ public class Mail extends PermissionServlet implements UploadListener {
      */
     protected static final OXException getWrappingOXException(final Exception cause) {
         final String message = cause.getMessage();
-        if (LOG.isWarnEnabled()) {
-            final StringBuilder warnBuilder = new StringBuilder(140);
-            final String lineSeparator = System.getProperty("line.separator");
-            warnBuilder.append("An unexpected exception occurred, which is going to be wrapped for proper display.").append(lineSeparator);
-            warnBuilder.append("For safety reason its original content is displayed here.").append(lineSeparator);
-            warnBuilder.append(null == message ? "[Not available]" : message);
-            LOG.warn(warnBuilder.toString(), cause);
-        }
+        final String lineSeparator = System.getProperty("line.separator");
+        LOG.warn("An unexpected exception occurred, which is going to be wrapped for proper display.{}For safety reason its original content is displayed here.{}{}", lineSeparator, lineSeparator, (null == message ? "[Not available]" : message), cause);
         return MailExceptionCode.UNEXPECTED_ERROR.create(cause, null == message ? "[Not available]" : message);
     }
 

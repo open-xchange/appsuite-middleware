@@ -174,56 +174,38 @@ public final class DefaultFolderNamesProvider {
     public String[] getDefaultFolderNames(final String trash, final String sent, final String drafts, final String spam, final String confirmedSpam, final String confirmedHam, final boolean isSpamEnabled) {
         final String[] names = new String[isSpamEnabled ? 6 : 4];
         if ((drafts == null) || (drafts.length() == 0)) {
-            if (LOG.isWarnEnabled()) {
-                // final OXException e = new OXException(OXException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_DRAFTS);
-                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, fallbackProvider.getDrafts()));
-            }
+            LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, fallbackProvider.getDrafts()));
             names[INDEX_DRAFTS] = fallbackProvider.getDrafts();
         } else {
             names[INDEX_DRAFTS] = drafts;
         }
         if ((sent == null) || (sent.length() == 0)) {
-            if (LOG.isWarnEnabled()) {
-                // final OXException e = new OXException(OXException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_SENT);
-                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, fallbackProvider.getSent()));
-            }
+            LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, fallbackProvider.getSent()));
             names[INDEX_SENT] = fallbackProvider.getSent();
         } else {
             names[INDEX_SENT] = sent;
         }
         if ((spam == null) || (spam.length() == 0)) {
-            if (LOG.isWarnEnabled()) {
-                // final OXException e = new OXException(OXException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_SPAM);
-                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, fallbackProvider.getSpam()));
-            }
+            LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, fallbackProvider.getSpam()));
             names[INDEX_SPAM] = fallbackProvider.getSpam();
         } else {
             names[INDEX_SPAM] = spam;
         }
         if ((trash == null) || (trash.length() == 0)) {
-            if (LOG.isWarnEnabled()) {
-                // final OXException e = new OXException(OXException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_TRASH);
-                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, fallbackProvider.getTrash()));
-            }
+            LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, fallbackProvider.getTrash()));
             names[INDEX_TRASH] = fallbackProvider.getTrash();
         } else {
             names[INDEX_TRASH] = trash;
         }
         if (isSpamEnabled) {
             if ((confirmedSpam == null) || (confirmedSpam.length() == 0)) {
-                if (LOG.isWarnEnabled()) {
-                    // final OXException e = new OXException(OXException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_CONFIRMED_SPAM);
-                    LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, fallbackProvider.getConfirmedSpam()));
-                }
+                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, fallbackProvider.getConfirmedSpam()));
                 names[INDEX_CONFIRMED_SPAM] = fallbackProvider.getConfirmedSpam();
             } else {
                 names[INDEX_CONFIRMED_SPAM] = confirmedSpam;
             }
             if ((confirmedHam == null) || (confirmedHam.length() == 0)) {
-                if (LOG.isWarnEnabled()) {
-                    // final OXException e = new OXException(OXException.Code.MISSING_DEFAULT_FOLDER_NAME, STD_CONFIRMED_HAM);
-                    LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, fallbackProvider.getConfirmedHam()));
-                }
+                LOG.warn(String.format(SWITCH_DEFAULT_FOLDER, fallbackProvider.getConfirmedHam()));
                 names[INDEX_CONFIRMED_HAM] = fallbackProvider.getConfirmedHam();
             } else {
                 names[INDEX_CONFIRMED_HAM] = confirmedHam;

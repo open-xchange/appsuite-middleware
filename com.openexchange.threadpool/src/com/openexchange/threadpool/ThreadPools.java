@@ -202,7 +202,7 @@ public final class ThreadPools {
                 final Future<R> f = completionService.poll(timeoutMillis, TimeUnit.MILLISECONDS);
                 if (null != f) {
                     ret.add(f.get());
-                } else if (LOG.isWarnEnabled()) {
+                } else {
                     LOG.warn("Completion service's task elapsed time-out of {}msec", timeoutMillis);
                 }
             }

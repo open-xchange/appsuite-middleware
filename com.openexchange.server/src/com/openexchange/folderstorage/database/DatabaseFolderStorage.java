@@ -362,12 +362,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         try {
             con = optParameter(ConnectionMode.class, PARAM_CONNECTION, params);
         } catch (final OXException e) {
-            /*
-             * Already committed
-             */
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Storage already committed:\n{}", params.getCommittedTrace(), e);
-            }
+            LOG.warn("Storage already committed:\n{}", params.getCommittedTrace(), e);
             return;
         }
         if (null == con) {

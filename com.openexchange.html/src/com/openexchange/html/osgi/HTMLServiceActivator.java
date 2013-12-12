@@ -441,9 +441,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
             }
         }
         if (useDefaultConfig) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Using default JTidy configuration");
-            }
+            LOG.warn("Using default JTidy configuration");
             try {
                 final StringBuilder defaultConfig = new StringBuilder(512);
                 defaultConfig.append("indent=no\n");
@@ -499,17 +497,10 @@ public class HTMLServiceActivator extends HousekeepingActivator {
             try {
                 return new BufferedInputStream(new FileInputStream(tidyMessagesFilename));
             } catch (final IOException e) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("File providing JTidy messages could not be found: {}", tidyMessagesFilename, e);
-                }
+                LOG.warn("File providing JTidy messages could not be found: {}", tidyMessagesFilename, e);
             }
         }
-        /*
-         * File not found or file name is null
-         */
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Using default JTidy messages");
-        }
+        LOG.warn("Using default JTidy messages");
         final StringBuilder tidyMsgs = new StringBuilder(4096);
         tidyMsgs.append("anchor_not_unique={0} Anchor \"{1}\" already defined\n");
         tidyMsgs.append("apos_undefined=Named Entity &apos; only defined in XML/XHTML\n");

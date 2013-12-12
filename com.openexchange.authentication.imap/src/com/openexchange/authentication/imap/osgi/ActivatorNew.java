@@ -79,9 +79,7 @@ public class ActivatorNew extends DeferredActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: {}", clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
 
         getServiceRegistry().addService(clazz, getService(clazz));
         // wenn alle services da und nicht authservice published, dann authservice publishen

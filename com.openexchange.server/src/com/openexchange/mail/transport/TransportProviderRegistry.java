@@ -106,9 +106,7 @@ public final class TransportProviderRegistry {
         final String transportServerURL = TransportConfig.getTransportServerURL(session, accountId);
         final String protocol;
         if (transportServerURL == null) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Missing transport server URL. Transport server URL not set in account {} for user {} in context {}. Using fallback protocol {}", accountId, session.getUserId(), session.getContextId(), TransportProperties.getInstance().getDefaultTransportProvider());
-            }
+            LOG.warn("Missing transport server URL. Transport server URL not set in account {} for user {} in context {}. Using fallback protocol {}", accountId, session.getUserId(), session.getContextId(), TransportProperties.getInstance().getDefaultTransportProvider());
             protocol = TransportProperties.getInstance().getDefaultTransportProvider();
         } else {
             protocol = extractProtocol(transportServerURL, TransportProperties.getInstance().getDefaultTransportProvider());

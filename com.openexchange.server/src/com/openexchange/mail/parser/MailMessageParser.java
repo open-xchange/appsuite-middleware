@@ -777,9 +777,7 @@ public final class MailMessageParser {
                     return;
                 }
             } catch (final MessagingException e) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error("", e);
-                }
+                LOG.error("", e);
                 if (!mailPart.containsSequenceId()) {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));
                 }

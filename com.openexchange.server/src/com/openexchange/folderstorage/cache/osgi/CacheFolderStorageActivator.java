@@ -132,9 +132,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: {}", clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
         if (CacheService.class.equals(clazz)) {
             try {
                 disposeCacheFolderStorage();

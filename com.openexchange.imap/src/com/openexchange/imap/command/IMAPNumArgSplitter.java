@@ -401,9 +401,7 @@ public final class IMAPNumArgSplitter {
             }
             if (endPos <= offset) {
                 final int p = numArg.indexOf(',', offset);
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("Token does not fit into given max size of {} bytes: {}", maxLen, numArg.substring(offset, p));
-                }
+                LOG.warn("Token does not fit into given max size of {} bytes: {}", maxLen, numArg.substring(offset, p));
                 offset = p + 1;
             } else {
                 tmp.add(numArg.substring(offset, endPos));

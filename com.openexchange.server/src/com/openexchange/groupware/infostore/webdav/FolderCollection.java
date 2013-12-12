@@ -669,9 +669,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		try {
 			url = parent().getUrl().dup().append(getDisplayName());
 		} catch (final OXException e) {
-			if (LOG.isErrorEnabled()) {
-				LOG.error("", e);
-			}
+			LOG.error("", e);
 		}
 	}
 

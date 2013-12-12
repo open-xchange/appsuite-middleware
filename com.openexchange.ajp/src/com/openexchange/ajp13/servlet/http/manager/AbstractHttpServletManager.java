@@ -278,9 +278,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
             }
             final ServletQueue servletQueue = servletPool.remove(path);
             if (null == servletQueue) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("Servlet un-registration failed. No servlet is bound to path: {}", path);
-                }
+                LOG.warn("Servlet un-registration failed. No servlet is bound to path: {}", path);
                 return;
             }
             configLoader.removeConfig(servletQueue.get().getClass().getCanonicalName());

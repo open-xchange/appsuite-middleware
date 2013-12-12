@@ -730,9 +730,7 @@ public final class MimeForward {
                             ltz.locale,
                             ltz.timeZone)));
             } catch (final Exception t) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("", t);
-                }
+                LOG.warn("", t);
                 forwardPrefix = PATTERN_DATE.matcher(forwardPrefix).replaceFirst("");
             }
             try {
@@ -744,9 +742,7 @@ public final class MimeForward {
                             ltz.locale,
                             ltz.timeZone)));
             } catch (final Exception t) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("", t);
-                }
+                LOG.warn("", t);
                 forwardPrefix = PATTERN_TIME.matcher(forwardPrefix).replaceFirst("");
             }
 

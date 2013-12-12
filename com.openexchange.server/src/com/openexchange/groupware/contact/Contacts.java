@@ -2576,16 +2576,7 @@ public final class Contacts {
                     }
 
                 } catch (final Exception oe) {
-                    if (LOG.isWarnEnabled()) {
-                        final StringBuilder sb = new StringBuilder(128);
-                        sb.append("WARNING: During the delete process 'delete all contacts from one user', a contact was found who has no folder.");
-                        sb.append("This contact will be modified and can be found in the administrator address book.");
-                        sb.append(" Context=").append(contextId);
-                        sb.append(" Folder=").append(fid);
-                        sb.append(" User=").append(uid);
-                        sb.append(" Contact=").append(oid);
-                        LOG.warn(sb.toString());
-                    }
+                    LOG.warn("WARNING: During the delete process ''delete all contacts from one user'', a contact was found who has no folder. This contact will be modified and can be found in the administrator address book. Context={} Folder={} User={} Contact={}", contextId, fid, uid, oid);
                     folder_error = true;
                     delete = true;
                 }

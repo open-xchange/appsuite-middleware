@@ -236,10 +236,7 @@ public final class IMAPSearch {
                     throw ((FolderClosedException) cause);
                 }
             }
-            if (LOG.isWarnEnabled()) {
-                final OXException imapException = IMAPException.Code.IMAP_SEARCH_FAILED.create(e, e.getMessage());
-                LOG.warn("", imapException);
-            }
+            LOG.warn("", IMAPException.Code.IMAP_SEARCH_FAILED.create(e, e.getMessage()));
             return null;
         }
     }

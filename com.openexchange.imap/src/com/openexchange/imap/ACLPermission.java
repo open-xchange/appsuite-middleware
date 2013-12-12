@@ -143,16 +143,12 @@ public final class ACLPermission extends MailPermission {
 
     @Override
     public void setFuid(final int pid) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn(ERR);
-        }
+        LOG.warn(ERR);
     }
 
     @Override
     public int getFuid() {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn(ERR);
-        }
+        LOG.warn(ERR);
         return -1;
     }
 

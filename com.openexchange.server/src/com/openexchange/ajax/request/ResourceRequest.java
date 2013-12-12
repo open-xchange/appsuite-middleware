@@ -257,9 +257,7 @@ public class ResourceRequest {
         if (jData.has(SearchFields.PATTERN) && !jData.isNull(SearchFields.PATTERN)) {
             searchpattern = jData.getString(SearchFields.PATTERN);
         } else {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Missing field \"{}\" in JSON data. Searching for all as fallback", SearchFields.PATTERN);
-            }
+            LOG.warn("Missing field \"{}\" in JSON data. Searching for all as fallback", SearchFields.PATTERN);
             return actionAll();
         }
 

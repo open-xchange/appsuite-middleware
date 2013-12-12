@@ -83,20 +83,13 @@ public final class MonitoringActivator extends HousekeepingActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        /*
-         * Never stop the server even if a needed service is absent
-         */
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: {}", clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
         MonitoringServiceRegistry.getServiceRegistry().removeService(clazz);
     }
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Re-available service: {}", clazz.getName());
-        }
+        LOG.warn("Re-available service: {}", clazz.getName());
         MonitoringServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
     }
 

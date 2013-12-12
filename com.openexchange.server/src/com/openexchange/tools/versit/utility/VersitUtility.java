@@ -52,7 +52,6 @@ package com.openexchange.tools.versit.utility;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.contact.ContactService;
@@ -217,9 +216,7 @@ public final class VersitUtility {
                      */
                     retvalList.add(taskObj);
                 } else {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn("invalid versit object: {}", vo.name);
-                    }
+                    LOG.warn("invalid versit object: {}", vo.name);
                 }
             }
         } finally {

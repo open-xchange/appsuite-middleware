@@ -114,9 +114,7 @@ public final class MimeDefaultSession {
                     final String defaultMimeCharset = mailProperties.getDefaultMimeCharset();
                     if (null == defaultMimeCharset) {
                         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MimeDefaultSession.class);
-                        if (log.isWarnEnabled()) {
-                            log.warn("Missing default MIME charset in mail configuration. Mail configuration is probably not initialized. Using fallback 'UTF-8' instead");
-                        }
+                        log.warn("Missing default MIME charset in mail configuration. Mail configuration is probably not initialized. Using fallback 'UTF-8' instead");
                         p.put(MimeSessionPropertyNames.PROP_MAIL_MIME_CHARSET, "UTF-8");
                     } else {
                         p.put(MimeSessionPropertyNames.PROP_MAIL_MIME_CHARSET, defaultMimeCharset);

@@ -359,17 +359,14 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                     }
                     final Bundle bundle = context.getBundle();
                     final StringBuilder errorBuilder = new StringBuilder(64);
-                    final boolean errorEnabled = LOG.isErrorEnabled();
-                    if (errorEnabled) {
-                        errorBuilder.append("\nStart-up of bundle \"").append(bundle.getSymbolicName()).append("\" failed: ");
-                        final String errorMsg = t.getMessage();
-                        if (null == errorMsg || "null".equals(errorMsg)) {
-                            errorBuilder.append(t.getClass().getName());
-                        } else {
-                            errorBuilder.append(errorMsg);
-                        }
-                        LOG.error(errorBuilder.toString(), t);
+                    errorBuilder.append("\nStart-up of bundle \"").append(bundle.getSymbolicName()).append("\" failed: ");
+                    final String errorMsg = t.getMessage();
+                    if (null == errorMsg || "null".equals(errorMsg)) {
+                        errorBuilder.append(t.getClass().getName());
+                    } else {
+                        errorBuilder.append(errorMsg);
                     }
+                    LOG.error(errorBuilder.toString(), t);
                     /*
                      * Shut-down
                      */
@@ -382,11 +379,11 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
 
                             @Override
                             public void run() {
-                                shutDownBundle(bundle, errorEnabled ? errorBuilder : null);
+                                shutDownBundle(bundle, errorBuilder);
                             }
                         }).start();
                     } else {
-                        shutDownBundle(bundle, errorEnabled ? errorBuilder : null);
+                        shutDownBundle(bundle, errorBuilder);
                     }
                 }
             }
@@ -405,15 +402,11 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
              * Stop with Bundle.STOP_TRANSIENT set to zero
              */
             bundle.stop();
-            if (null != errorBuilder) {
-                errorBuilder.setLength(0);
-                LOG.error(errorBuilder.append("\n\nBundle \"").append(bundle.getSymbolicName()).append("\" stopped.\n").toString());
-            }
+            errorBuilder.setLength(0);
+            LOG.error(errorBuilder.append("\n\nBundle \"").append(bundle.getSymbolicName()).append("\" stopped.\n").toString());
         } catch (final BundleException e) {
-            if (null != errorBuilder) {
-                errorBuilder.setLength(0);
-                LOG.error(errorBuilder.append("\n\nBundle \"").append(bundle.getSymbolicName()).append("\" could not be stopped.\n").toString());
-            }
+            errorBuilder.setLength(0);
+            LOG.error(errorBuilder.append("\n\nBundle \"").append(bundle.getSymbolicName()).append("\" could not be stopped.\n").toString());
         }
     }
 

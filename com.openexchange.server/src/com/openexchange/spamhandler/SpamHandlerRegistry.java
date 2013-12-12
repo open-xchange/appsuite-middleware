@@ -247,18 +247,14 @@ public final class SpamHandlerRegistry {
      */
     public static SpamHandler getSpamHandler(final String registrationName) {
         if (null == registrationName) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Given registration name is null. Using fallback spam handler '{}'", SpamHandler.SPAM_HANDLER_FALLBACK);
-            }
+            LOG.warn("Given registration name is null. Using fallback spam handler '{}'", SpamHandler.SPAM_HANDLER_FALLBACK);
             return NoSpamHandler.getInstance();
         } else if (SpamHandler.SPAM_HANDLER_FALLBACK.equals(registrationName) || unknownSpamHandlers.containsKey(registrationName)) {
             return NoSpamHandler.getInstance();
         }
         final SpamHandler spamHandler = spamHandlers.get(registrationName);
         if (null == spamHandler) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("No spam handler found for registration name '{}'. Using fallback '{}'", registrationName, SpamHandler.SPAM_HANDLER_FALLBACK);
-            }
+            LOG.warn("No spam handler found for registration name '{}'. Using fallback '{}'", registrationName, SpamHandler.SPAM_HANDLER_FALLBACK);
             unknownSpamHandlers.put(registrationName, PRESENT);
             return NoSpamHandler.getInstance();
         }

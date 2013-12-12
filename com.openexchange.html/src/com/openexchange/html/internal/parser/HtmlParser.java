@@ -158,9 +158,7 @@ public final class HtmlParser {
                     } else if (prevEvent == XmlPullParser.CDSECT) {
                         cdataBuilder.append('&').append(parser.getTextCharacters(holderForStartAndLength)).append(';');
                     } else {
-                        if (LOG.isWarnEnabled()) {
-                            LOG.warn("Unexpected entity occurring inside non-text and non-CDATA area");
-                        }
+                        LOG.warn("Unexpected entity occurring inside non-text and non-CDATA area");
                     }
                 } else {
                     /*

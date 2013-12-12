@@ -49,7 +49,6 @@
 
 package com.openexchange.file.storage.osgi;
 
-import java.text.MessageFormat;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.osgi.framework.BundleContext;
@@ -188,10 +187,8 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
                     return service;
                 }
                 final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OSGIFileStorageAccountManagerLookupService.Customizer.class);
-                if (logger.isWarnEnabled()) {
-                    logger.warn(new StringBuilder(128).append("File storage account manager provider ").append(service.getClass().getSimpleName()).append(
-                        " could not be added. Provider is already present.").toString());
-                }
+                logger.warn(new StringBuilder(128).append("File storage account manager provider ").append(service.getClass().getSimpleName()).append(
+                    " could not be added. Provider is already present.").toString());
             }
             /*
              * Adding to registry failed

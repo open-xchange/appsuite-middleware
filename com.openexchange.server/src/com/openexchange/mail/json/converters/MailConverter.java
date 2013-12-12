@@ -165,9 +165,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         try {
             final Object resultObject = result.getResultObject();
             if (null == resultObject) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("Result object is null.");
-                }
+                LOG.warn("Result object is null.");
                 result.setResultObject(JSONObject.NULL, "json");
                 return;
             }

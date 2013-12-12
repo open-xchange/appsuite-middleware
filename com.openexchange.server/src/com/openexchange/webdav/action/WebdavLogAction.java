@@ -120,9 +120,7 @@ public class WebdavLogAction extends AbstractAction {
 			}
 			throw x;
 		} catch (final RuntimeException x) {
-			if (LOG.isErrorEnabled()) {
-				LOG.error("RuntimeException In WebDAV for request: {}", b,x);
-			}
+			LOG.error("RuntimeException In WebDAV for request: {}", b,x);
 			throw x;
 		}
 	}

@@ -1107,9 +1107,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                     final ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class);
                     final File whitelist = null == service ? null : service.getFileByName("whitelist.properties");
                     if (null == whitelist) {
-                        if (LOG.isWarnEnabled()) {
-                            LOG.warn("Using default white list");
-                        }
+                        LOG.warn("Using default white list");
                         mapStr = new String(DEFAULT_WHITELIST);
                     } else {
                         BufferedReader reader = null;
@@ -1127,9 +1125,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                             }
                             mapStr = sb.toString();
                         } catch (final Exception e) {
-                            if (LOG.isWarnEnabled()) {
-                                LOG.warn("Using default white list", e);
-                            }
+                            LOG.warn("Using default white list", e);
                             mapStr = new String(DEFAULT_WHITELIST);
                         } finally {
                             Streams.close(reader);

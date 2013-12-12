@@ -57,7 +57,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
@@ -149,10 +148,8 @@ public class OSGIFileStorageServiceRegistry implements FileStorageServiceRegistr
                     return service;
                 }
                 final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OSGIFileStorageServiceRegistry.Customizer.class);
-                if (logger.isWarnEnabled()) {
-                    logger.warn(new StringBuilder(128).append("File storage service ").append(addMe.getDisplayName()).append(
-                        " could not be added to registry. Another service is already registered with identifier: ").append(addMe.getId()).toString());
-                }
+                logger.warn(new StringBuilder(128).append("File storage service ").append(addMe.getDisplayName()).append(
+                    " could not be added to registry. Another service is already registered with identifier: ").append(addMe.getId()).toString());
             }
             /*
              * Adding to registry failed

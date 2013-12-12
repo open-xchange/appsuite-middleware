@@ -51,7 +51,6 @@ package com.openexchange.sessiond.osgi;
 
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 import java.util.List;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -103,18 +102,13 @@ public final class SessiondActivator extends HousekeepingActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        // Don't stop the sessiond
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: {}", clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
         getServiceRegistry().removeService(clazz);
     }
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: {}", clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         getServiceRegistry().addService(clazz, getService(clazz));
     }
 

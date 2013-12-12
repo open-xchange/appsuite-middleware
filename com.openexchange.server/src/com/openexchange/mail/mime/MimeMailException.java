@@ -72,6 +72,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
+import com.openexchange.tools.exceptions.ExceptionUtils;
 import com.sun.mail.smtp.SMTPSendFailedException;
 
 /**
@@ -510,9 +511,8 @@ public class MimeMailException extends OXException {
              */
             return MimeMailExceptionCode.MESSAGING_ERROR.create(nextException, appendInfo(nextException.getMessage(), folder));
         } catch (final Throwable t) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("", t);
-            }
+            ExceptionUtils.handleThrowable(t);
+            LOG.warn("", t);
             /*
              * This routine should not fail since it's purpose is wrap a corresponding mail error around specified messaging error
              */

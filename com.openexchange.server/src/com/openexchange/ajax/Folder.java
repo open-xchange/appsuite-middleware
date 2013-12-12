@@ -174,12 +174,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
     }
 
     private static final OXException getWrappingOXException(final Throwable cause) {
-        if (LOG.isWarnEnabled()) {
-            final StringBuilder warnBuilder = new StringBuilder(140);
-            warnBuilder.append("An unexpected exception occurred, which is going to be wrapped for proper display.\n");
-            warnBuilder.append("For safety reason its original content is display here.");
-            LOG.warn(warnBuilder.toString(), cause);
-        }
+        LOG.warn("An unexpected exception occurred, which is going to be wrapped for proper display.\nFor safety reason its original content is display here.", cause);
         final String message = cause.getMessage();
         return OXFolderExceptionCode.UNKNOWN_EXCEPTION.create(cause, null == message ? "[Not available]" : message);
     }
@@ -2246,12 +2241,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         try {
                             delFolderObj = access.getFolderObject(delFolderId);
                         } catch (final OXException exc) {
-                            /*
-                             * Folder could not be found and therefore need not to be deleted
-                             */
-                            if (LOG.isWarnEnabled()) {
-                                LOG.warn("", exc);
-                            }
+                            LOG.warn("", exc);
                             continue NextId;
                         }
                         if (delFolderObj.getLastModified().getTime() > timestamp.getTime()) {

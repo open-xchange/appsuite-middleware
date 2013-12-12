@@ -213,14 +213,12 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
         }
         if (!failed.isEmpty()) {
             final OXException exception = TransactionExceptionCodes.NO_COMPLETE_ROLLBACK.create();
-            if (LOG.isErrorEnabled()) {
-                final StringBuilder explanations = new StringBuilder();
-                for (final Undoable undo : failed) {
-                    explanations.append(undo.error());
-                    explanations.append('\n');
-                }
-                LOG.error(explanations.toString(), exception);
+            final StringBuilder explanations = new StringBuilder();
+            for (final Undoable undo : failed) {
+                explanations.append(undo.error());
+                explanations.append('\n');
             }
+            LOG.error(explanations.toString(), exception);
             throw exception;
         }
     }

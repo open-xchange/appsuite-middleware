@@ -377,9 +377,7 @@ public class GrizzlyConfig implements Initialization {
             List<String> proxyCandidates = IPTools.splitAndTrim(ipList, IPTools.COMMA_SEPARATOR);
             List<String> erroneousIPs = IPTools.filterErroneousIPs(proxyCandidates);
             if(!erroneousIPs.isEmpty()) {
-                if(LOG.isWarnEnabled()) {
-                    LOG.warn("Falling back to empty list as com.openexchange.server.knownProxies contains malformed IPs: {}", erroneousIPs);
-                }
+                LOG.warn("Falling back to empty list as com.openexchange.server.knownProxies contains malformed IPs: {}", erroneousIPs);
             } else {
                 this.knownProxies = proxyCandidates;
             }

@@ -924,15 +924,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
                             throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", createMe.getFullName()));
                         }
-                        if (LOG.isWarnEnabled()) {
-                            LOG.warn("IMAP folder creation failed due to unsupported type. Going to retry with fallback type HOLDS-MESSAGES.", e);
-                        }
+                        LOG.warn("IMAP folder creation failed due to unsupported type. Going to retry with fallback type HOLDS-MESSAGES.", e);
                         if (!(created = createMe.create(Folder.HOLDS_MESSAGES))) {
                             throw IMAPException.create(IMAPException.Code.FOLDER_CREATION_FAILED, imapConfig, session, e, createMe.getFullName(), isParentDefault ? DEFAULT_FOLDER_ID : parent.getFullName());
                         }
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info("IMAP folder created with fallback type HOLDS_MESSAGES");
-                        }
+                        LOG.info("IMAP folder created with fallback type HOLDS_MESSAGES");
                     }
                     /*
                      * Subscribe
@@ -1183,9 +1179,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 try {
                     subscriptionStatus = getSubscriptionStatus(renameMe, oldFullName, newFullName);
                 } catch (final MessagingException e) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn("Subscription status of folder \"{}\" and its subfolders could not be stored prior to rename operation", renameMe.getFullName());
-                    }
+                    LOG.warn("Subscription status of folder \"{}\" and its subfolders could not be stored prior to rename operation", renameMe.getFullName());
                     subscriptionStatus = null;
                 }
                 removeSessionData(renameMe);
@@ -1499,9 +1493,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     try {
                         subscriptionStatus = getSubscriptionStatus(moveMe, oldFullName, newFullName);
                     } catch (final MessagingException e) {
-                        if (LOG.isWarnEnabled()) {
-                            LOG.warn("Subscription status of folder \"{}\" and its subfolders could not be stored prior to rename operation", moveMe.getFullName());
-                        }
+                        LOG.warn("Subscription status of folder \"{}\" and its subfolders could not be stored prior to rename operation", moveMe.getFullName());
                         subscriptionStatus = null;
                     }
                     removeSessionData(moveMe);
@@ -2310,12 +2302,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             folderQuota = IMAPCommandsCollection.getQuotaRoot(f);
                             mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                         } catch (final MessagingException inner) {
-                            /*
-                             * Custom parse routine failed, too
-                             */
-                            if (LOG.isWarnEnabled()) {
-                                LOG.warn("", inner);
-                            }
+                            LOG.warn("", inner);
                             return com.openexchange.mail.Quota.getUnlimitedQuotas(types);
                         }
                     } else {
@@ -2518,9 +2505,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
         Boolean b = m.get(f.getFullName());
         if (b == null) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("No stored subscription status found for {}", f.getFullName());
-            }
+            LOG.warn("No stored subscription status found for {}", f.getFullName());
             b = Boolean.TRUE;
         }
         f.setSubscribed(b.booleanValue());
@@ -2674,9 +2659,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
          * Delete old folder
          */
         IMAPCommandsCollection.forceSetSubscribed(imapStore, moveFullname, false);
-        if (!toMove.delete(true) && LOG.isWarnEnabled()) {
-            final OXException e = IMAPException.create(IMAPException.Code.DELETE_FAILED, moveFullname);
-            LOG.warn("", e);
+        if (!toMove.delete(true)) {
+            LOG.warn("", IMAPException.create(IMAPException.Code.DELETE_FAILED, moveFullname));
         }
         /*
          * Notify message storage

@@ -122,9 +122,7 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: {}", clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
         getServiceRegistry().removeService(clazz);
     }
 

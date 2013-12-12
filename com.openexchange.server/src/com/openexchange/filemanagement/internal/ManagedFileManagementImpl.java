@@ -241,7 +241,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                     tmpFile.deleteOnExit();
                 }
             } catch (final IOException e) {
-                if (tmpFile != null && !tmpFile.delete() && LOG.isWarnEnabled()) {
+                if (tmpFile != null && !tmpFile.delete()) {
                     LOG.warn("Temporary file could not be deleted: {}", tmpFile.getPath(), e);
                 }
                 throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
@@ -320,7 +320,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                     tmpFile.deleteOnExit();
                 }
             } catch (final IOException e) {
-                if (tmpFile != null && !tmpFile.delete() && LOG.isWarnEnabled()) {
+                if (tmpFile != null && !tmpFile.delete()) {
                     LOG.warn("Temporary file could not be deleted: {}", tmpFile.getPath(), e);
                 }
                 throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());

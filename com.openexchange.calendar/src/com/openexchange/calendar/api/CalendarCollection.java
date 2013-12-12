@@ -276,58 +276,50 @@ public final class CalendarCollection implements CalendarCollectionService {
 
     private void checkAndCorrectErrors(final CalendarDataObject cdao) {
         if (cdao.getInterval() > MAX_OCCURRENCESE) {
-            final OXException exc =
-                    OXCalendarExceptionCodes.RECURRING_VALUE_CONSTRAINT.create(Integer.valueOf(cdao.getInterval()), Integer
-                            .valueOf(MAX_OCCURRENCESE));
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("{} Auto-corrected to {}", exc.getMessage(), MAX_OCCURRENCESE, exc);
-            }
+            final OXException exc = OXCalendarExceptionCodes.RECURRING_VALUE_CONSTRAINT.create(Integer.valueOf(cdao.getInterval()), Integer.valueOf(MAX_OCCURRENCESE));
+            LOG.warn("{} Auto-corrected to {}", exc.getMessage(), MAX_OCCURRENCESE, exc);
             cdao.setInterval(MAX_OCCURRENCESE);
         }
         if (cdao.getOccurrence() > MAX_OCCURRENCESE) {
-            final OXException exc =
-                    OXCalendarExceptionCodes.RECURRING_VALUE_CONSTRAINT.create(Integer.valueOf(cdao.getOccurrence()), Integer
-                            .valueOf(MAX_OCCURRENCESE));
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("{} Auto-corrected to {}", exc.getMessage(), MAX_OCCURRENCESE, exc);
-            }
+            final OXException exc = OXCalendarExceptionCodes.RECURRING_VALUE_CONSTRAINT.create(Integer.valueOf(cdao.getOccurrence()), Integer.valueOf(MAX_OCCURRENCESE));
+            LOG.warn("{} Auto-corrected to {}", exc.getMessage(), MAX_OCCURRENCESE, exc);
             cdao.setOccurrence(MAX_OCCURRENCESE);
         }
         if (cdao.getRecurrenceType() == CalendarObject.DAILY) {
             if (cdao.getInterval() < 1) {
-                    LOG.debug("Auto correction (daily), set interval to 1, the given interval was: {}", cdao.getInterval());
+                LOG.debug("Auto correction (daily), set interval to 1, the given interval was: {}", cdao.getInterval());
                 cdao.setInterval(1);
             }
         } else if (cdao.getRecurrenceType() == CalendarObject.WEEKLY) {
             if (cdao.getInterval() < 1) {
-                    LOG.debug("Auto correction (weekly), set interval to 1, the given interval was: {}", cdao.getInterval());
+                LOG.debug("Auto correction (weekly), set interval to 1, the given interval was: {}", cdao.getInterval());
                 cdao.setInterval(1);
             }
             if (cdao.getDays() < 1) {
-                    LOG.debug("Auto correction (weekly), set day to CalendarDataObject.MONDAY, the given day was: {}", cdao.getDays());
+                LOG.debug("Auto correction (weekly), set day to CalendarDataObject.MONDAY, the given day was: {}", cdao.getDays());
                 cdao.setDays(CalendarObject.MONDAY);
             }
         } else if (cdao.getRecurrenceType() == CalendarObject.MONTHLY) {
             if (cdao.getInterval() < 1) {
-                    LOG.debug("Auto correction (montly), set interval to 1, the given interval was: {}", cdao.getInterval());
+                LOG.debug("Auto correction (montly), set interval to 1, the given interval was: {}", cdao.getInterval());
                 cdao.setInterval(1);
             }
             if (cdao.containsDays() && cdao.getDays() != 0 && (getDay(cdao.getDays()) == -1)) {
-                //if (getDay(cdao.getDays()) == -1) {
-                    LOG.debug("Auto correction (monthly), set day to CalendarDataObject.MONDAY, the given day was: {}", cdao.getDays());
+                // if (getDay(cdao.getDays()) == -1) {
+                LOG.debug("Auto correction (monthly), set day to CalendarDataObject.MONDAY, the given day was: {}", cdao.getDays());
                 cdao.setDays(CalendarObject.MONDAY);
-                //}
+                // }
             }
         } else if (cdao.getRecurrenceType() == CalendarObject.YEARLY) {
             if (cdao.getMonth() < 0 || cdao.getMonth() > 12) {
-                    LOG.debug("Auto correction (monthy), set month to 1, the given interval was: {}", cdao.getMonth());
+                LOG.debug("Auto correction (monthy), set month to 1, the given interval was: {}", cdao.getMonth());
                 cdao.setMonth(Calendar.JANUARY);
             }
             if (cdao.containsDays() && (getDay(cdao.getDays()) == -1)) {
-                //if (getDay(cdao.getDays()) == -1) {
-                    LOG.debug("Auto correction (yearly), set day to CalendarDataObject.MONDAY, the given day was: {}", cdao.getDays());
+                // if (getDay(cdao.getDays()) == -1) {
+                LOG.debug("Auto correction (yearly), set day to CalendarDataObject.MONDAY, the given day was: {}", cdao.getDays());
                 cdao.setDays(CalendarObject.MONDAY);
-                //}
+                // }
             }
         }
     }

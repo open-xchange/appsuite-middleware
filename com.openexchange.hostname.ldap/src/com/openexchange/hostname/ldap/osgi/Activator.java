@@ -78,9 +78,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: {}", clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
 
         HostnameLDAPServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
     }
