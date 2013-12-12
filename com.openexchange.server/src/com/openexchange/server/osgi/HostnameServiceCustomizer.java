@@ -93,9 +93,7 @@ public final class HostnameServiceCustomizer implements ServiceTrackerCustomizer
 
 	@Override
     public void modifiedService(final ServiceReference<HostnameService> reference, final HostnameService service) {
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("HostnameURLCustomizer.modifiedService()");
-		}
+		LOG.trace("HostnameURLCustomizer.modifiedService()");
 	}
 
 	@Override

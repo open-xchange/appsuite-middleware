@@ -151,9 +151,7 @@ public abstract class ContextStorage {
      * @throws OXException if invalidating the context fails
      */
     public void invalidateContext(final int contextId) throws OXException {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("invalidateContext not implemented in {}", this.getClass().getCanonicalName());
-        }
+        LOG.trace("invalidateContext not implemented in {}", this.getClass().getCanonicalName());
     }
 
     /**
@@ -163,9 +161,7 @@ public abstract class ContextStorage {
      * @throws OXException if invalidating the login information fails.
      */
     public void invalidateLoginInfo(final String loginContextInfo) throws OXException {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("invalidateLoginInfo not implemented in {}", this.getClass().getCanonicalName());
-        }
+        LOG.trace("invalidateLoginInfo not implemented in {}", this.getClass().getCanonicalName());
     }
 
     /**

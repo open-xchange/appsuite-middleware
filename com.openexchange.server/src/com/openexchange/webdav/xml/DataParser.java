@@ -120,9 +120,7 @@ public class DataParser {
                 }
             }
         } else {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("unknown xml tag: {}", parser.getName());
-            }
+            LOG.trace("unknown xml tag: {}", parser.getName());
             getValue(parser);
         }
     }

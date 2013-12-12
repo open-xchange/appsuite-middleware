@@ -240,9 +240,7 @@ public class OXContainerConverter {
     }
 
     public void close() {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("OXContainerConverter.close()");
-        }
+        LOG.trace("OXContainerConverter.close()");
     }
 
     public boolean isSendFloating() {
@@ -591,10 +589,7 @@ public class OXContainerConverter {
                             loadImageFromURL(contactContainer, url);
                             value = null;
                         } catch (final MalformedURLException e) {
-                            // Not a valid URL
-                            if (LOG.isTraceEnabled()) {
-                                LOG.trace("", e);
-                            }
+                            LOG.trace("", e);
                         }
                     }
                 }

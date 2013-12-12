@@ -331,16 +331,12 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
 
     @Override
     public void loadContent() throws OXException {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("DataSourceMailPart.loadContent()");
-        }
+        LOG.trace("DataSourceMailPart.loadContent()");
     }
 
     @Override
     public void prepareForCaching() {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("DataSourceMailPart.prepareForCaching()");
-        }
+        LOG.trace("DataSourceMailPart.prepareForCaching()");
     }
 
     /**

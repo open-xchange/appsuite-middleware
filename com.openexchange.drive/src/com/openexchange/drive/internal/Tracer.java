@@ -83,9 +83,7 @@ public class Tracer {
     public void trace(Object message) {
         if (isTraceEnabled()) {
             String msg = String.valueOf(message);
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(msg);
-            }
+            LOG.trace(msg);
             if (null != traceLog) {
                 int remainingCapacity = MAX_SIZE - traceLog.length();
                 if (0 < remainingCapacity) {

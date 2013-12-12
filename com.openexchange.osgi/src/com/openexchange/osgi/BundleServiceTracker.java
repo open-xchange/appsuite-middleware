@@ -120,9 +120,7 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer<S, S> {
      * @param service The service
      */
     protected void addingServiceInternal(final S service) {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("BundleServiceTracker.addingServiceInternal(): {}", service);
-        }
+        LOG.trace("BundleServiceTracker.addingServiceInternal(): {}", service);
     }
 
     @Override
@@ -157,9 +155,7 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer<S, S> {
      * @param service The service
      */
     protected void removedServiceInternal(final S service) {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("BundleServiceTracker.removedServiceInternal()");
-        }
+        LOG.trace("BundleServiceTracker.removedServiceInternal()");
     }
 
 }

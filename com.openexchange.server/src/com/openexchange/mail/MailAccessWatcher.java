@@ -195,7 +195,6 @@ public final class MailAccessWatcher {
             final String lineSeparator = System.getProperty("line.separator");
             this.lineSeparator = lineSeparator;
             // Specify filter expression
-            final boolean traceEnabled = logger.isTraceEnabled();
             filter = new MailAccessDelayQueue.ElementFilter() {
 
                 @Override
@@ -205,9 +204,7 @@ public final class MailAccessWatcher {
                         return true;
                     }
                     if (mailAccess.isWaiting()) {
-                        if (traceEnabled) {
-                            logger.trace(new com.openexchange.java.StringAllocator("Idling/waiting mail connection:").append(lineSeparator).append(mailAccess.getTrace()).toString());
-                        }
+                        logger.trace("Idling/waiting mail connection:{}{}", lineSeparator, mailAccess.getTrace());
                         return false;
                     }
                     // Connected and not idle...

@@ -734,7 +734,9 @@ public class ImprovedHazelcastJobStore implements JobStore {
         long startTime = System.currentTimeMillis();
         long lastTime = startTime;
         StringBuilder logBuilder = null;
-        if (LOG.isTraceEnabled()) {
+
+        final boolean traceEnabled = LOG.isTraceEnabled();
+        if (traceEnabled) {
             logBuilder = new StringBuilder();
             logBuilder.append("Acquiring triggers at ");
             logBuilder.append(startTime);
@@ -780,7 +782,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
             Set<JobKey> excluded = new HashSet<JobKey>();
             for (TriggerStateWrapper stateWrapper : triggers) {
                 if (stateWrapper.getTrigger().getNextFireTime() == null || stateWrapper.getState() == TriggerStateWrapper.STATE_COMPLETE) {
-                    if (LOG.isTraceEnabled()) {
+                    if (traceEnabled) {
                         LOG.trace("Removing trigger {}", stateWrapper.getTrigger().getKey().getName());
                     }
 
@@ -869,7 +871,9 @@ public class ImprovedHazelcastJobStore implements JobStore {
     @Override
     public void releaseAcquiredTrigger(OperableTrigger trigger) throws JobPersistenceException {
         lock.lock();
-        if (LOG.isTraceEnabled()) {
+
+        final boolean traceEnabled = LOG.isTraceEnabled();
+        if (traceEnabled) {
             LOG.trace("Got lock. {}", System.nanoTime());
         }
 
@@ -886,7 +890,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
         } finally {
             lock.unlock();
 
-            if (LOG.isTraceEnabled()) {
+            if (traceEnabled) {
                 StringBuilder sb = new StringBuilder("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
                 sb.append("\n    Trigger: ").append(trigger.getKey().getName());
@@ -900,7 +904,9 @@ public class ImprovedHazelcastJobStore implements JobStore {
     public List<TriggerFiredResult> triggersFired(List<OperableTrigger> firedTriggers) throws JobPersistenceException {
         List<TriggerFiredResult> results = new ArrayList<TriggerFiredResult>();
         lock.lock();
-        if (LOG.isTraceEnabled()) {
+
+        final boolean traceEnabled = LOG.isTraceEnabled();
+        if (traceEnabled) {
             LOG.trace("Got lock. {}", System.nanoTime());
         }
 
@@ -973,7 +979,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
             return results;
         } finally {
             lock.unlock();
-            if (LOG.isTraceEnabled()) {
+            if (traceEnabled) {
                 StringBuilder sb = new StringBuilder("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
                 for (OperableTrigger trigger : firedTriggers) {
@@ -988,7 +994,9 @@ public class ImprovedHazelcastJobStore implements JobStore {
     @Override
     public void triggeredJobComplete(OperableTrigger trigger, JobDetail jobDetail, CompletedExecutionInstruction triggerInstCode) throws JobPersistenceException {
         lock.lock();
-        if (LOG.isTraceEnabled()) {
+
+        final boolean traceEnabled = LOG.isTraceEnabled();
+        if (traceEnabled) {
             LOG.trace("Got lock. {}", System.nanoTime());
         }
 
@@ -1087,7 +1095,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
             }
         } finally {
             lock.unlock();
-            if (LOG.isTraceEnabled()) {
+            if (traceEnabled) {
                 StringBuilder sb = new StringBuilder("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
                 sb.append("\n    Trigger: ").append(trigger.getKey().getName());
@@ -1163,9 +1171,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
             triggersByKey.set(stateWrapper.getTrigger().getKey(), stateWrapper, 0, TimeUnit.SECONDS);
         }
 
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Applied misfire on trigger: {}", stateWrapper.getTrigger().getKey().getName());
-        }
+        LOG.trace("Applied misfire on trigger: {}", stateWrapper.getTrigger().getKey().getName());
         return true;
     }
 

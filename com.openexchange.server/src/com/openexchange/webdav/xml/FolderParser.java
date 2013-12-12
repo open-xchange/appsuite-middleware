@@ -94,9 +94,7 @@ public class FolderParser extends FolderChildParser {
 
 	protected void parseElementFolder(final FolderObject folderobject, final XmlPullParser parser) throws Exception {
 		if (!hasCorrectNamespace(parser)) {
-			if (LOG.isTraceEnabled()) {
-				LOG.trace("unknown namespace in tag: {}", parser.getName());
-			}
+			LOG.trace("unknown namespace in tag: {}", parser.getName());
 			parser.nextText();
 			return ;
 		}

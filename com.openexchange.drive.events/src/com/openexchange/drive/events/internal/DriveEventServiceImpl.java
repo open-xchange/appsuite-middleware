@@ -164,13 +164,10 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
     }
 
     @Override
-    public void handleEvent(Event event) {
-        /*
-         * check event
-         */
-        if (LOG.isTraceEnabled()) {
-            LOG.trace(FileStorageEventHelper.createDebugMessage("event", event));
-        }
+    public void handleEvent(final Event event) {
+
+        LOG.trace("{}", new Object() { @Override public String toString() { return FileStorageEventHelper.createDebugMessage("event", event);}});
+
         if (false == check(event)) {
             LOG.debug("Unable to handle incomplete event: {}", event);
             return;

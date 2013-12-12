@@ -91,9 +91,7 @@ public class IndexingServiceImpl implements IndexingService {
             startDate = new Date();
         }
 
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Scheduling job {} at {}.\n    Initial interval: {}\n    Progression rate: {}\n    Timeout: {}\n    Priority: {}", info, startDate, initialInterval, progressionRate, timeout, priority);
-        }
+        LOG.trace("Scheduling job {} at {}.\n    Initial interval: {}\n    Progression rate: {}\n    Timeout: {}\n    Priority: {}", info, startDate, initialInterval, progressionRate, timeout, priority);
 
         if (timeout <= 0) {
             throw new IllegalArgumentException("Parameter 'timeout' must be > 0.");
@@ -180,10 +178,7 @@ public class IndexingServiceImpl implements IndexingService {
 
     @Override
     public void scheduleJob(boolean async, final JobInfo info, final Date startDate, final long repeatInterval, final int priority) throws OXException {
-        if (LOG.isTraceEnabled()) {
-            String at = startDate == null ? "now" : startDate.toString();
-            LOG.trace("Scheduling job {} at {} with interval {} and priority {}.", info, at, repeatInterval, priority);
-        }
+        LOG.trace("Scheduling job {} at {} with interval {} and priority {}.", info, startDate == null ? "now" : startDate.toString(), repeatInterval, priority);
 
         Task<Object> task = new TaskAdapter(new ScheduleJobCallable(info, startDate, repeatInterval, priority));
         try {
@@ -221,9 +216,7 @@ public class IndexingServiceImpl implements IndexingService {
 
     @Override
     public void unscheduleAllForUser(boolean async, int contextId, int userId) throws OXException {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Unscheduling all jobs for user {} in context {}.", userId, contextId);
-        }
+        LOG.trace("Unscheduling all jobs for user {} in context {}.", userId, contextId);
 
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         ExecutorService executorService = hazelcast.getExecutorService();
@@ -235,9 +228,7 @@ public class IndexingServiceImpl implements IndexingService {
 
     @Override
     public void unscheduleAllForContext(boolean async, int contextId) throws OXException {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Unscheduling all jobs for context {}.", contextId);
-        }
+        LOG.trace("Unscheduling all jobs for context {}.", contextId);
 
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         ExecutorService executorService = hazelcast.getExecutorService();

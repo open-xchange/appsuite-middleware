@@ -94,9 +94,7 @@ public class ContactParser extends CommonParser {
 
     protected void parseElementContact(final Contact contactobject, final XmlPullParser parser) throws XmlPullParserException, IOException, OXException {
         if (!hasCorrectNamespace(parser)) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("unknown namespace in tag: {}", parser.getName());
-            }
+            LOG.trace("unknown namespace in tag: {}", parser.getName());
             parser.nextText();
             return;
         }

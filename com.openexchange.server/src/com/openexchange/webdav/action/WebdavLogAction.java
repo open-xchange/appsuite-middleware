@@ -136,9 +136,7 @@ public class WebdavLogAction extends AbstractAction {
 					b.append(line);
 					b.append('\n');
 				}
-				if (LOG.isTraceEnabled()) {
-					LOG.trace(b.toString());
-				}
+				LOG.trace(b.toString());
 			} catch (final IOException x) {
 				LOG.debug("",x);
 			} finally {

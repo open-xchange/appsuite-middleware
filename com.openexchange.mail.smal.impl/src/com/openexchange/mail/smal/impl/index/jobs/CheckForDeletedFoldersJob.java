@@ -129,9 +129,7 @@ public class CheckForDeletedFoldersJob extends AbstractMailJob {
                     ChunkPerformer.perform(idsToDelete, 0, CHUNK_SIZE, new ListPerformable<MailUUID>() {
                         @Override
                         public void perform(List<MailUUID> subList) throws OXException {
-                            if (LOG.isTraceEnabled()) {
-                                LOG.trace("Deleting a chunk of mails in folder {}: {}", info.folder, info);
-                            }
+                            LOG.trace("Deleting a chunk of mails in folder {}: {}", info.folder, info);
 
                             Set<String> uuidStrings = new HashSet<String>();
                             Map<String, List<String>> deletedFullNames = new HashMap<String, List<String>>();

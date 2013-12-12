@@ -475,9 +475,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             try {
                 return Integer.parseInt(prop.trim());
             } catch (final NumberFormatException e) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("", e);
-                }
+                LOG.trace("", e);
             }
         }
         return defaultValue;

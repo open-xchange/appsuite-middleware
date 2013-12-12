@@ -830,12 +830,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                             }
                         } catch (final OXException e) {
                             if (e.getCode() == OXFolderExceptionCode.NO_MODULE_ACCESS.getNumber() && CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
-                                /*
-                                 * No non-tree-visible public calendar folders due to user configuration
-                                 */
-                                if (LOG.isTraceEnabled()) {
-                                    LOG.trace("", e);
-                                }
+                                LOG.trace("", e);
                             } else {
                                 throw e;
                             }
@@ -861,12 +856,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                             }
                         } catch (final OXException e) {
                             if (OXFolderExceptionCode.NO_MODULE_ACCESS.getNumber() == e.getCode() && CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
-                                /*
-                                 * No non-tree-visible public contact folders due to user configuration
-                                 */
-                                if (LOG.isTraceEnabled()) {
-                                    LOG.trace("", e);
-                                }
+                                LOG.trace("", e);
                             } else {
                                 throw e;
                             }
@@ -892,12 +882,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                             }
                         } catch (final OXException e) {
                             if (e.getCode() == OXFolderExceptionCode.NO_MODULE_ACCESS.getNumber() && CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
-                                /*
-                                 * No non-tree-visible public task folders due to user configuration
-                                 */
-                                if (LOG.isTraceEnabled()) {
-                                    LOG.trace("", e);
-                                }
+                                LOG.trace("", e);
                             } else {
                                 throw e;
                             }

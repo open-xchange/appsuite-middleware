@@ -190,10 +190,11 @@ public class JsonClient {
     }
 
     private JSONObject getResponse(String requestURL, JSONObject request) throws OXException {
+        final boolean traceEnabled = LOG.isTraceEnabled();
         long start = 0;
-        if (LOG.isTraceEnabled()) {
-            start = new Date().getTime();
-            LOG.trace(String.format("==> POST %s%n  > %s", requestURL, request));
+        if (traceEnabled) {
+            start = System.currentTimeMillis();
+            LOG.trace("==> POST {}{}  > {}", requestURL, System.getProperty("line.separator"), request);
         }
         PostMethod method = createPostMethod(requestURL, request);
         executeMethod(method);
@@ -201,8 +202,8 @@ public class JsonClient {
             //TODO: upgrade our json.jar
             //JSONObject response = new JSONObject(new JSONTokener(new InputStreamReader(method.getResponseBodyAsStream())));
             String body = method.getResponseBodyAsString();
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(String.format("<== %s (%dms elapsed)%n<  %s", method.getStatusLine(), new Date().getTime() - start, body));
+            if (traceEnabled) {
+                LOG.trace("<== {} ({}ms elapsed){}<  {}", method.getStatusLine(), System.currentTimeMillis() - start, System.getProperty("line.separator"), body);
             }
             return null != body ? new JSONObject(body) : null;
         } catch (IOException e) {

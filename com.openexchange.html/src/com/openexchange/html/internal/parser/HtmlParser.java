@@ -185,22 +185,11 @@ public final class HtmlParser {
                         }
                         ignoreWhitespace = true;
                     } else if (event == XmlPullParser.IGNORABLE_WHITESPACE) {
-                        // Ignore
-                        if (LOG.isTraceEnabled()) {
-                            LOG.trace("IGNORABLE_WHITESPACE: {}", parser.getText());
-                        }
+                        LOG.trace("IGNORABLE_WHITESPACE: {}", parser.getText());
                     } else if (event == XmlPullParser.PROCESSING_INSTRUCTION) {
-                        // Ignore
-                        if (LOG.isTraceEnabled()) {
-                            LOG.trace("PROCESSING_INSTRUCTION: {}", parser.getText());
-                        }
+                        LOG.trace("PROCESSING_INSTRUCTION: {}", parser.getText());
                     } else if (event == XmlPullParser.START_DOCUMENT) {
-                        /*
-                         * Cannot occur since initial nextToken() has already been invoked
-                         */
-                        if (LOG.isTraceEnabled()) {
-                            LOG.trace("START_DOCUMENT: {}", parser.getText());
-                        }
+                        LOG.trace("START_DOCUMENT: {}", parser.getText());
                     } else if (event == XmlPullParser.START_TAG) {
                         final Map<String, String> attributes = new HashMap<String, String>();
                         final int count = parser.getAttributeCount();

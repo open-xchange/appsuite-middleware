@@ -311,23 +311,17 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 
     @Override
     public void postRegister(final Boolean registrationDone) {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("postRegister() with {}", registrationDone);
-        }
+        LOG.trace("postRegister() with {}", registrationDone);
     }
 
     @Override
     public void preDeregister() throws Exception {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("preDeregister()");
-        }
+        LOG.trace("preDeregister()");
     }
 
     @Override
     public void postDeregister() {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("postDeregister()");
-        }
+        LOG.trace("postDeregister()");
     }
 
     public Integer getNbObjects() {

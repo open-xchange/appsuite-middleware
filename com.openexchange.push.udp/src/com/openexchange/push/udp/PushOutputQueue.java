@@ -272,9 +272,7 @@ public class PushOutputQueue implements Runnable {
                     if (System.currentTimeMillis() <= (remoteHostObject.getTimer().getTime() + remoteHostTimeOut)) {
                         channels.makeAndSendPackage(b, remoteHostObject.getHost(), remoteHostObject.getPort(), INTERNAL);
                     } else {
-                        if (LOG.isTraceEnabled()) {
-                            LOG.trace("remote host object is timed out");
-                        }
+                        LOG.trace("remote host object is timed out");
                         iter.remove();
                     }
                 } catch (final Exception exc) {
@@ -335,9 +333,7 @@ public class PushOutputQueue implements Runnable {
                     if (System.currentTimeMillis() <= (remoteHostObject.getTimer().getTime() + remoteHostTimeOut)) {
                         channels.makeAndSendPackage(b, remoteHostObject.getHost(), remoteHostObject.getPort(), INTERNAL);
                     } else {
-                        if (LOG.isTraceEnabled()) {
-                            LOG.trace("remote host object is timed out");
-                        }
+                        LOG.trace("remote host object is timed out");
                         iter.remove();
                     }
                 } catch (final Exception exc) {

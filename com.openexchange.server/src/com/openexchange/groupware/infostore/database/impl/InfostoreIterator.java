@@ -244,9 +244,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
             for(final Object arg : args) {
                 stmt.setObject(i++,arg);
             }
-            if(LOG.isTraceEnabled()) {
-                LOG.trace(stmt.toString());
-            }
+            LOG.trace("{}", stmt);
             //System.out.println(stmt.toString());
             rs = stmt.executeQuery();
         } catch (final SQLException x) {

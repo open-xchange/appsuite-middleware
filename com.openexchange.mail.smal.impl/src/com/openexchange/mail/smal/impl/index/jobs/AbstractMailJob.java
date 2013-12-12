@@ -108,9 +108,7 @@ public abstract class AbstractMailJob implements IndexingJob {
         ChunkPerformer.perform(idsToAdd, 0, CHUNK_SIZE, new ListPerformable<String>() {
             @Override
             public void perform(List<String> subList) throws OXException {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Adding a chunk of mails of folder {}: {}", info.folder, info);
-                }
+                LOG.trace("Adding a chunk of mails of folder {}: {}", info.folder, info);
 
                 List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>();
                 List<IndexDocument<Attachment>> attachments = new ArrayList<IndexDocument<Attachment>>();
@@ -172,9 +170,7 @@ public abstract class AbstractMailJob implements IndexingJob {
         ChunkPerformer.perform(idsToDelete, 0, CHUNK_SIZE, new ListPerformable<String>() {
             @Override
             public void perform(List<String> subList) throws OXException {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Deleting a chunk of mails in folder {}: {}", info.folder, info);
-                }
+                LOG.trace("Deleting a chunk of mails in folder {}: {}", info.folder, info);
 
                 SearchTerm<?>[] idTerms = new SearchTerm<?>[subList.size()];
                 Set<String> mailUuids = new HashSet<String>(subList.size());
@@ -212,9 +208,7 @@ public abstract class AbstractMailJob implements IndexingJob {
         ChunkPerformer.perform(changedMails, 0, CHUNK_SIZE, new ListPerformable<String>() {
             @Override
             public void perform(List<String> subList) throws OXException {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Adding a chunk of mails of folder {}: {}", info.folder, info);
-                }
+                LOG.trace("Adding a chunk of mails of folder {}: {}", info.folder, info);
 
                 List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>();
                 MailMessage[]  messages = messageStorage.getMessages(

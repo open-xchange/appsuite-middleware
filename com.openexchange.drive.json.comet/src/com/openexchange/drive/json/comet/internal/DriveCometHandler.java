@@ -96,9 +96,7 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
     @Override
     public void onInitialize(CometEvent event) throws IOException {
         initializationTime = System.currentTimeMillis();
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("{}: initialized.", this);
-        }
+        LOG.trace("{}: initialized.", this);
     }
 
     @Override

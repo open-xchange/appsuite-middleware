@@ -1304,29 +1304,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     protected static void close(final Writer w) {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Called close() with writer{}", w);
-        }
-        /*-
-         *
-        if (w != null) {
-            try {
-                w.flush();
-                System.out.println("INFOSTORE: Flushed!");
-            } catch (IOException e) {
-                LOG.error(e.toString());
-            }
-            try {
-                w.close();
-                System.out.println("INFOSTORE: Closed!");
-            } catch (IOException e) {
-                LOG.error(e.toString());
-            }
-        } else {
-            return;
-        }
-         *
-         */
+        LOG.trace("Called close() with writer{}", w);
     }
 
     /**

@@ -91,9 +91,7 @@ public class CachingContextStorage extends ContextStorage {
         final Cache cache = cacheService.getCache(REGION_NAME);
         Integer contextId = (Integer) cache.get(loginInfo);
         if (null == contextId) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Cache MISS. Login info: {}", loginInfo);
-            }
+            LOG.trace("Cache MISS. Login info: {}", loginInfo);
             contextId = I(persistantImpl.getContextId(loginInfo));
             if (NOT_FOUND != contextId.intValue()) {
                 try {
@@ -102,7 +100,7 @@ public class CachingContextStorage extends ContextStorage {
                     LOG.error("", e);
                 }
             }
-        } else if (LOG.isTraceEnabled()) {
+        } else {
             LOG.trace("Cache HIT. Login info: {}", loginInfo);
         }
         return contextId.intValue();

@@ -359,9 +359,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                     lock.unlock();
                 }
             }
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Get time: {}, Created: {}", getWaitTime(startTime), created);
-            }
+            LOG.trace("Get time: {}, Created: {}", getWaitTime(startTime), created);
             return retval.getPooled();
         }
         throw new PoolingException("Pool has been stopped.");
@@ -534,9 +532,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     @Override
     public void run() {
         final long startTime = System.currentTimeMillis();
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Starting cleaner run.");
-        }
+        LOG.trace("Starting cleaner run.");
         final List<PooledData<T>> toCheck = new ArrayList<PooledData<T>>();
         final List<PooledData<T>> removed = new ArrayList<PooledData<T>>();
         final List<PooledData<T>> notReturned = new ArrayList<PooledData<T>>();

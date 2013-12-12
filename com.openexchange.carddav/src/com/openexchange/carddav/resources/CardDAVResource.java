@@ -217,9 +217,7 @@ public abstract class CardDAVResource extends AbstractResource {
 	@Override
 	public InputStream getBody() throws WebdavProtocolException {
 	    String body = this.getVCard();
-	    if (LOG.isTraceEnabled()) {
-	        LOG.trace(body);
-	    }
+	    LOG.trace(body);
         return null != body ? new ByteArrayInputStream(body.getBytes()) : null;
 	}
 

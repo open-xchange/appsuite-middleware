@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * {@link FormalFieldParser}
@@ -227,9 +228,10 @@ public class FormalFieldParser {
     }
 
     private Map<String, List<String>> createMapping(Map<String, String> rawMap) {
-        if (log.isTraceEnabled()) {
-            for (String s : rawMap.keySet()) {
-                log.debug("[createMapping]: Received {}:{}", s, rawMap.get(s));
+        final boolean traceEnabled = log.isTraceEnabled();
+        if (traceEnabled) {
+            for (Entry<String, String> entry : rawMap.entrySet()) {
+                log.debug("[createMapping]: Received {}:{}", entry.getKey(), entry.getValue());
             }
         }
         Map<String, List<String>> fieldMappings = new HashMap<String, List<String>>();
@@ -252,7 +254,7 @@ public class FormalFieldParser {
             fieldMappings.put(formalField, schemaFields);
         }
 
-        if (log.isTraceEnabled()) {
+        if (traceEnabled) {
             for (String s : fieldMappings.keySet()) {
                 StringBuffer b = new StringBuffer();
                 b.append(s + ":");

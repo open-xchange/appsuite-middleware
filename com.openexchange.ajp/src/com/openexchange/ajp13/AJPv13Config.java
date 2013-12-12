@@ -189,7 +189,7 @@ public final class AJPv13Config implements Initialization {
             }
             final File servletConfigsFile = configService.getDirectory(servletConfigs);
             final boolean nonExisting = (null == servletConfigsFile) || !servletConfigsFile.exists() || !servletConfigsFile.isDirectory();
-            if (LOG.isTraceEnabled() && nonExisting) {
+            if (nonExisting) {
                 LOG.trace("{} does not exist or is not a directory", servletConfigsFile);
             }
 

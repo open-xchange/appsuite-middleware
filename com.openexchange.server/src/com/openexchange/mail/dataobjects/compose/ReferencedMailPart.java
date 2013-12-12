@@ -403,16 +403,12 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 
     @Override
     public void loadContent() {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("ReferencedMailPart.loadContent()");
-        }
+        LOG.trace("ReferencedMailPart.loadContent()");
     }
 
     @Override
     public void prepareForCaching() {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("ReferencedMailPart.prepareForCaching()");
-        }
+        LOG.trace("ReferencedMailPart.prepareForCaching()");
     }
 
     /**

@@ -1739,10 +1739,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 getDefaultMailAccount(user, cid, con);
                 throw MailAccountExceptionCodes.NO_DUPLICATE_DEFAULT.create();
             } catch (final OXException e) {
-                // Expected exception since no default account should exist
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("", e);
-                }
+                LOG.trace("", e);
             }
             id = MailAccount.DEFAULT_ID;
         } else {

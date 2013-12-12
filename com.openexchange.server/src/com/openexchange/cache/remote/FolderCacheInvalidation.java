@@ -90,9 +90,7 @@ public class FolderCacheInvalidation implements GenericCacheInvalidationInterfac
 
 	@Override
     public void invalidateContext(final int contextId) throws RemoteException {
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("Method invalidateContext() not implemented");
-		}
+		LOG.trace("Method invalidateContext() not implemented");
 	}
 
 }

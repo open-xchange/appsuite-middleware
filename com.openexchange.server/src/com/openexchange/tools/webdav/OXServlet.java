@@ -268,9 +268,7 @@ public abstract class OXServlet extends WebDavServlet {
             return;
         }
         try {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Entering HTTP sub method. Session: {}", getSession(req));
-            }
+            LOG.trace("Entering HTTP sub method. Session: {}", getSession(req));
             super.service(req, resp);
         } catch (final ServletException e) {
             throw e;

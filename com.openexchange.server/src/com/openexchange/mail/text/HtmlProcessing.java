@@ -724,9 +724,7 @@ public final class HtmlProcessing {
                 try {
                     offset = (offset < line.length()) && Strings.isWhitespace(line.charAt(offset)) ? offset + 1 : offset;
                 } catch (final StringIndexOutOfBoundsException e) {
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("", e);
-                    }
+                    LOG.trace("", e);
                 }
                 line = line.substring(offset);
             }

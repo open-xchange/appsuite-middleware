@@ -158,9 +158,7 @@ public class Search {
         } catch (final OXException e) {
             throw e;
         }
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Search tasks, all: {}, own: {}, shared: {}", all, own, shared);
-        }
+        LOG.trace("Search tasks, all: {}, own: {}, shared: {}", all, own, shared);
     }
 
     private static SearchIterator<FolderObject> loadFolder(final Context ctx, final int[] folderIds) throws OXException {

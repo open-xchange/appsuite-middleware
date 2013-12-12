@@ -91,9 +91,7 @@ public final class DateUtils {
                     return DATEFORMAT_RFC822_RETRY.parse(s);
                 }
             } catch (final ParseException e1) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("", e1);
-                }
+                LOG.trace("", e1);
             }
             throw new IllegalArgumentException(e.getMessage());
         }

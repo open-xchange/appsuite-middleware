@@ -87,9 +87,7 @@ public final class AJAXRequestHandlerCustomizer implements ServiceTrackerCustomi
 
 	@Override
     public void modifiedService(final ServiceReference<AJAXRequestHandler> reference, final AJAXRequestHandler service) {
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("AJAXRequestHandlerCustomizer.modifiedService()");
-		}
+		LOG.trace("AJAXRequestHandlerCustomizer.modifiedService()");
 	}
 
 	@Override

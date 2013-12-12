@@ -91,9 +91,7 @@ public final class PasswordChangeCustomizer implements ServiceTrackerCustomizer<
 
 	@Override
     public void modifiedService(final ServiceReference<PasswordChangeService> reference, final PasswordChangeService service) {
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("UserPasswordChangeCustomizer.modifiedService()");
-		}
+		LOG.trace("UserPasswordChangeCustomizer.modifiedService()");
 	}
 
 	@Override

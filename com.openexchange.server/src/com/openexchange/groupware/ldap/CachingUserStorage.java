@@ -209,9 +209,7 @@ public class CachingUserStorage extends UserStorage {
                 tmp = null;
             }
             if (null == tmp) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Cache MISS. Context: {} User: {}", context.getContextId(), uid);
-                }
+                LOG.trace("Cache MISS. Context: {} User: {}", context.getContextId(), uid);
                 identifier = delegate.getUserId(uid, context);
                 try {
                     cache.put(key, Integer.valueOf(identifier), false);
@@ -219,9 +217,7 @@ public class CachingUserStorage extends UserStorage {
                     throw LdapExceptionCode.CACHE_PROBLEM.create(e, new Object[0]).setPrefix("USR");
                 }
             } else {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Cache HIT. Context: {} User: {}", context.getContextId(), uid);
-                }
+                LOG.trace("Cache HIT. Context: {} User: {}", context.getContextId(), uid);
                 identifier = tmp.intValue();
             }
             return identifier;

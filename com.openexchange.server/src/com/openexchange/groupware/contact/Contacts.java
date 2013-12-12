@@ -447,9 +447,7 @@ public final class Contacts {
             writecon = DBPool.pickupWriteable(context);
             writecon.setAutoCommit(false);
             id = IDGenerator.getId(context, Types.CONTACT, writecon);
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Got ID from Generator -> {}", id);
-            }
+            LOG.trace("Got ID from Generator -> {}", id);
             writecon.commit();
         } catch (final SQLException e) {
             rollback(writecon);
