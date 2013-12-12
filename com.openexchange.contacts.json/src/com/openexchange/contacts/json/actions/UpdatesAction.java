@@ -105,8 +105,11 @@ public class UpdatesAction extends ContactAction {
          */
         List<Contact> deletedContacts = new ArrayList<Contact>();
         if (false == "deleted".equals(request.getIgnore())) {
-            lastModified = addContacts(deletedContacts, contactService.getDeletedContacts(
+            Date lastModified2 = addContacts(deletedContacts, contactService.getDeletedContacts(
                 request.getSession(), request.getFolderID(), since, request.getFields()));
+            if (0 < deletedContacts.size() && null != lastModified2 && lastModified2.after(lastModified)) {
+                lastModified = lastModified2;
+            }
         }
         Map<String, List<Contact>> responseMap = new HashMap<String, List<Contact>>(2);
         responseMap.put("modified", modifiedContacts);
