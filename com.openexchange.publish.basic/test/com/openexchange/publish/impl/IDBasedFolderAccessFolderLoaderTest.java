@@ -53,7 +53,10 @@ import java.util.Collection;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -81,60 +84,58 @@ public class IDBasedFolderAccessFolderLoaderTest {
     /**
      * Class under test
      */
+    @InjectMocks
     private IDBasedFolderAccessFolderLoader idBasedFolderAccessFolderLoader;
 
     /**
      * Mock
      */
+    @Mock
     private IDBasedFolderAccessFactory idBasedFolderAccessFactory;
 
     /**
      * Mock
      */
+    @Mock
     private IDBasedFileAccessFactory idBasedFileAccessFactory;
 
     /**
      * Mock
      */
+    @Mock
     private Publication publication;
 
     /**
      * Mock
      */
+    @Mock
     private IDBasedFolderAccess idBasedFolderAccess;
 
     /**
      * Mock
      */
+    @Mock
     private IDBasedFileAccess idBasedFileAccess;
 
     /**
      * Mock
      */
+    @Mock
     private FileStorageFolder fileStorageFolder;
 
     /**
      * Mock that will be returned in a collection
      */
+    @Mock
     private TimedResult<File> timedResult;
 
     @Before
     public void setUp() throws Exception {
-        this.idBasedFolderAccessFactory = PowerMockito.mock(IDBasedFolderAccessFactory.class);
-        this.idBasedFileAccessFactory = PowerMockito.mock(IDBasedFileAccessFactory.class);
-        this.publication = PowerMockito.mock(Publication.class);
-        this.idBasedFolderAccess = PowerMockito.mock(IDBasedFolderAccess.class);
-        this.idBasedFileAccess = PowerMockito.mock(IDBasedFileAccess.class);
-        this.fileStorageFolder = PowerMockito.mock(FileStorageFolder.class);
-        this.timedResult = PowerMockito.mock(TimedResult.class);
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
     public void testLoad_PublicationNull_ReturnEmptyCollection() throws OXException {
-        this.idBasedFolderAccessFolderLoader = new IDBasedFolderAccessFolderLoader(
-            this.idBasedFolderAccessFactory,
-            this.idBasedFileAccessFactory);
-
         Collection<? extends Object> load = this.idBasedFolderAccessFolderLoader.load(null);
 
         Assert.assertEquals(0, load.size());
@@ -142,10 +143,6 @@ public class IDBasedFolderAccessFolderLoaderTest {
 
     @Test
     public void testLoad_NoDocumentFound_ReturnEmptyCollection() throws OXException {
-        this.idBasedFolderAccessFolderLoader = new IDBasedFolderAccessFolderLoader(
-            this.idBasedFolderAccessFactory,
-            this.idBasedFileAccessFactory);
-
         PowerMockito.when(this.idBasedFileAccessFactory.createAccess((Session) Matchers.any())).thenReturn(this.idBasedFileAccess);
         PowerMockito.when(this.idBasedFolderAccessFactory.createAccess((Session) Matchers.any())).thenReturn(this.idBasedFolderAccess);
         PowerMockito.when(this.idBasedFolderAccess.getFolder(Matchers.anyString())).thenReturn(this.fileStorageFolder);
@@ -157,10 +154,6 @@ public class IDBasedFolderAccessFolderLoaderTest {
 
     @Test
     public void testLoad_SearchIteratorEmpty_ReturnEmptyCollection() throws OXException {
-        this.idBasedFolderAccessFolderLoader = new IDBasedFolderAccessFolderLoader(
-            this.idBasedFolderAccessFactory,
-            this.idBasedFileAccessFactory);
-
         PowerMockito.when(this.idBasedFileAccessFactory.createAccess((Session) Matchers.any())).thenReturn(this.idBasedFileAccess);
         PowerMockito.when(this.idBasedFolderAccessFactory.createAccess((Session) Matchers.any())).thenReturn(this.idBasedFolderAccess);
         PowerMockito.when(this.idBasedFolderAccess.getFolder(Matchers.anyString())).thenReturn(this.fileStorageFolder);
@@ -178,10 +171,6 @@ public class IDBasedFolderAccessFolderLoaderTest {
 
     @Test
     public void testLoad_FoundOne_ReturnOneFolder() throws OXException {
-        this.idBasedFolderAccessFolderLoader = new IDBasedFolderAccessFolderLoader(
-            this.idBasedFolderAccessFactory,
-            this.idBasedFileAccessFactory);
-
         PowerMockito.when(this.idBasedFileAccessFactory.createAccess((Session) Matchers.any())).thenReturn(this.idBasedFileAccess);
         PowerMockito.when(this.idBasedFolderAccessFactory.createAccess((Session) Matchers.any())).thenReturn(this.idBasedFolderAccess);
         PowerMockito.when(this.idBasedFolderAccess.getFolder(Matchers.anyString())).thenReturn(this.fileStorageFolder);

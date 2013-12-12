@@ -190,7 +190,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         if (capability != null) {
             return capability;
         }
-        final Capability existingCapability = capabilities.putIfAbsent(id, capability = new Capability(id, false));
+        final Capability existingCapability = capabilities.putIfAbsent(id, capability = new Capability(id));
         return existingCapability == null ? capability : existingCapability;
     }
 
@@ -264,7 +264,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         return tmp.booleanValue();
     }
 
-    private static final Capability CAP_AUTO_LOGIN = new Capability("autologin", true);
+    private static final Capability CAP_AUTO_LOGIN = new Capability("autologin");
 
     @Override
     public CapabilitySet getCapabilities(final int userId, final int contextId, final boolean computeCapabilityFilters) throws OXException {
@@ -545,8 +545,8 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     }
 
     @Override
-    public void declareCapability(String capability) {
-        declaredCapabilities.put(capability, PRESENT);
+    public boolean declareCapability(String capability) {
+        return (null == declaredCapabilities.putIfAbsent(capability, PRESENT));
     }
 
     /**

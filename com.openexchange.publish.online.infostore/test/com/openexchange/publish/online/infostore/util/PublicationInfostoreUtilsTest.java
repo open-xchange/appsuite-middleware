@@ -54,6 +54,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.exception.OXException;
@@ -75,24 +77,24 @@ public class PublicationInfostoreUtilsTest {
     /**
      * Mock of the {@link Publication}
      */
+    @Mock
     private Publication publication;
 
     /**
      * Mock of the {@link IDBasedFileAccessFactory}
      */
+    @Mock
     private IDBasedFileAccessFactory fileAccessFactory = null;
 
     /**
      * Mock of the {@link IDBasedFileAccess}
      */
+    @Mock
     private IDBasedFileAccess fileAccess = null;
 
     @Before
     public void setUp() throws Exception {
-        // MEMBERS
-        this.publication = PowerMockito.mock(Publication.class);
-        this.fileAccessFactory = PowerMockito.mock(IDBasedFileAccessFactory.class);
-        this.fileAccess = PowerMockito.mock(IDBasedFileAccess.class);
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test(expected = IllegalArgumentException.class)

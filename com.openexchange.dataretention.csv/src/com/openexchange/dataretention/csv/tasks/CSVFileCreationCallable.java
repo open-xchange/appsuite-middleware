@@ -55,7 +55,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
-import com.openexchange.dataretention.DataRetentionExceptionMessages;
+import com.openexchange.dataretention.DataRetentionExceptionCodes;
 import com.openexchange.dataretention.csv.CSVDataRetentionConfig;
 
 /**
@@ -144,7 +144,7 @@ final class CSVFileCreationCallable implements Callable<Boolean> {
                 }
             }
             if (!success) {
-                throw DataRetentionExceptionMessages.ERROR.create("CSV file could not be created.");
+                throw DataRetentionExceptionCodes.ERROR.create("CSV file could not be created.");
             }
         }
         // Return dummy object

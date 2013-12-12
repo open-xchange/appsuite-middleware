@@ -506,13 +506,13 @@ public final class LoginPerformer {
             sb.append(')');
         }
         final Session session = result.getSession();
-        if (null != session) {
+        if (null == session) {
+            sb.append(" No session created.");
+        } else {
             sb.append(" Session:");
             sb.append(session.getSessionID());
             sb.append(" Random:");
             sb.append(session.getRandomToken());
-        } else {
-            sb.append(" Failed.");
         }
         LOG.info(sb.toString());
     }

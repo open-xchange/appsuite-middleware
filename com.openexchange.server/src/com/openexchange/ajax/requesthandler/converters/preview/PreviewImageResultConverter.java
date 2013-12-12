@@ -152,42 +152,50 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             // No cached preview available -- get the preview document from appropriate 'PreviewService'
             final PreviewDocument previewDocument;
             {
-                final Object resultObject = result.getResultObject();
-                if (!(resultObject instanceof IFileHolder)) {
-                    throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(IFileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
-                }
-                final IFileHolder fileHolder = (IFileHolder) resultObject;
-
-                // Check file holder's content
-                InputStream stream = fileHolder.getStream();
-                {
-                    if (0 == fileHolder.getLength()) {
-                        Streams.close(stream, fileHolder);
-                        setDefaulThumbnail(requestData, result);
-                        return;
+                InputStream stream = null;
+                IFileHolder fileHolder = null;
+                try {
+                    final Object resultObject = result.getResultObject();
+                    if (!(resultObject instanceof IFileHolder)) {
+                        throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(IFileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
                     }
-                    final Ref<InputStream> ref = new Ref<InputStream>();
-                    if (streamIsEof(stream, ref)) {
-                        Streams.close(stream, fileHolder);
-                        setDefaulThumbnail(requestData, result);
-                        return;
-                    }
-                    stream = ref.getValue();
-                }
+                    fileHolder = (IFileHolder) resultObject;
 
-                // Obtain preview
-                final PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
-                final DataProperties dataProperties = new DataProperties(9);
-                dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null));
-                dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
-                dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
-                dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
-                dataProperties.put("PreviewType", requestData.getModule().equals("files") ? "DetailView" : "Thumbnail");
-                dataProperties.put("PreviewWidth", requestData.getParameter("width"));
-                dataProperties.put("PreviewHeight", requestData.getParameter("height"));
-                dataProperties.put("PreviewDelivery", requestData.getParameter("delivery"));
-                dataProperties.put("PreviewScaleType", requestData.getParameter("scaleType"));
-                previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(stream, dataProperties), getOutput(), session, 1);
+                    // Check file holder's content
+                    stream = fileHolder.getStream();
+                    {
+                        if (0 == fileHolder.getLength()) {
+                            Streams.close(stream, fileHolder);
+                            stream = null;
+                            setDefaulThumbnail(requestData, result);
+                            return;
+                        }
+                        final Ref<InputStream> ref = new Ref<InputStream>();
+                        if (streamIsEof(stream, ref)) {
+                            Streams.close(stream, fileHolder);
+                            stream = null;
+                            setDefaulThumbnail(requestData, result);
+                            return;
+                        }
+                        stream = ref.getValue();
+                    }
+
+                    // Obtain preview
+                    final PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
+                    final DataProperties dataProperties = new DataProperties(9);
+                    dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null));
+                    dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
+                    dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
+                    dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
+                    dataProperties.put("PreviewType", requestData.getModule().equals("files") ? "DetailView" : "Thumbnail");
+                    dataProperties.put("PreviewWidth", requestData.getParameter("width"));
+                    dataProperties.put("PreviewHeight", requestData.getParameter("height"));
+                    dataProperties.put("PreviewDelivery", requestData.getParameter("delivery"));
+                    dataProperties.put("PreviewScaleType", requestData.getParameter("scaleType"));
+                    previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(stream, dataProperties), getOutput(), session, 1);
+                } finally {
+                    Streams.close(stream, fileHolder);
+                }
             }
 
             // Check thumbnail stream

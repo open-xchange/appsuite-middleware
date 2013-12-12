@@ -473,8 +473,9 @@ public class ICal4JParser implements ICalParser {
             	workaroundFor20453(
             	workaroundFor27706And28942(
             	workaroundFor29282(
+            	workaroundFor30027(
             	removeAnnoyingWhitespaces(chunk.toString()
-                ))))))))))
+                )))))))))))
             ); // FIXME: Encoding?
             return builder.build(chunkedReader);
         } catch (final IOException e) {
@@ -524,6 +525,8 @@ public class ICal4JParser implements ICalParser {
         }
 	    m.appendTail(sb);
 
+        // -------------------------------------------------------------------------------------------------- //
+
 	    m = Pattern.compile("COMPLETED;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
         sb.setLength(0);
         while (m.find()) {
@@ -531,6 +534,8 @@ public class ICal4JParser implements ICalParser {
             m.appendReplacement(sb, Strings.quoteReplacement("COMPLETED:" + getUtcPropertyFrom(m.group(2), tz)));
         }
         m.appendTail(sb);
+
+        // -------------------------------------------------------------------------------------------------- //
 
         m = Pattern.compile("LAST-MODIFIED;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
         sb.setLength(0);
@@ -540,6 +545,8 @@ public class ICal4JParser implements ICalParser {
         }
         m.appendTail(sb);
 
+        // -------------------------------------------------------------------------------------------------- //
+
         m = Pattern.compile("CREATED;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
         sb.setLength(0);
         while (m.find()) {
@@ -547,6 +554,8 @@ public class ICal4JParser implements ICalParser {
             m.appendReplacement(sb, Strings.quoteReplacement("CREATED:" + getUtcPropertyFrom(m.group(2), tz)));
         }
         m.appendTail(sb);
+
+        // -------------------------------------------------------------------------------------------------- //
 
         m = Pattern.compile("TRIGGER;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
         sb.setLength(0);
@@ -579,6 +588,17 @@ public class ICal4JParser implements ICalParser {
             return s;
         }
 	}
+
+	private String workaroundFor30027(final String input) {
+        final Matcher m = Pattern.compile(":\\s{2,}([0-9]{8}T[0-9]{6}Z?)[ \\t]*").matcher(input);
+        final StringBuffer sb = new StringBuffer(input.length());
+        while (m.find()) {
+            m.appendReplacement(sb, ": $1");
+        }
+        m.appendTail(sb);
+
+        return sb.toString();
+    }
 
 	/**
      * Method written out of laziness: Because you can spread iCal attributes

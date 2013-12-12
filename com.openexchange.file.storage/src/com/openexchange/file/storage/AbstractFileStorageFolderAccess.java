@@ -91,4 +91,8 @@ public abstract class AbstractFileStorageFolderAccess implements FileStorageFold
         return Quota.getUnlimitedQuotas(types);
     }
 
+    @Override
+    public String moveFolder(String folderId, String newParentId) throws OXException {
+        return moveFolder(folderId, newParentId, null);
+    }
 }

@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-admin
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 8
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -16,10 +16,11 @@ BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Extension to restore context data from a database dump
+Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-admin >= @OXVERSION@
 Provides:      open-xchange-admin-plugin-contextrestore = %{version}
-Obsoletes:     open-xchange-admin-plugin-contextrestore <= %{version}
+Obsoletes:     open-xchange-admin-plugin-contextrestore < %{version}
 
 %description
 This package adds the OSGi bundle that allows to restore a complete context from a MySQL database dump file. Only the table rows for the
@@ -62,10 +63,20 @@ ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc plug
 %doc com.openexchange.admin.contextrestore/ChangeLog
 
 %changelog
+* Mon Dec 09 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2013-12-09
+* Fri Dec 06 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2013-12-10
+* Fri Dec 06 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2013-11-29
+* Tue Dec 03 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2013-11-28
 * Wed Nov 20 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Fifth candidate for 7.4.1 release
 * Tue Nov 19 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Fourth candidate for 7.4.1 release
+* Mon Nov 11 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2013-11-12
 * Mon Nov 11 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2013-11-12
 * Fri Nov 08 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>

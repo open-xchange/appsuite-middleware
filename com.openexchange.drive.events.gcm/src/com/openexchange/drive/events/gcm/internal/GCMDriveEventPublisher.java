@@ -96,6 +96,7 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
             LOG.error("unable to get subscriptions for service {}", SERIVCE_ID, e);
         }
         if (null != subscriptions && 0 < subscriptions.size()) {
+            String pushTokenReference = event.getPushTokenReference();
             for (int i = 0; i < subscriptions.size(); i += MULTICAST_LIMIT) {
                 /*
                  * prepare chunk
@@ -103,7 +104,12 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
                 int length = Math.min(subscriptions.size(), i + MULTICAST_LIMIT) - i;
                 List<String> registrationIDs = new ArrayList<String>(length);
                 for (int j = 0; j < length; j++) {
-                    registrationIDs.add(subscriptions.get(i + j).getToken());
+                    Subscription subscription = subscriptions.get(i + j);
+                    if (null != pushTokenReference && subscription.matches(pushTokenReference)) {
+                        LOG.trace("Skipping push notification for subscription: " + subscription);
+                        continue;
+                    }
+                    registrationIDs.add(subscription.getToken());
                 }
                 /*
                  * send chunk
@@ -117,10 +123,6 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
                 if (null != result) {
                     LOG.debug("{}", result);
                 }
-                /*
-                 * process resulst
-                 */
-                processResult(event.getContextID(), registrationIDs, result);
             }
         }
     }

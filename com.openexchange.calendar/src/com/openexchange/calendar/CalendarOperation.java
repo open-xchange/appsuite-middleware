@@ -445,7 +445,11 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         return loadAppointment(load_resultset, oid, inFolder, cimp, readcon, so, ctx, action, action_folder, true);
     }
 
-    protected final CalendarDataObject loadAppointment(final ResultSet load_resultset, final int oid, final int inFolder, final CalendarSqlImp cimp, final Connection readcon, final Session so, final Context ctx, final int action, final int action_folder, final boolean check_permissions) throws SQLException, OXException {
+    protected CalendarDataObject loadAppointment(ResultSet load_resultset, int oid, int inFolder, CalendarSqlImp cimp, Connection readcon, Session so, Context ctx, int action, int action_folder, boolean check_permissions) throws SQLException, OXException {
+        return loadAppointment(load_resultset, oid, inFolder, cimp, readcon, so, ctx, action, action_folder, check_permissions, null, null);
+    }
+
+    protected CalendarDataObject loadAppointment(ResultSet load_resultset, int oid, int inFolder, CalendarSqlImp cimp, Connection readcon, Session so, Context ctx, int action, int action_folder, boolean check_permissions, String organizer, String uniqueId) throws SQLException, OXException {
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setObjectID(oid);
         cdao.setContext(ctx);
@@ -464,25 +468,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 cdao.setPrivateFlag(setBooleanToInt(i++, load_resultset));
                 Participant[] participants = cimp.getParticipants(cdao, readcon).getList();
                 cdao.setParticipants(participants);
-                if (check_permissions && !recColl.checkPermissions(cdao, so, ctx, readcon, check_special_action, action_folder)) {
-                    if (action_folder != inFolder) {
-                        LOG.debug(
-                            "Permission Exception 1 (fid!inFolder) for user:oid:fid:inFolder {}:{}:{}:{}",
-                            I(so.getUserId()),
-                            I(oid),
-                            I(action_folder),
-                            inFolder);
-                    }
-                    throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.create(I(oid));
-                } else if (!check_permissions && 0 < inFolder && inFolder == action_folder) {
-                    /*
-                     * Assign parent folder ID when not checking permissions - necessary for bug #23181 so that the parent folder is not
-                     * considered as 'shared' to the current user.
-                     */
-                    cdao.setParentFolderID(inFolder);
-                    OXFolderAccess access = new OXFolderAccess(readcon, cdao.getContext());
-                    cdao.setFolderType(access.getFolderType(inFolder, so.getUserId()));
-                }
+
                 cdao.setStartDate(setDate(i++, load_resultset));
                 cdao.setEndDate(setDate(i++, load_resultset));
                 cdao.setTimezone(setString(i++, load_resultset));
@@ -498,49 +484,27 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 cdao.setNote(setString(i++, load_resultset));
                 cdao.setFullTime(setBooleanToInt(i++, load_resultset));
                 cdao.setCategories(setString(i++, load_resultset));
-                final String organizer = setString(i++, load_resultset);
-                if (organizer != null) {
-                    cdao.setOrganizer(organizer);
+                final String org = setString(i++, load_resultset);
+                if (org != null) {
+                    cdao.setOrganizer(org);
                 }
                 cdao.setUid(setString(i++, load_resultset));
+
+                //Context of check is critical. TODO: Make independent!
+                checkGeneralPermissions(oid, inFolder, readcon, so, ctx, action_folder, check_permissions, cdao, check_special_action, organizer, uniqueId);
+
                 cdao.setFilename(setString(i++, load_resultset));
                 cdao.setSequence(setInt(i++, load_resultset));
                 cdao.setOrganizerId(setInt(i++, load_resultset));
                 cdao.setPrincipal(setString(i++, load_resultset));
                 cdao.setPrincipalId(setInt(i++, load_resultset));
                 cdao.setUsers(cimp.getUserParticipants(cdao, readcon, so.getUserId()).getUsers());
-                if (check_permissions && cdao.getEffectiveFolderId() != inFolder) {
-                    if (cdao.getFolderType() != FolderObject.SHARED && check_special_action == action) {
-                        LOG.debug(
-                            "Permission Exception 2 (fid!inFolder) for user:oid:fid:inFolder {}:{}:{}:{}",
-                            I(so.getUserId()),
-                            I(oid),
-                            I(inFolder),
-                            I(action));
-                        throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.create();
-                    } else if (action_folder != inFolder && check_special_action == action) {
-                        LOG.debug(
-                            "Permission Exception 3 (fid!inFolder) for user:oid:fid:inFolder {}:{}:{}:{}",
-                            I(so.getUserId()),
-                            I(oid),
-                            I(inFolder),
-                            I(action));
-                        throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_3.create();
-                    }
-                }
-                if (check_permissions && action == UPDATE && inFolder != action_folder) {
-                    if (!recColl.checkPermissions(cdao, so, ctx, readcon, DELETE, inFolder)) { // Move means to check delete
-                        if (inFolder != action_folder) {
-                            LOG.debug(
-                                "Permission Exception 4 (fid!inFolder) for user:oid:fid:inFolder {}:{}:{}:{}",
-                                I(so.getUserId()),
-                                I(oid),
-                                I(action_folder),
-                                I(inFolder));
-                        }
-                        throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_4.create();
-                    }
-                }
+
+                //Context of check is critical. TODO: Make independent!
+                checkShared(oid, inFolder, so, action, action_folder, check_permissions, cdao, check_special_action);
+                //Context of check is critical. TODO: Make independent!
+                checkMove(oid, inFolder, readcon, so, ctx, action, action_folder, check_permissions, cdao);
+
                 if (cdao.containsRecurrenceID()) {
                     cdao.setRecurrenceCalculator(setInt(i++, load_resultset));
                     int recurrencePosition = setInt(i++, load_resultset);
@@ -564,13 +528,93 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             } else {
                 final String text = "Object " + oid + " in context " + cdao.getContextID();
                 final OXException e = OXException.notFound(text);
-                LOG.error("", e);
+                LOG.error(e.getMessage(), e);
                 throw e;
             }
         } finally {
             load_resultset.close();
         }
         return cdao;
+    }
+
+    private void checkGeneralPermissions(final int oid, final int inFolder, final Connection readcon, final Session so, final Context ctx, final int action_folder, boolean check_permissions, final CalendarDataObject cdao, int check_special_action, String organizer, String uniqueId) throws OXException {
+        check_permissions = check_permissions && !isExternalOrganizerAndKnown(organizer, uniqueId, cdao);
+
+        if (check_permissions && !recColl.checkPermissions(cdao, so, ctx, readcon, check_special_action, action_folder)) {
+            if (action_folder != inFolder) {
+                LOG.debug(
+                    "Permission Exception 1 (fid!inFolder) for user:oid:fid:inFolder {}:{}:{}:{}",
+                    I(so.getUserId()),
+                    I(oid),
+                    I(action_folder),
+                    inFolder);
+            }
+            throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.create(I(oid));
+        } else if (!check_permissions && 0 < inFolder && inFolder == action_folder) {
+            /*
+             * Assign parent folder ID when not checking permissions - necessary for bug #23181 so that the parent folder is not
+             * considered as 'shared' to the current user.
+             */
+            cdao.setParentFolderID(inFolder);
+            OXFolderAccess access = new OXFolderAccess(readcon, cdao.getContext());
+            cdao.setFolderType(access.getFolderType(inFolder, so.getUserId()));
+        }
+    }
+
+    /**
+     * OLOX2 Hack to provide the posibility to change existing appointments without using the iTip API.
+     * @param cdao
+     * @return
+     */
+   private boolean isExternalOrganizerAndKnown(String organizer, String uniqueId, CalendarDataObject cdao) {
+        if (cdao.getOrganizer() == null || cdao.getUid() == null) {
+            return false;
+        }
+        if (!cdao.getOrganizer().equals(organizer)) {
+            return false;
+        }
+        if (!cdao.getUid().equals(uniqueId)) {
+            return false;
+        }
+        return true;
+    }
+
+ private void checkShared(final int oid, final int inFolder, final Session so, final int action, final int action_folder, final boolean check_permissions, final CalendarDataObject cdao, int check_special_action) throws OXException {
+        if (check_permissions && cdao.getEffectiveFolderId() != inFolder) {
+            if (cdao.getFolderType() != FolderObject.SHARED && check_special_action == action) {
+                LOG.debug(
+                    "Permission Exception 2 (fid!inFolder) for user:oid:fid:inFolder {}:{}:{}:{}",
+                    I(so.getUserId()),
+                    I(oid),
+                    I(inFolder),
+                    I(action));
+                throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.create();
+            } else if (action_folder != inFolder && check_special_action == action) {
+                LOG.debug(
+                    "Permission Exception 3 (fid!inFolder) for user:oid:fid:inFolder {}:{}:{}:{}",
+                    I(so.getUserId()),
+                    I(oid),
+                    I(inFolder),
+                    I(action));
+                throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_3.create();
+            }
+        }
+    }
+
+    private void checkMove(final int oid, final int inFolder, final Connection readcon, final Session so, final Context ctx, final int action, final int action_folder, final boolean check_permissions, final CalendarDataObject cdao) throws OXException {
+        if (check_permissions && action == UPDATE && inFolder != action_folder) {
+            if (!recColl.checkPermissions(cdao, so, ctx, readcon, DELETE, inFolder)) { // Move means to check delete
+                if (inFolder != action_folder) {
+                    LOG.debug(
+                        "Permission Exception 4 (fid!inFolder) for user:oid:fid:inFolder {}:{}:{}:{}",
+                        I(so.getUserId()),
+                        I(oid),
+                        I(action_folder),
+                        I(inFolder));
+                }
+                throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_4.create();
+            }
+        }
     }
 
     private static final String setString(final int i, final ResultSet string_rs) throws SQLException {

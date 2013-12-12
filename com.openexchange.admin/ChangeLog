@@ -1,3 +1,7 @@
+* 2013-12-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30144: Properly set login mappings (no "null" strings) in case autocontextid is active
+
 * 2013-10-31 - thorben.betten@open-xchange.com
 
  - Fix for bug 29612: Possible to set user attributes via SOAP (patch provided by choeger)

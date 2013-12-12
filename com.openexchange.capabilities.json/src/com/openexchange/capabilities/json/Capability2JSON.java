@@ -110,7 +110,6 @@ public class Capability2JSON implements ResultConverter {
     private JSONObject transform(Capability resultObject) throws JSONException {
         final JSONObject object = new JSONObject(3);
         object.put("id", resultObject.getId());
-        object.put("backendSupport", resultObject.isSupportedByBackend());
         object.put("attributes", new JSONObject(resultObject.getAttributes()));
         return object;
     }

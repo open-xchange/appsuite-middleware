@@ -312,7 +312,10 @@ public class ReplicationMonitor {
             increaseCounter(assign, con);
             con.releaseSavepoint(save);
         } catch (SQLException e) {
-            rollback(con, save);
+            if (1213 != e.getErrorCode()) {
+                // In case of a transaction deadlock MySQL already rolled the transaction back. Then the savepoint does not exist anymore.
+                rollback(con, save);
+            }
             throw e;
         }
     }

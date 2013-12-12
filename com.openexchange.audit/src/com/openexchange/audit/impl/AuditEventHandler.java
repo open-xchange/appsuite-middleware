@@ -216,8 +216,8 @@ public class AuditEventHandler implements EventHandler {
      * @throws OXException
      */
     protected void handleGroupwareEvent(Event event, StringBuilder log) throws OXException {
-        Validate.notNull(event, "Event mustn't be null.");
-        Validate.notNull(log, "StringBuilder to write to mustn't be null.");
+        Validate.notNull(event, "Event must not be null.");
+        Validate.notNull(log, "StringBuilder to write to must not be null.");
 
         final CommonEvent commonEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
 
@@ -246,6 +246,10 @@ public class AuditEventHandler implements EventHandler {
             case Types.INFOSTORE:
                 handleInfostoreCommonEvent(commonEvent, context, log);
                 break ModuleSwitch;
+
+            case Types.FOLDER:
+                handleFolderCommonEvent(commonEvent, context, log);
+                break ModuleSwitch;
             }
         }
     }
@@ -271,6 +275,31 @@ public class AuditEventHandler implements EventHandler {
         synchronized (logDateFormat) {
             log.append("EVENT TIME: ").append(logDateFormat.format(new Date())).append("; ");
         }
+    }
+
+    /**
+     * Handles appointment events.
+     *
+     * @param event - the {@link CommonEvent} that was received
+     * @param context - the {@link Context}
+     * @param log - the log to add information
+     * @throws OXException
+     */
+    protected void handleFolderCommonEvent(CommonEvent commonEvent, Context context, StringBuilder log) throws OXException {
+        Validate.notNull(commonEvent, "CommonEvent mustn't be null.");
+        Validate.notNull(log, "StringBuilder to write to mustn't be null.");
+
+        final FolderObject folder = (FolderObject) commonEvent.getActionObj();
+
+        log.append("OBJECT TYPE: FOLDER; ");
+        appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), log);
+        log.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
+        log.append("FOLDER ID: ").append(folder.getObjectID()).append("; ");
+        log.append("CREATED BY: ").append(UserStorage.getInstance().getUser(folder.getCreatedBy(), context).getDisplayName()).append(
+            "; ");
+        log.append("MODIFIED BY: ").append(UserStorage.getInstance().getUser(folder.getModifiedBy(), context).getDisplayName()).append(
+            "; ");
+        log.append("NAME: ").append(folder.getFolderName()).append("; ");
     }
 
     /**

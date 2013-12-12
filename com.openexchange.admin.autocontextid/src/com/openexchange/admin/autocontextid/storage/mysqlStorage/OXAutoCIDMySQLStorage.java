@@ -75,9 +75,6 @@ public final class OXAutoCIDMySQLStorage extends OXAutoCIDSQLStorage {
         super();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#generateContextId()
-     */
     @Override
     public int generateContextId() throws StorageException {
         final Connection con;
@@ -87,25 +84,31 @@ public final class OXAutoCIDMySQLStorage extends OXAutoCIDSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         }
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
             int id = IDGenerator.getId(con, -2);
             con.commit();
+            rollback = false;
             return id;
         } catch (final SQLException e) {
-            log.error("", e);
-            doRollback(con);
             throw new StorageException(e.getMessage());
         } finally {
+            if (rollback) {
+                doRollback(con);
+            }
             cache.closeConfigDBSqlStuff(con, null);
         }
     }
 
     private static void doRollback(final Connection con) {
-        try {
-            con.rollback();
-        } catch (final SQLException e2) {
-            log.error("Error doing rollback", e2);
+        if (null != con) {
+            try {
+                con.rollback();
+            } catch (final SQLException e2) {
+                log.error("Error doing rollback", e2);
+            }
         }
     }
 

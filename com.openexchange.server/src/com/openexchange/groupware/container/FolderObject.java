@@ -336,13 +336,12 @@ public class FolderObject extends FolderChildObject implements Cloneable {
 
     protected boolean b_fullName;
 
-    private Map<String, Object> meta;
-
     /**
      * Initializes a new {@link FolderObject}
      */
     public FolderObject() {
         super();
+        topic = "ox/common/folder";
     }
 
     /**
@@ -353,7 +352,8 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     public FolderObject(final int objectId) {
         super();
         this.objectId = objectId;
-        b_object_id = true;
+        b_objectId = true;
+        topic = "ox/common/folder";
     }
 
     /**
@@ -375,9 +375,10 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         this.type = type;
         b_type = true;
         this.objectId = objectId;
-        b_object_id = true;
+        b_objectId = true;
         createdBy = creator;
-        b_created_by = true;
+        b_createdBy = true;
+        topic = "ox/common/folder";
     }
 
     /**
@@ -792,7 +793,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      * @return <code>true</code> if creator is set; otherwise <code>false</code>
      */
     public boolean containsCreator() {
-        return b_created_by;
+        return b_createdBy;
     }
 
     /**
@@ -802,7 +803,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      */
     public void setCreator(final int creator) {
         createdBy = creator;
-        b_created_by = true;
+        b_createdBy = true;
     }
 
     /**
@@ -810,7 +811,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      */
     public void removeCreator() {
         createdBy = 0;
-        b_created_by = false;
+        b_createdBy = false;
     }
 
     /**
@@ -1248,6 +1249,10 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     }
 
     private final EffectivePermission calcEffectiveUserPermission(final int userId, final UserPermissionBits userPermissionBits) {
+        return calcEffectiveUserPermission(userId, userPermissionBits, true);
+    }
+
+    private final EffectivePermission calcEffectiveUserPermission(final int userId, final UserPermissionBits userPermissionBits, final boolean considerSystemPermissions) {
         final EffectivePermission maxPerm = new EffectivePermission(userId, getObjectID(), getType(userId), getModule(), getCreatedBy(), userPermissionBits);
         final int[] idArr;
         {
@@ -1263,7 +1268,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         int odp = 0;
         boolean admin = false;
         for (final OCLPermission oclPerm : getPermissions()) {
-            if (Arrays.binarySearch(idArr, oclPerm.getEntity()) >= 0) {
+            if ((considerSystemPermissions || !oclPerm.isSystem()) && Arrays.binarySearch(idArr, oclPerm.getEntity()) >= 0) {
                 // Folder permission
                 int cur = oclPerm.getFolderPermission();
                 if (cur > fp) {
@@ -1418,16 +1423,16 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     public FolderObject clone() {
         try {
             final FolderObject clone = (FolderObject) super.clone();
-            if (b_created_by) {
+            if (b_createdBy) {
                 clone.setCreatedBy(createdBy);
             }
-            if (b_creation_date) {
+            if (b_creationDate) {
                 clone.setCreationDate(creationDate);
             }
             if (b_defaultFolder) {
                 clone.setDefaultFolder(defaultFolder);
             }
-            if (b_object_id) {
+            if (b_objectId) {
                 clone.setObjectID(objectId);
             }
             if (b_folderName) {
@@ -1436,10 +1441,10 @@ public class FolderObject extends FolderChildObject implements Cloneable {
             if (b_fullName) {
                 clone.setFullName(fullName);
             }
-            if (b_last_modified) {
+            if (b_lastModified) {
                 clone.setLastModified(lastModified);
             }
-            if (b_modified_by) {
+            if (b_modifiedBy) {
                 clone.setModifiedBy(modifiedBy);
             }
             if (b_module) {
@@ -1788,12 +1793,37 @@ public class FolderObject extends FolderChildObject implements Cloneable {
             FolderObject.SYSTEM_TYPE);
     }
 
+    /**
+     * Sets the meta map with arbitrary properties.
+     * <p>
+     * Delegates to {@link #setMap(Map)}
+     *
+     * @param map The meta map
+     */
     public void setMeta(Map<String, Object> meta) {
-        this.meta = meta;
+        setMap(meta);
     }
 
+    /**
+     * Gets (optionally) the meta map with arbitrary properties.
+     * <p>
+     * Delegates to {@link #getMap()}
+     *
+     * @return The meta map or <code>null</code>
+     */
     public Map<String, Object> getMeta() {
-        return meta;
+        return getMap();
+    }
+
+    /**
+     * Checks if this object contains a map.
+     * <p>
+     * Delegates to {@link #containsMap()}
+     *
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public boolean containsMeta() {
+        return containsMap();
     }
 
 }

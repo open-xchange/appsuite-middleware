@@ -54,7 +54,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.ajax.container.IFileHolder;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DirectoryMetadata;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveExceptionCodes;
@@ -65,7 +64,7 @@ import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.SyncResult;
-import com.openexchange.drive.internal.DriveServiceLookup;
+import com.openexchange.drive.management.DriveConfig;
 import com.openexchange.exception.OXException;
 
 /**
@@ -77,7 +76,6 @@ public class ThrottlingDriveService implements DriveService {
 
     private final DriveService delegate;
 
-    private final int maxConcurrentSyncOperations;
     private final AtomicInteger currentSyncOperations;
 
     /**
@@ -90,8 +88,6 @@ public class ThrottlingDriveService implements DriveService {
         super();
         this.delegate = delegate;
         currentSyncOperations = new AtomicInteger();
-        maxConcurrentSyncOperations = DriveServiceLookup.getService(ConfigurationService.class, true)
-            .getIntProperty("com.openexchange.drive.maxConcurrentSyncOperations", -1);
     }
 
     @Override
@@ -159,6 +155,7 @@ public class ThrottlingDriveService implements DriveService {
     }
 
     private void enterSyncOperation() throws OXException {
+        int maxConcurrentSyncOperations = DriveConfig.getInstance().getMaxConcurrentSyncOperations();
         if (0 < maxConcurrentSyncOperations && maxConcurrentSyncOperations < currentSyncOperations.incrementAndGet()) {
             throw DriveExceptionCodes.SERVER_BUSY.create();
         }

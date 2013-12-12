@@ -558,9 +558,9 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             }
         }
         final boolean performMove = fo.containsParentFolderID();
-        if (fo.containsPermissions() || fo.containsModule()) {
+        if (fo.containsPermissions() || fo.containsModule() || fo.containsMeta()) {
             if (performMove) {
-                move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), getFolderFromMaster(fo.getObjectID()), lastModified);
+                move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), fo.getFolderName(), getFolderFromMaster(fo.getObjectID()), lastModified);
             }
             if (isRenameOnly) {
                 rename(fo, getFolderFromMaster(fo.getObjectID()), lastModified);
@@ -569,14 +569,15 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             }
         } else if (fo.containsFolderName()) {
             if (performMove) {
-                move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), getFolderFromMaster(fo.getObjectID()), lastModified);
+                move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), fo.getFolderName(), getFolderFromMaster(fo.getObjectID()), lastModified);
+            } else {
+                rename(fo, getFolderFromMaster(fo.getObjectID()), lastModified);
             }
-            rename(fo, getFolderFromMaster(fo.getObjectID()), lastModified);
         } else if (performMove) {
             /*
              * Perform move
              */
-            move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), getFolderFromMaster(fo.getObjectID()), lastModified);
+            move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), null, getFolderFromMaster(fo.getObjectID()), lastModified);
         }
         /*
          * Finally update cache
@@ -1072,11 +1073,11 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         return Arrays.binarySearch(a, key) >= 0;
     }
 
-    private void move(final int folderId, final int targetFolderId, final int createdBy, final FolderObject storageSrc, final long lastModified) throws OXException {
+    private void move(final int folderId, final int targetFolderId, final int createdBy, String newName, final FolderObject storageSrc, final long lastModified) throws OXException {
         /*
-         * Folder is already in target folder
+         * Folder is already in target folder and does not need to be renamed
          */
-        if (storageSrc.getParentFolderID() == targetFolderId) {
+        if (storageSrc.getParentFolderID() == targetFolderId && (null == newName || newName.equals(storageSrc.getFolderName()))) {
             return;
         }
         /*
@@ -1095,7 +1096,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
          */
         try {
             final int parentFolderID = storageDest.getObjectID();
-            final String folderName = storageSrc.getFolderName();
+            final String folderName = null == newName ? storageSrc.getFolderName() : newName;
             boolean throwException = false;
 
             /*
@@ -1218,6 +1219,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
          * Call SQL move
          */
         try {
+            storageSrc.setFolderName(newName);
             OXFolderSQL.moveFolderSQL(user.getId(), storageSrc, storageDest, lastModified, ctx, readCon, writeCon);
         } catch (final DataTruncation e) {
             throw parseTruncated(e, storageSrc, TABLE_OXFOLDER_TREE);

@@ -49,59 +49,61 @@
 
 package com.openexchange.conversion;
 
-import static com.openexchange.conversion.DataExceptionMessages.*;
+import static com.openexchange.conversion.DataExceptionMessages.TRUNCATED_MSG;
+import static com.openexchange.conversion.DataExceptionMessages.TYPE_NOT_SUPPORTED_MSG;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * Enumeration about all {@link OXException}s.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public enum DataExceptionCodes implements OXExceptionCode {
+public enum DataExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * The given type of %1$s is not supported
      */
-    TYPE_NOT_SUPPORTED(TYPE_NOT_SUPPORTED_MSG, Category.CATEGORY_ERROR, 1),
+    TYPE_NOT_SUPPORTED("The given type of %1$s is not supported", TYPE_NOT_SUPPORTED_MSG, Category.CATEGORY_ERROR, 1),
     /**
      * Missing argument %1$s
      */
-    MISSING_ARGUMENT(MISSING_ARGUMENT_MSG, Category.CATEGORY_ERROR, 2),
+    MISSING_ARGUMENT("Missing argument %1$", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 2),
     /**
      * Invalid value for argument %1$s: ``%2$s''
      */
-    INVALID_ARGUMENT(INVALID_ARGUMENT_MSG, Category.CATEGORY_ERROR, 3),
+    INVALID_ARGUMENT("Invalid value for argument %1$s: \"%2$s\"", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 3),
     /**
      * Unknown data source identifier: %1$s
      */
-    UNKNOWN_DATA_SOURCE(UNKNOWN_DATA_SOURCE_MSG, Category.CATEGORY_ERROR, 4),
+    UNKNOWN_DATA_SOURCE("Unknown data source identifier: %1$s", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 4),
     /**
      * Unknown data handler identifier: %1$s
      */
-    UNKNOWN_DATA_HANDLER(UNKNOWN_DATA_HANDLER_MSG, Category.CATEGORY_ERROR, 5),
+    UNKNOWN_DATA_HANDLER("Unknown data handler identifier: %1$s", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 5),
     /**
      * No matching type could be found for data source %1$s and data handler %2$s
      */
-    NO_MATCHING_TYPE(NO_MATCHING_TYPE_MSG, Category.CATEGORY_ERROR, 6),
+    NO_MATCHING_TYPE("No matching type could be found for data source %1$s and data handler %2$s", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 6),
     /**
      * An error occurred: %1$s
      */
-    ERROR(ERROR_MSG, Category.CATEGORY_ERROR, 7),
+    ERROR("An error occurred: %1$s", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 7),
     /**
      * The following field(s) are too long: %1$s
      */
-    TRUNCATED(TRUNCATED_MSG, Category.CATEGORY_TRUNCATED, 8),
+    TRUNCATED("The following field(s) are too long: %1$s", TRUNCATED_MSG, Category.CATEGORY_TRUNCATED, 8),
     /**
      * Unable to change data. (%1$s)
      */
-    UNABLE_TO_CHANGE_DATA(UNABLE_TO_CHANGE_DATA_MSG, Category.CATEGORY_USER_INPUT, 9),
+    UNABLE_TO_CHANGE_DATA("Unable to change data. (%1$s)", OXExceptionStrings.MESSAGE, Category.CATEGORY_USER_INPUT, 9),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(IO_ERROR_MSG, Category.CATEGORY_ERROR, 10),
+    IO_ERROR("An I/O error occurred: %1$s", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 10),
 
     ;
 
@@ -110,11 +112,14 @@ public enum DataExceptionCodes implements OXExceptionCode {
     private final int number;
 
     private final String message;
+    
+    private final String displayMessage;
 
-    private DataExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private DataExceptionCodes(final String message, final String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
         this.number = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage;
     }
 
     @Override
@@ -170,5 +175,13 @@ public enum DataExceptionCodes implements OXExceptionCode {
      */
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.exception.DisplayableOXExceptionCode#getDisplayMessage()
+     */
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 }

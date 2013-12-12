@@ -243,8 +243,8 @@ public class AppointmentRequest extends CalendarRequest {
             jsonResponseObj.put(DataFields.ID, appointmentObj.getObjectID());
             timestamp = appointmentObj.getLastModified();
         } else {
-            final JSONArray jsonConflictArray = new JSONArray();
-            final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone);
+            final JSONArray jsonConflictArray = new JSONArray(conflicts.length);
+            final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone).setSession(session);
             for (int a = 0; a < conflicts.length; a++) {
                 final JSONObject jsonAppointmentObj = new JSONObject();
                 appointmentWriter.writeAppointment(conflicts[a], jsonAppointmentObj);
@@ -288,8 +288,8 @@ public class AppointmentRequest extends CalendarRequest {
             jsonResponseObj.put(DataFields.ID, appointmentObj.getObjectID());
             timestamp = appointmentObj.getLastModified();
         } else {
-            final JSONArray jsonConflictArray = new JSONArray();
-            final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone);
+            final JSONArray jsonConflictArray = new JSONArray(conflicts.length);
+            final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone).setSession(session);
             for (int a = 0; a < conflicts.length; a++) {
                 final JSONObject jsonAppointmentObj = new JSONObject();
                 appointmentWriter.writeAppointment(conflicts[a], jsonAppointmentObj);
@@ -347,7 +347,7 @@ public class AppointmentRequest extends CalendarRequest {
             return jsonResponseArray;
         }
 
-        final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone);
+        final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone).setSession(session);
         final AppointmentSQLInterface appointmentsql = appointmentFactory.createAppointmentSql(session);
         final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         SearchIterator<Appointment> it = null;
@@ -584,7 +584,7 @@ public class AppointmentRequest extends CalendarRequest {
                 if (null == appointment) {
                     continue;
                 }
-                final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
+                final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone).setSession(session);
 
                 final Date startDate = appointment.getStartDate();
                 final Date endDate = appointment.getEndDate();
@@ -743,7 +743,7 @@ public class AppointmentRequest extends CalendarRequest {
             Date lastModified = new Date(0);
             while (it.hasNext()) {
                 final Appointment appointment = it.next();
-                final AppointmentWriter writer = new AppointmentWriter(timeZone);
+                final AppointmentWriter writer = new AppointmentWriter(timeZone).setSession(session);
                 boolean written = false;
 
                 // Workaround to fill appointments with alarm times
@@ -851,7 +851,7 @@ public class AppointmentRequest extends CalendarRequest {
             }
 
             if (listOrder && !objectList.isEmpty()) {
-                final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
+                final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone).setSession(session);
                 final DateOrderObject[] dateOrderObjectArray = objectList.toArray(new DateOrderObject[objectList.size()]);
                 Arrays.sort(dateOrderObjectArray);
 
@@ -900,7 +900,7 @@ public class AppointmentRequest extends CalendarRequest {
                 anonymize(appointmentobject);
             }
 
-            final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
+            final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone).setSession(session);
             appointmentwriter.setSession(session);
 
             final JSONObject jsonResponseObj = new JSONObject();
@@ -1008,7 +1008,7 @@ public class AppointmentRequest extends CalendarRequest {
 
         try {
             final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-            final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
+            final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone).setSession(session);
 
             while (it.hasNext()) {
                 final Appointment appointment = it.next();
@@ -1097,7 +1097,7 @@ public class AppointmentRequest extends CalendarRequest {
             final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
             searchIterator = appointmentsql.getAppointmentsByExtendedSearch(searchObj, orderBy, orderDir, _appointmentFields);
 
-            final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
+            final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone).setSession(session);
 
             while (searchIterator.hasNext()) {
                 final Appointment appointmentobject = searchIterator.next();
@@ -1189,7 +1189,7 @@ public class AppointmentRequest extends CalendarRequest {
         final JSONArray jsonResponseArray = new JSONArray();
 
         try {
-            final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone);
+            final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone).setSession(session);
 
             final AppointmentSQLInterface appointmentsql = appointmentFactory.createAppointmentSql(session);
             it = appointmentsql.getFreeBusyInformation(userId, type, start, end);
@@ -1243,8 +1243,8 @@ public class AppointmentRequest extends CalendarRequest {
         final JSONObject jsonResponseObj = new JSONObject();
 
         if (conflicts != null) {
-            final JSONArray jsonConflictArray = new JSONArray();
-            final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone);
+            final JSONArray jsonConflictArray = new JSONArray(conflicts.length);
+            final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone).setSession(session);
             for (int a = 0; a < conflicts.length; a++) {
                 final JSONObject jsonAppointmentObj = new JSONObject();
                 appointmentWriter.writeAppointment(conflicts[a], jsonAppointmentObj);

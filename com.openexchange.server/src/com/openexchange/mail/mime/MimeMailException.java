@@ -63,7 +63,6 @@ import javax.mail.Store;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.Category;
-import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
@@ -274,7 +273,7 @@ public class MimeMailException extends OXException {
             } else if (e instanceof com.sun.mail.smtp.SMTPSendFailedException) {
                 final SMTPSendFailedException exc = (SMTPSendFailedException) e;
                 if ((exc.getReturnCode() == 552) || (toLowerCase(exc.getMessage(), "").indexOf(ERR_MSG_TOO_LARGE) > -1)) {
-                    return MimeMailExceptionCode.MESSAGE_TOO_LARGE.create(exc, new Object[0]).setLogLevel(LogLevel.ERROR);
+                    return MimeMailExceptionCode.MESSAGE_TOO_LARGE.create(exc, new Object[0]).setForceLog(true);
                 }
                 final Exception nextException = exc.getNextException();
                 if (nextException instanceof com.sun.mail.smtp.SMTPSendFailedException) {
@@ -284,7 +283,7 @@ public class MimeMailException extends OXException {
                         return MimeMailExceptionCode.SEND_FAILED_MSG_EXT_ERROR.create(
                             exc,
                             exc.getMessage(),
-                            '(' + smtpExc.getMessage() + ')').setLogLevel(LogLevel.ERROR);
+                            '(' + smtpExc.getMessage() + ')').setForceLog(true);
                     }
                 }
                 String serverInfo = null;
@@ -294,9 +293,9 @@ public class MimeMailException extends OXException {
                 final Address[] addrs = exc.getInvalidAddresses();
                 if (null == addrs || addrs.length == 0) {
                     // No invalid addresses available
-                    return MimeMailExceptionCode.SEND_FAILED_MSG_ERROR.create(exc, exc.getMessage()).setLogLevel(LogLevel.ERROR);
+                    return MimeMailExceptionCode.SEND_FAILED_MSG_ERROR.create(exc, exc.getMessage()).setForceLog(true);
                 }
-                return MimeMailExceptionCode.SEND_FAILED_EXT.create(exc, Arrays.toString(addrs), null == serverInfo ? "" : '('+serverInfo+')').setLogLevel(LogLevel.ERROR);
+                return MimeMailExceptionCode.SEND_FAILED_EXT.create(exc, Arrays.toString(addrs), null == serverInfo ? "" : '('+serverInfo+')').setForceLog(true);
             } else if (e instanceof javax.mail.SendFailedException) {
                 final SendFailedException exc = (SendFailedException) e;
                 if (toLowerCase(exc.getMessage(), "").indexOf(ERR_MSG_TOO_LARGE) > -1) {
@@ -318,18 +317,18 @@ public class MimeMailException extends OXException {
                 if (null == addrs || addrs.length == 0) {
                     if (null == afe) {
                         // No invalid addresses available
-                        return MimeMailExceptionCode.SEND_FAILED_MSG_ERROR.create(exc, e.getMessage()).setLogLevel(LogLevel.ERROR);
+                        return MimeMailExceptionCode.SEND_FAILED_MSG_ERROR.create(exc, e.getMessage()).setForceLog(true);
                     }
                     final InternetAddress failedAddr = afe.getAddress();
                     if (null == failedAddr) {
-                        return MimeMailExceptionCode.SEND_FAILED_MSG_ERROR.create(exc, afe.getMessage()).setLogLevel(LogLevel.ERROR);
+                        return MimeMailExceptionCode.SEND_FAILED_MSG_ERROR.create(exc, afe.getMessage()).setForceLog(true);
                     }
-                    return MimeMailExceptionCode.SEND_FAILED_EXT.create(exc, failedAddr.toUnicodeString(), afe.getMessage()).setLogLevel(LogLevel.ERROR);
+                    return MimeMailExceptionCode.SEND_FAILED_EXT.create(exc, failedAddr.toUnicodeString(), afe.getMessage()).setForceLog(true);
                 }
                 return MimeMailExceptionCode.SEND_FAILED_EXT.create(
                     exc,
                     Arrays.toString(addrs),
-                    null == afe ? "" : '(' + afe.getMessage() + ')').setLogLevel(LogLevel.ERROR);
+                    null == afe ? "" : '(' + afe.getMessage() + ')').setForceLog(true);
             } else if (e instanceof javax.mail.StoreClosedException) {
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.STORE_CLOSED_EXT.create(

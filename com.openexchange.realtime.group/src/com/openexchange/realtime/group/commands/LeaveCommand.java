@@ -53,7 +53,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.GroupCommand;
 import com.openexchange.realtime.group.GroupDispatcher;
+import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.ActionHandler;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
 
 
 /**
@@ -64,20 +68,45 @@ import com.openexchange.realtime.packet.Stanza;
 public class LeaveCommand implements GroupCommand {
 
     @Override
-    public void perform(Stanza stanza, GroupDispatcher groupDispatcher) throws OXException {
+    public void perform(final Stanza stanza, final GroupDispatcher groupDispatcher) throws OXException {
         if (isSynchronous(stanza) && groupDispatcher.isMember(stanza.getOnBehalfOf())) {
-            Stanza signOffMessage = groupDispatcher.getSignOffMessage(stanza.getOnBehalfOf());
-            signOffMessage.setFrom(groupDispatcher.getId());
-            signOffMessage.setTo(stanza.getFrom());
+            if (shouldExecuteAsynchronously(groupDispatcher)) {
+                GroupDispatcher.SERVICE_REF.get().getService(ThreadPoolService.class).submit(new AbstractTask<Void>() {
 
-            groupDispatcher.leave(stanza.getOnBehalfOf());
-           
-            GroupDispatcher.SERVICE_REF.get().getService(MessageDispatcher.class).send(signOffMessage);
+                    @Override
+                    public Void call() throws Exception {
+                        doSignOff(stanza, groupDispatcher);
+                        return null;
+                    }
+                });
+            } else {
+                doSignOff(stanza, groupDispatcher);
+            }
         } else {
             groupDispatcher.leave(stanza.getFrom());
         }
     }
+
+    private void doSignOff(final Stanza stanza, final GroupDispatcher groupDispatcher) throws OXException {
+        Stanza signOffMessage = groupDispatcher.getSignOffMessage(stanza.getOnBehalfOf());
+        signOffMessage.setFrom(groupDispatcher.getId());
+        signOffMessage.setTo(stanza.getFrom());
+
+        groupDispatcher.leave(stanza.getOnBehalfOf());
+            
+        GroupDispatcher.SERVICE_REF.get().getService(MessageDispatcher.class).send(signOffMessage);
+    }
     
+    private boolean shouldExecuteAsynchronously(GroupDispatcher groupDispatcher) {
+        try {
+            return ActionHandler.isAsynchronous(groupDispatcher.getClass().getMethod("getSignOffMessage", ID.class));            
+        } catch (SecurityException e) {
+            return false;
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
+    }
+
     private boolean isSynchronous(Stanza stanza) {
         return stanza.getFrom().getProtocol().equals("call");
     }

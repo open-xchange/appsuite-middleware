@@ -296,7 +296,12 @@ public class Patches {
          * @param updatedTask
          */
         public static void adjustTaskStatus(Task originalTask, Task updatedTask) {
-            if (Task.DONE == updatedTask.getStatus() && Task.DONE != originalTask.getStatus()) {
+            if (false == originalTask.containsStatus()) {
+                /*
+                 * Nothing to restore
+                 */
+                return;
+            } else if (Task.DONE == updatedTask.getStatus() && Task.DONE != originalTask.getStatus()) {
                 /*
                  * 'Done' in Mac OS client: STATUS:COMPLETED / PERCENT-COMPLETE:100
                  */

@@ -52,15 +52,25 @@ package com.openexchange.ajax.writer;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.math.BigDecimal;
+import java.text.MessageFormat;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
+import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.json.JSONWriter;
 import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.meta.MetaContributor;
+import com.openexchange.ajax.meta.MetaContributorRegistry;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.groupware.container.DataObject;
+import com.openexchange.server.services.MetaContributors;
+import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 
 /**
@@ -71,6 +81,9 @@ import com.openexchange.tools.TimeZoneUtils;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class DataWriter {
+
+    /** The logger */
+    static final Log LOG = com.openexchange.log.Log.loggerFor(DataWriter.class);
 
     protected TimeZone timeZone;
 
@@ -235,7 +248,7 @@ public class DataWriter {
      * @param condition <code>true</code> to put; otherwise <code>false</code> to omit value
      * @throws JSONException If putting into JSON object fails
      */
-    public static void writeParameter(String name, BigDecimal value, JSONObject jsonObj, boolean condition) throws JSONException {
+    public static void writeParameter(final String name, final BigDecimal value, final JSONObject jsonObj, final boolean condition) throws JSONException {
         if (condition) {
             writeParameter(name, value, jsonObj);
         }
@@ -249,7 +262,7 @@ public class DataWriter {
      * @param jsonObj The JSON object to put into
      * @throws JSONException If putting into JSON object fails
      */
-    private static void writeParameter(String name, BigDecimal value, JSONObject jsonObj) throws JSONException {
+    private static void writeParameter(final String name, final BigDecimal value, final JSONObject jsonObj) throws JSONException {
         if (null == value) {
             jsonObj.put(name, JSONObject.NULL);
         } else {
@@ -400,7 +413,7 @@ public class DataWriter {
      * @param jsonArray the JSON array to put into
      * @param condition <code>true</code> to put; otherwise <code>false</code> to put {@link JSONObject#NULL}
      */
-    public static void writeValue(BigDecimal value, JSONArray jsonArray, boolean condition) {
+    public static void writeValue(final BigDecimal value, final JSONArray jsonArray, final boolean condition) {
         if (!condition || null == value) {
             jsonArray.put(JSONObject.NULL);
         } else {
@@ -561,8 +574,8 @@ public class DataWriter {
         jsonArray.put(JSONObject.NULL);
     }
 
-    protected void writeFields(final DataObject obj, final TimeZone tz, final JSONObject json) throws JSONException {
-        final WriterProcedure<DataObject> procedure = new WriterProcedure<DataObject>(obj, json, tz);
+    protected void writeFields(final DataObject obj, final TimeZone tz, final JSONObject json, final Session session) throws JSONException {
+        final WriterProcedure<DataObject> procedure = new WriterProcedure<DataObject>(obj, json, tz, session);
         if (!WRITER_MAP.forEachValue(procedure)) {
             final JSONException je = procedure.getError();
             if (null != je) {
@@ -571,103 +584,172 @@ public class DataWriter {
         }
     }
 
-    protected boolean writeField(final DataObject obj, final int column, final TimeZone tz, final JSONArray json) throws JSONException {
+    protected boolean writeField(final DataObject obj, final int column, final TimeZone tz, final JSONArray json, final Session session) throws JSONException {
         final FieldWriter<DataObject> writer = WRITER_MAP.get(column);
         if (null == writer) {
             return false;
         }
-        writer.write(obj, tz, json);
+        writer.write(obj, tz, json, session);
         return true;
     }
 
     protected static interface FieldWriter<T> {
 
         /**
-         * Writes this writer's value taken from specified data object to given JSON array.
+         * Writes specified value to given JSON array.
          *
-         * @param data the data object
+         * @param obj The value to write
+         * @param timeZone The time zone
          * @param json The JSON array
+         * @param session The associated session
+         *
          * @throws JSONException If writing to JSON array fails
          */
-        void write(T obj, TimeZone timeZone, JSONArray json) throws JSONException;
+        void write(T obj, TimeZone timeZone, JSONArray json, Session session) throws JSONException;
 
-        void write(T obj, TimeZone timeZone, JSONObject json) throws JSONException;
+        /**
+         * Writes specified value to given JSON object.
+         *
+         * @param obj The value to write
+         * @param timeZone The time zone
+         * @param json The JSON array
+         * @param session The associated session
+         * @throws JSONException If writing to JSON object fails
+         */
+        void write(T obj, TimeZone timeZone, JSONObject json, Session session) throws JSONException;
     }
 
     private static final FieldWriter<DataObject> OBJECT_ID_WRITER = new FieldWriter<DataObject>() {
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json, final Session session) {
             writeValue(obj.getObjectID(), json, obj.containsObjectID());
         }
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json, final Session session) throws JSONException {
             writeParameter(DataFields.ID, obj.getObjectID(), json, obj.containsObjectID());
         }
     };
 
     private static final FieldWriter<DataObject> CREATED_BY_WRITER = new FieldWriter<DataObject>() {
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json, final Session session) {
             writeValue(obj.getCreatedBy(), json, obj.containsCreatedBy());
         }
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json, final Session session) throws JSONException {
             writeParameter(DataFields.CREATED_BY, obj.getCreatedBy(), json, obj.containsCreatedBy());
         }
     };
 
     private static final FieldWriter<DataObject> CREATION_DATE_WRITER = new FieldWriter<DataObject>() {
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json, final Session session) {
             writeValue(obj.getCreationDate(), timeZone, json, obj.containsCreationDate());
         }
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json, final Session session) throws JSONException {
             writeParameter(DataFields.CREATION_DATE, obj.getCreationDate(), timeZone, json);
         }
     };
 
     private static final FieldWriter<DataObject> MODIFIED_BY_WRITER = new FieldWriter<DataObject>() {
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json, final Session session) {
             writeValue(obj.getModifiedBy(), json, obj.containsModifiedBy());
         }
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json, final Session session) throws JSONException {
             writeParameter(DataFields.MODIFIED_BY, obj.getModifiedBy(), json, obj.containsModifiedBy());
         }
     };
 
     private static final FieldWriter<DataObject> LAST_MODIFIED_WRITER = new FieldWriter<DataObject>() {
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json, final Session session) {
             writeValue(obj.getLastModified(), timeZone, json, obj.containsLastModified());
         }
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json, final Session session) throws JSONException {
             writeParameter(DataFields.LAST_MODIFIED, obj.getLastModified(), timeZone, json, obj.containsLastModified());
         }
     };
 
     private static final FieldWriter<DataObject> LAST_MODIFIED_UTC_WRITER = new FieldWriter<DataObject>() {
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json, final Session session) {
             writeValue(obj.getLastModified(), UTC, json, obj.containsLastModified());
         }
         @Override
-        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json, final Session session) throws JSONException {
             writeParameter(DataFields.LAST_MODIFIED_UTC, obj.getLastModified(), UTC, json, obj.containsLastModified());
         }
     };
 
+    private static final FieldWriter<DataObject> META_WRITER = new FieldWriter<DataObject>() {
+
+        @Override
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONArray json, final Session session) throws JSONException {
+            // Get meta map
+            Map<String, Object> map = obj.getMap();
+            // Invoke contribution service
+            map = contributeTo(map, obj, session);
+
+            // Write meta map
+            if (null == map || map.isEmpty()) {
+                writeValue((String) null, json, false);
+            } else {
+                writeValue((JSONValue) JSONCoercion.coerceToJSON(map), json, true);
+            }
+        }
+
+        @Override
+        public void write(final DataObject obj, final TimeZone timeZone, final JSONObject json, final Session session) throws JSONException {
+            // Get meta map
+            Map<String, Object> map = obj.getMap();
+            // Invoke contribution service
+            map = contributeTo(map, obj, session);
+
+            // Write meta map
+            if (null != map && !map.isEmpty()) {
+                writeParameter(DataFields.META, (JSONValue) JSONCoercion.coerceToJSON(map), json, true);
+            }
+        }
+    };
+
+    protected static Map<String, Object> contributeTo(final Map<String, Object> map, final DataObject obj, final Session session) {
+        final String topic = obj.getTopic();
+        if (null != topic) {
+            final MetaContributorRegistry registry = MetaContributors.getRegistry();
+            if (null == registry) {
+                return map;
+            }
+            final Set<MetaContributor> contributors = registry.getMetaContributors(topic);
+            if (null != contributors && !contributors.isEmpty()) {
+                final Map<String, Object> mapp = null == map ? new LinkedHashMap<String, Object>(2) : map;
+                final int objectID = obj.getObjectID();
+                final String id = objectID <= 0 ? null : Integer.toString(objectID);
+                for (final MetaContributor contributor : contributors) {
+                    try {
+                        contributor.contributeTo(mapp, id, session);
+                    } catch (final Exception e) {
+                        LOG.warn(MessageFormat.format("Cannot contribute to entity (contributor={0}, entity={1})", contributor.getClass().getName(), Integer.valueOf(objectID)), e);
+                    }
+                }
+                return mapp;
+            }
+        }
+        return map;
+    }
+
     static {
-        final TIntObjectMap<FieldWriter<DataObject>> m = new TIntObjectHashMap<FieldWriter<DataObject>>(6, 1);
+        final TIntObjectMap<FieldWriter<DataObject>> m = new TIntObjectHashMap<FieldWriter<DataObject>>(8, 1);
         m.put(DataObject.OBJECT_ID, OBJECT_ID_WRITER);
         m.put(DataObject.CREATED_BY, CREATED_BY_WRITER);
         m.put(DataObject.CREATION_DATE, CREATION_DATE_WRITER);
         m.put(DataObject.MODIFIED_BY, MODIFIED_BY_WRITER);
         m.put(DataObject.LAST_MODIFIED, LAST_MODIFIED_WRITER);
         m.put(DataObject.LAST_MODIFIED_UTC, LAST_MODIFIED_UTC_WRITER);
+        m.put(DataObject.META, META_WRITER);
         WRITER_MAP = m;
     }
 

@@ -50,10 +50,10 @@
 package com.openexchange.http.requestwatcher;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
-import static com.openexchange.http.requestwatcher.RequestWatcherExceptionMessage.*;
+import com.openexchange.exception.OXExceptionStrings;
 
 
 /**
@@ -61,22 +61,24 @@ import static com.openexchange.http.requestwatcher.RequestWatcherExceptionMessag
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public enum RequestWatcherExceptionCode implements OXExceptionCode {
+public enum RequestWatcherExceptionCode implements DisplayableOXExceptionCode {
 
     /** Error while trying to interrupt Request processing. */
-    ERROR_WHILE_INTERRUPTING_REQUEST_PROCESSING(ERROR_WHILE_INTERRUPTING_REQUEST_PROCESSING_MSG, CATEGORY_ERROR, 1),
+    ERROR_WHILE_INTERRUPTING_REQUEST_PROCESSING("Error while trying to interrupt Request processing.", CATEGORY_ERROR, 1, null),
     /** Error while sending the servlet status code. */
-    ERROR_WHILE_SENDING_SERVLET_STATUS_CODE(ERROR_WHILE_SENDING_SERVLET_STATUS_CODE_MSG, CATEGORY_ERROR, 1),
+    ERROR_WHILE_SENDING_SERVLET_STATUS_CODE("Error while sending the servlet status code.", CATEGORY_ERROR, 2, null),
     ;
 
     private final String message;
     private final int number;
     private final Category category;
+    private final String displayMessage;
 
-    private RequestWatcherExceptionCode(final String message, final Category category, final int detailNumber) {
+    private RequestWatcherExceptionCode(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         number = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -102,6 +104,11 @@ public enum RequestWatcherExceptionCode implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     /**

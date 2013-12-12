@@ -58,21 +58,11 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class ImportExportExceptionMessages implements LocalizableStrings {
 
-    public static final String CANNOT_EXPORT_MSG = "Could not export the folder %1$s in the format %2$s.";
+    public static final String CANNOT_EXPORT_MSG = "Could not export the folder %1$s.";
 
-    public static final String LOADING_CONTACTS_FAILED_MSG = "Could not load contacts";
+    public static final String LOADING_CONTACTS_FAILED_MSG = "Could not load contacts.";
 
-    public static final String UTF8_ENCODE_FAILED_MSG = "Could not encode as UTF-8";
-
-    public static final String NO_DATABASE_CONNECTION_MSG = "Can not get connection to database.";
-
-    public static final String SQL_PROBLEM_MSG = "Invalid SQL Query: %s";
-
-    public static final String LOADING_FOLDER_FAILED_MSG = "Could not load folder %s";
-
-    public static final String ICAL_EMITTER_SERVICE_MISSING_MSG = "The necessary iCal emitter service is missing.";
-
-    public static final String NUMBER_FAILED_MSG = "Parsing %1$s to a number failed.";
+    public static final String LOADING_FOLDER_FAILED_MSG = "Could not load folder %s.";
 
     public static final String ICAL_CONVERSION_FAILED_MSG = "Conversion to iCal failed.";
 
@@ -80,19 +70,15 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 
     public static final String CANNOT_IMPORT_MSG = "Can not import the format %2$s into folder %1$s.";
 
-    public static final String CALENDAR_DISABLED_MSG = "Calendar module is not enabled for the user. Appointments can not be imported.";
+    public static final String CALENDAR_DISABLED_MSG = "Calendar module is not enabled. Appointments can not be imported.";
 
-    public static final String TASKS_DISABLED_MSG = "Tasks module is not enabled for the user. Tasks cannot be imported.";
-
-    public static final String ICAL_PARSER_SERVICE_MISSING_MSG = "The necessary iCal parser service is missing.";
+    public static final String TASKS_DISABLED_MSG = "Tasks module is not enabled. Tasks cannot be imported.";
 
     public static final String RESOURCE_HARD_CONFLICT_MSG = "Importing the appointment failed due to a conflicting resource.";
 
-    public static final String WARNINGS_MSG = "Warnings when importing file: %d warnings";
+    public static final String WARNINGS_MSG = "Warnings when importing file.";
 
-    public static final String UNKNOWN_VCARD_FORMAT_MSG = "Could not recognize format of the following data: %s";
-
-    public static final String CONTACTS_DISABLED_MSG = "Contacts module is not enabled for the user. Contacts cannot be imported.";
+    public static final String CONTACTS_DISABLED_MSG = "Contacts module is not enabled. Contacts cannot be imported.";
 
     public static final String NO_VCARD_FOUND_MSG = "No vCard to import found.";
 
@@ -112,28 +98,13 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 
     public static final String NO_FIELD_FOR_NAMING_IN_LINE_MSG = "No field was set that might give the contact in line %s a display name: no name, company or E-Mail.";
 
-    public static final String IOEXCEPTION_MSG = "Could not read InputStream as string";
-
-    public static final String NO_IMPORTER_MSG = "Cannot find an importer for format %s into folders %s";
-
-    public static final String NO_EXPORTER_MSG = "Cannot find an exporter for folder %s to format %s";
-
-    public static final String NO_TYPES_CONSTANT_MSG = "Cannot translate id=%d to a constant from Types.";
-
-    public static final String NO_FOLDEROBJECT_CONSTANT_MSG = "Cannot translate id=%d to a constant from FolderObject.";
-
     public static final String ONLY_ONE_FILE_MSG = "Can only handle one file, not %s";
-
+    
     public static final String UNKNOWN_FORMAT_MSG = "Unknown format: %s";
 
     public static final String EMPTY_FILE_MSG = "Empty file uploaded.";
 
     public static final String FILE_NOT_EXISTS_MSG = "The file you selected does not exist.";
-
-    // Could not load ContactInterface to write storage contacts.
-    public static final String CONTACT_INTERFACE_MISSING_MSG = "Could not load ContactInterface to write storage contacts.";
-
-    public static final String COULD_NOT_WRITE_MSG = "Could not write entry into database.";
 
     //  Ignoring invalid value for field "%1$s": %2$s
     public static final String IGNORE_FIELD_MSG = "Ignoring invalid value for field \"%1$s\": %2$s";
@@ -145,8 +116,6 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 
     // Pretty generic: Could not one element in an import
 	public static final String COULD_NOT_CREATE_MSG = "Could not create the following element: %s";
-
-	public static final String TEMP_FILE_NOT_FOUND_MSG = "Could not find the temp file needed for the conversion.";
 
 	public static final String NEED_FOLDER_MSG = "Missing parameter for folder";
 

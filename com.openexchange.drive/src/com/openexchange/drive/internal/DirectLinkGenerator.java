@@ -51,7 +51,7 @@ package com.openexchange.drive.internal;
 
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.drive.management.DriveConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.java.Strings;
@@ -66,7 +66,6 @@ public class DirectLinkGenerator {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DirectLinkGenerator.class);
 
     private final SyncSession session;
-    private final ConfigurationService configService;
 
     private Boolean documentPreview;
 
@@ -78,7 +77,6 @@ public class DirectLinkGenerator {
     public DirectLinkGenerator(SyncSession session) {
         super();
         this.session = session;
-        this.configService = DriveServiceLookup.getService(ConfigurationService.class);
     }
 
     /**
@@ -87,7 +85,7 @@ public class DirectLinkGenerator {
      * @return The quota link
      */
     public String getQuotaLink() {
-        return getProperty("com.openexchange.drive.directLinkQuota", "[protocol]://[hostname]")
+        return DriveConfig.getInstance().getDirectLinkQuota()
             .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
             .replaceAll("\\[hostname\\]", session.getHostData().getHost())
             .replaceAll("\\[uiwebpath\\]", getWebpath())
@@ -115,7 +113,7 @@ public class DirectLinkGenerator {
      * @return The direct link fragments
      */
     public String getFileLinkFragments(String folderID, String objectID) {
-        return getProperty("com.openexchange.drive.directLinkFragmentsFile", "m=infostore&f=[folder]&i=[object]")
+        return DriveConfig.getInstance().getDirectLinkFragmentsFile()
             .replaceAll("\\[folder\\]", folderID)
             .replaceAll("\\[object\\]", objectID)
         ;
@@ -139,7 +137,7 @@ public class DirectLinkGenerator {
      * @return The direct link
      */
     public String getFileLink(String folderID, String objectID) {
-        return getProperty("com.openexchange.drive.directLinkFile", "[protocol]://[hostname]/[uiwebpath]#[filefragments]")
+        return DriveConfig.getInstance().getDirectLinkFile()
             .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
             .replaceAll("\\[hostname\\]", session.getHostData().getHost())
             .replaceAll("\\[uiwebpath\\]", getWebpath())
@@ -154,7 +152,7 @@ public class DirectLinkGenerator {
      * @return The direct link, or <code>null</code> if not available
      */
     public String getFilePreviewLink(File file) {
-        int[] dimensions = getDimensions("com.openexchange.drive.previewImageSize", 800, 800);
+        int[] dimensions = DriveConfig.getInstance().getPreviewImageSize();
         return getFileImageLink(file, dimensions[0], dimensions[1]);
     }
 
@@ -165,7 +163,7 @@ public class DirectLinkGenerator {
      * @return The direct link, or <code>null</code> if not available
      */
     public String getFileThumbnailLink(File file) {
-        int[] dimensions = getDimensions("com.openexchange.drive.thumbnailImageSize", 100, 100);
+        int[] dimensions = DriveConfig.getInstance().getThumbnailImageSize();
         return getFileImageLink(file, dimensions[0], dimensions[1]);
     }
 
@@ -174,9 +172,7 @@ public class DirectLinkGenerator {
         if (false == Strings.isEmpty(mimeType)) {
             // patterns borrowed from web interface
             if (mimeType.matches("(?i)^(image\\/(gif|png|jpe?g|bmp|tiff))$")) {
-                return getProperty("com.openexchange.drive.imageLinkImageFile", "[protocol]://[hostname]/[dispatcherPrefix]/files" +
-                    "?action=document&folder=[folder]&id=[object]&version=[version]&delivery=download&scaleType=contain" +
-                    "&width=[width]&height=[height]&rotate=true")
+                return DriveConfig.getInstance().getImageLinkImageFile()
                     .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
                     .replaceAll("\\[hostname\\]", session.getHostData().getHost())
                     .replaceAll("\\[dispatcherPrefix\\]", getDispatcherPrefix())
@@ -188,8 +184,7 @@ public class DirectLinkGenerator {
                 ;
             }
             if (mimeType.matches("(?i)^audio\\/(mpeg|m4a|m4b|mp3|ogg|oga|opus|x-m4a)$")) {
-                return getProperty("com.openexchange.drive.imageLinkAudioFile", "[protocol]://[hostname]/[dispatcherPrefix]/image/file/" +
-                    "mp3Cover?folder=[folder]&id=[object]&version=[version]&delivery=download&scaleType=contain&width=[width]&height=[height]")
+                return DriveConfig.getInstance().getImageLinkAudioFile()
                     .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
                     .replaceAll("\\[hostname\\]", session.getHostData().getHost())
                     .replaceAll("\\[dispatcherPrefix\\]", getDispatcherPrefix())
@@ -203,9 +198,7 @@ public class DirectLinkGenerator {
             if ((mimeType.matches(
                 "(?i)^application\\/.*(ms-word|ms-excel|ms-powerpoint|msword|msexcel|mspowerpoint|openxmlformats|opendocument|pdf|rtf).*$")
                 || mimeType.matches("(?i)^text\\/.*(rtf|plain).*$")) && hasDocumentPreview()) {
-                return getProperty("com.openexchange.drive.imageLinkDocumentFile", "[protocol]://[hostname]/[dispatcherPrefix]/files?action=" +
-                    "document&format=preview_image&folder=[folder]&id=[object]&version=[version]&delivery=download&scaleType=contain" +
-                    "&width=[width]&height=[height]")
+                return DriveConfig.getInstance().getImageLinkDocumentFile()
                     .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
                     .replaceAll("\\[hostname\\]", session.getHostData().getHost())
                     .replaceAll("\\[dispatcherPrefix\\]", getDispatcherPrefix())
@@ -227,7 +220,7 @@ public class DirectLinkGenerator {
      * @return The direct link fragments
      */
     public String getDirectoryLinkFragments(String folderID) {
-        return getProperty("com.openexchange.drive.directLinkFragmentsDirectory", "m=infostore&f=[folder]")
+        return DriveConfig.getInstance().getDirectLinkFragmentsDirectory()
             .replaceAll("\\[folder\\]", folderID)
         ;
     }
@@ -239,16 +232,12 @@ public class DirectLinkGenerator {
      * @return The direct link
      */
     public String getDirectoryLink(String folderID) {
-        return getProperty("com.openexchange.drive.directLinkDirectory", "[protocol]://[hostname]/[uiwebpath]#[directoryfragments]")
+        return DriveConfig.getInstance().getDirectLinkDirectory()
             .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
             .replaceAll("\\[hostname\\]", session.getHostData().getHost())
             .replaceAll("\\[uiwebpath\\]", getWebpath())
             .replaceAll("\\[directoryfragments\\]", getDirectoryLinkFragments(folderID))
         ;
-    }
-
-    private String getProperty(String propertyName, String defaultValue) {
-        return null != configService ? configService.getProperty(propertyName, defaultValue) : defaultValue;
     }
 
     private boolean hasDocumentPreview() {
@@ -269,29 +258,12 @@ public class DirectLinkGenerator {
         return documentPreview.booleanValue();
     }
 
-    private int[] getDimensions(String propertyName, int defaultWidth, int defaultHeight) {
-        String value = getProperty(propertyName, null);
-        if (false == Strings.isEmpty(value)) {
-            int idx = value.indexOf('x');
-            if (1 > idx) {
-                LOG.warn("Invalid value for {}, falling back to defaults.", propertyName);
-            } else {
-                try {
-                    return new int[] { Integer.parseInt(value.substring(0, idx)), Integer.parseInt(value.substring(idx + 1)) };
-                } catch (NumberFormatException e) {
-                    LOG.warn("Invalid value for {}, falling back to defaults.", propertyName, e);
-                }
-            }
-        }
-        return new int[] { defaultWidth, defaultHeight };
-    }
-
     private String getWebpath() {
-        return getProperty("com.openexchange.UIWebPath", "/ox6/index.html");
+        return DriveConfig.getInstance().getUiWebPath();
     }
 
     private String getDispatcherPrefix() {
-        return trimSlashes(getProperty("com.openexchange.dispatcher.prefix", "ajax"));
+        return trimSlashes(DriveConfig.getInstance().getDispatcherPrefix());
     }
 
     private static String trimSlashes(String path) {
@@ -305,6 +277,5 @@ public class DirectLinkGenerator {
         }
         return path;
     }
-
 
 }

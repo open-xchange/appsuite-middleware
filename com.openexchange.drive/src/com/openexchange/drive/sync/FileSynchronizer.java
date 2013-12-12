@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
@@ -68,9 +67,9 @@ import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.comparison.ThreeWayComparison;
 import com.openexchange.drive.comparison.VersionMapper;
-import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.drive.internal.SyncSession;
 import com.openexchange.drive.internal.UploadHelper;
+import com.openexchange.drive.management.DriveConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStoragePermission;
@@ -132,8 +131,9 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                     uploadActions.add(uploadAction);
                     syncResult.addActionForClient(uploadAction);
                 } else {
-                    syncResult.addActionForClient(new ErrorFileAction(clientVersion, renamedVersion, null, path,
-                        DriveExceptionCodes.NO_CREATE_FILE_PERMISSION.create(path), true));
+                    OXException e = DriveExceptionCodes.NO_CREATE_FILE_PERMISSION.create(path);
+                    LOG.warn("Client upload not allowed for " + clientVersion, e);
+                    syncResult.addActionForClient(new ErrorFileAction(clientVersion, renamedVersion, null, path, e , true));
                 }
             }
         }
@@ -144,8 +144,9 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  */
                 ThreeWayComparison<FileVersion> twc = new ThreeWayComparison<FileVersion>();
                 twc.setClientVersion(clientVersion);
-                syncResult.addActionForClient(new ErrorFileAction(null, clientVersion, twc, path,
-                    DriveExceptionCodes.CONFLICTING_FILENAME.create(clientVersion.getName()), true));
+                OXException e = DriveExceptionCodes.CONFLICTING_FILENAME.create(clientVersion.getName());
+                LOG.warn("Client upload not allowed due to unicode conflicts: " + clientVersion, e);
+                syncResult.addActionForClient(new ErrorFileAction(null, clientVersion, twc, path, e, true));
             }
         }
         return syncResult;
@@ -153,12 +154,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
 
     @Override
     protected int getMaxActions() {
-        int defaultValue = 500;
-        ConfigurationService configService = DriveServiceLookup.getService(ConfigurationService.class);
-        if (null != configService) {
-            return configService.getIntProperty("com.openexchange.drive.maxDirectoryActions", defaultValue);
-        }
-        return defaultValue;
+        return DriveConfig.getInstance().getMaxFileActions();
     }
 
     @Override
@@ -215,10 +211,12 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 /*
                  * not allowed, let client re-download the file, indicate as error without quarantine flag
                  */
+                OXException e = DriveExceptionCodes.NO_DELETE_FILE_PERMISSION.create(comparison.getServerVersion().getName(), path);
+                LOG.warn("Client change refused for " + comparison.getServerVersion(), e);
                 result.addActionForClient(new DownloadFileAction(session, comparison.getClientVersion(),
                     ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
                 result.addActionForClient(new ErrorFileAction(comparison.getClientVersion(), comparison.getServerVersion(), comparison,
-                    path, DriveExceptionCodes.NO_DELETE_FILE_PERMISSION.create(comparison.getServerVersion().getName(), path), false));
+                    path, e, false));
                 return 2;
             }
         case MODIFIED:
@@ -256,8 +254,10 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 /*
                  * ... then mark that file as error (without quarantine)...
                  */
-                result.addActionForClient(new ErrorFileAction(comparison.getClientVersion(), comparison.getServerVersion(), comparison,
-                    path, DriveExceptionCodes.NO_MODIFY_FILE_PERMISSION.create(comparison.getServerVersion().getName(), path), false));
+                OXException e = DriveExceptionCodes.NO_MODIFY_FILE_PERMISSION.create(comparison.getServerVersion().getName(), path);
+                LOG.warn("Client change refused for " + comparison.getServerVersion(), e);
+                result.addActionForClient(new ErrorFileAction(
+                    comparison.getClientVersion(), comparison.getServerVersion(), comparison, path, e, false));
                 /*
                  * ... then upload it, and download the server version afterwards
                  */
@@ -368,8 +368,10 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                     uploadActions.add(uploadAction);
                     result.addActionForClient(uploadAction);
                 } else {
-                    result.addActionForClient(new ErrorFileAction(comparison.getClientVersion(), renamedVersion, comparison, path,
-                        DriveExceptionCodes.NO_CREATE_FILE_PERMISSION.create(path), true));
+                    OXException e = DriveExceptionCodes.NO_CREATE_FILE_PERMISSION.create(path);
+                    LOG.warn("Client upload not allowed for " + comparison.getClientVersion(), e);
+                    result.addActionForClient(new ErrorFileAction(
+                        comparison.getClientVersion(), renamedVersion, comparison, path, e, true));
                 }
                 /*
                  * ... and download the server version aftwerwards
@@ -488,7 +490,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
         if (fileName.endsWith(DriveConstants.FILEPART_EXTENSION)) {
             return true; // no temporary upload files
         }
-        if (DriveConstants.EXCLUDED_FILENAMES_PATTERN.matcher(fileName).matches()) {
+        if (DriveConfig.getInstance().getExcludedFilenamesPattern().matcher(fileName).matches()) {
             return true; // no excluded files
         }
         return false;

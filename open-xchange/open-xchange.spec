@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 8
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -15,12 +15,12 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Source1:       open-xchange.init
 Summary:       The Open-Xchange backend
+Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-authentication
 Requires:      open-xchange-authorization
 Requires:      open-xchange-mailstore
 Requires:      open-xchange-httpservice
-Requires:      open-xchange-theme-default
 Requires:      open-xchange-smtp >= @OXVERSION@
 %if 0%{?rhel_version}
 # Bug #23216
@@ -60,10 +60,20 @@ ln -sf ../etc/init.d/open-xchange %{buildroot}/sbin/rcopen-xchange
 /sbin/rcopen-xchange
 
 %changelog
+* Mon Dec 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-09
+* Fri Dec 06 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-10
+* Fri Dec 06 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-11-29
+* Tue Dec 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-11-28
 * Wed Nov 20 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth candidate for 7.4.1 release
 * Tue Nov 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth candidate for 7.4.1 release
+* Mon Nov 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-11-12
 * Mon Nov 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-11-12
 * Fri Nov 08 2013 Marcus Klein <marcus.klein@open-xchange.com>

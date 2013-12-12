@@ -117,7 +117,7 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
             timeZone = null == timeZoneId ? userTimeZone : getTimeZone(timeZoneId);
         }
         final JSONArray jsonResponseArray = new JSONArray();
-        final AppointmentWriter writer = new AppointmentWriter(timeZone);
+        final AppointmentWriter writer = new AppointmentWriter(timeZone).setSession(req.getSession());
 
         for (final Appointment appointment : appointmentList) {
             try {
@@ -149,8 +149,8 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
             timeZone = null == timeZoneId ? userTimeZone : getTimeZone(timeZoneId);
         }
 
-        final JSONArray jsonResponseArray = new JSONArray();
-        final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone);
+        final JSONArray jsonResponseArray = new JSONArray(appointmentList.size());
+        final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone).setSession(req.getSession());
         for (final Appointment appointment : appointmentList) {
             final JSONObject jsonAppointmentObj = new JSONObject();
             try {
@@ -177,8 +177,8 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
             final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
             timeZone = null == timeZoneId ? userTimeZone : getTimeZone(timeZoneId);
         }
-        final JSONArray jsonResponseArray = new JSONArray();
-        final AppointmentWriter writer = new AppointmentWriter(timeZone);
+        final JSONArray jsonResponseArray = new JSONArray(appointmentList.size());
+        final AppointmentWriter writer = new AppointmentWriter(timeZone).setSession(req.getSession());
 
         for (final Appointment appointment : appointmentList) {
             try {
@@ -227,7 +227,7 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
             final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
             timeZone = null == timeZoneId ? userTimeZone : getTimeZone(timeZoneId);
         }
-        final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
+        final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone).setSession(request.getSession());
         appointmentwriter.setSession(session);
 
         if (appointmentobject.getRecurrenceType() != CalendarObject.NONE && recurrencePosition > 0) {

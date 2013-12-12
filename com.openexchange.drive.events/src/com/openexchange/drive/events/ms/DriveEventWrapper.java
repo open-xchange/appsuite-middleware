@@ -81,6 +81,10 @@ public class DriveEventWrapper {
         if (null != folderIDs) {
             map.put("__folderIDs", driveEvent.getFolderIDs().toArray(new String[folderIDs.size()]));
         }
+        String pushToken = driveEvent.getPushTokenReference();
+        if (null != pushToken) {
+            map.put("__pushToken", pushToken);
+        }
         return map;
     }
 
@@ -96,8 +100,9 @@ public class DriveEventWrapper {
         }
         Integer contextID = (Integer)map.get("__contextID");
         String[] folderIDs = (String[])map.get("__folderIDs");
+        String pushToken = (String)map.get("__pushToken");
         if (null != folderIDs && null != contextID) {
-            return new DriveEventImpl(contextID.intValue(), new HashSet<String>(Arrays.asList(folderIDs)), true);
+            return new DriveEventImpl(contextID.intValue(), new HashSet<String>(Arrays.asList(folderIDs)), true, pushToken);
         } else {
             return null;
         }

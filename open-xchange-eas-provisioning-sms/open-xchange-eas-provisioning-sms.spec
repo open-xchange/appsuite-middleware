@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-eas-provisioning-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 8
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -15,10 +15,11 @@ BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       EAS provisioning extension to sent provisioning to mobile phones via SMS
+Autoreqprov:   no
 Requires:      open-xchange-eas-provisioning-core >= @OXVERSION@
 Provides:      open-xchange-eas-provisioning-action
 Provides:      open-xchange-mobile-configuration-json-action-sms = %{version}
-Obsoletes:     open-xchange-mobile-configuration-json-action-sms <= %{version}
+Obsoletes:     open-xchange-mobile-configuration-json-action-sms < %{version}
 
 %description
 EAS provisioning extension to sent provisioning to mobile phones via SMS
@@ -55,10 +56,20 @@ ox_update_permissions /opt/open-xchange/etc/eas-provisioning-sms.properties root
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/eas-provisioning-sms.properties
 
 %changelog
+* Mon Dec 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-09
+* Fri Dec 06 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-10
+* Fri Dec 06 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-11-29
+* Tue Dec 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-11-28
 * Wed Nov 20 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth candidate for 7.4.1 release
 * Tue Nov 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth candidate for 7.4.1 release
+* Mon Nov 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-11-12
 * Mon Nov 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-11-12
 * Fri Nov 08 2013 Marcus Klein <marcus.klein@open-xchange.com>

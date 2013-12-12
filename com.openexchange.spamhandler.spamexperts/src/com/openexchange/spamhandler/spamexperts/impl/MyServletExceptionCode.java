@@ -50,9 +50,10 @@
 package com.openexchange.spamhandler.spamexperts.impl;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.groupware.EnumComponent;
 
 /**
@@ -60,7 +61,7 @@ import com.openexchange.groupware.EnumComponent;
  *
  *
  */
-public enum MyServletExceptionCode implements OXExceptionCode {
+public enum MyServletExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * A spamexperts interface error occurred. action: \"%1$s\" ,response: \"%2$s\"
@@ -77,10 +78,35 @@ public enum MyServletExceptionCode implements OXExceptionCode {
 
     private final Category category;
 
+    /**
+     * Message displayed to the user
+     */
+    private String displayMessage;
+
+    /**
+     * Initializes a new {@link MyServletExceptionCode}.
+     * 
+     * @param message
+     * @param category
+     * @param detailNumber
+     */
     private MyServletExceptionCode(final String message, final Category category, final int detailNumber) {
+        this(message, category, detailNumber, null);
+    }
+
+    /**
+     * Initializes a new {@link MyServletExceptionCode}.
+     * 
+     * @param message
+     * @param category
+     * @param detailNumber
+     * @param displayMessage
+     */
+    private MyServletExceptionCode(final String message, final Category category, final int detailNumber, final String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage == null ? OXExceptionStrings.MESSAGE : displayMessage;
     }
 
     @Override
@@ -109,8 +135,16 @@ public enum MyServletExceptionCode implements OXExceptionCode {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDisplayMessage() {
+        return this.displayMessage;
+    }
+
+    /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {

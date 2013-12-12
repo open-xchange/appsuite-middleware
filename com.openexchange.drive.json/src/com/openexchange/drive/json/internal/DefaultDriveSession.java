@@ -51,6 +51,8 @@ package com.openexchange.drive.json.internal;
 
 import java.util.List;
 import java.util.Locale;
+import com.openexchange.drive.DriveClientType;
+import com.openexchange.drive.DriveClientVersion;
 import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.groupware.ldap.User;
@@ -71,19 +73,24 @@ public class DefaultDriveSession implements DriveSession {
     private Boolean diagnostics;
     private List<DriveFileField> fields;
     private final HostData hostData;
+    private final DriveClientVersion clientVersion;
 
     /**
      * Initializes a new {@link DefaultDriveSession}.
      *
-     * @param session The session
+     * @param session The server session
      * @param rootFolderID The root folder ID
+     * @param hostData The host data as extracted from the corresponding http request
+     * @param apiVersion The API version as set by the client, or <code>0</code> if not set
+     * @param clientVersion The client version as set by the client, or {@link DriveClientVersion#VERSION_0} if not set
      */
-    public DefaultDriveSession(ServerSession session, String rootFolderID, HostData hostData, int apiVersion) {
+    public DefaultDriveSession(ServerSession session, String rootFolderID, HostData hostData, int apiVersion, DriveClientVersion clientVersion) {
         super();
         this.session = session;
         this.rootFolderID = rootFolderID;
         this.hostData = hostData;
         this.apiVersion = apiVersion;
+        this.clientVersion = clientVersion;
     }
 
     /**
@@ -158,6 +165,16 @@ public class DefaultDriveSession implements DriveSession {
     @Override
     public int getApiVersion() {
         return apiVersion;
+    }
+
+    @Override
+    public DriveClientVersion getClientVersion() {
+        return clientVersion;
+    }
+
+    @Override
+    public DriveClientType getClientType() {
+        return DriveClientType.parse(null != session ? session.getClient() : null);
     }
 
     @Override

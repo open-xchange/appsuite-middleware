@@ -61,7 +61,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
+import com.openexchange.ajax.meta.MetaContributorRegistry;
+import com.openexchange.ajax.meta.internal.MetaContributorTracker;
 import com.openexchange.exception.internal.I18nCustomizer;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.java.ConcurrentList;
@@ -81,7 +82,9 @@ public final class GlobalActivator implements BundleActivator {
     private volatile Initialization initialization;
     private volatile ServiceTracker<StringParser,StringParser> parserTracker;
     private volatile ServiceRegistration<StringParser> parserRegistration;
+    private volatile ServiceRegistration<MetaContributorRegistry> metaContributorsRegistration;
     private volatile List<ServiceTracker<?,?>> trackers;
+
 
     /**
      * Initializes a new {@link GlobalActivator}
@@ -104,9 +107,14 @@ public final class GlobalActivator implements BundleActivator {
             this.trackers = trackers;
             trackers.add(new ServiceTracker<I18nService, I18nService>(context, I18nService.class, new I18nCustomizer(context)));
 
+            final MetaContributorTracker metaContributors = new MetaContributorTracker(context);
+            trackers.add(metaContributors);
+
             for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
+
+            metaContributorsRegistration = context.registerService(MetaContributorRegistry.class, metaContributors, null);
 
             logger.info("Global bundle successfully started");
         } catch (final Exception e) {
@@ -211,6 +219,13 @@ public final class GlobalActivator implements BundleActivator {
                 this.initialization = null;
             }
             shutdownStringParsers();
+
+            final ServiceRegistration<MetaContributorRegistry> metaContributorsRegistration = this.metaContributorsRegistration;
+            if (null != metaContributorsRegistration) {
+                metaContributorsRegistration.unregister();
+                this.metaContributorsRegistration = null;
+            }
+
             logger.debug("Global bundle successfully stopped");
         } catch (final Exception e) {
             logger.error("", e);

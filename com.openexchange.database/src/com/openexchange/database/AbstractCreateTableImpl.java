@@ -58,6 +58,7 @@ import java.sql.Statement;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 
 /**
  * Abstract class for easily implementing {@link CreateTableService} services.
@@ -87,7 +88,12 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
                     if (tableExists(con, tableName)) {
                         LOG.info("A table with name \"{}\" already exists. Aborting table creation.", tableName);
                     } else {
-                        stmt.execute(create);
+                        try {
+                            stmt.execute(create);
+                        } catch (SQLException e) {
+                            final String sep = System.getProperty("line.separator");
+                            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, new StringAllocator(256).append(e.getMessage()).append(sep).append("Affected statement:").append(sep).append(create).toString());
+                        }
                     }
                 }
                 final String procedureName = extractProcedureName(create);
@@ -95,12 +101,17 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
                     if (procedureExists(con, procedureName)) {
                         LOG.info("A procedure with name \"{}\" already exists. Aborting procedure creation.", procedureName);
                     } else {
-                        stmt.execute(create);
+                        try {
+                            stmt.execute(create);
+                        } catch (SQLException e) {
+                            final String sep = System.getProperty("line.separator");
+                            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, new StringAllocator(256).append(e.getMessage()).append(sep).append("Affected statement:").append(sep).append(create).toString());
+                        }
                     }
                 }
             }
         } catch (final SQLException e) {
-            e.printStackTrace();
+            // e.printStackTrace();
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
@@ -117,7 +128,7 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
         }
         return null;
     }
-    
+
     private static String extractProcedureName(final String create) {
         final Matcher m = PATTERN_CREATE_PROCEDURE.matcher(create);
         if (m.find()) {
@@ -140,7 +151,7 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
         }
         return retval;
     }
-    
+
     private static final boolean procedureExists(final Connection con, final String procedure) throws SQLException {
         final DatabaseMetaData metaData = con.getMetaData();
         ResultSet rs = null;

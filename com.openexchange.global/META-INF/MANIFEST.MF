@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.global
 Bundle-Version: 7.4.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: com.openexchange.authentication,
+Export-Package: com.openexchange.ajax.meta,
+ com.openexchange.authentication,
  com.openexchange.cache,
  com.openexchange.cache.dynamic,
  com.openexchange.configjump,

@@ -296,6 +296,7 @@ public class RdbContactStorage extends DefaultContactStorage {
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         ConnectionHelper connectionHelper = new ConnectionHelper(session);
         Connection connection = connectionHelper.getWritable();
+        int deletedContacts = 0;
         try {
             /*
              * get a list of object IDs to delete
@@ -318,7 +319,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * delete contacts - per convention, don't check last modification time when clearing a folder
              */
-            deleteContacts(serverSession, connection, folderID, objectIDs, Long.MIN_VALUE);
+            deletedContacts = deleteContacts(serverSession, connection, folderID, objectIDs, Long.MIN_VALUE);
             /*
              * commit
              */
@@ -330,7 +331,11 @@ public class RdbContactStorage extends DefaultContactStorage {
             DBUtils.rollback(connection);
             throw e;
         } finally {
-            connectionHelper.backWritable();
+            if (deletedContacts <= 0) {
+                connectionHelper.backWritableAfterReading();
+            } else {
+                connectionHelper.backWritable();
+            }
         }
     }
 

@@ -69,13 +69,21 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class JsonDriveAction<T extends DriveVersion> implements DriveAction<T> {
+public class JsonDriveAction<T extends DriveVersion> implements DriveAction<T> {
 
-    protected final Action action;
-    protected final T version;
-    protected final T newVersion;
-    protected final Map<String, Object> parameters;
+    private final Action action;
+    private final T version;
+    private final T newVersion;
+    private final Map<String, Object> parameters;
 
+    /**
+     * Initializes a new {@link JsonDriveAction}.
+     *
+     * @param action The action
+     * @param version The (previous) version referenced by the action
+     * @param newVersion The (new) version referenced by the action
+     * @param parameters The list of action parameters (possible parameter names are defined at {@link DriveAction#PARAMETER_NAMES})
+     */
     public JsonDriveAction(Action action, T version, T newVersion, Map<String, Object> parameters) {
         super();
         this.action = action;
@@ -84,7 +92,16 @@ public abstract class JsonDriveAction<T extends DriveVersion> implements DriveAc
         this.parameters = parameters;
     }
 
-    public static JSONObject serialize(DriveAction<? extends DriveVersion> action, Locale locale) throws JSONException {
+    /**
+     * Serializes the supplied drive action to JSON.
+     *
+     * @param <T> The drive version type, either {@link FileVersion} or {@link DirectoryVersion}
+     * @param action The action to serialize
+     * @param locale The locale to use during serialization
+     * @return The serialized action
+     * @throws JSONException
+     */
+    public static <T extends DriveVersion> JSONObject serialize(DriveAction<T> action, Locale locale) throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.putOpt("action", action.getAction().toString().toLowerCase());
         if (null != action.getVersion()) {
@@ -121,10 +138,35 @@ public abstract class JsonDriveAction<T extends DriveVersion> implements DriveAc
         return jsonObject;
     }
 
+    /**
+     * Serializes the supplied drive actions to JSON.
+     *
+     * @param <T> The drive version type, either {@link FileVersion} or {@link DirectoryVersion}
+     * @param actions The actions to serialize
+     * @param locale The locale to use during serialization
+     * @return The serialized actions
+     * @throws JSONException
+     */
+    public static <T extends DriveVersion> JSONArray serializeActions(List<DriveAction<T>> actions, Locale locale) throws JSONException {
+        JSONArray jsonArray = new JSONArray();
+        for (DriveAction<? extends DriveVersion> action : actions) {
+            jsonArray.put(JsonDriveAction.serialize(action, locale));
+        }
+        return jsonArray;
+    }
+
+    /**
+     * Serializes the supplied drive actions to JSON.
+     *
+     * @param actions The actions to serialize, either of type {@link FileVersion} or {@link DirectoryVersion}
+     * @param locale The locale to use during serialization
+     * @return The serialized actions
+     * @throws JSONException
+     */
     public static JSONArray serialize(List<DriveAction<? extends DriveVersion>> actions, Locale locale) throws JSONException {
         JSONArray jsonArray = new JSONArray();
         for (DriveAction<? extends DriveVersion> action : actions) {
-            jsonArray.put(serialize(action, locale));
+            jsonArray.put(JsonDriveAction.serialize(action, locale));
         }
         return jsonArray;
     }

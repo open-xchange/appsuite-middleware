@@ -248,6 +248,10 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
      */
     private void ensureSequence(Stanza stanza, Member receiver) throws OXException {
         if (stanza.getSequenceNumber() != -1) {
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("peerMapsPerID before ensuring Sequence: " + peerMapPerID);
+                LOG.debug("SequencePrincipal for peerMapPerID lookup is: " + stanza.getSequencePrincipal());
+            }
             ConcurrentHashMap<String, AtomicLong> peerMap = peerMapPerID.get(stanza.getSequencePrincipal());
             if (peerMap == null) {
                 peerMap = new ConcurrentHashMap<String, AtomicLong>();
@@ -257,11 +261,17 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
 
                         @Override
                         public void handle(String event, ID id, Object source, Map<String, Object> properties) {
+                            if(LOG.isDebugEnabled()) {
+                                LOG.debug("Removing SequencePrincipal from peerMapPerID lookup table: " + id);
+                            }
                             peerMapPerID.remove(id);
                         }
 
                     });
                 } else {
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Found other peerMap for SequencePrincipal: {} with value {}", stanza.getSequencePrincipal(), otherPeerMap);
+                    }
                     peerMap = otherPeerMap;
                 }
             }
@@ -270,12 +280,25 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
                 nextNumber = new AtomicLong(0);
                 AtomicLong otherNextNumber = peerMap.putIfAbsent(receiver.getUuid(), nextNumber);
                 nextNumber = (otherNextNumber != null) ? otherNextNumber : nextNumber;
-                LOG.debug("nextNumber for receiver {} was null, adding nextNumber: {}", receiver.getUuid(), nextNumber);
+                if(otherNextNumber != null) {
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Found other nextNumber to use for receiver: {}, nextNumber {}", receiver.getUuid(), otherNextNumber);
+                    }
+                    nextNumber = otherNextNumber;
+                }
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("nextNumber for receiver {} was null, adding nextNumber: {}", receiver.getUuid(), nextNumber);
+                }
             }
             Long ensuredSequence = nextNumber.incrementAndGet() - 1;
-            LOG.debug("Updating sequence number for {}: {}", receiver, ensuredSequence);
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Updating sequence number for {}: {}", receiver.getUuid(), ensuredSequence);
+            }
             stanza.setSequenceNumber(ensuredSequence);
-            stanza.trace("Updating sequence number for " + receiver + ": " + ensuredSequence);
+            stanza.trace("Updating sequence number for " + receiver.getUuid() + ": " + ensuredSequence);
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("peerMapsPerID after ensuring Sequence: {}", peerMapPerID);
+            }
         }
     }
 }

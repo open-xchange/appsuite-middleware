@@ -53,7 +53,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.exception.OXException;
@@ -78,31 +81,30 @@ public class InfostoreFileServletTest {
     /**
      * Instance to test
      */
+    @InjectMocks
     private InfostoreFileServlet infostoreFileServlet = null;
 
     /**
      * Mock of the {@link Publication}
      */
+    @Mock
     private Publication publication;
 
     /**
      * {@link IDBasedFileAccessFactory} mock
      */
+    @Mock
     private IDBasedFileAccessFactory idBasedFileAccessFactory;
 
     /**
      * {@link IDBasedFileAccess} mock
      */
+    @Mock
     private IDBasedFileAccess idBasedFileAccess;
 
     @Before
     public void setUp() throws Exception {
-        this.infostoreFileServlet = new InfostoreFileServlet();
-
-        // MEMBERS
-        this.publication = PowerMockito.mock(Publication.class);
-        this.idBasedFileAccessFactory = PowerMockito.mock(IDBasedFileAccessFactory.class);
-        this.idBasedFileAccess = PowerMockito.mock(IDBasedFileAccess.class);
+        MockitoAnnotations.initMocks(this);
 
         InfostoreFileServlet.setFileFactory(this.idBasedFileAccessFactory);
         PowerMockito.when(this.idBasedFileAccessFactory.createAccess((Session) Matchers.any())).thenReturn(idBasedFileAccess);

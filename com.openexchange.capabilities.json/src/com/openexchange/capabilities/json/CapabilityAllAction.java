@@ -54,6 +54,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -82,10 +83,9 @@ public class CapabilityAllAction implements AJAXActionService {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         // Get capabilities
-        return new AJAXRequestResult(services.getService(CapabilityService.class).getCapabilities(
-            session.getUserId(),
-            session.getContextId(),
-            true), "capability");
+        CapabilitySet capabilities = services.getService(CapabilityService.class).getCapabilities(
+            session.getUserId(), session.getContextId(), true);
+        return null == capabilities ? new AJAXRequestResult() : new AJAXRequestResult(capabilities.asSet(), "capability");
     }
 
 }

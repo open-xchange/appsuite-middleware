@@ -50,28 +50,29 @@
 package com.openexchange.documentation.internal;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link DocumentationExceptionCode} - Exceptions for the documentation module.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public enum DocumentationExceptionCode implements OXExceptionCode {
+public enum DocumentationExceptionCode implements DisplayableOXExceptionCode {
     /** Module '%s' already registered. */
-    MODULE_ALREADY_REGISTERED(DocumentationExceptionMessage.MODULE_ALREADY_REGISTERED_MSG, Category.CATEGORY_ERROR, 1),
+    MODULE_ALREADY_REGISTERED("Module '%s' is already registered.", Category.CATEGORY_ERROR, 1),
     /** Container '%s' already registered. */
-    CONTAINER_ALREADY_REGISTERED(DocumentationExceptionMessage.CONTAINER_ALREADY_REGISTERED_MSG, Category.CATEGORY_ERROR, 2),
+    CONTAINER_ALREADY_REGISTERED("Container '%s' is already registered.", Category.CATEGORY_ERROR, 2),
     /** The module name is missing in the module description. */
-    MODULE_NAME_MISSING(DocumentationExceptionMessage.MODULE_NAME_MISSING_MSG, Category.CATEGORY_ERROR, 3),
+    MODULE_NAME_MISSING("The module name is missing in the module description.", Category.CATEGORY_ERROR, 3),
     /** The container name is missing in the container description. */
-    CONTAINER_NAME_MISSING(DocumentationExceptionMessage.CONTAINER_NAME_MISSING_MSG, Category.CATEGORY_ERROR, 4),
+    CONTAINER_NAME_MISSING("The container name is missing in the container description.", Category.CATEGORY_ERROR, 4),
     /** The module '%s' is not known in the registry. */
-    MODULE_NOT_REGISTERED(DocumentationExceptionMessage.MODULE_NOT_REGISTERED_MSG, Category.CATEGORY_ERROR, 5),
+    MODULE_NOT_REGISTERED("The module '%s' is not known in the registry.", Category.CATEGORY_ERROR, 5),
     /** The container '%s' is not known in the registry. */
-    CONTAINER_NOT_REGISTERED(DocumentationExceptionMessage.CONTAINER_NOT_REGISTERED_MSG, Category.CATEGORY_ERROR, 6),
+    CONTAINER_NOT_REGISTERED("The container '%s' is not known in the registry.", Category.CATEGORY_ERROR, 6),
     ;
 
     private final String message;
@@ -137,6 +138,11 @@ public enum DocumentationExceptionCode implements OXExceptionCode {
      */
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return OXExceptionStrings.MESSAGE;
     }
 
 }

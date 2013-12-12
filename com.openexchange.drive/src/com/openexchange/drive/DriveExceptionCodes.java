@@ -50,6 +50,7 @@
 package com.openexchange.drive;
 
 import static com.openexchange.drive.DriveExceptionMessages.CLIENT_OUTDATED_MSG;
+import static com.openexchange.drive.DriveExceptionMessages.CLIENT_VERSION_UPDATE_AVAILABLE_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.CONFLICTING_FILENAME_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.CONFLICTING_PATH_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.DIRECTORYVERSION_NOT_FOUND_MSG;
@@ -164,8 +165,14 @@ public enum DriveExceptionCodes implements DisplayableOXExceptionCode {
     /** The directory \"%1$s\" with checksum \"%2$s\" caused repeated synchronization problems */
     REPEATED_SYNC_PROBLEMS("The directory \"%1$s\" with checksum \"%2$s\" caused repeated synchronization problems", REPEATED_SYNC_PROBLEMS_MSG, Category.CATEGORY_WARNING, 26),
 
-    /** The client application you're using is outdated and no longer supported - please upgrade to a newer version */
+    /** The client application you're using is outdated and no longer supported - please upgrade to a newer version. */
     CLIENT_OUTDATED(CLIENT_OUTDATED_MSG, CLIENT_OUTDATED_MSG, Category.CATEGORY_WARNING, 27),
+
+    /** The client application you're using is outdated and no longer supported - please upgrade to a newer version. */
+    CLIENT_VERSION_OUTDATED("Client outdated - current: \"%1$s\", required: \"%2$s\"", CLIENT_OUTDATED_MSG, Category.CATEGORY_WARNING, 28),
+
+    /** The client application you're using is outdated and no longer supported - please upgrade to a newer version. */
+    CLIENT_VERSION_UPDATE_AVAILABLE("Client update available - current: \"%1$s\", available: \"%2$s\"", CLIENT_VERSION_UPDATE_AVAILABLE_MSG, Category.CATEGORY_WARNING, 29),
 
     ;
 

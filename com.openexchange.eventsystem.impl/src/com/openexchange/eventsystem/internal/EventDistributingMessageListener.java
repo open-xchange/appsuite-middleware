@@ -95,18 +95,17 @@ public final class EventDistributingMessageListener implements MessageListener<M
             return;
         }
 
-        final EventHandlerTracker handlers = this.handlers;
-        final Set<EventHandlerReference> eventHandlers = handlers.getHandlers(event.getTopic());
+        final Set<EventHandlerReference> eventHandlers = this.handlers.getHandlers(event.getTopic());
         // If there are no handlers, then we are done
         if (eventHandlers.isEmpty()) {
             return;
         }
 
         if (isAsync) {
-            ThreadPools.getThreadPool().submit(new DispatchTask(event, eventHandlers, handlers), CallerRunsBehavior.getInstance());
+            ThreadPools.getThreadPool().submit(new DispatchTask(event, eventHandlers), CallerRunsBehavior.getInstance());
         } else {
             for (final EventHandlerReference eventHandlerWrapper : eventHandlers) {
-                handlers.dispatchEvent(eventHandlerWrapper, event);
+                eventHandlerWrapper.handleEvent(event);
             }
         }
     }
@@ -117,18 +116,16 @@ public final class EventDistributingMessageListener implements MessageListener<M
 
         private final Event event;
         private final Set<EventHandlerReference> eventHandlers;
-        private final EventHandlerTracker handlers;
 
-        DispatchTask(final Event event, final Set<EventHandlerReference> eventHandlers, final EventHandlerTracker handlers) {
+        DispatchTask(final Event event, final Set<EventHandlerReference> eventHandlers) {
             this.event = event;
             this.eventHandlers = eventHandlers;
-            this.handlers = handlers;
         }
 
         @Override
         public Object call() throws Exception {
             for (final EventHandlerReference eventHandlerWrapper : eventHandlers) {
-                handlers.dispatchEvent(eventHandlerWrapper, event);
+                eventHandlerWrapper.handleEvent(event);
             }
             return null;
         }

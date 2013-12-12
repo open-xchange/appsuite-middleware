@@ -59,48 +59,21 @@ import com.openexchange.i18n.LocalizableStrings;
 public class PasswordExceptionMessage implements LocalizableStrings {
 
     /**
+     * New password too short.
+     */
+    public final static String PASSWORD_SHORT_MSG = "The entered password is too short. Please try again using a longer password.";
+
+    /**
+     * New password too weak.
+     */
+    public final static String PASSWORD_WEAK_MSG = "The entered password is too weak. Please try again using a more complex password.";
+
+
+    /**
      * Initializes a new {@link PasswordExceptionMessage}.
      */
     private PasswordExceptionMessage() {
         super();
     }
-
-    /**
-     * Cannot change password for any reason.
-     */
-    public final static String PASSWORD_FAILED_MSG = "Cannot change password < %s >, see log files for details.";
-
-    /**
-     * New password too short.
-     */
-    public final static String PASSWORD_SHORT_MSG = "New password is too short.";
-
-    /**
-     * New password too weak.
-     */
-    public final static String PASSWORD_WEAK_MSG = "New password is too weak.";
-
-    /**
-     * User not found.
-     */
-    public final static String PASSWORD_NOUSER_MSG = "Cannot find user.";
-
-    /**
-     * User not found.
-     */
-    public final static String LDAP_ERROR_MSG = "LDAP error.";
-
-    /**
-     * A database connection cannot be obtained.
-     */
-    public final static String NO_CONNECTION_MSG = "Cannot get database connection.";
-
-    /**
-     * No permission to modify resources in context %1$s
-     */
-    public final static String PERMISSION_MSG = "No permission to modify resources in context %1$s";
-
-    // Cannot change password: %1$s
-    public static final String PASSWORD_FAILED_WITH_MSG_MSG = "Cannot change password: %1$s";
 
 }

@@ -75,6 +75,7 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Queue;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.DatabaseService;
@@ -466,6 +467,13 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                     createMe.setType(getFolderType(createMe.getParentFolderID(), storageParameters.getContext(), con));
                 } else {
                     createMe.setType(getTypeByFolderType(t));
+                }
+            }
+            // Meta
+            {
+                final Map<String, Object> meta = folder.getMeta();
+                if (null != meta) {
+                    createMe.setMeta(meta);
                 }
             }
             // Permissions
@@ -1613,6 +1621,13 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 final Type t = folder.getType();
                 if (null != t) {
                     updateMe.setType(getTypeByFolderType(t));
+                }
+            }
+            // Meta
+            {
+                final Map<String, Object> meta = folder.getMeta();
+                if (null != meta) {
+                    updateMe.setMeta(meta);
                 }
             }
             // Permissions

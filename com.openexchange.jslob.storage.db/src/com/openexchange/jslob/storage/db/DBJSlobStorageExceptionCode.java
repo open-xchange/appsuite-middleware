@@ -51,41 +51,60 @@ package com.openexchange.jslob.storage.db;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.Category.EnumCategory;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link DBJSlobStorageExceptionCode}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum DBJSlobStorageExceptionCode implements OXExceptionCode {
+public enum DBJSlobStorageExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * An unexpected error occurred: %1$s
      */
-    UNEXPECTED_ERROR(DBJSlobStorageExceptionMessages.UNEXPECTED_ERROR_MSG, EnumCategory.ERROR, 1),
+    UNEXPECTED_ERROR(DBJSlobStorageExceptionCode.UNEXPECTED_ERROR_MSG, EnumCategory.ERROR, 1),
     /**
      * A SQL error occurred: %1$s
      */
-    SQL_ERROR(DBJSlobStorageExceptionMessages.SQL_ERROR_MSG, EnumCategory.ERROR, 2),
+    SQL_ERROR(DBJSlobStorageExceptionCode.SQL_ERROR_MSG, EnumCategory.ERROR, 2, OXExceptionStrings.SQL_ERROR_MSG),
     /**
      * No entry available for identifier: %1$s
      */
-    NO_ENTRY(DBJSlobStorageExceptionMessages.NO_ENTRY_MSG, EnumCategory.ERROR, 3),
+    NO_ENTRY(DBJSlobStorageExceptionCode.NO_ENTRY_MSG, EnumCategory.ERROR, 3),
     /**
      * Entry already locked for identifier: %1$s
      */
-    ALREADY_LOCKED(DBJSlobStorageExceptionMessages.ALREADY_LOCKED_MSG, EnumCategory.ERROR, 4),
+    ALREADY_LOCKED(DBJSlobStorageExceptionCode.ALREADY_LOCKED_MSG, EnumCategory.ERROR, 4),
     /**
      * Lock failed for entry with identifier: %1$s
      */
-    LOCK_FAILED(DBJSlobStorageExceptionMessages.LOCK_FAILED_MSG, EnumCategory.ERROR, 5),
+    LOCK_FAILED(DBJSlobStorageExceptionCode.LOCK_FAILED_MSG, EnumCategory.ERROR, 5),
     /**
      * Unlock failed for entry with identifier: %1$s
      */
-    UNLOCK_FAILED(DBJSlobStorageExceptionMessages.UNLOCK_FAILED_MSG, EnumCategory.ERROR, 6), ;
+    UNLOCK_FAILED(DBJSlobStorageExceptionCode.UNLOCK_FAILED_MSG, EnumCategory.ERROR, 6), ;
+
+    // An unexpected error occurred: %1$s
+    private static final String UNEXPECTED_ERROR_MSG = "An unexpected error occurred: %1$s";
+
+    // A SQL error occurred: %1$s
+    private static final String SQL_ERROR_MSG = "A SQL error occurred: %1$s";
+
+    // No entry available for identifier: %1$s
+    private static final String NO_ENTRY_MSG = "No entry available for identifier: %1$s";
+
+    // Entry already locked for identifier: %1$s
+    private static final String ALREADY_LOCKED_MSG = "Entry already locked for identifier: %1$s";
+
+    // Lock failed for entry with identifier: %1$s
+    private static final String LOCK_FAILED_MSG = "Lock failed for entry with identifier: %1$s";
+
+    // Unlock failed for entry with identifier: %1$s
+    private static final String UNLOCK_FAILED_MSG = "Unlock failed for entry with identifier: %1$s";
 
     /**
      * The error code prefix for JSlob exceptions.
@@ -98,11 +117,35 @@ public enum DBJSlobStorageExceptionCode implements OXExceptionCode {
 
     private final String message;
 
+    /**
+     * Message displayed to the user
+     */
+    private String displayMessage;
 
+    /**
+     * Initializes a new {@link DBJSlobStorageExceptionCode}.
+     * 
+     * @param message
+     * @param category
+     * @param detailNumber
+     */
     private DBJSlobStorageExceptionCode(final String message, final Category category, final int detailNumber) {
+        this(message, category, detailNumber, null);
+    }
+
+    /**
+     * Initializes a new {@link DBJSlobStorageExceptionCode}.
+     * 
+     * @param message
+     * @param category
+     * @param detailNumber
+     * @param displayMessage
+     */
+    private DBJSlobStorageExceptionCode(final String message, final Category category, final int detailNumber, final String displayMessage) {
         this.message = message;
         number = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage == null ? OXExceptionStrings.MESSAGE : displayMessage;
     }
 
     @Override
@@ -131,8 +174,16 @@ public enum DBJSlobStorageExceptionCode implements OXExceptionCode {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDisplayMessage() {
+        return this.displayMessage;
+    }
+
+    /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {

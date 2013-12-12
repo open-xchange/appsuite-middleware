@@ -311,7 +311,7 @@ public abstract class SessionServlet extends AJAXServlet {
         if (!ctx.isEnabled()) {
             sessiondService.removeSession(sessionId);
             LOG.info("The context {} associated with session is locked.", ctx.getContextId());
-            throw SessionExceptionCodes.CONTEXT_LOCKED.create();
+            throw SessionExceptionCodes.CONTEXT_LOCKED.create(ctx.getContextId(), ctx.getName());
         }
         checkIP(session, req.getRemoteAddr());
     }

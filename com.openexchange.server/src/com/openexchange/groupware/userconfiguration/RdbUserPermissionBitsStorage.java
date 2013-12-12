@@ -56,13 +56,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 
 /**
@@ -82,10 +85,19 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
     }
 
     @Override
-    public UserPermissionBits getUserPermissionBits(int userId, Context ctx) throws OXException {
+    public UserPermissionBits getUserPermissionBits(final int userId, final int contextId) throws OXException {
+        final ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class);
+        if (null == contextService) {
+            throw ServiceExceptionCode.absentService(ContextService.class);
+        }
+        return getUserPermissionBits(userId, contextService.getContext(contextId));
+    }
+
+    @Override
+    public UserPermissionBits getUserPermissionBits(final int userId, final Context ctx) throws OXException {
         try {
             return loadUserPermissionBits(userId, ctx);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -94,7 +106,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
     @Override
     public UserPermissionBits[] getUserPermissionBits(final Context ctx, final User[] users) throws OXException {
         try {
-            int[] userIds = new int[users.length];
+            final int[] userIds = new int[users.length];
             for(int i = 0; i < users.length; i++) {
                 userIds[i] = users[i].getId();
             }
@@ -105,7 +117,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
     }
 
     @Override
-    public UserPermissionBits[] getUserPermissionBits(Context ctx, int[] userIds) throws OXException {
+    public UserPermissionBits[] getUserPermissionBits(final Context ctx, final int[] userIds) throws OXException {
         try {
             return loadUserPermissionBits(ctx, null, userIds);
         } catch (final SQLException e) {
@@ -148,7 +160,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
         saveUserPermissionBits(perms.getPermissionBits(), perms.getUserId(), insert, perms.getContextId(), writeCon);
     }
 
-    private static Context getContext(UserPermissionBits perms) throws OXException {
+    private static Context getContext(final UserPermissionBits perms) throws OXException {
         return ContextStorage.getInstance().getContext(perms.getContextId());
     }
 
@@ -204,7 +216,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
         Connection writeCon = writeConArg;
         boolean closeConnection = false;
         PreparedStatement stmt = null;
-        ContextImpl ctx = new ContextImpl(ctxId);
+        final ContextImpl ctx = new ContextImpl(ctxId);
         try {
             if (writeCon == null) {
                 writeCon = DBPool.pickupWriteable(ctx);

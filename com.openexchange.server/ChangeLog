@@ -1,3 +1,118 @@
+* 2013-12-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30278: Corrected handling of timestamp in "updates" request of contacts module
+
+* 2013-12-12 - marcus.klein@open-xchange.com
+
+ - Fix for bug 30275: Removed dependency to package open-xchange-themes-default from package open-xchange for AppSuite only installations.
+
+* 2013-12-09 - marcus.klein@open-xchange.com
+
+ - Fix for bug 30145: Have to clear variable in post installation script before using it.
+
+* 2013-12-09 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29729: Skip filestorage deletion if bucket no longer exists
+ - Fix for bug 30204: Don't try and restore task status if not previously set
+
+* 2013-12-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29954: Enable support for EAS favorite folder if property "com.openexchange.usm.eas.allow_folder_selection" is set to "true"
+ - Fix for bug 29350: Explicitly check folder permissions, not folder visibility which may also be granted through administer permission
+ - Fix for bug 29631: Return connection with "after-reading" flag if not used for write access
+
+* 2013-12-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30190: Fixed parsing of CLI call
+ - Fix for bug 29729: Ignore possible "404 Not Found" HTTP error if S3 bucket is supposed to be deleted anyway
+ - Fix for bug 27640: Properly decode "Subject" header in JSON MIME representation
+ - Fix for bug 30191: Explicitly specify number of bytes of 'uid' VARCHAR column considered in index
+
+* 2013-12-05 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30123: Remotely distribute and handle password change event  
+ - Fix for bug 30186: Obfuscate sensitive data on update operation in distributed map  
+
+* 2013-12-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30154: Don't abort importing Google contacts if no more contact images are allowed to be fetched due to temporary rate limiting
+ - Fix for bug 30146: Doubled accepted length of HTML content when performing in-depth sanitizing (white-list, etc.)
+
+* 2013-12-04 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29847: Don't create HTTP session implicitly 
+
+* 2013-12-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29816: Added "TLSv1" to enabled protocols accepted by Open-Xchange as a client
+ - Fix for bug 30135: Added null guard when parsing user attributes delivered via SOAP
+ - Fix for bug 30115: Introduced possibility to specify an IP-based black-list for mail account hosts
+
+* 2013-12-02 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30100: Include causing throwable for java.io.FileNotFoundException 
+
+* 2013-12-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30119: Avoid superfluous database updates on JSlob write-back requests
+ - Fix for bug 30114: Properly sanitize CSS selectors
+ - Fix for bug 29809: Drop personal in formation leftovers from backup tables
+
+* 2013-11-29 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 29495: Removed port 587 from list of secure smtp ports
+ - Fix for bug 30050: Extended logging for folders
+
+* 2013-11-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30069: Fixed regex to match a publication URL to support any word character, but not only alphabetic ones
+
+* 2013-11-29 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 29655: Added possibility to change appointments, if external organizer and UID is given (OLOX2 requirement).
+
+* 2013-11-29 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30070: Use single operation for moving and renaming folders 
+
+* 2013-11-28 - marcus.klein@open-xchange.com
+
+ - Fix for bug 30063: Do no try to roll back to the save point if MySQL did already a complete transaction rollback.
+ - Fix for bug 30051: Added missing build step for de_CH l10n package to install the PO file during package build.
+
+* 2013-11-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30065: Changed misleading wording on no-op login request
+
+* 2013-11-27 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 29982: Correct handling of URLs as database hostnames
+
+* 2013-11-27 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29853: Check for duplicate folder name during insert/update
+ - Fix for bug 30049: Added missing import to javax.management
+  
+* 2013-11-26 - marcus.klein@open-xchange.com
+
+ - Fix for bug 29734: Marked paths.perfMap not as configuration file anymore.
+ - Fix for bug 29981: Be resilient against concurrent reads and modifications.
+
+* 2013-11-26 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30003: Introduced 'pushToken' parameter for drive requests to associate the registration token in generated events 
+ - Fix for bug 29949: Extend the sizes of the 'fname' column in the 'oxfolder_tree' and the 'name' column in the 'virtualTree' table 
+
+* 2013-11-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29914: Cleansed all duplicate log4j occurrences from runtime system
+ - Fix for bug 30027: Trim date values prior to passing to iCal parser
+ - Fix for bug 30029: Avoid unexpected semicolon on color-quoting for plain text
+
+* 2013-11-25 - steffen.templin@open-xchange.com
+
+ - Fix for Bug 29967: Use proper credentials when accessing an external transport account
+
 * 2013-11-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 29823: Delegate acquiring stream from part to thread pool if possible
@@ -9,7 +124,7 @@
  - Fix for bug 29860: Tolerate non-deletable file from file storage on user delete attempt
  - Fix for bug 29925: Propagate proper event in case auto-login is turned off and short-term session container elapsed
 
-* 2013-11-22- tobias.friedrich@open-xchange.com
+* 2013-11-22 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 29904: Validate numerical identifiers for infostore file metadata 
 
@@ -30,7 +145,7 @@
 * 2013-11-19 - marc.arens@open-xchange.com
 
  - Fix for bug 29851: Keep Stanza to send proper client acks before recasting for local/remote delivery
- 
+
 * 2013-11-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 29438: Deal with changing User-Agent identifier when Apple Media Player jumps in
@@ -45,7 +160,7 @@
 
  - Fix for bug 29794: Prevent concurrent cleanup via mutual exclusion
  - Fix for bug 29795: Prevent concurrent cleanup via mutual exclusion
- 
+
 * 2013-11-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 29824: Don't re-distribute already remotely received events

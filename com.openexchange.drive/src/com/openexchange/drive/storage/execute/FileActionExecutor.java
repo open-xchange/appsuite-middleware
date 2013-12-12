@@ -242,7 +242,7 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
          */
         ServerFileVersion versionToRemove = ServerFileVersion.valueOf(action.getVersion(), path, session);
         FileChecksum fileChecksum = versionToRemove.getFileChecksum();
-        if (DriveConstants.EMPTY_MD5.equals(fileChecksum.getChecksum())) {
+        if (false == session.hasTempFolder() || DriveConstants.EMPTY_MD5.equals(fileChecksum.getChecksum())) {
             // don't preserve empty files
             session.getStorage().deleteFile(versionToRemove.getFile());
             session.getChecksumStore().removeFileChecksum(fileChecksum);

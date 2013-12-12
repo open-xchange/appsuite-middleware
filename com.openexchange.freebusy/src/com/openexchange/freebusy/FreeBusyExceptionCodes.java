@@ -50,9 +50,11 @@
 package com.openexchange.freebusy;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link FreeBusyExceptionCodes}
@@ -61,17 +63,17 @@ import com.openexchange.exception.OXExceptionFactory;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public enum FreeBusyExceptionCodes implements OXExceptionCode {
+public enum FreeBusyExceptionCodes implements DisplayableOXExceptionCode {
 
-    NO_PROVIDERS_AVAILABLE(FreeBusyExceptionMessages.NO_PROVIDERS_AVAILABLE_MSG, Category.CATEGORY_SERVICE_DOWN, 1),
-    AMBIGUOUS_PARTICIPANT(FreeBusyExceptionMessages.AMBIGUOUS_PARTICIPANT_MSG, Category.CATEGORY_CONFLICT, 2),
-    PARTICIPANT_NOT_FOUND(FreeBusyExceptionMessages.PARTICIPANT_NOT_FOUND_MSG, CATEGORY_USER_INPUT, 3),
-    FREEBUSY_NOT_ENABLED(FreeBusyExceptionMessages.FREEBUSY_NOT_ENABLED_MSG, CATEGORY_PERMISSION_DENIED, 4),
-    DATA_NOT_AVAILABLE(FreeBusyExceptionMessages.DATA_NOT_AVAILABLE_MSG, CATEGORY_USER_INPUT, 5),
-    COMMUNICATION_FAILURE(FreeBusyExceptionMessages.COMMUNICATION_FAILURE_MSG, CATEGORY_SERVICE_DOWN, 6),
-    EXTERNAL_ERROR(FreeBusyExceptionMessages.EXTERNAL_ERROR_MSG, CATEGORY_ERROR, 7),
-    INTERNAL_ERROR(FreeBusyExceptionMessages.INTERNAL_ERROR_MSG, CATEGORY_ERROR, 8),
-    CONFIGURATION_ERROR(FreeBusyExceptionMessages.CONFIGURATION_ERROR_MSG, CATEGORY_CONFIGURATION, 9),
+    NO_PROVIDERS_AVAILABLE("No free/busy providers available.", FreeBusyExceptionMessages.NO_PROVIDERS_AVAILABLE_MSG, Category.CATEGORY_SERVICE_DOWN, 1),
+    AMBIGUOUS_PARTICIPANT("The participant \"%1$s\" is ambiguous.", FreeBusyExceptionMessages.AMBIGUOUS_PARTICIPANT_MSG, Category.CATEGORY_CONFLICT, 2),
+    PARTICIPANT_NOT_FOUND("The participant \"%1$s\" can't be found.", FreeBusyExceptionMessages.PARTICIPANT_NOT_FOUND_MSG, CATEGORY_USER_INPUT, 3),
+    FREEBUSY_NOT_ENABLED("Free/busy is not enabled for user %1$d in context %2$d.", FreeBusyExceptionMessages.FREEBUSY_NOT_ENABLED_MSG, CATEGORY_PERMISSION_DENIED, 4),
+    DATA_NOT_AVAILABLE("Free/busy data for \"%1$s\" is not available.", FreeBusyExceptionMessages.DATA_NOT_AVAILABLE_MSG, CATEGORY_USER_INPUT, 5),
+    COMMUNICATION_FAILURE("A communication error occured while processing the free/busy request (\"%1$s\").", OXExceptionStrings.MESSAGE, CATEGORY_SERVICE_DOWN, 6),
+    EXTERNAL_ERROR("An external error occured while processing the free/busy request (\"%1$s\").", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 7),
+    INTERNAL_ERROR("An internal error occured while processing the free/busy request (\"%1$s\").", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 8),
+    CONFIGURATION_ERROR("A configuration error occured (\"%1$s\").", OXExceptionStrings.MESSAGE, CATEGORY_CONFIGURATION, 9),
     ;
 
     private static final String PREFIX = "FRB";
@@ -79,11 +81,13 @@ public enum FreeBusyExceptionCodes implements OXExceptionCode {
     private final Category category;
     private final int number;
     private final String message;
+    private final String displayMessage;
 
-    private FreeBusyExceptionCodes(String message, Category category, int detailNumber) {
+    private FreeBusyExceptionCodes(String message, final String displayMessage, Category category, int detailNumber) {
         this.message = message;
         number = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage;
     }
 
     @Override
@@ -139,6 +143,14 @@ public enum FreeBusyExceptionCodes implements OXExceptionCode {
      */
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.exception.DisplayableOXExceptionCode#getDisplayMessage()
+     */
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
 }

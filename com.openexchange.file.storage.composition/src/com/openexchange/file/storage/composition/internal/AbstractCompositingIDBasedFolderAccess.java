@@ -67,6 +67,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
+import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageEventConstants;
@@ -166,6 +167,11 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
 
     @Override
     public String moveFolder(String folderId, String newParentId) throws OXException {
+        return moveFolder(folderId, newParentId, null);
+    }
+
+    @Override
+    public String moveFolder(String folderId, String newParentId, String newName) throws OXException {
         FolderID folderID = new FolderID(folderId);
         FileStorageFolderAccess folderAccess = getFolderAccess(folderID);
         FileStorageFolder[] path = folderAccess.getPath2DefaultFolder(folderID.getFolderId());
@@ -173,13 +179,18 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
         String newID;
         Event deleteEvent = new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(folderID, path));
         if (folderID.getAccountId().equals(newParentID.getAccountId()) && folderID.getService().equals(newParentID.getService())) {
-            newID = folderAccess.moveFolder(folderID.getFolderId(), newParentID.getFolderId());
+            newID = folderAccess.moveFolder(folderID.getFolderId(), newParentID.getFolderId(), newName);
         } else {
             FileStorageFolder sourceFolder = folderAccess.getFolder(folderID.getFolderId());
-            FileStorageFolder toCreate = new IDManglingFolder(sourceFolder, null, newParentID.getFolderId());
+            DefaultFileStorageFolder toCreate = new DefaultFileStorageFolder();
+            toCreate.setName(null != newName ? newName : sourceFolder.getName());
+            toCreate.setParentId(newParentID.getFolderId());
+            toCreate.setSubscribed(sourceFolder.isSubscribed());
+            toCreate.setPermissions(sourceFolder.getPermissions());
             FileStorageFolderAccess targetFolderAccess = getFolderAccess(newParentID);
             path = targetFolderAccess.getPath2DefaultFolder(newParentID.getFolderId());
             newID = targetFolderAccess.createFolder(toCreate);
+            folderAccess.deleteFolder(folderID.getFolderId());
         }
         FolderID newFolderID = new FolderID(newParentID.getService(), newParentID.getAccountId(), newID);
         fire(deleteEvent);

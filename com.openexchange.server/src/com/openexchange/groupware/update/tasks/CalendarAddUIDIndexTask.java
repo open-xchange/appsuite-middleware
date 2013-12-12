@@ -55,7 +55,6 @@ import static com.openexchange.tools.update.Tools.createIndex;
 import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.slf4j.Logger;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -88,7 +87,7 @@ public final class CalendarAddUIDIndexTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { CalendarExtendDNColumnTask.class.getName() };
+        return new String[] { CalendarExtendDNColumnTask.class.getName(), EnlargeCalendarUid.class.getName() };
     }
 
     @Override
@@ -116,11 +115,10 @@ public final class CalendarAddUIDIndexTask extends UpdateTaskAdapter {
     private void createCalendarIndex(final Connection con, final String[] tables) {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CalendarAddUIDIndexTask.class);
         final String name = "uidIndex";
-        final String[] columns = { "cid", "uid" };
         final StringBuilder sb = new StringBuilder(64);
         for (final String table : tables) {
             try {
-                final String indexName = existsIndex(con, table, columns);
+                final String indexName = existsIndex(con, table, new String[] { "cid", "uid" });
                 if (null == indexName) {
                     if (log.isInfoEnabled()) {
                         sb.setLength(0);
@@ -131,7 +129,7 @@ public final class CalendarAddUIDIndexTask extends UpdateTaskAdapter {
                         sb.append('.');
                         log.info(sb.toString());
                     }
-                    createIndex(con, table, name, columns, false);
+                    createIndex(con, table, name, new String[] { "cid", "uid(255)" }, false);
                 } else {
                     if (log.isInfoEnabled()) {
                         sb.setLength(0);

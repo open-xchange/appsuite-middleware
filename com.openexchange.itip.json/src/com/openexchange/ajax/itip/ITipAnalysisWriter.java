@@ -68,6 +68,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Change;
 import com.openexchange.groupware.container.ConfirmationChange;
 import com.openexchange.groupware.container.Difference;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -76,10 +77,12 @@ import com.openexchange.groupware.container.Difference;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ITipAnalysisWriter {
+
     private final AppointmentWriter appointmentWriter;
 
-    public ITipAnalysisWriter(final TimeZone timezone) {
-        this.appointmentWriter = new AppointmentWriter(timezone);
+    public ITipAnalysisWriter(final TimeZone timezone, final ServerSession session) {
+        super();
+        this.appointmentWriter = new AppointmentWriter(timezone).setSession(session);
     }
 
     public void write(final ITipAnalysis analysis, final JSONObject object) throws JSONException {

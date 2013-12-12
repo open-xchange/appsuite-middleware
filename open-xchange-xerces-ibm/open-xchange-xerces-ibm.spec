@@ -6,7 +6,7 @@ BuildRequires:  ant
 BuildRequires:  ant-nodeps
 BuildRequires:  java-sdk-ibm >= 1.6.0
 Version:    	@OXVERSION@
-%define        ox_release 5
+%define        ox_release 8
 Release:     	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -14,6 +14,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Xerces Compat for IBM Java
+Autoreqprov:   no
 Requires:       java-ibm >= 1.6.0
 Provides:       open-xchange-xerces
 Conflicts:      open-xchange-xerces-sun
@@ -46,10 +47,20 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Mon Dec 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-09
+* Fri Dec 06 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-10
+* Fri Dec 06 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-11-29
+* Tue Dec 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-11-28
 * Wed Nov 20 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth candidate for 7.4.1 release
 * Tue Nov 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth candidate for 7.4.1 release
+* Mon Nov 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-11-12
 * Mon Nov 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-11-12
 * Fri Nov 08 2013 Marcus Klein <marcus.klein@open-xchange.com>

@@ -129,7 +129,7 @@ public class HashingFileStorage extends DefaultFileStorage {
                 bufOut.write(i);
             }
         } catch (final FileNotFoundException e) {
-            throw FileStorageCodes.FILE_NOT_FOUND.create(filePath.toString());
+            throw FileStorageCodes.FILE_NOT_FOUND.create(e, filePath.toString());
         } catch (final IOException e) {
             throw FileStorageCodes.IOERROR.create(e.toString());
         } finally {

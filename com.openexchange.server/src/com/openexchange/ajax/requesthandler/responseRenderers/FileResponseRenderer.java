@@ -749,9 +749,6 @@ public class FileResponseRenderer implements ResponseRenderer {
             final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request);
             final CachedResource cachedResource = resourceCache.get(cacheKey, 0, request.getSession().getContextId());
             if (null != cachedResource) {
-
-                System.out.println("ResourceCache HIT for " + cacheKey);
-
                 // Scaled version already cached
                 // Create appropriate IFileHolder
                 String contentType = cachedResource.getFileType();
@@ -772,8 +769,6 @@ public class FileResponseRenderer implements ResponseRenderer {
                     }
                 }
                 return ret;
-            } else {
-                System.out.println("ResourceCache MISS for " + cacheKey);
             }
         }
 

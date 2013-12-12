@@ -59,8 +59,11 @@ import java.util.concurrent.ConcurrentMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Matchers;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -92,31 +95,37 @@ public class TokenLoginActivatorTest {
     /**
      * Class under test
      */
+    @InjectMocks
     private TokenLoginActivator tokenLoginActivator = null;
 
     /**
      * {@link BundleContext} mock
      */
+    @Mock
     private BundleContext bundleContext;
 
     /**
      * {@link Bundle} mock
      */
+    @Mock
     private Bundle bundle;
 
     /**
      * {@link ConfigurationService} mock
      */
+    @Mock
     private ConfigurationService configurationService;
 
     /**
      * {@link HazelcastConfigurationService} mock
      */
+    @Mock
     private HazelcastConfigurationService hazelcastConfigurationService;
 
     /**
      * {@link Properties} mock
      */
+    @Mock
     private Properties properties;
 
     /**
@@ -124,16 +133,7 @@ public class TokenLoginActivatorTest {
      */
     @Before
     public void setUp() throws Exception {
-        PowerMockito.mockStatic(Services.class);
-
-        this.tokenLoginActivator = new TokenLoginActivator();
-
-        // MEMBERS
-        this.bundleContext = PowerMockito.mock(BundleContext.class);
-        this.bundle = PowerMockito.mock(Bundle.class);
-        this.configurationService = PowerMockito.mock(ConfigurationService.class);
-        this.hazelcastConfigurationService = PowerMockito.mock(HazelcastConfigurationService.class);
-        this.properties = PowerMockito.mock(Properties.class);
+        MockitoAnnotations.initMocks(this);
 
         // SERVICES
         PowerMockito.when(this.configurationService.getProperty(Matchers.anyString())).thenReturn("theStringPropertyValue");

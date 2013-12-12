@@ -97,9 +97,10 @@ public final class Services {
     public void unregisterService() {
         registrationLock.lock();
         try {
+            final ServiceRegistration<ConfigJumpService> configJump = this.configJump;
             if (null != configJump) {
                 configJump.unregister();
-                configJump = null;
+                this.configJump = null;
             }
         } finally {
             registrationLock.unlock();

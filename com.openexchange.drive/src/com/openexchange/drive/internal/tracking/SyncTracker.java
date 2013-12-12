@@ -175,8 +175,10 @@ public class SyncTracker {
                         " times - adding 'qurantine' action for affected directories to interrupt further processing.");
                     optimizedActionsForClient.clear();
                     for (DirectoryVersion directoryVersion : affectedDirectoryVersions) {
-                        optimizedActionsForClient.add(new ErrorDirectoryAction(null, directoryVersion, null,
-                            DriveExceptionCodes.REPEATED_SYNC_PROBLEMS.create(directoryVersion.getPath(), directoryVersion.getChecksum()), false, true));
+                        OXException e = DriveExceptionCodes.REPEATED_SYNC_PROBLEMS.create(
+                            directoryVersion.getPath(), directoryVersion.getChecksum());
+                        LOG.warn("Requesting client to stop synchronization: " + session, e);
+                        optimizedActionsForClient.add(new ErrorDirectoryAction(null, directoryVersion, null, e, false, true));
                     }
                 }
             } else {

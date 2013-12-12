@@ -137,7 +137,9 @@ public class ListenerRegistrar implements DriveEventPublisher  {
             public LongPollingListener call() throws Exception {
                 LongPollingListener listener = createListener(session);
                 listenersPerFolder.put(getFolderKey(session), sessionID);
-                LOG.debug("Registered new listener: {}", listener);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Registered new listener: {}", listener);
+                }
                 return listener;
             }
         });
@@ -174,7 +176,13 @@ public class ListenerRegistrar implements DriveEventPublisher  {
         for (String folderID : event.getFolderIDs()) {
             listenerSessionIDs.addAll(listenersPerFolder.get(getFolderKey(folderID, event.getContextID())));
         }
+        String pushTokenReference = event.getPushTokenReference();
         for (LongPollingListener listener : listeners.getAllPresent(listenerSessionIDs).values()) {
+            if (null != pushTokenReference && listener.matches(pushTokenReference)) {
+                // don't send back to originator
+                LOG.trace("Skipping push notification for listener: {}", listener);
+                continue;
+            }
             listener.onEvent(event);
         }
     }

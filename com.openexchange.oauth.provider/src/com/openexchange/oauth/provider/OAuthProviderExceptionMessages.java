@@ -59,47 +59,8 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class OAuthProviderExceptionMessages implements LocalizableStrings {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
-    // A JSON error occurred: %1$s
-    public static final String JSON_ERROR_MSG = "A JSON error occurred: %1$s";
-
-    // Response is not of type: %1$s
-    public static final String NOT_OF_TYPE_MSG = "Response is not of type: %1$s";
-
-    // A HTTP error occurred: %1$s
-    public static final String HTTP_ERROR_MSG = "A HTTP error occurred: %1$s";
-
-    // Unexpected status %1$s (%2$s)
-    public static final String UNEXPECTED_STATUS_MSG = "Unexpected status %1$s (%2$s)";
-
-    // Invalid URL: %1$s
-    public static final String INVALID_URL_MSG = "Invalid URL: %1$s";
-
-    // Unknown OAuth service meta data: %1$s
-    public static final String UNKNOWN_OAUTH_SERVICE_META_DATA_MSG = "Unknown OAuth service meta data: %1$s";
-
-    // A SQL error occurred: %1$s
-    public static final String SQL_ERROR_MSG = "A SQL error occurred: %1$s";
-
     // Account not found with identifier %1$s for user %2$s in context %3$s.
-    public static final String ACCOUNT_NOT_FOUND_MSG = "Account not found with identifier %1$s for user %2$s in context %3$s.";
-
-    // Unsupported OAuth service: %1$s
-    public static final String UNSUPPORTED_SERVICE_MSG = "Unsupported OAuth service: %1$s";
-
-    // Missing argument: %1$s
-    public static final String MISSING_ARGUMENT_MSG = "Missing argument: %1$s";
-
-    // An OAuth error occurred: %1$s
-    public static final String OAUTH_ERROR_MSG = "An OAuth error occurred: %1$s";
-
-    // No OAuth provider found for identifier %1$s.
-    public static final String PROVIDER_NOT_FOUND_MSG = "No OAuth provider found for identifier %1$s.";
+    public static final String ACCOUNT_NOT_FOUND_MSG = "Account not found with identifier %1$s for user %2$s";
 
     /**
      * Initializes a new {@link OAuthProviderExceptionMessages}.

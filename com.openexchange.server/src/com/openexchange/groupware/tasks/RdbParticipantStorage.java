@@ -374,12 +374,12 @@ public class RdbParticipantStorage extends ParticipantStorage {
             stmt.setInt(pos++, taskId);
             for (final ExternalParticipant participant : participants) {
                 pos = 3;
-                stmt.setString(pos++, participant.getMail());
+                stmt.setString(pos++, StorageType.DELETED.equals(type) ? "" : participant.getMail());
                 final String displayName = participant.getDisplayName();
                 if (null == displayName) {
                     stmt.setNull(pos++, java.sql.Types.VARCHAR);
                 } else {
-                    stmt.setString(pos++, displayName);
+                    stmt.setString(pos++, StorageType.DELETED.equals(type) ? "" : displayName);
                 }
                 stmt.addBatch();
             }

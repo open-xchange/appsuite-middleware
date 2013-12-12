@@ -50,29 +50,30 @@
 package com.openexchange.subscribe.microformats;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link OXMFSubscriptionErrorMessage}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public enum OXMFSubscriptionErrorMessage implements OXExceptionCode {
+public enum OXMFSubscriptionErrorMessage implements DisplayableOXExceptionCode {
 
     /**
      * A parsing error occurred: %1$s.
      */
     ParseException(CATEGORY_ERROR, 2, OXMFErrorStrings.PARSE_EXCEPTION_HELP, OXMFErrorStrings.PARSE_EXCEPTION),
-    IOException(CATEGORY_SERVICE_DOWN, 3, OXMFErrorStrings.IOException_HELP, OXMFErrorStrings.IOException),
-    HttpException(CATEGORY_SERVICE_DOWN, 4, OXMFErrorStrings.HttpException_HELP, OXMFErrorStrings.HttpException),
-    CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES(CATEGORY_ERROR, 5, OXMFErrorStrings.CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES_HELP, OXMFErrorStrings.CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES),
-    ERROR_LOADING_SUBSCRIPTION(CATEGORY_SERVICE_DOWN, 6, OXMFErrorStrings.ERROR_LOADING_SUBSCRIPTION_HELP, OXMFErrorStrings.ERROR_LOADING_SUBSCRIPTION),
+    IOException(CATEGORY_SERVICE_DOWN, 3, "An I/O error occurred: %1$s. Was trying to get the service at %2$s."),
+    HttpException(CATEGORY_SERVICE_DOWN, 4, "An HTTP Error occurred: %1$s. Was trying to get the service at %2$s."),
+    CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES(CATEGORY_ERROR, 5, OXMFErrorStrings.CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES, "Can only post to external subscription sources."),
+    ERROR_LOADING_SUBSCRIPTION(CATEGORY_SERVICE_DOWN, 6, OXMFErrorStrings.ERROR_LOADING_SUBSCRIPTION, "Could not fetch site at %1$s. Please check the spelling or whether you can reach the site in your browser."),
     /**
      * The string cannot be parsed to a valid URL.
      */
-    INVALID_URL(CATEGORY_USER_INPUT, 7, OXMFErrorStrings.INVALID_URL, OXMFErrorStrings.INVALID_URL),
+    INVALID_URL(CATEGORY_USER_INPUT, 7, OXMFErrorStrings.INVALID_URL, "The string cannot be parsed to a valid URL."),
     
     ;
 
@@ -80,15 +81,19 @@ public enum OXMFSubscriptionErrorMessage implements OXExceptionCode {
 
     private int errorCode;
 
-    private String help;
-
     private String message;
+    
+    private final String displayMessage;
 
-    private OXMFSubscriptionErrorMessage(final Category category, final int errorCode, final String help, final String message) {
+    private OXMFSubscriptionErrorMessage(final Category category, final int errorCode, final String message) {
+        this(category, errorCode, null, message);
+    }
+    
+    private OXMFSubscriptionErrorMessage(final Category category, final int errorCode, final String displayMessage, final String message) {
         this.category = category;
         this.errorCode = errorCode;
-        this.help = help;
         this.message = message;
+        this.displayMessage = (displayMessage == null) ? OXExceptionStrings.MESSAGE : displayMessage;
     }
 
     @Override
@@ -104,10 +109,6 @@ public enum OXMFSubscriptionErrorMessage implements OXExceptionCode {
     @Override
     public int getNumber() {
         return errorCode;
-    }
-
-    public String getHelp() {
-        return help;
     }
 
     @Override
@@ -148,5 +149,13 @@ public enum OXMFSubscriptionErrorMessage implements OXExceptionCode {
      */
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.exception.DisplayableOXExceptionCode#getDisplayMessage()
+     */
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 }

@@ -49,15 +49,18 @@
 
 package com.openexchange.ajax.helper;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.CharsetDetector;
@@ -69,7 +72,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.encoding.Helper;
@@ -84,6 +86,27 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 public final class DownloadUtility {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DownloadUtility.class);
+
+    private static volatile Integer maxLength;
+    private static int htmlThreshold() {
+        Integer i = maxLength;
+        if (null == maxLength) {
+            synchronized (DownloadUtility.class) {
+                i = maxLength;
+                if (null == maxLength) {
+                    // Default is 1MB
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    final int defaultMaxLength = 1048576;
+                    if (null == service) {
+                        return defaultMaxLength;
+                    }
+                    i = Integer.valueOf(service.getIntProperty("com.openexchange.html.maxLength", defaultMaxLength));
+                    maxLength = i;
+                }
+            }
+        }
+        return i.intValue();
+    }
 
     /**
      * Initializes a new {@link DownloadUtility}.
@@ -137,6 +160,7 @@ public final class DownloadUtility {
      * @throws OXException If checking download fails
      */
     public static CheckedDownload checkInlineDownload(final InputStream inputStream, final long sizer, final String fileName, final String sContentType, final String overridingDisposition, final String userAgent) throws OXException {
+        ThresholdFileHolder sink = null;
         try {
             /*
              * We are supposed to let the client display the attachment. Therefore set attachment's Content-Type and inline disposition to let
@@ -169,18 +193,28 @@ public final class DownloadUtility {
                     /*
                      * Sanitizing of HTML content needed
                      */
-                    final ByteArrayOutputStream baos = Streams.stream2ByteArrayOutputStream(in);
                     final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                    sink = new ThresholdFileHolder();
+                    sink.write(in);
+                    in = null;
                     String cs = contentType.getCharsetParameter();
                     if (!CharsetDetector.isValid(cs)) {
-                        cs = CharsetDetector.detectCharset(Streams.asInputStream(baos));
+                        cs = CharsetDetector.detectCharset(sink.getStream());
                         if ("US-ASCII".equalsIgnoreCase(cs)) {
                             cs = "ISO-8859-1";
                         }
                     }
-                    String htmlContent = baos.toString(cs);
+                    // Check size
+                    if (sink.getLength() > htmlThreshold()) {
+                        // HTML cannot be sanitized as it exceeds threshold for HTML parsing
+                        throw AjaxExceptionCodes.BAD_REQUEST.create();
+                    }
+                    String htmlContent = new String(sink.toByteArray(), Charsets.forName(cs));
+                    sink.close();
+                    sink = null; // Null'ify as not needed anymore
                     htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
-                    final byte[] tmp = htmlContent.getBytes(Charsets.forName(cs));
+                    final byte[] tmp = htmlContent.getBytes(Charsets.UTF_8);
+                    contentType.setCharsetParameter("UTF-8");
                     sz = tmp.length;
                     in = Streams.newByteArrayInputStream(tmp);
                 }
@@ -195,21 +229,41 @@ public final class DownloadUtility {
                      * Escaping of XML content needed
                      */
                     final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                    final ByteArrayOutputStream baos = Streams.stream2ByteArrayOutputStream(in);
+                    sink = new ThresholdFileHolder();
+                    sink.write(in);
+                    in = null;
                     String cs = contentType.getCharsetParameter();
                     if (!CharsetDetector.isValid(cs)) {
-                        cs = CharsetDetector.detectCharset(Streams.asInputStream(baos));
+                        cs = CharsetDetector.detectCharset(sink.getStream());
                         if ("US-ASCII".equalsIgnoreCase(cs)) {
                             cs = "ISO-8859-1";
                         }
-                        contentType.setCharsetParameter(cs);
                     }
-                    String xmlContent = baos.toString(cs);
-                    xmlContent = htmlService.htmlFormat(xmlContent);
-                    contentType.setPrimaryType("text").setSubType("html");
-                    final byte[] tmp = xmlContent.getBytes(Charsets.forName(cs));
-                    sz = tmp.length;
-                    in = Streams.newByteArrayInputStream(tmp);
+                    // Escape of XML content
+                    {
+                        final ThresholdFileHolder copy = new ThresholdFileHolder();
+                        OutputStreamWriter w = null;
+                        Reader r = null;
+                        try {
+                            r = new InputStreamReader(sink.getClosingStream(), Charsets.forName(cs));
+                            w = new OutputStreamWriter(copy.asOutputStream(), Charsets.UTF_8);
+                            final int buflen = 8192;
+                            final char[] cbuf = new char[buflen];
+                            for (int read; (read = r.read(cbuf, 0, buflen)) > 0;) {
+                                String xmlContent = new String(cbuf, 0, read);
+                                xmlContent = htmlService.htmlFormat(xmlContent);
+                                w.write(xmlContent);
+                            }
+                            w.flush();
+                        } finally {
+                            Streams.close(r, w);
+                        }
+                        sink = copy;
+                    }
+                    contentType.setCharsetParameter("UTF-8");
+                    sz = sink.getLength();
+                    in = sink.getClosingStream();
+                    sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                 }
             } else if (contentType.startsWith("text/plain")) {
                 /*-
@@ -221,39 +275,65 @@ public final class DownloadUtility {
                     /*
                      * Try and detect charset for plain text files
                      */
-                    ByteArrayOutputStream baos = Streams.stream2ByteArrayOutputStream(in);
-                    String cs = CharsetDetector.detectCharset(Streams.asInputStream(baos));
+                    sink = new ThresholdFileHolder();
+                    sink.write(in);
+                    in = null;
+                    String cs = CharsetDetector.detectCharset(sink.getStream());
                     if ("US-ASCII".equalsIgnoreCase(cs)) {
                         cs = "ISO-8859-1";
                     }
                     contentType.setCharsetParameter(cs);
-                    String textContent = baos.toString(cs);
-                    final byte[] tmp = textContent.getBytes(Charsets.forName(cs));
-                    sz = tmp.length;
-                    in = Streams.newByteArrayInputStream(tmp);
+                    sz = sink.getLength();
                 }
                 /*
                  * Safe reading of content if appropriate
                  */
                 if (null == sContentDisposition) {
+                    if (null != sink) {
+                        sz = sink.getLength();
+                        in = sink.getClosingStream();
+                        sink = null; // Set to null to avoid premature closing at the end of try-finally clause
+                    }
                     sContentDisposition = "attachment";
                 } else if (toLowerCase(sContentDisposition).startsWith("inline")) {
                     /*
                      * Sanitizing of text content needed
                      */
-                    final ByteArrayOutputStream baos = Streams.stream2ByteArrayOutputStream(in);
+                    if (null == sink) {
+                        sink = new ThresholdFileHolder();
+                        sink.write(in);
+                        in = null;
+                    }
                     String cs = contentType.getCharsetParameter();
                     if (!CharsetDetector.isValid(cs)) {
-                        cs = CharsetDetector.detectCharset(Streams.asInputStream(baos));
+                        cs = CharsetDetector.detectCharset(sink.getStream());
                         if ("US-ASCII".equalsIgnoreCase(cs)) {
                             cs = "ISO-8859-1";
                         }
                     }
-                    final String content = MessageUtility.readStream(Streams.asInputStream(baos), cs);
-                    final byte[] tmp = content.getBytes(Charsets.UTF_8);
+                    // Convert to UTF-8
+                    {
+                        final ThresholdFileHolder utf8Copy = new ThresholdFileHolder();
+                        OutputStreamWriter w = null;
+                        Reader r = null;
+                        try {
+                            r = new InputStreamReader(sink.getClosingStream(), Charsets.forName(cs));
+                            w = new OutputStreamWriter(utf8Copy.asOutputStream(), Charsets.UTF_8);
+                            final int buflen = 8192;
+                            final char[] cbuf = new char[buflen];
+                            for (int read; (read = r.read(cbuf, 0, buflen)) > 0;) {
+                                w.write(cbuf, 0, read);
+                            }
+                            w.flush();
+                        } finally {
+                            Streams.close(r, w);
+                        }
+                        sink = utf8Copy;
+                    }
                     contentType.setCharsetParameter("UTF-8");
-                    sz = tmp.length;
-                    in = Streams.newByteArrayInputStream(tmp);
+                    sz = sink.getLength();
+                    in = sink.getClosingStream();
+                    sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                 }
             } else if (contentType.startsWith("image/") || fileNameImpliesImage(fileName)) {
                 /*
@@ -267,8 +347,9 @@ public final class DownloadUtility {
                      *
                      * Get image bytes
                      */
-                    final ThresholdFileHolder tmp = new ThresholdFileHolder();
-                    tmp.write(in);
+                    sink = new ThresholdFileHolder();
+                    sink.write(in);
+                    in = null;
                     /*
                      * Check consistency of content-type, file extension and magic bytes
                      */
@@ -278,8 +359,10 @@ public final class DownloadUtility {
                         /*
                          * Check for HTML since no corresponding file extension is known
                          */
-                        if (HTMLDetector.containsHTMLTags(tmp.toByteArray())) {
-                            return asAttachment(tmp.getClosingStream(), preparedFileName, tmp.getLength());
+                        if (HTMLDetector.containsHTMLTags(sink.getStream(), false)) {
+                            final CheckedDownload ret = asAttachment(sink.getClosingStream(), preparedFileName, sink.getLength());
+                            sink = null; // Set to null to avoid premature closing at the end of try-finally clause
+                            return ret;
                         }
                     } else {
                         if ('.' == fileExtension.charAt(0)) {
@@ -296,8 +379,10 @@ public final class DownloadUtility {
                                 /*
                                  * No content type known
                                  */
-                                if (HTMLDetector.containsHTMLTags(tmp.toByteArray())) {
-                                    return asAttachment(tmp.getClosingStream(), preparedFileName, tmp.getLength());
+                                if (HTMLDetector.containsHTMLTags(sink.getStream(), false)) {
+                                    final CheckedDownload ret = asAttachment(sink.getClosingStream(), preparedFileName, sink.getLength());
+                                    sink = null; // Set to null to avoid premature closing at the end of try-finally clause
+                                    return ret;
                                 }
                             } else {
                                 final int pos = ct.indexOf('/');
@@ -311,13 +396,15 @@ public final class DownloadUtility {
                             fn = addFileExtension(fileExtension, extensions.iterator().next());
                             preparedFileName = getSaveAsFileName(fn, msieOnWindows, contentType.getBaseType());
                         }
-                        final String detectedCT = ImageTypeDetector.getMimeType(tmp.toByteArray());
+                        final String detectedCT = ImageTypeDetector.getMimeType(sink.getStream());
                         if (MIME_APPL_OCTET.equals(detectedCT)) {
                             /*
                              * Unknown magic bytes. Check for HTML.
                              */
-                            if (HTMLDetector.containsHTMLTags(tmp.toByteArray())) {
-                                return asAttachment(tmp.getClosingStream(), preparedFileName, tmp.getLength());
+                            if (HTMLDetector.containsHTMLTags(sink.getStream(), false)) {
+                                final CheckedDownload ret = asAttachment(sink.getClosingStream(), preparedFileName, sink.getLength());
+                                sink = null; // Set to null to avoid premature closing at the end of try-finally clause
+                                return ret;
                             }
                         } else if (!contentType.isMimeType(detectedCT)) {
                             /*
@@ -329,7 +416,8 @@ public final class DownloadUtility {
                     /*
                      * New combined input stream (with original size)
                      */
-                    in = tmp.getClosingStream();
+                    in = sink.getClosingStream();
+                    sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                 }
             } else if (fileNameImpliesHtml(fileName) && HTMLDetector.containsHTMLTags((bytes = Streams.stream2bytes(in)), true)) {
                 /*
@@ -342,16 +430,27 @@ public final class DownloadUtility {
                      * Sanitizing of HTML content needed
                      */
                     final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                    sink = new ThresholdFileHolder();
+                    sink.write(in);
+                    in = null;
                     String cs = contentType.getCharsetParameter();
                     if (!CharsetDetector.isValid(cs)) {
-                        cs = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
+                        cs = CharsetDetector.detectCharset(sink.getStream());
                         if ("US-ASCII".equalsIgnoreCase(cs)) {
                             cs = "ISO-8859-1";
                         }
                     }
-                    String htmlContent = new String(bytes, Charsets.forName(cs));
+                    // Check size
+                    if (sink.getLength() > htmlThreshold()) {
+                        // HTML cannot be sanitized as it exceeds threshold for HTML parsing
+                        throw AjaxExceptionCodes.BAD_REQUEST.create();
+                    }
+                    String htmlContent = new String(sink.toByteArray(), Charsets.forName(cs));
+                    sink.close();
+                    sink = null; // Null'ify as not needed anymore
                     htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
-                    final byte[] tmp = htmlContent.getBytes(Charsets.forName(cs));
+                    final byte[] tmp = htmlContent.getBytes(Charsets.UTF_8);
+                    contentType.setCharsetParameter("UTF-8");
                     sz = tmp.length;
                     in = Streams.newByteArrayInputStream(tmp);
                 }
@@ -380,6 +479,8 @@ public final class DownloadUtility {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(sink);
         }
     }
 

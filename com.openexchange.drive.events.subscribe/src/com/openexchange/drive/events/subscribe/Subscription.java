@@ -49,6 +49,12 @@
 
 package com.openexchange.drive.events.subscribe;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
+
 
 /**
  * {@link Subscription}
@@ -184,6 +190,36 @@ public class Subscription {
      */
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    /**
+     * Gets a value indicating whether this subscription's push registration token matches the supplied token value, trying to match
+     * either the token itself or the md5 checksum of the token.
+     *
+     * @param tokenRef The push token reference to match
+     * @return <code>true</code> if this subscription's token or the md5 checksum of this subscription's token matches,
+     *         <code>false</code>, otherwise
+     */
+    public boolean matches(String tokenRef) {
+        return null == tokenRef ? null == token : tokenRef.equals(token) || tokenRef.equals(getMD5(token));
+    }
+
+    private static String getMD5(String string) {
+        if (Strings.isEmpty(string)) {
+            return string;
+        }
+        try {
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+            byte[] digest = md5.digest(string.getBytes(Charsets.UTF_8));
+            return new BigInteger(1, digest).toString(16);
+        } catch (NoSuchAlgorithmException e) {
+            return null; // ignore
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Subscription [serviceID=" + serviceID + ", token=" + token + ", contextID=" + contextID + ", userID=" + userID + ", rootFolderID=" + rootFolderID + ", timestamp=" + timestamp + "]";
     }
 
 }

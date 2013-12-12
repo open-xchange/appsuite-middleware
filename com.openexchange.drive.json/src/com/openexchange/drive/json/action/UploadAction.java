@@ -61,7 +61,7 @@ import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.SyncResult;
 import com.openexchange.drive.json.internal.Services;
-import com.openexchange.drive.json.json.JsonFileAction;
+import com.openexchange.drive.json.json.JsonDriveAction;
 import com.openexchange.drive.json.json.JsonFileVersion;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
@@ -164,10 +164,10 @@ public class UploadAction extends AbstractDriveAction {
             if (null != session.isDiagnostics()) {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("diagnostics", syncResult.getDiagnostics());
-                jsonObject.put("actions", JsonFileAction.serialize(syncResult.getActionsForClient(), session.getLocale()));
+                jsonObject.put("actions", JsonDriveAction.serializeActions(syncResult.getActionsForClient(), session.getLocale()));
                 return new AJAXRequestResult(jsonObject, "json");
             }
-            return new AJAXRequestResult(JsonFileAction.serialize(syncResult.getActionsForClient(), session.getLocale()), "json");
+            return new AJAXRequestResult(JsonDriveAction.serializeActions(syncResult.getActionsForClient(), session.getLocale()), "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

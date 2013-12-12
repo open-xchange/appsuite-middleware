@@ -65,6 +65,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.json.JSONArray;
@@ -95,9 +97,12 @@ import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.shared.SharedJSlobService;
 import com.openexchange.jslob.storage.JSlobStorage;
 import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
+import com.openexchange.preferences.ServerUserSettingLoader;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.threadpool.ThreadPoolCompletionService;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link ConfigJSlobService}
@@ -620,43 +625,61 @@ public final class ConfigJSlobService implements JSlobService {
             final List<List<JSONPathElement>> pathsToPurge = new LinkedList<List<JSONPathElement>>();
             // Config Tree Values first
 
-            final ConfigTreeEquivalent equiv = configTreeEquivalents.get(id);
-            if (equiv != null) {
-                final SettingStorage stor = SettingStorage.getInstance(session);
-                final ConfigTree configTree = ConfigTree.getInstance();
-                final Map<String, String> attribute2ConfigTreeMap = equiv.lob2config;
+            CompletionService<Void> completionService = null;
+            int num = 0;
+            {
+                final ConfigTreeEquivalent equiv = configTreeEquivalents.get(id);
+                if (equiv != null) {
+                    session.setParameter("__serverUserSetting", ServerUserSettingLoader.getInstance().loadFor(session.getUserId(), session.getContextId()));
+                    try {
+                        final SettingStorage stor = SettingStorage.getInstance(session);
+                        final ConfigTree configTree = ConfigTree.getInstance();
+                        final Map<String, String> attribute2ConfigTreeMap = equiv.lob2config;
+                        for (final Entry<String, Object> entry : jObject.entrySet()) {
+                            String path = attribute2ConfigTreeMap.get(entry.getKey());
+                            if (path != null) {
+                                pathsToPurge.add(Arrays.asList(new JSONPathElement(entry.getKey())));
+                                if (path.length() > 0 && path.charAt(0) == '/') {
+                                    path = path.substring(1);
+                                }
+                                if (path.endsWith("/")) {
+                                    path = path.substring(0, path.length() - 1);
+                                }
+                                final String _path = path;
+                                final Callable<Void> task = new Callable<Void>() {
 
-                for (final Entry<String, Object> entry : jObject.entrySet()) {
-                    String path = attribute2ConfigTreeMap.get(entry.getKey());
-                    if (path != null) {
-                        pathsToPurge.add(Arrays.asList(new JSONPathElement(entry.getKey())));
-                        if (path.length() > 0 && path.charAt(0) == '/') {
-                            path = path.substring(1);
-                        }
-                        if (path.endsWith("/")) {
-                            path = path.substring(0, path.length() - 1);
-                        }
-                        try {
-                            final Setting setting = configTree.getSettingByPath(path);
-                            setting.setSingleValue(entry.getValue());
-                            saveSettingWithSubs(stor, setting);
-                        } catch (OXException x) {
-                            if (SettingExceptionCodes.UNKNOWN_PATH.equals(x)) {
-                                LOG.error("Ignoring update to unmappable path", x);
-                            } else {
-                                throw x;
+                                    @Override
+                                    public Void call() throws Exception {
+                                        try {
+                                            final Setting setting = configTree.getSettingByPath(_path);
+                                            setting.setSingleValue(entry.getValue());
+                                            saveSettingWithSubs(stor, setting);
+                                        } catch (OXException x) {
+                                            if (!SettingExceptionCodes.UNKNOWN_PATH.equals(x)) {
+                                                throw x;
+                                            }
+                                            LOG.error("Ignoring update to unmappable path", x);
+                                        }
+                                        return null;
+                                    }
+                                };
+
+                                if (null == completionService) {
+                                    completionService = new ThreadPoolCompletionService<Void>(ThreadPools.getThreadPool());
+                                }
+                                completionService.submit(task);
+                                num++;
                             }
                         }
+                    } finally {
+                        session.setParameter("__serverUserSetting", null);
                     }
                 }
             }
 
             // Set (or replace) JSlob
             final Map<String, AttributedProperty> attributes = preferenceItems.get(id);
-            if (null == attributes) {
-                // Store JSlob in common storage
-                getStorage().store(new JSlobId(SERVICE_ID, id, userId, contextId), jsonJSlob);
-            } else {
+            if (null != attributes) {
                 // A config cascade change because identifier refers to a preference item
                 final ConfigView view = getConfigViewFactory().getView(userId, contextId);
                 for (final AttributedProperty attributedProperty : attributes.values()) {
@@ -677,8 +700,14 @@ public final class ConfigJSlobService implements JSlobService {
                 JSONPathElement.remove(path, jObject);
             }
             jsonJSlob.setJsonObject(jObject);
+
             // Finally store JSlob
             getStorage().store(new JSlobId(SERVICE_ID, id, userId, contextId), jsonJSlob);
+
+            // Check completion service
+            if (num > 0) {
+                ThreadPools.<Void, OXException> awaitCompletionService(completionService, num, ThreadPools.DEFAULT_EXCEPTION_FACTORY);
+            }
         }
     }
 
@@ -698,7 +727,7 @@ public final class ConfigJSlobService implements JSlobService {
      * @param setting actual setting.
      * @throws OXException If an error occurs.
      */
-    private void saveSettingWithSubs(final SettingStorage storage, final Setting setting) throws OXException {
+    protected void saveSettingWithSubs(final SettingStorage storage, final Setting setting) throws OXException {
         try {
             if (setting.isLeaf()) {
                 final String value = setting.getSingleValue().toString();

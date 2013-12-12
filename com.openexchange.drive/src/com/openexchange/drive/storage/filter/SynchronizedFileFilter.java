@@ -50,6 +50,7 @@
 package com.openexchange.drive.storage.filter;
 
 import com.openexchange.drive.DriveConstants;
+import com.openexchange.drive.management.DriveConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
@@ -92,7 +93,7 @@ public class SynchronizedFileFilter extends FileNameFilter {
         if (false == DriveConstants.FILENAME_VALIDATION_PATTERN.matcher(fileName).matches()) {
             return false; // no invalid filenames
         }
-        if (DriveConstants.EXCLUDED_FILENAMES_PATTERN.matcher(fileName).matches()) {
+        if (DriveConfig.getInstance().getExcludedFilenamesPattern().matcher(fileName).matches()) {
             return false; // no excluded files
         }
         return true;

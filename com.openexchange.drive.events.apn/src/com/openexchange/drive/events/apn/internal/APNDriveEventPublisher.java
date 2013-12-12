@@ -159,8 +159,13 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
     }
 
     private List<PayloadPerDevice> getPayloads(DriveEvent event, List<Subscription> subscriptions) {
+        String pushTokenReference = event.getPushTokenReference();
         List<PayloadPerDevice> payloads = new ArrayList<PayloadPerDevice>(subscriptions.size());
         for (Subscription subscription : subscriptions) {
+            if (null != pushTokenReference && subscription.matches(pushTokenReference)) {
+                LOG.trace("Skipping push notification for subscription: " + subscription);
+                continue;
+            }
             try {
                 PushNotificationPayload payload = new PushNotificationPayload();
                 payload.addCustomAlertLocKey("TRIGGER_SYNC");

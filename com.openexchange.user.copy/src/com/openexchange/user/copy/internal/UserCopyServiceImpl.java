@@ -51,13 +51,13 @@ package com.openexchange.user.copy.internal;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.exception.OXException;
 import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.ObjectMapping;
@@ -71,8 +71,8 @@ import com.openexchange.user.copy.UserCopyService;
  */
 public final class UserCopyServiceImpl implements UserCopyService {
 
-    private List<CopyUserTaskService> tasks = new ArrayList<CopyUserTaskService>();
-
+    // Adding and removal can take place concurrently to reading the list for execution.
+    private final List<CopyUserTaskService> tasks = new CopyOnWriteArrayList<CopyUserTaskService>();
 
     public UserCopyServiceImpl() {
         super();
@@ -80,7 +80,6 @@ public final class UserCopyServiceImpl implements UserCopyService {
 
     public int copyUser(final int srcCtxId, final int dstCtxId, final int userId) throws OXException {
         final List<CopyUserTaskService> toExecute = new CopyTaskSorter().sort(tasks);
-        tasks = toExecute;
         final Map<String, ObjectMapping<?>> copied = new HashMap<String, ObjectMapping<?>>();
         copied.put(Constants.CONTEXT_ID_KEY, new ObjectMapping<Integer>() {
             public Integer getSource(final int id) {

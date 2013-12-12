@@ -56,8 +56,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
+import org.mockito.MockitoAnnotations;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityService;
@@ -77,16 +78,19 @@ public class AllActionTest {
     /**
      * Mock for the service lookup
      */
+    @Mock
     private AJAXModuleActivator serviceLookup = null;
 
     /**
      * Mock for the ServerSession
      */
+    @Mock
     private ServerSession serverSession = null;
 
     /**
      * Mock for the CapabilityService
      */
+    @Mock
     private CapabilityService capabilityService = null;
 
     /**
@@ -94,10 +98,7 @@ public class AllActionTest {
      */
     @Before
     public void setUp() throws Exception {
-        // MEMBERS
-        this.serviceLookup = PowerMockito.mock(AJAXModuleActivator.class);
-        this.serverSession = PowerMockito.mock(ServerSession.class);
-        this.capabilityService = PowerMockito.mock(CapabilityService.class);
+        MockitoAnnotations.initMocks(this);
 
         // BEHAVIOUR
         Mockito.when(this.serverSession.isAnonymous()).thenReturn(false);

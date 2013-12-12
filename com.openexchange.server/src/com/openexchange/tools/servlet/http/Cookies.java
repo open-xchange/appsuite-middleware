@@ -49,8 +49,8 @@
 
 package com.openexchange.tools.servlet.http;
 
-import static com.openexchange.sessiond.impl.IPAddressUtil.textToNumericFormatV4;
-import static com.openexchange.sessiond.impl.IPAddressUtil.textToNumericFormatV6;
+import static com.openexchange.java.IPAddressUtil.textToNumericFormatV4;
+import static com.openexchange.java.IPAddressUtil.textToNumericFormatV6;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Arrays;

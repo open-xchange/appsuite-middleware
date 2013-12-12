@@ -835,6 +835,7 @@ public class Contact extends CommonObject {
      */
     public Contact() {
         reset();
+        topic = "ox/common/contact";
         warnings = new LinkedList<OXException>();
     }
 

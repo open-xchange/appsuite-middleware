@@ -56,6 +56,7 @@ import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
+import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
@@ -121,6 +122,50 @@ public class Bug29853Test extends AbstractFolderTest {
         assertNotNull("No folder created", createdFolder);
         assertEquals("Folder name wrong", folderName, createdFolder.getFolderName());
         assertFalse("Folder was created " + listResponse.getArray().length + " times: " + listResponse.getResponse(), iterator.hasNext());
+    }
+
+    public void testRenameToSameName() throws Throwable {
+        FolderObject[] subfolders = new FolderObject[THREAD_COUNT];
+        for (int i = 0; i < THREAD_COUNT; i++) {
+            subfolders[i] = createSingle(FolderObject.INFOSTORE, "f" + i);
+            subfolders[i].setParentFolderID(folder.getObjectID());
+            InsertRequest insertRequest = new InsertRequest(EnumAPI.OX_NEW, subfolders[i]);
+            InsertResponse insertResponse = client.execute(insertRequest);
+            insertResponse.fillObject(subfolders[i]);
+        }
+        String folderName = "a";
+        Thread[] updateThreads = new Thread[THREAD_COUNT];
+        for (int i = 0; i < THREAD_COUNT; i++) {
+            subfolders[i].setFolderName(folderName);
+            final UpdateRequest updateRequest = new UpdateRequest(EnumAPI.OX_NEW, subfolders[i]);
+            Runnable updateRunnable = new Runnable() {
+
+                @Override
+                public void run() {
+                    client.executeSafe(updateRequest);
+                }
+            };
+            updateThreads[i] = new Thread(updateRunnable);
+            updateThreads[i].start();
+        }
+        for (int i = 0; i < THREAD_COUNT; i++) {
+            updateThreads[i].join();
+        }
+        ListRequest listRequest = new ListRequest(EnumAPI.OX_NEW, folder.getObjectID());
+        ListResponse listResponse = client.execute(listRequest);
+        FolderObject renamedFolder = null;
+        Iterator<FolderObject> iterator = listResponse.getFolder();
+        while (iterator.hasNext()) {
+            FolderObject folder = iterator.next();
+            if (folderName.equals(folder.getFolderName())) {
+                if (null == renamedFolder) {
+                    renamedFolder = folder;
+                } else {
+                    fail("Folder was renamed more than once: " + listResponse.getResponse());
+                }
+            }
+        }
+        assertNotNull("No folder renamed", renamedFolder);
     }
 
 }

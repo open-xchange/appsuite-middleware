@@ -828,6 +828,8 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     private static final HeaderName HN_DATE = HeaderName.valueOf("date");
 
+    private static final HeaderName HN_SUBJECT = HeaderName.valueOf("subject");
+
     private static final Set<HeaderName> PARAMETERIZED_HEADERS =
         new HashSet<HeaderName>(Arrays.asList(HN_CONTENT_TYPE, HeaderName.valueOf(CONTENT_DISPOSITION)));
 
@@ -895,6 +897,8 @@ public final class MIMEStructureHandler implements StructureHandler {
                     }
                 } else if (HN_DATE.equals(headerName)) {
                     hdrObject.put(name, generateDateObject(entry.getValue()));
+                } else if (HN_SUBJECT.equals(headerName)) {
+                    hdrObject.put(name, MimeMessageUtility.decodeEnvelopeSubject(entry.getValue()));
                 } else {
                     if (hdrObject.has(name)) {
                         final Object previous = hdrObject.get(name);

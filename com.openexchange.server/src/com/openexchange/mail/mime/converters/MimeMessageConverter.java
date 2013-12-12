@@ -579,7 +579,7 @@ public final class MimeMessageConverter {
                 throw MimeMailException.handleMessagingException(e);
             }
             return multipartFor(message, contentType, false);
-        } catch (MessagingException e) {
+        } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -618,9 +618,21 @@ public final class MimeMessageConverter {
         if (content instanceof InputStream) {
             try {
                 return new MimeMultipart(new MessageDataSource((InputStream) content, contentType));
-            } catch (MessagingException e) {
+            } catch (final MessagingException e) {
                 throw MimeMailException.handleMessagingException(e);
-            } catch (IOException e) {
+            } catch (final IOException e) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                }
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+            }
+        }
+        if (content instanceof String) {
+            try {
+                return new MimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(((String) content).getBytes(Charsets.ISO_8859_1)), contentType));
+            } catch (final MessagingException e) {
+                throw MimeMailException.handleMessagingException(e);
+            } catch (final IOException e) {
                 if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
@@ -722,7 +734,7 @@ public final class MimeMessageConverter {
             if (null != sContentType && sContentType.startsWith("multipart/")) {
                 final Object o = part.getContent();
                 if (o instanceof MimeMultipart) {
-                    MimeMultipart multipart = (MimeMultipart) o;
+                    final MimeMultipart multipart = (MimeMultipart) o;
                     final int count = multipart.getCount();
                     for (int i = 0; i < count; i++) {
                         if (!sanitizeMultipartContent((MimePart) multipart.getBodyPart(i))) {
@@ -743,7 +755,7 @@ public final class MimeMessageConverter {
             return true;
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }

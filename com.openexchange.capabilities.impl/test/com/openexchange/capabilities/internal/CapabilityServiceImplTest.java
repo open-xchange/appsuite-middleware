@@ -5,8 +5,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
+import org.mockito.MockitoAnnotations;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.capabilities.CapabilitySet;
@@ -30,36 +32,38 @@ public class CapabilityServiceImplTest {
     /**
      * Class under test
      */
+    @InjectMocks
     private CapabilityServiceImpl capabilityServiceImpl;
 
     /**
      * Mock of {@link ServiceLookup}
      */
+    @Mock(name = "services")
     private ServiceLookup serviceLookup;
 
     /**
      * Mock of {@link CapabilityCheckerRegistry}
      */
+    @Mock(name = "capCheckers")
     private CapabilityCheckerRegistry capabilityCheckerRegistry;
 
     /**
      * Mock of {@link NearRegistryServiceTracker}
      */
+    @Mock
     private PermissionAvailabilityServiceRegistry registry;
 
     /**
      * The capabilities that should be filtered
      */
-    CapabilitySet capabilities = null;
+    private CapabilitySet capabilities = null;
 
     /**
      * {@inheritDoc}
      */
     @Before
     public void setUp() {
-        this.serviceLookup = Mockito.mock(ServiceLookup.class);
-        this.capabilityCheckerRegistry = Mockito.mock(CapabilityCheckerRegistry.class);
-        this.registry = PowerMockito.mock(PermissionAvailabilityServiceRegistry.class);
+        MockitoAnnotations.initMocks(this);
 
         this.capabilities = new CapabilitySet(64);
         this.capabilities.add(CapabilityServiceImpl.getCapability(Permission.CALDAV.toString().toLowerCase()));
@@ -73,10 +77,7 @@ public class CapabilityServiceImplTest {
 
     @Test
     public void testApplyJSONFilter_TrackerNull_ReturnWithoutCheckAndWithoutRemoving() {
-        this.capabilityServiceImpl = new CapabilityServiceImpl(
-            this.serviceLookup,
-            this.capabilityCheckerRegistry,
-            null);
+        this.capabilityServiceImpl = new CapabilityServiceImpl(this.serviceLookup, this.capabilityCheckerRegistry, null);
         this.capabilityServiceImpl.applyUIFilter(this.capabilities);
 
         Assert.assertEquals(7, this.capabilities.size());
@@ -84,10 +85,7 @@ public class CapabilityServiceImplTest {
 
     @Test
     public void testApplyJSONFilter_NoServiceRegistered_RemoveAllControlledPermissions() {
-        this.capabilityServiceImpl = new CapabilityServiceImpl(
-            this.serviceLookup,
-            this.capabilityCheckerRegistry,
-            this.registry);
+        this.capabilityServiceImpl = new CapabilityServiceImpl(this.serviceLookup, this.capabilityCheckerRegistry, this.registry);
 
         Mockito.when(this.registry.getServiceMap()).thenReturn(new ConcurrentHashMap<Permission, PermissionAvailabilityService>());
 
@@ -98,10 +96,7 @@ public class CapabilityServiceImplTest {
 
     @Test
     public void testApplyJSONFilter_AllServicesRegistered_RemoveNoPermission() {
-        this.capabilityServiceImpl = new CapabilityServiceImpl(
-            this.serviceLookup,
-            this.capabilityCheckerRegistry,
-            this.registry);
+        this.capabilityServiceImpl = new CapabilityServiceImpl(this.serviceLookup, this.capabilityCheckerRegistry, this.registry);
 
         PermissionAvailabilityService jsonEditPassword = Mockito.mock(PermissionAvailabilityService.class);
         Mockito.when(jsonEditPassword.getRegisteredPermission()).thenReturn(Permission.EDIT_PASSWORD);
@@ -124,10 +119,7 @@ public class CapabilityServiceImplTest {
 
     @Test
     public void testApplyJSONFilter_OnlySubscritionsRegistered_RemoveOtherPermissions() {
-        this.capabilityServiceImpl = new CapabilityServiceImpl(
-            this.serviceLookup,
-            this.capabilityCheckerRegistry,
-            this.registry);
+        this.capabilityServiceImpl = new CapabilityServiceImpl(this.serviceLookup, this.capabilityCheckerRegistry, this.registry);
 
         PermissionAvailabilityService jsonSubscription = Mockito.mock(PermissionAvailabilityService.class);
         Mockito.when(jsonSubscription.getRegisteredPermission()).thenReturn(Permission.SUBSCRIPTION);
@@ -144,10 +136,7 @@ public class CapabilityServiceImplTest {
 
     @Test
     public void testApplyJSONFilter_TwoPermissionsRegistered_RemoveOnePermissions() {
-        this.capabilityServiceImpl = new CapabilityServiceImpl(
-            this.serviceLookup,
-            this.capabilityCheckerRegistry,
-            this.registry);
+        this.capabilityServiceImpl = new CapabilityServiceImpl(this.serviceLookup, this.capabilityCheckerRegistry, this.registry);
 
         PermissionAvailabilityService jsonSubscription = Mockito.mock(PermissionAvailabilityService.class);
         Mockito.when(jsonSubscription.getRegisteredPermission()).thenReturn(Permission.SUBSCRIPTION);

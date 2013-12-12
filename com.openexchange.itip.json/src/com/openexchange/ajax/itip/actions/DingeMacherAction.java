@@ -89,8 +89,8 @@ public class DingeMacherAction extends AbstractITipAction {
         List<Appointment> list = macher.perform(action, analysisToProcess, session);
 
         if (list != null) {
-            AppointmentWriter writer = new AppointmentWriter(tz);
-            JSONArray array = new JSONArray();
+            AppointmentWriter writer = new AppointmentWriter(tz).setSession(session);
+            JSONArray array = new JSONArray(list.size());
             for (Appointment appointment : list) {
                 JSONObject object = new JSONObject();
                 writer.writeAppointment(appointment, object);

@@ -165,7 +165,12 @@ public enum MailAccountExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Secure port specified for transport protocol "%1$s", but SSL is not enabled. Please review if appropriate.
      */
-    SECURE_BUT_DEFAULT_TRANSPORT(MailAccountExceptionCodes.SECURE_BUT_DEFAULT_TRANSPORT_MSG, CATEGORY_WARNING, 25, MailAccountExceptionStrings.UNABLE_TO_CONNECT_TO_HOST_MSG_DISPLAY);
+    SECURE_BUT_DEFAULT_TRANSPORT(MailAccountExceptionCodes.SECURE_BUT_DEFAULT_TRANSPORT_MSG, CATEGORY_WARNING, 25, MailAccountExceptionStrings.UNABLE_TO_CONNECT_TO_HOST_MSG_DISPLAY),
+    /**
+     * Mail account creation denied. The host/server name "%1$s" is covered by specified IP range back-list.
+     */
+    BLACKLISTED_SERVER(MailAccountExceptionCodes.BLACKLISTED_SERVER_MSG, CATEGORY_WARNING, 25, MailAccountExceptionStrings.BLACKLISTED_SERVER_MSG_DISPLAY),
+    ;
 
     private static final String PREFIX = "ACC";
 
@@ -221,6 +226,8 @@ public enum MailAccountExceptionCodes implements DisplayableOXExceptionCode {
 
     private static final String SECURE_BUT_DEFAULT_TRANSPORT_MSG = "Secure port specified for transport protocol \"%1$s\", but SSL is not enabled. Please review if appropriate.";
 
+    private static final String BLACKLISTED_SERVER_MSG = "Mail account creation denied. The host/server name \"%1$s\" is covered by specified IP range back-list.";
+
     /**
      * Checks if specified {@code OXException}'s prefix is equal to this {@code OXExceptionCode} enumeration.
      *
@@ -267,7 +274,7 @@ public enum MailAccountExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param message
      * @param category
      * @param number

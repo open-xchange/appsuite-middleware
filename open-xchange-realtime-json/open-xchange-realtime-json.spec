@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-realtime-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 8
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -15,6 +15,7 @@ BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Realtime channel implementation for frequent polling
+Autoreqprov:   no
 Requires:      open-xchange-realtime-core >= @OXVERSION@
 Requires:      open-xchange-grizzly >= @OXVERSION@
 Obsoletes:     open-xchange-realtime-atmosphere
@@ -46,6 +47,12 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Mon Dec 09 2013 Steffen Templin <steffen.templin@open-xchange.com>
+Build for patch 2013-12-09
+* Fri Dec 06 2013 Steffen Templin <steffen.templin@open-xchange.com>
+Build for patch 2013-12-10
+* Tue Dec 03 2013 Steffen Templin <steffen.templin@open-xchange.com>
+Build for patch 2013-11-28
 * Wed Nov 20 2013 Steffen Templin <steffen.templin@open-xchange.com>
 Fifth candidate for 7.4.1 release
 * Tue Nov 19 2013 Steffen Templin <steffen.templin@open-xchange.com>

@@ -589,6 +589,7 @@ if ! grep "com.openexchange.import.contacts.limit" >/dev/null $pfile; then
 fi
 
 # SoftwareChange_Request-1564
+VALUE=""
 [ -e /opt/open-xchange/etc/cluster.properties ] && VALUE=$(ox_read_property com.openexchange.cluster.name /opt/open-xchange/etc/cluster.properties)
 [ -e /opt/open-xchange/etc/cluster.properties.dpkg-remove ] && VALUE=$(ox_read_property com.openexchange.cluster.name /opt/open-xchange/etc/cluster.properties)
 [ -e /opt/open-xchange/etc/cluster.properties.dpkg-backup ] && VALUE=$(ox_read_property com.openexchange.cluster.name /opt/open-xchange/etc/cluster.properties)
@@ -698,6 +699,23 @@ ox_add_property com.openexchange.mail.transport.removeMimeVersionInSubParts fals
 
 # SoftwareChange_Request-1707
 ox_add_property com.openexchange.servlet.contentSecurityPolicy '""' /opt/open-xchange/etc/server.properties
+
+PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
+if ! grep "com.openexchange.groupware.update.tasks.FolderExtendNameTask" >/dev/null $PFILE; then
+    cat >> $PFILE <<EOF
+
+# v7.4.2 update tasks start here
+
+# Extends the size of the 'fname' column in the 'oxfolder_tree' table, as well as the 'name' column in the 'virtualTree' table.
+!com.openexchange.groupware.update.tasks.FolderExtendNameTask
+EOF
+fi
+
+# SoftwareChange_Request-1747
+ox_add_property com.openexchange.log.suppressedCategories USER_INPUT /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-1760
+ox_add_property com.openexchange.mail.account.blacklist "" /opt/open-xchange/etc/mail.properties
 
 # SoftwareChange_Request-1772
 if [ -e /opt/open-xchange/etc/file-logging.properties.dpkg-backup ]; then

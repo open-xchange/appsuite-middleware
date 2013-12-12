@@ -247,6 +247,28 @@ public class JSONArray extends AbstractJSONValue {
     }
 
     /**
+     * Gets the {@link List list} view for this JSON array.
+     *
+     * @return The list
+     */
+    public List<Object> asList() {
+        final List<Object> retval = new ArrayList<Object>(myArrayList.size());
+        for (final Object value : myArrayList) {
+            if (value instanceof JSONValue) {
+                final JSONValue jsonValue = (JSONValue) value;
+                if (jsonValue.isArray()) {
+                    retval.add(jsonValue.toArray().asList());
+                } else {
+                    retval.add(jsonValue.toObject().asMap());
+                }
+            } else {
+                retval.add(value);
+            }
+        }
+        return retval;
+    }
+
+    /**
      * Resets this JSONArray for re-use
      */
     @Override

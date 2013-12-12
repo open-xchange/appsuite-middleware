@@ -114,6 +114,16 @@ public final class CapabilitySet implements Iterable<Capability> {
     }
 
     /**
+     * Gets the capability identifies by the supplied ID.
+     *
+     * @param id The capability identifier to look for
+     * @return The capability, or <code>null</code> if not found
+     */
+    public Capability get(final String id) {
+        return null == id ? null : capabilities.get(id);
+    }
+
+    /**
      * Gets an iterator for capabilities.
      *
      * @return An iterator for capabilities

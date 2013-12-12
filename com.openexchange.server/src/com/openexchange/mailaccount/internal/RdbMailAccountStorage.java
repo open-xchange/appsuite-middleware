@@ -96,6 +96,8 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.cache.IMailAccessCache;
+import com.openexchange.mail.config.IPRange;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
@@ -478,7 +480,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             } else {
                 // Add aliases, too
                 if (MailAccount.DEFAULT_ID == id) {
-                    Map<String, String> properties = new HashMap<String, String>(8, 1);
+                    final Map<String, String> properties = new HashMap<String, String>(8, 1);
                     properties.put("addresses", getAliases(user, cid, mailAccount));
                     mailAccount.setProperties(properties);
                 } else {
@@ -490,12 +492,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
-    private static String getAliases(int user, int cid, AbstractMailAccount mailAccount) {
-        StringAllocator sb = new StringAllocator(128);
+    private static String getAliases(final int user, final int cid, final AbstractMailAccount mailAccount) {
+        final StringAllocator sb = new StringAllocator(128);
         sb.append(mailAccount.getPrimaryAddress());
-        Set<String> s = new HashSet<String>(4);
+        final Set<String> s = new HashSet<String>(4);
         s.add(mailAccount.getPrimaryAddress());
-        for (String alias : UserStorage.getStorageUser(user, cid).getAliases()) {
+        for (final String alias : UserStorage.getStorageUser(user, cid).getAliases()) {
             if (s.add(alias)) {
                 sb.append(", ").append(alias);
             }
@@ -1720,6 +1722,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         final String primaryAddress = mailAccount.getPrimaryAddress();
         final String name = mailAccount.getName();
         if (!isUnifiedMail) {
+            // Check if black-listed
+            final List<IPRange> ranges = MailProperties.getInstance().getAccountBlacklistRanges();
+            if (null != ranges && !ranges.isEmpty()) {
+                checkHostIfBlacklisted(mailAccount.getMailServer(), ranges);
+                checkHostIfBlacklisted(mailAccount.getTransportServer(), ranges);
+            }
             // Check for duplicate
             if (-1 != getByPrimaryAddress(primaryAddress, user, cid, con)) {
                 throw MailAccountExceptionCodes.CONFLICT_ADDR.create(primaryAddress, I(user), I(cid));
@@ -1909,6 +1917,26 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             }
         }
         return id;
+    }
+
+    private void checkHostIfBlacklisted(final String host, final List<IPRange> ranges) throws OXException {
+        if (!isEmpty(host)) {
+            boolean allowed = true;
+            try {
+                final String hostAddress = InetAddress.getByName(host).getHostAddress();
+                for (int j = ranges.size(); allowed && j-- > 0;) {
+                    final IPRange ipRange = ranges.get(j);
+                    if (ipRange.contains(hostAddress)) {
+                        allowed = false;
+                    }
+                }
+            } catch (final Exception e) {
+                LOG.warn("Could not check host name \"" + host + "\" against IP range black-list", e);
+            }
+            if (false == allowed) {
+                throw MailAccountExceptionCodes.BLACKLISTED_SERVER.create(host);
+            }
+        }
     }
 
     @Override

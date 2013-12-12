@@ -2166,6 +2166,9 @@ public final class MimeMessageUtility {
         if (content instanceof InputStream) {
             return new MimeMultipart(new MessageDataSource((InputStream) content, contentType));
         }
+        if (content instanceof String) {
+            return new MimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(((String) content).getBytes(Charsets.ISO_8859_1)), contentType));
+        }
         return null;
     }
 

@@ -50,19 +50,23 @@
 package com.openexchange.oauth.facebook;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.FacebookApi;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
+import com.openexchange.java.Streams;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.DefaultOAuthToken;
@@ -145,6 +149,9 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     @Override
     public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OXException {
         final String code = (String) arguments.get(OAuthConstants.ARGUMENT_PIN);
+        if (null == code) {
+            throw OAuthExceptionCodes.INVALID_ACCOUNT.create().setForceLog(true);
+        }
         final String callback = (String) arguments.get(OAuthConstants.ARGUMENT_CALLBACK);
         final Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
 
@@ -159,10 +166,26 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
             builder.append("&client_secret=").append(getAPISecret(session));
             builder.append("&code=").append(code);
             final URL url = new URL(builder.toString());
-            final URLConnection connection = url.openConnection();
+            final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setConnectTimeout(10000);
             connection.setReadTimeout(10000);
             connection.connect();
+            /*
+             * Check response code
+             */
+            final int responseCode = connection.getResponseCode();
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                String msg;
+                {
+                    final InputStream errorStream = getErrorStream(connection);
+                    if (null == errorStream) {
+                        msg = connection.getResponseMessage();
+                    } else {
+                        msg = getErrorMessage(errorStream, builder);
+                    }
+                }
+                throw OAuthExceptionCodes.OAUTH_ERROR.create(msg).setForceLog(true);
+            }
             /*
              * Initialize a reader on URL connection...
              */
@@ -182,13 +205,35 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
         } catch (final IOException e) {
             throw OAuthExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
-            if(reader != null) {
-                try {
-                    reader.close();
-                } catch (final IOException e) {
-                    // IGNORE
-                }
+            Streams.close(reader);
+        }
+    }
+
+    private String getErrorMessage(final InputStream errorStream, final StringBuilder builder) throws IOException {
+        Reader errReader = new InputStreamReader(errorStream, com.openexchange.java.Charsets.UTF_8);
+        try {
+            final JSONObject jError = new JSONObject(errReader).getJSONObject("error");
+            builder.setLength(0);
+            return builder.append("Facebook ").append(jError.getString("type")).append(" code: ").append(jError.getInt("code")).append(" - ").append(jError.getString("message")).toString();
+        } catch (final JSONException e) {
+            builder.setLength(0);
+            final char[] buf = new char[BUFSIZE];
+            int read;
+            while ((read = errReader.read(buf, 0, BUFSIZE)) > 0) {
+                builder.append(buf, 0, read);
             }
+            return builder.toString();
+        } finally {
+            Streams.close(errReader);
+            errReader = null;
+        }
+    }
+
+    private InputStream getErrorStream(final HttpURLConnection connection) {
+        try {
+            return null == connection ? null : connection.getErrorStream();
+        } catch (final Exception e) {
+            return null;
         }
     }
 

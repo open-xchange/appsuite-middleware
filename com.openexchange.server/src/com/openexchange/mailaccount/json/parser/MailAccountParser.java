@@ -109,7 +109,7 @@ public class MailAccountParser extends DataParser {
         m.put("pop3", new StandardPorts(ports, sslPorts));
         // SMTP
         ports = new TIntHashSet(new int[] {25});
-        sslPorts = new TIntHashSet(new int[] {465, 587});
+        sslPorts = new TIntHashSet(new int[] {465});
         m.put("smtp", new StandardPorts(ports, sslPorts));
 
         PORTS = Collections.unmodifiableMap(m);

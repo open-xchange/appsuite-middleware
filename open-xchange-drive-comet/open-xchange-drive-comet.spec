@@ -8,7 +8,7 @@ BuildRequires:  open-xchange-drive
 BuildRequires:  open-xchange-grizzly
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define         ox_release 5
+%define         ox_release 8
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -16,6 +16,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Drive push implementation using Comet and using less system resources
+Autoreqprov:   no
 Requires:       open-xchange-drive >= @OXVERSION@
 Requires:       open-xchange-grizzly >= @OXVERSION@
 
@@ -47,6 +48,12 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Mon Dec 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-09
+* Fri Dec 06 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-10
+* Tue Dec 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-11-28
 * Wed Nov 20 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth candidate for 7.4.1 release
 * Tue Nov 19 2013 Marcus Klein <marcus.klein@open-xchange.com>

@@ -59,13 +59,14 @@ import com.openexchange.realtime.group.conversion.GroupCommand2JSON;
 import com.openexchange.realtime.group.conversion.JSON2GroupCommand;
 import com.openexchange.realtime.payload.converter.PayloadTreeConverter;
 import com.openexchange.realtime.util.ElementPath;
+import com.openexchange.threadpool.ThreadPoolService;
 
 
 public class RTGroupActivator extends HousekeepingActivator implements BundleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[]{MessageDispatcher.class, PayloadTreeConverter.class};
+        return new Class[]{MessageDispatcher.class, PayloadTreeConverter.class, ThreadPoolService.class};
     }
 
     @Override

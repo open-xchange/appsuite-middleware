@@ -66,7 +66,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * Unit tests for {@link AuditConfiguration}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4.1
  */

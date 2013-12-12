@@ -90,4 +90,12 @@ public interface DriveEvent {
      */
     boolean isRemote();
 
+    /**
+     * Gets the drive push token if this event originates in a drive client. Only applicable if available in the drive session. A token
+     * reference is either the push token itself, or the md5 checksum of that token, expressed as a lowercase hexadecimal number string.
+     *
+     * @return The push token reference of the device causing the event, or <code>null</code> if not applicable
+     */
+    String getPushTokenReference();
+
 }

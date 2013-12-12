@@ -51,6 +51,8 @@ package com.openexchange.test.fixtures;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.groupware.container.Contact;
 
@@ -141,34 +143,48 @@ public class SimpleCredentials implements Cloneable {
         return contactId;
     }
 
+    private void resolveFolderIDs() {
+        try {
+            final JSONObject obj = new JSONObject(getConfig().getString(Tree.PrivateFolders));
+
+            privateAppointmentFolderId = obj.getString("calendar");
+            privateContactFolderId = obj.getString("contacts");
+            privateTaskFolderId = obj.getString("tasks");
+
+            if (obj.has("infostore")) {
+                privateInfostoreFolderId = obj.getString("infostore");
+            } else {
+                privateInfostoreFolderId = "";
+            }
+        } catch (JSONException e) {
+            // do nothing
+        }
+    }
+
     public String getPrivateAppointmentFolderId() {
         if (null == privateAppointmentFolderId) {
-            privateAppointmentFolderId = getConfig().getString(Tree.PrivateAppointmentFolder);
+            resolveFolderIDs();
         }
         return privateAppointmentFolderId;
     }
 
     public String getPrivateTaskFolderId() {
         if (null == privateTaskFolderId) {
-            privateTaskFolderId = getConfig().getString(Tree.PrivateTaskFolder);
+            resolveFolderIDs();
         }
         return privateTaskFolderId;
     }
 
     public String getPrivateContactFolderId() {
         if (null == privateContactFolderId) {
-            privateContactFolderId = getConfig().getString(Tree.PrivateContactFolder);
+            resolveFolderIDs();
         }
         return privateContactFolderId;
     }
 
     public String getPrivateInfostoreFolderId() {
         if (null == privateInfostoreFolderId) {
-            try {
-                privateInfostoreFolderId = getConfig().getString(Tree.PrivateInfostoreFolder);
-            } catch (final Exception e) {
-                privateInfostoreFolderId = "";
-            }
+            resolveFolderIDs();
         }
         return privateInfostoreFolderId;
     }

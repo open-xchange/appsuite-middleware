@@ -68,11 +68,11 @@ public class Tracer {
     /**
      * Initializes a new {@link Tracer}.
      *
-     * @param diagnostics Whether to write a diagnostics log or not.
+     * @param clientDiagnostics Whether to write a diagnostics log or not.
      */
-    public Tracer(Boolean diagnostics) {
+    public Tracer(Boolean clientDiagnostics) {
         super();
-        this.traceLog = null != diagnostics && diagnostics.booleanValue() ? new StringAllocator() : null;
+        this.traceLog = null != clientDiagnostics && clientDiagnostics.booleanValue() ? new StringAllocator() : null;
     }
 
     /**
@@ -95,17 +95,6 @@ public class Tracer {
                         traceLog.append(msg.substring(0, remainingCapacity)).append("\n... (truncated)");
                     }
                 }
-//                if (traceLog.length() + msg.length() < MAX_SIZE) {
-//                    traceLog
-//                        .append(DriveConstants.LOG_DATE_FORMAT.get().format(new Date()))
-//                        .append(" [").append(Thread.currentThread().getId()).append("] : ")
-//                        .append(msg.trim()).append("\n\n");
-//                } else {
-//                    String end = traceLog.substring(traceLog.length() - 20, traceLog.length());
-//                    if (false == end.endsWith("\n... (truncated)")) {
-//                        traceLog.append("\n... (truncated)");
-//                    }
-//                }
             }
         }
     }

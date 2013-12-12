@@ -159,9 +159,6 @@ public class WrappingFilter implements Filter {
         }
         httpServletResponseWrapper = new HttpServletResponseWrapper(httpServletResponse);
 
-        // Create a Session if needed
-        httpServletRequest.getSession(true);
-
         // Set LogProperties
         {
 

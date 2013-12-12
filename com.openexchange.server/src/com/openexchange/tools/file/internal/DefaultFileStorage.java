@@ -130,7 +130,7 @@ public abstract class DefaultFileStorage implements FileStorage {
         try {
             return new RandomAccessFile(file, readOnly ? READ : READ_WRITE);
         } catch (FileNotFoundException e) {
-            throw FileStorageCodes.FILE_NOT_FOUND.create(file.getAbsolutePath());
+            throw FileStorageCodes.FILE_NOT_FOUND.create(e, file.getAbsolutePath());
         }
     }
 
@@ -155,7 +155,7 @@ public abstract class DefaultFileStorage implements FileStorage {
         try {
             return new BufferedInputStream(new FileInputStream(file(name)));
         } catch (FileNotFoundException e) {
-            throw FileStorageCodes.FILE_NOT_FOUND.create(name);
+            throw FileStorageCodes.FILE_NOT_FOUND.create(e, name);
         }
     }
 
@@ -183,7 +183,7 @@ public abstract class DefaultFileStorage implements FileStorage {
             }
             return new RandomAccessFileInputStream(eraf, offset, length);
         } catch (FileNotFoundException e) {
-            throw FileStorageCodes.FILE_NOT_FOUND.create(name);
+            throw FileStorageCodes.FILE_NOT_FOUND.create(e, name);
         } catch (IOException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         }

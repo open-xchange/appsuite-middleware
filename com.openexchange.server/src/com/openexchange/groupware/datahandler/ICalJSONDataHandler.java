@@ -95,6 +95,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -201,7 +202,7 @@ public final class ICalJSONDataHandler implements DataHandler {
              * Insert parsed appointments into denoted calendar folder
              */
             try {
-                final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
+                final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone).setSession(ServerSessionAdapter.valueOf(session));
                 final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
                 /*
                  * Get recurrence position
@@ -266,7 +267,7 @@ public final class ICalJSONDataHandler implements DataHandler {
              */
             try {
                 for (final Task task : tasks) {
-                    final TaskWriter taskWriter = new TaskWriter(timeZone);
+                    final TaskWriter taskWriter = new TaskWriter(timeZone).setSession(session);
                     final JSONObject jsonTask = new JSONObject();
                     taskWriter.writeTask(task, jsonTask);
                     objects.put(jsonTask);

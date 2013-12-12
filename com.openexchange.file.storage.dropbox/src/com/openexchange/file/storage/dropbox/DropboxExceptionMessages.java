@@ -58,32 +58,29 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class DropboxExceptionMessages implements LocalizableStrings {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
     // A Dropbox error occurred: %1$s
     public static final String DROPBOX_ERROR_MSG = "A Dropbox error occurred: %1$s";
 
     // Invalid Dropbox URL: %1$s
-    public static final String INVALID_DROPBOX_URL_MSG = "Invalid Dropbox URL: %1$s";
+    public static final String INVALID_DROPBOX_URL_MSG = "The provided Dropbox URL: %1$s is invalid";
 
     // Dropbox URL does not denote a directory: %1$s
-    public static final String NOT_A_FOLDER_MSG = "Dropbox URL does not denote a directory: %1$s";
+    public static final String NOT_A_FOLDER_MSG = "The provided Dropbox URL does not denote a directory: %1$s";
 
     // The Dropbox resource does not exist: %1$s
-    public static final String NOT_FOUND_MSG = "The Dropbox resource does not exist: %1$s";
+    public static final String NOT_FOUND_MSG = "The provided Dropbox resource does not exist: %1$s";
 
     // Update denied for Dropbox resource: %1$s
-    public static final String UPDATE_DENIED_MSG = "Update denied for Dropbox resource: %1$s";
+    public static final String UPDATE_DENIED_MSG = "Update denied for the provided Dropbox resource: %1$s";
 
     // Delete denied for Dropbox resource: %1$s
-    public static final String DELETE_DENIED_MSG = "Delete denied for Dropbox resource: %1$s";
+    public static final String DELETE_DENIED_MSG = "Delete denied for the provided Dropbox resource: %1$s";
 
     // Dropbox URL does not denote a file: %1$s
-    public static final String NOT_A_FILE_MSG = "Dropbox URL does not denote a file: %1$s";
+    public static final String NOT_A_FILE_MSG = "The provided Dropbox URL does not denote a file: %1$s";
 
     // Missing file name.
-    public static final String MISSING_FILE_NAME_MSG = "Missing file name.";
+    public static final String MISSING_FILE_NAME_MSG = "Missing file name. Please provide one and try again.";
 
     // Versioning not supported by Dropbox file storage.
     public static final String VERSIONING_NOT_SUPPORTED_MSG = "Versioning not supported by Dropbox file storage.";

@@ -197,28 +197,29 @@ public final class HzTopic<E> implements Topic<E> {
             for (int i = 0; i < size; i++) {
                 hzTopic.publish(HzDataUtility.generateMapFor(messages.get(i), senderId));
             }
-        }
-        // Chunk-wise
-        final StringBuilder sb = new StringBuilder(MULTIPLE_PREFIX);
-        final int reset = MULTIPLE_PREFIX.length();
-        final int chunkSize = CHUNK_SIZE;
-        int off = 0;
-        while (off < size) {
-            // Determine end index
-            int end = off + chunkSize;
-            if (end > size) {
-                end = size;
+        } else {
+            // Chunk-wise
+            final StringBuilder sb = new StringBuilder(MULTIPLE_PREFIX);
+            final int reset = MULTIPLE_PREFIX.length();
+            final int chunkSize = CHUNK_SIZE;
+            int off = 0;
+            while (off < size) {
+                // Determine end index
+                int end = off + chunkSize;
+                if (end > size) {
+                    end = size;
+                }
+                // Create map carrying multiple messages
+                final Map<String, Object> multiple = new LinkedHashMap<String, Object>(chunkSize + 1);
+                multiple.put(MULTIPLE_MARKER, Boolean.TRUE);
+                for (int i = off; i < end; i++) {
+                    sb.setLength(reset);
+                    multiple.put(sb.append(i+1).toString(), HzDataUtility.generateMapFor(messages.get(i), senderId));
+                }
+                // Publish
+                hzTopic.publish(multiple);
+                off = end;
             }
-            // Create map carrying multiple messages
-            final Map<String, Object> multiple = new LinkedHashMap<String, Object>(chunkSize + 1);
-            multiple.put(MULTIPLE_MARKER, Boolean.TRUE);
-            for (int i = off; i < end; i++) {
-                sb.setLength(reset);
-                multiple.put(sb.append(i+1).toString(), HzDataUtility.generateMapFor(messages.get(i), senderId));
-            }
-            // Publish
-            hzTopic.publish(multiple);
-            off = end;
         }
     }
 

@@ -1,3 +1,21 @@
+open-xchange-admin-soap-reseller (7.4.1-8) stable; urgency=low
+
+  * Build for patch 2013-12-09
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 09 Dec 2013 11:45:43 +0100
+
+open-xchange-admin-soap-reseller (7.4.1-7) stable; urgency=low
+
+  * Build for patch 2013-12-10
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 06 Dec 2013 09:21:42 +0100
+
+open-xchange-admin-soap-reseller (7.4.1-6) stable; urgency=low
+
+  * Build for patch 2013-11-28
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 03 Dec 2013 10:16:32 +0100
+
 open-xchange-admin-soap-reseller (7.4.1-5) stable; urgency=low
 
   * Fifth candidate for 7.4.1 release
@@ -166,11 +184,23 @@ open-xchange-admin-soap-reseller (7.4.0-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 16 Jul 2013 15:15:13 +0200
 
-open-xchange-admin-soap-reseller (7.4.0-0) UNRELEASED; urgency=low
+open-xchange-admin-soap-reseller (7.2.2-25) stable; urgency=low
 
-  * prepare for 7.4.0
+  * Build for patch 2013-11-29
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Apr 2013 10:28:59 +0200
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 06 Dec 2013 13:35:46 +0100
+
+open-xchange-admin-soap-reseller (7.2.2-24) stable; urgency=low
+
+  * Build for patch 2013-11-12
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 11 Nov 2013 12:38:41 +0100
+
+open-xchange-admin-soap-reseller (7.2.2-23) stable; urgency=low
+
+  * Build for patch 2013-10-30
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 24 Oct 2013 15:56:20 +0200
 
 open-xchange-admin-soap-reseller (7.2.2-22) stable; urgency=low
 

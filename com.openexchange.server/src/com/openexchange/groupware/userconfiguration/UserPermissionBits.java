@@ -976,7 +976,7 @@ public class UserPermissionBits implements Serializable, Cloneable {
             return false;
         }
         try {
-            return new OXFolderAccess(context).isVisibleFor(FolderObject.SYSTEM_LDAP_FOLDER_ID, userId, groups, this);
+            return new OXFolderAccess(context).isReadFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID, userId, groups, this);
         } catch (final OXException e) {
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(UserPermissionBits.class);
             logger.warn("Cannot check availability of Global Address Book.", e);

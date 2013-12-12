@@ -298,10 +298,10 @@ public final class CSSMatcher {
     }
 
     /** Matches a starting CSS block */
-    protected static final Pattern PATTERN_STYLE_STARTING_BLOCK = Pattern.compile("(?:#|\\.|@|[a-zA-Z])[^{/*]*?\\{");
+    protected static final Pattern PATTERN_STYLE_STARTING_BLOCK = Pattern.compile("(?:\\*|#|\\.|@|[a-zA-Z])[^{/;]*?\\{");
 
     /** Matches a complete CSS block, but not appropriate for possible nested blocks */
-    private static final Pattern PATTERN_STYLE_BLOCK = Pattern.compile("((?:#|\\.|[a-zA-Z])[^{]*?\\{)([^}/]+)\\}");
+    private static final Pattern PATTERN_STYLE_BLOCK = Pattern.compile("((?:\\*|#|\\.|[a-zA-Z])[^{]*?\\{)([^}/]+)\\}");
 
     /** Matches a CR?LF plus indention */
     protected static final Pattern CRLF = Pattern.compile("\r?\n( {2,})?");
@@ -585,26 +585,21 @@ public final class CSSMatcher {
 
     private static void handleWords(final String sWords, final String cssPrefix, final StringBuilder builder, final StringBuilder helper) {
         final String[] words = SPLIT_WORDS.split(sWords, 0);
-        if (1 == words.length && toLowerCase(words[0]).indexOf("body") >= 0) {
-            // Special treatment for "body" selector
-            builder.append('#').append(cssPrefix).append(' ');
-        } else {
-            boolean first = true;
-            for (final String word : words) {
-                if (isEmpty(word)) {
-                    builder.append(word);
+        boolean first = true;
+        for (final String word : words) {
+            if (isEmpty(word)) {
+                builder.append(word);
+            } else {
+                if (first) {
+                    handleSelector(cssPrefix, builder, helper, word, true);
+                    first = false;
                 } else {
-                    if (first) {
-                        handleSelector(cssPrefix, builder, helper, word, true);
-                        first = false;
-                    } else {
-                        builder.append(' ');
-                        handleSelector(cssPrefix, builder, helper, word, false);
-                    }
+                    builder.append(' ');
+                    handleSelector(cssPrefix, builder, helper, word, false);
                 }
             }
-            builder.append(' ');
         }
+        builder.append(' ');
     }
 
     private static void handleSelector(final String cssPrefix, final StringBuilder builder, final StringBuilder helper, final String selector, final boolean first) {
@@ -628,7 +623,9 @@ public final class CSSMatcher {
             if (first) {
                 builder.append('#').append(cssPrefix).append(' ');
             }
-            builder.append(replaceDotsAndHashes(selector, cssPrefix, helper));
+            if (!"body".equalsIgnoreCase(selector)) {
+                builder.append(replaceDotsAndHashes(selector, cssPrefix, helper));
+            }
         }
     }
 

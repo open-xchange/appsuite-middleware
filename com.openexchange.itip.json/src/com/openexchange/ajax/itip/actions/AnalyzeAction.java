@@ -73,9 +73,9 @@ public class AnalyzeAction extends AbstractITipAction {
 
     @Override
     protected Object process(List<ITipAnalysis> analysis, AJAXRequestData request, ServerSession session, TimeZone tz) {
-        JSONArray array = new JSONArray();
+        JSONArray array = new JSONArray(analysis.size());
 
-        ITipAnalysisWriter writer = new ITipAnalysisWriter(tz);
+        ITipAnalysisWriter writer = new ITipAnalysisWriter(tz, session);
         for (ITipAnalysis anAnalysis : analysis) {
             JSONObject object = new JSONObject();
             try {
@@ -85,10 +85,7 @@ public class AnalyzeAction extends AbstractITipAction {
             }
             array.put(object);
         }
-       return array;
+        return array;
     }
-
-
-
 
 }

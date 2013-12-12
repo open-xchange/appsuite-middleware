@@ -86,7 +86,7 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer<Object,Objec
 
     private ServiceRegistration<OAuthServiceMetaData> registration;
     private ServiceRegistration<FacebookService> registration2;
-    private ServiceRegistration<CapabilityChecker> capabilityChecker;
+    private volatile ServiceRegistration<CapabilityChecker> capabilityChecker;
     private ConfigurationService configurationService;
     private OAuthService oAuthService;
 
@@ -176,8 +176,10 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer<Object,Objec
             lock.unlock();
         }
         if (null != unregister) {
+            final ServiceRegistration<CapabilityChecker> capabilityChecker = this.capabilityChecker;
             if (capabilityChecker != null) {
                 capabilityChecker.unregister();
+                this.capabilityChecker = null;
             }
 
             LOG.info("Unregistering facebook metadata service.");

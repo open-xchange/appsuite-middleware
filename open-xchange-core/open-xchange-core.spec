@@ -1,4 +1,4 @@
-%define	       configfiles     configfiles.list
+%define        configfiles     configfiles.list
 
 Name:          open-xchange-core
 BuildArch:     noarch
@@ -9,140 +9,141 @@ BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 8
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
-License:       GPL-2.0 
+License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The essential core of an Open-Xchange backend
+Autoreqprov:   no
 Requires:      open-xchange-osgi >= @OXVERSION@
 Requires:      open-xchange-xerces
 Provides:      open-xchange-cache = %{version}
-Obsoletes:     open-xchange-cache <= %{version}
+Obsoletes:     open-xchange-cache < %{version}
 Provides:      open-xchange-calendar = %{version}
-Obsoletes:     open-xchange-calendar <= %{version}
+Obsoletes:     open-xchange-calendar < %{version}
 Provides:      open-xchange-charset = %{version}
-Obsoletes:     open-xchange-charset <= %{version}
+Obsoletes:     open-xchange-charset < %{version}
 Provides:      open-xchange-common = %{version}
-Obsoletes:     open-xchange-common <= %{version}
+Obsoletes:     open-xchange-common < %{version}
 Provides:      open-xchange-config-cascade = %{version}
-Obsoletes:     open-xchange-config-cascade <= %{version}
+Obsoletes:     open-xchange-config-cascade < %{version}
 Provides:      open-xchange-config-cascade-context = %{version}
-Obsoletes:     open-xchange-config-cascade-context <= %{version}
+Obsoletes:     open-xchange-config-cascade-context < %{version}
 Provides:      open-xchange-config-cascade-user = %{version}
-Obsoletes:     open-xchange-config-cascade-user <= %{version}
+Obsoletes:     open-xchange-config-cascade-user < %{version}
 Provides:      open-xchange-configread = %{version}
-Obsoletes:     open-xchange-configread <= %{version}
+Obsoletes:     open-xchange-configread < %{version}
 Provides:      open-xchange-contactcollector = %{version}
-Obsoletes:     open-xchange-contactcollector <= %{version}
+Obsoletes:     open-xchange-contactcollector < %{version}
 Provides:      open-xchange-control = %{version}
-Obsoletes:     open-xchange-control <= %{version}
+Obsoletes:     open-xchange-control < %{version}
 Provides:      open-xchange-conversion = %{version}
-Obsoletes:     open-xchange-conversion <= %{version}
+Obsoletes:     open-xchange-conversion < %{version}
 Provides:      open-xchange-conversion-engine = %{version}
-Obsoletes:     open-xchange-conversion-engine <= %{version}
+Obsoletes:     open-xchange-conversion-engine < %{version}
 Provides:      open-xchange-conversion-servlet = %{version}
-Obsoletes:     open-xchange-conversion-servlet <= %{version}
+Obsoletes:     open-xchange-conversion-servlet < %{version}
 Provides:      open-xchange-crypto = %{version}
-Obsoletes:     open-xchange-crypto <= %{version}
+Obsoletes:     open-xchange-crypto < %{version}
 Provides:      open-xchange-data-conversion-ical4j = %{version}
-Obsoletes:     open-xchange-data-conversion-ical4j <= %{version}
+Obsoletes:     open-xchange-data-conversion-ical4j < %{version}
 Provides:      open-xchange-dataretention = %{version}
-Obsoletes:     open-xchange-dataretention <= %{version}
+Obsoletes:     open-xchange-dataretention < %{version}
 Provides:      open-xchange-genconf = %{version}
-Obsoletes:     open-xchange-genconf <= %{version}
+Obsoletes:     open-xchange-genconf < %{version}
 Provides:      open-xchange-genconf-mysql = %{version}
-Obsoletes:     open-xchange-genconf-mysql <= %{version}
+Obsoletes:     open-xchange-genconf-mysql < %{version}
 Provides:      open-xchange-file-storage = %{version}
-Obsoletes:     open-xchange-file-storage <= %{version}
+Obsoletes:     open-xchange-file-storage < %{version}
 Provides:      open-xchange-file-storage-composition = %{version}
-Obsoletes:     open-xchange-file-storage-composition <= %{version}
+Obsoletes:     open-xchange-file-storage-composition < %{version}
 Provides:      open-xchange-file-storage-config = %{version}
-Obsoletes:     open-xchange-file-storage-config <= %{version}
+Obsoletes:     open-xchange-file-storage-config < %{version}
 Provides:      open-xchange-file-storage-generic = %{version}
-Obsoletes:     open-xchange-file-storage-generic <= %{version}
+Obsoletes:     open-xchange-file-storage-generic < %{version}
 Provides:      open-xchange-file-storage-infostore = %{version}
-Obsoletes:     open-xchange-file-storage-infostore <= %{version}
+Obsoletes:     open-xchange-file-storage-infostore < %{version}
 Provides:      open-xchange-file-storage-json = %{version}
-Obsoletes:     open-xchange-file-storage-json <= %{version}
+Obsoletes:     open-xchange-file-storage-json < %{version}
 Provides:      open-xchange-folder-json = %{version}
-Obsoletes:     open-xchange-folder-json <= %{version}
+Obsoletes:     open-xchange-folder-json < %{version}
 Provides:      open-xchange-frontend-uwa = %{version}
-Obsoletes:     open-xchange-frontend-uwa <= %{version}
+Obsoletes:     open-xchange-frontend-uwa < %{version}
 Provides:      open-xchange-frontend-uwa-json = %{version}
-Obsoletes:     open-xchange-frontend-uwa-json <= %{version}
+Obsoletes:     open-xchange-frontend-uwa-json < %{version}
 Provides:      open-xchange-global = %{version}
-Obsoletes:     open-xchange-global <= %{version}
+Obsoletes:     open-xchange-global < %{version}
 Provides:      open-xchange-html = %{version}
-Obsoletes:     open-xchange-html <= %{version}
+Obsoletes:     open-xchange-html < %{version}
 Provides:      open-xchange-i18n = %{version}
-Obsoletes:     open-xchange-i18n <= %{version}
+Obsoletes:     open-xchange-i18n < %{version}
 Provides:      open-xchange-itip-json = %{version}
-Obsoletes:     open-xchange-itip-json <= %{version}
+Obsoletes:     open-xchange-itip-json < %{version}
 Provides:      open-xchange-jcharset = %{version}
-Obsoletes:     open-xchange-jcharset <= %{version}
+Obsoletes:     open-xchange-jcharset < %{version}
 Provides:      open-xchange-logging = %{version}
-Obsoletes:     open-xchange-logging <= %{version}
+Obsoletes:     open-xchange-logging < %{version}
 Provides:      open-xchange-management = %{version}
-Obsoletes:     open-xchange-management <= %{version}
+Obsoletes:     open-xchange-management < %{version}
 Provides:      open-xchange-modules-json = %{version}
-Obsoletes:     open-xchange-modules-json <= %{version}
+Obsoletes:     open-xchange-modules-json < %{version}
 Provides:      open-xchange-modules-model = %{version}
-Obsoletes:     open-xchange-modules-model <= %{version}
+Obsoletes:     open-xchange-modules-model < %{version}
 Provides:      open-xchange-modules-storage = %{version}
-Obsoletes:     open-xchange-modules-storage <= %{version}
+Obsoletes:     open-xchange-modules-storage < %{version}
 Provides:      open-xchange-monitoring = %{version}
-Obsoletes:     open-xchange-monitoring <= %{version}
+Obsoletes:     open-xchange-monitoring < %{version}
 Provides:      open-xchange-proxy = %{version}
-Obsoletes:     open-xchange-proxy <= %{version}
+Obsoletes:     open-xchange-proxy < %{version}
 Provides:      open-xchange-proxy-servlet = %{version}
-Obsoletes:     open-xchange-proxy-servlet <= %{version}
+Obsoletes:     open-xchange-proxy-servlet < %{version}
 Provides:      open-xchange-publish-basic = %{version}
-Obsoletes:     open-xchange-publish-basic <= %{version}
+Obsoletes:     open-xchange-publish-basic < %{version}
 Provides:      open-xchange-publish-infostore-online = %{version}
-Obsoletes:     open-xchange-publish-infostore-online <= %{version}
+Obsoletes:     open-xchange-publish-infostore-online < %{version}
 Provides:      open-xchange-push = %{version}
-Obsoletes:     open-xchange-push <= %{version}
+Obsoletes:     open-xchange-push < %{version}
 Provides:      open-xchange-push-udp = %{version}
-Obsoletes:     open-xchange-push-udp <= %{version}
+Obsoletes:     open-xchange-push-udp < %{version}
 Provides:      open-xchange-secret = %{version}
-Obsoletes:     open-xchange-secret <= %{version}
+Obsoletes:     open-xchange-secret < %{version}
 Provides:      open-xchange-secret-recovery = %{version}
-Obsoletes:     open-xchange-secret-recovery <= %{version}
+Obsoletes:     open-xchange-secret-recovery < %{version}
 Provides:      open-xchange-secret-recovery-json = %{version}
-Obsoletes:     open-xchange-secret-recovery-json <= %{version}
+Obsoletes:     open-xchange-secret-recovery-json < %{version}
 Provides:      open-xchange-secret-recovery-mail = %{version}
-Obsoletes:     open-xchange-secret-recovery-mail <= %{version}
+Obsoletes:     open-xchange-secret-recovery-mail < %{version}
 Provides:      open-xchange-server = %{version}
-Obsoletes:     open-xchange-server <= %{version}
+Obsoletes:     open-xchange-server < %{version}
 Provides:      open-xchange-sessiond = %{version}
-Obsoletes:     open-xchange-sessiond <= %{version}
+Obsoletes:     open-xchange-sessiond < %{version}
 Provides:      open-xchange-settings-extensions = %{version}
-Obsoletes:     open-xchange-settings-extensions <= %{version}
+Obsoletes:     open-xchange-settings-extensions < %{version}
 Provides:      open-xchange-sql = %{version}
-Obsoletes:     open-xchange-sql <= %{version}
+Obsoletes:     open-xchange-sql < %{version}
 Provides:      open-xchange-templating = %{version}
-Obsoletes:     open-xchange-templating <= %{version}
+Obsoletes:     open-xchange-templating < %{version}
 Provides:      open-xchange-templating-base = %{version}
-Obsoletes:     open-xchange-templating-base <= %{version}
+Obsoletes:     open-xchange-templating-base < %{version}
 Provides:      open-xchange-threadpool = %{version}
-Obsoletes:     open-xchange-threadpool <= %{version}
+Obsoletes:     open-xchange-threadpool < %{version}
 Provides:      open-xchange-tx = %{version}
-Obsoletes:     open-xchange-tx <= %{version}
+Obsoletes:     open-xchange-tx < %{version}
 Provides:      open-xchange-user-json = %{version}
-Obsoletes:     open-xchange-user-json <= %{version}
+Obsoletes:     open-xchange-user-json < %{version}
 Provides:      open-xchange-xml = %{version}
-Obsoletes:     open-xchange-xml <= %{version}
+Obsoletes:     open-xchange-xml < %{version}
 Provides:      open-xchange-passwordchange-servlet = %{version}
-Obsoletes:     open-xchange-passwordchange-servlet <= %{version}
+Obsoletes:     open-xchange-passwordchange-servlet < %{version}
 Provides:      open-xchange-file-storage-webdav = %{version}
-Obsoletes:     open-xchange-file-storage-webdav <= %{version}
+Obsoletes:     open-xchange-file-storage-webdav < %{version}
 Provides:      open-xchange-cluster-discovery-mdns = %{version}
-Obsoletes:     open-xchange-cluster-discovery-mdns <= %{version}
+Obsoletes:     open-xchange-cluster-discovery-mdns < %{version}
 Provides:      open-xchange-cluster-discovery-static = %{version}
-Obsoletes:     open-xchange-cluster-discovery-static <= %{version}
+Obsoletes:     open-xchange-cluster-discovery-static < %{version}
 Provides:      open-xchange-log4j = %{version}
 Obsoletes:     open-xchange-log4j <= %{version}
 
@@ -181,6 +182,7 @@ find %{buildroot}/opt/open-xchange/etc \
         -type f \
         -printf "%%%config(noreplace) %p\n" > %{configfiles}
 perl -pi -e 's;%{buildroot};;' %{configfiles}
+perl -pi -e 's;^(.*?)\s+(.*/paths.perfMap)$;$2;' %{configfiles}
 perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server|filestorage|management|oauth-provider|secret|sessiond)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
 perl -pi -e 's;(^.*?)\s+(.*/(secrets|tokenlogin-secrets))$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
 
@@ -724,6 +726,7 @@ if ! grep "com.openexchange.import.contacts.limit" >/dev/null $pfile; then
 fi
 
 # SoftwareChange_Request-1564
+VALUE=""
 [ -e /opt/open-xchange/etc/cluster.properties ] && VALUE=$(ox_read_property com.openexchange.cluster.name /opt/open-xchange/etc/cluster.properties)
 TOVALUE=$(ox_read_property com.openexchange.hazelcast.group.name /opt/open-xchange/etc/hazelcast.properties)
 if [ -n "$VALUE" -a -z "$TOVALUE" ]; then
@@ -831,6 +834,23 @@ ox_add_property com.openexchange.mail.transport.removeMimeVersionInSubParts fals
 # SoftwareChange_Request-1707
 ox_add_property com.openexchange.servlet.contentSecurityPolicy '""' /opt/open-xchange/etc/server.properties
 
+PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
+if ! grep "com.openexchange.groupware.update.tasks.FolderExtendNameTask" >/dev/null $PFILE; then
+    cat >> $PFILE <<EOF
+
+# v7.4.2 update tasks start here
+
+# Extends the size of the 'fname' column in the 'oxfolder_tree' table, as well as the 'name' column in the 'virtualTree' table.
+!com.openexchange.groupware.update.tasks.FolderExtendNameTask
+EOF
+fi
+
+# SoftwareChange_Request-1747
+ox_add_property com.openexchange.log.suppressedCategories USER_INPUT /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-1760
+ox_add_property com.openexchange.mail.account.blacklist "" /opt/open-xchange/etc/mail.properties
+
 # SoftwareChange_Request-1772
 MODIFIED=$(rpm --verify open-xchange-core | grep file-logging.properties | grep 5 | wc -l)
 if [ -e /opt/open-xchange/etc/file-logging.properties -a $MODIFIED -eq 1 ]; then
@@ -881,10 +901,20 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Mon Dec 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-09
+* Fri Dec 06 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-10
+* Fri Dec 06 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-11-29
+* Tue Dec 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-11-28
 * Wed Nov 20 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Fifth candidate for 7.4.1 release
 * Tue Nov 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth candidate for 7.4.1 release
+* Mon Nov 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-11-12
 * Mon Nov 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-11-12
 * Fri Nov 08 2013 Marcus Klein <marcus.klein@open-xchange.com>

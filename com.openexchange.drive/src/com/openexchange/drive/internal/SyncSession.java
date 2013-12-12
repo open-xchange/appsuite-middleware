@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import jonelo.jacksum.algorithm.MD;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveFileField;
@@ -67,6 +66,7 @@ import com.openexchange.drive.checksum.FileChecksum;
 import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
 import com.openexchange.drive.comparison.ServerDirectoryVersion;
 import com.openexchange.drive.comparison.ServerFileVersion;
+import com.openexchange.drive.management.DriveConfig;
 import com.openexchange.drive.storage.DriveStorage;
 import com.openexchange.drive.storage.StorageOperation;
 import com.openexchange.exception.OXException;
@@ -231,9 +231,7 @@ public class SyncSession {
             /*
              * check configuration first
              */
-            ConfigurationService configService = DriveServiceLookup.getService(ConfigurationService.class);
-            if (null != configService && false ==
-                Boolean.valueOf(configService.getBoolProperty("com.openexchange.drive.useTempFolder", false))) {
+            if (false == DriveConfig.getInstance().isUseTempFolder()) {
                 trace("Temporary folder for upload is disabled by configuration.");
                 hasTempFolder = Boolean.FALSE;
             } else {
@@ -242,17 +240,26 @@ public class SyncSession {
                  */
                 FileStorageFolder tempFolder = getStorage().optFolder(TEMP_PATH, false);
                 if (null == tempFolder) {
-                    try {
-                        tempFolder = getStorage().optFolder(TEMP_PATH, true);
-                    } catch (OXException e) {
-                        trace("Error creating temporary folder for uploads: " + e.getMessage());
+                    FileStorageFolder rootFolder = getStorage().getFolder(DriveConstants.ROOT_PATH);
+                    if (null != rootFolder.getOwnPermission() &&
+                        FileStoragePermission.CREATE_SUB_FOLDERS <= rootFolder.getOwnPermission().getDeletePermission() &&
+                        FileStoragePermission.WRITE_ALL_OBJECTS <= rootFolder.getOwnPermission().getFolderPermission() &&
+                        FileStoragePermission.READ_ALL_OBJECTS <= rootFolder.getOwnPermission().getFolderPermission() &&
+                        FileStoragePermission.DELETE_ALL_OBJECTS <= rootFolder.getOwnPermission().getDeletePermission()) {
+                        try {
+                            tempFolder = getStorage().optFolder(TEMP_PATH, true);
+                        } catch (OXException e) {
+                            trace("Error creating temporary folder for uploads: " + e.getMessage());
+                        }
                     }
                 }
                 if (null == tempFolder) {
                     trace("No temporary folder available for uploads.");
                     hasTempFolder = Boolean.FALSE;
                 } else if (null != tempFolder.getOwnPermission() &&
-                    FileStoragePermission.CREATE_OBJECTS_IN_FOLDER <= tempFolder.getOwnPermission().getFolderPermission()) {
+                    FileStoragePermission.CREATE_OBJECTS_IN_FOLDER <= tempFolder.getOwnPermission().getFolderPermission() &&
+                    FileStoragePermission.WRITE_ALL_OBJECTS <= tempFolder.getOwnPermission().getFolderPermission() &&
+                    FileStoragePermission.DELETE_ALL_OBJECTS <= tempFolder.getOwnPermission().getDeletePermission()) {
                     trace("Using folder '" + tempFolder + "' for temporary uploads.");
                     hasTempFolder = Boolean.TRUE;
                 } else {

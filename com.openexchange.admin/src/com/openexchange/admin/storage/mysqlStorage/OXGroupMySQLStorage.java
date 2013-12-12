@@ -110,13 +110,9 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             stmt.setInt(1, groupId);
             stmt.setInt(2, ctxId);
             result = stmt.executeQuery();
-            String ident = null;
-            String disp = null;
             int gidNumber = -1;
 
             if (result.next()) {
-                ident = result.getString("identifier");
-                disp = result.getString("displayName");
                 gidNumber = result.getInt("gidNumber");
             }
             stmt.close();
@@ -125,8 +121,8 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             stmt.setInt(1, groupId);
             stmt.setInt(2, ctxId);
             stmt.setLong(3, System.currentTimeMillis());
-            stmt.setString(4, ident);
-            stmt.setString(5, disp);
+            stmt.setString(4, "");
+            stmt.setString(5, "");
             stmt.setInt(6, gidNumber);
             stmt.executeUpdate();
         } finally {

@@ -58,7 +58,7 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class MailAccountExceptionStrings implements LocalizableStrings {
 
-    // Cannot find mail account for user \"%2$s\".
+    // Cannot find mail account for user "%2$s".
     public static final String NOT_FOUND_MSG_DISPLAY = "Cannot find mail account for user \"%2$s\".";
 
     // You do not have the appropriate permissions to delete the default mail account.
@@ -85,7 +85,7 @@ public final class MailAccountExceptionStrings implements LocalizableStrings {
     // A mail account with the given E-Mail address already exists.
     public static final String CONFLICT_ADDR_MSG_DISPLAY = "A mail account with the given E-Mail address already exists.";
 
-    // The mail account name \"%1$s\" is not valid.
+    // The mail account name "%1$s" is not valid.
     public static final String INVALID_NAME_MSG_DISPLAY = "The mail account name \"%1$s\" is not valid.";
 
     // The selected mail account name already exists.
@@ -94,8 +94,11 @@ public final class MailAccountExceptionStrings implements LocalizableStrings {
     // Unable to connect to mail server.
     public static final String UNABLE_TO_CONNECT_TO_HOST_MSG_DISPLAY = "Unable to connect to mail server.";
 
-    // The given host name \"%1$s\" is invalid.
+    // The given host name "%1$s" is invalid.
     public static final String INVALID_HOST_NAME_MSG_DISPLAY = "The given host name \"%1$s\" is invalid.";
+
+    // The given host name "%1$s" is not allowed.
+    public static final String BLACKLISTED_SERVER_MSG_DISPLAY = "The given host name \"%1$s\" is not allowed.";
 
     /**
      * Initializes a new {@link MailAccountExceptionStrings}.

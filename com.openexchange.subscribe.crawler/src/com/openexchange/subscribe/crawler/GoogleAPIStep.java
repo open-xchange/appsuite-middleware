@@ -76,6 +76,7 @@ import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
@@ -104,9 +105,6 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
 
     @Override
     public void execute(final WebClient webClient) throws OXException {
-
-        final List<Contact> contacts = new ArrayList<Contact>();
-
         // Request the feed
         URL feedUrl;
         try {
@@ -120,11 +118,18 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
             final ContactsService myService = new ContactsService("com.openexchange");
             myService.setUserCredentials(username, password);
             feedUrl = new URL("http://www.google.com/m8/feeds/contacts/" + username + "/full?max-results=5000");
-            final ContactFeed resultFeed = myService.getFeed(feedUrl, ContactFeed.class);
-            for (int i = 0; i < resultFeed.getEntries().size(); i++) {
+
+            final List<ContactEntry> entries = myService.getFeed(feedUrl, ContactFeed.class).getEntries();
+            final int size = entries.size();
+
+            final List<Contact> contacts = new ArrayList<Contact>(size);
+            boolean overQuotaEncountered = false;
+
+            // Iterate one-by-one
+            for (int i = 0; i < size; i++) {
                 try {
                     final Contact contact = new Contact();
-                    final ContactEntry entry = resultFeed.getEntries().get(i);
+                    final ContactEntry entry = entries.get(i);
                     if (entry.hasName()) {
                         final com.google.gdata.data.extensions.Name name = entry.getName();
                         if (name.hasFullName()) {
@@ -198,9 +203,9 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
                             final Pattern pattern = Pattern.compile(regex);
                             final Matcher matcher = pattern.matcher(birthday);
                             if (matcher.matches() && matcher.groupCount() == 3) {
-                                final int year = Integer.valueOf(matcher.group(1));
-                                final int month = Integer.valueOf(matcher.group(2));
-                                final int day = Integer.valueOf(matcher.group(3));
+                                final int year = Integer.parseInt(matcher.group(1));
+                                final int month = Integer.parseInt(matcher.group(2));
+                                final int day = Integer.parseInt(matcher.group(3));
                                 final Calendar cal = Calendar.getInstance();
                                 cal.clear();
                                 cal.set(year, month, day);
@@ -273,18 +278,47 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
                         }
                     }
 
-                    if (entry.getContactPhotoLink() != null && entry.getContactPhotoLink().getEtag() != null) {
-                        final Link photoLink = entry.getContactPhotoLink();
-                        final Service.GDataRequest request = myService.createLinkQueryRequest(photoLink);
-                        request.execute();
-                        final InputStream in = request.getResponseStream();
-                        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-                        final byte[] buffer = new byte[4096];
-                        for (int read = 0; (read = in.read(buffer)) > 0;) {
-                            out.write(buffer, 0, read);
+                    final Link contactPhotoLink = entry.getContactPhotoLink();
+                    if (contactPhotoLink != null && contactPhotoLink.getEtag() != null) {
+                        Service.GDataRequest request = null;
+                        InputStream in = null;
+                        try {
+                            request = myService.createLinkQueryRequest(contactPhotoLink);
+                            request.execute();
+                            in = request.getResponseStream();
+                            final ByteArrayOutputStream out = new ByteArrayOutputStream();
+                            final byte[] buffer = new byte[4096];
+                            for (int read = 0; (read = in.read(buffer)) > 0;) {
+                                out.write(buffer, 0, read);
+                            }
+                            contact.setImage1(out.toByteArray());
+                            contact.setImageContentType("image/jpeg");
+                        } catch (final ServiceException e) {
+                            final String lcm = Strings.toLowerCase(e.getMessage());
+                            if (lcm.indexOf("temporary problem - please try again later and consider using batch operations.") > 0) {
+                                if (!overQuotaEncountered) {
+                                    LOG.warn("Unable to load more Google contact images due to quota restrictions.", e);
+                                    overQuotaEncountered = true;
+                                }
+                            } else {
+                                LOG.warn("Error while trying to load Google contact's image", e);
+                            }
+                        } finally {
+                            if (null != in) {
+                                try {
+                                    in.close();
+                                } catch (final Exception e) {
+                                    // Ignore
+                                }
+                            }
+                            if (null != request) {
+                                try {
+                                    request.end();
+                                } catch (final Exception e) {
+                                    // Ignore
+                                }
+                            }
                         }
-                        contact.setImage1(out.toByteArray());
-                        contact.setImageContentType("image/jpeg");
                     }
 
                     contacts.add(contact);
@@ -292,6 +326,13 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
                     LOG.error(e.toString());
                 }
             }
+
+            output = new Contact[contacts.size()];
+            for (int i = 0; i < output.length && i < contacts.size(); i++) {
+                output[i] = contacts.get(i);
+            }
+            executedSuccessfully = true;
+
         } catch (final MalformedURLException e) {
             LOG.error(e.toString());
             LOG.error("User with id={} and context={} failed to subscribe source={} with display_name={}", workflow.getSubscription().getUserId(), workflow.getSubscription().getContext(), workflow.getSubscription().getSource().getDisplayName(), workflow.getSubscription().getDisplayName());
@@ -311,13 +352,6 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
             LOG.error("User with id={} and context={} failed to subscribe source={} with display_name={}", workflow.getSubscription().getUserId(), workflow.getSubscription().getContext(), workflow.getSubscription().getSource().getDisplayName(), workflow.getSubscription().getDisplayName());
             throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
         }
-
-        output = new Contact[contacts.size()];
-        for (int i = 0; i < output.length && i < contacts.size(); i++) {
-            output[i] = contacts.get(i);
-        }
-        executedSuccessfully = true;
-
     }
 
     public String getUsername() {

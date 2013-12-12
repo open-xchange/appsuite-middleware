@@ -240,7 +240,7 @@ public class TaskRequest extends CalendarRequest {
             internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
 
             final TasksSQLInterface taskssql = new TasksSQLImpl(session);
-            final TaskWriter taskWriter = new TaskWriter(timeZone);
+            final TaskWriter taskWriter = new TaskWriter(timeZone).setSession(session);
 
             it = taskssql.getModifiedTasksInFolder(folderId, internalColumns, requestedTimestamp);
             while (it.hasNext()) {
@@ -316,7 +316,7 @@ public class TaskRequest extends CalendarRequest {
 
         try {
             final TasksSQLInterface taskssql = new TasksSQLImpl(session);
-            final TaskWriter taskwriter = new TaskWriter(timeZone);
+            final TaskWriter taskwriter = new TaskWriter(timeZone).setSession(session);
             it = taskssql.getObjectsById(objectIdAndFolderId, internalColumns);
 
             while (it.hasNext()) {
@@ -360,7 +360,7 @@ public class TaskRequest extends CalendarRequest {
         SearchIterator<Task> it = null;
         try {
 
-            final TaskWriter taskwriter = new TaskWriter(timeZone);
+            final TaskWriter taskwriter = new TaskWriter(timeZone).setSession(session);
 
             final TasksSQLInterface taskssql = new TasksSQLImpl(session);
             if (leftHandLimit == 0) {
@@ -395,7 +395,7 @@ public class TaskRequest extends CalendarRequest {
 
         final TasksSQLInterface sqlinterface = new TasksSQLImpl(session);
         final Task task = sqlinterface.getTaskById(id, inFolder);
-        final TaskWriter taskWriter = new TaskWriter(timeZone);
+        final TaskWriter taskWriter = new TaskWriter(timeZone).setSession(session);
 
         final JSONObject jsonResponseObject = new JSONObject();
         taskWriter.writeTask(task, jsonResponseObject);
@@ -484,7 +484,7 @@ public class TaskRequest extends CalendarRequest {
         SearchIterator<Task> it = null;
 
         try {
-            final TaskWriter taskWriter = new TaskWriter(timeZone);
+            final TaskWriter taskWriter = new TaskWriter(timeZone).setSession(session);
 
             final TasksSQLInterface taskssql = new TasksSQLImpl(session);
             it = taskssql.getTasksByExtendedSearch(searchObj, orderBy, order, internalColumns);

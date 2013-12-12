@@ -49,6 +49,7 @@
 
 package com.openexchange.imap;
 
+import static com.openexchange.java.Strings.isEmpty;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -333,7 +334,9 @@ public class IMAPDefaultFolderChecker {
              */
             for (int i = 0; i < fullNames.length; i++) {
                 final String fullName = fullNames[i];
-                if (null != fullName && (fullName.indexOf(sep) > 0 || !fullName.equals(names[i]))) {
+                if (isEmpty(fullName)) {
+                    fullNames[i] = null;
+                } else if ((fullName.indexOf(sep) > 0) || !fullName.equals(names[i])) {
                     fullNames[i] = null;
                 }
             }
@@ -866,19 +869,6 @@ public class IMAPDefaultFolderChecker {
                 // Ignore
             }
         }
-    }
-
-    /** Checks for empty string */
-    protected static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
 }

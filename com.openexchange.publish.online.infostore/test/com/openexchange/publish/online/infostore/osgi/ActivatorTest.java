@@ -58,7 +58,10 @@ import java.util.concurrent.ConcurrentMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -89,49 +92,48 @@ public class ActivatorTest {
     /**
      * Class under test
      */
+    @InjectMocks
     private Activator activator = null;
 
     /**
      * {@link IDBasedFileAccessFactory} mock
      */
+    @Mock
     private IDBasedFileAccessFactory idBasedFileAccessFactory;
 
     /**
      * {@link HttpService} mock
      */
+    @Mock
     private HttpService httpService = null;
 
     /**
      * {@link PublicationDataLoaderService} mock
      */
+    @Mock
     private PublicationDataLoaderService publicationDataLoaderService = null;
 
     /**
      * {@link ContextService} mock
      */
+    @Mock
     private ContextService contextService = null;
 
     /**
      * {@link BundleContext} mock
      */
+    @Mock
     private BundleContext bundleContext;
 
     /**
      * {@link Bundle} mock
      */
+    @Mock
     private Bundle bundle;
 
     @Before
     public void setUp() throws Exception {
-        this.activator = new Activator();
-
-        // MEMBERS
-        this.bundleContext = PowerMockito.mock(BundleContext.class);
-        this.bundle = PowerMockito.mock(Bundle.class);
-        this.idBasedFileAccessFactory = PowerMockito.mock(IDBasedFileAccessFactory.class);
-        this.httpService = PowerMockito.mock(HttpService.class);
-        this.publicationDataLoaderService = PowerMockito.mock(PublicationDataLoaderService.class);
-        this.contextService = PowerMockito.mock(ContextService.class);
+        MockitoAnnotations.initMocks(this);
 
         // SERVICES
         ConcurrentMap<Class<?>, ServiceProvider<?>> services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>();

@@ -542,7 +542,7 @@ public final class HtmlServiceImpl implements HtmlService {
             html = dropDoubleAccents(html);
             html = dropSlashedTags(html);
             // CSS- and tag-wise sanitizing
-            {
+            try {
                 // Determine the definition to use
                 final String definition;
                 {
@@ -559,6 +559,9 @@ public final class HtmlServiceImpl implements HtmlService {
                     modified[0] |= handler.isImageURLFound();
                 }
                 html = handler.getHTML();
+            } catch (final ParsingDeniedException e) {
+                LOG.warn("HTML content will be returned un-white-listed. Reason: "+e.getMessage(), e);
+                return htmlContent;
             }
             // Repetitive sanitizing until no further replacement/changes performed
             final boolean[] sanitized = new boolean[] { true };
@@ -568,7 +571,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 html = SaneScriptTags.saneScriptTags(html, sanitized);
             }
             return html;
-        } catch (final ParsingDeniedException e) {
+        } catch (final RuntimeException e) {
             LOG.warn("HTML content will be returned un-sanitized. Reason: {}", e.getMessage(), e);
             return htmlContent;
         }

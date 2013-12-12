@@ -57,8 +57,6 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.Cache;
@@ -86,8 +84,6 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 
     private transient final UserConfigurationStorage delegateStorage;
 
-    private final Lock cacheWriteLock;
-
     private volatile Cache cache;
 
     private volatile UserConfigurationStorage fallback;
@@ -100,7 +96,6 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
      */
     public CachingUserConfigurationStorage() throws OXException {
         super();
-        cacheWriteLock = new ReentrantLock();
         this.delegateStorage = new CapabilityUserConfigurationStorage();
         cacheAvailabilityListener = new CacheAvailabilityListener() {
 
@@ -304,13 +299,10 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             int userId = userConfig.getUserId();
             CacheKey key;
             key = getKey(cache, ctx, userId, false);
-            cacheWriteLock.lock();
             try {
                 cache.put(key, userConfig, false);
             } catch (RuntimeException e) {
                 LOG.warn("Failed to add user configuration for context {} and user {} to cache.", ctx.getContextId(), userId, e);
-            } finally {
-                cacheWriteLock.unlock();
             }
             map.put(userId, userConfig.clone());
         }
@@ -322,7 +314,6 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         if (cache == null) {
             return;
         }
-        cacheWriteLock.lock();
         try {
             cache.clear();
         } catch (final RuntimeException rte) {
@@ -330,8 +321,6 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
              * Swallow
              */
             LOG.warn("A runtime error occurred.", rte);
-        } finally {
-            cacheWriteLock.unlock();
         }
     }
 
@@ -343,14 +332,11 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         }
         CacheKey key = getKey(userId, ctx, cache);
         CacheKey keyWithoutExtended = getKey(cache, ctx, userId, false);
-        cacheWriteLock.lock();
         try {
             cache.remove(key);
             cache.remove(keyWithoutExtended);
         } catch (RuntimeException e) {
             LOG.warn("Failed to remove user configuration for context {} and user {} to cache.", ctx.getContextId(), userId, e);
-        } finally {
-            cacheWriteLock.unlock();
         }
         UserPermissionBitsStorage.getInstance().removeUserPermissionBits(userId, ctx);
     }

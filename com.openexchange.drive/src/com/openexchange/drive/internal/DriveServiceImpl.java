@@ -56,11 +56,11 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.container.IFileHolder;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryMetadata;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveAction;
+import com.openexchange.drive.DriveClientVersion;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveFileField;
@@ -86,6 +86,7 @@ import com.openexchange.drive.comparison.FileVersionMapper;
 import com.openexchange.drive.comparison.ServerDirectoryVersion;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.internal.tracking.SyncTracker;
+import com.openexchange.drive.management.DriveConfig;
 import com.openexchange.drive.storage.execute.DirectoryActionExecutor;
 import com.openexchange.drive.storage.execute.FileActionExecutor;
 import com.openexchange.drive.sync.DefaultSyncResult;
@@ -123,15 +124,29 @@ public class DriveServiceImpl implements DriveService {
     public SyncResult<DirectoryVersion> syncFolders(DriveSession session, List<DirectoryVersion> originalVersions,
         List<DirectoryVersion> clientVersions) throws OXException {
         /*
-         * check api version first
+         * check (hard) version restrictions
          */
-        if (session.getApiVersion() < DriveServiceLookup.getService(ConfigurationService.class)
-            .getIntProperty("com.openexchange.drive.minApiVersion", DriveConstants.DEFAULT_MIN_API_VERSION)) {
+        if (session.getApiVersion() < DriveConfig.getInstance().getMinApiVersion()) {
             OXException error = DriveExceptionCodes.CLIENT_OUTDATED.create();
+            LOG.warn("Client synchronization aborted for " + session, error);
             List<AbstractAction<DirectoryVersion>> actionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(1);
             actionsForClient.add(new ErrorDirectoryAction(null, null, null, error, false, true));
             return new DefaultSyncResult<DirectoryVersion>(actionsForClient, error.getLogMessage());
         }
+        DriveClientVersion clientVersion = session.getClientVersion();
+        if (null != clientVersion) {
+            DriveClientVersion hardVersionLimit = DriveConfig.getInstance().getHardMinimumVersion(session.getClientType());
+            if (0 > clientVersion.compareTo(hardVersionLimit)) {
+                OXException error = DriveExceptionCodes.CLIENT_VERSION_OUTDATED.create(clientVersion, hardVersionLimit);
+                LOG.warn("Client synchronization aborted for " + session, error);
+                List<AbstractAction<DirectoryVersion>> actionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(1);
+                actionsForClient.add(new ErrorDirectoryAction(null, null, null, error, false, true));
+                return new DefaultSyncResult<DirectoryVersion>(actionsForClient, error.getLogMessage());
+            }
+        }
+        /*
+         * sync folders
+         */
         long start = System.currentTimeMillis();
         DriveVersionValidator.validateDirectoryVersions(originalVersions);
         DriveVersionValidator.validateDirectoryVersions(clientVersions);
@@ -156,7 +171,7 @@ public class DriveServiceImpl implements DriveService {
                 DirectoryActionExecutor executor = new DirectoryActionExecutor(driveSession, true, retryCount < DriveConstants.MAX_RETRIES);
                 executor.execute(syncResult.getActionsForServer());
             } catch (OXException e) {
-                if (tryAgain(e) && retryCount <= DriveConstants.MAX_RETRIES) {
+                if (0 == retryCount || (tryAgain(e) && retryCount <= DriveConstants.MAX_RETRIES)) {
                     retryCount++;
                     int delay = DriveConstants.RETRY_BASEDELAY * retryCount;
                     driveSession.trace("Got exception during execution of server actions (" + e.getMessage() + "), trying again in " +
@@ -165,7 +180,7 @@ public class DriveServiceImpl implements DriveService {
                     continue;
                 }
                 driveSession.trace("Got exception during execution of server actions (" + e.getMessage() + ")");
-                LOG.debug("Got exception during execution of server actions ({})", e.getMessage(), e);
+                LOG.warn("Got exception during execution of server actions ({})\nPrevious sync result:\n{}", e.getMessage(), syncResult, e);
                 throw e;
             }
             /*
@@ -173,6 +188,17 @@ public class DriveServiceImpl implements DriveService {
              */
             if (syncResult.isEmpty()) {
                 TempCleaner.cleanUpIfNeeded(driveSession);
+            }
+            /*
+             * check (soft) version restrictions
+             */
+            if (null != clientVersion) {
+                DriveClientVersion softVersionLimit = DriveConfig.getInstance().getSoftMinimumVersion(session.getClientType());
+                if (0 > clientVersion.compareTo(softVersionLimit)) {
+                    OXException error = DriveExceptionCodes.CLIENT_VERSION_UPDATE_AVAILABLE.create(clientVersion, softVersionLimit);
+                    LOG.trace("Client upgrade available for " + session, error);
+                    syncResult.addActionForClient(new ErrorDirectoryAction(null, null, null, error, false, false));
+                }
             }
             /*
              * return actions for client
@@ -211,7 +237,7 @@ public class DriveServiceImpl implements DriveService {
                 FileActionExecutor executor = new FileActionExecutor(driveSession, true, retryCount < DriveConstants.MAX_RETRIES, path);
                 executor.execute(syncResult.getActionsForServer());
             } catch (OXException e) {
-                if (tryAgain(e) && retryCount <= DriveConstants.MAX_RETRIES) {
+                if (0 == retryCount || (tryAgain(e) && retryCount <= DriveConstants.MAX_RETRIES)) {
                     retryCount++;
                     int delay = DriveConstants.RETRY_BASEDELAY * retryCount;
                     driveSession.trace("Got exception during execution of server actions (" + e.getMessage() + "), trying again in " +
@@ -277,6 +303,9 @@ public class DriveServiceImpl implements DriveService {
         try {
             createdFile = new UploadHelper(driveSession).perform(path, originalVersion, newVersion, uploadStream, contentType, offset, totalLength, created, modified);
         } catch (OXException e) {
+            LOG.warn("Got exception during upload (" + e.getMessage() + ")\n" + "Session: " + driveSession + ", path: " + path +
+                ", original version: " + originalVersion + ", new version: " + newVersion + ", offset: " + offset + ", total length: " +
+                totalLength);
             if ("FLS-0024".equals(e.getErrorCode())) {
                 /*
                  * quota reached
@@ -342,7 +371,7 @@ public class DriveServiceImpl implements DriveService {
         final SyncSession driveSession = new SyncSession(session);
         LOG.debug("Handling get-quota for root folder '{}'", session.getRootFolderID());
         final Quota[] quota = driveSession.getStorage().getQuota();
-        LOG.debug("Got quota for root folder '{}': {}", session.getRootFolderID(), quota);
+        LOG.debug("Got quota for root folder ''{}'': {}", session.getRootFolderID(), (null != quota ? Arrays.toString(quota) : ""));
         final String manageLink = new DirectLinkGenerator(driveSession).getQuotaLink();
         return new DriveQuota() {
 

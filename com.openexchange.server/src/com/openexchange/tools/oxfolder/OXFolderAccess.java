@@ -407,6 +407,45 @@ public class OXFolderAccess {
     }
 
     /**
+     * Determines if folder permission is at least set to <code>READ_FOLDER</code> (without respect to user configuration).
+     *
+     * @param folderId The folder ID
+     * @param userId The user ID
+     * @param permissions The permission bits
+     * @return <code>true</code> if folder permission applies; otherwise <code>false</code>
+     * @throws OXException If operation fails
+     */
+    public final boolean isReadFolder(final int folderId, final int userId, final UserPermissionBits permissions) throws OXException {
+        return isReadFolder(folderId, userId, UserStorage.getStorageUser(userId, ctx).getGroups(), permissions);
+    }
+
+    /**
+     * Determines if folder permission is at least set to <code>READ_FOLDER</code> (without respect to user configuration).
+     *
+     * @param folderId The folder ID
+     * @param userId The user ID
+     * @param groups The group identifier
+     * @param permissions The permission bits
+     * @return <code>true</code> if folder permission applies; otherwise <code>false</code>
+     * @throws OXException If operation fails
+     */
+    public final boolean isReadFolder(final int folderId, final int userId, final int[] groups, final UserPermissionBits permissions) throws OXException {
+        if (null == groups) {
+            return isReadFolder(folderId, userId, permissions);
+        }
+
+        final FolderObject fo = getFolderObject(folderId);
+        if (null == readCon) {
+            return fo.getEffectiveUserPermission(userId, permissions).getFolderPermission() >= OCLPermission.READ_FOLDER;
+        }
+        try {
+            return fo.getEffectiveUserPermission(userId, permissions, readCon).getFolderPermission() >= OCLPermission.READ_FOLDER;
+        } catch (final SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
      * Determines user's default folder of given module.
      *
      * @param userId The user ID

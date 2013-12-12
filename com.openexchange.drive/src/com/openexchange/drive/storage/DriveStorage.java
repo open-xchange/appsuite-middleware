@@ -61,13 +61,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveStrings;
 import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.drive.internal.PathNormalizer;
 import com.openexchange.drive.internal.SyncSession;
+import com.openexchange.drive.management.DriveConfig;
 import com.openexchange.drive.storage.filter.FileNameFilter;
 import com.openexchange.drive.storage.filter.Filter;
 import com.openexchange.drive.storage.filter.SynchronizedFileFilter;
@@ -380,13 +380,13 @@ public class DriveStorage {
         }
         if (false == oldParentPath.equals(newParentPath)) {
             /*
-             * perform move
+             * perform move / rename
              */
-            folderID = getFolderAccess().moveFolder(folderID, newParentFolder.getId());
-        }
-        if (false == oldName.equals(newName)) {
+            folderID = oldName.equals(newName) ? getFolderAccess().moveFolder(folderID, newParentFolder.getId()) :
+                getFolderAccess().moveFolder(folderID, newParentFolder.getId(), newName);
+        } else if (false == oldName.equals(newName)) {
             /*
-             * perform rename
+             * perform rename only
              */
             folderID = getFolderAccess().renameFolder(folderID, newName);
         }
@@ -606,8 +606,7 @@ public class DriveStorage {
 
     public String getVersionComment() {
         String device = Strings.isEmpty(session.getDeviceName()) ? session.getServerSession().getClient() : session.getDeviceName();
-        ConfigurationService configService = DriveServiceLookup.getService(ConfigurationService.class);
-        String product = configService.getProperty("com.openexchange.drive.shortProductName", "OX Drive");
+        String product = DriveConfig.getInstance().getShortProductName();
         String format = StringHelper.valueOf(session.getDriveSession().getLocale()).getString(DriveStrings.VERSION_COMMENT);
         return String.format(format, product, device);
     }

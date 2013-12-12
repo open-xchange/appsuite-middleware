@@ -120,6 +120,9 @@ public class StatisticTools extends AbstractJMXTools {
     private static final char OPT_DOCUMENTCONVERTER_STATS_SHORT = 'y';
     private static final String OPT_DOCUMENTCONVERTER_STATS_LONG = "documentconverterstats";
 
+    private static final char OPT_OFFICE_STATS_SHORT = 'f';
+    private static final String OPT_OFFICE_STATS_LONG = "officestats";
+
     private CLIOption xchangestats = null;
     private CLIOption threadpoolstats = null;
     private CLIOption runtimestats = null;
@@ -135,6 +138,7 @@ public class StatisticTools extends AbstractJMXTools {
     private CLIOption clusterStats = null;
     private CLIOption grizzlyStats = null;
     private CLIOption documentconverterstats = null;
+    private CLIOption officestats = null;
 
     /**
      * Option for garbage collection statistics
@@ -226,6 +230,10 @@ public class StatisticTools extends AbstractJMXTools {
         }
         if (null != parser.getOptionValue(this.documentconverterstats) && 0 == count) {
             System.out.print(showDocumentConverterData(mbc));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.officestats) && 0 == count) {
+            System.out.print(showOfficeData(mbc));
             count++;
         }
         if (0 == count) {
@@ -447,6 +455,13 @@ public class StatisticTools extends AbstractJMXTools {
             "shows the documentconverter stats",
             false,
             NeededQuadState.notneeded);
+        this.officestats = setShortLongOpt(
+            parser,
+            OPT_OFFICE_STATS_SHORT,
+            OPT_OFFICE_STATS_LONG,
+            "shows the office stats",
+            false,
+            NeededQuadState.notneeded);
     }
 
     static String showMemoryPoolData(MBeanServerConnection con) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
@@ -592,6 +607,10 @@ public class StatisticTools extends AbstractJMXTools {
 
     static String showDocumentConverterData(final MBeanServerConnection mbeanServerConnection) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
         return getStats(mbeanServerConnection, "com.openexchange.documentconverter:name=DocumentConverterInformation").toString();
+    }
+
+    static String showOfficeData(final MBeanServerConnection mbeanServerConnection) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
+        return getStats(mbeanServerConnection, "com.openexchange.office:name=OfficeMonitoring").toString();
     }
 
     /**

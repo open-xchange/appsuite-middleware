@@ -58,7 +58,9 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.internal.ConfigProviderServiceImpl;
 import com.openexchange.config.internal.ConfigurationImpl;
+import com.openexchange.config.internal.SuppressedLoggingCheckerImpl;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
+import com.openexchange.exception.SuppressedLoggingChecker;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -81,8 +83,7 @@ public final class ConfigActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // Nothing to do
-        return null;
+        return EMPTY_CLASSES;
     }
 
     @Override
@@ -91,6 +92,8 @@ public final class ConfigActivator extends HousekeepingActivator {
         try {
             final ConfigurationService configService = new ConfigurationImpl();
             registerService(ConfigurationService.class, configService, null);
+
+            registerService(SuppressedLoggingChecker.class, SuppressedLoggingCheckerImpl.newInstance(configService), null);
 
             final Hashtable<String, Object> properties = new Hashtable<String, Object>();
             properties.put("scope", "server");

@@ -197,19 +197,19 @@ public class EffectivePermission extends OCLPermission {
 
     @Override
     public int getFolderPermission() {
-        final int superFolderPermission = super.getFolderPermission();
         if (validateUserConfig()) {
             if (!hasModuleAccess(folderModule)) {
                 return NO_PERMISSIONS;
             } else if (isPublicFolder()) {
                 if (folderModule != FolderObject.INFOSTORE && !permissionBits.hasFullPublicFolderAccess()) {
+                    final int superFolderPermission = super.getFolderPermission();
                     return superFolderPermission > READ_FOLDER ? READ_FOLDER : superFolderPermission;
                 }
             } else if (!permissionBits.hasFullSharedFolderAccess() && folderType == FolderObject.SHARED) {
                 return NO_PERMISSIONS;
             }
         }
-        return superFolderPermission;
+        return super.getFolderPermission();
     }
 
     @Override
@@ -220,19 +220,19 @@ public class EffectivePermission extends OCLPermission {
 
     @Override
     public int getReadPermission() {
-        final int superReadPermission = super.getReadPermission();
         if (validateUserConfig()) {
             if (!hasModuleAccess(folderModule)) {
                 return NO_PERMISSIONS;
             } else if (isPublicFolder()) {
                 if (folderModule != FolderObject.INFOSTORE && !permissionBits.hasFullPublicFolderAccess()) {
+                    final int superReadPermission = super.getReadPermission();
                     return superReadPermission > READ_ALL_OBJECTS ? READ_ALL_OBJECTS : superReadPermission;
                 }
             } else if (!permissionBits.hasFullSharedFolderAccess() && folderType == FolderObject.SHARED) {
                 return NO_PERMISSIONS;
             }
         }
-        return superReadPermission;
+        return super.getReadPermission();
     }
 
     @Override
