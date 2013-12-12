@@ -20,13 +20,10 @@
     <!-- Please note: If these settings are changed, Open-Xchange will take no responsibility and will exclude support regarding any -->
     <!-- session issues and potential security breaches arising thereof. -->
     <logger name="com.openexchange.login.internal.LoginPerformer">
-        <level value="INFO"/> 
+        <level value="DEBUG"/> 
     </logger>
     <logger name="com.openexchange.sessiond.impl.SessionHandler">
         <level value="WARN"/> 
-    </logger>
-    <logger name="com.openexchange.sessiond.impl.SessionHandler123">
-        <level value="INFO"/> 
     </logger>
     <root>
         <level value="INFO"/>

@@ -123,7 +123,12 @@ public class ExtractLog4JModificationsCLT {
         }
         try {
             InputStream resourceAsStream = ExtractLog4JModificationsCLT.class.getClassLoader().getResourceAsStream("log4j.xml");
-            Document original = db.parse(resourceAsStream);
+            final Document original;
+            try {
+                original = db.parse(resourceAsStream);
+            } finally {
+                resourceAsStream.close();
+            }
             Document document = parseInput(!cmd.hasOption('i'), cmd.getOptionValue('i'));
             // Find differences
             Set<Logger> origLogger = parseLogger(original);

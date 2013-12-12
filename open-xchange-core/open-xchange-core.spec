@@ -855,12 +855,27 @@ ox_add_property com.openexchange.mail.account.blacklist "" /opt/open-xchange/etc
 MODIFIED=$(rpm --verify open-xchange-core | grep file-logging.properties | grep 5 | wc -l)
 if [ -e /opt/open-xchange/etc/file-logging.properties -a $MODIFIED -eq 1 ]; then
     # Configuration has been modified after installation. Try to migrate.
-    /opt/open-xchange/sbin/extractJULModifications -i /opt/open-xchange/etc/file-logging.properties | /opt/open-xchange/sbin/convertJUL2Logback | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration -a -
+    /opt/open-xchange/sbin/extractJULModifications -i /opt/open-xchange/etc/file-logging.properties | /opt/open-xchange/sbin/convertJUL2Logback | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/logger -r - -d @name
     mv /opt/open-xchange/etc/logback.xml.new /opt/open-xchange/etc/logback.xml
 fi
 rm -f /opt/open-xchange/etc/file-logging.properties
-
-# TODO enable SYSLOG if open-xchange-log4j was installed.
+MODIFIED=$(rpm --verify open-xchange-log4j | grep log4j.xml | grep 5 | wc -l)
+if [ -e /opt/open-xchange/etc/log4j.xml ]; then
+    cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /tmp/logback.xml -x /configuration/appender[@name='ASYNC']/appender-ref -r -
+<configuration>
+    <appender name="ASYNC">
+        <appender-ref ref="SYSLOG"/>
+    </appender>
+</configuration>
+EOF
+    mv /opt/open-xchange/etc/logback.xml.new /opt/open-xchange/etc/logback.xml
+    if [ $MODIFIED -eq 1 ]; then
+        # Configuration has been modified after installation. Try to migrate.
+        /opt/open-xchange/sbin/extractLog4JModifications -i /opt/open-xchange/etc/log4j.xml | /opt/open-xchange/sbin/convertJUL2Logback | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/logger -r - -d @name
+        mv /opt/open-xchange/etc/logback.xml.new /opt/open-xchange/etc/logback.xml
+    fi
+fi
+rm -f /opt/open-xchange/etc/log4j.xml
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT

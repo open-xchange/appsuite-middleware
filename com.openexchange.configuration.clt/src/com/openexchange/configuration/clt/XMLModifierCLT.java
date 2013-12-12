@@ -55,7 +55,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Iterator;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -79,7 +78,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -109,10 +107,10 @@ public class XMLModifierCLT {
         options.addOption(createOption("h", "help", false, "Prints a help text.", false));
         options.addOption(createOption("i", "in", true, "XML document is read from this file.", false));
         options.addOption(createOption("o", "out", true, "Modified XML document is written to this file.", false));
-        options.addOption(createOption("x", "xpath", true, "XPath to the element that should be modified.", false));
-        options.addOption(createOption("a", "add", true, "XML file that should be added to the element denotes by the XPath. - can be used to read from STDIN.", false));
-        options.addOption(createOption("d", "id", true, "Defines the identifying attribute as XPath (relative to \"x\") to determine if an element should be ignored or replaced (-r)", true));
-        options.addOption(createOption("r", "replace", false, "Replaces existing elements.", false));
+        options.addOption(createOption("x", "xpath", true, "XPath to the elements that should be modified.", false));
+        options.addOption(createOption("a", "add", true, "XML file that should add the elements denoted by the XPath. - can be used to read from STDIN.", false));
+        options.addOption(createOption("r", "replace", true, "XML file that should replace the elements denoted by the XPath. - can be used to read from STDIN.", false));
+        options.addOption(createOption("d", "id", true, "Defines the identifying attribute as XPath (relative to \"-x\") to determine if an element should be replaced (-r). If omitted all matches will be replaced.", false));
         CommandLineParser parser = new PosixParser();
         final CommandLine cmd;
         try {
@@ -125,14 +123,6 @@ public class XMLModifierCLT {
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("xmlModifier", "Can modify XML configuration files. Currently only allows to add XML fragments.", options, null, false);
             return 0;
-        }
-        final DocumentBuilder db;
-        try {
-            db = dbf.newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
-            System.err.println("Can not configure XML parser: " + e.getMessage());
-            e.printStackTrace();
-            return 1;
         }
         final Transformer transformer;
         try {
@@ -147,35 +137,15 @@ public class XMLModifierCLT {
             return 1;
         }
         try {
-            // Modify
             XPath path = xf.newXPath();
             String xPath = cmd.getOptionValue('x');
-            String identifier = cmd.getOptionValue('d');
             XPathExpression expression = path.compile(xPath);
             if (cmd.hasOption('a')) {
-                InputStream addIs = determineInput("-".equals(cmd.getOptionValue('a')), cmd.getOptionValue('a'));
-                final Document add;
-                try {
-                    add = db.parse(addIs);
-                } finally {
-                    addIs.close();
-                }
-
-                NodeList toAddList = (NodeList) expression.evaluate(add, XPathConstants.NODESET);
-                for (int i = 0; i < toAddList.getLength(); i++) {
-                    Node toAdd = toAddList.item(i);
-                    Node id = (Node) path.compile(identifier).evaluate(toAdd, XPathConstants.NODE);
-                    Node original = (Node) path.compile(xPath + "[" + identifier + "='" + id.getNodeValue() + "']").evaluate(document, XPathConstants.NODE);
-                    Node imported = document.importNode(toAdd, true);
-                    Node destination = (Node) path.compile(xPath + "/..").evaluate(document, XPathConstants.NODE);
-                    if (original == null) {
-                            destination.appendChild(imported);
-                    } else {
-                        if (cmd.hasOption('r')) {
-                            original.getParentNode().replaceChild(imported, original);
-                        }
-                    }
-                }
+                Document add = parseInput("-".equals(cmd.getOptionValue('a')), cmd.getOptionValue('a'));
+                doAdd(document, expression, add);
+            } else if (cmd.hasOption('r')) {
+                Document replace = parseInput("-".equals(cmd.getOptionValue('r')), cmd.getOptionValue('r'));
+                doReplace(cmd.getOptionValue('d'), document, expression, replace);
             } else {
                 System.err.println("Unknown operation mode.");
             }
@@ -189,10 +159,6 @@ public class XMLModifierCLT {
             } finally {
                 os.close();
             }
-        } catch (SAXException e) {
-            System.err.println("Can not parse XML document: " + e.getMessage());
-            e.printStackTrace();
-            return 1;
         } catch (XPathExpressionException e) {
             System.err.println("Can not parse XPath expression: " + e.getMessage());
             e.printStackTrace();
@@ -207,6 +173,52 @@ public class XMLModifierCLT {
             return 1;
         }
         return 0;
+    }
+
+    private static void doAdd(Document document, XPathExpression expression, Document add) throws XPathExpressionException {
+        NodeList origList = (NodeList) expression.evaluate(document, XPathConstants.NODESET);
+        Node parentNode = origList.item(0).getParentNode();
+        NodeList toAddList = (NodeList) expression.evaluate(add, XPathConstants.NODESET);
+        for (int i = 0; i < toAddList.getLength(); i++) {
+            Node toAdd = toAddList.item(i);
+            Node imported = document.importNode(toAdd, true);
+            parentNode.appendChild(imported);
+        }
+    }
+
+    private static void doReplace(String identifier, Document document, XPathExpression expression, Document replace) throws XPathExpressionException {
+        NodeList toReplaceList = (NodeList) expression.evaluate(replace, XPathConstants.NODESET);
+        for (int i = 0; i < toReplaceList.getLength(); i++) {
+            Node toReplace = toReplaceList.item(i);
+            final String toReplaceIdentifier = getIdentifier(identifier, toReplace);
+            // Try to find the matching original node
+            boolean found = false;
+            NodeList origList = (NodeList) expression.evaluate(document, XPathConstants.NODESET);
+            for (int j = 0; j < origList.getLength(); j++) {
+                Node original = origList.item(j);
+                final String origIdentifier = getIdentifier(identifier, original);
+                if (toReplaceIdentifier.equals(origIdentifier)) {
+                    Node imported = document.importNode(toReplace, true);
+                    Node parent = original.getParentNode();
+                    parent.replaceChild(imported, original);
+                    found = true;
+                }
+            }
+            if (!found) {
+                Node imported = document.importNode(toReplace, true);
+                origList.item(0).getParentNode().appendChild(imported);
+            }
+        }
+    }
+
+    private static String getIdentifier(String identifier, Node node) throws XPathExpressionException {
+        String retval = "";
+        if (null != identifier) {
+            XPath path = xf.newXPath();
+            XPathExpression identifierExpression = path.compile(identifier);
+            retval = identifierExpression.evaluate(node);
+        }
+        return retval;
     }
 
     static Option createOption(String shortArg, String longArg, boolean hasArg, String description, boolean required) {
