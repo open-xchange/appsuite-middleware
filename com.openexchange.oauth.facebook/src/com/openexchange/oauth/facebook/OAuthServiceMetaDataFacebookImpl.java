@@ -150,7 +150,7 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OXException {
         final String code = (String) arguments.get(OAuthConstants.ARGUMENT_PIN);
         if (null == code) {
-            throw OAuthExceptionCodes.INVALID_ACCOUNT.create().setForceLog(true);
+            throw OAuthExceptionCodes.INVALID_ACCOUNT.create();
         }
         final String callback = (String) arguments.get(OAuthConstants.ARGUMENT_CALLBACK);
         final Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
@@ -184,7 +184,7 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
                         msg = getErrorMessage(errorStream, builder);
                     }
                 }
-                throw OAuthExceptionCodes.OAUTH_ERROR.create(msg).setForceLog(true);
+                throw OAuthExceptionCodes.OAUTH_ERROR.create(msg);
             }
             /*
              * Initialize a reader on URL connection...

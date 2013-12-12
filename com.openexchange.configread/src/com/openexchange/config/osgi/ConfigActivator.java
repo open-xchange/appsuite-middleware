@@ -58,9 +58,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.internal.ConfigProviderServiceImpl;
 import com.openexchange.config.internal.ConfigurationImpl;
-import com.openexchange.config.internal.SuppressedLoggingCheckerImpl;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
-import com.openexchange.exception.SuppressedLoggingChecker;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -93,11 +91,11 @@ public final class ConfigActivator extends HousekeepingActivator {
             final ConfigurationService configService = new ConfigurationImpl();
             registerService(ConfigurationService.class, configService, null);
 
-            registerService(SuppressedLoggingChecker.class, SuppressedLoggingCheckerImpl.newInstance(configService), null);
-
-            final Hashtable<String, Object> properties = new Hashtable<String, Object>();
-            properties.put("scope", "server");
-            registerService(ConfigProviderService.class, new ConfigProviderServiceImpl(configService), properties);
+            {
+                final Hashtable<String, Object> properties = new Hashtable<String, Object>(2);
+                properties.put("scope", "server");
+                registerService(ConfigProviderService.class, new ConfigProviderServiceImpl(configService), properties);
+            }
 
             // Web Console stuff
             final Collection<ServiceReference<ManagedService>> serviceReferences = context.getServiceReferences(ManagedService.class, null);

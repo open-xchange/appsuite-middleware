@@ -63,7 +63,6 @@ import java.util.MissingFormatArgumentException;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import com.openexchange.exception.Category.EnumType;
 import com.openexchange.exception.internal.I18n;
@@ -219,17 +218,6 @@ public class OXException extends Exception implements OXExceptionConstants {
             Generic.CONFLICT);
     }
 
-    private static final AtomicReference<SuppressedLoggingChecker> CHECKER_REF = new AtomicReference<SuppressedLoggingChecker>();
-
-    /**
-     * Sets specified checker.
-     *
-     * @param checker The checker to set
-     */
-    public static void setSuppressedLoggingChecker(final SuppressedLoggingChecker checker) {
-        CHECKER_REF.set(checker);
-    }
-
     /*-
      * ------------------------------------- Member stuff -------------------------------------
      */
@@ -261,8 +249,6 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     private Generic generic;
 
-    private boolean forceLog;
-
     /**
      * Initializes a default {@link OXException}.
      */
@@ -277,7 +263,6 @@ public class OXException extends Exception implements OXExceptionConstants {
         logMessage = null;
         displayArgs = MESSAGE_ARGS_EMPTY;
         problematics = new LinkedList<ProblematicAttribute>();
-        forceLog = false;
     }
 
     /**
@@ -296,7 +281,6 @@ public class OXException extends Exception implements OXExceptionConstants {
         logMessage = null;
         displayArgs = MESSAGE_ARGS_EMPTY;
         problematics = new LinkedList<ProblematicAttribute>();
-        forceLog = false;
     }
 
     /**
@@ -320,7 +304,6 @@ public class OXException extends Exception implements OXExceptionConstants {
             null == cloneMe.problematics ? new LinkedList<ProblematicAttribute>() : new ArrayList<ProblematicAttribute>(
                 cloneMe.problematics);
         this.properties = null == cloneMe.properties ? new HashMap<String, String>(8) : new HashMap<String, String>(cloneMe.properties);
-        forceLog = false;
     }
 
     /**
@@ -338,7 +321,6 @@ public class OXException extends Exception implements OXExceptionConstants {
         this.displayMessage = OXExceptionStrings.MESSAGE;
         this.displayArgs = MESSAGE_ARGS_EMPTY;
         problematics = new LinkedList<ProblematicAttribute>();
-        forceLog = false;
     }
 
     /**
@@ -358,7 +340,6 @@ public class OXException extends Exception implements OXExceptionConstants {
         this.displayMessage = null == displayMessage ? OXExceptionStrings.MESSAGE : displayMessage;
         this.displayArgs = null == displayArgs ? MESSAGE_ARGS_EMPTY : displayArgs;
         problematics = new LinkedList<ProblematicAttribute>();
-        forceLog = false;
     }
 
     /**
@@ -379,7 +360,6 @@ public class OXException extends Exception implements OXExceptionConstants {
         this.displayMessage = null == displayMessage ? OXExceptionStrings.MESSAGE : displayMessage;
         this.displayArgs = displayArgs;
         problematics = new ArrayList<ProblematicAttribute>(1);
-        forceLog = false;
     }
 
     /**
@@ -467,17 +447,6 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public boolean isConflict() {
         return Generic.CONFLICT.equals(generic);
-    }
-
-    /**
-     * Sets whether to enforce logging or not.
-     *
-     * @param forceLog <code>true</code> for enforced logging; otherwise <code>false</code>
-     * @return This exception with new behavior applied
-     */
-    public OXException setForceLog(boolean forceLog) {
-        this.forceLog = forceLog;
-        return this;
     }
 
     /**
@@ -698,20 +667,11 @@ public class OXException extends Exception implements OXExceptionConstants {
      * Checks if this {@link OXException} is loggable for specified log level.
      *
      * @return <code>true</code> if this {@link OXException} is loggable for specified log level; otherwise <code>false</code>
+     * @deprecated
      */
+    @Deprecated
     public boolean isLoggable() {
-        return forceLog || !isSuppressedLog();
-    }
-
-    /**
-     * Check if specified category is forced to be logged.
-     *
-     * @param category The category to check
-     * @return <code>true</code> if forced being logged; otherwise <code>false</code>
-     */
-    private boolean isSuppressedLog() {
-        final SuppressedLoggingChecker checker = CHECKER_REF.get();
-        return null != checker && checker.isSuppressed(this);
+        return true;
     }
 
     /**

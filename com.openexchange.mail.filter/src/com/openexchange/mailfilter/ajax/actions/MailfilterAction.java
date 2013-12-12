@@ -971,10 +971,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         if (null != msg) {
             if (msg.startsWith(OXMailfilterExceptionCode.ERR_PREFIX_REJECTED_ADDRESS)) {
                 ret.setCategory(Category.CATEGORY_USER_INPUT);
-                ret.setForceLog(true);
             } else if (msg.startsWith(OXMailfilterExceptionCode.ERR_PREFIX_INVALID_ADDRESS)) {
                 ret.setCategory(Category.CATEGORY_USER_INPUT);
-                ret.setForceLog(true);
             }
         }
         return ret;
