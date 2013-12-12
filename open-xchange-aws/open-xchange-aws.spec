@@ -36,7 +36,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh
-ox_update_permissions /opt/open-xchange/etc/aws.properties root:open-xchange 640
+ox_update_permissions /opt/open-xchange/etc/awss3.properties root:open-xchange 640
 
 %clean
 %{__rm} -rf %{buildroot}
