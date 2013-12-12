@@ -72,9 +72,7 @@ public final class TwitterActivator extends HousekeepingActivator {
     public void startBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TwitterActivator.class);
         try {
-            if (log.isInfoEnabled()) {
-                log.info("starting bundle: com.openexchange.twitter");
-            }
+            log.info("starting bundle: com.openexchange.twitter");
             /*
              * Service trackers
              */
@@ -94,9 +92,7 @@ public final class TwitterActivator extends HousekeepingActivator {
     public void stopBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TwitterActivator.class);
         try {
-            if (log.isInfoEnabled()) {
-                log.info("stopping bundle: com.openexchange.twitter");
-            }
+            log.info("stopping bundle: com.openexchange.twitter");
             /*
              * Unregister
              */

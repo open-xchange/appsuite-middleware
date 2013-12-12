@@ -114,9 +114,7 @@ public final class OXFolderDeleteListenerHelper {
          * ... and handle them
          */
         if (null != corruptPermissions && corruptPermissions.length > 0) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("{} corrupt user permissions detected", corruptPermissions.length);
-            }
+            LOG.info("{} corrupt user permissions detected", corruptPermissions.length);
             final boolean performTransaction = writeCon.getAutoCommit();
             if (performTransaction) {
                 writeCon.setAutoCommit(false);
@@ -144,9 +142,7 @@ public final class OXFolderDeleteListenerHelper {
                 }
             }
         } else {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("No corrupt user permissions detected");
-            }
+            LOG.info("No corrupt user permissions detected");
         }
     }
 
@@ -166,9 +162,7 @@ public final class OXFolderDeleteListenerHelper {
          * ... and handle them
          */
         if (null != corruptPermissions && corruptPermissions.length > 0) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("{} corrupt group permissions detected on host ", corruptPermissions.length);
-            }
+            LOG.info("{} corrupt group permissions detected on host ", corruptPermissions.length);
             final boolean performTransaction = writeCon.getAutoCommit();
             if (performTransaction) {
                 writeCon.setAutoCommit(false);
@@ -196,9 +190,7 @@ public final class OXFolderDeleteListenerHelper {
                 }
             }
         } else {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("No corrupt group permissions detected on host ");
-            }
+            LOG.info("No corrupt group permissions detected on host ");
         }
     }
 

@@ -238,16 +238,14 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
     }
 
     private void logInfo() {
-        if (LOG.isInfoEnabled()) {
-            final StringBuilder sb = new StringBuilder(512);
-            sb.append("\nFolder Properties & Folder Cache Properties:\n");
-            sb.append("\tENABLE_SHARED_FOLDER_CACHING=").append(enableSharedFolderCaching).append('\n');
-            sb.append("\tENABLE_DB_GROUPING=").append(enableDBGrouping).append('\n');
-            sb.append("\tENABLE_FOLDER_CACHE=").append(enableFolderCache).append('\n');
-            sb.append("\tENABLE_INTERNAL_USER_EDIT=").append(enableInternalUsersEdit).append('\n');
-            sb.append("\tIGNORE_SHARED_ADDRESSBOOK=").append(ignoreSharedAddressbook);
-            LOG.info(sb.toString());
-        }
+        final StringBuilder sb = new StringBuilder(512);
+        sb.append("\nFolder Properties & Folder Cache Properties:\n");
+        sb.append("\tENABLE_SHARED_FOLDER_CACHING=").append(enableSharedFolderCaching).append('\n');
+        sb.append("\tENABLE_DB_GROUPING=").append(enableDBGrouping).append('\n');
+        sb.append("\tENABLE_FOLDER_CACHE=").append(enableFolderCache).append('\n');
+        sb.append("\tENABLE_INTERNAL_USER_EDIT=").append(enableInternalUsersEdit).append('\n');
+        sb.append("\tIGNORE_SHARED_ADDRESSBOOK=").append(ignoreSharedAddressbook);
+        LOG.info(sb.toString());
     }
 
     private static final String WARN_FOLDER_PROPERTIES_INIT = "Folder properties have not been started.";
