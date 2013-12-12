@@ -72,6 +72,7 @@ import com.hazelcast.config.MapIndexConfig;
 import com.hazelcast.config.MultiMapConfig;
 import com.hazelcast.config.QueueConfig;
 import com.hazelcast.config.SemaphoreConfig;
+import com.hazelcast.config.SymmetricEncryptionConfig;
 import com.hazelcast.config.TopicConfig;
 import com.hazelcast.impl.GroupProperties;
 import com.openexchange.config.ConfigurationService;
@@ -251,6 +252,17 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         }
         config.setProperty(GroupProperties.PROP_SOCKET_BIND_ANY, String.valueOf(
             configService.getBoolProperty("com.openexchange.hazelcast.socket.bindAny", false)));
+        /*
+         * Encryption
+         */
+        if (configService.getBoolProperty("com.openexchange.hazelcast.network.symmetricEncryption", false)) {
+            config.getNetworkConfig().setSymmetricEncryptionConfig(new SymmetricEncryptionConfig().setEnabled(true)
+                .setAlgorithm(configService.getProperty("com.openexchange.hazelcast.network.symmetricEncryption.algorithm", "PBEWithMD5AndDES"))
+                .setSalt(configService.getProperty("com.openexchange.hazelcast.network.symmetricEncryption.salt", "2mw67LqNDEb3"))
+                .setPassword(configService.getProperty("com.openexchange.hazelcast.network.symmetricEncryption.password", "D2xhL8mPkjsF"))
+                .setIterationCount(configService.getIntProperty("com.openexchange.hazelcast.network.symmetricEncryption.iterationCount", 19)))
+            ;
+        }
         /*
          * Miscellaneous
          */
