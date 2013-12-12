@@ -147,9 +147,7 @@ public final class ServerConfig {
             if (new File(uploadDirectory).mkdir()) {
                 Runtime.getRuntime().exec("chmod 700 " + uploadDirectory);
                 Runtime.getRuntime().exec("chown open-xchange:open-xchange " + uploadDirectory);
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Temporary upload directory created");
-                }
+                LOG.info("Temporary upload directory created");
             }
         } catch (final Exception e) {
             LOG.error("Temporary upload directory could NOT be properly created");

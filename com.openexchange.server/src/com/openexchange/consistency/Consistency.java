@@ -485,9 +485,7 @@ public abstract class Consistency implements ConsistencyMBean {
     // Taken from original consistency tool //
 
     private void output(final String text) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info(text);
-        }
+        LOG.info(text);
     }
 
     private void erroroutput(final Exception e) {

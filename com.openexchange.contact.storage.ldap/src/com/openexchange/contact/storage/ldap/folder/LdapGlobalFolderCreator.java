@@ -119,9 +119,7 @@ public class LdapGlobalFolderCreator {
              */
             final OXFolderManager instance = OXFolderManager.getInstance(getDummySessionObj(admin_user_id, ctx.getContextId()));
             ldapFolderID = instance.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
-            if (LOG.isInfoEnabled()) {
-                LOG.info("LDAP folder successfully created");
-            }
+            LOG.info("LDAP folder successfully created");
         }
         return new FolderIDAndAdminID(ldapFolderID, admin_user_id);
     }
