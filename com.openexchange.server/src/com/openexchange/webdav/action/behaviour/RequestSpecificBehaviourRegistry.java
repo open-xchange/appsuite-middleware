@@ -98,13 +98,13 @@ public class RequestSpecificBehaviourRegistry {
 	}
 
 	public void log() {
-		if(LOG.isInfoEnabled()) {
-			int sum = 0;
-			for(final Map.Entry<Class<? extends Object>, List<Behaviour>> entry : registry.entrySet()) {
-				sum += entry.getValue().size();
-			}
-			LOG.info("Using {} overrides for WebDAV", sum);
-		}
+		LOG.info("Using {} overrides for WebDAV", new Object() { @Override public String toString() {
+            int sum = 0;
+            for(final Map.Entry<Class<? extends Object>, List<Behaviour>> entry : registry.entrySet()) {
+                sum += entry.getValue().size();
+            }
+            return Integer.toString(sum);
+        }});
 
 		if(LOG.isDebugEnabled()) {
 			LOG.debug("Overrides for WebDAV:");

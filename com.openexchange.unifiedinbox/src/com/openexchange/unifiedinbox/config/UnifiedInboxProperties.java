@@ -89,9 +89,7 @@ public final class UnifiedInboxProperties extends AbstractProtocolProperties imp
         final StringBuilder logBuilder = new StringBuilder(1024);
         logBuilder.append("\nLoading global Unified Mail properties...\n");
         logBuilder.append("Global Unified Mail properties successfully loaded!");
-        if (LOG.isInfoEnabled()) {
-            LOG.info(logBuilder.toString());
-        }
+        LOG.info(logBuilder.toString());
     }
 
     @Override

@@ -375,9 +375,7 @@ public abstract class OXServlet extends WebDavServlet {
              */
             final String address = req.getRemoteAddr();
             if (null == address || !address.equals(session.getLocalIp())) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Request to server denied for session: {}. in WebDAV XML interface. Client login IP changed from {} to {}{}", session.getSessionID(), session.getLocalIp(), address, '.');
-                }
+                LOG.info("Request to server denied for session: {}. in WebDAV XML interface. Client login IP changed from {} to {}{}", session.getSessionID(), session.getLocalIp(), address, '.');
                 addUnauthorizedHeader(req, resp);
                 removeSession(session.getSessionID());
                 removeCookie(req, resp, COOKIE_SESSIONID);

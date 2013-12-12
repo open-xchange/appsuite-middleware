@@ -800,9 +800,7 @@ public final class OXFolderAdminHelper {
         if (!checkFolderExistence(cid, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, writeCon)) {
             createSystemPublicInfostoreFolder(cid, mailAdmin, writeCon, creatingTime);
         }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("All System folders successfully created for context {}", cid);
-        }
+        LOG.info("All System folders successfully created for context {}", cid);
         /*
          * Add mailadmin's folder rights to context's system folders and create his standard folders
          */
@@ -869,9 +867,7 @@ public final class OXFolderAdminHelper {
             cid,
             writeCon);
         addUserToOXFolders(mailAdmin, mailAdminDisplayName, language, cid, writeCon);
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Folder rights for mail admin successfully added for context {}", cid);
-        }
+        LOG.info("Folder rights for mail admin successfully added for context {}", cid);
     }
 
     /**
@@ -1558,17 +1554,7 @@ public final class OXFolderAdminHelper {
             if (defaultTaskName == null || defaultTaskName.length() == 0) {
                 defaultTaskName = DEFAULT_TASK_NAME;
             }
-            /*
-             * GlobalConfig.loadLanguageCodes(propfile); String stdCalFolderName = GlobalConfig.getCode(language +
-             * "oxfolder_standardfolder_calendar"); if (stdCalFolderName == null || stdCalFolderName.length() == 0) { stdCalFolderName = "My
-             * Calendar"; } String stdConFolderName = GlobalConfig.getCode(language + "oxfolder_standardfolder_contact"); if
-             * (stdConFolderName == null || stdConFolderName.length() == 0) { stdConFolderName = "My Contacts"; } String stdTaskFolderName =
-             * GlobalConfig.getCode(language + "oxfolder_standardfolder_task"); if (stdTaskFolderName == null || stdTaskFolderName.length()
-             * == 0) { stdTaskFolderName = "My Tasks"; }
-             */
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Folder names determined for default folders:\n\tCalendar={}\tContact={}\tTask={}", defaultCalName, defaultConName, defaultTaskName);
-            }
+            LOG.info("Folder names determined for default folders:\n\tCalendar={}\tContact={}\tTask={}", defaultCalName, defaultConName, defaultTaskName);
             /*
              * Insert default calendar folder
              */
@@ -1591,9 +1577,7 @@ public final class OXFolderAdminHelper {
             fo.setModule(FolderObject.CALENDAR);
             int newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
-            if (LOG.isInfoEnabled()) {
-                LOG.info("User's default CALENDAR folder successfully created");
-            }
+            LOG.info("User's default CALENDAR folder successfully created");
             /*
              * Insert default contact folder
              */
@@ -1601,9 +1585,7 @@ public final class OXFolderAdminHelper {
             fo.setModule(FolderObject.CONTACT);
             newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
-            if (LOG.isInfoEnabled()) {
-                LOG.info("User's default CONTACT folder successfully created");
-            }
+            LOG.info("User's default CONTACT folder successfully created");
             /*
              * Insert default contact folder
              */
@@ -1611,9 +1593,7 @@ public final class OXFolderAdminHelper {
             fo.setModule(FolderObject.TASK);
             newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
-            if (LOG.isInfoEnabled()) {
-                LOG.info("User's default TASK folder successfully created");
-            }
+            LOG.info("User's default TASK folder successfully created");
             /*
              * Insert default infostore folder
              */
@@ -1626,14 +1606,12 @@ public final class OXFolderAdminHelper {
             fo.setModule(FolderObject.INFOSTORE);
             newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
-            if (LOG.isInfoEnabled()) {
-                LOG.info("User's default INFOSTORE folder successfully created");
-                LOG.info("All user default folders were successfully created");
-                /*
-                 * TODO: Set standard special folders (projects, ...) located beneath system user folder
-                 */
-                LOG.info("User {} successfully created in context {}", userId, cid);
-            }
+            LOG.info("User's default INFOSTORE folder successfully created");
+            LOG.info("All user default folders were successfully created");
+            /*
+             * TODO: Set standard special folders (projects, ...) located beneath system user folder
+             */
+            LOG.info("User {} successfully created in context {}", userId, cid);
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
@@ -1683,9 +1661,7 @@ public final class OXFolderAdminHelper {
             fo.setModule(FolderObject.INFOSTORE);
             final int newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
-            if (LOG.isInfoEnabled()) {
-                LOG.info("User's default INFOSTORE folder successfully created");
-            }
+            LOG.info("User's default INFOSTORE folder successfully created");
             return newFolderId;
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());

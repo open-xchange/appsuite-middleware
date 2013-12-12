@@ -114,9 +114,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
              */
             try {
                 deleteCalendarFolderData(newUserConfiguration.getUserId(), event);
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("All calendar-related folder data removed due to loss of calendar module access");
-                }
+                LOG.info("All calendar-related folder data removed due to loss of calendar module access");
             } catch (final Exception e) {
                 LOG.warn("Could not remove all calendar-related folder data caused by loss of calendar module access.");
                 LOG.debug("", e);
@@ -128,9 +126,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
              */
             try {
                 deleteTaskFolderData(newUserConfiguration.getUserId(), event);
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("All task-related folder data removed due to loss of task module access");
-                }
+                LOG.info("All task-related folder data removed due to loss of task module access");
             } catch (final Exception e) {
                 LOG.warn("Could not remove all task-related folder data caused by loss of task module access.");
                 LOG.debug("", e);
@@ -142,9 +138,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
              */
             try {
                 deleteInfostoreFolderData(newUserConfiguration.getUserId(), event);
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("All infostore-related folder data removed due to loss of infostore module access");
-                }
+                LOG.info("All infostore-related folder data removed due to loss of infostore module access");
             } catch (final Exception e) {
                 LOG.warn("Could not remove all infostore-related folder data caused by loss of infostore module access.");
                 LOG.debug("", e);
@@ -156,9 +150,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
              */
             try {
                 deleteSharedFolderData(newUserConfiguration.getUserId(), event);
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("All shared folder data removed due to loss of full shared folder access");
-                }
+                LOG.info("All shared folder data removed due to loss of full shared folder access");
             } catch (final Exception e) {
                 LOG.warn("Could not remove all shared folder data caused by loss of full shared folder access.");
                 LOG.debug("", e);
