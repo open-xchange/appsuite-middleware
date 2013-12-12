@@ -91,22 +91,16 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
 
     @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Starting {}", CalendarExtendDNColumnTask.class.getSimpleName());
-        }
+        LOG.info("Starting {}", CalendarExtendDNColumnTask.class.getSimpleName());
         modifyColumnInTable("prg_date_rights", contextId);
         modifyColumnInTable("del_date_rights", contextId);
-        if (LOG.isInfoEnabled()) {
-            LOG.info("{} finished.", CalendarExtendDNColumnTask.class.getSimpleName());
-        }
+        LOG.info("{} finished.", CalendarExtendDNColumnTask.class.getSimpleName());
     }
 
     private static final String SQL_MODIFY = "ALTER TABLE #TABLE# MODIFY dn varchar(" + DESIRED_SIZE + ") collate utf8_unicode_ci default NULL";
 
     private void modifyColumnInTable(final String tableName, final int contextId) throws OXException {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("{}: Going to extend size of column `dn` in table `{}`.", CalendarExtendDNColumnTask.class.getSimpleName(), tableName);
-        }
+        LOG.info("{}: Going to extend size of column `dn` in table `{}`.", CalendarExtendDNColumnTask.class.getSimpleName(), tableName);
         final Connection con = Database.getNoTimeout(contextId, true);
         try {
             // Check if size needs to be increased
@@ -145,9 +139,7 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
         } finally {
             Database.backNoTimeout(contextId, true, con);
         }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("{}: Size of column `dn` in table `{}` successfully extended.", CalendarExtendDNColumnTask.class.getSimpleName(), tableName);
-        }
+        LOG.info("{}: Size of column `dn` in table `{}` successfully extended.", CalendarExtendDNColumnTask.class.getSimpleName(), tableName);
     }
 
     private static OXException wrapSQLException(final SQLException e) {

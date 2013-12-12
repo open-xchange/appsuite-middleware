@@ -97,9 +97,7 @@ public final class AppointmentRepairRecurrenceString implements UpdateTask {
     @Override
     public void perform(final Schema schema, final int contextId)
         throws OXException, OXException {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Performing update task to repair the recurrence string in appointment change exceptions.");
-        }
+        LOG.info("Performing update task to repair the recurrence string in appointment change exceptions.");
         final String findBroken = "SELECT cid,intfield01,intfield02 "
             + "FROM prg_dates WHERE intfield01!=intfield02 AND field06 IS NULL";
         final Connection con = Database.get(contextId, true);
@@ -134,9 +132,7 @@ public final class AppointmentRepairRecurrenceString implements UpdateTask {
                 Database.back(contextId, true, con);
             }
         }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Update task to repair the recurrence string in appointments performed.");
-        }
+        LOG.info("Update task to repair the recurrence string in appointments performed.");
     }
 
     private String getRecurrenceString(final Connection con, final int cid,

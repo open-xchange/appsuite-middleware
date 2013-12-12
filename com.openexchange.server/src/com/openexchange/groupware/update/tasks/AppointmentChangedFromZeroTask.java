@@ -85,9 +85,7 @@ public final class AppointmentChangedFromZeroTask implements UpdateTask {
 
     @Override
     public void perform(final Schema schema, final int contextId) throws OXException, OXException {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Performing update task to remove 0 set changed_from in appointments.");
-        }
+        LOG.info("Performing update task to remove 0 set changed_from in appointments.");
         final Connection con = Database.get(contextId, true);
         Statement st = null;
         try {
@@ -105,8 +103,6 @@ public final class AppointmentChangedFromZeroTask implements UpdateTask {
                 Database.back(contextId, true, con);
             }
         }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Update task to remove 0 set changed_from in appointments performed.");
-        }
+        LOG.info("Update task to remove 0 set changed_from in appointments performed.");
     }
 }

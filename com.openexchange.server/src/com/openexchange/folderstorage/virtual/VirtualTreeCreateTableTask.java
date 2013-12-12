@@ -120,9 +120,7 @@ public class VirtualTreeCreateTableTask implements UpdateTask {
         createTable("virtualBackupSubscription", getDelTable3(), contextId);
 
         final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(VirtualTreeCreateTableTask.class);
-        if (LOG.isInfoEnabled()) {
-            LOG.info("UpdateTask 'VirtualTreeCreateTableTask' successfully performed!");
-        }
+        LOG.info("UpdateTask 'VirtualTreeCreateTableTask' successfully performed!");
     }
 
     private void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException {

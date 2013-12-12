@@ -99,9 +99,7 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
 
     @Override
     public void perform(final Schema schema, final int contextId) throws OXException, OXException {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Performing update task to repair the recurrence date position of appointment change exceptions.");
-        }
+        LOG.info("Performing update task to repair the recurrence date position of appointment change exceptions.");
         final Connection con = Database.get(contextId, true);
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -150,9 +148,7 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
                 Database.back(contextId, true, con);
             }
         }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Update task to repair the recurrence date position of appointment change exceptions performed.");
-        }
+        LOG.info("Update task to repair the recurrence date position of appointment change exceptions performed.");
     }
 
     private void writeRecurrenceDatePosition(final Connection con, final int cid, final int id, final long recurrenceDatePosition) {

@@ -773,9 +773,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
     public <T> T getAttribute(final String attributeName, final Contact candidate) {
         final AttributeGetter getter = GETTERS.get(attributeName);
         if (null == getter) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("No getter for field: {}", attributeName);
-            }
+            LOG.info("No getter for field: {}", attributeName);
             return null;
         }
         return (T) getter.getObject(candidate);

@@ -143,18 +143,14 @@ public final class UserConfigurationStorageInit implements Initialization {
             final String className = getUserConfigurationImpl(classNameProp);
             final Class<? extends UserConfigurationStorage> implementingClass = Class.forName(className == null ? classNameProp : className).asSubclass(
                 UserConfigurationStorage.class);
-            if (LOG.isInfoEnabled()) {
-                LOG.info("UserConfigurationStorage implementation: {}", implementingClass.getName());
-            }
+            LOG.info("UserConfigurationStorage implementation: {}", implementingClass.getName());
             UserConfigurationStorage.setInstance(implementingClass.newInstance());
 
             // Now for the permission bits
             final String bitClassName = getUserPermissionBitsImpl(classNameProp);
             final Class<? extends UserPermissionBitsStorage> bitsImplementingClass = Class.forName(bitClassName).asSubclass(UserPermissionBitsStorage.class);
 
-            if (LOG.isInfoEnabled()) {
-                LOG.info("UserPermissionBitsStorage implementation: {}", bitsImplementingClass.getName());
-            }
+            LOG.info("UserPermissionBitsStorage implementation: {}", bitsImplementingClass.getName());
 
             UserPermissionBitsStorage.setInstance(bitsImplementingClass.newInstance());
 

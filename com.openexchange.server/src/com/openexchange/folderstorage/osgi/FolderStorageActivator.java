@@ -295,13 +295,7 @@ public final class FolderStorageActivator implements BundleActivator {
 			// Unregister previously registered component
 
 
-			if (LOG.isInfoEnabled()) {
-				final StringBuilder sb = new StringBuilder(32);
-				sb.append("Bundle \"");
-				sb.append("com.openexchange.folderstorage");
-				sb.append("\" successfully stopped!");
-				LOG.info(sb.toString());
-			}
+			LOG.info("Bundle \"com.openexchange.folderstorage\" successfully stopped!");
 		} catch (final Exception e) {
 			LOG.error("", e);
 			throw e;

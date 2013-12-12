@@ -401,12 +401,7 @@ public class LoginServlet extends AJAXServlet {
                     }
                     final String newIP = req.getParameter(LoginFields.CLIENT_IP_PARAM);
                     if (null == newIP) {
-                        if (LoginServlet.LOG.isInfoEnabled()) {
-                            final StringBuilder sb = new StringBuilder(32);
-                            sb.append("Parameter \"").append(LoginFields.CLIENT_IP_PARAM).append("\" not found for action ").append(
-                                ACTION_CHANGEIP);
-                            LOG.info(sb.toString());
-                        }
+                        LOG.info("Parameter \"{}\" not found for action {}", LoginFields.CLIENT_IP_PARAM, ACTION_CHANGEIP);
                         throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.CLIENT_IP_PARAM);
                     }
                     final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);

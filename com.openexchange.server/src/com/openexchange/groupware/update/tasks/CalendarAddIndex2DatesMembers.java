@@ -55,7 +55,6 @@ import static com.openexchange.tools.update.Tools.createIndex;
 import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.slf4j.Logger;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
@@ -102,39 +101,17 @@ public final class CalendarAddIndex2DatesMembers extends UpdateTaskAdapter {
     private void createMyIndex(final Connection con, final String[] tables, final String fieldName, final String name) {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CalendarAddIndex2DatesMembers.class);
         final String[] columns = { "cid", fieldName };
-        final StringBuilder sb = new StringBuilder(64);
         for (final String table : tables) {
             try {
                 final String indexName = existsIndex(con, table, columns);
                 if (null == indexName) {
-                    if (log.isInfoEnabled()) {
-                        sb.setLength(0);
-                        sb.append("Creating new index named \"");
-                        sb.append(name);
-                        sb.append("\" with columns (cid,");
-                        sb.append(fieldName);
-                        sb.append(") on table ");
-                        sb.append(table);
-                        sb.append('.');
-                        log.info(sb.toString());
-                    }
+                    log.info("Creating new index named \"{}\" with columns (cid,{}) on table {}.", name, fieldName, table);
                     createIndex(con, table, name, columns, false);
                 } else {
-                    if (log.isInfoEnabled()) {
-                        sb.setLength(0);
-                        sb.append("New index named \"");
-                        sb.append(indexName);
-                        sb.append("\" with columns (cid,");
-                        sb.append(fieldName);
-                        sb.append(") already exists on table ");
-                        sb.append(table);
-                        sb.append('.');
-                        log.info(sb.toString());
-                    }
+                    log.info("New index named \"{}\" with columns (cid,{}) already exists in table {}.", indexName, fieldName, table);
                 }
             } catch (final SQLException e) {
-                log.error("Problem adding index {} on table {}{}", name, table, '.',
-                    e);
+                log.error("Problem adding index {} on table {}.", name, table, e);
             }
         }
     }

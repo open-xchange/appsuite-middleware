@@ -73,9 +73,7 @@ public class ReminderPool implements Runnable {
 
 	public ReminderPool(final ReminderConfig reminderConfig) {
 		if (reminderConfig.isReminderEnabled()) {
-			if (LOG.isInfoEnabled()) {
-				LOG.info("Starting ReminderPool");
-			}
+			LOG.info("Starting ReminderPool");
 
 			//addReminderEvent(new ProjectsReminderEvent(), Types.PROJECT);
 
@@ -84,9 +82,7 @@ public class ReminderPool implements Runnable {
                 timer.schedule(this, reminderConfig.getReminderInterval());
             }
 		} else {
-			if (LOG.isInfoEnabled()) {
-				LOG.info("ReminderPool is disabled");
-			}
+			LOG.info("ReminderPool is disabled");
 		}
 	}
 
