@@ -125,9 +125,7 @@ public class I18nActivator extends HousekeepingActivator {
                 serviceRegistrations[i] = null;
             }
             serviceRegistrations = null;
-            if (LOG.isInfoEnabled()) {
-                LOG.info("All I18n services unregistered");
-            }
+            LOG.info("All I18n services unregistered");
         }
     }
 
@@ -197,9 +195,7 @@ public class I18nActivator extends HousekeepingActivator {
 
         }
 
-        if (LOG.isInfoEnabled()) {
-            LOG.info("All I18n services registered");
-        }
+        LOG.info("All I18n services registered");
         return serviceRegistrations.toArray(new ServiceRegistration[serviceRegistrations.size()]);
     }
 

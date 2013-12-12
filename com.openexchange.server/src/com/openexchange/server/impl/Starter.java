@@ -257,12 +257,10 @@ public class Starter implements Initialization {
             }
         }
 
-        if (LOG.isInfoEnabled()) {
-            if (started.size() == inits.length) {
-                LOG.info("Groupware server successfully initialized.");
-            } else {
-                LOG.info("Groupware server initialized with errors.");
-            }
+        if (started.size() == inits.length) {
+            LOG.info("Groupware server successfully initialized.");
+        } else {
+            LOG.info("Groupware server initialized with errors.");
         }
 
         /*
@@ -270,12 +268,10 @@ public class Starter implements Initialization {
          * (FolderCacheProperties.isEnableInternalUsersEdit())
          */
 
-        if (LOG.isInfoEnabled()) {
-            if (started.size() == inits.length) {
-                LOG.info("SYSTEM IS UP & RUNNING...");
-            } else {
-                LOG.info("SYSTEM IS UP & RUNNING WITH ERRORS...");
-            }
+        if (started.size() == inits.length) {
+            LOG.info("SYSTEM IS UP & RUNNING...");
+        } else {
+            LOG.info("SYSTEM IS UP & RUNNING WITH ERRORS...");
         }
 
     }
@@ -293,19 +289,15 @@ public class Starter implements Initialization {
                 LOG.error("Initialization of {} failed", init.getClass().getName(), e);
             }
         }
-        if (LOG.isInfoEnabled()) {
-            if (started.size() == adminInits.length) {
-                LOG.info("Admin successfully initialized.");
-            } else {
-                LOG.info("Admin initialized with errors.");
-            }
+        if (started.size() == adminInits.length) {
+            LOG.info("Admin successfully initialized.");
+        } else {
+            LOG.info("Admin initialized with errors.");
         }
-        if (LOG.isInfoEnabled()) {
-            if (started.size() == adminInits.length) {
-                LOG.info("SYSTEM IS UP & RUNNING IN ADMIN MODE...");
-            } else {
-                LOG.info("SYSTEM IS UP & RUNNING WITH ERRORS IN ADMIN MODE...");
-            }
+        if (started.size() == adminInits.length) {
+            LOG.info("SYSTEM IS UP & RUNNING IN ADMIN MODE...");
+        } else {
+            LOG.info("SYSTEM IS UP & RUNNING WITH ERRORS IN ADMIN MODE...");
         }
     }
 
@@ -315,31 +307,19 @@ public class Starter implements Initialization {
     private static final void dumpServerInfos() {
         try {
             final Properties p = System.getProperties();
-            if (LOG.isInfoEnabled()) {
-                LOG.info(p.getProperty("os.name") + ' ' + p.getProperty("os.arch") + ' ' + p.getProperty("os.version"));
-            }
-            if (LOG.isInfoEnabled()) {
-                LOG.info(p.getProperty("java.runtime.version"));
-            }
+            LOG.info("{}{}{}{}{}", p.getProperty("os.name"), ' ', p.getProperty("os.arch"), ' ', p.getProperty("os.version"));
+            LOG.info(p.getProperty("java.runtime.version"));
             final long totalMemory = Runtime.getRuntime().totalMemory() >> 10;
-            if (LOG.isInfoEnabled()) {
-                LOG.info("VM Total Memory       : {} KB", NumberFormat.getNumberInstance().format(totalMemory));
-            }
+            LOG.info("VM Total Memory       : {} KB", NumberFormat.getNumberInstance().format(totalMemory));
             final long freeMemory = Runtime.getRuntime().freeMemory() >> 10;
-            if (LOG.isInfoEnabled()) {
-                LOG.info("VM Free Memory        : {} KB", NumberFormat.getNumberInstance().format(freeMemory));
-            }
+            LOG.info("VM Free Memory        : {} KB", NumberFormat.getNumberInstance().format(freeMemory));
             final long usedMemory = totalMemory - freeMemory;
-            if (LOG.isInfoEnabled()) {
-                LOG.info("VM Used Memory        : {} KB", NumberFormat.getNumberInstance().format(usedMemory));
-            }
+            LOG.info("VM Used Memory        : {} KB", NumberFormat.getNumberInstance().format(usedMemory));
         } catch (final Exception gee) {
             LOG.error("", gee);
         }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("System version : {} Server [{}] initializing ...", Version.NAME, Version.getInstance().getVersionString());
-            LOG.info("Server Footprint : {}", OXException.getServerId());
-        }
+        LOG.info("System version : {} Server [{}] initializing ...", Version.NAME, Version.getInstance().getVersionString());
+        LOG.info("Server Footprint : {}", OXException.getServerId());
     }
 
     /**

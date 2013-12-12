@@ -289,9 +289,7 @@ public class PropertyHandler {
 //        }
 
         this.loaded.set(true);
-        if (LOG.isInfoEnabled()) {
-            LOG.info(logBuilder.toString());
-        }
+        LOG.info(logBuilder.toString());
     }
 
     public void reloadProperties() {

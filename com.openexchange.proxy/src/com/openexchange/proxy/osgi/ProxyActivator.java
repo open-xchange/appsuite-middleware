@@ -62,9 +62,7 @@ public class ProxyActivator extends HousekeepingActivator {
     public void startBundle() throws Exception {
 	    final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProxyActivator.class);
         try {
-            if (log.isInfoEnabled()) {
-                log.info("starting bundle: com.openexchange.proxy");
-            }
+            log.info("starting bundle: com.openexchange.proxy");
         } catch (final Exception e) {
             log.error("Failed start-up of bundle com.openexchange.proxy: {}", e.getMessage(), e);
             throw e;
@@ -75,9 +73,7 @@ public class ProxyActivator extends HousekeepingActivator {
     public void stopBundle() throws Exception {
 	    final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProxyActivator.class);
         try {
-            if (log.isInfoEnabled()) {
-                log.info("stopping bundle: com.openexchange.proxy");
-            }
+            log.info("stopping bundle: com.openexchange.proxy");
         } catch (final Exception e) {
             log.error("Failed shut-down of bundle com.openexchange.proxy: {}", e.getMessage(), e);
             throw e;

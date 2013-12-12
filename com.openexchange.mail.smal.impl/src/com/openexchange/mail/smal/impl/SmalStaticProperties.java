@@ -121,9 +121,7 @@ public final class SmalStaticProperties extends AbstractProtocolProperties {
         }
 
         logBuilder.append("Global SMAL properties successfully loaded!");
-        if (logger.isInfoEnabled()) {
-            logger.info(logBuilder.toString());
-        }
+        logger.info(logBuilder.toString());
     }
 
     @Override

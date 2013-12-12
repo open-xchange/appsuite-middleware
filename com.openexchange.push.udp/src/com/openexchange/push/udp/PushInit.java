@@ -111,9 +111,7 @@ public class PushInit {
             config = new PushConfigurationImpl(conf);
         }
 
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Starting Push UDP");
-        }
+        LOG.info("Starting Push UDP");
 
         if (config == null) {
             throw PushUDPExceptionCode.MISSING_CONFIG.create();

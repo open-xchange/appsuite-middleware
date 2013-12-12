@@ -110,9 +110,7 @@ public final class OAuthActivator extends HousekeepingActivator {
     public void startBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OAuthActivator.class);
         try {
-            if (log.isInfoEnabled()) {
-                log.info("starting bundle: com.openexchange.oauth");
-            }
+            log.info("starting bundle: com.openexchange.oauth");
 
             Services.setServiceLookup(this);
 
@@ -191,9 +189,7 @@ public final class OAuthActivator extends HousekeepingActivator {
     public void stopBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OAuthActivator.class);
         try {
-            if (log.isInfoEnabled()) {
-                log.info("stopping bundle: com.openexchange.oauth");
-            }
+            log.info("stopping bundle: com.openexchange.oauth");
             cleanUp();
             final OSGiDelegateServiceMap delegateServices = this.delegateServices;
             if (null != delegateServices) {

@@ -132,9 +132,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
     private void initializeMBeanServer() {
         if (running.get()) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("MonitorAgent already running...");
-            }
+            LOG.info("MonitorAgent already running...");
             return;
         }
         try {
@@ -268,9 +266,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                 //
                 cs.start();
                 connectors.put(url, cs);
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("JMX connector server on {} started", url);
-                }
+                LOG.info("JMX connector server on {} started", url);
                 jmxURL = url;
             } else {
                 /*

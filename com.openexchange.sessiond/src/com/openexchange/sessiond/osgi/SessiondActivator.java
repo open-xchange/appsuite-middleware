@@ -240,9 +240,7 @@ public final class SessiondActivator extends HousekeepingActivator {
                             }
                         }
                     }
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("stopping bundle: com.openexchange.sessiond.\nRemaining active sessions were put into central session storage\n");
-                    }
+                    LOG.info("stopping bundle: com.openexchange.sessiond.\nRemaining active sessions were put into central session storage\n");
                 } catch (final RuntimeException e) {
                     LOG.warn("Remaining active sessions could not be put into central session storage.", e);
                 }

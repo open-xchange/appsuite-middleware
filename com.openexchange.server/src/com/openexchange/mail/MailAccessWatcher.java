@@ -91,9 +91,7 @@ public final class MailAccessWatcher {
                 final int frequencyMillis = MailProperties.getInstance().getWatcherFrequency();
                 watcherTask = timer.scheduleWithFixedDelay(new WatcherTask(MAIL_ACCESSES, LOG), 1000, frequencyMillis);
             }
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Mail connection watcher successfully established and ready for tracing");
-            }
+            LOG.info("Mail connection watcher successfully established and ready for tracing");
         }
         initialized = true;
     }
@@ -115,9 +113,7 @@ public final class MailAccessWatcher {
                     timer.purge();
                 }
             }
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Mail connection watcher successfully stopped");
-            }
+            LOG.info("Mail connection watcher successfully stopped");
         }
         MAIL_ACCESSES.clear();
         initialized = false;

@@ -324,9 +324,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Data mail part exeeds {}MB limit. A temporary disk copy has been created: {}", Float.valueOf(TransportProperties.getInstance().getReferencedPartLimit() / MB).floatValue(), file.getFile().getName());
-        }
+        LOG.info("Data mail part exeeds {}MB limit. A temporary disk copy has been created: {}", Float.valueOf(TransportProperties.getInstance().getReferencedPartLimit() / MB).floatValue(), file.getFile().getName());
     }
 
     @Override

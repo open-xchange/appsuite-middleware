@@ -209,8 +209,6 @@ public class DatabaseOAuthProviderService extends AbstractOAuthProviderService i
                 @Override
                 public void run() {
                     try {
-                        final boolean infoEnabled = LOG.isInfoEnabled();
-                        final long st = infoEnabled ? System.currentTimeMillis() : 0L;
                         final TIntSet processed = new TIntHashSet(contextIds.size());
                         final AtomicReference<OXException> errorRef = new AtomicReference<OXException>();
                         final List<int[]> delete = new LinkedList<int[]>();
@@ -336,10 +334,6 @@ public class DatabaseOAuthProviderService extends AbstractOAuthProviderService i
                                     databaseService.backWritable(cid, con);
                                 }
                             }
-                        }
-                        if (infoEnabled) {
-                            final long dur = System.currentTimeMillis() - st;
-                            LOG.info("DatabaseOAuthProviderService.loadConsumers(): Loading accessors took {}msec", dur);
                         }
                     } catch (final Exception e) {
                         LOG.warn("Couldn't load OAuth accessors.", e);

@@ -117,9 +117,7 @@ public final class MonitoringInit implements Initialization {
         } catch (final Exception exc) {
             LOG.error("", exc);
         }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("JMX Monitor applied");
-        }
+        LOG.info("JMX Monitor applied");
 
         started.set(true);
     }
@@ -144,9 +142,7 @@ public final class MonitoringInit implements Initialization {
             } catch (final Exception exc) {
                 LOG.error("", exc);
             }
-            if (LOG.isInfoEnabled()) {
-                LOG.info("JMX Monitor removed");
-            }
+            LOG.info("JMX Monitor removed");
         }
         started.set(false);
     }

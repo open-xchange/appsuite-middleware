@@ -166,9 +166,7 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
         }
 
         logBuilder.append("Global SMTP properties successfully loaded!");
-        if (LOG.isInfoEnabled()) {
-            LOG.info(logBuilder.toString());
-        }
+        LOG.info(logBuilder.toString());
 
     }
 

@@ -85,9 +85,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: {}", clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
 
         HostnameLDAPServiceRegistry.getServiceRegistry().removeService(clazz);
     }

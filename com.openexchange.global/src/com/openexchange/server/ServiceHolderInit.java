@@ -134,13 +134,9 @@ public final class ServiceHolderInit implements Initialization {
                         serviceUsageTimeout = Integer.parseInt(DEFAULT_TIMEOUT);
                     }
                     ServiceHolder.enableServiceUsageInspection(serviceUsageTimeout);
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Service usage inspection successfully enabled");
-                    }
+                    LOG.info("Service usage inspection successfully enabled");
                 } else {
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Service usage inspection not enabled");
-                    }
+                    LOG.info("Service usage inspection not enabled");
                 }
             } catch (final IOException e) {
                 throw ServiceExceptionCode.IO_ERROR.create();

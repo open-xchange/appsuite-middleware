@@ -52,7 +52,6 @@ package com.openexchange.imap.threadsort;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -301,9 +300,7 @@ public final class ThreadSortUtil {
                     final long start = System.currentTimeMillis();
                     r = p.command(command, null);
                     final long dur = System.currentTimeMillis() - start;
-                    if (log.isInfoEnabled()) {
-                        log.info("{}{}\" for \"{}\" ({}) took {}msec.", '"', command, imapFolder.getFullName(), imapFolder.getStore(), dur);
-                    }
+                    log.info("{}{}\" for \"{}\" ({}) took {}msec.", '"', command, imapFolder.getFullName(), imapFolder.getStore(), dur);
                     mailInterfaceMonitor.addUseTime(dur);
                 }
                 final Response response = r[r.length - 1];

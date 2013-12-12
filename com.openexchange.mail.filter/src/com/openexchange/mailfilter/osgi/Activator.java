@@ -104,9 +104,7 @@ public class Activator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: {}", clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         MailFilterServletServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
     }
 

@@ -172,9 +172,7 @@ public final class PasswordChangeServletActivator extends HousekeepingActivator 
                  * Register servlet
                  */
                 httpService.registerServlet(getService(DispatcherPrefixService.class).getPrefix() + PWC_SRVLT_ALIAS_APPENDIX, new PasswordChangeServlet(), null, null);
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Password change servlet successfully registered");
-                }
+                LOG.info("Password change servlet successfully registered");
             }
         }
     }
@@ -192,9 +190,7 @@ public final class PasswordChangeServletActivator extends HousekeepingActivator 
                  * Unregister servlet
                  */
                 httpService.unregister(getService(DispatcherPrefixService.class).getPrefix() + PWC_SRVLT_ALIAS_APPENDIX);
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Password change servlet successfully unregistered");
-                }
+                LOG.info("Password change servlet successfully unregistered");
             }
         }
     }

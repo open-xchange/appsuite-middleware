@@ -141,9 +141,7 @@ public final class MALPollCreateTableTask extends AbstractCreateTableImpl implem
         final int contextId = params.getContextId();
         createTable("malPollHash", getCreateHashTable(), contextId);
         createTable("malPollUid", getCreateUIDsTable(), contextId);
-        if (LOG.isInfoEnabled()) {
-            LOG.info("UpdateTask 'MALPollCreateTableTask' successfully performed!");
-        }
+        LOG.info("UpdateTask 'MALPollCreateTableTask' successfully performed!");
     }
 
     private void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException, OXException {

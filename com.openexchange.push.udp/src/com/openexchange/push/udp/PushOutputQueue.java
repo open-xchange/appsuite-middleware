@@ -375,9 +375,7 @@ public class PushOutputQueue implements Runnable {
         remoteHost = pushConfigInterface.getRemoteHost();
 
         if (pushConfigInterface.isPushEnabled()) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Starting PushOutputQueue");
-            }
+            LOG.info("Starting PushOutputQueue");
 
             remoteHost = pushConfigInterface.getRemoteHost();
 
@@ -395,9 +393,7 @@ public class PushOutputQueue implements Runnable {
             th.setName(this.getClass().getName());
             th.start();
         } else {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("PushOutputQueue is disabled");
-            }
+            LOG.info("PushOutputQueue is disabled");
         }
 
         isInit = true;

@@ -242,9 +242,7 @@ public class AppendBackendRouteFilter extends BaseFilter {
      * @param logValue the String that should be logged
      */
     private static void writeToInfoLog(String logValue) {
-        if(LOG.isInfoEnabled()) {
-            LOG.info(logValue);
-        }
+        LOG.info(logValue);
     }
 
     /**

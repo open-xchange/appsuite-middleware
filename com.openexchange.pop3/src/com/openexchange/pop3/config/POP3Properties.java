@@ -194,9 +194,7 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
         logBuilder.append("\tSpam Handler: ").append(spamHandlerName).append('\n');
 
         logBuilder.append("Global POP3 properties successfully loaded!");
-        if (LOG.isInfoEnabled()) {
-            LOG.info(logBuilder.toString());
-        }
+        LOG.info(logBuilder.toString());
     }
 
     @Override

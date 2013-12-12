@@ -54,7 +54,6 @@ import java.util.Hashtable;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -84,9 +83,7 @@ public final class PushActivator extends HousekeepingActivator {
     public void startBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PushActivator.class);
         try {
-            if (log.isInfoEnabled()) {
-                log.info("starting bundle: com.openexchange.push");
-            }
+            log.info("starting bundle: com.openexchange.push");
             /*
              * Initialize and open service tracker for push manager services
              */
@@ -118,9 +115,7 @@ public final class PushActivator extends HousekeepingActivator {
     public void stopBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PushActivator.class);
         try {
-            if (log.isInfoEnabled()) {
-                log.info("stopping bundle: com.openexchange.push");
-            }
+            log.info("stopping bundle: com.openexchange.push");
             /*
              * Unregister event handler
              */

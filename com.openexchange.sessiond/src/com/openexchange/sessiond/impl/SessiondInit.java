@@ -82,16 +82,12 @@ public class SessiondInit implements Initialization {
             LOG.error("{} started", SessiondInit.class.getName());
             return;
         }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Parse Sessiond properties");
-        }
+        LOG.info("Parse Sessiond properties");
 
         final ConfigurationService conf = getServiceRegistry().getService(ConfigurationService.class);
         if (conf != null) {
             config = new SessiondConfigImpl(conf);
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Starting Sessiond");
-            }
+            LOG.info("Starting Sessiond");
 
             if (config != null) {
                 final Sessiond sessiond = Sessiond.getInstance(config);

@@ -86,9 +86,7 @@ public class PushChannels {
 
         try {
             if (config.isPushEnabled()) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Starting Push Register Socket on Port: {}", serverRegisterPort);
-                }
+                LOG.info("Starting Push Register Socket on Port: {}", serverRegisterPort);
 
                 if (senderAddress != null) {
                     externalChannel = new DatagramSocket(serverRegisterPort, senderAddress);
@@ -103,9 +101,7 @@ public class PushChannels {
                 listenForRegistrations();
 
             } else {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Push Registration is disabled");
-                }
+                LOG.info("Push Registration is disabled");
             }
         } catch (SocketException e) {
             throw PushUDPExceptionCode.NO_CHANNEL.create(e);

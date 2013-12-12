@@ -95,9 +95,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
         try {
             Services.setServiceLookup(this);
 
-            if (log.isInfoEnabled()) {
-                log.info("Starting Grizzly server.");
-            }
+            log.info("Starting Grizzly server.");
             context.addFrameworkListener(new FrameworkListener() {
 
                 @Override
@@ -136,9 +134,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
             if (grizzlyConfig.isAJPEnabled()) {
                 networkListener.registerAddOn(new AjpAddOn());
-                if (log.isInfoEnabled()) {
-                    log.info("Enabled AJP for Grizzly server.");
-                }
+                log.info("Enabled AJP for Grizzly server.");
             }
 
             // Set the transport
@@ -156,40 +152,30 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
             if (grizzlyConfig.isJMXEnabled()) {
                 grizzly.getServerConfiguration().setJmxEnabled(true);
-                if (log.isInfoEnabled()) {
-                    log.info("Enabled JMX for Grizzly server.");
-                }
+                log.info("Enabled JMX for Grizzly server.");
             }
 
             if (grizzlyConfig.isWebsocketsEnabled()) {
                 networkListener.registerAddOn(new WebSocketAddOn());
-                if (log.isInfoEnabled()) {
-                    log.info("Enabled WebSockets for Grizzly server.");
-                }
+                log.info("Enabled WebSockets for Grizzly server.");
             }
 
             if (grizzlyConfig.isCometEnabled()) {
                 networkListener.registerAddOn(new CometAddOn());
                 registerService(CometContextService.class, new CometContextServiceImpl());
-                if (log.isInfoEnabled()) {
-                    log.info("Enabled Comet for Grizzly server.");
-                }
+                log.info("Enabled Comet for Grizzly server.");
             }
 
             grizzly.addListener(networkListener);
             grizzly.start();
-            if (log.isInfoEnabled()) {
-                log.info(String.format("Registered Grizzly HttpNetworkListener on host: %s and port: %s", grizzlyConfig.getHttpHost(), Integer.valueOf(grizzlyConfig.getHttpPort())));
-            }
+            log.info("Registered Grizzly HttpNetworkListener on host: {} and port: {}", grizzlyConfig.getHttpHost(), Integer.valueOf(grizzlyConfig.getHttpPort()));
 
             /*
              * Servicefactory that creates instances of the HttpService interface that grizzly implements. Each distinct bundle that uses
              * getService() will get its own instance of HttpServiceImpl
              */
             registerService(HttpService.class.getName(), new HttpServiceFactory(grizzly, context.getBundle()));
-            if (log.isInfoEnabled()) {
-                log.info("Registered OSGi HttpService for Grizzly server.");
-            }
+            log.info("Registered OSGi HttpService for Grizzly server.");
 
         } catch (final Exception e) {
             throw GrizzlyExceptionCode.GRIZZLY_SERVER_NOT_STARTED.create(e, new Object[] {});
@@ -202,14 +188,10 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
         Services.setServiceLookup(null);
 
-        if (log.isInfoEnabled()) {
-            log.info("Unregistering services.");
-        }
+        log.info("Unregistering services.");
         cleanUp();
 
-        if (log.isInfoEnabled()) {
-            log.info("Stopping Grizzly.");
-        }
+        log.info("Stopping Grizzly.");
         final OXHttpServer grizzly = this.grizzly;
         if (null != grizzly) {
             grizzly.stop();

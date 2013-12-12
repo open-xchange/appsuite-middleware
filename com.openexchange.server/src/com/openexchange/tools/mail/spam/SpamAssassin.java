@@ -67,7 +67,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class SpamAssassin {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamAssassin.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamAssassin.class);
 
     private static final String STR_SPAMASSASSIN = "SpamAssassin result: ";
 
@@ -148,9 +148,7 @@ public class SpamAssassin {
              * Read its result
              */
             final String result = cmdExec.getOutputString();
-            if (LOG.isInfoEnabled()) {
-                LOG.info("{}{}", STR_SPAMASSASSIN, result);
-            }
+            LOG.info("{}{}", STR_SPAMASSASSIN, result);
             if (result != null && exitCode == 1) {
                 /*
                  * Spam found
@@ -249,9 +247,7 @@ public class SpamAssassin {
                  * Read its result
                  */
                 final String res = cmdExec.getOutputString();
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("{}{}{}", STR_SPAMASSASSIN, isSpam ? STR_SPAM : STR_HAM, res);
-                }
+                LOG.info("{}{}{}", STR_SPAMASSASSIN, isSpam ? STR_SPAM : STR_HAM, res);
             } catch (final IOException e) {
                 LOG.error("{}{}", ERR_PREFIX, e.getMessage(), e);
             } catch (final InterruptedException e) {

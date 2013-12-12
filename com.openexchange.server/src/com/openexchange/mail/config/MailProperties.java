@@ -655,9 +655,7 @@ public final class MailProperties implements IMailProperties {
         }
 
         logBuilder.append("Global mail properties successfully loaded!");
-        if (LOG.isInfoEnabled()) {
-            LOG.info(logBuilder.toString());
-        }
+        LOG.info(logBuilder.toString());
     }
 
     /**

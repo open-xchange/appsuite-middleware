@@ -49,7 +49,6 @@
 
 package com.openexchange.imap.entity2acl;
 
-import java.text.MessageFormat;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.config.IMAPProperties;
@@ -99,12 +98,7 @@ public final class Entity2ACLInit implements Initialization {
                     throw Entity2ACLExceptionCode.MISSING_SETTING.create("com.openexchange.imap.User2ACLImpl");
                 }
                 if ("auto".equalsIgnoreCase(classNameProp)) {
-                    /*
-                     * Try to detect dependent on IMAP server greeting
-                     */
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Auto-Detection for IMAP server implementation");
-                    }
+                    LOG.info("Auto-Detection for IMAP server implementation");
                     implementingClass = null;
                     return;
                 }
@@ -113,9 +107,7 @@ public final class Entity2ACLInit implements Initialization {
                     Entity2ACL.setInstance(className);
                 } else {
                     implementingClass = Class.forName(classNameProp).asSubclass(Entity2ACL.class);
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Used IMAP server implementation: {}", implementingClass.getName());
-                    }
+                    LOG.info("Used IMAP server implementation: {}", implementingClass.getName());
                     Entity2ACL.setInstance(implementingClass.newInstance());
                 }
             }

@@ -156,18 +156,14 @@ public abstract class AJAXServlet extends HttpServlet {
             }
             session = service.getSession(sessionId);
             if (null == session) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("There is no session associated with session identifier: {}", sessionId);
-                }
+                LOG.info("There is no session associated with session identifier: {}", sessionId);
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
             }
             response.setLocale(session);
             final String secret = SessionServlet.extractSecret(hashSource, req, session.getHash(), session.getClient());
             // Check if session is valid
             if (!session.getSecret().equals(secret)) {
-                if (LOG.isInfoEnabled() && null != secret) {
-                    LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
-                }
+                LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
                 throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
             }
 
@@ -222,18 +218,14 @@ public abstract class AJAXServlet extends HttpServlet {
             }
             session = service.getSession(sessionId);
             if (null == session) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("There is no session associated with session identifier: {}", sessionId);
-                }
+                LOG.info("There is no session associated with session identifier: {}", sessionId);
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
             }
             response.setLocale(session);
             final String secret = SessionServlet.extractSecret(hashSource, req, session.getHash(), session.getClient());
             // Check if session is valid
             if (!session.getSecret().equals(secret)) {
-                if (LOG.isInfoEnabled() && null != secret) {
-                    LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
-                }
+                LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
                 throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
             }
 

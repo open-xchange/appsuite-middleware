@@ -285,9 +285,7 @@ public class MonitoringInfo {
             // Nothing to do
             break;
         default:
-            if (LOG.isInfoEnabled()) {
-                LOG.info("MonitoringInfo.changeNumberOfConnections(): Unknown connection type: {}", connectionType);
-            }
+            LOG.info("MonitoringInfo.changeNumberOfConnections(): Unknown connection type: {}", connectionType);
         }
     }
 

@@ -194,9 +194,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                 copy2File(referencedPart.getInputStream());
                 setHeaders(referencedPart);
             }
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Referenced mail part exeeds {}MB limit. A temporary disk copy has been created: {}", Float.valueOf(TransportProperties.getInstance().getReferencedPartLimit() / MB).floatValue(), file.getFile().getName());
-            }
+            LOG.info("Referenced mail part exeeds {}MB limit. A temporary disk copy has been created: {}", Float.valueOf(TransportProperties.getInstance().getReferencedPartLimit() / MB).floatValue(), file.getFile().getName());
         }
         if (!containsFileName() && referencedPart.containsFileName()) {
             setFileName(referencedPart.getFileName());

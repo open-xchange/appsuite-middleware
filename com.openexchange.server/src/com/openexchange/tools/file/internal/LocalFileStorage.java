@@ -487,9 +487,7 @@ public class LocalFileStorage extends DefaultFileStorage {
     public void recreateStateFile() throws OXException {
         lock(LOCK_TIMEOUT);
         try {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Repairing.");
-            }
+            LOG.info("Repairing.");
             final State state = repairState();
             saveState(state);
         } finally {
@@ -834,9 +832,7 @@ public class LocalFileStorage extends DefaultFileStorage {
         lock(LOCK_TIMEOUT);
         try {
             if (!exists(STATEFILENAME)) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Repairing.");
-                }
+                LOG.info("Repairing.");
                 final State state = repairState();
                 saveState(state);
             }

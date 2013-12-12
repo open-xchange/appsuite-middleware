@@ -248,9 +248,7 @@ public final class TransportProperties implements ITransportProperties {
         }
 
         logBuilder.append("Global transport properties successfully loaded!");
-        if (LOG.isInfoEnabled()) {
-            LOG.info(logBuilder.toString());
-        }
+        LOG.info(logBuilder.toString());
     }
 
     @Override

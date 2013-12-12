@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.rmi.server.RMIServerSocketFactory;
-import org.slf4j.Logger;
 
 /**
  * {@link LocalServerFactory}
@@ -73,14 +72,10 @@ public class LocalServerFactory implements RMIServerSocketFactory {
     @Override
     public ServerSocket createServerSocket(final int port) throws IOException {
         if (hostname.equalsIgnoreCase("0")) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Admindaemon will listen on all network devices!");
-            }
+            LOG.info("Admindaemon will listen on all network devices!");
             return new ServerSocket(port, 0, null);
         }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Admindaemon will listen on {}!", hostname);
-        }
+        LOG.info("Admindaemon will listen on {}!", hostname);
         return new ServerSocket(port, 0, InetAddress.getByName(hostname));
     }
 }

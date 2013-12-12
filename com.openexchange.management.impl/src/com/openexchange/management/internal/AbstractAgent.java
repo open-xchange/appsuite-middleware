@@ -381,9 +381,7 @@ public abstract class AbstractAgent {
                 registry = LocateRegistry.createRegistry(port, null, rmiSocketFactory);
             }
             registries.put(Integer.valueOf(port), registry);
-            if (LOG.isInfoEnabled()) {
-                LOG.info("RMI registry created on port {} and bind address {}", port, bindAddr);
-            }
+            LOG.info("RMI registry created on port {} and bind address {}", port, bindAddr);
         } catch (final UnknownHostException e) {
             throw ManagementExceptionCode.UNKNOWN_HOST_ERROR.create(e, e.getMessage());
         } catch (final RemoteException e) {
@@ -451,9 +449,7 @@ public abstract class AbstractAgent {
             final JMXConnectorServer cs = JMXConnectorServerFactory.newJMXConnectorServer(url, environment, mbs);
             cs.start();
             connectors.put(url, cs);
-            if (LOG.isInfoEnabled()) {
-                LOG.info("JMX connector server on {} started", url);
-            }
+            LOG.info("JMX connector server on {} started", url);
             return url;
         } catch (final IOException e) {
             throw ManagementExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -472,9 +468,7 @@ public abstract class AbstractAgent {
         }
         try {
             connector.stop();
-            if (LOG.isInfoEnabled()) {
-                LOG.info("JMX connector server on {} stopped", url);
-            }
+            LOG.info("JMX connector server on {} stopped", url);
         } catch (final IOException e) {
             LOG.error("JMX connector server on {} could not be stopped", url, e);
             return;

@@ -86,18 +86,14 @@ public class PushMulticastSocket implements Runnable {
 
         try {
             if (config.isMultiCastEnabled()) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Starting Multicast Socket on Port: {}", multicastPort);
-                }
+                LOG.info("Starting Multicast Socket on Port: {}", multicastPort);
                 multicastSocket = new MulticastSocket(multicastPort);
                 multicastSocket.joinGroup(multicastAddress);
 
                 final ThreadPoolService threadPool = PushServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
                 thread = threadPool.submit(ThreadPools.task(this));
             } else {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Multicast Socket is disabled");
-                }
+                LOG.info("Multicast Socket is disabled");
             }
         } catch (final Exception exc) {
             LOG.error("MultiCastPushSocket", exc);

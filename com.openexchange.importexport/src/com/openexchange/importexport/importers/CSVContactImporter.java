@@ -105,8 +105,8 @@ public class CSVContactImporter extends AbstractImporter {
 	private LinkedList<ContactFieldMapper> mappers;
 
 	private ContactFieldMapper currentMapper;
-	
-	
+
+
 	public CSVContactImporter(ServiceLookup services) {
 	    super(services);
 	}
@@ -134,9 +134,7 @@ public class CSVContactImporter extends AbstractImporter {
             return false;
         }
         if (fo == null) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Folder does not exist: {}", folder);
-            }
+            LOG.info("Folder does not exist: {}", folder);
             return false;
         }
         // check format of folder
@@ -202,7 +200,7 @@ public class CSVContactImporter extends AbstractImporter {
                 intentions.add(intention);
             }
         }
-        
+
         int limit = getLimit(sessObj);
         int count = 0;
         // Build a list of contacts to insert
@@ -237,7 +235,7 @@ public class CSVContactImporter extends AbstractImporter {
 
         // Build result list
         final List<ImportResult> results = new ArrayList<ImportResult>(intentions.size());
-        
+
         boolean exceeds = false;
         for (final ImportIntention intention : intentions) {
             final boolean notNull = intention.contact != null;
@@ -265,7 +263,7 @@ public class CSVContactImporter extends AbstractImporter {
                 results.add(intention.result);
             }
         }
-        
+
         if (exceeds) {
             throw ImportExportExceptionCodes.LIMIT_EXCEEDED.create(limit);
         }

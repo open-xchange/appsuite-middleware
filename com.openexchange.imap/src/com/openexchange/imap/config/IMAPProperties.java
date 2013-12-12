@@ -382,9 +382,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         logBuilder.append("\tSpam Handler: ").append(spamHandlerName).append('\n');
 
         logBuilder.append("Global IMAP properties successfully loaded!");
-        if (LOG.isInfoEnabled()) {
-            LOG.info(logBuilder.toString());
-        }
+
+        LOG.info(logBuilder.toString());
     }
 
     @Override

@@ -84,9 +84,7 @@ public class ProxyServletActivator extends AbstractSessionServletActivator {
     public void startBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProxyServletActivator.class);
         try {
-            if (log.isInfoEnabled()) {
-                log.info("starting bundle: com.openexchange.proxy.servlet");
-            }
+            log.info("starting bundle: com.openexchange.proxy.servlet");
 
             registerSessionServlet(Constants.PATH, new ProxyServlet());
 
@@ -118,9 +116,7 @@ public class ProxyServletActivator extends AbstractSessionServletActivator {
     public void stopBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProxyServletActivator.class);
         try {
-            if (log.isInfoEnabled()) {
-                log.info("stopping bundle: com.openexchange.proxy.servlet");
-            }
+            log.info("stopping bundle: com.openexchange.proxy.servlet");
             if (null != trackers) {
                 for (final ServiceTracker<?,?> serviceTracker : trackers) {
                     serviceTracker.close();

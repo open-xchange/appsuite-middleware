@@ -126,9 +126,7 @@ public final class ManagementInit implements Initialization {
          * Run
          */
         agent.run();
-        if (LOG.isInfoEnabled()) {
-            LOG.info("JMX server successfully initialized.");
-        }
+        LOG.info("JMX server successfully initialized.");
         started.set(true);
     }
 

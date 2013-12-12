@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.search.service;
 
-import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -470,9 +469,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
     public <T> T getAttribute(final String attributeName, final MailMessage candidate) {
         final AttributeGetter getter = GETTERS.get(attributeName);
         if (null == getter) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("No getter for field: {}", attributeName);
-            }
+            LOG.info("No getter for field: {}", attributeName);
             return null;
         }
         @SuppressWarnings("unchecked") final T retval = (T) getter.getObject(candidate);
@@ -491,9 +488,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
     public SearchTerm<?> getSearchTerm(final String attributeName, final SingleOperation operation, final Object constant) {
         final AttributeGetter getter = GETTERS.get(attributeName);
         if (null == getter) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("No getter for field: {}", attributeName);
-            }
+            LOG.info("No getter for field: {}", attributeName);
             return null;
         }
         return getter.getSearchTerm(operation, constant);

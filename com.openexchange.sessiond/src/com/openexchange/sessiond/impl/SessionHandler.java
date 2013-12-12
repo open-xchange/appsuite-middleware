@@ -1064,19 +1064,13 @@ public final class SessionHandler {
         }
         final List<SessionControl> controls = sessionData.rotateShort();
         if (config.isAutoLogin()) {
-            if (LOG.isInfoEnabled()) {
-                final String message = "Session is moved to long life time container. All temporary session data will be cleaned up. ID: ";
-                for (final SessionControl sessionControl : controls) {
-                    LOG.info("{}{}", message, sessionControl.getSession().getSessionID());
-                }
+            for (final SessionControl sessionControl : controls) {
+                LOG.info("Session is moved to long life time container. All temporary session data will be cleaned up. ID: {}", new Object() { @Override public String toString() { return sessionControl.getSession().getSessionID();}});
             }
             postSessionDataRemoval(controls);
         } else {
-            if (LOG.isInfoEnabled()) {
-                final String message = "Session timed out. ID: ";
-                for (final SessionControl sessionControl : controls) {
-                    LOG.info("{}{}", message, sessionControl.getSession().getSessionID());
-                }
+            for (final SessionControl sessionControl : controls) {
+                LOG.info("Session timed out. ID: {}", new Object() { @Override public String toString() { return sessionControl.getSession().getSessionID();}});
             }
             postContainerRemoval(controls, true);
         }

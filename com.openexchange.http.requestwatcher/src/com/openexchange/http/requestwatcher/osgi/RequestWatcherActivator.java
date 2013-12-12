@@ -76,9 +76,7 @@ public class RequestWatcherActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws OXException {
         final Logger log = org.slf4j.LoggerFactory.getLogger(RequestWatcherActivator.class);
-        if (log.isInfoEnabled()) {
-            log.info("Starting RequestWatcher.");
-        }
+        log.info("Starting RequestWatcher.");
 
         Services.setServiceLookup(this);
 
@@ -90,9 +88,7 @@ public class RequestWatcherActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         final Logger log = org.slf4j.LoggerFactory.getLogger(RequestWatcherActivator.class);
-        if (log.isInfoEnabled()) {
-            log.info("Stopping RequestWatcher.");
-        }
+        log.info("Stopping RequestWatcher.");
         // Stop the Watcher
         final RequestWatcherServiceImpl requestWatcher = this.requestWatcher;
         if (null != requestWatcher) {
