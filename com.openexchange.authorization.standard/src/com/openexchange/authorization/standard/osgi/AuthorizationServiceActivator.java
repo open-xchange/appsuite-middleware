@@ -68,19 +68,12 @@ public class AuthorizationServiceActivator extends HousekeepingActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        /*
-         * Never stop the server even if a needed service is absent
-         */
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: {}", clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
     }
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: {}", clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
     }
 
     @Override
@@ -89,12 +82,8 @@ public class AuthorizationServiceActivator extends HousekeepingActivator {
             /*
              * (Re-)Initialize service registry with available services
              */
-            {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("starting bundle: com.openexchange.authorization.standard");
-                }
-                registerService(AuthorizationService.class, DefaultAuthorizationImpl.getInstance(), null);
-            }
+            LOG.info("starting bundle: com.openexchange.authorization.standard");
+            registerService(AuthorizationService.class, DefaultAuthorizationImpl.getInstance(), null);
         } catch (final Exception e) {
             LOG.error("", e);
             throw e;

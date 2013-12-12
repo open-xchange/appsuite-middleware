@@ -92,9 +92,7 @@ public class ActivatorNew extends DeferredActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: {}", clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         getServiceRegistry().removeService(clazz);
         // wenn authservice gepublished, dann publish wegnehmen
         if (registration != null) {

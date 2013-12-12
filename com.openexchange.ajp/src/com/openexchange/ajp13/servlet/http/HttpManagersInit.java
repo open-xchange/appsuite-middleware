@@ -112,9 +112,7 @@ public final class HttpManagersInit implements Initialization {
         }
         initServletMappings(false);
         HttpSessionManagement.init();
-        if (LOG.isInfoEnabled()) {
-            LOG.info("HTTP servlet manager successfully initialized");
-        }
+        LOG.info("HTTP servlet manager successfully initialized");
     }
 
     @Override
@@ -125,9 +123,7 @@ public final class HttpManagersInit implements Initialization {
         }
         HttpSessionManagement.reset();
         HttpServletManager.shutdownHttpServletManager();
-        if (LOG.isInfoEnabled()) {
-            LOG.info("HTTP servlet manager successfully stopped");
-        }
+        LOG.info("HTTP servlet manager successfully stopped");
     }
 
     private void initServletMappings(final boolean readFromFile) throws OXException {

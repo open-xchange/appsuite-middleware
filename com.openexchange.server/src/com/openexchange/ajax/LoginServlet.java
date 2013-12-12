@@ -396,11 +396,7 @@ public class LoginServlet extends AJAXServlet {
                 try {
                     final String sessionId = req.getParameter(PARAMETER_SESSION);
                     if (null == sessionId) {
-                        if (LoginServlet.LOG.isInfoEnabled()) {
-                            final StringBuilder sb = new StringBuilder(32);
-                            sb.append("Parameter \"").append(PARAMETER_SESSION).append("\" not found for action ").append(ACTION_CHANGEIP);
-                            LOG.info(sb.toString());
-                        }
+                        LOG.info("Parameter \"{}\" not found for action {}", PARAMETER_SESSION, ACTION_CHANGEIP);
                         throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
                     }
                     final String newIP = req.getParameter(LoginFields.CLIENT_IP_PARAM);
@@ -424,7 +420,7 @@ public class LoginServlet extends AJAXServlet {
                             session.getHash(),
                             session.getClient());
                         if (secret == null || !session.getSecret().equals(secret)) {
-                            if (LoginServlet.LOG.isInfoEnabled() && null != secret) {
+                            if (null != secret) {
                                 LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
                             }
                             throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
@@ -437,9 +433,7 @@ public class LoginServlet extends AJAXServlet {
                         }
                         response.setData("1");
                     } else {
-                        if (LoginServlet.LOG.isInfoEnabled()) {
-                            LOG.info("There is no session associated with session identifier: {}", sessionId);
-                        }
+                        LOG.info("There is no session associated with session identifier: {}", sessionId);
                         throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
                     }
                 } catch (final OXException e) {
@@ -505,7 +499,7 @@ public class LoginServlet extends AJAXServlet {
                     // Unknown random token; throw error
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("No session could be found for random token: {}", randomToken, new Throwable());
-                    } else if (LoginServlet.LOG.isInfoEnabled()) {
+                    } else {
                         LOG.info("No session could be found for random token: {}", randomToken);
                     }
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);

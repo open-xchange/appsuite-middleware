@@ -221,9 +221,7 @@ public final class EventQueue {
         delay = config.getEventQueueDelay();
 
         if (config.isEventQueueEnabled()) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Starting EventQueue");
-            }
+            LOG.info("Starting EventQueue");
 
             queue1 = new ArrayList<EventObject>();
             queue2 = new ArrayList<EventObject>();
@@ -249,9 +247,7 @@ public final class EventQueue {
             }
             isEnabled = true;
         } else {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("EventQueue is disabled");
-            }
+            LOG.info("EventQueue is disabled");
         }
         isInit = true;
         shuttingDown.set(false);

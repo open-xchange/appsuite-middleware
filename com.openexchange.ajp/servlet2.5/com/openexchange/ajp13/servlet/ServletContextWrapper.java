@@ -255,23 +255,17 @@ public class ServletContextWrapper implements ServletContext {
 
     @Override
     public void log(final Exception exception, final String string) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info(string, exception);
-        }
+        LOG.info(string, exception);
     }
 
     @Override
     public void log(final String string) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info(string);
-        }
+        LOG.info(string);
     }
 
     @Override
     public void log(final String string, final Throwable throwable) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info(string, throwable);
-        }
+        LOG.info(string, throwable);
     }
 
     @Override

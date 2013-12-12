@@ -138,13 +138,9 @@ final class CSVFileCreationCallable implements Callable<Boolean> {
                 success = file.renameTo(dest);
                 if (success) {
                     writeTask.csvFile.setFile(dest);
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Successfully created CSV file \"{}\" and added starting header line", writeTask.csvFile.getFile().getPath());
-                    }
+                    LOG.info("Successfully created CSV file \"{}\" and added starting header line", writeTask.csvFile.getFile().getPath());
                 } else {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn("Renaming to CSV file \"{}\" failed. Retry #{}", dest.getPath(), counter);
-                    }
+                    LOG.warn("Renaming to CSV file \"{}\" failed. Retry #{}", dest.getPath(), counter);
                 }
             }
             if (!success) {

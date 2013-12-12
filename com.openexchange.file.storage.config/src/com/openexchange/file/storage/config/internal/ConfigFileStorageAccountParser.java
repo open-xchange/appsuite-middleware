@@ -49,7 +49,6 @@
 
 package com.openexchange.file.storage.config.internal;
 
-import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -164,14 +163,10 @@ public final class ConfigFileStorageAccountParser {
         }
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ConfigFileStorageAccountParser.class);
         if (ids.isEmpty()) {
-            if (logger.isInfoEnabled()) {
-                logger.info("Found no pre-configured file storage accounts.");
-            }
+            logger.info("Found no pre-configured file storage accounts.");
             return;
         }
-        if (logger.isInfoEnabled()) {
-            logger.info("Found following pre-configured file storage accounts: {}", new TreeSet<String>(ids));
-        }
+        logger.info("Found following pre-configured file storage accounts: {}", new TreeSet<String>(ids));
         /*
          * Get the accounts for identifiers
          */

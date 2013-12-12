@@ -149,9 +149,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
             for (final Initialization initialization : inits) {
                 initialization.start();
             }
-            if (LOG.isInfoEnabled()) {
-                LOG.info("AJP server successfully started.");
-            }
+            LOG.info("AJP server successfully started.");
             /*
              * Start trackers
              */
@@ -179,9 +177,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
                 }
                 this.inits = null;
             }
-            if (LOG.isInfoEnabled()) {
-                LOG.info("AJP server successfully stopped.");
-            }
+            LOG.info("AJP server successfully stopped.");
             /*
              * Clear service registry
              */

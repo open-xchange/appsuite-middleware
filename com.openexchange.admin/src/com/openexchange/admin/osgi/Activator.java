@@ -124,26 +124,22 @@ public class Activator extends HousekeepingActivator {
         daemon.initRMI(context);
 
 
-        if (log.isInfoEnabled()) {
+        {
             final Dictionary<?, ?> headers = context.getBundle().getHeaders();
             log.info("Version: {}", headers.get("Bundle-Version"));
             log.info("Name: {}", headers.get("Bundle-SymbolicName"));
-            log.info("Build: {}", Version.getInstance().getVersionString());
         }
+        log.info("Build: {}", Version.getInstance().getVersionString());
         log.info("Admindaemon successfully started.");
 
         // The listener which is called if a new plugin is registered
         final ServiceListener sl = new ServiceListener() {
             @Override
             public void serviceChanged(final ServiceEvent ev) {
-                if (log.isInfoEnabled()) {
-                    log.info("Service: {}, {}", ev.getServiceReference().getBundle().getSymbolicName(), ev.getType());
-                }
+                log.info("Service: {}, {}", ev.getServiceReference().getBundle().getSymbolicName(), ev.getType());
                 switch (ev.getType()) {
                     case ServiceEvent.REGISTERED:
-                        if(log.isInfoEnabled()){
-                            log.info("{} registered service", ev.getServiceReference().getBundle().getSymbolicName());
-                        }
+                    log.info("{} registered service", ev.getServiceReference().getBundle().getSymbolicName());
                         break;
                     default:
                         break;

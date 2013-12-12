@@ -127,9 +127,7 @@ public class RemoteCacheAdmin {
 		 * Bind interface to registry
 		 */
 		registry.bind(gci.getRemoteName(), gci);
-		if (LOG.isInfoEnabled()) {
-			LOG.info("RemoteCacheAdmin started...");
-		}
+		LOG.info("RemoteCacheAdmin started...");
 	}
 
 }

@@ -164,9 +164,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
         session.setParameter("__ccf#", folder);
         serverUserSetting.setContactCollectOnMailAccess(cid, userId, serverUserSetting.isContactCollectOnMailAccess(cid, userId).booleanValue());
         serverUserSetting.setContactCollectOnMailTransport(cid, userId, serverUserSetting.isContactCollectOnMailTransport(cid, userId).booleanValue());
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Contact collector folder (id={}) successfully created for user {} in context {}", collectFolderID, userId, cid);
-        }
+        LOG.info("Contact collector folder (id={}) successfully created for user {} in context {}", collectFolderID, userId, cid);
     }
 
     private static boolean isConfigured(final ServerUserSetting setting, final int cid, final int userId) throws OXException {

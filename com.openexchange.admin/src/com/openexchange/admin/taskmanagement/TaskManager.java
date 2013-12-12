@@ -99,9 +99,7 @@ public class TaskManager {
         this.cache = ClientAdminThread.cache;
         this.prop = this.cache.getProperties();
         final int threadCount = Integer.parseInt(this.prop.getProp("CONCURRENT_JOBS", "2"));
-        if (log.isInfoEnabled()) {
-            log.info("AdminJobExecutor: running {} jobs parallel", threadCount);
-        }
+        log.info("AdminJobExecutor: running {} jobs parallel", threadCount);
         this.executor = Executors.newFixedThreadPool(threadCount);
     }
 

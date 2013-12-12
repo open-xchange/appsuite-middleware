@@ -483,9 +483,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                      */
                     continue;
                 }
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Special cookie {} not handled, yet!", name);
-                }
+                LOG.info("Special cookie {} not handled, yet!", name);
             }
             if (prevEnd != -1) {
                 final int start = m.start();

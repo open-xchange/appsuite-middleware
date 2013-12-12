@@ -171,9 +171,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
             }
             servletPool.put(path, servletQueue);
         }
-        if (log.isInfoEnabled()) {
-            log.info("All Servlet Instances created & initialized");
-        }
+        log.info("All Servlet Instances created & initialized");
     }
 
     protected final void registerServlet0(final String id, final HttpServlet servlet, final Dictionary<String, String> initParams) throws ServletException {
@@ -262,9 +260,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
                         "\" has already been registered before.").toString());
                 }
             }
-            if (LOG.isInfoEnabled()) {
-                LOG.info("New servlet \"{}\" successfully registered to \"{}{}", servlet.getClass().getCanonicalName(), path, '"');
-            }
+            LOG.info("New servlet \"{}\" successfully registered to \"{}\"", servlet.getClass().getCanonicalName(), path);
         } catch (final URISyntaxException e) {
             final ServletException se = new ServletException("Servlet path is not a valid URI", e);
             se.initCause(e);

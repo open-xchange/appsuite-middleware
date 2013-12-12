@@ -118,9 +118,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: {}", clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         getServiceRegistry().addService(clazz, getService(clazz));
         if (CacheService.class.equals(clazz)) {
             try {

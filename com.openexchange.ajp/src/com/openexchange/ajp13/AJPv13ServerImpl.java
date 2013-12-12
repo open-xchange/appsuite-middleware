@@ -135,9 +135,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
             }
             AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.setNumActive(threadArr.length);
         } else {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("AJPv13Server is already running...");
-            }
+            LOG.info("AJPv13Server is already running...");
         }
     }
 
@@ -188,9 +186,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
             }
             AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.setNumActive(0);
         } else {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("AJPv13Server is not running and thus does not need to be stopped");
-            }
+            LOG.info("AJPv13Server is not running and thus does not need to be stopped");
         }
     }
 
@@ -200,9 +196,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
     private void initializePools() {
         resetPools();
         socketHandler.startUp();
-        if (LOG.isInfoEnabled()) {
-            LOG.info("All pools initialized...");
-        }
+        LOG.info("All pools initialized...");
     }
 
     /**

@@ -84,9 +84,7 @@ public final class CharsetActivator extends HousekeepingActivator implements Ser
         final CharsetProvider addedService = context.getService(reference);
         {
             collectionCharsetProvider.addCharsetProvider(addedService);
-            if (LOG.isInfoEnabled()) {
-                LOG.info("New charset provider detected and added: {}", addedService.getClass().getName());
-            }
+            LOG.info("New charset provider detected and added: {}", addedService.getClass().getName());
         }
         return addedService;
     }
@@ -100,9 +98,7 @@ public final class CharsetActivator extends HousekeepingActivator implements Ser
     public void removedService(final ServiceReference<CharsetProvider> reference, final CharsetProvider service) {
         {
             collectionCharsetProvider.removeCharsetProvider(service);
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Charset provider removed: {}", service.getClass().getName());
-            }
+            LOG.info("Charset provider removed: {}", service.getClass().getName());
         }
         context.ungetService(reference);
     }
@@ -126,17 +122,13 @@ public final class CharsetActivator extends HousekeepingActivator implements Ser
                 final CharsetProvider[] results = ModifyCharsetStandardProvider.modifyCharsetExtendedProvider();
                 backupStandardCharsetProvider = null == results ? null : results[0];
             }
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Standard & external charset provider replaced with collection charset provider");
-            }
+            LOG.info("Standard & external charset provider replaced with collection charset provider");
             /*
              * Initialize a service tracker to track bundle chars providers
              */
             track(CharsetProvider.class, this);
             openTrackers();
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Charset bundle successfully started");
-            }
+            LOG.info("Charset bundle successfully started");
         } catch (final Throwable t) {
             LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -160,10 +152,7 @@ public final class CharsetActivator extends HousekeepingActivator implements Ser
                 backupStandardCharsetProvider = null;
             }
             collectionCharsetProvider = null;
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Collection charset provider replaced with former standard/external charset provider");
-                LOG.info("Charset bundle successfully stopped");
-            }
+            LOG.info("Collection charset provider replaced with former standard/external charset provider. Charset bundle successfully stopped");
         } catch (final Throwable t) {
             LOG.error("", t);
 //            throw t instanceof Exception ? (Exception) t : new Exception(t);

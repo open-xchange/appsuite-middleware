@@ -49,7 +49,6 @@
 
 package com.openexchange.ajp13.watcher;
 
-import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -187,7 +186,7 @@ public class AJPv13TaskWatcher {
                     return;
                 }
                 final boolean logExceededTasks = AJPv13Config.getAJPWatcherEnabled();
-                if (logExceededTasks && log.isInfoEnabled()) {
+                if (logExceededTasks) {
                     final AtomicInteger countWaiting = new AtomicInteger();
                     final AtomicInteger countProcessing = new AtomicInteger();
                     final AtomicInteger countExceeded = new AtomicInteger();

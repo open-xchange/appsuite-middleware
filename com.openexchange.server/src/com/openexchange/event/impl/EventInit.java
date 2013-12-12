@@ -86,21 +86,22 @@ public class EventInit implements Initialization {
 			return;
 		}
         started = true;
-        if (LOG.isInfoEnabled()) {
+        final boolean infoEnabled = LOG.isInfoEnabled();
+        if (infoEnabled) {
 			LOG.info("Parse Event properties");
 		}
 		final EventConfig eventConfig = new EventConfigImpl(ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getFileByName("event.properties"));
 		//final EventQueue eventQueue = new EventQueue(eventConfig);
 		EventQueue.init(eventConfig);
 
-		if (LOG.isInfoEnabled()) {
+		if (infoEnabled) {
 			LOG.info("Adding Notification Listener");
 		}
         final ParticipantNotify notify = new ParticipantNotify();
 		EventQueue.addModernListener((AppointmentEventInterface) notify);
 		EventQueue.addModernListener((TaskEventInterface) notify);
 
-		if (LOG.isInfoEnabled()) {
+		if (infoEnabled) {
 			LOG.info("Adding LinkEventHandler");
 		}
         final LinksEventHandler linkHandler = new LinksEventHandler();
@@ -108,7 +109,7 @@ public class EventInit implements Initialization {
 		EventQueue.addContactEvent(linkHandler);
 		EventQueue.addTaskEvent(linkHandler);
 
-		if (LOG.isInfoEnabled()) {
+		if (infoEnabled) {
 			LOG.info("Adding AttachmentCleaner");
 		}
         final AttachmentCleaner attCleaner = new AttachmentCleaner();
@@ -116,13 +117,13 @@ public class EventInit implements Initialization {
 		EventQueue.addContactEvent(attCleaner);
 		EventQueue.addTaskEvent(attCleaner);
 
-		if (LOG.isInfoEnabled()) {
+		if (infoEnabled) {
 			LOG.info("Adding PropertiesCleaner");
 		}
         final PropertyCleaner propertyCleaner = new PropertyCleaner(new PropertyStoreImpl(new DBPoolProvider(), "oxfolder_property"), new PropertyStoreImpl(new DBPoolProvider(), "infostore_property"));
 		EventQueue.addFolderEvent(propertyCleaner);
 
-		if (LOG.isInfoEnabled()) {
+		if (infoEnabled) {
 			LOG.info("Adding LockCleaner");
 		}
         final LockCleaner lockCleaner = new LockCleaner(new FolderLockManagerImpl(new DBPoolProvider()), new EntityLockManagerImpl(new DBPoolProvider(), "infostore_lock"));

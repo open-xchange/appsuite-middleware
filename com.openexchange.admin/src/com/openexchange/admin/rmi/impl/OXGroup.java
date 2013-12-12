@@ -121,9 +121,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         this.context = context;
         cache = ClientAdminThread.cache;
         prop = cache.getProperties();
-        if (log.isInfoEnabled()) {
-            log.info("Class loaded: {}", this.getClass().getName());
-        }
+        log.info("Class loaded: {}", this.getClass().getName());
         basicauth = new BasicAuthenticator();
     }
 

@@ -109,7 +109,7 @@ public class AuditEventHandler implements EventHandler {
      */
     @Override
     public void handleEvent(final Event event) {
-        Validate.notNull(event, "Event mustn't be null.");
+        Validate.notNull(event, "Event must not be null.");
 
         if (!LOG.isInfoEnabled()) {
             // Not allowed to log

@@ -82,9 +82,7 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
     public OXLogin(final BundleContext context) throws RemoteException, StorageException {
         super();
         this.context = context;
-        if (log.isInfoEnabled()) {
-            log.info("Class loaded: {}", this.getClass().getName());
-        }
+        log.info("Class loaded: {}", this.getClass().getName());
     }
 
     @Override

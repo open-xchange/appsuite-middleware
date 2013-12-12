@@ -251,7 +251,7 @@ public final class AJPv13Config implements Initialization {
     }
 
     private static void logInfo(final String desc) {
-        if (LOG.isInfoEnabled()) {
+        LOG.info("{}", new Object() { @Override public String toString() {
             final StringBuilder logBuilder = new StringBuilder(1024);
             logBuilder.append("\nAJP CONFIGURATION:\n");
             logBuilder.append("\tAJP_PORT=").append(instance.port).append('\n');
@@ -270,8 +270,8 @@ public final class AJPv13Config implements Initialization {
             logBuilder.append("\tAJP_SERVLET_CONFIG_DIR=").append(instance.servletConfigs).append(null == desc ? "" : desc).append('\n');
             logBuilder.append("\tAJP_BIND_ADDR=").append(
                 instance.ajpBindAddr == null ? "* (all interfaces)" : instance.ajpBindAddr.toString());
-            LOG.info(logBuilder.toString());
-        }
+            return logBuilder.toString();
+        }});
     }
 
     private AJPv13Config() {

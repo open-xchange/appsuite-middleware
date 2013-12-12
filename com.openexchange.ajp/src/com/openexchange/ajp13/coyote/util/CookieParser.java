@@ -119,9 +119,7 @@ public final class CookieParser {
                      */
                     continue;
                 }
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Special cookie {} not handled, yet!", name);
-                }
+                LOG.info("Special cookie {} not handled, yet!", name);
             }
             if (prevEnd != -1) {
                 final int start = m.start();
