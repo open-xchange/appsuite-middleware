@@ -18,11 +18,8 @@
     ... add the OXException category filter here ...
     -->
 
-    <!-- As of version 0.9.25, logback-classic ships with LevelChangePropagator, an implementation of LoggerContextListener which
-         propagates changes made to the level of any logback-classic logger onto the java.util.logging framework. Such propagation
-         eliminates the performance impact of disabled log statements. Instances of LogRecord will be sent to logback (via SLF4J) only
-         for enabled log statements. This makes it reasonable for real-world applications to use the jul-to-slf4j bridge.
-    -->
+    <!-- 	Propagates changes made to the level of any logback-classic logger onto the java.util.logging framework. 
+    		If this listener will be deleted, ox backend will add it programmatically.-->
     <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator"/>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">

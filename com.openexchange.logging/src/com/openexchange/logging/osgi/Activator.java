@@ -49,9 +49,12 @@
 
 package com.openexchange.logging.osgi;
 
+import java.util.Collection;
+import java.util.List;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
+import org.apache.commons.lang.Validate;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -62,6 +65,8 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.jul.LevelChangePropagator;
+import ch.qos.logback.classic.spi.LoggerContextListener;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.logging.mbean.LogbackConfiguration;
@@ -109,8 +114,8 @@ public class Activator implements BundleActivator {
         logger.info("starting bundle com.openexchange.logging");
         configureJavaUtilLogging();
         overrideLoggerLevels();
+        installJulLevelChangePropagator();
         registerLoggingConfigurationMBean(context);
-        logger.info("LoggingConfigurationMBean successfully registered.");
         ServiceTracker<ConfigurationService, ConfigurationService> tracker = new ServiceTracker<ConfigurationService, ConfigurationService>(
             context,
             ConfigurationService.class,
@@ -118,14 +123,36 @@ public class Activator implements BundleActivator {
         tracker.open();
     }
 
-    @Override
-    public void stop(BundleContext context) throws Exception {
-        logger.info("stopping bundle com.openexchange.logging");
-        if (managementService != null && logbackConfObjName != null) {
-            managementService.unregisterMBean(logbackConfObjName);
-            logbackConfMBean = null;
-            logger.info("LoggingConfigurationMBean successfully unregistered.");
+    /**
+     * Installs the logback LevelChangePropagator if the descriptive configuration was removed by the admin.
+     */
+    protected void installJulLevelChangePropagator() {
+        List<LoggerContextListener> loggerContextListener = loggerContext.getCopyOfListenerList();
+
+        if (!hasInstanceOf(loggerContextListener, LevelChangePropagator.class)) {
+            LevelChangePropagator levelChangePropagator = new LevelChangePropagator();
+            levelChangePropagator.setContext(loggerContext);
+            levelChangePropagator.start();
+            loggerContext.addListener(levelChangePropagator);
         }
+    }
+
+    /**
+     * Checks, if the given class is in the given collection.
+     * 
+     * @param collection - the collection to verify
+     * @param clazz - the class to search for
+     * @return true, if an object of that class is available within the collection. Otherwise false.
+     */
+    protected <T> boolean hasInstanceOf(Collection<?> collection, Class<T> clazz) {
+        Validate.notNull(collection);
+
+        for (Object o : collection) {
+            if (o != null && o.getClass() == clazz) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -192,6 +219,17 @@ public class Activator implements BundleActivator {
         } catch (NotCompliantMBeanException e) {
             logger.error("Could not register LogbackConfigurationMBean", e);
         }
+
+        logger.info("LoggingConfigurationMBean successfully registered.");
     }
 
+    @Override
+    public void stop(BundleContext context) throws Exception {
+        logger.info("stopping bundle com.openexchange.logging");
+        if (managementService != null && logbackConfObjName != null) {
+            managementService.unregisterMBean(logbackConfObjName);
+            logbackConfMBean = null;
+            logger.info("LoggingConfigurationMBean successfully unregistered.");
+        }
+    }
 }
