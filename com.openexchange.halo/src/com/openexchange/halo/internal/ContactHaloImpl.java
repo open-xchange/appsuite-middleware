@@ -152,7 +152,7 @@ public class ContactHaloImpl implements ContactHalo {
         final HaloContactQuery contactQuery = new HaloContactQuery();
 
         if (contact.getObjectID() > 0 && contact.getParentFolderID() > 0) {
-            Contact loaded = contactService.getContact(session, "" + contact.getParentFolderID(), "" + contact.getInternalUserId());
+            Contact loaded = contactService.getContact(session, "" + contact.getParentFolderID(), "" + contact.getObjectID());
             contactQuery.setContact(loaded);
             contactQuery.setMergedContacts(Arrays.asList(loaded));
             return contactQuery;
