@@ -53,8 +53,6 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.server.services.I18nServices;
 
@@ -66,9 +64,7 @@ import com.openexchange.server.services.I18nServices;
  */
 public class StringHelper {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(StringHelper.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StringHelper.class);
 
     private static final ConcurrentMap<Locale, StringHelper> CACHE = new ConcurrentHashMap<Locale, StringHelper>();
 
@@ -119,16 +115,12 @@ public class StringHelper {
         try {
             final I18nService tool = I18nServices.getInstance().getService(locale);
             if (tool == null) {
-                if (DEBUG) {
-                    LOG.debug("No service for " + locale + "  found. Using default for bundle ");
-                }
+                LOG.debug("No service for {}  found. Using default for bundle ", locale);
                 return key;
             }
             return tool.getLocalized(key);
         } catch (final MissingResourceException x) {
-            if (DEBUG) {
-                LOG.debug("MissingResource for " + locale + ". Using default for bundle ", x);
-            }
+            LOG.debug("MissingResource for {}. Using default for bundle ", locale, x);
             return key;
         }
     }

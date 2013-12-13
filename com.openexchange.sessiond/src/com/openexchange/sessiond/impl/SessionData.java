@@ -62,10 +62,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionMatcher;
@@ -81,7 +79,7 @@ import com.openexchange.timer.TimerService;
  */
 final class SessionData {
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionData.class));
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionData.class);
 
     private final int maxSessions;
     private final long randomTokenTimeout;
@@ -690,7 +688,7 @@ final class SessionData {
         final SessionImpl session = sessionControl.getSession();
         if (!randomToken.equals(session.getRandomToken())) {
             final OXException e = SessionExceptionCodes.WRONG_BY_RANDOM.create(session.getSessionID(), session.getRandomToken(), randomToken, sessionId);
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             SessionHandler.clearSession(sessionId);
             return null;
         }
@@ -763,7 +761,7 @@ final class SessionData {
                     control = container.removeSessionById(sessionId);
                     if (null != control) {
                         sessionList.getFirst().putSessionControl(control);
-                        LOG.trace("Moved from container " + i + " to first one.");
+                        LOG.trace("Moved from container {} to first one.", i);
                     }
                 }
             }
@@ -771,14 +769,11 @@ final class SessionData {
                 if (sessionList.getFirst().containsSessionId(sessionId)) {
                     LOG.warn("Somebody else moved session to most up-to-date container.");
                 } else {
-                    // Session removed in the meantime
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Was not able to move the session " + sessionId + " into the most up-to-date container since it has already been removed in the meantime");
-                    }
+                    LOG.debug("Was not able to move the session {} into the most up-to-date container since it has already been removed in the meantime", sessionId);
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             wlock.unlock();
         }
@@ -803,7 +798,7 @@ final class SessionData {
                 sessionList.getFirst().putSessionControl(control);
                 final SessionImpl session = control.getSession();
                 longTermUserGuardian.remove(session.getUserId(), session.getContextId());
-                LOG.trace("Moved from long term container " + i + " to first one.");
+                LOG.trace("Moved from long term container {} to first one.", i);
                 movedSession = true;
             }
             if (!movedSession) {
@@ -814,7 +809,7 @@ final class SessionData {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             wlongTermLock.unlock();
             wlock.unlock();
@@ -957,7 +952,7 @@ final class SessionData {
                 removers.remove(randomToken);
                 removeRandomToken(randomToken);
             } catch (final Throwable t) {
-                LOG.error(t.getMessage(), t);
+                LOG.error("", t);
             }
         }
     }

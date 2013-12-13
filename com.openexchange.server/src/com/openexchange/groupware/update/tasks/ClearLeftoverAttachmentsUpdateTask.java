@@ -56,24 +56,23 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.file.FileStorage;
 
 public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 
     private final ThreadLocal<Map<Integer, FileStorage>> filestorages = new ThreadLocal<Map<Integer,FileStorage>>();
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ClearLeftoverAttachmentsUpdateTask.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ClearLeftoverAttachmentsUpdateTask.class);
 
     @Override
     public int addedWithVersion() {
@@ -168,7 +167,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         try {
             fs.deleteFile(fileId);
         } catch (final OXException x) {
-            LOG.warn("Could not delete "+fileId+ "in context "+ctx_id+". The file might be gone already.");
+            LOG.warn("Could not delete {}in context {}. The file might be gone already.", fileId, ctx_id);
         }
     }
 
@@ -188,7 +187,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
             rs = stmt.executeQuery();
 
             if(!rs.next()) {
-                LOG.error("Context "+ctx_id+" doesn't seem to have a proper filestore");
+                LOG.error("Context {} doesn''t seem to have a proper filestore", ctx_id);
                 return null;
             }
 
@@ -205,7 +204,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
             rs = stmt.executeQuery();
 
             if(!rs.next()) {
-                LOG.error("Context "+ctx_id+" doesn't seem to have a proper filestore");
+                LOG.error("Context {} doesn''t seem to have a proper filestore", ctx_id);
                 return null;
             }
             final String uri_string = rs.getString(1);
@@ -217,7 +216,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 
 
         } catch (final URISyntaxException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         } finally {
             if(stmt != null) {

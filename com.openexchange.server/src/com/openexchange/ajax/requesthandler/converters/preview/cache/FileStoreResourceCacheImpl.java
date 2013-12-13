@@ -62,7 +62,6 @@ import java.sql.Types;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.ajax.requesthandler.cache.CachedResource;
@@ -91,7 +90,7 @@ import com.openexchange.tools.file.external.FileStorageCodes;
  */
 public final class FileStoreResourceCacheImpl implements ResourceCache, EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FileStoreResourceCacheImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileStoreResourceCacheImpl.class);
 
     private static final ConcurrentTIntObjectHashMap<FileStorage> FILE_STORE_CACHE = new ConcurrentTIntObjectHashMap<FileStorage>();
 

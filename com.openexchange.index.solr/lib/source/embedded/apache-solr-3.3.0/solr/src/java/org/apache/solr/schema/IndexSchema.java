@@ -63,7 +63,7 @@ public final class IndexSchema {
   public static final String DEFAULT_SCHEMA_FILE = "schema.xml";
   public static final String LUCENE_MATCH_VERSION_PARAM = "luceneMatchVersion";
 
-  final static Logger log = LoggerFactory.getLogger(IndexSchema.class);
+  final static org.slf4j.Logger log = LoggerFactory.getLogger(IndexSchema.class);
   private final SolrConfig solrConfig;
   private final String resourceName;
   private String name;

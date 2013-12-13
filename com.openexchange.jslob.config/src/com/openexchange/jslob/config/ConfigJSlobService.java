@@ -69,12 +69,12 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.json.JSONValue;
+import org.slf4j.Logger;
 import com.openexchange.ajax.tools.JSONUtil;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -97,7 +97,6 @@ import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.shared.SharedJSlobService;
 import com.openexchange.jslob.storage.JSlobStorage;
 import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
-import com.openexchange.log.LogFactory;
 import com.openexchange.preferences.ServerUserSettingLoader;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -112,8 +111,7 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public final class ConfigJSlobService implements JSlobService {
 
-    /** The logger */
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(ConfigJSlobService.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigJSlobService.class);
 
     private static final List<String> ALIASES = Arrays.asList("config");
 
@@ -283,7 +281,7 @@ public final class ConfigJSlobService implements JSlobService {
         final ConfigView view = getConfigViewFactory().getView();
         final Map<String, ComposedConfigProperty<String>> all = view.all();
         // Logger
-        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigJSlobService.class));
+        final Logger logger = org.slf4j.LoggerFactory.getLogger(ConfigJSlobService.class);
         // Initialize resulting map
         final int initialCapacity = all.size() >> 1;
         final Map<String, Map<String, AttributedProperty>> preferenceItems = new HashMap<String, Map<String, AttributedProperty>>(
@@ -306,7 +304,7 @@ public final class ConfigJSlobService implements JSlobService {
                     try {
                         attributes.put(preferencePath, new AttributedProperty(preferencePath, entry.getKey(), property));
                     } catch (final Exception e) {
-                        logger.warn("Couldn't initialize preference path: " + preferencePath, e);
+                        logger.warn("Couldn''t initialize preference path: {}", preferencePath, e);
                     }
                 }
             }
@@ -544,11 +542,7 @@ public final class ConfigJSlobService implements JSlobService {
 
                     jObject.put(lobPath, convert2JS(setting));
                 } catch (final OXException e) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.warn("Illegal config-tree path: " + configTreePath + ". Please check paths.perfMap file (JSlob ID: " + lobPath + ") OR if path-associatd bundle has been started.", e);
-                    } else {
-                        LOG.warn("Illegal config-tree path: " + configTreePath + ". Please check paths.perfMap file (JSlob ID: " + lobPath + ") OR if path-associatd bundle has been started.");
-                    }
+                    LOG.warn("Illegal config-tree path: {}. Please check paths.perfMap file (JSlob ID: {}) OR if path-associatd bundle has been started.", configTreePath, lobPath, e);
                 }
             }
 

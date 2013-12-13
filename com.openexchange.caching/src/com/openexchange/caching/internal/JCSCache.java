@@ -51,6 +51,7 @@ package com.openexchange.caching.internal;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -67,6 +68,7 @@ import org.apache.jcs.engine.control.CompositeCache;
 import org.apache.jcs.engine.control.group.GroupAttrName;
 import org.apache.jcs.engine.control.group.GroupId;
 import org.apache.jcs.engine.memory.MemoryCache;
+import org.slf4j.Logger;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.CacheExceptionCode;
@@ -79,8 +81,6 @@ import com.openexchange.caching.internal.cache2jcs.CacheStatistics2JCS;
 import com.openexchange.caching.internal.cache2jcs.ElementAttributes2JCS;
 import com.openexchange.caching.internal.jcs2cache.JCSElementAttributesDelegator;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link JCSCache} - A cache implementation that uses the <a href="http://jakarta.apache.org/jcs/">JCS</a> caching system.
@@ -89,7 +89,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class JCSCache implements Cache, SupportsLocalOperations {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(JCSCache.class));
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(JCSCache.class);
 
     private static volatile Field cacheControlField;
     private static Field cacheControlField() {
@@ -170,8 +170,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
                         }
                     }
                     this.localOnly = localOnly;
-                    LOG.info("Cache '" + cache.getCacheAttributes().getCacheName() + "' is operating in " +
-                        (localOnly.booleanValue() ? "local-only" : "distributed") + " mode");
+                    LOG.info("Cache ''{}'' is operating in {} mode", cache.getCacheAttributes().getCacheName(), (localOnly.booleanValue() ? "local-only" : "distributed"));
                 }
             }
         }

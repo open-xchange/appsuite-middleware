@@ -64,7 +64,7 @@ import com.openexchange.log.Log;
  */
 public final class SolrUtils {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(com.openexchange.log.LogFactory.getLog(SolrUtils.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SolrUtils.class);
 
     /**
      * Initializes a new {@link SolrUtils}.
@@ -160,11 +160,11 @@ public final class SolrUtils {
      */
     public static void handleThrowable(final Throwable t) {
         if (t instanceof ThreadDeath) {
-            LOG.fatal(MARKER + "Thread death" + MARKER, t);
+            LOG.error(MARKER + "Thread death" + MARKER, t);
             throw (ThreadDeath) t;
         }
         if (t instanceof VirtualMachineError) {
-            LOG.fatal(
+            LOG.error(
                 MARKER + "The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating." + MARKER,
                 t);
             throw (VirtualMachineError) t;

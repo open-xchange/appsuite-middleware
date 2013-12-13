@@ -70,9 +70,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class GetPerformer extends AbstractUserizedFolderPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(GetPerformer.class));
-
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetPerformer.class);
 
     /**
      * Initializes a new {@link GetPerformer}.
@@ -123,7 +121,6 @@ public final class GetPerformer extends AbstractUserizedFolderPerformer {
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
-        final long start = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         final java.util.List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
         if (folderStorage.startTransaction(storageParameters, false)) {
             openedStorages.add(folderStorage);
@@ -148,10 +145,6 @@ public final class GetPerformer extends AbstractUserizedFolderPerformer {
             // TODO: All or only subscribed subfolders?
             final UserizedFolder userizedFolder =
                 getUserizedFolder(folder, ownPermission, treeId, true, true, storageParameters, openedStorages);
-            if (DEBUG_ENABLED) {
-                final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new com.openexchange.java.StringAllocator().append("Get.doGet() took ").append(duration).append("msec for folder: ").append(folderId).toString());
-            }
 
             /*
              * Commit

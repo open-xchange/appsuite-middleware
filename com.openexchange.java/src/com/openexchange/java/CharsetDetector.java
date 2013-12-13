@@ -57,9 +57,8 @@ import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.mozilla.universalchardet.UniversalDetector;
+import org.slf4j.Logger;
 
 /**
  * {@link CharsetDetector} - A charset detector based on <a href="https://code.google.com/p/juniversalchardet/">juniversalchardet</a>
@@ -69,7 +68,7 @@ import org.mozilla.universalchardet.UniversalDetector;
  */
 public final class CharsetDetector {
 
-    private static final Log LOG = LogFactory.getLog(CharsetDetector.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CharsetDetector.class);
 
     private static final String FALLBACK = "ISO-8859-1";
 
@@ -100,15 +99,15 @@ public final class CharsetDetector {
         try {
             return (null != charset && checkName(charset) && Charset.isSupported(charset));
         } catch (final RuntimeException rte) {
-            LOG.warn("RuntimeException while checking charset: " + charset, rte);
+            LOG.warn("RuntimeException while checking charset: {}", charset, rte);
             return false;
         } catch (final Error e) {
             handleThrowable(e);
-            LOG.warn("Error while checking charset: " + charset, e);
+            LOG.warn("Error while checking charset: {}", charset, e);
             return false;
         } catch (final Throwable t) {
             handleThrowable(t);
-            LOG.warn("Unexpected error while checking charset: " + charset, t);
+            LOG.warn("Unexpected error while checking charset: {}", charset, t);
             return false;
         }
     }
@@ -120,11 +119,11 @@ public final class CharsetDetector {
      */
     private static void handleThrowable(final Throwable t) {
         if (t instanceof ThreadDeath) {
-            LOG.fatal(" ---=== /!\\ ===--- Thread death ---=== /!\\ ===--- ", t);
+            LOG.error(" ---=== /!\\ ===--- Thread death ---=== /!\\ ===--- ", t);
             throw (ThreadDeath) t;
         }
         if (t instanceof VirtualMachineError) {
-            LOG.fatal(
+            LOG.error(
                 " ---=== /!\\ ===--- The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating. ---=== /!\\ ===--- ",
                 t);
             throw (VirtualMachineError) t;
@@ -199,7 +198,7 @@ public final class CharsetDetector {
                 /*
                  * Neither a MimeBodyPart nor a MimeMessage
                  */
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 return FALLBACK;
             }
             return detectCharset(rawIn);
@@ -261,7 +260,7 @@ public final class CharsetDetector {
         try {
             return detectCharsetFailOnError(in);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return FALLBACK;
         }
     }
@@ -288,7 +287,7 @@ public final class CharsetDetector {
                 detector.handleData(buffer, 0, read);
             }
         } catch (IOException e) {
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
         } finally {
             Streams.close(in);
         }

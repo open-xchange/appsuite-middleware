@@ -87,7 +87,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class MimeType2ExtMap {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeType2ExtMap.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeType2ExtMap.class);
 
     private static volatile Map<String, String> typeMap;
 
@@ -193,11 +193,9 @@ public final class MimeType2ExtMap {
                         }
 
                     }
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("MIMEType2ExtMap successfully initialized");
-                    }
+                    LOG.debug("MIMEType2ExtMap successfully initialized");
                 } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -323,17 +321,17 @@ public final class MimeType2ExtMap {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), com.openexchange.java.Charsets.ISO_8859_1));
             parse(reader);
         } catch (final UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final FileNotFoundException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
                 } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -350,17 +348,17 @@ public final class MimeType2ExtMap {
             reader = new BufferedReader(new InputStreamReader(url.openStream(), com.openexchange.java.Charsets.ISO_8859_1));
             parse(reader);
         } catch (final UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final FileNotFoundException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
                 } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }

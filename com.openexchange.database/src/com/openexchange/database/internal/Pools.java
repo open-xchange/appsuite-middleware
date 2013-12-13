@@ -57,8 +57,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
 
@@ -68,7 +66,7 @@ import com.openexchange.exception.OXException;
  */
 public final class Pools implements Runnable {
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Pools.class));
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Pools.class);
 
     private final List<PoolLifeCycle> lifeCycles = new ArrayList<PoolLifeCycle>(2);
 
@@ -132,7 +130,7 @@ public final class Pools implements Runnable {
                 Pools.this.run();
                 thread.setName(origName);
             } catch (final Throwable t) {
-                LOG.error(t.getMessage(), t);
+                LOG.error("", t);
             }
         }
     };
@@ -157,7 +155,7 @@ public final class Pools implements Runnable {
                     }
                     if (!destroyed) {
                         final OXException e = DBPoolingExceptionCodes.UNKNOWN_POOL.create(entry.getKey());
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }
@@ -189,7 +187,7 @@ public final class Pools implements Runnable {
                 }
                 if (!destroyed) {
                     final OXException e = DBPoolingExceptionCodes.UNKNOWN_POOL.create(entry.getKey());
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
             pools.clear();

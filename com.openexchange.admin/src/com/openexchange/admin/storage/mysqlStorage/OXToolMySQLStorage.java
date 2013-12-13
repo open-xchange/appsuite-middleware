@@ -62,7 +62,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -91,7 +90,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
-import com.openexchange.log.LogFactory;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.BitAND;
 import com.openexchange.sql.grammar.BitOR;
@@ -107,7 +105,7 @@ import com.openexchange.sql.grammar.UPDATE;
  */
 public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefaultValues {
 
-    private final static Log log = LogFactory.getLog(OXToolMySQLStorage.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXToolMySQLStorage.class);
 
     private static final String FALLBACK_LANGUAGE_CREATE = "en";
 
@@ -1564,7 +1562,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (doUpdate) {
                 if (ctx == null) {
                     final StorageException e = new StorageException("context must not be null when schema update should be done");
-                    log.error(e.getMessage(), e);
+                    log.error("", e);
                     throw e;
                 }
                 updater.startUpdate(ctx.getId().intValue());
@@ -1691,7 +1689,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         try {
             con = cache.getConnectionForConfigDB();
         } catch (final PoolException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         }
         PreparedStatement stmt = null;

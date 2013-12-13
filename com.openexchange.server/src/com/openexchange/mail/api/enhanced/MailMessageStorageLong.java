@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.api.enhanced;
 
+import java.text.MessageFormat;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
@@ -77,7 +78,7 @@ import com.openexchange.spamhandler.SpamHandler;
  */
 public abstract class MailMessageStorageLong extends MailMessageStorage {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailMessageStorageLong.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailMessageStorageLong.class);
 
     /**
      * The fields containing {@link MailField#FULL}.
@@ -178,7 +179,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
         try {
             return getAttachmentLong(folder, parseUnsignedLong(mailId), sequenceId);
         } catch (final NumberFormatException e) {
-            LOG.error("UID cannot be parsed to a number: " + mailId, e);
+            LOG.error("UID cannot be parsed to a number: {}", mailId, e);
             return null;
         }
     }
@@ -212,7 +213,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
         try {
             return getImageAttachmentLong(folder, parseUnsignedLong(mailId), contentId);
         } catch (final NumberFormatException e) {
-            LOG.error("UID cannot be parsed to a number: " + mailId, e);
+            LOG.error("UID cannot be parsed to a number: {}", mailId, e);
             return null;
         }
     }
@@ -267,7 +268,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
             try {
                 text = textFinder.getText(getMessageLong(folder, mailIds[i], false));
             } catch (Throwable t) {
-                LOG.warn("Error while getting primary content for mail '" + mailIds[i] + "' in folder '" + folder + "'. Returning null.", t);
+                LOG.warn("Error while getting primary content for mail ''{}'' in folder ''{}''. Returning null.", mailIds[i], folder, t);
             }
 
             retval[i] = text;
@@ -280,7 +281,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
         try {
             return getMessageLong(folder, parseUnsignedLong(mailId), markSeen);
         } catch (final NumberFormatException e) {
-            LOG.error("UID cannot be parsed to a number: " + mailId, e);
+            LOG.error("UID cannot be parsed to a number: {}", mailId, e);
             return null;
         }
     }

@@ -48,7 +48,6 @@
  */
 package com.openexchange.uuid.osgi;
 
-import org.apache.commons.logging.Log;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.eav.UUIDService;
@@ -61,7 +60,7 @@ import com.openexchange.uuid.impl.UUIDServiceImpl;
  */
 public class UUIDServiceActivator extends HousekeepingActivator {
 
-	private static Log log = com.openexchange.log.Log.loggerFor(UUIDServiceActivator.class);
+	private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UUIDServiceActivator.class);
 
 	/*
 	 * (non-Javadoc)

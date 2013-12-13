@@ -51,8 +51,6 @@ package com.openexchange.subscribe.crawler;
 
 import java.io.IOException;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
@@ -75,7 +73,7 @@ public class PageByNamedHtmlElementStep extends AbstractStep<Page,HtmlPage>{
     private Exception exception;
 
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PageByNamedHtmlElementStep.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PageByNamedHtmlElementStep.class);
 
 
     public PageByNamedHtmlElementStep(){
@@ -95,7 +93,7 @@ public class PageByNamedHtmlElementStep extends AbstractStep<Page,HtmlPage>{
             try {
                 output = el.click();
             } catch (final IOException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
             }
         }
         executedSuccessfully = true;

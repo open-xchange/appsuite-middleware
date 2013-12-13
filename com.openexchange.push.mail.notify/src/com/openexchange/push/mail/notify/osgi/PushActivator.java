@@ -79,7 +79,7 @@ public final class PushActivator extends HousekeepingActivator {
 
     private static final String CRLF = "\r\n";
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PushActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushActivator.class);
 
     private static final String PROP_UDP_LISTEN_MULTICAST = "com.openexchange.push.mail.notify.udp_listen_multicast";
 
@@ -121,17 +121,13 @@ public final class PushActivator extends HousekeepingActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         PushServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
     }
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
         PushServiceRegistry.getServiceRegistry().removeService(clazz);
     }
 
@@ -161,7 +157,7 @@ public final class PushActivator extends HousekeepingActivator {
             registerService(DeleteListener.class, new MailNotifyPushDeleteListener(), null);
             startUdpListener();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -183,7 +179,7 @@ public final class PushActivator extends HousekeepingActivator {
              */
             PushServiceRegistry.getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -253,7 +249,7 @@ public final class PushActivator extends HousekeepingActivator {
             }
         }
 
-        LOG.info(sb);
+        LOG.info(sb.toString());
     }
 
     private void startUdpListener() throws OXException, IOException {

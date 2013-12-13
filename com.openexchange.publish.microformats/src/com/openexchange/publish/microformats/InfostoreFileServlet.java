@@ -59,7 +59,6 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -76,7 +75,6 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.tools.PublicationSession;
@@ -98,7 +96,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
     private static final String SITE = "site";
     private static final String INFOSTORE_ID = "infoId";
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreFileServlet.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreFileServlet.class);
 
     private static OXMFPublicationService infostorePublisher = null;
 
@@ -156,7 +154,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
             if(!startedWriting) {
                 t.printStackTrace(resp.getWriter());
             }
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
         }
 
     }

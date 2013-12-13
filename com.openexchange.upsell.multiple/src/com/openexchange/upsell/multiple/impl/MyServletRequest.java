@@ -67,11 +67,10 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.httpclient.URIException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.framework.ServiceException;
+import org.slf4j.Logger;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -115,7 +114,7 @@ public final class MyServletRequest  {
     private final ConfigView configView;
 
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MyServletRequest.class));
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(MyServletRequest.class);
 
     // HTTP API methods/parameters
     public static final String ACTION_GET_CONFIGURED_METHOD = "get_method"; // action to retrieve configured upsell method
@@ -155,7 +154,7 @@ public final class MyServletRequest  {
             this.admin = UserStorage.getInstance().getUser(this.ctx.getMailadmin(), ctx);
 
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
 
@@ -213,14 +212,14 @@ public final class MyServletRequest  {
             final Credentials authcreds = new Credentials(getFromConfig(PROPERTY_RMI_MASTERADMIN),getFromConfig(PROPERTY_RMI_MASTERADMIN_PWD));
 
             iface.getAccessCombinationName(bla, authcreds);
-            LOG.info("Current access combination name for context "+this.ctx.getContextId()+": "+iface.getAccessCombinationName(bla, authcreds));
+            LOG.info("Current access combination name for context {}: {}", this.ctx.getContextId(), iface.getAccessCombinationName(bla, authcreds));
 
             // update the level of the context
             iface.changeModuleAccess(bla,upsell_plan, authcreds);
 
             // get updated level to debug if it was correctly set
             iface.getAccessCombinationName(bla, authcreds);
-            LOG.info("Updated access combination name for context "+this.ctx.getContextId()+" to: "+iface.getAccessCombinationName(bla, authcreds));
+            LOG.info("Updated access combination name for context {} to: {}", this.ctx.getContextId(), iface.getAccessCombinationName(bla, authcreds));
 
         } catch (final RemoteException e) {
             LOG.error("Error changing context",e);
@@ -318,9 +317,7 @@ public final class MyServletRequest  {
                 }
 
                 sendUpsellEmail(email_addy_ox_user, email_addy_ox_user, oxuser_body, oxuser_subject);
-                if(LOG.isDebugEnabled()){
-                    LOG.debug("Sent upsell request email to enduser with email address:"+email_addy_ox_user);
-                }
+                LOG.debug("Sent upsell request email to enduser with email address:{}", email_addy_ox_user);
             }
 
         } catch (final OXException e) {
@@ -347,12 +344,10 @@ public final class MyServletRequest  {
         if (!i18n) {
             final File templateFile = new File(fulltemplatepath);
             if (templateFile.exists() && templateFile.canRead() && templateFile.isFile()) {
-                LOG.debug("Found and now using the upsell mail template at "+ fulltemplatepath);
+                LOG.debug("Found and now using the upsell mail template at {}", fulltemplatepath);
                 return getFileContents(templateFile);
             } else {
-                LOG.error("Could not find an upsell mail template at "
-                    + fulltemplatepath + ", using "
-                    + PROPERTY_METHOD_EMAIL_SUBJECT + " as mail body.");
+                LOG.error("Could not find an upsell mail template at {}, using {} as mail body.", fulltemplatepath, PROPERTY_METHOD_EMAIL_SUBJECT);
                 return null;
             }
         } else {
@@ -362,14 +357,14 @@ public final class MyServletRequest  {
             // first try to load i18n file, then the fallback file
             if (templateFile_i18n.exists() && templateFile_i18n.canRead()
                 && templateFile_i18n.isFile()) {
-                LOG.debug("Found and now using the i18n upsell mail template at "+ templateFile_i18n.getPath());
+                LOG.debug("Found and now using the i18n upsell mail template at {}", templateFile_i18n.getPath());
                 return getFileContents(templateFile_i18n);
             } else if (templateFile.exists() && templateFile.canRead()
                 && templateFile.isFile()) {
-                LOG.debug("Found and now using the upsell mail template at "+ templateFile.getPath());
+                LOG.debug("Found and now using the upsell mail template at {}", templateFile.getPath());
                 return getFileContents(templateFile);
             } else {
-                LOG.error("Could not find an i18n upsell mail template with base path "+ fulltemplatepath);
+                LOG.error("Could not find an i18n upsell mail template with base path {}", fulltemplatepath);
                 return null;
             }
         }
@@ -404,16 +399,12 @@ public final class MyServletRequest  {
             final UpsellURLService urlservice = getServiceRegistry().getService(UpsellURLService.class);
             final UpsellURLService provider = null;
             if (null != urlservice) {
-                if(LOG.isDebugEnabled()){
-                    LOG.debug("Found URLGenerator service. Using it now to generate redirect Upsell URL instead of default.");
-                }
+                LOG.debug("Found URLGenerator service. Using it now to generate redirect Upsell URL instead of default.");
                 // We have a special service providing login information, so we use that one...
                 try {
                     // pass the parameters to the external implementation
                     url = urlservice.generateUrl(getParameterMap(jsonObject),this.sessionObj,this.user,this.admin,this.ctx);
-                    if(LOG.isDebugEnabled()){
-                        LOG.debug("Using custom redirect URL from URLGenerator service. URL: "+url);
-                    }
+                    LOG.debug("Using custom redirect URL from URLGenerator service. URL: {}", url);
                 } catch (final OXException e) {
                     LOG.error("Fatal error occurred, generating redirect URL from custom implementation failed!", e);
                 }
@@ -439,21 +430,15 @@ public final class MyServletRequest  {
         String STATIC_URL_RAW = getFromConfig(PROPERTY_METHOD_STATIC_SHOP_REDIR_URL);
         final int contextId = this.ctx.getContextId();
 
-        if(LOG.isDebugEnabled()){
-            LOG.debug("Admin user attributes for context "+contextId+" : "+this.admin.getAttributes().toString());
-        }
+        LOG.debug("Admin user attributes for context {} : {}", contextId, this.admin.getAttributes());
 
         if(this.admin.getAttributes().containsKey("com.openexchange.upsell/url")){
             final Set urlset = this.admin.getAttributes().get("com.openexchange.upsell/url");
             STATIC_URL_RAW = (String) urlset.iterator().next();
             STATIC_URL_RAW += "src=ox&user=_USER_&invite=_INVITE_&mail=_MAIL_&purchase_type=_PURCHASE_TYPE_&login=_LOGIN_&imaplogin=_IMAPLOGIN_&clicked_feat=_CLICKED_FEATURE_&upsell_plan=_UPSELL_PLAN_&cid=_CID_&lang=_LANG_";
-            if(LOG.isDebugEnabled()){
-                LOG.debug("Parsed UPSELL URL from context "+contextId+" and admin user attributes: "+STATIC_URL_RAW);
-            }
+            LOG.debug("Parsed UPSELL URL from context {} and admin user attributes: {}", contextId, STATIC_URL_RAW);
         }else{
-            if(LOG.isDebugEnabled()){
-                LOG.debug("Parsed UPSELL URL from configuration for context: "+contextId);
-            }
+            LOG.debug("Parsed UPSELL URL from configuration for context: {}", contextId);
         }
 
         return STATIC_URL_RAW;
@@ -511,7 +496,7 @@ public final class MyServletRequest  {
             try {
                 mailConfig = transport.getTransportConfig();
                 transport.sendMailMessage(new ContentAwareComposedMailMessage(mimeMessage, sessionObj, ctx), ComposeType.NEW);
-                LOG.info("Upsell request from user "+this.sessionObj.getLogin()+" (cid:"+this.ctx.getContextId()+")  was sent to "+to+"");
+                LOG.info("Upsell request from user {} (cid:{})  was sent to {}", this.sessionObj.getLogin(), this.ctx.getContextId(), to);
             } finally {
                 transport.close();
             }
@@ -581,7 +566,7 @@ public final class MyServletRequest  {
                 stringBuilder.append(System.getProperty("line.separator"));
             }
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             Streams.close(input);
         }

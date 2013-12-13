@@ -53,7 +53,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
 
-import org.apache.commons.logging.Log;
 
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.exception.OXException;
@@ -72,7 +71,7 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  */
 public class FolderCollection extends CardDAVCollection {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FolderCollection.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderCollection.class);
 
     private final UserizedFolder folder;
 
@@ -80,7 +79,7 @@ public class FolderCollection extends CardDAVCollection {
         super(factory, url);
         this.folder = folder;
         super.includeProperties(new CurrentUserPrivilegeSet(folder.getOwnPermission()));
-        LOG.debug(getUrl() + ": initialized for folder '" + folder.getName() + "' [" + folder.getID() + "].");
+        LOG.debug("{}: initialized for folder '{}' [{}].", getUrl(), folder.getName(), folder.getID());
     }
 
 	@Override
@@ -134,7 +133,7 @@ public class FolderCollection extends CardDAVCollection {
                     try {
                         ownerName = factory.resolveUser(entity).getDisplayName();
                     } catch (OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                         ownerName = new Integer(entity).toString();
                     }
                     break;

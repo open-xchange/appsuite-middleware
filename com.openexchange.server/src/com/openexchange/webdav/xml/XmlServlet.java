@@ -56,7 +56,6 @@ import java.util.LinkedList;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
@@ -76,7 +75,6 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.version.Version;
 import com.openexchange.webdav.LastModifiedCache;
@@ -157,7 +155,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
 
     private static final Namespace dav = Namespace.getNamespace("D", davUri);
 
-    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(XmlServlet.class));
+    private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(XmlServlet.class);
 
     @Override
     public void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException {
@@ -166,9 +164,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
 
     @Override
     public void doPropPatch(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("PROPPATCH");
-        }
+        LOG.debug("PROPPATCH");
 
         XmlPullParser parser = null;
         final PendingInvocations<I> pendingInvocations = new PendingInvocations<I>(new LinkedList<QueuedAction<I>>(), new LastModifiedCache());
@@ -216,9 +212,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
     @Override
     public void doPropFind(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
             IOException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("PROPFIND");
-        }
+        LOG.debug("PROPFIND");
 
         Document input_doc = null;
 
@@ -351,9 +345,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
             if (exc.isGeneric(Generic.NO_PERMISSION)) {
                 doError(req, resp, HttpServletResponse.SC_FORBIDDEN, exc.getMessage());
             } else if (exc.isGeneric(Generic.CONFLICT)) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(exc.getMessage(), exc);
-                }
+                LOG.error("", exc);
                 doError(req, resp, HttpServletResponse.SC_CONFLICT, "Conflict: " + exc.getMessage());
             } else if (OXExceptionConstants.CATEGORY_PERMISSION_DENIED.equals(exc.getCategory())) {
                 doError(req, resp, HttpServletResponse.SC_FORBIDDEN, exc.getMessage());
@@ -377,9 +369,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
     public void doError(final HttpServletRequest req, final HttpServletResponse resp, final int code, final String msg)
             throws ServletException {
         try {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("STATUS: " + msg + ": (" + code + ')');
-            }
+            LOG.debug("STATUS: {}: ({})", msg, code);
 
             resp.sendError(code, msg);
             resp.setContentType("text/html");
@@ -517,9 +507,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
     protected void writeResponse(final DataObject dataobject, final int status, final String message,
             final String client_id, final OutputStream os, final XMLOutputter xo, final Appointment[] conflicts)
             throws IOException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(message + ':' + status);
-        }
+        LOG.debug("{}:{}", message, status);
 
         final Element e_response = new Element("response", dav);
         e_response.addNamespaceDeclaration(NS);

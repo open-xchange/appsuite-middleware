@@ -52,7 +52,6 @@ package com.openexchange.mail.smal.impl;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailSortField;
@@ -77,7 +76,7 @@ import com.openexchange.session.Session;
  */
 public final class SmalFolderStorage extends AbstractSMALStorage implements IMailFolderStorage, IMailFolderStorageEnhanced, IMailFolderStorageDelegator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SmalFolderStorage.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SmalFolderStorage.class);
 
     private static final String DEFAULT_FOLDER_ID = MailFolder.DEFAULT_FOLDER_ID;
 
@@ -125,7 +124,7 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
         try {
             submitFolderJob(fullName);
         } catch (final OXException e) {
-            LOG.warn("Could not schedule folder job for folder " + fullName + '.', e);
+            LOG.warn("Could not schedule folder job for folder {}{}", fullName, '.', e);
         }
         return fullName;
     }
@@ -143,7 +142,7 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
             submitFolderJob(fullName);
             submitFolderJob(nfn);
         } catch (final OXException e) {
-            LOG.warn("Could not schedule folder job for folder " + fullName + '.', e);
+            LOG.warn("Could not schedule folder job for folder {}{}", fullName, '.', e);
         }
 
         return nfn;
@@ -158,7 +157,7 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
                 submitFolderJob(getTrashFolder());
             }
         } catch (final OXException e) {
-            LOG.warn("Could not schedule folder job for folder " + retval + '.', e);
+            LOG.warn("Could not schedule folder job for folder {}{}", retval, '.', e);
         }
         return retval;
     }
@@ -169,7 +168,7 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
         try {
             submitFolderJob(fullName);
         } catch (final OXException e) {
-            LOG.warn("Could not schedule folder job for folder " + fullName + '.', e);
+            LOG.warn("Could not schedule folder job for folder {}{}", fullName, '.', e);
         }
     }
 
@@ -225,7 +224,7 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
             submitFolderJob(fullName);
             submitFolderJob(nfn);
         } catch (final OXException e) {
-            LOG.warn("Could not schedule folder job for folder " + fullName + '.', e);
+            LOG.warn("Could not schedule folder job for folder {}{}", fullName, '.', e);
         }
 
         return nfn;

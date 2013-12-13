@@ -61,10 +61,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.file.external.FileStorageCodes;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -78,7 +76,7 @@ class State {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(State.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(State.class);
 
     /**
      * Version long for interoperability.

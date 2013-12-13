@@ -51,7 +51,6 @@ package com.openexchange.ajax.request;
 
 import java.util.Arrays;
 import java.util.Locale;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONWriter;
@@ -60,7 +59,6 @@ import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
@@ -68,7 +66,7 @@ public abstract class CommonRequest {
 
 	protected JSONWriter w;
 
-	private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CommonRequest.class));
+	private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CommonRequest.class);
 
 	public CommonRequest(final JSONWriter w) {
 		this.w = w;
@@ -107,7 +105,7 @@ public abstract class CommonRequest {
 		    x.log(LOG);
 		    res.setException(x);
 		} else {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             res.setException(new OXException(t));
 		}
 		try {

@@ -50,8 +50,6 @@
 package com.openexchange.groupware.calendar;
 
 import java.io.File;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
@@ -69,7 +67,7 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
 
     private static final CalendarConfig singleton = new CalendarConfig();
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarConfig.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarConfig.class);
 
     private static volatile boolean solo_reminder_trigger_event = true;
     private static volatile boolean check_and_remove_past_reminders = true;
@@ -177,7 +175,7 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
                     MAX_PRE_FETCH = mfs;
                 }
             } catch(final NumberFormatException nfe) {
-                LOG.error("Unable to parse config parameter MAX_PRE_FETCH: "+check_max_pre_fetch_size);
+                LOG.error("Unable to parse config parameter MAX_PRE_FETCH: {}", check_max_pre_fetch_size);
             }
         }
         String check_and_remove_past_reminders_string = CalendarConfig.getProperty("CHECK_AND_REMOVE_PAST_REMINDERS");
@@ -203,7 +201,7 @@ public class CalendarConfig extends AbstractConfig implements Initialization {
         	try {
 				max_operations_in_recurrence_calculations = Integer.parseInt(max_operations_in_recurrence_calculations_string);
 			} catch (final NumberFormatException e) {
-				LOG.error("Unable to parse config parameter MAX_OPERATIONS_IN_RECURRENCE_CALCULATIONS: "+max_operations_in_recurrence_calculations_string);
+				LOG.error("Unable to parse config parameter MAX_OPERATIONS_IN_RECURRENCE_CALCULATIONS: {}", max_operations_in_recurrence_calculations_string);
 				max_operations_in_recurrence_calculations = 999 * 50;
 			}
         }

@@ -52,7 +52,6 @@ package com.openexchange.carddav.resources;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.Tools;
 import com.openexchange.exception.OXException;
@@ -69,11 +68,11 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  */
 public class ReducedAggregatedCollection extends AggregatedCollection {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ReducedAggregatedCollection.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReducedAggregatedCollection.class);
 
     public ReducedAggregatedCollection(GroupwareCarddavFactory factory, WebdavPath url, String displayName) throws WebdavProtocolException {
         super(factory, url, displayName);
-        LOG.debug(getUrl() + ": initialized.");
+        LOG.debug("{}: initialized.", getUrl());
     }
 
 	@Override

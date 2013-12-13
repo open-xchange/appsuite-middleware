@@ -72,8 +72,8 @@ public final class ElapsedFolderJob extends AbstractMailSyncJob {
 
     private static final long serialVersionUID = -3561304349504231252L;
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ElapsedFolderJob.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(ElapsedFolderJob.class);
 
     private static final String SIMPLE_NAME = ElapsedFolderJob.class.getSimpleName();
 

@@ -57,8 +57,6 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import javax.security.auth.Subject;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.kerberos.ClientPrincipal;
@@ -76,7 +74,7 @@ import com.openexchange.timer.TimerService;
  */
 class TicketRenewalTimer implements Runnable {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TicketRenewalTimer.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TicketRenewalTimer.class);
 
     private final Session session;
     private final KerberosService kerberosService;
@@ -103,15 +101,7 @@ class TicketRenewalTimer implements Runnable {
         if (LOG.isDebugEnabled()) {
             Calendar cal = new GregorianCalendar(TimeZones.UTC, Locale.ENGLISH);
             cal.add(Calendar.SECOND, ticketExpiresInSeconds);
-            StringBuilder sb = new StringBuilder();
-            sb.append("Ticket for ");
-            sb.append(getName(subject));
-            sb.append(" expires in ");
-            sb.append(cal.toString());
-            sb.append(". Running timer in ");
-            sb.append(ticketExpiresInSeconds);
-            sb.append(" seconds.");
-            LOG.debug(sb.toString());
+            LOG.debug("Ticket for {} expires in {}. Running timer in {} seconds.", getName(subject), cal.toString(), ticketExpiresInSeconds);
         }
         scheduled = timerService.schedule(this, ticketExpiresInSeconds, TimeUnit.SECONDS);
     }
@@ -130,7 +120,7 @@ class TicketRenewalTimer implements Runnable {
             schedule(subject);
             principal.dispose();
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

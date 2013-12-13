@@ -52,13 +52,11 @@ package com.openexchange.subscribe.yahoo;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -76,7 +74,7 @@ private final Activator activator;
 
     private final SubscriptionSource source = new SubscriptionSource();
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(YahooSubscribeService.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(YahooSubscribeService.class);
 
     public YahooSubscribeService(final Activator activator){
         this.activator = activator;
@@ -118,7 +116,7 @@ private final Activator activator;
                 if (subscription.getConfiguration().get("account") != null){
                     subscription.getConfiguration().put("account", subscription.getConfiguration().get("account").toString());
                 }else {
-                    LOG.error("subscription.getConfiguration().get(\"account\") is null. Complete configuration is : "+subscription.getConfiguration());
+                    LOG.error("subscription.getConfiguration().get(\"account\") is null. Complete configuration is : {}", subscription.getConfiguration());
                 }
             } else {
                 LOG.error("subscription.getConfiguration() is null");

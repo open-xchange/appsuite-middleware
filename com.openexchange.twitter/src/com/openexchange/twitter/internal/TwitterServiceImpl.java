@@ -87,9 +87,7 @@ import com.openexchange.twitter.TwitterService;
  */
 public final class TwitterServiceImpl implements TwitterService {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(TwitterServiceImpl.class);
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TwitterServiceImpl.class);
 
     /**
      * Initializes a new {@link TwitterServiceImpl}.
@@ -173,7 +171,7 @@ public final class TwitterServiceImpl implements TwitterService {
                 /*
                  * PIN could not be crawled
                  */
-                LOG.warn("PIN could no be read from authorization URL: " + requestToken.getAuthenticationURL());
+                LOG.warn("PIN could no be read from authorization URL: {}", requestToken.getAuthenticationURL());
                 return new TwitterAccessTokenImpl(twitter.getOAuthAccessToken(requestToken));
             }
             /*
@@ -229,10 +227,7 @@ public final class TwitterServiceImpl implements TwitterService {
                 final int size = forms.size();
                 for (int i = 0; null == loginForm && i < size; i++) {
                     final HtmlForm form = iter.next();
-                    if (DEBUG) {
-                        LOG.debug(new StringBuilder(128).append("Forms action attribute / index is : ").append(form.getActionAttribute()).append(
-                            " / ").append(i).append(", should be ").append(actionOfLoginForm).append(" / ").append(formIndex).toString());
-                    }
+                    LOG.debug("Forms action attribute / index is : {} / {}, should be {} / {}", form.getActionAttribute(), i, actionOfLoginForm, formIndex);
                     if (formIndex == i) {
                         if ((actionOfLoginForm.equals(form.getActionAttribute()) || idOfLoginForm.equals(form.getId())) && form.getInputsByName(nameOfUserField) != null) {
                             loginForm = form;
@@ -257,16 +252,14 @@ public final class TwitterServiceImpl implements TwitterService {
                  * Find PIN in page's content
                  */
                 final Matcher matcher = PATTERN_PIN.matcher(pageWithPinString);
-                if (DEBUG) {
-                    LOG.debug(pageWithPinString);
-                }
+                LOG.debug(pageWithPinString);
                 if (matcher.find()) {
                     /*
                      * Assign found PIN
                      */
                     pin = matcher.group(1);
                 } else {
-                    LOG.warn("PIN not found in page content:\n" + pageWithPinString);
+                    LOG.warn("PIN not found in page content:\n{}", pageWithPinString);
                 }
             }
             /*

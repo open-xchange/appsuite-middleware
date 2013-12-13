@@ -1,3 +1,15 @@
+* 2013-12-13 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 30293: Added primary key to CreateTableService & added UpdateTask for existing tables
+
+* 2013-12-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30278: Corrected handling of timestamp in "updates" request of contacts module
+
+* 2013-12-12 - marcus.klein@open-xchange.com
+
+ - Fix for bug 30275: Removed dependency to package open-xchange-themes-default from package open-xchange for AppSuite only installations.
+
 * 2013-12-09 - marcus.klein@open-xchange.com
 
  - Fix for bug 30145: Have to clear variable in post installation script before using it.

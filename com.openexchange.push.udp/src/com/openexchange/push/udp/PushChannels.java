@@ -58,9 +58,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link PushChannels}
@@ -73,7 +71,7 @@ public class PushChannels {
         INTERNAL, EXTERNAL;
     }
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushChannels.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushChannels.class);
 
     private DatagramSocket internalChannel = null;
     private DatagramSocket externalChannel = null;
@@ -88,9 +86,7 @@ public class PushChannels {
 
         try {
             if (config.isPushEnabled()) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Starting Push Register Socket on Port: " + serverRegisterPort);
-                }
+                LOG.info("Starting Push Register Socket on Port: {}", serverRegisterPort);
 
                 if (senderAddress != null) {
                     externalChannel = new DatagramSocket(serverRegisterPort, senderAddress);
@@ -105,9 +101,7 @@ public class PushChannels {
                 listenForRegistrations();
 
             } else {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Push Registration is disabled");
-                }
+                LOG.info("Push Registration is disabled");
             }
         } catch (SocketException e) {
             throw PushUDPExceptionCode.NO_CHANNEL.create(e);
@@ -153,7 +147,7 @@ public class PushChannels {
         try {
             getSocket(channel).send(datagramPackage);
         } catch (IOException x) {
-            LOG.error("Could not send package to "+host+":"+port+" Using "+channel+" socket.", x);
+            LOG.error("Could not send package to {}:{} Using {} socket.", host, port, channel, x);
         }
     }
 

@@ -64,7 +64,7 @@ import com.sun.mail.imap.IMAPFolder;
  */
 public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CopyIMAPCommand.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CopyIMAPCommand.class);
 
     private static final long[] DEFAULT_RETVAL = new long[0];
 
@@ -231,9 +231,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
          */
         int pos = resp.indexOf(COPYUID);
         if (pos < 0) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(new com.openexchange.java.StringAllocator(128).append("Missing COPYUID response code: ").append(resp).toString());
-            }
+            LOG.warn("Missing COPYUID response code: {}", resp);
             return true;
         }
         /*
@@ -269,7 +267,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
             }
             copyuidResp.fillResponse(uids, retval);
         } else {
-            LOG.error(new StringBuilder(128).append("Invalid COPYUID response: ").append(resp).toString());
+            LOG.error("Invalid COPYUID response: {}", resp);
         }
         proceed = false;
         return true;

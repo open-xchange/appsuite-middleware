@@ -92,8 +92,7 @@ public class SyncServlet extends PermissionServlet {
 
 	private static final long serialVersionUID = 8749478304854849616L;
 
-	private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
-			.getLog(SyncServlet.class);
+	private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SyncServlet.class);
 
 	public static final String ACTION_REFRESH_SERVER = "refresh_server";
 
@@ -133,18 +132,18 @@ public class SyncServlet extends PermissionServlet {
 			try {
 				ResponseWriter.write(response, writer, localeFrom(getSessionObject(req)));
 			} catch (final JSONException e1) {
-				LOG.error(e1.getMessage(), e1);
+				LOG.error("", e1);
 			}
 		} catch (final Exception e) {
 			final OXException wrapper = getWrappingOXException(e);
-			LOG.error(wrapper.getMessage(), wrapper);
+			LOG.error("", wrapper);
 			final Writer writer = resp.getWriter();
 			final Response response = new Response();
 			response.setException(wrapper);
 			try {
 				ResponseWriter.write(response, writer, localeFrom(getSessionObject(req)));
 			} catch (final JSONException e1) {
-				LOG.error(e1.getMessage(), e1);
+				LOG.error("", e1);
 			}
 		}
 	}
@@ -216,13 +215,7 @@ public class SyncServlet extends PermissionServlet {
 						try {
 							delFolderObj = access.getFolderObject(delFolderId);
 						} catch (final OXException exc) {
-							/*
-							 * Folder could not be found and therefore need not
-							 * to be deleted
-							 */
-							if (LOG.isWarnEnabled()) {
-								LOG.warn(exc.getMessage(), exc);
-							}
+							LOG.warn("", exc);
 							continue NextId;
 						}
 						if (delFolderObj.getLastModified().getTime() > timestamp.getTime()) {
@@ -263,7 +256,7 @@ public class SyncServlet extends PermissionServlet {
 			}
 		} catch (final Exception e) {
 			final OXException wrapper = getWrappingOXException(e);
-			LOG.error(wrapper.getMessage(), wrapper);
+			LOG.error("", wrapper);
 			response.setException(wrapper);
 		}
 		/*
@@ -282,7 +275,7 @@ public class SyncServlet extends PermissionServlet {
 	private static final void writeErrorResponse(final HttpServletResponseWrapper resp, final Throwable e, final Session session)
 			throws IOException {
 		final OXException wrapper = getWrappingOXException(e);
-		LOG.error(wrapper.getMessage(), wrapper);
+		LOG.error("", wrapper);
 		writeErrorResponse(resp, wrapper, session);
 	}
 
@@ -293,7 +286,7 @@ public class SyncServlet extends PermissionServlet {
 		try {
 			ResponseWriter.write(response, writer, localeFrom(session));
 		} catch (final JSONException e1) {
-			LOG.error(e1.getMessage(), e1);
+			LOG.error("", e1);
 		}
 	}
 

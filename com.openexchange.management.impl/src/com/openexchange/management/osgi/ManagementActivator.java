@@ -51,8 +51,6 @@ package com.openexchange.management.osgi;
 
 import static com.openexchange.management.services.ManagementServiceRegistry.getServiceRegistry;
 import java.lang.management.ThreadMXBean;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
@@ -68,7 +66,7 @@ import com.openexchange.osgi.ServiceRegistry;
  */
 public final class ManagementActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagementActivator.class);
 
     /**
      * Initializes a new {@link ManagementActivator}
@@ -84,9 +82,7 @@ public final class ManagementActivator extends HousekeepingActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         getServiceRegistry().addService(clazz, getService(clazz));
         /*
          * TODO: Should the management bundle be restarted due to re-available configuration service?
@@ -101,9 +97,7 @@ public final class ManagementActivator extends HousekeepingActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         /*
          * Just remove absent service from service registry but do not stop management bundle
          */

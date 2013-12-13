@@ -60,7 +60,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.jdom2.Element;
 import org.jdom2.output.XMLOutputter;
 import com.openexchange.api2.AppointmentSQLInterface;
@@ -78,7 +77,6 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -108,7 +106,7 @@ public class AppointmentWriter extends CalendarWriter {
     protected final static int[] deleteFields = { DataObject.OBJECT_ID, DataObject.LAST_MODIFIED,
             Appointment.RECURRENCE_ID };
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AppointmentWriter.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppointmentWriter.class);
 
     /**
      * Initializes a new {@link AppointmentWriter}.
@@ -321,16 +319,13 @@ public class AppointmentWriter extends CalendarWriter {
                         final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
                         recuResults = recColl.calculateFirstRecurring(ao);
                     } catch (final OXException x) {
-                        LOG.error(new StringBuilder("Can not calculate recurrence ").append(ao.getObjectID()).append(
-                                ':').append(sessionObj.getContextId()).toString(), x);
+                        LOG.error("Can not calculate recurrence {}:{}", ao.getObjectID(), sessionObj.getContextId(), x);
                     }
                     if (recuResults != null && recuResults.size() == 1) {
                         ao.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
                         ao.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));
                     } else {
-                        LOG.warn(new StringBuilder("Cannot load first recurring appointment from appointment object: ")
-                                .append(ao.getRecurrenceType()).append(" / ").append(+ao.getObjectID())
-                                .append("\n\n\n").toString());
+                        LOG.warn("Cannot load first recurring appointment from appointment object: {} / {}\n\n\n", ao.getRecurrenceType(), ao.getObjectID());
                     }
                 }
                 addElement(CalendarFields.START_DATE, ao.getStartDate(), e_prop);

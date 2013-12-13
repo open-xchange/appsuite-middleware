@@ -55,7 +55,6 @@ import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -70,7 +69,7 @@ import com.openexchange.rmi.RMIRegistry;
  */
 public class RMITrackerCustomizer implements ServiceTrackerCustomizer<Remote, Remote> {
 
-    private static final Log log = com.openexchange.log.Log.loggerFor(RMITrackerCustomizer.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RMITrackerCustomizer.class);
     private final BundleContext context;
 
     public RMITrackerCustomizer(final BundleContext context) {
@@ -88,13 +87,13 @@ public class RMITrackerCustomizer implements ServiceTrackerCustomizer<Remote, Re
             try {
                 RMIRegistry.getRMIRegistry().bind(name, UnicastRemoteObject.exportObject(r, 0));
             } catch (final AccessException e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
             } catch (final RemoteException e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
             } catch (final AlreadyBoundException e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
             } catch (final OXException e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
             }
         }
         return r;
@@ -112,13 +111,13 @@ public class RMITrackerCustomizer implements ServiceTrackerCustomizer<Remote, Re
             RMIRegistry.getRMIRegistry().unbind(name);
             UnicastRemoteObject.unexportObject(service, true);
         } catch (final AccessException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
         } catch (final RemoteException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
         } catch (final NotBoundException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
         } catch (final OXException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
         }
     }
 

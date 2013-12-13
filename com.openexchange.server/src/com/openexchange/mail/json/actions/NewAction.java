@@ -55,7 +55,6 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -114,13 +113,10 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 responseDescription = "Object ID of the newly created/moved mail.")
 public final class NewAction extends AbstractMailAction {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(NewAction.class);
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NewAction.class);
 
     private static final String FLAGS = MailJSONField.FLAGS.getKey();
     private static final String FROM = MailJSONField.FROM.getKey();
-    private static final String ATTACHMENTS = MailJSONField.ATTACHMENTS.getKey();
-    private static final String CONTENT = MailJSONField.CONTENT.getKey();
     private static final String UPLOAD_FORMFIELD_MAIL = AJAXServlet.UPLOAD_FORMFIELD_MAIL;
 
     /**
@@ -182,7 +178,7 @@ public final class NewAction extends AbstractMailAction {
                     // Re-throw
                     throw e;
                 }
-                LOG.warn(new com.openexchange.java.StringAllocator(128).append(e.getMessage()).append(". Using default account's transport.").toString());
+                LOG.warn("{}. Using default account's transport.", e.getMessage());
                 // Send with default account's transport provider
                 accountId = MailAccount.DEFAULT_ID;
             }
@@ -364,7 +360,7 @@ public final class NewAction extends AbstractMailAction {
                 if (!force && MailExceptionCode.INVALID_SENDER.equals(e)) {
                     throw e;
                 }
-                LOG.warn(new com.openexchange.java.StringAllocator(128).append(e.getMessage()).append(". Using default account's transport.").toString());
+                LOG.warn("{}. Using default account's transport.", e.getMessage());
                 // Send with default account's transport provider
                 accId = MailAccount.DEFAULT_ID;
             }
@@ -413,7 +409,7 @@ public final class NewAction extends AbstractMailAction {
                                 session.getUserId(),
                                 session.getContext().getContextId());
                         } catch (final OXException e) {
-                            LOG.error(e.getMessage(), e);
+                            LOG.error("", e);
                         }
                     } catch (final OXException e) {
                         if (e.getMessage().indexOf("quota") != -1) {

@@ -49,8 +49,6 @@
 
 package com.openexchange.subscribe.linkedin.osgi;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -62,7 +60,7 @@ import com.openexchange.subscribe.linkedin.groupware.LinkedInSubscriptionsOAuthA
 
 public class Activator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
     private OAuthServiceMetaData oAuthServiceMetadata;
 
@@ -98,7 +96,7 @@ public class Activator extends HousekeepingActivator {
             try {
                 registerService(OAuthAccountDeleteListener.class, new LinkedInSubscriptionsOAuthAccountDeleteListener(linkedInSubscribeService, contextService));
             } catch (final Throwable t) {
-                LOG.error(t.getMessage(), t);
+                LOG.error("", t);
             }
 
             LOG.info("LinkedInSubscribeService was started.");

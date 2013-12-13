@@ -52,8 +52,6 @@ package com.openexchange.subscribe.crawler;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.groupware.contact.ContactUtil;
@@ -73,7 +71,7 @@ public class ContactsByCsvFileStep extends AbstractStep<Contact[], TextPage> {
 
     private Map<Integer, String> fieldMapping;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactsByCsvFileStep.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactsByCsvFileStep.class);
 
     public ContactsByCsvFileStep() {
         super();
@@ -113,7 +111,7 @@ public class ContactsByCsvFileStep extends AbstractStep<Contact[], TextPage> {
                     try {
                         contact = Mappings.translateMapToContact(resultMap);
                     } catch (final ConverterException e) {
-                        LOG.error(e.getMessage() + " for Context : " + workflow.getSubscription().getContext().getContextId() + ", User : " + workflow.getSubscription().getUserId() + ", Folder : " + workflow.getSubscription().getFolderId() + ".");
+                        LOG.error("{} for Context : {}, User : {}, Folder : {}.", e.getMessage(), workflow.getSubscription().getContext().getContextId(), workflow.getSubscription().getUserId(), workflow.getSubscription().getFolderId());
 
                         exception = e;
                     }

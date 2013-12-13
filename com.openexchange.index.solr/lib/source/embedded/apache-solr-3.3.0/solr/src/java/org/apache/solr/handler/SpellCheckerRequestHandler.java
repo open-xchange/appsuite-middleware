@@ -197,7 +197,7 @@ pre.code
 @Deprecated
 public class SpellCheckerRequestHandler extends RequestHandlerBase implements SolrCoreAware {
 
-  private static Logger log = LoggerFactory.getLogger(SpellCheckerRequestHandler.class);
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(SpellCheckerRequestHandler.class);
   
   private SpellChecker spellChecker;
   

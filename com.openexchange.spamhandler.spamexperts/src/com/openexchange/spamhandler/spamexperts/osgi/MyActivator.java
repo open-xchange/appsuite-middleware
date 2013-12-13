@@ -50,10 +50,7 @@
 package com.openexchange.spamhandler.spamexperts.osgi;
 
 import static com.openexchange.spamhandler.spamexperts.osgi.MyServiceRegistry.getServiceRegistry;
-
-import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
@@ -65,7 +62,7 @@ import com.openexchange.user.UserService;
 
 public class MyActivator extends HousekeepingActivator {
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(MyActivator.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MyActivator.class);
 
 	private HTTPServletRegistration servletRegistration;
 
@@ -80,18 +77,13 @@ public class MyActivator extends HousekeepingActivator {
 
 	@Override
 	protected void handleAvailability(final Class<?> clazz) {
-		if (LOG.isWarnEnabled()) {
-			LOG.warn("Absent service: " + clazz.getName());
-		}
-
+		LOG.warn("Absent service: {}", clazz.getName());
 		getServiceRegistry().addService(clazz, getService(clazz));
 	}
 
 	@Override
 	protected void handleUnavailability(final Class<?> clazz) {
-		if (LOG.isInfoEnabled()) {
-			LOG.info("Re-available service: " + clazz.getName());
-		}
+		LOG.info("Re-available service: {}", clazz.getName());
 		getServiceRegistry().removeService(clazz);
 
 	}
@@ -119,7 +111,7 @@ public class MyActivator extends HousekeepingActivator {
 
 
 		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
+			LOG.error("", t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}
 
@@ -140,7 +132,7 @@ public class MyActivator extends HousekeepingActivator {
 			}
 			getServiceRegistry().clearRegistry();
 		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
+			LOG.error("", t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}
 	}

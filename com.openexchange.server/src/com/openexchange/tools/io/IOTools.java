@@ -49,9 +49,8 @@
 
 package com.openexchange.tools.io;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -59,6 +58,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Scanner;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 
 public class IOTools {
 
@@ -76,29 +76,32 @@ public class IOTools {
         }
     }
 
+    /**
+     * Copies content from <code>in</code> to <code>out</code>.
+     * <p>
+     * &nbsp;&nbsp;&nbsp;<strong>Note: Passed streams do <i>not</i> get {@link Closeable#close() closed}!</strong>
+     *
+     * @param in The stream source
+     * @param out The stream sink
+     * @throws IOException If an I/O error occurs
+     */
     public static final void copy(final InputStream in, final OutputStream out) throws IOException {
-        final BufferedInputStream inputStream = new BufferedInputStream(in);
-        final BufferedOutputStream outputStream = new BufferedOutputStream(out);
+        final InputStream inputStream = Streams.bufferedInputStreamFor(in);
+        final OutputStream outputStream = Streams.bufferedOutputStreamFor(out);
 
-        int i = -1;
-        int count = 0;
-        while((i = inputStream.read()) != -1) {
-            count++;
+        for(int i; (i = inputStream.read()) >= 0;) {
             outputStream.write(i);
         }
-
         outputStream.flush();
     }
 
     public static final byte[] getBytes(final InputStream stream) throws IOException {
-        final BufferedInputStream in = new BufferedInputStream(stream);
+        final InputStream in = Streams.bufferedInputStreamFor(stream);
         try {
-            final ByteArrayOutputStream out = new ByteArrayOutputStream();
-            int i;
-            while((i = in.read()) != -1) {
+            final ByteArrayOutputStream out = Streams.newByteArrayOutputStream();
+            for(int i; (i = in.read()) >= 0;) {
                 out.write(i);
             }
-
             return out.toByteArray();
         } finally {
             in.close();

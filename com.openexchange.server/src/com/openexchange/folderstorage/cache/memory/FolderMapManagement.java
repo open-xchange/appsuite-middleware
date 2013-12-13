@@ -57,18 +57,18 @@ import com.openexchange.session.Session;
 
 /**
  * {@link FolderMapManagement}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderMapManagement {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FolderMapManagement.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderMapManagement.class);
 
     private static final FolderMapManagement INSTANCE = new FolderMapManagement();
 
     /**
      * Gets the {@link FolderMapManagement management} instance.
-     * 
+     *
      * @return The management instance
      */
     public static FolderMapManagement getInstance() {
@@ -94,19 +94,17 @@ public final class FolderMapManagement {
 
     /**
      * Drop caches for given context.
-     * 
+     *
      * @param contextId The context identifier
      */
     public void dropFor(final int contextId) {
         map.remove(Integer.valueOf(contextId));
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned user-sensitive folder cache for context ").append(contextId).toString());
-        }
+        LOG.debug("Cleaned user-sensitive folder cache for context {}", contextId);
     }
 
     /**
      * Drop caches for given session's user.
-     * 
+     *
      * @param session The session
      */
     public void dropFor(final Session session) {
@@ -114,15 +112,12 @@ public final class FolderMapManagement {
         if (null != contextMap) {
             contextMap.remove(Integer.valueOf(session.getUserId()));
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned user-sensitive folder cache for user ").append(session.getUserId()).append(
-                " in context ").append(session.getContextId()).toString());
-        }
+        LOG.debug("Cleaned user-sensitive folder cache for user {} in context {}", session.getUserId(), session.getContextId());
     }
 
     /**
      * Drop caches for given session's user.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      */
@@ -131,15 +126,12 @@ public final class FolderMapManagement {
         if (null != contextMap) {
             contextMap.remove(Integer.valueOf(userId));
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned user-sensitive folder cache for user ").append(userId).append(
-                " in context ").append(contextId).toString());
-        }
+        LOG.debug("Cleaned user-sensitive folder cache for user {} in context {}", userId, contextId);
     }
 
     /**
      * Gets the folder map for specified session.
-     * 
+     *
      * @param session The session
      * @return The folder map
      */
@@ -167,7 +159,7 @@ public final class FolderMapManagement {
 
     /**
      * Optionally gets the folder map for specified session.
-     * 
+     *
      * @param session The session
      * @return The folder map or <code>null</code> if absent
      */
@@ -181,7 +173,7 @@ public final class FolderMapManagement {
 
     /**
      * Optionally gets the folder map for specified user in given context.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The folder map or <code>null</code> if absent
@@ -196,7 +188,7 @@ public final class FolderMapManagement {
 
     /**
      * Drop folder from all user caches for given context.
-     * 
+     *
      * @param folderId The folder id
      * @param treeId The tree id
      * @param optUser The optional user identifier
@@ -208,7 +200,7 @@ public final class FolderMapManagement {
 
     /**
      * Drop folder from all user caches for given context.
-     * 
+     *
      * @param folderId The folder id
      * @param treeId The tree id
      * @param optUser The optional user identifier

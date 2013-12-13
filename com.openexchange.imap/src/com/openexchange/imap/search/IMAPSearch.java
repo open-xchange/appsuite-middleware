@@ -86,8 +86,8 @@ import com.sun.mail.imap.protocol.MessageSet;
  */
 public final class IMAPSearch {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPSearch.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(IMAPSearch.class);
 
     /**
      * No instantiation
@@ -236,10 +236,7 @@ public final class IMAPSearch {
                     throw ((FolderClosedException) cause);
                 }
             }
-            if (LOG.isWarnEnabled()) {
-                final OXException imapException = IMAPException.Code.IMAP_SEARCH_FAILED.create(e, e.getMessage());
-                LOG.warn(imapException.getMessage(), imapException);
-            }
+            LOG.warn("", IMAPException.Code.IMAP_SEARCH_FAILED.create(e, e.getMessage()));
             return null;
         }
     }
@@ -260,17 +257,7 @@ public final class IMAPSearch {
          * JavaMail already searches dependent on whether pattern contains non-ascii characters. If yes a charset is used:
          * SEARCH CHARSET UTF-8 <one or more search criteria>
          */
-        if (!LOG.isDebugEnabled()) {
-            return search(term, imapFolder);
-        }
-        final long start = System.currentTimeMillis();
-        /*-
-         * JavaMail already searches dependent on whether pattern contains non-ascii characters. If yes a charset is used:
-         * SEARCH CHARSET UTF-8 <one or more search criteria>
-         */
-        final int[] seqNums = search(term, imapFolder);
-        LOG.debug(new com.openexchange.java.StringAllocator(128).append("IMAP search took ").append((System.currentTimeMillis() - start)).append("msec").toString());
-        return seqNums;
+        return search(term, imapFolder);
     }
 
     /**

@@ -55,7 +55,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -63,7 +62,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
@@ -81,7 +79,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionService, FolderUpdaterRegistry {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SubscriptionExecutionServiceImpl.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SubscriptionExecutionServiceImpl.class);
 
     /*-
      * -------------------------------- Guard stuff -------------------------------
@@ -235,7 +233,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         for (final Subscription subscription : subscriptionsToRefresh) {
             subscription.setSession(session);
             if (!subscription.isEnabled()) {
-                LOG.debug("Skipping subscription " + subscription.getDisplayName() + " because it is disabled");
+                LOG.debug("Skipping subscription {} because it is disabled", subscription.getDisplayName());
             } else {
                 final int subscriptionId = subscription.getId();
                 if (tryLock(subscriptionId, session)) {

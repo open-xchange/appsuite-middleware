@@ -65,7 +65,7 @@ import com.openexchange.dataretention.csv.CSVDataRetentionConfig;
  */
 final class CSVFileCreationCallable implements Callable<Boolean> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CSVFileCreationCallable.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVFileCreationCallable.class);
 
     /**
      * Atomic counter for file creations.
@@ -138,15 +138,9 @@ final class CSVFileCreationCallable implements Callable<Boolean> {
                 success = file.renameTo(dest);
                 if (success) {
                     writeTask.csvFile.setFile(dest);
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info(new StringBuilder("Successfully created CSV file \"").append(writeTask.csvFile.getFile().getPath()).append(
-                            "\" and added starting header line").toString());
-                    }
+                    LOG.info("Successfully created CSV file \"{}\" and added starting header line", writeTask.csvFile.getFile().getPath());
                 } else {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn(new StringBuilder("Renaming to CSV file \"").append(dest.getPath()).append("\" failed. Retry #").append(
-                            counter).toString());
-                    }
+                    LOG.warn("Renaming to CSV file \"{}\" failed. Retry #{}", dest.getPath(), counter);
                 }
             }
             if (!success) {

@@ -52,7 +52,7 @@ public class XSLTResponseWriter implements QueryResponseWriter {
   public static final int XSLT_CACHE_DEFAULT = 60;
   private static final String XSLT_CACHE_PARAM = "xsltCacheLifetimeSeconds"; 
 
-  private static final Logger log = LoggerFactory.getLogger(XSLTResponseWriter.class);
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(XSLTResponseWriter.class);
   
   public void init(NamedList n) {
       final SolrParams p = SolrParams.toSolrParams(n);

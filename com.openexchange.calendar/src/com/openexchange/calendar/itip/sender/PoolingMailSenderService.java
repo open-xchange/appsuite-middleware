@@ -49,7 +49,6 @@
 
 package com.openexchange.calendar.itip.sender;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.calendar.itip.AppointmentNotificationPoolService;
 import com.openexchange.calendar.itip.generators.NotificationMail;
 import com.openexchange.exception.OXException;
@@ -59,7 +58,7 @@ import com.openexchange.session.Session;
 
 public class PoolingMailSenderService implements MailSenderService {
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(PoolingMailSenderService.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PoolingMailSenderService.class);
 
 	private final AppointmentNotificationPoolService pool;
 	private final MailSenderService delegate;
@@ -107,7 +106,7 @@ public class PoolingMailSenderService implements MailSenderService {
 			//delegate.sendMail(mail, session);
 
 		} catch (OXException x) {
-			LOG.error(x.getMessage(), x);
+			LOG.error("", x);
 		}
 	}
 

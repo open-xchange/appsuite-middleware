@@ -20,4 +20,5 @@ Import-Package: com.openexchange.authentication,
  javax.naming,
  javax.naming.directory,
  org.apache.commons.logging,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j

@@ -76,8 +76,8 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
  */
 public final class SMTPCapabilityCache {
 
-    static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SMTPCapabilityCache.class));
+    static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(SMTPCapabilityCache.class);
 
     private static volatile ConcurrentMap<InetSocketAddress, Future<Capabilities>> MAP;
 
@@ -274,7 +274,7 @@ public final class SMTPCapabilityCache {
                         sb.append(chars, 0, read);
                     }
                     if (0 == sb.length()) {
-                        LOG.warn("Empty EHLO response for: " + command);
+                        LOG.warn("Empty EHLO response for: {}", command);
                     }
                 }
                 final String capabilities = sb.toString();
@@ -299,7 +299,7 @@ public final class SMTPCapabilityCache {
                     try {
                         s.close();
                     } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }

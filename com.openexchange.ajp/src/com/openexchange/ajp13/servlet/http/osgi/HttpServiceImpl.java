@@ -80,10 +80,8 @@ public final class HttpServiceImpl implements HttpService {
 
     @Override
     public void registerResources(final String alias, final String name, final HttpContext context) throws NamespaceException {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HttpServiceImpl.class));
-        if (log.isTraceEnabled()) {
-            log.trace("HttpServiceImpl.registerResources() not implemented");
-        }
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HttpServiceImpl.class);
+        log.trace("HttpServiceImpl.registerResources() not implemented");
     }
 
     @Override

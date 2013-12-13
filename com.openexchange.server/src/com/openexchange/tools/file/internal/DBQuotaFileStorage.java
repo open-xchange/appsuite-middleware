@@ -62,11 +62,9 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.FileStorageCodes;
 import com.openexchange.tools.file.external.QuotaFileStorage;
@@ -75,7 +73,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 public class DBQuotaFileStorage implements QuotaFileStorage {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(QuotaFileStorage.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QuotaFileStorage.class);
 
     /**
      * The context of the QuotaFileStorage
@@ -208,7 +206,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
             if (newUsage < 0) {
                 newUsage = 0;
                 final OXException e = QuotaFileStorageExceptionCodes.QUOTA_UNDERRUN.create(I(context.getContextId()));
-                LOG.fatal(e.getMessage(), e);
+                LOG.error("", e);
             }
 
             ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=?");
@@ -330,9 +328,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
      */
     @Override
     public void recalculateUsage() throws OXException {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Recalculating usage for Context " + context.getContextId());
-        }
+        LOG.info("Recalculating usage for Context {}", context.getContextId());
         final SortedSet<String> filenames = fileStorage.getFileList();
         long entireFileSize = 0;
 

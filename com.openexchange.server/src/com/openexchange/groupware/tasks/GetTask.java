@@ -53,7 +53,6 @@ import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.Date;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -64,7 +63,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.log.LogFactory;
 
 /**
  * This class collects all information for getting tasks. It is also able to
@@ -73,7 +71,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class GetTask {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(GetTask.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetTask.class);
 
     private final Context ctx;
 
@@ -277,7 +275,7 @@ public final class GetTask {
         try {
             lastModifiedOfNewestAttachment = attachmentBase.getNewestCreationDate(ctx, Types.TASK, task.getObjectID());
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         if (null != lastModifiedOfNewestAttachment) {
             task.setLastModifiedOfNewestAttachment(lastModifiedOfNewestAttachment);

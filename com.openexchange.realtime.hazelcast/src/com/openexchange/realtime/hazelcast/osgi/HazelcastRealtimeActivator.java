@@ -50,14 +50,12 @@
 package com.openexchange.realtime.hazelcast.osgi;
 
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -85,7 +83,7 @@ import com.openexchange.timer.TimerService;
  */
 public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
-    private static Log LOG = LogFactory.getLog(HazelcastRealtimeActivator.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastRealtimeActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -95,7 +93,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("Starting bundle: " + getClass().getCanonicalName());
+        LOG.info("Starting bundle: {}", getClass().getCanonicalName());
         Services.setServiceLookup(this);
         
         ManagementHouseKeeper managementHouseKeeper = ManagementHouseKeeper.getInstance();
@@ -157,7 +155,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
     @Override
     public void stopBundle() throws Exception {
-        LOG.info("Stopping bundle: " + getClass().getCanonicalName());
+        LOG.info("Stopping bundle: {}", getClass().getCanonicalName());
         super.stopBundle();
         Services.setServiceLookup(null);
         ManagementHouseKeeper.getInstance().cleanup();

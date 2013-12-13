@@ -78,11 +78,9 @@ public final class FileStorageActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileStorageActivator.class));
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileStorageActivator.class);
         try {
-            if (log.isInfoEnabled()) {
-                log.info("starting bundle: com.openexchange.file.storage");
-            }
+            log.info("starting bundle: com.openexchange.file.storage");
             /*
              * Start registry tracking
              */
@@ -108,11 +106,9 @@ public final class FileStorageActivator extends HousekeepingActivator {
 
     @Override
     public void stopBundle() throws Exception {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileStorageActivator.class));
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileStorageActivator.class);
         try {
-            if (log.isInfoEnabled()) {
-                log.info("stopping bundle: com.openexchange.file.storage");
-            }
+            log.info("stopping bundle: com.openexchange.file.storage");
             unregisterServices();
             /*
              * Stop look-up service

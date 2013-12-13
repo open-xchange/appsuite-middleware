@@ -53,7 +53,6 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,7 +60,6 @@ import org.json.JSONValue;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -69,7 +67,7 @@ public class Appointment extends DataServlet {
 
     private static final long serialVersionUID = 8550664916596120436L;
 
-    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Appointment.class));
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Appointment.class);
 
     @Override
     protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
@@ -81,7 +79,7 @@ public class Appointment extends DataServlet {
             try {
                 jsonObj = convertParameter2JSONObject(httpServletRequest);
             } catch (final JSONException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
                 writeResponse(response, httpServletResponse, session);
                 return;
@@ -95,7 +93,7 @@ public class Appointment extends DataServlet {
             response.setException(e);
         } catch (final JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error(oje.getMessage(), oje);
+            LOG.error("", oje);
             response.setException(oje);
         }
 
@@ -117,7 +115,7 @@ public class Appointment extends DataServlet {
                 try {
                     jsonObj = convertParameter2JSONObject(httpServletRequest);
                 } catch (final JSONException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
                     writeResponse(response, httpServletResponse, getSessionObject(httpServletRequest));
                     return;
@@ -143,7 +141,7 @@ public class Appointment extends DataServlet {
             }
         } catch (final JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error(oje.getMessage(), oje);
+            LOG.error("", oje);
             response.setException(oje);
         } catch (final OXException e) {
             e.log(LOG);

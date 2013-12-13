@@ -53,8 +53,9 @@ package com.openexchange.custom.parallels.impl;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.MessageFormat;
 import java.util.Arrays;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.custom.parallels.osgi.ParallelsServiceRegistry;
@@ -74,7 +75,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
  */
 public final class ParallelsHostnameService implements HostnameService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ParallelsHostnameService.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ParallelsHostnameService.class);
 
     @Override
     public String getHostname(final int userId, final int contextId) {
@@ -89,10 +90,7 @@ public final class ParallelsHostnameService implements HostnameService {
 
                 // load suffix for branding string dynamically in loginmappings
                 final String suffix_branded = configservice.getProperty(ParallelsOptions.PROPERTY_BRANDING_SUFFIX);
-                // for debugging purposes
-                if(LOG.isDebugEnabled()){
-                    LOG.debug("getHostname: Loaded loginmappings "+Arrays.toString(login_mappings)+" for context "+contextId);
-                }
+                LOG.debug("getHostname: Loaded loginmappings {} for context {}", Arrays.toString(login_mappings), contextId);
                 boolean found_host = false;
                 if( null != suffix_branded && suffix_branded.length() != 0) {
                     for (final String login_mapping : login_mappings) {
@@ -106,12 +104,10 @@ public final class ParallelsHostnameService implements HostnameService {
                              */
                             final String[] URL_ = login_mapping.split("\\|\\|"); // perhaps replace with substring(start,end) if would be faster
                             if(URL_.length!=2){
-                                LOG.error("getHostname: Could not split up branded host "+login_mapping+" login mapping for context "+contextId);
+                                LOG.error("getHostname: Could not split up branded host {} login mapping for context {}", login_mapping, contextId);
                             }else{
                                 hostname = URL_[1];
-                                if(LOG.isDebugEnabled()){
-                                    LOG.debug("getHostname: Successfully resolved HOST to "+hostname+" for branded context "+contextId);
-                                }
+                                LOG.debug("getHostname: Successfully resolved HOST to {} for branded context {}", hostname, contextId);
                                 found_host = true;
                             }
                         }
@@ -127,16 +123,16 @@ public final class ParallelsHostnameService implements HostnameService {
                         } catch (UnknownHostException e) { }
                     }
                     if( null == hostname || hostname.length() == 0 ) {
-                        LOG.warn("getHostname: Unable to determine any hostname for context "+contextId);
+                        LOG.warn("getHostname: Unable to determine any hostname for context {}", contextId);
                     }
                 }
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
 
             return hostname;
         }else{
-            LOG.error("getHostname: Got context with id "+contextId+", dont generating any hostname");
+            LOG.error("getHostname: Got context with id {}, dont generating any hostname", contextId);
             return null;
         }
 

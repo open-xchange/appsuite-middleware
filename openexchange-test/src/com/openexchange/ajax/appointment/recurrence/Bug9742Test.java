@@ -3,7 +3,6 @@ package com.openexchange.ajax.appointment.recurrence;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.meterware.httpunit.WebConversation;
 import com.openexchange.ajax.AppointmentTest;
@@ -23,7 +22,7 @@ import com.openexchange.groupware.container.FolderChildObject;
 
 public class Bug9742Test extends AbstractAJAXSession {
 
-	private static final Log LOG = LogFactory.getLog(Bug9742Test.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug9742Test.class);
 
 	public static final int[] APPOINTMENT_FIELDS = { DataObject.OBJECT_ID, DataObject.CREATED_BY,
 			DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY,

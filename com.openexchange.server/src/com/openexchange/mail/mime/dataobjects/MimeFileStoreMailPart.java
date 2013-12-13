@@ -90,8 +90,8 @@ public abstract class MimeFileStoreMailPart extends MailPart {
 
     private static final long serialVersionUID = 257902073011243269L;
 
-    private static final transient org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeFileStoreMailPart.class));
+    private static final transient org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(MimeFileStoreMailPart.class);
 
     private final IDBasedFileAccessFactory fileAccessFactory;
 
@@ -257,7 +257,7 @@ public abstract class MimeFileStoreMailPart extends MailPart {
                 }
                 dataSource = mds;
             } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 dataSource = new MessageDataSource(new byte[0], MimeTypes.MIME_APPL_OCTET);
             }
         }

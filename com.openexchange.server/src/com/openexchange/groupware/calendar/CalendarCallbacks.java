@@ -52,8 +52,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.session.Session;
@@ -70,7 +68,7 @@ public class CalendarCallbacks implements CalendarListener {
     private List<CalendarListener> copyForReading = new ArrayList<CalendarListener>();
 
     private static final CalendarCallbacks INSTANCE = new CalendarCallbacks();
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarCallbacks.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarCallbacks.class);
 
     private boolean mustCopy;
 
@@ -131,7 +129,7 @@ public class CalendarCallbacks implements CalendarListener {
             try {
                 listener.createdChangeExceptionInRecurringAppointment(master, changeException,inFolder, serverSession);
             } catch (final OXException x) {
-                LOG.error(x.getMessage(), x);
+                LOG.error("", x);
                 exceptionIDs.add(x.getExceptionId());
             }
         }

@@ -83,7 +83,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class AppointmentResultConverter extends AbstractCalendarJSONResultConverter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AppointmentResultConverter.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppointmentResultConverter.class);
 
     private static final String INPUT_FORMAT = "appointment";
 
@@ -241,9 +241,7 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
                 CalendarCollectionService.MAX_OCCURRENCESE,
                 true);
             if (recuResults.size() == 0) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn(new com.openexchange.java.StringAllocator(32).append("No occurrence at position ").append(recurrencePosition));
-                }
+                LOG.warn("No occurrence at position {}", recurrencePosition);
                 throw OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION.create(Integer.valueOf(recurrencePosition));
             }
             final RecurringResultInterface resultInterface = recuResults.getRecurringResult(0);

@@ -56,7 +56,6 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.sso.SSOConstants;
 import com.openexchange.sso.services.SSOServiceRegistry;
 import com.openexchange.sso.servlet.SSOServlet;
@@ -86,9 +85,9 @@ public final class SSOServletRegisterer implements ServiceTrackerCustomizer<Http
         try {
             service.registerServlet(SSOServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + SSOConstants.SERVLET_PATH_APPENDIX, new SSOServlet(), null, null);
         } catch (final ServletException e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(SSOServletRegisterer.class)).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(SSOServletRegisterer.class).error("", e);
         } catch (final NamespaceException e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(SSOServletRegisterer.class)).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(SSOServletRegisterer.class).error("", e);
         }
         return service;
     }

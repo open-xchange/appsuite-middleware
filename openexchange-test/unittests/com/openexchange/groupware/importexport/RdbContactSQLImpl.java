@@ -58,7 +58,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
@@ -75,7 +74,6 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
@@ -100,7 +98,7 @@ public class RdbContactSQLImpl {
 
     private final UserConfiguration userConfiguration;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbContactSQLImpl.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbContactSQLImpl.class);
 
     public RdbContactSQLImpl(final Session session) throws OXException {
         super();
@@ -184,7 +182,7 @@ public class RdbContactSQLImpl {
             }
             if ((contactFolder.getType() != FolderObject.PRIVATE) && pflag) {
                 LOG.debug(new com.openexchange.java.StringAllocator("Here is a contact in a non PRIVATE folder with a set private flag -> (cid=").append(
-                    ctx.getContextId()).append(" fid=").append(fuid).append(" oid=").append(oid).append(')'));
+                    ctx.getContextId()).append(" fid=").append(fuid).append(" oid=").append(oid).append(')').toString());
             } else if ((contactFolder.getType() == FolderObject.PRIVATE) && pflag && created_from != userId) {
                 throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(I(fuid), I(ctx.getContextId()), I(userId));
             }

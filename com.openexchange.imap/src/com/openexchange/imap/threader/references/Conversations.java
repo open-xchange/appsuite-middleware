@@ -60,7 +60,6 @@ import javax.mail.FetchProfile;
 import javax.mail.FetchProfile.Item;
 import javax.mail.MessagingException;
 import javax.mail.UIDFolder;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.command.MailMessageFetchIMAPCommand;
@@ -87,7 +86,7 @@ import com.sun.mail.imap.protocol.IMAPResponse;
  */
 public final class Conversations {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Conversations.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Conversations.class);
 
     /**
      * Initializes a new {@link Conversations}.
@@ -273,7 +272,7 @@ public final class Conversations {
              */
             return Collections.<MailMessage> emptyList();
         }
-        final org.apache.commons.logging.Log log = LOG;
+        final org.slf4j.Logger log = LOG;
         return (List<MailMessage>) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
@@ -298,9 +297,7 @@ public final class Conversations {
                     final long start = System.currentTimeMillis();
                     r = protocol.command(command, null);
                     final long dur = System.currentTimeMillis() - start;
-                    if (log.isDebugEnabled()) {
-                        log.debug('"' + command + "\" for \"" + imapFolder.getFullName() + "\" (" + imapFolder.getStore().toString() + ") took " + dur + "msec.");
-                    }
+                    log.debug("{}{}\" for \"{}\" ({}) took {}msec.", '"', command, imapFolder.getFullName(), imapFolder.getStore(), dur);
                     mailInterfaceMonitor.addUseTime(dur);
                 }
                 final int len = r.length - 1;

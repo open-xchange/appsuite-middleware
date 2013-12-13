@@ -65,7 +65,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.logging.Log;
 import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
 import com.javacodegeeks.concurrent.LRUPolicy;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
@@ -85,7 +84,7 @@ import com.openexchange.tools.servlet.http.Cookies;
  */
 public final class RateLimiter {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RateLimiter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RateLimiter.class);
 
     /**
      * Initializes a new {@link RateLimiter}.

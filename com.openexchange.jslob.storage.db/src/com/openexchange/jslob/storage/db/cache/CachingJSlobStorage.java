@@ -58,7 +58,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
@@ -80,7 +79,7 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public final class CachingJSlobStorage implements JSlobStorage, Runnable {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CachingJSlobStorage.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CachingJSlobStorage.class);
 
     private static final String REGION_NAME = Constants.REGION_NAME;
 

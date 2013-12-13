@@ -58,7 +58,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import com.microsoft.schemas.exchange.services._2006.types.BaseFolderType;
 import com.microsoft.schemas.exchange.services._2006.types.DefaultShapeNamesType;
 import com.microsoft.schemas.exchange.services._2006.types.DisposalType;
@@ -93,7 +92,7 @@ import com.openexchange.user.UserService;
  */
 public class Publisher implements Runnable {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Publisher.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Publisher.class);
 
     private final Map<String, FolderIdType> freeBusySubfolders;
     private final Session session;
@@ -177,24 +176,24 @@ public class Publisher implements Runnable {
         for (int i = 0; i < users.length; i++) {
             String legacyExchangeDN = legacyExchangeDNs[i];
             if (null == legacyExchangeDN) {
-                LOG.debug("No legacyExchangeDN for user " + users[i].getLoginInfo() + ", skipping.");
+                LOG.debug("No legacyExchangeDN for user {}, skipping.", users[i].getLoginInfo());
                 continue;
-            } else if (LOG.isTraceEnabled()) {
-                LOG.trace("Using " + legacyExchangeDN + " as legacyExchangeDN for user " + users[i].getLoginInfo() + ".");
+            } else {
+                LOG.trace("Using {} as legacyExchangeDN for user {}.", legacyExchangeDN, users[i].getLoginInfo());
             }
             FreeBusyData freeBusyData = getFreeBusyInformation(users[i], from, until);
             if (null == freeBusyData) {
-                LOG.debug("No free/busy data for user " + users[i].getLoginInfo() + ", skipping.");
+                LOG.debug("No free/busy data for user {}, skipping.", users[i].getLoginInfo());
                 continue;
-            } else if (LOG.isTraceEnabled()) {
-                LOG.trace("Got the following free/busy data for user " + users[i].getLoginInfo() + ":\n" + freeBusyData);
+            } else {
+                LOG.trace("Got the following free/busy data for user {}:\n{}", users[i].getLoginInfo(), freeBusyData);
             }
             FolderIdType folderId = getFreeBusySubfolderId(legacyExchangeDN);
             if (null == folderId) {
-                LOG.warn("No free/busy subfolder for " + legacyExchangeDN + ", skipping.");
+                LOG.warn("No free/busy subfolder for {}, skipping.", legacyExchangeDN);
                 continue;
-            } else if (LOG.isTraceEnabled()) {
-                LOG.trace("Using free/busy subfolder " + folderId + " for user " + users[i].getLoginInfo() + ":\n" + freeBusyData);
+            } else {
+                LOG.trace("Using free/busy subfolder {} for user {}:\n{}", folderId, users[i].getLoginInfo(), freeBusyData);
             }
             if (null == messagesPerFolder.get(folderId)) {
                 messagesPerFolder.put(folderId, new ArrayList<PostItemType>());
@@ -207,7 +206,7 @@ public class Publisher implements Runnable {
          */
         for (Entry<FolderIdType, List<PostItemType>> entry : messagesPerFolder.entrySet()) {
             ews.getItems().createItems(entry.getKey(), entry.getValue(), MessageDispositionType.SAVE_ONLY);
-            LOG.debug("Successfully published " + entry.getValue().size() + " free/busy messages.");
+            LOG.debug("Successfully published {} free/busy messages.", entry.getValue().size());
         }
     }
 

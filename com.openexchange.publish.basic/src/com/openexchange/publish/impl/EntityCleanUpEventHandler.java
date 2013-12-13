@@ -49,8 +49,6 @@
 
 package com.openexchange.publish.impl;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.context.ContextService;
@@ -65,7 +63,7 @@ import com.openexchange.groupware.contexts.Context;
  */
 public abstract class EntityCleanUpEventHandler<T> implements EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EntityCleanUpEventHandler.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EntityCleanUpEventHandler.class);
 
     private final String module;
 
@@ -92,14 +90,14 @@ public abstract class EntityCleanUpEventHandler<T> implements EventHandler {
         try {
             context = contexts.getContext(commonEvent.getContextId());
         } catch (OXException e) {
-            LOG.error("Could not delete all dependent publications: " + e.getMessage(), e);
+            LOG.error("Could not delete all dependent publications: {}", e.getMessage(), e);
             return;
         }
 
         try {
             entityCleanUp.cleanUp(context, module, entityId);
         } catch (OXException e) {
-            LOG.error("Could not delete all dependent publications: " + e.getMessage(), e);
+            LOG.error("Could not delete all dependent publications: {}", e.getMessage(), e);
         }
     }
 

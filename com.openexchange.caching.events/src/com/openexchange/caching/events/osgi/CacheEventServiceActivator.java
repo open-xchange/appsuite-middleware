@@ -49,7 +49,6 @@
 
 package com.openexchange.caching.events.osgi;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.internal.CacheEventServiceImpl;
 import com.openexchange.caching.events.internal.CacheEventServiceLookup;
@@ -63,7 +62,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public final class CacheEventServiceActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CacheEventServiceActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheEventServiceActivator.class);
 
     /**
      * Initializes a new {@link CacheEventServiceActivator}.
@@ -79,14 +78,14 @@ public final class CacheEventServiceActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("starting bundle: " + context.getBundle().getSymbolicName());
+        LOG.info("starting bundle: {}", context.getBundle().getSymbolicName());
         CacheEventServiceLookup.set(this);
         registerService(CacheEventService.class, new CacheEventServiceImpl());
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: " + context.getBundle().getSymbolicName());
+        LOG.info("stopping bundle: {}", context.getBundle().getSymbolicName());
         CacheEventServiceLookup.set(null);
         super.stopBundle();
     }

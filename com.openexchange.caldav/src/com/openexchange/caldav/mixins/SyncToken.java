@@ -50,7 +50,6 @@
 package com.openexchange.caldav.mixins;
 
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import com.openexchange.caldav.resources.CommonCollection;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -65,7 +64,7 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  */
 public class SyncToken extends SingleXMLPropertyMixin {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SyncToken.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SyncToken.class);
 
     private String value = null;
     private final CommonCollection collection;

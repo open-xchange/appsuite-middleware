@@ -55,7 +55,6 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -64,7 +63,6 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -78,7 +76,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class ContactFixUserDistListReferencesTask extends UpdateTaskAdapter {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactFixUserDistListReferencesTask.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactFixUserDistListReferencesTask.class);
 
     /**
      * Initializes a new {@link ContactFixUserDistListReferencesTask}.
@@ -101,10 +99,10 @@ public final class ContactFixUserDistListReferencesTask extends UpdateTaskAdapte
             connection.setAutoCommit(false);
             LOG.info("Trying to auto-correct wrong contact references in 'prg_dlist'...");
             int corrected = correctWrongReferences(connection);
-            LOG.info("Auto-corrected " + corrected + " contact references.");
+            LOG.info("Auto-corrected {} contact references.", corrected);
             LOG.info("Deleting remaining wrong contact references in 'prg_dlist'...");
             int deleted = deleteWrongReferences(connection);
-            LOG.info("Deleted " + deleted + " contact references.");
+            LOG.info("Deleted {} contact references.", deleted);
             connection.commit();
         } catch (SQLException e) {
             rollback(connection);

@@ -49,11 +49,13 @@
 
 package com.openexchange.messaging.facebook.parser.user;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -146,7 +148,8 @@ public final class FacebookFQLUserParser {
             if (null != localName) {
                 final ItemHandler itemHandler = ITEM_HANDLERS.get(localName);
                 if (null == itemHandler) {
-                    com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookFQLUserParser.class)).warn("Un-handled item: " + localName);
+                    Logger logger = org.slf4j.LoggerFactory.getLogger(FacebookFQLUserParser.class);
+                    logger.warn("Un-handled item: {}", localName);
                 } else {
                     itemHandler.handleItem(item, user);
                 }

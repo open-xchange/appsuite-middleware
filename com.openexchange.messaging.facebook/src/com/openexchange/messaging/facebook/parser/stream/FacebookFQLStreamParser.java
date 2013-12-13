@@ -51,6 +51,7 @@ package com.openexchange.messaging.facebook.parser.stream;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -59,13 +60,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.StringContent;
@@ -156,7 +156,7 @@ public final class FacebookFQLStreamParser {
                     final String content = item.getTextContent();
                     final long fromId = FacebookMessagingUtility.parseUnsignedLong(null == content ? null : content.trim());
                     if (fromId < 0) {
-                        com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookFQLStreamParser.class)).warn(
+                        org.slf4j.LoggerFactory.getLogger(FacebookFQLStreamParser.class).warn(
                             new StringBuilder("Field actor_id cannot be parsed to a long: ``").append(content).append("\u00b4\u00b4").toString());
                     }
                     message.setFromId(fromId);
@@ -427,7 +427,8 @@ public final class FacebookFQLStreamParser {
                             throw e;
                         }
                         // Something went wrong loading URL content... Ignore it
-                        LogFactory.getLog(FacebookFQLStreamParser.class).debug("Couldn't load URL: " + sourceURL, e);
+                        Logger logger = org.slf4j.LoggerFactory.getLogger(FacebookFQLStreamParser.class);
+                        logger.debug("Couldn''t load URL: {}", sourceURL, e);
                     }
                 }
 
@@ -638,7 +639,8 @@ public final class FacebookFQLStreamParser {
                         if ("attachment".equals(localName)) {
                             attachmentNode = item;
                         } else {
-                            com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookFQLStreamParser.class)).warn("Un-handled item: " + localName);
+                            Logger logger = org.slf4j.LoggerFactory.getLogger(FacebookFQLStreamParser.class);
+                            logger.warn("Un-handled item: {}", localName);
                         }
                     } else {
                         itemHandler.handleItem(item, message);
@@ -654,7 +656,8 @@ public final class FacebookFQLStreamParser {
             /*
              * Empty message... ignore it!
              */
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookFQLStreamParser.class)).warn("Empty Facebook message detected:\n" + streamElement);
+            Logger logger = org.slf4j.LoggerFactory.getLogger(FacebookFQLStreamParser.class);
+            logger.warn("Empty Facebook message detected:\n{}", streamElement);
             return null;
         }
         /*
@@ -675,9 +678,9 @@ public final class FacebookFQLStreamParser {
                         final String type = item.getTextContent();
                         final AttachmentHandler attachmentHandler = ATTACH_HANDLERS.get(type);
                         if (null == attachmentHandler) {
-                            final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookFQLStreamParser.class));
-                            logger.warn("Unknown attachment type: " + type);
-                            logger.debug("Stream element:\n" + Utility.prettyPrintXML(streamElement));
+                            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(FacebookFQLStreamParser.class);
+                            logger.warn("Unknown attachment type: {}", type);
+                            logger.debug("Stream element:\n{}", Utility.prettyPrintXML(streamElement));
                         } else {
                             attachmentHandler.handleAttachment(attachmentChildNodes, len, message, multipartProvider);
                         }
@@ -703,9 +706,9 @@ public final class FacebookFQLStreamParser {
                             final String sType = type.getTextContent();
                             final AttachmentHandler attachmentHandler = ATTACH_HANDLERS.get(sType);
                             if (null == attachmentHandler) {
-                                final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookFQLStreamParser.class));
-                                logger.warn("Unknown attachment type: " + sType);
-                                logger.debug("Stream element:\n" + Utility.prettyPrintXML(streamElement));
+                                final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(FacebookFQLStreamParser.class);
+                                logger.warn("Unknown attachment type: {}", sType);
+                                logger.debug("Stream element:\n{}", Utility.prettyPrintXML(streamElement));
                             } else {
                                 attachmentHandler.handleAttachment(attachmentChildNodes, len, message, multipartProvider);
                             }
@@ -724,8 +727,8 @@ public final class FacebookFQLStreamParser {
          * Debug
          */
         if (size <= 0 && !attachmentHandlerFound) {
-            final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookFQLStreamParser.class));
-            logger.debug("Stream element lead to empty message:\n" + Utility.prettyPrintXML(streamElement));
+            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(FacebookFQLStreamParser.class);
+            logger.debug("Stream element lead to empty message:\n{}", Utility.prettyPrintXML(streamElement));
         }
         message.setSize(size);
         final String htmlContent;

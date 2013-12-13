@@ -50,7 +50,6 @@
 package com.openexchange.ajax.folder;
 
 import java.util.Iterator;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -74,7 +73,7 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class ListTest extends AbstractAJAXSession {
 
-    private static final Log LOG = LogFactory.getLog(ListTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ListTest.class);
 
     private AJAXClient client;
     private AJAXClient client2;

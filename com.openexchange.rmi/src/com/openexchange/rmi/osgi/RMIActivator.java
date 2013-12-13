@@ -50,7 +50,6 @@
 package com.openexchange.rmi.osgi;
 
 import java.rmi.Remote;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
@@ -62,7 +61,7 @@ import com.openexchange.osgi.ServiceRegistry;
  */
 public class RMIActivator extends HousekeepingActivator {
 
-    private static final Log log = com.openexchange.log.Log.loggerFor(RMIActivator.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RMIActivator.class);
 
     private static volatile ServiceRegistry serviceRegistry;
 

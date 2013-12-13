@@ -52,7 +52,7 @@ package com.openexchange.recaptcha;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.ajax.DataServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.config.ConfigurationService;
@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ReCaptchaServlet extends DataServlet {
 
-    private static final transient Log LOG = com.openexchange.log.Log.loggerFor(ReCaptchaServlet.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReCaptchaServlet.class);
 
     private static final String ACTION_HTML = "html";
 
@@ -90,7 +90,7 @@ public class ReCaptchaServlet extends DataServlet {
                 doGetPublicKey(response);
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         }
 

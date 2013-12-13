@@ -50,7 +50,6 @@
 package com.openexchange.admin.osgi;
 
 import java.util.Dictionary;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
@@ -90,7 +89,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     public void startBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.loggerFor(Activator.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
         track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
         track(ContextService.class, new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class));
@@ -115,36 +114,32 @@ public class Activator extends HousekeepingActivator {
             AdminDaemon.initCache(configurationService);
             daemon.initAccessCombinationsInCache();
         } catch (final OXGenericException e) {
-            log.fatal(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final ClassNotFoundException e) {
-            log.fatal(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
         track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThread.cache.getPool())).open();
         daemon.initRMI(context);
 
 
-        if (log.isInfoEnabled()) {
+        {
             final Dictionary<?, ?> headers = context.getBundle().getHeaders();
-            log.info("Version: " + headers.get("Bundle-Version"));
-            log.info("Name: " + headers.get("Bundle-SymbolicName"));
-            log.info("Build: " + Version.getInstance().getVersionString());
+            log.info("Version: {}", headers.get("Bundle-Version"));
+            log.info("Name: {}", headers.get("Bundle-SymbolicName"));
         }
+        log.info("Build: {}", Version.getInstance().getVersionString());
         log.info("Admindaemon successfully started.");
 
         // The listener which is called if a new plugin is registered
         final ServiceListener sl = new ServiceListener() {
             @Override
             public void serviceChanged(final ServiceEvent ev) {
-                if (log.isInfoEnabled()) {
-                    log.info("Service: " + ev.getServiceReference().getBundle().getSymbolicName() + ", " + ev.getType());
-                }
+                log.info("Service: {}, {}", ev.getServiceReference().getBundle().getSymbolicName(), ev.getType());
                 switch (ev.getType()) {
                     case ServiceEvent.REGISTERED:
-                        if(log.isInfoEnabled()){
-                            log.info(ev.getServiceReference().getBundle().getSymbolicName() + " registered service");
-                        }
+                    log.info("{} registered service", ev.getServiceReference().getBundle().getSymbolicName());
                         break;
                     default:
                         break;
@@ -178,7 +173,7 @@ public class Activator extends HousekeepingActivator {
     @Override
     public void stopBundle() throws Exception {
         cleanUp();
-        final Log log = com.openexchange.log.Log.loggerFor(Activator.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Activator.class);
         log.info("Stopping RMI...");
         final AdminDaemon daemon = this.daemon;
         if (null != daemon) {

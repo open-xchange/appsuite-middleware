@@ -55,10 +55,9 @@ import static com.openexchange.kerberos.impl.ConfigurationProperty.KRB5_CONF;
 import static com.openexchange.kerberos.impl.ConfigurationProperty.MODULE_NAME;
 import static com.openexchange.kerberos.impl.ConfigurationProperty.USER_MODULE_NAME;
 import java.io.File;
+import java.text.MessageFormat;
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.Configuration;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 
 /**
@@ -68,7 +67,7 @@ import com.openexchange.config.ConfigurationService;
  */
 public final class KerberosConfiguration {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(KerberosConfiguration.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(KerberosConfiguration.class);
 
     private static String moduleName;
     private static String userModuleName;
@@ -83,7 +82,7 @@ public final class KerberosConfiguration {
         if (krb5Conf.exists() && krb5Conf.isFile() && krb5Conf.canRead()) {
             System.setProperty("java.security.krb5.conf", krb5ConfPath);
         } else {
-            LOG.error("Cannot read krb5.conf configuration file stated to be here: \"" + krb5ConfPath + "\".");
+            LOG.error("Cannot read krb5.conf configuration file stated to be here: \"{}\".", krb5ConfPath);
             configured = false;
         }
 
@@ -92,7 +91,7 @@ public final class KerberosConfiguration {
         if (jaasConf.exists() && jaasConf.isFile() && jaasConf.canRead()) {
             System.setProperty("java.security.auth.login.config", jaasConfPath);
         } else {
-            LOG.error("Cannot read JAAS configuration file state to be here: \"" + jaasConfPath + "\".");
+            LOG.error("Cannot read JAAS configuration file state to be here: \"{}\".", jaasConfPath);
             configured = false;
         }
 

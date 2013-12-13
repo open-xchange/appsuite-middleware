@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -94,7 +95,7 @@ public class LdapGlobalFolderCreator {
 
     }
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(LdapGlobalFolderCreator.class));
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapGlobalFolderCreator.class);
 
     public static FolderIDAndAdminID createGlobalFolder(int contextID, String foldername) throws OXException, SQLException {
         // First search for a folder with the name if is doesn't exist create it
@@ -118,9 +119,7 @@ public class LdapGlobalFolderCreator {
              */
             final OXFolderManager instance = OXFolderManager.getInstance(getDummySessionObj(admin_user_id, ctx.getContextId()));
             ldapFolderID = instance.createFolder(fo, true, System.currentTimeMillis()).getObjectID();
-            if (LOG.isInfoEnabled()) {
-                LOG.info("LDAP folder successfully created");
-            }
+            LOG.info("LDAP folder successfully created");
         }
         return new FolderIDAndAdminID(ldapFolderID, admin_user_id);
     }
@@ -151,14 +150,14 @@ public class LdapGlobalFolderCreator {
                 try {
                     executeQuery.close();
                 } catch (final SQLException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
             if (null != ps) {
                 try {
                     ps.close();
                 } catch (final SQLException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }

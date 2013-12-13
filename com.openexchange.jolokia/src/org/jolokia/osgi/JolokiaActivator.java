@@ -5,7 +5,6 @@ import java.util.Hashtable;
 
 import javax.servlet.ServletException;
 
-import org.apache.commons.logging.Log;
 import org.jolokia.osgi.servlet.JolokiaContext;
 import org.jolokia.osgi.servlet.JolokiaServlet;
 import org.jolokia.restrictor.Restrictor;
@@ -66,7 +65,7 @@ public class JolokiaActivator implements BundleActivator, JolokiaContext {
     private Restrictor restrictor = null;
 
     // Internal Ox Logging
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(JolokiaActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JolokiaActivator.class);
     
     /** {@inheritDoc} */
     public void start(BundleContext pBundleContext) {

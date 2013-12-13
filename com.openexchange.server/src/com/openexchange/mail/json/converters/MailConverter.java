@@ -101,8 +101,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class MailConverter implements ResultConverter, MailActionConstants {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailConverter.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(MailConverter.class);
 
     private static final MailConverter INSTANCE = new MailConverter();
 
@@ -165,9 +165,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         try {
             final Object resultObject = result.getResultObject();
             if (null == resultObject) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("Result object is null.");
-                }
+                LOG.warn("Result object is null.");
                 result.setResultObject(JSONObject.NULL, "json");
                 return;
             }

@@ -79,9 +79,7 @@ import com.openexchange.java.StringAllocator;
  */
 public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>, Runnable {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractWriteTask.class));
-
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractWriteTask.class);
 
     /**
      * The character indicating a header record.
@@ -221,13 +219,13 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
             // Write CSV line to file
             writeCSVLine(getCSVLine());
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final FileNotFoundException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -252,9 +250,7 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
         // Write CSV line to file
         final FileOutputStream fos = new FileOutputStream(csvFile.getFile(), true);
         try {
-            if (DEBUG_ENABLED) {
-                LOG.debug(new StringBuilder("Writing CSV line: ").append(csvLine).toString());
-            }
+            LOG.debug("Writing CSV line: {}", csvLine);
             fos.write(Charsets.toAsciiBytes(csvLine));
             fos.flush();
         } finally {

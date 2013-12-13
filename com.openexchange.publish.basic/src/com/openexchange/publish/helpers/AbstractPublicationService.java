@@ -52,11 +52,9 @@ package com.openexchange.publish.helpers;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
-import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.PublicationService;
@@ -75,7 +73,7 @@ public abstract class AbstractPublicationService implements PublicationService {
         CREATE, DELETE, UPDATE;
     }
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractPublicationService.class));
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractPublicationService.class);
 
     public static SecurityStrategy ALLOW_ALL = new AllowEverything();
 
@@ -120,9 +118,7 @@ public abstract class AbstractPublicationService implements PublicationService {
                 returnPublications.add(publication);
             } catch (OXException e) {
                 if (InfostoreExceptionCodes.NOT_EXIST.equals(e)){
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e.getLogMessage());
-                    }
+                    LOG.debug("", e);
                 } else {
                     throw e;
                 }
@@ -143,9 +139,7 @@ public abstract class AbstractPublicationService implements PublicationService {
                 returnPublications.add(publication);
             } catch (OXException e) {
                 if (InfostoreExceptionCodes.NOT_EXIST.equals(e)){
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e.getLogMessage());
-                    }
+                    LOG.debug("", e);
                 } else {
                     throw e;
                 }
@@ -172,9 +166,7 @@ public abstract class AbstractPublicationService implements PublicationService {
                 returnPublications.add(publication);
             } catch (OXException e) {
                 if (InfostoreExceptionCodes.NOT_EXIST.equals(e)){
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e.getLogMessage());
-                    }
+                    LOG.debug("", e);
                 } else {
                     throw e;
                 }

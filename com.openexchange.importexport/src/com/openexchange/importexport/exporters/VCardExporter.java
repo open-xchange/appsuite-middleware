@@ -55,7 +55,6 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.mapping.ContactMapper;
@@ -72,7 +71,6 @@ import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -92,7 +90,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public class VCardExporter implements Exporter {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(VCardExporter.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(VCardExporter.class);
     protected final static int[] _contactFields = {
         DataObject.OBJECT_ID,
         DataObject.CREATED_BY,
@@ -281,7 +279,7 @@ public class VCardExporter implements Exporter {
 
         //final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
         ContactField[] fields = ContactMapper.getInstance().getFields(null == fieldsToBeExported ? _contactFields : fieldsToBeExported, null, (ContactField[])null);
-        
+
         if (null == objectId) {
             if (EnumSet.copyOf(Arrays.asList(fields)).contains(ContactField.IMAGE1)) {
                 // Contact by contact
@@ -304,14 +302,12 @@ public class VCardExporter implements Exporter {
                     try {
                         searchIterator.close();
                     } catch (final SearchIteratorException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             } else {
                 final SearchIterator<Contact> searchIterator = ImportExportServices.getContactService().getAllContacts(session, folderId, fields);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Going to export " + searchIterator.size() + " contacts (user=" + session.getUserId() + ", context=" + session.getContextId()+")");
-                }
+                LOG.debug("Going to export {} contacts (user={}, context={})", searchIterator.size(), session.getUserId(), session.getContextId());
                 try {
                     while (searchIterator.hasNext()) {
                         exportContact(oxContainerConverter, contactDef, versitWriter, searchIterator.next());
@@ -322,7 +318,7 @@ public class VCardExporter implements Exporter {
                     try {
                         searchIterator.close();
                     } catch (final SearchIteratorException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }
@@ -384,7 +380,7 @@ public class VCardExporter implements Exporter {
             try {
                 versitWriter.close();
             } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

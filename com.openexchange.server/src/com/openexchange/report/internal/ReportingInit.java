@@ -49,8 +49,6 @@
 
 package com.openexchange.report.internal;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.report.Constants;
@@ -63,7 +61,7 @@ import com.openexchange.server.Initialization;
  */
 public class ReportingInit implements Initialization {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReportingInit.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReportingInit.class);
 
     private final ManagementService managementService;
 
@@ -82,7 +80,7 @@ public class ReportingInit implements Initialization {
             managementService.registerMBean(Constants.REPORTING_NAME, new ReportingMBean());
             managementService.registerMBean(Constants.LOGIN_COUNTER_NAME, new LoginCounter(new LoginCounterImpl()));
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -92,7 +90,7 @@ public class ReportingInit implements Initialization {
             managementService.unregisterMBean(Constants.REPORTING_NAME);
             managementService.unregisterMBean(Constants.LOGIN_COUNTER_NAME);
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 }

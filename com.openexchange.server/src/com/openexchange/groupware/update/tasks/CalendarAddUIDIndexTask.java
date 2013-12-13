@@ -55,7 +55,6 @@ import static com.openexchange.tools.update.Tools.createIndex;
 import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -63,7 +62,6 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -115,7 +113,7 @@ public final class CalendarAddUIDIndexTask extends UpdateTaskAdapter {
     }
 
     private void createCalendarIndex(final Connection con, final String[] tables) {
-        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarAddUIDIndexTask.class));
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CalendarAddUIDIndexTask.class);
         final String name = "uidIndex";
         final StringBuilder sb = new StringBuilder(64);
         for (final String table : tables) {
@@ -144,8 +142,7 @@ public final class CalendarAddUIDIndexTask extends UpdateTaskAdapter {
                     }
                 }
             } catch (final SQLException e) {
-                log.error(
-                    new StringBuilder("Problem adding index ").append(name).append(" on table ").append(table).append('.').toString(),
+                log.error("Problem adding index {} on table {}{}", name, table, '.',
                     e);
             }
         }

@@ -56,6 +56,7 @@ import java.io.File;
 import java.io.InputStream;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tx.AbstractActionTest;
+import com.openexchange.java.Streams;
 import com.openexchange.tools.file.internal.LocalFileStorageFactory;
 import com.openexchange.tx.UndoableAction;
 
@@ -105,16 +106,14 @@ public class SaveFileActionTest extends AbstractActionTest {
 		InputStream in = null;
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
-			in = new BufferedInputStream(storage.getFile(saveFile.getFileStorageID()));
+			in = new BufferedInputStream(storage.getFile(saveFile.getFileStorageID()), 65536);
 			int b = 0;
 			while((b = in.read()) != -1) {
 				out.write(b);
 			}
+			out.flush();
 		} finally {
-			if (in!=null) {
-				in.close();
-			}
-			out.close();
+		    Streams.close(in, out);
 		}
 		final String got = new String(out.toByteArray(), com.openexchange.java.Charsets.UTF_8);
 		assertEquals(content, got);

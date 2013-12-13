@@ -53,11 +53,9 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.login.Interface;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -71,7 +69,7 @@ public class Infostore extends OXServlet {
 
     private static final long serialVersionUID = -2064098724675986123L;
 
-    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Infostore.class));
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Infostore.class);
 
     @Override
     protected Interface getInterface() {

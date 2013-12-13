@@ -54,8 +54,6 @@ import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -103,7 +101,7 @@ public final class ReminderRequest {
 
     private final AppointmentSqlFactoryService appointmentFactory;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReminderRequest.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReminderRequest.class);
 
     /**
      * Gets the time stamp.
@@ -174,7 +172,7 @@ public final class ReminderRequest {
                 reminderSql.deleteReminder(reminder);
             }
         } catch (final OXException oxe) {
-            LOG.debug(oxe.getMessage(), oxe);
+            LOG.debug("", oxe);
             if (ReminderExceptionCode.NOT_FOUND.equals(oxe)) {
                 jsonArray.put(id);
                 return jsonArray;

@@ -49,11 +49,9 @@
 
 package com.openexchange.push.udp.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.log.LogFactory;
 import com.openexchange.push.udp.PushConfiguration;
 import com.openexchange.push.udp.PushDiscoverySender;
 import com.openexchange.push.udp.PushInit;
@@ -66,7 +64,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class TimerCustomizer implements ServiceTrackerCustomizer<TimerService,TimerService> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TimerCustomizer.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TimerCustomizer.class);
 
     private final BundleContext context;
     private volatile PushDiscoverySender sender;

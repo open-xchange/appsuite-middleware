@@ -54,10 +54,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
-import org.apache.commons.logging.Log;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link EventConfigImpl}
@@ -72,7 +70,7 @@ public class EventConfigImpl extends AbstractConfigWrapper implements EventConfi
 
     //private boolean isInit;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EventConfigImpl.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventConfigImpl.class);
 
     public EventConfigImpl() {
 
@@ -94,9 +92,7 @@ public class EventConfigImpl extends AbstractConfigWrapper implements EventConfi
         Properties prop = null;
 
         try {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("try to load propfile: " + propfile);
-            }
+            LOG.debug("try to load propfile: {}", propfile);
 
             prop = new Properties();
             final java.io.InputStream in = new FileInputStream(propfile);
@@ -106,20 +102,16 @@ public class EventConfigImpl extends AbstractConfigWrapper implements EventConfi
                 Streams.close(in);
             }
         } catch (final FileNotFoundException exc) {
-            LOG.error("Cannot find propfile: " + propfile, exc);
+            LOG.error("Cannot find propfile: {}", propfile, exc);
         } catch (final IOException exc) {
-            LOG.error("Cannot read propfile: " + propfile, exc);
+            LOG.error("Cannot read propfile: {}", propfile, exc);
         }
 
         isEventQueueEnabled = parseProperty(prop, "com.openexchange.event.isEventQueueEnabled", false);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Event property: com.openexchange.event.isEventQueueEnabled=" + isEventQueueEnabled);
-        }
+        LOG.debug("Event property: com.openexchange.event.isEventQueueEnabled={}", isEventQueueEnabled);
 
         eventQueueDelay = parseProperty(prop, "com.openexchange.event.eventQueueDelay", eventQueueDelay);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Event property: com.openexchange.event.eventQueueDelay=" + eventQueueDelay);
-        }
+        LOG.debug("Event property: com.openexchange.event.eventQueueDelay={}", eventQueueDelay);
 
         /*-
          * Field "isInit" is never used

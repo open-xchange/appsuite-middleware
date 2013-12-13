@@ -57,8 +57,6 @@ import java.util.Queue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * Implements the queue of preread tasks.
@@ -69,7 +67,7 @@ final class PreRead<T> {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PreRead.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PreRead.class);
 
     /**
      * What is the minimum count of tasks for additional sub requests.
@@ -128,7 +126,7 @@ final class PreRead<T> {
             if (elements.size() >= MINIMUM_PREREAD) {
                 waitForMinimum.signal();
             }
-            LOG.trace("Offered. " + elements.size());
+            LOG.trace("Offered. {}", elements.size());
         } finally {
             lock.unlock();
         }
@@ -138,7 +136,7 @@ final class PreRead<T> {
         final List<T> retval;
         lock.lock();
         try {
-            LOG.debug("Taking. " + minimum);
+            LOG.debug("Taking. {}", minimum);
             if (minimum && elements.size() < MINIMUM_PREREAD
                 && !preReaderFinished) {
                 LOG.debug("Waiting for enough.");
@@ -168,7 +166,7 @@ final class PreRead<T> {
                     // Nothing to do. Continue with normal work.
                     // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
                     Thread.currentThread().interrupt();
-                    LOG.trace(e.getMessage(), e);
+                    LOG.trace("", e);
                 }
             }
             return !elements.isEmpty();

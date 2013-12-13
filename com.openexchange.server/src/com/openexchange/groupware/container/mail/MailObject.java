@@ -70,13 +70,11 @@ import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import org.apache.commons.logging.Log;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -106,9 +104,7 @@ import com.openexchange.version.Version;
  */
 public class MailObject {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MailObject.class);
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailObject.class);
 
     private static volatile String staticHostName;
 
@@ -613,11 +609,7 @@ public class MailObject {
     }
 
     private static String getHostName() {
-        final Props logProperties = LogProperties.optLogProperties();
-        if (null == logProperties) {
-            return getStaticHostName();
-        }
-        final String serverName = logProperties.get(LogProperties.Name.AJP_SERVER_NAME);
+        final String serverName = LogProperties.getLogProperty(LogProperties.Name.AJP_SERVER_NAME);
         if (null == serverName) {
             return getStaticHostName();
         }

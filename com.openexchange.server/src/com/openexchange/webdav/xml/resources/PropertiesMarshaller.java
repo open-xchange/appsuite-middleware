@@ -56,13 +56,11 @@ import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
-import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.action.behaviour.BehaviourLookup;
 import com.openexchange.webdav.protocol.Multistatus;
 import com.openexchange.webdav.protocol.Protocol;
@@ -86,7 +84,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 		return new Multistatus<Iterable<WebdavProperty>>();
 	}
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PropertiesMarshaller.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PropertiesMarshaller.class);
 
 	public PropertiesMarshaller(final String charset){
 		this.charset = charset;
@@ -151,7 +149,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 		try {
 			return URLEncoder.encode(string,charset).replaceAll("\\+","%20");
 		} catch (final UnsupportedEncodingException e) {
-			LOG.fatal(e);
+			LOG.error(e.toString());
 			return string;
 		}
 	}
@@ -195,10 +193,10 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 				propertyElement.setContent(doc.getRootElement().cloneContent());
 			} catch (final JDOMException e) {
 				// NO XML
-				LOG.error(e);
+				LOG.error(e.toString());
 				propertyElement.setText(property.getValue());
 			} catch (final IOException e) {
-				LOG.error(e.getMessage(), e);
+				LOG.error("", e);
 			}
 		} else {
 			if(property.isDate()) {

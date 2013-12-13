@@ -40,7 +40,6 @@ package com.openexchange.ajax;
 import java.io.IOException;
 import java.net.URL;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
@@ -59,7 +58,7 @@ public class ConfigJumpTest extends AbstractAJAXTest {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(ConfigJumpTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigJumpTest.class);
 
     /**
      * URL of the AJAX config interface.

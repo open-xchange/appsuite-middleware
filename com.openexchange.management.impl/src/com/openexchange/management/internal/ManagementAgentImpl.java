@@ -132,9 +132,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
     private void initializeMBeanServer() {
         if (running.get()) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("MonitorAgent already running...");
-            }
+            LOG.info("MonitorAgent already running...");
             return;
         }
         try {
@@ -166,11 +164,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                         registry0 = LocateRegistry.getRegistry(jmxPort);
                         registry0.list();
                     } catch (final RemoteException e) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug(
-                                "No responsive RMI registry found that listens on port " + jmxPort + ". A new one is going to be created",
-                                e);
-                        }
+                        LOG.debug("No responsive RMI registry found that listens on port {}. A new one is going to be created", jmxPort, e);
                         /*
                          * Create a new one
                          */
@@ -179,10 +173,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                     registry = registry0;
                 }
                 registries.put(Integer.valueOf(jmxPort), registry);
-                if (LOG.isInfoEnabled()) {
-                    LOG.info(new StringBuilder(128).append("RMI registry created on port ").append(jmxPort).append(" and bind address ").append(
-                        jmxBindAddr == null ? "*" : jmxBindAddr.trim()).toString());
-                }
+                LOG.info("RMI registry created on port {} and bind address {}", jmxPort, jmxBindAddr == null ? "*" : jmxBindAddr.trim());
                 // Environment map.
                 //
                 final Map<String, Object> env = new HashMap<String, Object>(4);
@@ -275,9 +266,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                 //
                 cs.start();
                 connectors.put(url, cs);
-                if (LOG.isInfoEnabled()) {
-                    LOG.info(new StringBuilder("JMX connector server on ").append(url).append(" started"));
-                }
+                LOG.info("JMX connector server on {} started", url);
                 jmxURL = url;
             } else {
                 /*
@@ -303,21 +292,18 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                 final JMXServiceURL jmxServiceURL = jmxServiceUrlFor(ip, jmxServerPort, jmxPort);
                 jmxURL = addConnectorServer(jmxServiceURL, jmxLogin, jmxPassword);
             }
-            if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder(128).append("\n\n\tUse JConsole or MC4J to connect to MBeanServer with this url: ").append(
-                    jmxURL).append("\n").toString());
-            }
+            LOG.info("\n\n\tUse JConsole or MC4J to connect to MBeanServer with this url: {}\n", jmxURL);
             running.set(true);
         } catch (final MalformedURLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final UnknownHostException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final RemoteException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -351,7 +337,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                 unregisterMBean(objectNames.pop());
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         removeConnectorServer(jmxURL);
         /*
@@ -369,7 +355,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
         try {
             return InetAddress.getByName(host).getHostName();
         } catch (final UnknownHostException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
     }

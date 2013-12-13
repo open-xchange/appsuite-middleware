@@ -70,9 +70,7 @@ import com.openexchange.webdav.xml.fields.DataFields;
  */
 public class DataWriter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DataWriter.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DataWriter.class);
 
     public static final int ACTION_MODIFIED = 1;
 
@@ -204,9 +202,7 @@ public class DataWriter {
             /*
              * null is not a legal XML value, transform to an empty string
              */
-            if (DEBUG) {
-                LOG.debug("null is not a legal XML value");
-            }
+            LOG.debug("null is not a legal XML value");
             return "";
         }
         /*
@@ -232,13 +228,13 @@ public class DataWriter {
                         ch = 0x10000 + (ch - 0xD800) * 0x400 + (low - 0xDC00);
                         if (Verifier.isXMLCharacter(ch)) {
                             retvalBuilder.append((char) ch);
-                        } else if (DEBUG) {
-                            LOG.debug(("0x" + Integer.toHexString(ch) + " is not a legal XML character"));
+                        } else {
+                            LOG.debug("0x{} is not a legal XML character", Integer.toHexString(ch));
                         }
-                    } else if (DEBUG) {
+                    } else {
                         LOG.debug("illegal surrogate pair");
                     }
-                } else if (DEBUG) {
+                } else {
                     LOG.debug("truncated surrogate pair");
                 }
             } else {
@@ -247,8 +243,8 @@ public class DataWriter {
                  */
                 if (Verifier.isXMLCharacter(ch)) {
                     retvalBuilder.append((char) ch);
-                } else if (DEBUG) {
-                    LOG.debug(("0x" + Integer.toHexString(ch) + " is not a legal XML character"));
+                } else {
+                    LOG.debug("0x{} is not a legal XML character", Integer.toHexString(ch));
                 }
             }
         }

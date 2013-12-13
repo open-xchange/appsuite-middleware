@@ -72,7 +72,7 @@ import com.openexchange.version.Version;
  */
 public class ServletContextWrapper implements ServletContext {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ServletContextWrapper.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServletContextWrapper.class);
 
     private static final int OX_SERVLET_MAJOR = 6;
 
@@ -255,23 +255,17 @@ public class ServletContextWrapper implements ServletContext {
 
     @Override
     public void log(final Exception exception, final String string) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info(string, exception);
-        }
+        LOG.info(string, exception);
     }
 
     @Override
     public void log(final String string) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info(string);
-        }
+        LOG.info(string);
     }
 
     @Override
     public void log(final String string, final Throwable throwable) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info(string, throwable);
-        }
+        LOG.info(string, throwable);
     }
 
     @Override

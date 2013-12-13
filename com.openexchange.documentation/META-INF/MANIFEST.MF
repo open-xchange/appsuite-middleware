@@ -12,7 +12,8 @@ Import-Package: com.openexchange.exception,
  com.openexchange.osgi,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Export-Package: com.openexchange.documentation,
  com.openexchange.documentation.annotations,
  com.openexchange.documentation.descriptions

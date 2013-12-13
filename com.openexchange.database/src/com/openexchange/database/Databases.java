@@ -62,8 +62,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * Utilities for database resource handling.
@@ -73,7 +71,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class Databases {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Databases.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Databases.class);
 
     public static final int IN_LIMIT = 1000;
 
@@ -91,7 +89,7 @@ public final class Databases {
             try {
                 result.close();
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -106,7 +104,7 @@ public final class Databases {
             try {
                 stmt.close();
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -168,7 +166,7 @@ public final class Databases {
                 con.rollback();
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -186,7 +184,7 @@ public final class Databases {
                 con.setAutoCommit(true);
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

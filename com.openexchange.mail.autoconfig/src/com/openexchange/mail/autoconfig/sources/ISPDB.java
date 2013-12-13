@@ -77,7 +77,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public class ISPDB extends AbstractConfigSource {
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(ISPDB.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ISPDB.class);
 
     private static final String locationProperty = "com.openexchange.mail.autoconfig.ispdb";
 
@@ -112,7 +112,7 @@ public class ISPDB extends AbstractConfigSource {
         try {
             javaURL = new URL(url);
         } catch (MalformedURLException e) {
-            LOG.warn("Unable to parse URL: " + url, e);
+            LOG.warn("Unable to parse URL: {}", url, e);
             return null;
         }
 
@@ -140,7 +140,7 @@ public class ISPDB extends AbstractConfigSource {
             int httpCode = client.executeMethod(getMethod);
 
             if (httpCode != 200) {
-                LOG.info("Could not retrieve config XML. Return code was: " + httpCode);
+                LOG.info("Could not retrieve config XML. Return code was: {}", httpCode);
                 return null;
             }
 

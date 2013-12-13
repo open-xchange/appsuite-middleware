@@ -56,7 +56,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
@@ -65,7 +64,6 @@ import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mailfilter.ajax.actions.AbstractAction;
 import com.openexchange.mailfilter.ajax.actions.AbstractRequest;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
@@ -88,7 +86,7 @@ public abstract class AJAXServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 3006497622205429579L;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AJAXServlet.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AJAXServlet.class);
 
     private static final String PARAMETER_SESSION = com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
 
@@ -158,18 +156,14 @@ public abstract class AJAXServlet extends HttpServlet {
             }
             session = service.getSession(sessionId);
             if (null == session) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("There is no session associated with session identifier: " + sessionId);
-                }
+                LOG.info("There is no session associated with session identifier: {}", sessionId);
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
             }
             response.setLocale(session);
             final String secret = SessionServlet.extractSecret(hashSource, req, session.getHash(), session.getClient());
             // Check if session is valid
             if (!session.getSecret().equals(secret)) {
-                if (LOG.isInfoEnabled() && null != secret) {
-                    LOG.info("Session secret is different. Given secret \"" + secret + "\" differs from secret in session \"" + session.getSecret() + "\".");
-                }
+                LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
                 throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
             }
 
@@ -192,7 +186,7 @@ public abstract class AJAXServlet extends HttpServlet {
             final AbstractAction action = createAction(session);
             response.setData(action.action(request));
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         }
         /*
@@ -224,18 +218,14 @@ public abstract class AJAXServlet extends HttpServlet {
             }
             session = service.getSession(sessionId);
             if (null == session) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("There is no session associated with session identifier: " + sessionId);
-                }
+                LOG.info("There is no session associated with session identifier: {}", sessionId);
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
             }
             response.setLocale(session);
             final String secret = SessionServlet.extractSecret(hashSource, req, session.getHash(), session.getClient());
             // Check if session is valid
             if (!session.getSecret().equals(secret)) {
-                if (LOG.isInfoEnabled() && null != secret) {
-                    LOG.info("Session secret is different. Given secret \"" + secret + "\" differs from secret in session \"" + session.getSecret() + "\".");
-                }
+                LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
                 throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
             }
 
@@ -256,7 +246,7 @@ public abstract class AJAXServlet extends HttpServlet {
             final AbstractAction action = createAction(session);
             response.setData(action.action(request));
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         }
         /*

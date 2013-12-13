@@ -77,8 +77,8 @@ import com.openexchange.server.ServiceLookup;
 responseDescription = "An array of resource objects as described in Resource response.")
 public final class SearchAction extends AbstractResourceAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SearchAction.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(SearchAction.class);
 
     /**
      * Initializes a new {@link SearchAction}.
@@ -109,10 +109,7 @@ public final class SearchAction extends AbstractResourceAction {
         if (jData.has(SearchFields.PATTERN) && !jData.isNull(SearchFields.PATTERN)) {
             searchpattern = jData.getString(SearchFields.PATTERN);
         } else {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder(64).append("Missing field \"").append(SearchFields.PATTERN).append(
-                        "\" in JSON data. Searching for all as fallback"));
-            }
+            LOG.warn("Missing field \"{}\" in JSON data. Searching for all as fallback", SearchFields.PATTERN);
             return new AllAction(services).perform(req);
         }
 

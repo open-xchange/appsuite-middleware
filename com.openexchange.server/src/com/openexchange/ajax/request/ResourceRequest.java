@@ -79,8 +79,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ResourceRequest {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
-            .getLog(ResourceRequest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResourceRequest.class);
 
     private final ServerSession session;
 
@@ -141,7 +140,7 @@ public class ResourceRequest {
             updatedResources = resService .listModified(lastModified, session.getContext());
             deletedResources = resService.listDeleted(lastModified, session.getContext());
         } catch (final OXException exc) {
-            LOG.debug("Tried to find resources that were modified since "+lastModified, exc);
+            LOG.debug("Tried to find resources that were modified since {}", lastModified, exc);
         }
 
         final JSONArray modified = new JSONArray();
@@ -258,10 +257,7 @@ public class ResourceRequest {
         if (jData.has(SearchFields.PATTERN) && !jData.isNull(SearchFields.PATTERN)) {
             searchpattern = jData.getString(SearchFields.PATTERN);
         } else {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(new com.openexchange.java.StringAllocator(64).append("Missing field \"").append(SearchFields.PATTERN).append(
-                        "\" in JSON data. Searching for all as fallback"));
-            }
+            LOG.warn("Missing field \"{}\" in JSON data. Searching for all as fallback", SearchFields.PATTERN);
             return actionAll();
         }
 

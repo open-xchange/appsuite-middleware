@@ -68,7 +68,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class MailCacheConfiguration implements Initialization {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailCacheConfiguration.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailCacheConfiguration.class);
 
     private static final MailCacheConfiguration instance = new MailCacheConfiguration();
 
@@ -106,7 +106,7 @@ public final class MailCacheConfiguration implements Initialization {
     @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
-            LOG.warn(MailCacheConfiguration.class.getSimpleName() + " has already been started. Aborting.");
+            LOG.warn("{} has already been started. Aborting.", MailCacheConfiguration.class.getSimpleName());
         }
         configure();
     }
@@ -114,14 +114,14 @@ public final class MailCacheConfiguration implements Initialization {
     @Override
     public void stop() {
         if (!started.compareAndSet(true, false)) {
-            LOG.warn(MailCacheConfiguration.class.getSimpleName() + " has already been stopped. Aborting.");
+            LOG.warn("{} has already been stopped. Aborting.", MailCacheConfiguration.class.getSimpleName());
         }
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null != cacheService) {
             try {
                 cacheService.freeCache(MailMessageCache.REGION_NAME);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

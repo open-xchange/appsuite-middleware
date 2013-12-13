@@ -72,12 +72,16 @@ fi
 Build for patch 2013-12-09
 * Fri Dec 06 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2013-12-10
+* Fri Dec 06 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2013-11-29
 * Tue Dec 03 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2013-11-28
 * Wed Nov 20 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Fifth candidate for 7.4.1 release
 * Tue Nov 19 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Fourth candidate for 7.4.1 release
+* Mon Nov 11 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2013-11-12
 * Mon Nov 11 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2013-11-12
 * Fri Nov 08 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>

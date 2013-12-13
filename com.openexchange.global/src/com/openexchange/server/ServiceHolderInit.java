@@ -66,7 +66,7 @@ import com.openexchange.java.Streams;
  */
 public final class ServiceHolderInit implements Initialization {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ServiceHolderInit.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServiceHolderInit.class);
 
     private static final String DEFAULT_TIMEOUT = "10000";
 
@@ -106,7 +106,7 @@ public final class ServiceHolderInit implements Initialization {
             }
             final File sysPropFile = new File(propDir, "system.properties");
             if (!sysPropFile.exists() || !sysPropFile.isFile()) {
-                LOG.error(new com.openexchange.java.StringAllocator("Missing property file \"system.properties\" in properties path \"").append(propDir).append('"').toString());
+                LOG.error("Missing property file \"system.properties\" in properties path \"{}{}", propDir, '"');
                 throw ServiceExceptionCode.SERVICE_INITIALIZATION_FAILED.create();
             }
             try {
@@ -115,7 +115,7 @@ public final class ServiceHolderInit implements Initialization {
                 /*
                  * Cannot occur due to the above check
                  */
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw ServiceExceptionCode.SERVICE_INITIALIZATION_FAILED.create();
             }
         }
@@ -130,17 +130,13 @@ public final class ServiceHolderInit implements Initialization {
                     try {
                         serviceUsageTimeout = Integer.parseInt(serviceUsageTimeoutStr);
                     } catch (final NumberFormatException e) {
-                        LOG.error("Invalid property value for \"serviceUsageTimeout\": " + serviceUsageTimeoutStr);
+                        LOG.error("Invalid property value for \"serviceUsageTimeout\": {}", serviceUsageTimeoutStr);
                         serviceUsageTimeout = Integer.parseInt(DEFAULT_TIMEOUT);
                     }
                     ServiceHolder.enableServiceUsageInspection(serviceUsageTimeout);
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Service usage inspection successfully enabled");
-                    }
+                    LOG.info("Service usage inspection successfully enabled");
                 } else {
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Service usage inspection not enabled");
-                    }
+                    LOG.info("Service usage inspection not enabled");
                 }
             } catch (final IOException e) {
                 throw ServiceExceptionCode.IO_ERROR.create();

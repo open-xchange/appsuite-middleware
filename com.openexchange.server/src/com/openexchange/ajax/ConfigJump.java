@@ -55,7 +55,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -64,7 +63,6 @@ import com.openexchange.configjump.Replacements;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -79,7 +77,7 @@ public class ConfigJump extends SessionServlet {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigJump.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigJump.class);
 
     /**
      * For serialization.
@@ -147,7 +145,7 @@ public class ConfigJump extends SessionServlet {
             });
             response.setData(url);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         }
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);

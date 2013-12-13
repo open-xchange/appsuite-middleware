@@ -33,4 +33,5 @@ Import-Package: com.openexchange.ajax,
  org.glassfish.grizzly.comet,
  org.glassfish.grizzly.http.server,
  org.json,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j

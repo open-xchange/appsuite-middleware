@@ -100,7 +100,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class OXFolderSQL {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OXFolderSQL.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXFolderSQL.class);
 
     /**
      * Initializes a new OXFolderSQL
@@ -1799,7 +1799,7 @@ public final class OXFolderSQL {
                         FolderCacheManager.getInstance().removeFolderObject(iter.next(), ctx);
                     }
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
             /*
@@ -1835,10 +1835,7 @@ public final class OXFolderSQL {
          * Finally deliver it
          */
         eventAdmin.sendEvent(event);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder(64).append("Notified ").append("content-related").append(
-                "-wise changed folder \"").append(fuid).append(" in context ").append(contextId).toString());
-        }
+        LOG.debug("Notified content-related-wise changed folder \"{} in context {}", fuid, contextId);
     }
 
     private static final String SQL_DELETE_PERMS = "DELETE FROM " + TMPL_PERM_TABLE + " WHERE cid = ? AND fuid = ? AND permission_id = ?";
@@ -1926,7 +1923,7 @@ public final class OXFolderSQL {
                         deleteSingleEntityPermission(entity, fuid, permTable, wc, ctx);
                         updateSingleEntityPermission(mergedPerm, mailAdmin, fuid, permTable, wc, ctx);
                     } catch (final Exception e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                         continue Next;
                     }
                 } else {
@@ -1938,7 +1935,7 @@ public final class OXFolderSQL {
                     try {
                         executeUpdate(stmt);
                     } catch (final SQLException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                         continue Next;
                     } finally {
                         stmt.close();
@@ -2156,7 +2153,7 @@ public final class OXFolderSQL {
                         FolderCacheManager.getInstance().removeFolderObject(iterator.next(), ctx);
                     }
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
             /*
@@ -2203,7 +2200,7 @@ public final class OXFolderSQL {
                         FolderCacheManager.getInstance().removeFolderObject(iterator.next(), ctx);
                     }
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
             /*
@@ -2409,8 +2406,7 @@ public final class OXFolderSQL {
         } catch (final SQLException e) {
             if ("MySQLSyntaxErrorException".equals(e.getClass().getSimpleName())) {
                 final String sql = stmt.toString();
-                LOG.error(new StringBuilder().append("\nFollowing SQL query contains syntax errors:\n").append(
-                    sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.error("\nFollowing SQL query contains syntax errors:\n{}", sql.substring(sql.indexOf(": ") + 2));
             }
             throw e;
         }
@@ -2422,8 +2418,7 @@ public final class OXFolderSQL {
         } catch (final SQLException e) {
             if ("MySQLSyntaxErrorException".equals(e.getClass().getSimpleName())) {
                 final String sql = stmt.toString();
-                LOG.error(new StringBuilder().append("\nFollowing SQL query contains syntax errors:\n").append(
-                    sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.error("\nFollowing SQL query contains syntax errors:\n{}", sql.substring(sql.indexOf(": ") + 2));
             }
             throw e;
         }
@@ -2435,8 +2430,7 @@ public final class OXFolderSQL {
         } catch (final SQLException e) {
             if ("MySQLSyntaxErrorException".equals(e.getClass().getSimpleName())) {
                 final String sql = stmt.toString();
-                LOG.error(new StringBuilder().append("\nFollowing SQL query contains syntax errors:\n").append(
-                    sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.error("\nFollowing SQL query contains syntax errors:\n{}", sql.substring(sql.indexOf(": ") + 2));
             }
             throw e;
         }

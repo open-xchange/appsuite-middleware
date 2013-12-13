@@ -54,8 +54,6 @@ import java.util.Date;
 import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.cookie.CookieSpecBase;
 import org.apache.commons.httpclient.cookie.MalformedCookieException;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 
 /**
@@ -65,7 +63,7 @@ import com.openexchange.log.LogFactory;
  */
 public class CrawlerCookieSpec extends CookieSpecBase {
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CrawlerCookieSpec.class));
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CrawlerCookieSpec.class);
 
     public CrawlerCookieSpec(){
     }
@@ -75,8 +73,7 @@ public class CrawlerCookieSpec extends CookieSpecBase {
         boolean secure, final Cookie cookie)
         throws MalformedCookieException {
 
-        LOG.trace("enter CrawlerCookieSpec.validate("
-            + "String, port, path, boolean, Cookie)");
+        LOG.trace("enter CrawlerCookieSpec.validate(String, port, path, boolean, Cookie)");
         if (host == null) {
             throw new IllegalArgumentException(
                 "Host of origin may not be null");

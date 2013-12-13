@@ -50,14 +50,12 @@
 package com.openexchange.admin.user.copy.osgi;
 
 import java.rmi.Remote;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.user.copy.rmi.impl.OXUserCopy;
-import com.openexchange.log.LogFactory;
 import com.openexchange.user.copy.UserCopyService;
 
 /**
@@ -67,7 +65,7 @@ import com.openexchange.user.copy.UserCopyService;
  */
 public class RMIUserCopyRegisterer implements ServiceTrackerCustomizer<UserCopyService,UserCopyService> {
 
-    private static final Log LOG = LogFactory.getLog(RMIUserCopyRegisterer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RMIUserCopyRegisterer.class);
 
     private final BundleContext context;
 
@@ -86,7 +84,7 @@ public class RMIUserCopyRegisterer implements ServiceTrackerCustomizer<UserCopyS
             registration = context.registerService(Remote.class, userCopy, null);
             LOG.info("RMI Interface for usercopy bundle bound to RMI registry");
         } catch (final StorageException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return service;
     }
@@ -106,7 +104,7 @@ public class RMIUserCopyRegisterer implements ServiceTrackerCustomizer<UserCopyS
             }
             context.ungetService(reference);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 }

@@ -52,8 +52,6 @@ package com.openexchange.webdav.protocol.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
@@ -64,7 +62,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
 
 public final class DummyResourceManager implements WebdavFactory {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DummyResourceManager.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DummyResourceManager.class);
 	private static final DummyResourceManager INSTANCE = new DummyResourceManager();
 
 	public static DummyResourceManager getInstance(){

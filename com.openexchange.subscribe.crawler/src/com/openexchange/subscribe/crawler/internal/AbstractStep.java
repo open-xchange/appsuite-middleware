@@ -55,7 +55,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.TypeVariable;
-import org.apache.commons.logging.Log;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.exception.OXException;
@@ -64,7 +63,7 @@ import com.openexchange.subscribe.crawler.Workflow;
 
 public abstract class AbstractStep<O,I> implements Step<O,I>{
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractStep.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractStep.class);
 
     protected String description;
 
@@ -179,7 +178,7 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
           }
           //windows: iexplore http://www.example.com
         } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             Streams.close(output);
         }

@@ -78,7 +78,7 @@ import com.openexchange.server.Initialization;
  */
 public final class HttpManagersInit implements Initialization {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HttpManagersInit.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpManagersInit.class);
 
     private static final HttpManagersInit instance = new HttpManagersInit();
 
@@ -107,27 +107,23 @@ public final class HttpManagersInit implements Initialization {
             // Do nothing
         }
         if (!started.compareAndSet(false, true)) {
-            LOG.error(this.getClass().getName() + " already started");
+            LOG.error("{} already started", this.getClass().getName());
             return;
         }
         initServletMappings(false);
         HttpSessionManagement.init();
-        if (LOG.isInfoEnabled()) {
-            LOG.info("HTTP servlet manager successfully initialized");
-        }
+        LOG.info("HTTP servlet manager successfully initialized");
     }
 
     @Override
     public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
-            LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");
+            LOG.error("{} cannot be stopped since it has not been started before", this.getClass().getName());
             return;
         }
         HttpSessionManagement.reset();
         HttpServletManager.shutdownHttpServletManager();
-        if (LOG.isInfoEnabled()) {
-            LOG.info("HTTP servlet manager successfully stopped");
-        }
+        LOG.info("HTTP servlet manager successfully stopped");
     }
 
     private void initServletMappings(final boolean readFromFile) throws OXException {
@@ -208,33 +204,27 @@ public final class HttpManagersInit implements Initialization {
     private static void addServletClass(final String name, final String className, final Map<String, Constructor<?>> servletConstructorMap) {
         try {
             if (!checkServletPath(name)) {
-                LOG.error(new com.openexchange.java.StringAllocator("Invalid servlet path: ").append(name).toString());
+                LOG.error("Invalid servlet path: {}", name);
                 return;
             }
             if (servletConstructorMap.containsKey(name)) {
                 final boolean isEqual = servletConstructorMap.get(name).toString().indexOf(className) != -1;
-                if (!isEqual && LOG.isWarnEnabled()) {
+                if (!isEqual) {
                     final OXException e = OXServletException.Code.ALREADY_PRESENT.create(name, servletConstructorMap.get(name), className);
-                    LOG.warn(e.getMessage(), e);
+                    LOG.warn("", e);
                 }
             } else {
                 servletConstructorMap.put(name, Class.forName(className).getConstructor(CLASS_ARR));
             }
         } catch (final SecurityException e) {
-            if (LOG.isWarnEnabled()) {
-                final OXException se = OXServletException.Code.SECURITY_ERR.create(e, className);
-                LOG.warn(se.getMessage(), se);
-            }
+            final OXException se = OXServletException.Code.SECURITY_ERR.create(e, className);
+            LOG.warn("", se);
         } catch (final ClassNotFoundException e) {
-            if (LOG.isWarnEnabled()) {
-                final OXException se = OXServletException.Code.CLASS_NOT_FOUND.create(e, className);
-                LOG.warn(se.getMessage(), se);
-            }
+            final OXException se = OXServletException.Code.CLASS_NOT_FOUND.create(e, className);
+            LOG.warn("", se);
         } catch (final NoSuchMethodException e) {
-            if (LOG.isWarnEnabled()) {
-                final OXException se = OXServletException.Code.NO_DEFAULT_CONSTRUCTOR.create(e, className);
-                LOG.warn(se.getMessage(), se);
-            }
+            final OXException se = OXServletException.Code.NO_DEFAULT_CONSTRUCTOR.create(e, className);
+            LOG.warn("", se);
         }
     }
 

@@ -55,7 +55,6 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -65,7 +64,6 @@ import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -78,7 +76,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class TaskClearDelTablesTasks extends UpdateTaskAdapter {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TaskClearDelTablesTasks.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TaskClearDelTablesTasks.class);
 
     /**
      * Initializes a new {@link TaskClearDelTablesTasks}.
@@ -101,7 +99,7 @@ public final class TaskClearDelTablesTasks extends UpdateTaskAdapter {
             connection.setAutoCommit(false);
             LOG.info("Clearing obsolete fields in 'del_task'...");
             int cleared = clearDeletedTasks(connection);
-            LOG.info("Cleared " + cleared + " rows in 'del_task'.");
+            LOG.info("Cleared {} rows in 'del_task'.", cleared);
             connection.commit();
         } catch (SQLException e) {
             rollback(connection);

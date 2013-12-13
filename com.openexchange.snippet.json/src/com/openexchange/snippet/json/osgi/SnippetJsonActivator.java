@@ -49,7 +49,6 @@
 
 package com.openexchange.snippet.json.osgi;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityService;
@@ -79,7 +78,7 @@ public class SnippetJsonActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.loggerFor(SnippetJsonActivator.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SnippetJsonActivator.class);
 
         final RankingAwareNearRegistryServiceTracker<SnippetService> snippetServiceRegistry = new RankingAwareNearRegistryServiceTracker<SnippetService>(context, SnippetService.class);
         rememberTracker(snippetServiceRegistry);
@@ -94,6 +93,6 @@ public class SnippetJsonActivator extends AJAXModuleActivator {
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
-        com.openexchange.log.Log.loggerFor(SnippetJsonActivator.class).info("Bundle stopped: com.openexchange.snippet.json");
+        org.slf4j.LoggerFactory.getLogger(SnippetJsonActivator.class).info("Bundle stopped: com.openexchange.snippet.json");
     }
 }

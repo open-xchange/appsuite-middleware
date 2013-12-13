@@ -29,7 +29,7 @@ import org.apache.solr.common.util.NamedList;
 @Deprecated
 public class DisMaxParams extends CommonParams implements org.apache.solr.common.params.DisMaxParams {
 
-  public static Logger log = LoggerFactory.getLogger(DisMaxParams.class);
+  public static org.slf4j.Logger log = LoggerFactory.getLogger(DisMaxParams.class);
 
 
   /** query and init param for filtering query

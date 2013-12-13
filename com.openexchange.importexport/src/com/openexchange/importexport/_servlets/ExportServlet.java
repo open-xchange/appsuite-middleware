@@ -76,7 +76,7 @@
 //    /**
 //     * Logger.
 //     */
-//    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExportServlet.class));
+//    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExportServlet.class);
 //
 //    private static final long serialVersionUID = -4391378107330348835L;
 //
@@ -117,7 +117,7 @@
 //                outputStream.flush();
 //            }
 //        } catch (final OXException e) {
-//            LOG.error(e.getMessage(), e);
+//            LOG.error("", e);
 //        }
 //    }
 //}

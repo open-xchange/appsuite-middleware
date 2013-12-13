@@ -72,8 +72,8 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
 
-    protected static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CoyoteSocketHandler.class));
+    protected static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(CoyoteSocketHandler.class);
 
     /**
      * The atomic boolean to track started status.
@@ -130,7 +130,7 @@ public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
         try {
             tmp = new AJPv13TaskMonitor();
         } catch (final NotCompliantMBeanException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         listenerMonitor = tmp;
         readTimeout = AJPv13Config.getAJPListenerReadTimeout();

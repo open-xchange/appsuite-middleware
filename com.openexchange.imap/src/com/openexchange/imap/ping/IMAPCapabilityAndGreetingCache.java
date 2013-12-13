@@ -76,8 +76,8 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
  */
 public final class IMAPCapabilityAndGreetingCache {
 
-    static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPCapabilityAndGreetingCache.class));
+    static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(IMAPCapabilityAndGreetingCache.class);
 
     private static volatile ConcurrentMap<String, Future<CapabilityAndGreeting>> MAP;
 
@@ -334,7 +334,7 @@ public final class IMAPCapabilityAndGreetingCache {
                     try {
                         s.close();
                     } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }
@@ -351,7 +351,7 @@ public final class IMAPCapabilityAndGreetingCache {
             try {
                 port = Integer.parseInt(serverUrl.substring(pos + 1).trim());
             } catch (final NumberFormatException e) {
-                LOG.error("Port cannot be parsed to integer: " + serverUrl, e);
+                LOG.error("Port cannot be parsed to integer: {}", serverUrl, e);
                 port = 143;
             }
         } else {

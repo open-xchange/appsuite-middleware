@@ -77,8 +77,6 @@ import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -95,7 +93,7 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class ReportingMBean implements DynamicMBean {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReportingMBean.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReportingMBean.class);
 
     private final String[] totalNames = { "contexts", "users" };
 
@@ -146,7 +144,7 @@ public class ReportingMBean implements DynamicMBean {
             userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
             configurationService = ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe,e.getMessage());
         }
@@ -171,7 +169,7 @@ public class ReportingMBean implements DynamicMBean {
                 try {
                     connection = dbService.get(readPool, schema);
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     throw new MBeanException(e, "Couldn't get connection to schema " + schema + " in pool " + readPool + ".");
                 }
                 PreparedStatement stmt = null;
@@ -220,7 +218,7 @@ public class ReportingMBean implements DynamicMBean {
                         }
                     }
                 } catch (final SQLException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     throw new MBeanException(e, e.getMessage());
                 } finally {
                     DBUtils.closeSQLStuff(rs, stmt);
@@ -229,14 +227,14 @@ public class ReportingMBean implements DynamicMBean {
             }
             return allctx;
         } catch (final MBeanException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe,e.getMessage());
         } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe,e.getMessage());
         }
@@ -255,7 +253,7 @@ public class ReportingMBean implements DynamicMBean {
                 try {
                     connection = dbService.get(readPool, schema);
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     throw new MBeanException(e, "Couldn't get connection to schema " + schema + " in pool " + readPool + ".");
                 }
                 PreparedStatement stmt = null;
@@ -270,7 +268,7 @@ public class ReportingMBean implements DynamicMBean {
                     rs.close();
                     stmt.close();
                 } catch (final SQLException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     throw new MBeanException(e, e.getMessage());
                 } finally {
                     DBUtils.closeSQLStuff(rs, stmt);
@@ -282,18 +280,18 @@ public class ReportingMBean implements DynamicMBean {
             total.put(value);
             return total;
         } catch (final MBeanException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (OpenDataException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe,e.getMessage());
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe,e.getMessage());
         } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe,e.getMessage());
         }
@@ -313,7 +311,7 @@ public class ReportingMBean implements DynamicMBean {
                 try {
                     connection = dbService.get(readPool, schema);
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     throw new MBeanException(e, "Couldn't get connection to schema " + schema + " in pool " + readPool + ".");
                 }
                 PreparedStatement stmt = null;
@@ -345,7 +343,7 @@ public class ReportingMBean implements DynamicMBean {
                     rs.close();
                     stmt.close();
                 } catch (final SQLException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     throw new MBeanException(e, e.getMessage());
                 } finally {
                     DBUtils.closeSQLStuff(rs, stmt);
@@ -359,18 +357,18 @@ public class ReportingMBean implements DynamicMBean {
             }
             return total;
         } catch (final MBeanException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (OpenDataException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe,e.getMessage());
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe,e.getMessage());
         } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe,e.getMessage());
         }
@@ -405,15 +403,15 @@ public class ReportingMBean implements DynamicMBean {
                 detail.put(value);
             }
         } catch (final OpenDataException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe);
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe);
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             final Exception wrapMe = new Exception(t.getMessage());
             throw new MBeanException(wrapMe);
         }
@@ -525,7 +523,7 @@ public class ReportingMBean implements DynamicMBean {
             return new OpenMBeanInfoSupport(this.getClass().getName(), "Context and user reporting.", new OpenMBeanAttributeInfo[] {
                 totalAttribute, macsAttribute, detailAttribute }, null, null, null);
         } catch (final OpenDataException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return null;
     }

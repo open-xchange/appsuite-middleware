@@ -54,8 +54,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -81,7 +79,7 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
 
     private String titleExceptionsRegex, linkToTargetPage;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactObjectsByHTMLAnchorsAndPagePartSequenceStep.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactObjectsByHTMLAnchorsAndPagePartSequenceStep.class);
 
     private boolean addPagesTogether;
 
@@ -141,7 +139,7 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
                     String pageAsString = page.getWebResponse().getContentAsString() + additionalPageString;
                     final String pageString = StringEscapeUtils.unescapeHtml(pageAsString);
                     pageParts.setPage(pageString);
-                    LOG.debug("Page evaluated is : "+pageString);
+                    LOG.debug("Page evaluated is : {}", pageString);
                     final HashMap<String, String> map = pageParts.retrieveInformation();
 
                     final Contact contact = Mappings.translateMapToContact(map);
@@ -153,10 +151,7 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
             } catch (final VersitException e) {
                 exception = e;
             } catch (final ConverterException e) {
-                LOG.error(e.getMessage()
-                    + " for Context : " + workflow.getSubscription().getContext().getContextId()
-                    + ", User : " + workflow.getSubscription().getUserId()
-                    + ", Folder : " + workflow.getSubscription().getFolderId() + ".");
+                LOG.error("{} for Context : {}, User : {}, Folder : {}.", e.getMessage(), workflow.getSubscription().getContext().getContextId(), workflow.getSubscription().getUserId(), workflow.getSubscription().getFolderId());
 
                 exception = e;
             } catch (final IOException e) {

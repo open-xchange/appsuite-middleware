@@ -79,7 +79,7 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
  */
 public final class InlineContentHandler implements MailMessageHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(InlineContentHandler.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InlineContentHandler.class);
 
     private final int size;
 
@@ -264,7 +264,7 @@ public final class InlineContentHandler implements MailMessageHandler {
                 throw MimeMailException.handleMessagingException(e);
             }
         } else {
-            LOG.error("Ignoring nested message. Cannot handle part's content which should be a RFC822 message according to its content type: " + (null == content ? "null" : content.getClass().getSimpleName()));
+            LOG.error("Ignoring nested message. Cannot handle part's content which should be a RFC822 message according to its content type: {}", (null == content ? "null" : content.getClass().getSimpleName()));
             return true;
         }
         final InlineContentHandler handler = new InlineContentHandler(cids, inlineContents);

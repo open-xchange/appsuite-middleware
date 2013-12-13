@@ -65,8 +65,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -118,11 +116,9 @@ public class RdbParticipantStorage extends ParticipantStorage {
                     /*
                      * Duplicate address
                      */
-                    final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbParticipantStorage.class));
-                    if (logger.isWarnEnabled()) {
-                        final OXException e = OXCalendarExceptionCodes.DUPLICATE_EXTERNAL_PARTICIPANT.create(emailAddress);
-                        logger.warn(e.getMessage());
-                    }
+                    final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RdbParticipantStorage.class);
+                    final OXException e = OXCalendarExceptionCodes.DUPLICATE_EXTERNAL_PARTICIPANT.create(emailAddress);
+                    logger.warn(e.getMessage());
                 }
             }
             stmt.executeBatch();

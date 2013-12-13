@@ -74,7 +74,7 @@ import com.openexchange.pop3.storage.POP3StoragePropertyNames;
  */
 public class POP3StorageUtil {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(POP3StorageUtil.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(POP3StorageUtil.class);
 
     /**
      * Initializes a new {@link POP3StorageUtil}.
@@ -551,7 +551,7 @@ public class POP3StorageUtil {
         try {
             return Integer.parseInt(seconds.toString());
         } catch (final NumberFormatException e) {
-            LOG.warn("LOGIN-DELAY seconds cannot be parsed to an integer: " + capabilities, e);
+            LOG.warn("LOGIN-DELAY seconds cannot be parsed to an integer: {}", capabilities, e);
             return -1;
         }
     }

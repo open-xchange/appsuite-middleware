@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 
@@ -63,7 +62,7 @@ import com.openexchange.java.Charsets;
  */
 final class POTokenStream {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(POTokenStream.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(POTokenStream.class);
 
     private final InputStream stream;
 
@@ -90,10 +89,7 @@ final class POTokenStream {
         try {
             this.charset = Charset.forName(charset);
         } catch (final java.nio.charset.UnsupportedCharsetException e) {
-            // Invalid charset
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Unsupported charset: \"" + charset + "\". Therefore using fall-back \"UTF-8\". Forgot to replace header appropriately?");
-            }
+            LOG.warn("Unsupported charset: \"{}\". Therefore using fall-back \"UTF-8\". Forgot to replace header appropriately?", charset);
             this.charset = Charsets.UTF_8;
         }
     }

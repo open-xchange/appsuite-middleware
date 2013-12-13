@@ -62,13 +62,11 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.msn.osgi.MSNOAuthActivator;
@@ -83,7 +81,7 @@ public class MSNServiceImpl implements MSNService {
 
     private final MSNOAuthActivator activator;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MSNServiceImpl.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MSNServiceImpl.class);
 
     public MSNServiceImpl(final MSNOAuthActivator activator){
         this.activator = activator;
@@ -103,7 +101,7 @@ public class MSNServiceImpl implements MSNService {
             contacts = parseIntoContacts(wrap_access_token, response);
 
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
 
         return contacts;
@@ -129,11 +127,11 @@ public class MSNServiceImpl implements MSNService {
             wholeResponse = new JSONObject(response);
 
         } catch (final HttpException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return wholeResponse;
     }
@@ -231,7 +229,7 @@ public class MSNServiceImpl implements MSNService {
             	contacts.add(c);
             }
         } catch (JSONException x) {
-        	LOG.error(x);
+        	LOG.error("", x);
         }
 
         return contacts;
@@ -266,13 +264,13 @@ public class MSNServiceImpl implements MSNService {
             final String response = URLDecoder.decode(postMethod.getResponseBodyAsString(), "UTF-8");
             return new JSONObject(response).getString("access_token");
         } catch (final UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final HttpException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
 		}
         return accessToken;
     }
@@ -285,7 +283,7 @@ public class MSNServiceImpl implements MSNService {
             final OAuthAccount account = oAuthService.getAccount(accountId, session, user, contextId);
             displayName = account.getDisplayName();
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return displayName;
     }

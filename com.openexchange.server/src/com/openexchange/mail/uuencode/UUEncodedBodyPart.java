@@ -58,7 +58,7 @@ import javax.mail.internet.MimeUtility;
 
 public class UUEncodedBodyPart {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UUEncodedBodyPart.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UUEncodedBodyPart.class);
 
     private static final String BEGIN = "begin";
 
@@ -121,12 +121,12 @@ public class UUEncodedBodyPart {
                 /*
                  * there are no more tokens in this tokenizer's string
                  */
-                LOG.error(nsee.getMessage(), nsee);
+                LOG.error("", nsee);
             } catch (final NumberFormatException nfe) {
                 /*
                  * possibleFileSize was non-numeric
                  */
-                LOG.error(nfe.getMessage(), nfe);
+                LOG.error("", nfe);
             }
         }
         return false;

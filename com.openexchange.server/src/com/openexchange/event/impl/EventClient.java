@@ -58,7 +58,6 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.context.ContextService;
@@ -79,7 +78,6 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -91,7 +89,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  */
 public class EventClient {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EventClient.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventClient.class);
 
     public static final int CREATED = 5;
     public static final int CHANGED = 6;

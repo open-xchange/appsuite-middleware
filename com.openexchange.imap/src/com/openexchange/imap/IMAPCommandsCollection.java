@@ -154,9 +154,7 @@ public final class IMAPCommandsCollection {
 
     private static final String STR_FETCH = "FETCH";
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPCommandsCollection.class));
-
-    static final boolean DEBUG = LOG.isDebugEnabled();
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPCommandsCollection.class);
 
     /**
      * Prevent instantiation.
@@ -316,9 +314,7 @@ public final class IMAPCommandsCollection {
                     /*
                      * Either creation or deletion of temporary folder failed. Assume maildir folder format.
                      */
-                    if (DEBUG) {
-                        LOG.debug("Either creation or deletion of temporary folder failed. Assume maildir folder format.", e);
-                    }
+                    LOG.debug("Either creation or deletion of temporary folder failed. Assume maildir folder format.", e);
                     return Boolean.valueOf((((type & Folder.HOLDS_MESSAGES) > 0)) && ((type & Folder.HOLDS_FOLDERS) > 0));
                 }
             }
@@ -1262,7 +1258,7 @@ public final class IMAPCommandsCollection {
                 }
             });
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -1363,9 +1359,9 @@ public final class IMAPCommandsCollection {
             field.setAccessible(true);
             field.set(folder, null);
         } catch (final NoSuchFieldException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final IllegalAccessException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         new ExtendedIMAPFolder(folder, folder.getSeparator()).triggerNotifyFolderListeners(FolderEvent.RENAMED);
     }
@@ -1672,9 +1668,7 @@ public final class IMAPCommandsCollection {
 
             });
         } catch (final MessagingException e) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(e.getMessage(), e);
-            }
+            LOG.trace("", e);
         }
     }
 
@@ -1703,9 +1697,7 @@ public final class IMAPCommandsCollection {
 
             });
         } catch (final MessagingException e) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(e.getMessage(), e);
-            }
+            LOG.trace("", e);
         }
     }
 
@@ -1731,9 +1723,7 @@ public final class IMAPCommandsCollection {
 
             });
         } catch (final MessagingException e) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(e.getMessage(), e);
-            }
+            LOG.trace("", e);
         }
     }
 
@@ -1810,7 +1800,7 @@ public final class IMAPCommandsCollection {
                                 try {
                                     sia.append(Integer.parseInt(num));
                                 } catch (final NumberFormatException e) {
-                                    LOG.error(e.getMessage(), e);
+                                    LOG.error("", e);
                                     throw wrapException(e, "Invalid Message Number: " + num);
                                 }
                             }
@@ -2101,12 +2091,7 @@ public final class IMAPCommandsCollection {
                         throw ((FolderClosedException) cause);
                     }
                 }
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn(
-                        new StringAllocator(64).append("UID EXPUNGE failed: ").append(e.getMessage()).append(
-                            ".\nPerforming fallback actions.").toString(),
-                        e);
-                }
+                LOG.warn("UID EXPUNGE failed: {0}.\nPerforming fallback actions.", e.getMessage(), e);
                 performFallback = true;
             }
         }
@@ -2169,7 +2154,7 @@ public final class IMAPCommandsCollection {
             });
             return val.booleanValue();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw IMAPException.create(IMAPException.Code.FAILED_READ_ONLY_CHECK, e, new Object[0]);
         }
     }
@@ -2232,7 +2217,7 @@ public final class IMAPCommandsCollection {
                 }
             })).booleanValue();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw IMAPException.create(IMAPException.Code.FAILED_READ_ONLY_CHECK, e, new Object[0]);
         }
     }
@@ -2543,11 +2528,7 @@ public final class IMAPCommandsCollection {
                         p.handleResult(response);
                     }
                 }
-                if (DEBUG) {
-                    LOG.debug(new StringAllocator(128).append(imapFolder.getFullName()).append(
-                        ": IMAP resolve fetch >>>UID FETCH ... (UID)<<< for ").append(length).append(" messages took ").append(
-                        (System.currentTimeMillis() - start)).append("msec").toString());
-                }
+                LOG.debug("{}: IMAP resolve fetch >>>UID FETCH ... (UID)<<< for {} messages took {}msec", imapFolder.getFullName(), length, (System.currentTimeMillis() - start));
                 final int[] retval = new int[length];
                 for (int i = 0; i < retval.length; i++) {
                     final int seqNum = seqNumMap.get(uids[i]);
@@ -2624,11 +2605,7 @@ public final class IMAPCommandsCollection {
                         p.handleResult(response);
                     }
                 }
-                if (DEBUG) {
-                    LOG.debug(new StringAllocator(128).append(imapFolder.getFullName()).append(
-                        ": IMAP resolve fetch >>>UID FETCH ... (UID)<<< for ").append(uids.length).append(" messages took ").append(
-                        (System.currentTimeMillis() - start)).append("msec").toString());
-                }
+                LOG.debug("{}: IMAP resolve fetch >>>UID FETCH ... (UID)<<< for {} messages took {}msec", imapFolder.getFullName(), uids.length, (System.currentTimeMillis() - start));
                 return uid2seqNum;
             }
         }));

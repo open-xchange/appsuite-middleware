@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.configuration.clt overrides" basedir=".">
+
+    <description>
+        This build file uses the prepare target to copy the source resources to the binary directory.
+    </description>
+
+    <import file="build-clt.xml"/>
+
+    <target name="prepare">
+        <copy todir="${binDir}">
+            <fileset dir="${srcDir}">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+
+</project>

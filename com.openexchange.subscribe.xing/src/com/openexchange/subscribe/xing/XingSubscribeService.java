@@ -65,7 +65,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.activation.FileTypeMap;
-import org.apache.commons.logging.Log;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
@@ -99,7 +98,7 @@ import com.openexchange.xing.exception.XingUnlinkedException;
  */
 public class XingSubscribeService extends AbstractSubscribeService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(XingSubscribeService.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(XingSubscribeService.class);
 
     private final ServiceLookup services;
     private final SubscriptionSource source;
@@ -189,7 +188,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
                 if (accountId != null) {
                     subscription.getConfiguration().put("account", accountId.toString());
                 } else {
-                    LOG.error("subscription.getConfiguration().get(\"account\") is null. Complete configuration is : " + subscription.getConfiguration());
+                    LOG.error("subscription.getConfiguration().get(\"account\") is null. Complete configuration is : {}", subscription.getConfiguration());
                 }
             } else {
                 LOG.error("subscription.getConfiguration() is null");

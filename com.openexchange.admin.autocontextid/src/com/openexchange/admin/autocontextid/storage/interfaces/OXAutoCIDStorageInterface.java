@@ -51,8 +51,6 @@ package com.openexchange.admin.autocontextid.storage.interfaces;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.admin.autocontextid.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.autocontextid.tools.AdminCacheExtended;
 import com.openexchange.admin.autocontextid.tools.PropertyHandlerExtended;
@@ -70,7 +68,7 @@ public abstract class OXAutoCIDStorageInterface {
      */
     private static Class<? extends OXAutoCIDStorageInterface> implementingClass;
 
-    private static final Log log = LogFactory.getLog(OXAutoCIDStorageInterface.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXAutoCIDStorageInterface.class);
 
     protected static AdminCacheExtended cache = null;
 
@@ -96,12 +94,12 @@ public abstract class OXAutoCIDStorageInterface {
                     try {
                         implementingClass = Class.forName(className).asSubclass(OXAutoCIDStorageInterface.class);
                     } catch (final ClassNotFoundException e) {
-                        log.error(e.getMessage(), e);
+                        log.error("", e);
                         throw new StorageException(e);
                     }
                 } else {
                     final StorageException storageException = new StorageException("Property for reseller_storage not defined");
-                    log.error(storageException.getMessage(), storageException);
+                    log.error("", storageException);
                     throw storageException;
                 }
             }
@@ -111,22 +109,22 @@ public abstract class OXAutoCIDStorageInterface {
             cons = implementingClass.getConstructor(new Class[] {});
             return cons.newInstance(new Object[] {});
         } catch (final SecurityException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         } catch (final NoSuchMethodException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         } catch (final IllegalArgumentException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         } catch (final InstantiationException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         } catch (final IllegalAccessException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         } catch (final InvocationTargetException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         }
     }

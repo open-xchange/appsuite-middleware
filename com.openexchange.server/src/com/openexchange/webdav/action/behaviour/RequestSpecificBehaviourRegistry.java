@@ -54,13 +54,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.action.WebdavRequest;
 
 public class RequestSpecificBehaviourRegistry {
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RequestSpecificBehaviourRegistry.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RequestSpecificBehaviourRegistry.class);
 
 
 	//Generic-o-rama! Is it just me or does Java start to gain the same aesthetic appeal as c++?
@@ -100,19 +98,19 @@ public class RequestSpecificBehaviourRegistry {
 	}
 
 	public void log() {
-		if(LOG.isInfoEnabled()) {
-			int sum = 0;
-			for(final Map.Entry<Class<? extends Object>, List<Behaviour>> entry : registry.entrySet()) {
-				sum += entry.getValue().size();
-			}
-			LOG.info("Using "+sum+" overrides for WebDAV");
-		}
+		LOG.info("Using {} overrides for WebDAV", new Object() { @Override public String toString() {
+            int sum = 0;
+            for(final Map.Entry<Class<? extends Object>, List<Behaviour>> entry : registry.entrySet()) {
+                sum += entry.getValue().size();
+            }
+            return Integer.toString(sum);
+        }});
 
 		if(LOG.isDebugEnabled()) {
 			LOG.debug("Overrides for WebDAV:");
 			for(final Map.Entry<Class<? extends Object>, List<Behaviour>> entry : registry.entrySet()) {
 				for(final Behaviour behaviour : entry.getValue()) {
-					LOG.debug(behaviour+" provides override for "+entry.getKey());
+					LOG.debug("{} provides override for {}", behaviour, entry.getKey());
 				}
 			}
 		}

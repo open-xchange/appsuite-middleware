@@ -51,8 +51,6 @@ package com.openexchange.subscribe.crawler;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
@@ -74,7 +72,7 @@ public class PageByLinkRegexStep extends AbstractStep<HtmlPage, HtmlPage>{
 
     protected boolean executedSuccessfully;
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PageByLinkRegexStep.class));
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PageByLinkRegexStep.class);
 
     public PageByLinkRegexStep() {
         super();
@@ -103,9 +101,9 @@ public class PageByLinkRegexStep extends AbstractStep<HtmlPage, HtmlPage>{
             if (output != null) {
                 executedSuccessfully = true;
             } else {
-                LOG.error("The expected link was not on this page. Expectation was something matching this: "+ linkRegex);
+                LOG.error("The expected link was not on this page. Expectation was something matching this: {}", linkRegex);
                 for (final HtmlAnchor link : input.getAnchors()) {
-                    LOG.debug("Available Link : " + link.getHrefAttribute());
+                    LOG.debug("Available Link : {}", link.getHrefAttribute());
                 }
             }
 

@@ -76,7 +76,7 @@ import com.openexchange.session.Session;
  */
 public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, TtlAware {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ManagedFileImpl.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagedFileImpl.class);
 
     private final ManagedFileManagementImpl management;
     private final String id;
@@ -98,10 +98,10 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
     private final int optTtl;
 
 
-    
+
     /**
      * Initializes a new {@link ManagedFileImpl}.
-     * 
+     *
      * @param id The unique ID
      * @param file The kept file
      */
@@ -184,8 +184,8 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
                     frl.removePerformed(file);
                 }
             }
-            if (!file.delete() && LOG.isWarnEnabled()) {
-                LOG.warn("Temporary file could not be deleted: " + file.getPath());
+            if (!file.delete()) {
+                LOG.warn("Temporary file could not be deleted: {}", file.getPath());
             }
         }
         management.removeFromFiles(id);
@@ -227,7 +227,7 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
         }
         touch();
         try {
-            final CallbackInputStream retval = new CallbackInputStream(new BufferedInputStream(new FileInputStream(file)), this);
+            final CallbackInputStream retval = new CallbackInputStream(new BufferedInputStream(new FileInputStream(file), 65536), this);
             listeners.offer(retval);
             return retval;
         } catch (final FileNotFoundException e) {

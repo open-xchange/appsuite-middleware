@@ -130,7 +130,7 @@ public final class MIMEStructureHandler implements StructureHandler {
     /**
      * The logger.
      */
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MIMEStructureHandler.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MIMEStructureHandler.class);
 
     private static final MailDateFormat MAIL_DATE_FORMAT;
 
@@ -403,7 +403,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         } catch (final Exception e) {
             final Throwable t =
                 new Throwable(new StringBuilder("Unable to fetch content-type for '").append(filename).append("': ").append(e).toString());
-            LOG.warn(t.getMessage(), t);
+            LOG.warn("", t);
         }
         /*
          * Dummy headers
@@ -962,7 +962,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                     dateObject.put("utc", parsedDate.getTime());
                 }
             } catch (final ParseException pex) {
-                LOG.warn("Date string could not be parsed: " + date);
+                LOG.warn("Date string could not be parsed: {}", date);
             }
         }
         dateObject.put("date", date);
@@ -1003,12 +1003,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             }
             return addressList.toArray(new InternetAddress[addressList.size()]);
         } catch (final AddressException e) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(
-                    new com.openexchange.java.StringAllocator(128).append("Internet addresses could not be properly parsed: \"").append(e.getMessage()).append(
-                        "\". Using plain addresses' string representation instead.").toString(),
-                    e);
-            }
+            LOG.debug("Internet addresses could not be properly parsed: \"{}\". Using plain addresses' string representation instead.", e.getMessage(), e);
             return getAddressesOnParseError(addressStrings);
         }
     }
@@ -1024,10 +1019,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         } catch (final java.io.CharConversionException e) {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "US-ASCII";
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(charset).append(
-                    "\". Using fallback charset \"").append(fallback).append("\" instead."), e);
-            }
+            LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback, e);
             return MessageUtility.readMailPart(mailPart, fallback);
         }
     }
@@ -1037,22 +1029,13 @@ public final class MIMEStructureHandler implements StructureHandler {
         if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();
             if (!CharsetDetector.isValid(cs)) {
-                com.openexchange.java.StringAllocator sb = null;
-                if (null != cs) {
-                    sb = new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
-                }
+                final String prev = cs;
                 if (contentType.startsWith(PRIMARY_TEXT)) {
                     cs = CharsetDetector.detectCharset(mailPart.getInputStream());
-                    if (LOG.isWarnEnabled() && null != sb) {
-                        sb.append(" Using auto-detected encoding: \"").append(cs).append('"');
-                        LOG.warn(sb.toString());
-                    }
+                    LOG.warn("Illegal or unsupported encoding \"{}\". Using auto-detected encoding: \"{}\"", prev, cs);
                 } else {
                     cs = MailProperties.getInstance().getDefaultMimeCharset();
-                    if (LOG.isWarnEnabled() && null != sb) {
-                        sb.append(" Using fallback encoding: \"").append(cs).append('"');
-                        LOG.warn(sb.toString());
-                    }
+                    LOG.warn("Illegal or unsupported encoding \"{}\". Using fallback encoding:: \"{}\"", prev, cs);
                 }
             }
             charset = cs;
@@ -1073,10 +1056,7 @@ public final class MIMEStructureHandler implements StructureHandler {
         } catch (final java.io.CharConversionException e) {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "US-ASCII";
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(charset).append(
-                    "\". Using fallback charset \"").append(fallback).append("\" instead."), e);
-            }
+            LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback, e);
             return MessageUtility.readStream(isp.getInputStream(), fallback);
         }
     }

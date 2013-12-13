@@ -57,6 +57,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import org.slf4j.Logger;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.CacheKey;
@@ -66,8 +67,6 @@ import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link NotifyingCache}
@@ -79,13 +78,13 @@ import com.openexchange.log.LogFactory;
  */
 public class NotifyingCache implements Cache, CacheListener {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(NotifyingCache.class));
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(NotifyingCache.class);
 
     private static final AtomicReference<EventAdmin> EVENT_ADMIN_REF = new AtomicReference<EventAdmin>();
 
     /**
      * Sets the event admin.
-     * 
+     *
      * @param eventAdmin The event admin or <code>null</code>
      */
     public static void setEventAdmin(final EventAdmin eventAdmin) {
@@ -317,9 +316,7 @@ public class NotifyingCache implements Cache, CacheListener {
     @Override
     public void onEvent(Object sender, CacheEvent cacheEvent) {
         if (sender != this && null != cacheEvent) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("onEvent: " + cacheEvent);
-            }
+            LOG.debug("onEvent: {}", cacheEvent);
             try {
                 switch (cacheEvent.getOperation()) {
                 case INVALIDATE_GROUP:
@@ -335,10 +332,10 @@ public class NotifyingCache implements Cache, CacheListener {
                     locallyPostInvalidateEvent(cacheEvent);
                     break;
                 default:
-                    LOG.warn("Unknown cache event operation: " + cacheEvent.getOperation());
+                    LOG.warn("Unknown cache event operation: {}", cacheEvent.getOperation());
                 }
             } catch (OXException e) {
-                LOG.error("Error handling cache event: " + cacheEvent, e);
+                LOG.error("Error handling cache event: {}", cacheEvent, e);
             }
         }
     }
@@ -358,9 +355,7 @@ public class NotifyingCache implements Cache, CacheListener {
     private void fireInvalidateGroup(String groupName) {
         if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
             CacheEvent event = CacheEvent.INVALIDATE_GROUP(region, groupName);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("fireInvalidateGroup: " + event);
-            }
+            LOG.debug("fireInvalidateGroup: {}", event);
             eventService.notify(this, event);
         }
     }
@@ -372,9 +367,7 @@ public class NotifyingCache implements Cache, CacheListener {
     private void fireInvalidate(Serializable key, String groupName) {
         if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
             CacheEvent event = CacheEvent.INVALIDATE(region, groupName, key);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("fireInvalidate: " + event);
-            }
+            LOG.debug("fireInvalidate: {}", event);
             eventService.notify(this, event);
         }
     }

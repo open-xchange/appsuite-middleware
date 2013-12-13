@@ -52,14 +52,12 @@ package org.glassfish.grizzly.http.server;
 import static com.openexchange.tools.servlet.http.Cookies.extractDomainValue;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.nio.charset.Charset;
-import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.ThreadCache;
 import org.glassfish.grizzly.http.Cookie;
 import org.glassfish.grizzly.http.server.util.Globals;
 import org.glassfish.grizzly.utils.Charsets;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.tools.servlet.http.Cookies;
 
 /**
@@ -69,7 +67,7 @@ import com.openexchange.tools.servlet.http.Cookies;
  */
 public class OXRequest extends Request {
 
-    private static Log LOG = com.openexchange.log.Log.loggerFor(OXRequest.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXRequest.class);
 
     private static final GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
 
@@ -194,9 +192,7 @@ public class OXRequest extends Request {
         } else {
             String sessionId = createSessionID();
             registerNewSession(sessionId);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Set new JSessionId Cookie: " + sessionId);
-            }
+            LOG.debug("Set new JSessionId Cookie: {}", sessionId);
         }
         return session;
     }
@@ -220,10 +216,7 @@ public class OXRequest extends Request {
         session.setSessionTimeout(grizzlyConfig.getCookieMaxInactivityInterval() * 1000);
         sessions.put(sessionId, session);
         response.addCookie(createSessionCookie(sessionId));
-        if (LogProperties.isEnabled()) {
-            Props logProperties = LogProperties.getLogProperties();
-            logProperties.put(LogProperties.Name.GRIZZLY_HTTP_SESSION, sessionId);
-        }
+        LogProperties.put(LogProperties.Name.GRIZZLY_HTTP_SESSION, sessionId);
     }
 
     /**
@@ -232,9 +225,7 @@ public class OXRequest extends Request {
      * @param invalidSessionId The invalid sessionId requested by the browser/cookie
      */
     private void removeInvalidSessionCookie(String invalidSessionId) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Removing invalid JSessionId Cookie: " + invalidSessionId);
-        }
+        LOG.debug("Removing invalid JSessionId Cookie: {}", invalidSessionId);
         for (Cookie cookie : cookies) {
             if (cookie.getName().startsWith(Globals.SESSION_COOKIE_NAME)) {
                 if (cookie.getValue().equals(invalidSessionId)) {

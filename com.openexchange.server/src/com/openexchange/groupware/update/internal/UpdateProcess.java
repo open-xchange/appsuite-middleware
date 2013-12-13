@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.update.internal;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
@@ -64,7 +62,7 @@ import com.openexchange.groupware.update.SchemaUpdateState;
  */
 public class UpdateProcess implements Runnable {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UpdateProcess.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateProcess.class);
 
     private final int contextId;
 
@@ -89,9 +87,9 @@ public class UpdateProcess implements Runnable {
             }
             new UpdateExecutor(state, contextId, null).execute();
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
         }
     }
 }

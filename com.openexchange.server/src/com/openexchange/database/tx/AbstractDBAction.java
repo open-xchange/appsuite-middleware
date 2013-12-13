@@ -54,19 +54,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tx.AbstractUndoable;
 import com.openexchange.tx.UndoableAction;
 
 public abstract class AbstractDBAction extends AbstractUndoable implements UndoableAction {
 
-	static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractDBAction.class));
+	static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractDBAction.class);
 
 	private DBProvider provider = null;
 	private Context context = null;
@@ -160,9 +158,7 @@ public abstract class AbstractDBAction extends AbstractUndoable implements Undoa
 			stmt = writeCon.prepareStatement(sql);
 			fillStatement();
 			statementString = stmt.toString();
-			if(LOG.isTraceEnabled()) {
-				LOG.trace(statementString);
-			}
+			LOG.trace(statementString);
 			final int updated =  stmt.executeUpdate();
 			//System.out.println(String.format("%d ::: %s",updated,statementString));
 			return updated;

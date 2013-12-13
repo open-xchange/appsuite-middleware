@@ -98,9 +98,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+import org.slf4j.Logger;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * Grizzly OSGi HttpService implementation.
@@ -110,7 +109,9 @@ import com.openexchange.log.LogFactory;
  * @since Jan 20, 2009
  */
 public class HttpServiceImpl implements HttpService {
-    private static final  org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(HttpServiceImpl.class));
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpServiceImpl.class);
+
     private final Bundle bundle;
     final OSGiMainHandler mainHttpHandler;
 
@@ -139,8 +140,7 @@ public class HttpServiceImpl implements HttpService {
     @Override
     public void registerServlet(final String alias, final Servlet servlet, final Dictionary initparams, HttpContext httpContext) throws ServletException, NamespaceException {
 
-        LOG.info(new StringAllocator(128).append("Registering servlet: ").append(servlet.getClass().getName()).append(", under: ").append(
-            alias).append(" with context: ").append(httpContext).toString());
+        LOG.info("Registering servlet: {}, under: {} with context: {}", servlet.getClass().getName(), alias, httpContext);
         // .append(", with: ").append(initparams)
 
         mainHttpHandler.registerServletHandler(alias, servlet, initparams, httpContext, this);
@@ -152,8 +152,7 @@ public class HttpServiceImpl implements HttpService {
     @Override
     public void registerResources(final String alias, String prefix, HttpContext httpContext) throws NamespaceException {
 
-        LOG.info(new StringAllocator(128).append("Registering resource: alias: ").append(alias).append(", prefix: ").append(prefix).append(
-            " and context: ").append(httpContext).toString());
+        LOG.info("Registering resource: alias: {}, prefix: {} and context: {}", alias, prefix, httpContext);
 
         mainHttpHandler.registerResourceHandler(alias, httpContext, prefix, this);
     }
@@ -163,7 +162,7 @@ public class HttpServiceImpl implements HttpService {
      */
     @Override
     public void unregister(final String alias) {
-        LOG.info(new StringAllocator(32).append("Unregistering alias: ").append(alias).toString());
+        LOG.info("Unregistering alias: {}", alias);
         mainHttpHandler.unregisterAlias(alias);
     }
 

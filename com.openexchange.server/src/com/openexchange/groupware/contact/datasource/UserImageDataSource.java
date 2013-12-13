@@ -50,7 +50,6 @@
 package com.openexchange.groupware.contact.datasource;
 
 import java.io.InputStream;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.Data;
@@ -66,8 +65,6 @@ import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
-import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -79,7 +76,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 public final class UserImageDataSource implements ImageDataSource {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UserImageDataSource.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserImageDataSource.class);
     private static final String REGISTRATION_NAME = "com.openexchange.user.image";
     private static final String ALIAS = "/user/picture";
     private static final String ID_ARGUMENT = "com.openexchange.groupware.user.id";
@@ -135,11 +132,7 @@ public final class UserImageDataSource implements ImageDataSource {
         properties.put(DataProperties.PROPERTY_FOLDER_ID, String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID));
         properties.put(DataProperties.PROPERTY_ID, String.valueOf(userID));
         if (null == imageBytes) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringAllocator("Requested a non-existing image in user contact: user-id=").append(userID)
-                    .append(" context=").append(session.getContextId()).append(" session-user=").append(session.getUserId())
-                    .append("\nReturning an empty image as fallback.").toString());
-            }
+            LOG.warn("Requested a non-existing image in user contact: user-id={} context={} session-user={}\nReturning an empty image as fallback.", userID, session.getContextId(), session.getUserId());
             properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
             properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
             return new SimpleData<D>((D)new UnsynchronizedByteArrayInputStream(new byte[0]), properties);

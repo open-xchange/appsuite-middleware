@@ -61,8 +61,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -77,7 +75,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public final class ContactsFieldSizeUpdateTask implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactsFieldSizeUpdateTask.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactsFieldSizeUpdateTask.class);
 
     public ContactsFieldSizeUpdateTask() {
         super();
@@ -238,11 +236,9 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
                     final int size = rs.getInt("COLUMN_SIZE");
                     final Integer desiredSize = columnRefer.get(name);
                     if (desiredSize.intValue() == size) {
-                        LOG.info("FIELD " + sqltable + '.' + name + " WITH SIZE " + size + " IS CORRECT "
-                                + desiredSize);
+                        LOG.info("FIELD {}{}{} WITH SIZE {} IS CORRECT {}", sqltable, '.', name, size, desiredSize);
                     } else {
-                        LOG.warn("CHANGE FIELD " + sqltable + '.' + name + " WITH SIZE " + size + " TO NEW SIZE "
-                                + desiredSize);
+                        LOG.warn("CHANGE FIELD {}{}{} WITH SIZE {} TO NEW SIZE {}", sqltable, '.', name, size, desiredSize);
                         toChange.put(name, desiredSize);
                     }
                 }
@@ -280,7 +276,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
             alterCommand = alterBuilder.toString();
         }
         if (LOG.isInfoEnabled()) {
-            LOG.info("DROPPING SQL FIELDS: " + alterCommand);
+            LOG.info("DROPPING SQL FIELDS: {}", alterCommand);
         }
         executeAlterCommand(alterCommand, contextId);
     }
@@ -315,7 +311,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
             alterCommand = alterBuilder.toString();
         }
         if (LOG.isInfoEnabled()) {
-            LOG.info("CHANGING SQL FIELDS' SIZE: " + alterCommand);
+            LOG.info("CHANGING SQL FIELDS' SIZE: {}", alterCommand);
         }
         executeAlterCommand(alterCommand, contextId);
     }

@@ -240,10 +240,17 @@ public class SyncSession {
                  */
                 FileStorageFolder tempFolder = getStorage().optFolder(TEMP_PATH, false);
                 if (null == tempFolder) {
-                    try {
-                        tempFolder = getStorage().optFolder(TEMP_PATH, true);
-                    } catch (OXException e) {
-                        trace("Error creating temporary folder for uploads: " + e.getMessage());
+                    FileStorageFolder rootFolder = getStorage().getFolder(DriveConstants.ROOT_PATH);
+                    if (null != rootFolder.getOwnPermission() &&
+                        FileStoragePermission.CREATE_SUB_FOLDERS <= rootFolder.getOwnPermission().getDeletePermission() &&
+                        FileStoragePermission.WRITE_ALL_OBJECTS <= rootFolder.getOwnPermission().getFolderPermission() &&
+                        FileStoragePermission.READ_ALL_OBJECTS <= rootFolder.getOwnPermission().getFolderPermission() &&
+                        FileStoragePermission.DELETE_ALL_OBJECTS <= rootFolder.getOwnPermission().getDeletePermission()) {
+                        try {
+                            tempFolder = getStorage().optFolder(TEMP_PATH, true);
+                        } catch (OXException e) {
+                            trace("Error creating temporary folder for uploads: " + e.getMessage());
+                        }
                     }
                 }
                 if (null == tempFolder) {
@@ -251,6 +258,7 @@ public class SyncSession {
                     hasTempFolder = Boolean.FALSE;
                 } else if (null != tempFolder.getOwnPermission() &&
                     FileStoragePermission.CREATE_OBJECTS_IN_FOLDER <= tempFolder.getOwnPermission().getFolderPermission() &&
+                    FileStoragePermission.WRITE_ALL_OBJECTS <= tempFolder.getOwnPermission().getFolderPermission() &&
                     FileStoragePermission.DELETE_ALL_OBJECTS <= tempFolder.getOwnPermission().getDeletePermission()) {
                     trace("Using folder '" + tempFolder + "' for temporary uploads.");
                     hasTempFolder = Boolean.TRUE;

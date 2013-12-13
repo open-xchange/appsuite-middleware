@@ -21,5 +21,6 @@ Import-Package: com.openexchange.exception,
  javax.management,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.service.event
+ org.osgi.service.event,
+ org.slf4j
 Export-Package: com.openexchange.realtime.dispatch

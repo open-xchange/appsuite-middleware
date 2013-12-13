@@ -59,7 +59,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -76,7 +75,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.UnsynchronizedPushbackReader;
-import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -105,7 +103,7 @@ public class LinkedInServiceImpl implements LinkedInService {
 
     private final ServiceLookup services;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinkedInServiceImpl.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LinkedInServiceImpl.class);
 
     /**
      * Initializes a new {@link LinkedInServiceImpl}.
@@ -131,7 +129,7 @@ public class LinkedInServiceImpl implements LinkedInService {
             }
             account = oAuthService.getAccount(accountId, session, user, contextId);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
 
@@ -193,7 +191,7 @@ public class LinkedInServiceImpl implements LinkedInService {
             final JSONArray ids = json.getJSONArray("values");
             result = extractIds(ids);
         } catch (final JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return result;
     }
@@ -205,7 +203,7 @@ public class LinkedInServiceImpl implements LinkedInService {
                 result.add(connections.getJSONObject(i).getString("id"));
             }
         } catch (final JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return result;
     }
@@ -221,7 +219,7 @@ public class LinkedInServiceImpl implements LinkedInService {
             final OAuthAccount account = oAuthService.getAccount(accountId, session, user, contextId);
             displayName = account.getDisplayName();
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return displayName;
     }

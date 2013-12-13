@@ -64,7 +64,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
-import org.apache.commons.logging.Log;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.AbortMultipartUploadRequest;
@@ -83,7 +82,6 @@ import com.amazonaws.services.s3.model.UploadPartRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.FileStorageCodes;
@@ -95,7 +93,7 @@ import com.openexchange.tools.file.external.FileStorageCodes;
  */
 public class AWSS3FileStorage implements FileStorage {
 
-    private static final Log LOG = LogFactory.getLog(AWSS3FileStorage.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AWSS3FileStorage.class);
 
     /**
      * The size of the in-memory buffer for uploads to use.

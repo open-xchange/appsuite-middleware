@@ -31,6 +31,7 @@ Import-Package: com.openexchange.tools.ssl,
  javax.xml.transform.stream,
  org.apache.commons.logging,
  org.osgi.framework,
+ org.slf4j,
  sun.security.util
 Export-Package: com.sun.mail.auth;version="1.4.7",
  com.sun.mail.handlers;version="1.4.7";

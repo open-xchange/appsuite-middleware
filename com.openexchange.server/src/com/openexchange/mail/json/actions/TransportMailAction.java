@@ -78,10 +78,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class TransportMailAction extends AbstractMailAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TransportMailAction.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(TransportMailAction.class);
 
     /**
      * Initializes a new {@link TransportMailAction}.
@@ -127,7 +125,7 @@ public final class TransportMailAction extends AbstractMailAction {
                     // Re-throw
                     throw e;
                 }
-                LOG.warn(new com.openexchange.java.StringAllocator(128).append(e.getMessage()).append(". Using default account's transport.").toString());
+                LOG.warn("{}. Using default account's transport.", e.getMessage());
                 // Send with default account's transport provider
                 accountId = MailAccount.DEFAULT_ID;
             }

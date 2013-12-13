@@ -20,7 +20,8 @@ Import-Package: com.openexchange.ajax,
  javax.servlet.http,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.service.http
+ org.osgi.service.http,
+ org.slf4j
 Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.recaptcha
 Bundle-ClassPath: com.openexchange.recaptcha.jar,

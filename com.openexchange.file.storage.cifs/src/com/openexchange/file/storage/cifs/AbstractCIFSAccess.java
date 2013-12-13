@@ -54,7 +54,6 @@ import java.io.IOException;
 import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
-import org.apache.commons.logging.Log;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.cifs.cache.SmbFileMap;
@@ -68,7 +67,7 @@ import com.openexchange.session.Session;
  */
 public abstract class AbstractCIFSAccess {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractCIFSAccess.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractCIFSAccess.class);
 
     /**
      * The string constant for <code>'/'</code> character.
@@ -174,11 +173,7 @@ public abstract class AbstractCIFSAccess {
             return true;
         } else if (message.startsWith("0x")) {
             // Unspecified error occurred
-            if (LOG.isDebugEnabled()) {
-                LOG.warn(format("Unspecified error received from CIFS/SMB server \"{0}\" for login {1}: {2}", rootUrl, auth.getUsername() ,message), e);
-            } else {
-                LOG.warn(format("Unspecified error received from CIFS/SMB server \"{0}\" for login {1}: {2}", rootUrl, auth.getUsername() ,message));
-            }
+            LOG.warn(format("Unspecified error received from CIFS/SMB server \"{0}\" for login {1}: {2}", rootUrl, auth.getUsername() ,message), e);
             return true;
         }
         return false;

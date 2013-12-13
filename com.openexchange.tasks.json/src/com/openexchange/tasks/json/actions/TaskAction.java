@@ -52,7 +52,6 @@ package com.openexchange.tasks.json.actions;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -164,7 +163,7 @@ public abstract class TaskAction implements AJAXActionService {
         return isWhitespace;
     }
 
-    protected void convertExternalToInternalUsersIfPossible(final CalendarObject appointmentObj, final Context ctx, final Log log) {
+    protected void convertExternalToInternalUsersIfPossible(final CalendarObject appointmentObj, final Context ctx, final org.slf4j.Logger log) {
         final Participant[] participants = appointmentObj.getParticipants();
         if (participants == null) {
             return;

@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.comet.CometContext;
 import org.glassfish.grizzly.comet.CometEvent.Type;
 import org.json.JSONException;
@@ -76,7 +75,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class CometListener extends DefaultLongPollingListener {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CometListener.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CometListener.class);
 
     private final CometContext<DriveEvent> cometContext;
     private final ReentrantLock lock;
@@ -103,7 +102,7 @@ public class CometListener extends DefaultLongPollingListener {
                 /*
                  * wait for event inside comet handler
                  */
-                LOG.debug("Registering new comet handler for " + driveSession + " ...");
+                LOG.debug("Registering new comet handler for {} ...", driveSession);
                 cometHandler = new DriveCometHandler(driveSession);
                 cometContext.addCometHandler(cometHandler);
                 /*
@@ -116,7 +115,7 @@ public class CometListener extends DefaultLongPollingListener {
                 /*
                  * consume available event directly
                  */
-                LOG.debug("Stored event available for " + driveSession + ", no need to wait.");
+                LOG.debug("Stored event available for {}, no need to wait.", driveSession);
                 AJAXRequestResult result = createResult(this.event);
                 this.event = null;
                 return result;
@@ -142,7 +141,7 @@ public class CometListener extends DefaultLongPollingListener {
     @Override
     public void onEvent(DriveEvent event) {
         if (false == isInteresting(event)) {
-            LOG.debug("Skipping uninteresting event: " + event);
+            LOG.debug("Skipping uninteresting event: {}", event);
             return;
         }
         lock.lock();

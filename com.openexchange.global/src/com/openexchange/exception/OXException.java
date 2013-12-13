@@ -63,9 +63,7 @@ import java.util.MissingFormatArgumentException;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.Category.EnumType;
 import com.openexchange.exception.internal.I18n;
 import com.openexchange.i18n.LocalizableStrings;
@@ -87,7 +85,7 @@ public class OXException extends Exception implements OXExceptionConstants {
     // ([A-Za-z_]+)\((".*"),
     // $1($1_MSG,
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(OXException.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXException.class);
 
     private static final long serialVersionUID = 2058371531364916608L;
 
@@ -140,6 +138,18 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public static OXException general(final String logMessage) {
         return new OXException(CODE_DEFAULT, OXExceptionStrings.MESSAGE).setLogMessage(logMessage).setCategory(CATEGORY_ERROR).setPrefix(
+            PREFIX_GENERAL);
+    }
+
+    /**
+     * Creates a general exception.
+     *
+     * @param logMessage The log message
+     * @param cause The cause
+     * @return A general exception.
+     */
+    public static OXException general(final String logMessage, final Throwable cause) {
+        return new OXException(CODE_DEFAULT, OXExceptionStrings.MESSAGE, cause).setLogMessage(logMessage).setCategory(CATEGORY_ERROR).setPrefix(
             PREFIX_GENERAL);
     }
 
@@ -208,17 +218,6 @@ public class OXException extends Exception implements OXExceptionConstants {
             Generic.CONFLICT);
     }
 
-    private static final AtomicReference<SuppressedLoggingChecker> CHECKER_REF = new AtomicReference<SuppressedLoggingChecker>();
-
-    /**
-     * Sets specified checker.
-     *
-     * @param checker The checker to set
-     */
-    public static void setSuppressedLoggingChecker(final SuppressedLoggingChecker checker) {
-        CHECKER_REF.set(checker);
-    }
-
     /*-
      * ------------------------------------- Member stuff -------------------------------------
      */
@@ -250,8 +249,6 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     private Generic generic;
 
-    private boolean forceLog;
-
     /**
      * Initializes a default {@link OXException}.
      */
@@ -266,7 +263,6 @@ public class OXException extends Exception implements OXExceptionConstants {
         logMessage = null;
         displayArgs = MESSAGE_ARGS_EMPTY;
         problematics = new LinkedList<ProblematicAttribute>();
-        forceLog = false;
     }
 
     /**
@@ -285,7 +281,6 @@ public class OXException extends Exception implements OXExceptionConstants {
         logMessage = null;
         displayArgs = MESSAGE_ARGS_EMPTY;
         problematics = new LinkedList<ProblematicAttribute>();
-        forceLog = false;
     }
 
     /**
@@ -309,7 +304,6 @@ public class OXException extends Exception implements OXExceptionConstants {
             null == cloneMe.problematics ? new LinkedList<ProblematicAttribute>() : new ArrayList<ProblematicAttribute>(
                 cloneMe.problematics);
         this.properties = null == cloneMe.properties ? new HashMap<String, String>(8) : new HashMap<String, String>(cloneMe.properties);
-        forceLog = false;
     }
 
     /**
@@ -327,7 +321,6 @@ public class OXException extends Exception implements OXExceptionConstants {
         this.displayMessage = OXExceptionStrings.MESSAGE;
         this.displayArgs = MESSAGE_ARGS_EMPTY;
         problematics = new LinkedList<ProblematicAttribute>();
-        forceLog = false;
     }
 
     /**
@@ -347,7 +340,6 @@ public class OXException extends Exception implements OXExceptionConstants {
         this.displayMessage = null == displayMessage ? OXExceptionStrings.MESSAGE : displayMessage;
         this.displayArgs = null == displayArgs ? MESSAGE_ARGS_EMPTY : displayArgs;
         problematics = new LinkedList<ProblematicAttribute>();
-        forceLog = false;
     }
 
     /**
@@ -368,7 +360,6 @@ public class OXException extends Exception implements OXExceptionConstants {
         this.displayMessage = null == displayMessage ? OXExceptionStrings.MESSAGE : displayMessage;
         this.displayArgs = displayArgs;
         problematics = new ArrayList<ProblematicAttribute>(1);
-        forceLog = false;
     }
 
     /**
@@ -459,17 +450,6 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
-     * Sets whether to enforce logging or not.
-     *
-     * @param forceLog <code>true</code> for enforced logging; otherwise <code>false</code>
-     * @return This exception with new behavior applied
-     */
-    public OXException setForceLog(boolean forceLog) {
-        this.forceLog = forceLog;
-        return this;
-    }
-
-    /**
      * Sets the generic
      *
      * @param generic The generic to set
@@ -508,7 +488,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         } catch (final NullPointerException e) {
             this.logMessage = null;
         } catch (final IllegalFormatException e) {
-            LOG.error("Illegal format: >>" + displayFormat + "<<, params: " + (null == args || 0 == args.length ? "<none>" : Arrays.toString(args)) + ", code: " + getErrorCode(), e);
+            LOG.error("Illegal format: >>{}<<, params: {}, code: {}", displayFormat, (null == args || 0 == args.length ? "<none>" : Arrays.toString(args)), getErrorCode(), e);
             this.logMessage = null;
         }
         return this;
@@ -560,7 +540,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      *
      * @param log The logger
      */
-    public void log(final Log log) {
+    public void log(final org.slf4j.Logger log) {
         final LogLevel logLevel = getCategories().get(0).getLogLevel();
         if (!logLevel.appliesTo(log)) {
             return;
@@ -687,20 +667,11 @@ public class OXException extends Exception implements OXExceptionConstants {
      * Checks if this {@link OXException} is loggable for specified log level.
      *
      * @return <code>true</code> if this {@link OXException} is loggable for specified log level; otherwise <code>false</code>
+     * @deprecated
      */
+    @Deprecated
     public boolean isLoggable() {
-        return forceLog || !isSuppressedLog();
-    }
-
-    /**
-     * Check if specified category is forced to be logged.
-     *
-     * @param category The category to check
-     * @return <code>true</code> if forced being logged; otherwise <code>false</code>
-     */
-    private boolean isSuppressedLog() {
-        final SuppressedLoggingChecker checker = CHECKER_REF.get();
-        return null != checker && checker.isSuppressed(this);
+        return true;
     }
 
     /**
@@ -905,9 +876,9 @@ public class OXException extends Exception implements OXExceptionConstants {
             } catch (final NullPointerException e) {
                 msg = null;
             } catch (final MissingFormatArgumentException e) {
-                LOG.debug("Missing format argument: >>" + msg + "<<", e);
+                LOG.debug("Missing format argument: >>{}<<", msg, e);
             } catch (final IllegalFormatException e) {
-                LOG.error("Illegal message format: >>" + msg + "<<", e);
+                LOG.error("Illegal message format: >>{}<<", msg, e);
             }
         }
         return dropSubsequentWhitespaces(msg);

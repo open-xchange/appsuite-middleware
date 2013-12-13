@@ -54,7 +54,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -67,7 +66,6 @@ import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.session.Session;
 import com.openexchange.tools.versit.converter.ConverterException;
@@ -80,7 +78,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public class FacebookServiceImpl implements FacebookService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookServiceImpl.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FacebookServiceImpl.class);
 
     private final com.openexchange.oauth.OAuthService oAuthService;
     private final OAuthServiceMetaDataFacebookImpl facebookMetaData;
@@ -102,7 +100,7 @@ public class FacebookServiceImpl implements FacebookService {
         try {
             account = oAuthService.getAccount(accountId, session, user, contextId);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         if (null != account) {
             // get the users own profile (for his id) with the given access token
@@ -116,7 +114,7 @@ public class FacebookServiceImpl implements FacebookService {
                 final JSONObject object = new JSONObject(ownProfileResponse.getBody());
                 myuid = object.getString("id");
             } catch (final JSONException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
 
             // get the users connections
@@ -169,7 +167,7 @@ public class FacebookServiceImpl implements FacebookService {
                     try {
                         OXContainerConverter.loadImageFromURL(contact, (String) connection.get("pic_big"));
                     } catch (final ConverterException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
 
@@ -217,7 +215,7 @@ public class FacebookServiceImpl implements FacebookService {
         	} catch (final JSONException x) {
         		// Give up
         	}
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
 
         return contacts;
@@ -230,7 +228,7 @@ public class FacebookServiceImpl implements FacebookService {
             final OAuthAccount account = oAuthService.getAccount(accountId, session, user, contextId);
             displayName = account.getDisplayName();
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return displayName;
     }

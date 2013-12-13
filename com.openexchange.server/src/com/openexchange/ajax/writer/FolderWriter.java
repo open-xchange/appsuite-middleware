@@ -90,7 +90,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class FolderWriter extends DataWriter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FolderWriter.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderWriter.class);
 
     private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
 
@@ -664,8 +664,8 @@ public final class FolderWriter extends DataWriter {
                     break Fields;
                 default:
 
-                    if (!this.fields.knows(field) && LOG.isWarnEnabled()) {
-                        LOG.warn("Unknown folder field: " + field);
+                    if (!this.fields.knows(field)) {
+                        LOG.warn("Unknown folder field: {}", field);
                     }
 
                     final AdditionalFolderField folderField = this.fields.get(field);

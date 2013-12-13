@@ -76,7 +76,6 @@ import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.Attachment;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
@@ -139,7 +138,6 @@ import com.openexchange.i18n.tools.replacement.StringReplacement;
 import com.openexchange.i18n.tools.replacement.TaskActionReplacement;
 import com.openexchange.i18n.tools.replacement.TaskPriorityReplacement;
 import com.openexchange.i18n.tools.replacement.TaskStatusReplacement;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -167,9 +165,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     private static final String STR_UNKNOWN = "UNKNOWN";
 
-    private final static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ParticipantNotify.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ParticipantNotify.class);
 
     public static ParticipantNotify messageSender = new ParticipantNotify();
 
@@ -193,7 +189,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     }
 
     protected void sendMessage(final MailMessage msg, final ServerSession session, final CalendarObject obj, final State state, final boolean suppressOXReminderHeader) {
-        if (DEBUG) {
+        if (LOG.isDebugEnabled()) {
             String message;
             if (Multipart.class.isInstance(msg.message)) {
                 try {
@@ -210,8 +206,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             } else {
                 message = msg.message.toString();
             }
-            LOG.debug(new StringBuilder().append("Sending message to: ").append(msg.addresses).append("\n=====[").append(msg.title).append(
-                "]====\n\n").append(message).append("\n\n"));
+            LOG.debug("Sending message to: {}\n=====[{}]====\n\n{}\n\n", msg.addresses, msg.title, message);
         }
 
         int fuid = msg.folderId;
@@ -231,7 +226,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             try {
                 fromAddr = getUserSettingMail(session.getUserId(), session.getContext()).getSendAddr();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 fromAddr = UserStorage.getStorageUser(session.getUserId(), session.getContext()).getMail();
             }
         } else {
@@ -459,7 +454,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         try {
             serverSession = ServerSessionAdapter.valueOf(session);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return;
         }
         /*
@@ -470,21 +465,12 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
          * Check if notification shall be dropped
          */
         if (newObj.containsNotification() && !newObj.getNotification() && newObj.getCreatedBy() == serverSession.getUserId() && !forceNotifyOthers) {
-            if (DEBUG) {
-                LOG.debug(new StringBuilder(256).append("Dropping notification for ").append(
-                    (state.getModule() == Types.APPOINTMENT ? "appointment " : "task ")).append(title).append(" (").append(
-                        newObj.getObjectID()).append(") since it indicates to discard its notification").toString());
-            }
+            LOG.debug("Dropping notification for {}{} ({}) since it indicates to discard its notification", (state.getModule() == Types.APPOINTMENT ? "appointment " : "task "), title, newObj.getObjectID());
             return;
         }
         if (newObj.getParticipants() == null) {
             if (oldObj == null || oldObj.getParticipants() == null) {
-                if (DEBUG) {
-                    final StringBuilder builder = new StringBuilder(256).append("Dropping notification for ").append(
-                        (state.getModule() == Types.APPOINTMENT ? "appointment " : "task ")).append(title).append(" (").append(
-                            newObj.getObjectID()).append(") since it contains NO participants");
-                    LOG.debug(builder.toString());
-                }
+                LOG.debug("Dropping notification for {}{} ({}) since it contains NO participants", (state.getModule() == Types.APPOINTMENT ? "appointment " : "task "), title, newObj.getObjectID());
                 return;
             }
             /*
@@ -554,7 +540,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                         final StringBuilder builder = new StringBuilder(256).append(
                             "Could not set correct recurrence information in notification for appointment").append(title).append(" (").append(
                                 newObj.getObjectID()).append("). Cause:\n");
-                        LOG.error(builder.toString() + e.getMessage(), e);
+                        LOG.error("{}{}", builder, e.getMessage(), e);
                     }
                 }
             }
@@ -693,11 +679,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                          */
                         NotificationPool.getInstance().put(
                             new PooledNotification(p, title, state, locale, (RenderMap) renderMap.clone(), session, newObj));
-                        if (DEBUG) {
-                            LOG.debug(new StringBuilder(128).append((Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task")).append(
-                                " update (id = ").append(newObj.getObjectID()).append(") notification added to pool for receiver ").append(
-                                    p.email).toString());
-                        }
+                        LOG.debug("{} update (id = {}) notification added to pool for receiver {}", (Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task"), newObj.getObjectID(), p.email);
                     } else {
                         /*
                          * Compose message
@@ -721,12 +703,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                         }
                         if (null != message) {
                             messages.add(message);
-                            if (DEBUG) {
-                                LOG.debug(new StringBuilder(128).append((Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task")).append(
-                                    " (id = ").append(newObj.getObjectID()).append(") \"").append(
-                                        EmailableParticipant.STATE_NEW == p.state ? "New" : (EmailableParticipant.STATE_REMOVED == p.state ? "Deleted" : state.getType().toString())).append(
-                                            "\" notification message generated for receiver ").append(p.email).toString());
-                            }
+                            LOG.debug("{} (id = {}) \"{}\" notification message generated for receiver {}", (Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task"), newObj.getObjectID(), EmailableParticipant.STATE_NEW == p.state ? "New" : (EmailableParticipant.STATE_REMOVED == p.state ? "Deleted" : state.getType().toString()), p.email);
                         }
                     }
                 }
@@ -783,7 +760,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             try {
                 folderName = access.getFolderName(folderId);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 folderName = "";
             }
         }
@@ -1111,9 +1088,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                                     MimeMessageUtility.foldContentDisposition(cd.toString()));
                             }
                             bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
-                            if (DEBUG) {
-                                LOG.debug("Added file attachment to notification message: " + fileName);
-                            }
+                            LOG.debug("Added file attachment to notification message: {}", fileName);
                             /*
                              * Append body part
                              */
@@ -1890,7 +1865,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             tz = getCalendarTools().getTimeZone(user.getTimeZone());
         } catch (final OXException e) {
             // Should not happen
-            LOG.warn("Could not resolve user from session: UserId: " + session.getUserId() + " in Context: " + session.getContextId());
+            LOG.warn("Could not resolve user from session: UserId: {} in Context: {}", session.getUserId(), session.getContextId());
             l = Locale.getDefault();
             tz = TimeZone.getDefault();
         }
@@ -2003,7 +1978,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             l = user.getLocale();
         } catch (final OXException e) {
             // Should not happen
-            LOG.warn("Could not resolve user from session: UserId: " + session.getUserId() + " in Context: " + session.getContextId());
+            LOG.warn("Could not resolve user from session: UserId: {} in Context: {}", session.getUserId(), session.getContextId());
             l = Locale.getDefault();
         }
 
@@ -2143,7 +2118,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     /**
      * Checks if the participant is included in the participants array.
-     * 
+     *
      * @param toSearch - the participant to search for
      * @param participants - the array to search within
      * @return true, if the toSearch participant is included within the array. Otherwise false.
@@ -2280,17 +2255,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 final Date endDate = calendarObj.getEndDate();
                 if (endDate != null) {
                     if (Types.APPOINTMENT == module && endDate.getTime() < now) {
-                        if (DEBUG) {
-                            LOG.debug(new StringBuilder().append("Ignoring notification(s) for single appointment object ").append(
-                                calendarObj.getObjectID()).append(" since its end date is in the past").toString());
-                        }
+                        LOG.debug("Ignoring notification(s) for single appointment object {} since its end date is in the past", calendarObj.getObjectID());
                         return false;
                     }
                     if (Types.TASK == module && !compare2Date(endDate.getTime(), now)) {
-                        if (DEBUG) {
-                            LOG.debug(new StringBuilder().append("Ignoring notification(s) for single task object ").append(
-                                calendarObj.getObjectID()).append(" since its end date is in the past").toString());
-                        }
+                            LOG.debug("Ignoring notification(s) for single task object {} since its end date is in the past", calendarObj.getObjectID());
                         return false;
                     }
                 }
@@ -2299,17 +2268,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             final Date untilDate = calendarObj.getUntil();
             if (null != untilDate) {
                 if (Types.APPOINTMENT == module && untilDate.getTime() < now) {
-                    if (DEBUG) {
-                        LOG.debug(new StringBuilder().append("Ignoring notification(s) for recurring appointment object ").append(
-                            calendarObj.getObjectID()).append(" since its until date is in the past").toString());
-                    }
+                        LOG.debug("Ignoring notification(s) for recurring appointment object {} since its until date is in the past", calendarObj.getObjectID());
                     return false;
                 }
                 if (Types.TASK == module && !compare2Date(untilDate.getTime(), now)) {
-                    if (DEBUG) {
-                        LOG.debug(new StringBuilder().append("Ignoring notification(s) for recurring task object ").append(
-                            calendarObj.getObjectID()).append(" since its until date is in the past").toString());
-                    }
+                        LOG.debug("Ignoring notification(s) for recurring task object {} since its until date is in the past", calendarObj.getObjectID());
                     return false;
                 }
             }

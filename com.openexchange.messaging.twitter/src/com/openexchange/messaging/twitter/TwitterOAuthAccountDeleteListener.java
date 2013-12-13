@@ -71,7 +71,7 @@ import com.openexchange.oauth.OAuthExceptionCodes;
  */
 public final class TwitterOAuthAccountDeleteListener implements OAuthAccountDeleteListener, OAuthAccountInvalidationListener {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TwitterOAuthAccountDeleteListener.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TwitterOAuthAccountDeleteListener.class);
 
     /**
      * Initializes a new {@link TwitterOAuthAccountDeleteListener}.
@@ -190,7 +190,7 @@ public final class TwitterOAuthAccountDeleteListener implements OAuthAccountDele
             try {
                 result.close();
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -205,7 +205,7 @@ public final class TwitterOAuthAccountDeleteListener implements OAuthAccountDele
             try {
                 stmt.close();
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

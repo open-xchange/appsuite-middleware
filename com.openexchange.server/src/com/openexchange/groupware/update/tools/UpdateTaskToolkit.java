@@ -63,7 +63,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -76,7 +75,6 @@ import com.openexchange.groupware.update.internal.DynamicList;
 import com.openexchange.groupware.update.internal.SchemaExceptionCodes;
 import com.openexchange.groupware.update.internal.UpdateExecutor;
 import com.openexchange.groupware.update.internal.UpdateProcess;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -86,7 +84,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class UpdateTaskToolkit {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UpdateTaskToolkit.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateTaskToolkit.class);
 
     private static final Object LOCK = new Object();
 
@@ -274,7 +272,7 @@ public final class UpdateTaskToolkit {
                 try {
                     removeContexts(contextId);
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }

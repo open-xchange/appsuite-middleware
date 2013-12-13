@@ -64,8 +64,8 @@ import com.openexchange.mail.smal.impl.SmalMailProviderRegistry;
  */
 public final class SmalProviderServiceTracker implements ServiceTrackerCustomizer<MailProvider, MailProvider> {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SmalProviderServiceTracker.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(SmalProviderServiceTracker.class);
 
     private final BundleContext context;
 
@@ -82,25 +82,23 @@ public final class SmalProviderServiceTracker implements ServiceTrackerCustomize
         final MailProvider addedService = context.getService(reference);
         final Object protocol = reference.getProperty("protocol");
         if (null == protocol) {
-            LOG.error("Missing protocol in mail provider service: " + addedService.getClass().getName());
+            LOG.error("Missing protocol in mail provider service: {}", addedService.getClass().getName());
             context.ungetService(reference);
             return null;
         }
         try {
             if (SmalMailProviderRegistry.registerMailProvider(protocol.toString(), addedService)) {
-                LOG.info(new StringBuilder(64).append("Mail provider for protocol '").append(protocol.toString()).append(
-                    "' successfully registered in SMAL registry."));
+                LOG.info("Mail provider for protocol '{}' successfully registered in SMAL registry.", protocol);
             } else {
                 if (!Protocol.ALL.equals(protocol.toString())) {
-                    LOG.warn(new StringBuilder(64).append("Mail provider for protocol '").append(protocol.toString()).append(
-                        "' could not be added to SMAL registry.").append(" Another provider which supports the protocol has already been registered."));
+                    LOG.warn("Mail provider for protocol '{}' could not be added to SMAL registry. Another provider which supports the protocol has already been registered.", protocol);
                     context.ungetService(reference);
                 }
                 context.ungetService(reference);
                 return null;
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             context.ungetService(reference);
             return null;
         }
@@ -118,8 +116,7 @@ public final class SmalProviderServiceTracker implements ServiceTrackerCustomize
             try {
                 final MailProvider provider = service;
                 SmalMailProviderRegistry.unregisterMailProvider(provider);
-                LOG.info(new StringBuilder(64).append("Mail provider for protocol '").append(provider.getProtocol().toString()).append(
-                    "' successfully unregistered from SMAL registry."));
+                LOG.info("Mail provider for protocol '{}' successfully unregistered from SMAL registry.", provider.getProtocol());
             } finally {
                 context.ungetService(reference);
             }

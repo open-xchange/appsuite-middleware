@@ -59,13 +59,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.UUID;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -77,9 +75,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class ServerUserSetting {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServerUserSetting.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServerUserSetting.class);
 
     private static final Attribute<Boolean> CONTACT_COLLECT_ENABLED = new Attribute<Boolean>() {
 
@@ -593,9 +589,7 @@ public class ServerUserSetting {
             UUID uuid = UUID.randomUUID();
             byte[] uuidBinary = UUIDs.toByteArray(uuid);
             stmt.setBytes(pos, uuidBinary);
-            if (DEBUG) {
-                LOG.debug("INSERTing user settings: " + DBUtils.getStatementString(stmt));
-            }
+            LOG.debug("INSERTing user settings: {}", DBUtils.getStatementString(stmt));
             stmt.execute();
         } catch (final SQLException e) {
             throw SettingExceptionCodes.SQL_ERROR.create(e);

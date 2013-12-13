@@ -79,8 +79,8 @@ public abstract class MimeFileMailPart extends MailPart {
 
     private static final long serialVersionUID = 257902073011243269L;
 
-    private static final transient org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeFileMailPart.class));
+    private static final transient org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(MimeFileMailPart.class);
 
     private final File file;
 
@@ -115,7 +115,7 @@ public abstract class MimeFileMailPart extends MailPart {
             }
             this.dataSource = fileDataSource;
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             dataSource = new MessageDataSource(new byte[0], MimeTypes.MIME_APPL_OCTET);
         }
     }
@@ -157,7 +157,7 @@ public abstract class MimeFileMailPart extends MailPart {
                 }
                 dataSource = new FileDataSource(file, getContentType().toString());
             } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 dataSource = new MessageDataSource(new byte[0], MimeTypes.MIME_APPL_OCTET);
             }
         }
@@ -183,10 +183,7 @@ public abstract class MimeFileMailPart extends MailPart {
             if (charset == null) {
                 try {
                     charset = detectCharset(new FileInputStream(file));
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn(new com.openexchange.java.StringAllocator("Uploaded file contains textual content but").append(
-                            " does not specify a charset. Assumed charset is: ").append(charset).toString());
-                    }
+                    LOG.warn("Uploaded file contains textual content but does not specify a charset. Assumed charset is: {}", charset);
                 } catch (final FileNotFoundException e) {
                     throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                 }

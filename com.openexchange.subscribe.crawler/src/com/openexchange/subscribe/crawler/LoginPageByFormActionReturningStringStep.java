@@ -53,8 +53,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -76,7 +74,7 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
  */
 public class LoginPageByFormActionReturningStringStep extends AbstractStep<String, Object> implements LoginStep, HasLoginPage {
 
-   private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginPageByFormActionStep.class));
+   private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LoginPageByFormActionStep.class);
 
    private String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, baseUrl, regexForReturnedString, nameOfSubmit;
 
@@ -112,7 +110,7 @@ public class LoginPageByFormActionReturningStringStep extends AbstractStep<Strin
            HtmlForm loginForm = null;
            int numberOfFormCounter = 1;
            for (final HtmlForm form : loginPage.getForms()) {
-               LOG.debug("Forms action attribute / number is : " + form.getActionAttribute() + " / " + numberOfFormCounter + ", should be " + actionOfLoginForm + " / "+numberOfForm);
+               LOG.debug("Forms action attribute / number is : {} / {}, should be {} / {}", form.getActionAttribute(), numberOfFormCounter, actionOfLoginForm, numberOfForm);
                if (form.getActionAttribute().matches(actionOfLoginForm) && numberOfForm == numberOfFormCounter && form.getInputsByName(nameOfUserField) != null) {
                    loginForm = form;
                }
@@ -136,7 +134,7 @@ public class LoginPageByFormActionReturningStringStep extends AbstractStep<Strin
                if (matcher.find()){
                    output = matcher.group(0);
                } else {
-                   LOG.debug("Page that does not have the String to imply a successful login : " + pageAfterLogin.getWebResponse().getContentAsString());
+                   LOG.debug("Page that does not have the String to imply a successful login : {}", pageAfterLogin.getWebResponse().getContentAsString());
                    if (debuggingEnabled){
                        openPageInBrowser(pageAfterLogin);
                    }

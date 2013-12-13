@@ -64,6 +64,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -73,8 +74,8 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
 import com.damienmiller.BCrypt;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.properties.AdminProperties;
@@ -89,7 +90,6 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPool;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.sql.DBUtils;
 
 public class AdminCache {
@@ -160,7 +160,7 @@ public class AdminCache {
 
     private PropertyHandler prop = null;
 
-    private final Log log = LogFactory.getLog(this.getClass());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdminCache.class);
 
     private OXAdminPoolInterface pool = null;
 
@@ -284,7 +284,7 @@ public class AdminCache {
                 String[] modules = predefined_modules.split(",");
                 for (String module : modules) {
                     if (!module_method_mapping.containsKey(module)) {
-                        log.error("Predefined combination \"" + predefined_combination_name + "\" contains invalid module \"" + module + "\" ");
+                        log.error("Predefined combination \"{}\" contains invalid module \"{}\" ", predefined_combination_name, module);
                         // AS DEFINED IN THE CONTEXT WIDE ACCES SPECIFICAION ,
                         // THE SYSTEM WILL STOP IF IT FINDS AN INVALID
                         // CONFIGURATION!
@@ -498,7 +498,7 @@ public class AdminCache {
                         props.put(name, URLDecoder.decode(value, "UTF-8"));
                     } catch (final UnsupportedEncodingException e) {
                         // Should not happen for UTF-8.
-                        log.error(e.getMessage(), e);
+                        log.error("", e);
                     }
                 }
             }
@@ -561,7 +561,7 @@ public class AdminCache {
             } else if (pwmech.equalsIgnoreCase(PasswordMechObject.BCRYPT_MECH)) {
                 passwordMech = PasswordMechObject.BCRYPT_MECH;
             } else {
-                log.warn("WARNING: unknown password mechanism " + pwmech + " using SHA");
+                log.warn("WARNING: unknown password mechanism {} using SHA", pwmech);
                 passwordMech = PasswordMechObject.SHA_MECH;
             }
             user.setPasswordMech(passwordMech);
@@ -574,7 +574,7 @@ public class AdminCache {
         } else if (PasswordMechObject.BCRYPT_MECH.equals(passwordMech)) {
             passwd = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
         } else {
-            log.error("unsupported password mechanism: " + passwordMech);
+            log.error("unsupported password mechanism: {}", passwordMech);
             throw new StorageException("unsupported password mechanism: " + passwordMech);
         }
         return passwd;
@@ -587,10 +587,10 @@ public class AdminCache {
         final String context_auth_disabled = this.prop.getProp("CONTEXT_AUTHENTICATION_DISABLED", "false"); // fallback is auth
 
         masterAuthenticationDisabled = Boolean.parseBoolean(master_auth_disabled);
-        log.debug("MasterAuthentication mechanism disabled: " + masterAuthenticationDisabled);
+        log.debug("MasterAuthentication mechanism disabled: {}", masterAuthenticationDisabled);
 
         contextAuthenticationDisabled = Boolean.parseBoolean(context_auth_disabled);
-        log.debug("ContextAuthentication mechanism disabled: " + contextAuthenticationDisabled);
+        log.debug("ContextAuthentication mechanism disabled: {}", contextAuthenticationDisabled);
     }
 
     private void readMasterCredentials(final ConfigurationService service) throws OXGenericException {
@@ -620,7 +620,7 @@ public class AdminCache {
                 try {
                     bf.close();
                 } catch (IOException e) {
-                    log.error(e.getMessage(), e);
+                    log.error("", e);
                 }
             }
         }

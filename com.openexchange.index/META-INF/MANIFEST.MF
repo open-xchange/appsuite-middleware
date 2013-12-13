@@ -26,6 +26,7 @@ Import-Package: com.openexchange.config,
  javax.management.timer,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Bundle-Activator: com.openexchange.index.osgi.Activator
 

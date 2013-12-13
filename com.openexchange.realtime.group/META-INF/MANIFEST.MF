@@ -23,7 +23,8 @@ Import-Package: com.openexchange.conversion.simple,
  javax.annotation.concurrent,
  org.apache.commons.logging,
  org.json,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j
 Export-Package: com.openexchange.realtime.group,
  com.openexchange.realtime.group.commands
 Bundle-Activator: com.openexchange.realtime.group.osgi.RTGroupActivator

@@ -61,8 +61,7 @@ import com.openexchange.groupware.ldap.User;
  */
 public abstract class UserConfigurationStorage {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
-            .getLog(UserConfigurationStorage.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserConfigurationStorage.class);
 
     private static volatile UserConfigurationStorage singleton;
 
@@ -154,7 +153,7 @@ public abstract class UserConfigurationStorage {
         try {
             return UserConfigurationStorage.getInstance().getUserConfiguration(userId, groups, ctx);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
     }

@@ -57,7 +57,6 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 import org.ho.yaml.Yaml;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -67,7 +66,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.data.conversion.ical.ICalParser;
-import com.openexchange.log.LogFactory;
 import com.openexchange.management.ManagementService;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.crawler.CrawlerDescription;
@@ -83,7 +81,7 @@ public class Activator implements BundleActivator {
 
     private ArrayList<ServiceRegistration<?>> services;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
     public static final String DIR_NAME_PROPERTY = "com.openexchange.subscribe.crawler.path";
 
@@ -144,10 +142,10 @@ public class Activator implements BundleActivator {
         }
         final File[] files = directory.listFiles();
         if (files == null) {
-            LOG.warn("Could not find crawler descriptions in " + directory + ". Skipping crawler initialisation.");
+            LOG.warn("Could not find crawler descriptions in {}. Skipping crawler initialisation.", directory);
             return crawlers;
         }
-        LOG.info("Loading crawler descriptions from directory : " + directory.getName());
+        LOG.info("Loading crawler descriptions from directory : {}", directory.getName());
         for (final File file : files) {
             try {
                 if (file.isFile() && file.getPath().endsWith(".yml")) {
@@ -156,7 +154,7 @@ public class Activator implements BundleActivator {
                     if (config.getBoolProperty(crawlerDescription.getId(), true)) {
                         crawlers.add(crawlerDescription);
                     } else {
-                        LOG.info("Ignoring crawler description \"" + crawlerDescription.getId() + "\" as per 'crawler.properties' file.");
+                        LOG.info("Ignoring crawler description \"{}\" as per 'crawler.properties' file.", crawlerDescription.getId());
                     }
                 }
             } catch (final FileNotFoundException e) {
@@ -207,7 +205,7 @@ public class Activator implements BundleActivator {
                     null);
                 services.add(serviceRegistration);
                 activeServices.put(crawler.getId(), serviceRegistration);
-                LOG.info("Crawler " + crawler.getId() + " was started.");
+                LOG.info("Crawler {} was started.", crawler.getId());
             }
         }
     }
@@ -241,9 +239,9 @@ public class Activator implements BundleActivator {
                     activeServices.put(crawler.getId(), serviceRegistration);
                 }
             }
-            LOG.info("Crawler " + crawlerIdToUpdate + " was restarted.");
+            LOG.info("Crawler {} was restarted.", crawlerIdToUpdate);
         } else {
-            LOG.error("Crawler " + crawlerIdToUpdate + " is not activated via config-file so it will not be (re)started.");
+            LOG.error("Crawler {} is not activated via config-file so it will not be (re)started.", crawlerIdToUpdate);
         }
     }
 

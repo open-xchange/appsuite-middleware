@@ -56,7 +56,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -75,7 +74,6 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.i18n.LocaleTools;
-import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
@@ -93,7 +91,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public abstract class AbstractLoginRequestHandler implements LoginRequestHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractLoginRequestHandler.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractLoginRequestHandler.class);
 
     /**
      * @return a boolean value indicated if an auto login should proceed afterwards
@@ -172,7 +170,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                 } catch (final ExecutionException e) {
                     // Cannot occur
                     final Throwable cause = e.getCause();
-                    LOG.warn("Modules could not be added to login JSON response: " + cause.getMessage(), cause);
+                    LOG.warn("Modules could not be added to login JSON response: {}", cause.getMessage(), cause);
                 }
             }
 
@@ -184,18 +182,18 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             }
             if (LoginExceptionCodes.NOT_SUPPORTED.equals(e)) {
                 // Rethrow according to previous behavior
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 throw AjaxExceptionCodes.DISABLED_ACTION.create("autologin");
             }
             if (LoginExceptionCodes.REDIRECT.equals(e)) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             } else {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             response.setException(e);
         } catch (final JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error(oje.getMessage(), oje);
+            LOG.error("", oje);
             response.setException(oje);
         }
         try {
@@ -273,11 +271,11 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                     SettingStorage.getInstance(session).readValues(setting);
                     return convert2JS(setting);
                 } catch (final OXException e) {
-                    LOG.warn("Modules could not be added to login JSON response: " + e.getMessage(), e);
+                    LOG.warn("Modules could not be added to login JSON response: {}", e.getMessage(), e);
                 } catch (final JSONException e) {
-                    LOG.warn("Modules could not be added to login JSON response: " + e.getMessage(), e);
+                    LOG.warn("Modules could not be added to login JSON response: {}", e.getMessage(), e);
                 } catch (final Exception e) {
-                    LOG.warn("Modules could not be added to login JSON response: " + e.getMessage(), e);
+                    LOG.warn("Modules could not be added to login JSON response: {}", e.getMessage(), e);
                 }
                 return null;
             }

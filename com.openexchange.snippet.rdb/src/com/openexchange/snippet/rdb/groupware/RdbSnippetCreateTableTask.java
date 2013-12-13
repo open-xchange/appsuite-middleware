@@ -54,7 +54,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
+import java.text.MessageFormat;
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -117,7 +117,7 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
                " id INT4 unsigned NOT NULL," +
                " referenceId VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
                " fileName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL," +
-               " INDEX (cid, user, id)" +
+               " PRIMARY KEY (cid, user, id)" +
                ") ENGINE=InnoDB";
     }
 
@@ -167,10 +167,8 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
         } finally {
             ds.backForUpdateTask(contextId, writeCon);
         }
-        final Log logger = com.openexchange.log.Log.loggerFor(RdbSnippetCreateTableTask.class);
-        if (logger.isInfoEnabled()) {
-            logger.info("UpdateTask '" + RdbSnippetCreateTableTask.class.getSimpleName() + "' successfully performed!");
-        }
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RdbSnippetCreateTableTask.class);
+        logger.info("UpdateTask ''{}'' successfully performed!", RdbSnippetCreateTableTask.class.getSimpleName());
     }
 
     private void createTable(final String tablename, final String sqlCreate, final Connection writeCon) throws OXException {

@@ -52,8 +52,6 @@
 package com.openexchange.webdav.xml;
 
 import java.io.OutputStream;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.jdom2.Element;
 import org.jdom2.output.XMLOutputter;
 import com.openexchange.groupware.container.DataObject;
@@ -68,7 +66,7 @@ import com.openexchange.webdav.xml.fields.DataFields;
  */
 public class FolderChildWriter extends DataWriter {
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderChildWriter.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderChildWriter.class);
 
 	protected void writeFolderChildElements(final FolderChildObject folderchildobject, final Element e_prop) {
 		writeDataElements(folderchildobject, e_prop);

@@ -68,7 +68,6 @@ import javax.mail.FetchProfile;
 import javax.mail.Header;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetHeaders;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
@@ -105,8 +104,7 @@ import com.sun.mail.imap.protocol.UID;
  */
 public final class Threadables {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Threadables.class);
-    private static final boolean INFO = LOG.isInfoEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Threadables.class);
 
     /**
      * Initializes a new {@link Threadables}.
@@ -196,8 +194,6 @@ public final class Threadables {
          */
         final ThreadableCacheEntry entry = ThreadableCache.getInstance().getEntry(imapFolder.getFullName(), accountId, session);
         synchronized (entry) {
-            final boolean logIt = INFO; // TODO: Switch to DEBUG
-            final long st = logIt ? System.currentTimeMillis() : 0L;
             TLongCollection uids = null;
             if (null == entry.getThreadable() || sorted != entry.isSorted()) {
                 Threadable threadable = getAllThreadablesFrom(imapFolder, limit);
@@ -209,10 +205,6 @@ public final class Threadables {
                     }
                 }
                 entry.set(new TLongHashSet(IMAPCommandsCollection.getUIDCollection(imapFolder)), threadable, sorted);
-                if (logIt) {
-                    final long dur = System.currentTimeMillis() - st;
-                    LOG.info("\tNew ThreadableCacheEntry queried for \"" + imapFolder.getFullName() + "\" in " + dur + "msec");
-                }
             } else if (entry.reconstructNeeded((uids = IMAPCommandsCollection.getUIDCollection(imapFolder)))) {
                 final TLongHashSet uidsSet = new TLongHashSet(uids);
                 if (cache) {
@@ -240,10 +232,6 @@ public final class Threadables {
                         }
                     };
                     ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(task));
-                    if (INFO) {
-                        final long dur = System.currentTimeMillis() - st;
-                        LOG.info("\tExisting ThreadableCacheEntry queried for \"" + imapFolder.getFullName() + "\" in " + dur + "msec. Reconstruct performed ansynchronously separate thread.");
-                    }
                     return new ThreadableResult((Threadable) retval.clone(), true);
                 }
                 Threadable threadable = getAllThreadablesFrom(imapFolder, limit);
@@ -255,13 +243,6 @@ public final class Threadables {
                     }
                 }
                 entry.set(uidsSet, threadable, sorted);
-                if (logIt) {
-                    final long dur = System.currentTimeMillis() - st;
-                    LOG.info("\tNew ThreadableCacheEntry queried for \"" + imapFolder.getFullName() + "\" in " + dur + "msec");
-                }
-            } else if (INFO) {
-                final long dur = System.currentTimeMillis() - st;
-                LOG.info("\tExisting ThreadableCacheEntry queried for \"" + imapFolder.getFullName() + "\" in " + dur + "msec");
             }
         }
         return new ThreadableResult((Threadable) entry.getThreadable().clone(), false);
@@ -327,7 +308,7 @@ public final class Threadables {
              */
             return Collections.emptyList();
         }
-        final org.apache.commons.logging.Log log = LOG;
+        final org.slf4j.Logger log = LOG;
         return (List<MailMessage>) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
@@ -351,9 +332,7 @@ public final class Threadables {
                     final long start = System.currentTimeMillis();
                     r = protocol.command(command, null);
                     final long dur = System.currentTimeMillis() - start;
-                    if (log.isDebugEnabled()) {
-                        log.debug('"' + command + "\" for \"" + imapFolder.getFullName() + "\" (" + imapFolder.getStore().toString() + ") took " + dur + "msec.");
-                    }
+                    log.debug("{}{}\" for \"{}\" ({}) took {}msec.", '"', command, imapFolder.getFullName(), imapFolder.getStore(), dur);
                     mailInterfaceMonitor.addUseTime(dur);
                 }
                 final int len = r.length - 1;
@@ -448,7 +427,7 @@ public final class Threadables {
              */
             return null;
         }
-        final org.apache.commons.logging.Log log = LOG;
+        final org.slf4j.Logger log = LOG;
         final Map<String, HeaderHandler> handlers = HANDLERS;
         return (Threadable) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
@@ -491,9 +470,7 @@ public final class Threadables {
                     final long start = System.currentTimeMillis();
                     r = protocol.command(command, null);
                     final long dur = System.currentTimeMillis() - start;
-                    if (log.isDebugEnabled()) {
-                        log.debug('"' + command + "\" for \"" + imapFolder.getFullName() + "\" (" + imapFolder.getStore().toString() + ") took " + dur + "msec.");
-                    }
+                    log.debug("{}{}\" for \"{}\" ({}) took {}msec.", '"', command, imapFolder.getFullName(), imapFolder.getStore(), dur);
                     mailInterfaceMonitor.addUseTime(dur);
                 }
                 final int len = r.length - 1;

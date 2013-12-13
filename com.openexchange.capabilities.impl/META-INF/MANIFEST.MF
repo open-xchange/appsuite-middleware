@@ -37,3 +37,4 @@ Import-Package: com.openexchange.caching,
  org.osgi.framework,
  org.osgi.util.tracker
 Bundle-Activator: com.openexchange.capabilities.osgi.CapabilitiesActivator
+Require-Bundle: slf4j.api

@@ -51,7 +51,6 @@ package com.openexchange.push.ms.osgi;
 
 import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -97,7 +96,7 @@ public class PushMsActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final Log LOG = com.openexchange.log.Log.loggerFor(PushMsActivator.class);
+        final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushMsActivator.class);
 
         {
             final ConfigurationService service = getService(ConfigurationService.class);
@@ -134,7 +133,7 @@ public class PushMsActivator extends HousekeepingActivator {
             openTrackers();
             activated = true;
         } catch (final Exception e) {
-            LOG.error("Starting bundle com.openexchange.push.ms failed: " + e.getMessage(), e);
+            LOG.error("Starting bundle com.openexchange.push.ms failed: {}", e.getMessage(), e);
             throw e;
         }
     }
@@ -145,7 +144,7 @@ public class PushMsActivator extends HousekeepingActivator {
             super.stopBundle();
             return;
         }
-        final Log LOG = com.openexchange.log.Log.loggerFor(PushMsActivator.class);
+        final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushMsActivator.class);
         LOG.info("Stopping bundle: com.openexchange.push.ms");
         try {
             final PushMsInit init = INIT_REF.get();
@@ -156,7 +155,7 @@ public class PushMsActivator extends HousekeepingActivator {
             super.stopBundle();
             Services.setServiceLookup(null);
         } catch (final Exception e) {
-            LOG.error("Stopping bundle com.openexchange.push.ms failed: " + e.getMessage(), e);
+            LOG.error("Stopping bundle com.openexchange.push.ms failed: {}", e.getMessage(), e);
             throw e;
         }
     }

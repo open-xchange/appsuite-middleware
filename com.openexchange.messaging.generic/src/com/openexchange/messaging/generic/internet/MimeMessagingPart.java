@@ -91,9 +91,7 @@ import com.openexchange.messaging.StringContent;
  */
 public class MimeMessagingPart implements MessagingPart {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMessagingPart.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeMessagingPart.class);
 
     /**
      * The <code>Content-Type</code> header name.
@@ -364,9 +362,7 @@ public class MimeMessagingPart implements MessagingPart {
             try {
                 contentType = getContentType();
             } catch (final OXException e) {
-                if (DEBUG) {
-                    LOG.debug("Content-Type header could not be requested.", e);
-                }
+                LOG.debug("Content-Type header could not be requested.", e);
             }
             if (null != contentType) {
                 if (contentType.startsWith(CT_MUL)) {
@@ -409,19 +405,13 @@ public class MimeMessagingPart implements MessagingPart {
         try {
             return clazz.cast(part.getContent());
         } catch (final IOException e) {
-            if (DEBUG) {
-                LOG.debug(clazz.getSimpleName() + " content could not be obtained.", e);
-            }
+            LOG.debug("{} content could not be obtained.", clazz.getSimpleName(), e);
             return null;
         } catch (final javax.mail.MessagingException e) {
-            if (DEBUG) {
-                LOG.debug(clazz.getSimpleName() + " content could not be obtained.", e);
-            }
+            LOG.debug("{} content could not be obtained.", clazz.getSimpleName(), e);
             return null;
         } catch (final ClassCastException e) {
-            if (DEBUG) {
-                LOG.debug("Content is not a " + clazz.getName() + '.', e);
-            }
+            LOG.debug("Content is not a {}{}", clazz.getName(), '.', e);
             return null;
         }
     }

@@ -56,12 +56,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
-import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessionMatcher;
@@ -76,7 +72,7 @@ import com.openexchange.sessiond.SessiondServiceExtended;
  */
 public class SessiondServiceImpl implements SessiondServiceExtended {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessiondServiceImpl.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondServiceImpl.class);
 
     private final Lock migrateLock;
 
@@ -192,9 +188,9 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
         }
         if (null == sessionControl) {
             if ("unset".equalsIgnoreCase(sessionId)) {
-                LOG.debug("Session not found. ID: " + sessionId);
+                LOG.debug("Session not found. ID: {}", sessionId);
             } else {
-                LOG.info("Session not found. ID: " + sessionId);
+                LOG.info("Session not found. ID: {}", sessionId);
             }
             return null;
         }
@@ -216,7 +212,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
         }
         final SessionControl sessionControl = SessionHandler.getSessionByAlternativeId(altId);
         if (null == sessionControl) {
-            LOG.info("Session not found by alternative identifier. Alternative ID: " + altId);
+            LOG.info("Session not found by alternative identifier. Alternative ID: {}", altId);
             return null;
         }
         return sessionControl.touch().getSession();
@@ -244,13 +240,6 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     @Override
     public Session getAnyActiveSessionForUser(final int userId, final int contextId) {
-        final Props logProperties = LogProperties.optLogProperties();
-        if (null != logProperties) {
-            final Session session = logProperties.get(LogProperties.Name.SESSION_SESSION);
-            if (null != session && userId == session.getUserId() && contextId == session.getContextId()) {
-                return session;
-            }
-        }
         final SessionControl sessionControl = SessionHandler.getAnyActiveSessionForUser(userId, contextId, false, false);
         return null == sessionControl ? null: sessionControl.getSession();
     }

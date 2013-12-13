@@ -91,8 +91,8 @@ import com.openexchange.tools.tnef.TNEF2ICal;
  */
 public final class TextFinder {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TextFinder.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(TextFinder.class);
 
     private boolean textIsHtml = false;
 
@@ -313,12 +313,7 @@ public final class TextFinder {
         } catch (final java.io.CharConversionException e) {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "ISO-8859-1";
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(
-                    new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(charset).append(
-                        "\". Using fallback charset \"").append(fallback).append("\" instead."),
-                    e);
-            }
+            LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback, e);
             return MessageUtility.readMailPart(mailPart, fallback);
         }
     }
@@ -328,10 +323,7 @@ public final class TextFinder {
         if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();
             if (!CharsetDetector.isValid(cs)) {
-                com.openexchange.java.StringAllocator sb = null;
-                if (null != cs) {
-                    sb = new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
-                }
+                final String prev = cs;
                 if (contentType.startsWith("text/")) {
                     try {
                         cs = CharsetDetector.detectCharsetFailOnError(mailPart.getInputStream());
@@ -342,16 +334,10 @@ public final class TextFinder {
                             cs = CharsetDetector.getFallback();
                         }
                     }
-                    if (LOG.isWarnEnabled() && null != sb) {
-                        sb.append(" Using auto-detected encoding: \"").append(cs).append('"');
-                        LOG.warn(sb.toString());
-                    }
+                    LOG.warn("Illegal or unsupported encoding \"{}\". Using auto-detected encoding: \"{}\"", prev, cs);
                 } else {
                     cs = MailProperties.getInstance().getDefaultMimeCharset();
-                    if (LOG.isWarnEnabled() && null != sb) {
-                        sb.append(" Using fallback encoding: \"").append(cs).append('"');
-                        LOG.warn(sb.toString());
-                    }
+                    LOG.warn("Illegal or unsupported encoding \"{}\". Using fallback encoding: \"{}\"", prev, cs);
                 }
             }
             charset = cs;

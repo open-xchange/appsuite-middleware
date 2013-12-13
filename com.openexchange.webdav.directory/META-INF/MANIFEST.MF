@@ -33,5 +33,6 @@ Import-Package: com.openexchange.authentication,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.service.http,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Export-Package: com.openexchange.webdav.directory

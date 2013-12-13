@@ -50,8 +50,6 @@
 package com.openexchange.chat.json.osgi;
 
 import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
@@ -84,7 +82,7 @@ public final class ChatJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(ChatJSONActivator.class));
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ChatJSONActivator.class);
         registerModule(new ChatAccountActionFactory(this), "chat/account");
         registerModule(new ChatConversationActionFactory(this), "conversation");
         registerModule(new ChatRosterActionFactory(this), "roster");
@@ -95,9 +93,9 @@ public final class ChatJSONActivator extends AJAXModuleActivator {
                 try {
                     service.registerServlet("/conversation", new com.openexchange.chat.json.rest.conversation.ConversationRestServlet(), null, null);
                 } catch (final ServletException e) {
-                    log.error("Servlet registration failed: " + com.openexchange.chat.json.rest.conversation.ConversationRestServlet.class.getName(), e);
+                    log.error("Servlet registration failed: {}", com.openexchange.chat.json.rest.conversation.ConversationRestServlet.class.getName(), e);
                 } catch (final NamespaceException e) {
-                    log.error("Servlet registration failed: " + com.openexchange.chat.json.rest.conversation.ConversationRestServlet.class.getName(), e);
+                    log.error("Servlet registration failed: {}", com.openexchange.chat.json.rest.conversation.ConversationRestServlet.class.getName(), e);
                 }
             }
 
@@ -113,9 +111,9 @@ public final class ChatJSONActivator extends AJAXModuleActivator {
                 try {
                     service.registerServlet("/roster", new com.openexchange.chat.json.rest.roster.RosterRestServlet(), null, null);
                 } catch (final ServletException e) {
-                    log.error("Servlet registration failed: " + com.openexchange.chat.json.rest.roster.RosterRestServlet.class.getName(), e);
+                    log.error("Servlet registration failed: {}", com.openexchange.chat.json.rest.roster.RosterRestServlet.class.getName(), e);
                 } catch (final NamespaceException e) {
-                    log.error("Servlet registration failed: " + com.openexchange.chat.json.rest.roster.RosterRestServlet.class.getName(), e);
+                    log.error("Servlet registration failed: {}", com.openexchange.chat.json.rest.roster.RosterRestServlet.class.getName(), e);
                 }
             }
 

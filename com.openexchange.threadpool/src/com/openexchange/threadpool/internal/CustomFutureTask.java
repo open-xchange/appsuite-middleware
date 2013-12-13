@@ -49,8 +49,10 @@
 
 package com.openexchange.threadpool.internal;
 
+import java.util.Map;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicLong;
+import com.openexchange.threadpool.MdcProvider;
 import com.openexchange.threadpool.RefusedExecutionBehavior;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.Trackable;
@@ -60,22 +62,24 @@ import com.openexchange.threadpool.Trackable;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CustomFutureTask<V> extends FutureTask<V> {
+public class CustomFutureTask<V> extends FutureTask<V> implements MdcProvider {
 
     private static final AtomicLong COUNTER = new AtomicLong();
 
     private final Task<V> task;
     private final RefusedExecutionBehavior<V> refusedExecutionBehavior;
     private final long number;
-    private final Trackable trackable;
+    private final boolean trackable;
+    private final Map<String, Object> mdcMap;
 
     /**
      * Initializes a new {@link CustomFutureTask}.
      *
      * @param task The task
+     * @param mdcMap The MDC map
      */
-    public CustomFutureTask(final Task<V> task) {
-        this(task, null);
+    public CustomFutureTask(final Task<V> task, final Map<String, Object> mdcMap) {
+        this(task, null, mdcMap);
     }
 
     /**
@@ -83,22 +87,29 @@ public class CustomFutureTask<V> extends FutureTask<V> {
      *
      * @param task The task
      * @param refusedExecutionBehavior The refused execution behavior
+     * @param mdcMap The MDC map
      */
-    public CustomFutureTask(final Task<V> task, final RefusedExecutionBehavior<V> refusedExecutionBehavior) {
+    public CustomFutureTask(final Task<V> task, final RefusedExecutionBehavior<V> refusedExecutionBehavior, final Map<String, Object> mdcMap) {
         super(task);
         this.task = task;
+        this.mdcMap = mdcMap;
         this.refusedExecutionBehavior = refusedExecutionBehavior;
         // Assign number
         number = COUNTER.incrementAndGet();
-        trackable = (task instanceof Trackable) ? (Trackable) task : null;
+        trackable = (task instanceof Trackable);
+    }
+
+    @Override
+    public Map<String, Object> getMdc() {
+        return mdcMap;
     }
 
     /**
-     * Gets the associated trackable instance.
+     * Checks if trackable.
      *
-     * @return The associated trackable instance or <code>null</code>
+     * @return <code>true</code> if trackable; otherwise <code>false</code>
      */
-    public Trackable getTrackable() {
+    public boolean isTrackable() {
         return trackable;
     }
 

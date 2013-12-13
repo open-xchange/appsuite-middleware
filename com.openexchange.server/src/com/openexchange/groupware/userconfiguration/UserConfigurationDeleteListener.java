@@ -65,8 +65,7 @@ import com.openexchange.groupware.delete.DeleteListener;
  */
 public final class UserConfigurationDeleteListener implements DeleteListener {
 
-	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
-			.getLog(UserConfigurationDeleteListener.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserConfigurationDeleteListener.class);
 
 	/**
 	 * Initializes a new {@link UserConfigurationDeleteListener}
@@ -86,7 +85,7 @@ public final class UserConfigurationDeleteListener implements DeleteListener {
 				RdbUserPermissionBitsStorage.deleteUserPermissionBits(deleteEvent.getId(), writeCon, deleteEvent
 						.getContext());
 			} catch (final SQLException e) {
-				LOG.error(e.getMessage(), e);
+				LOG.error("", e);
 				throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
 			}
 		}

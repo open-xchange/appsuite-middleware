@@ -50,7 +50,6 @@
 package com.openexchange.jolokia.osgi;
 
 import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
 import org.jolokia.osgi.JolokiaAuthenticatedHttpContext;
 import org.jolokia.osgi.JolokiaHttpContext;
 import org.jolokia.osgi.servlet.JolokiaServlet;
@@ -69,7 +68,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class CustomJolokiaBundleActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CustomJolokiaBundleActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CustomJolokiaBundleActivator.class);
 
     volatile JolokiaConfig myConfig;
 

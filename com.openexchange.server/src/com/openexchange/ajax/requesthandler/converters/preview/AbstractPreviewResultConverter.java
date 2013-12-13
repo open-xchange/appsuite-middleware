@@ -66,7 +66,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -82,7 +81,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.preview.PreviewDocument;
@@ -104,7 +102,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractPreviewResultConverter implements ResultConverter {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractPreviewResultConverter.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractPreviewResultConverter.class);
 
     private static final Charset UTF8 = Charsets.UTF_8;
     private static final byte[] DELIM = new byte[] { '\r', '\n' };
@@ -374,8 +372,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             usm.setAllowHTMLImages(false);
             displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
         } else {
-            LOG.warn(new com.openexchange.java.StringAllocator(64).append("Unknown value in parameter ").append(PARAMETER_VIEW).append(": ").append(view).append(
-                ". Using user's mail settings as fallback."));
+            LOG.warn("Unknown value in parameter {}: {}. Using user's mail settings as fallback.", PARAMETER_VIEW, view);
             displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
         }
         return displayMode;

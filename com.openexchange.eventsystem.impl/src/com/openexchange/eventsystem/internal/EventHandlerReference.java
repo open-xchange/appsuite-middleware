@@ -50,7 +50,6 @@
 package com.openexchange.eventsystem.internal;
 
 import java.util.Collection;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -68,7 +67,7 @@ import com.openexchange.eventsystem.EventHandler;
  */
 public class EventHandlerReference {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(EventHandlerReference.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventHandlerReference.class);
 
     private final ServiceReference<EventHandler> reference;
     private final BundleContext context;

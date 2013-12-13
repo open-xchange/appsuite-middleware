@@ -51,11 +51,11 @@ package com.openexchange.spamhandler.parallels.osgi;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.spamhandler.parallels.Configuration;
@@ -70,7 +70,7 @@ import com.openexchange.user.UserService;
  */
 public class SpamdServiceRegisterer implements ServiceTrackerCustomizer<Object, Object> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SpamdServiceRegisterer.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamdServiceRegisterer.class);
 
     private final BundleContext context;
     private final Lock lock = new ReentrantLock();

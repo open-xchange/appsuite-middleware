@@ -33,7 +33,8 @@ Import-Package: com.openexchange.admin.daemons,
  com.openexchange.tools.sql,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Require-Bundle: com.openexchange.admin,
  com.openexchange.admin.plugin.hosting
 Bundle-ClassPath: .

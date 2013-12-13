@@ -31,6 +31,7 @@ Import-Package: com.openexchange.ajax.login,
  org.apache.commons.lang;version="2.6.0",
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.service.event
+ org.osgi.service.event,
+ org.slf4j
 Bundle-ClassPath: .
 

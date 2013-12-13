@@ -59,13 +59,13 @@ import com.openexchange.realtime.packet.IDEventHandler;
 
 /**
  * The {@link StateManager} manages the state of connected clients.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class StateManager {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(StateManager.class);
-    
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StateManager.class);
+
     private final ConcurrentHashMap<ID, RTClientState> states = new ConcurrentHashMap<ID, RTClientState>();
 
     private final ConcurrentHashMap<ID, StanzaTransmitter> transmitters = new ConcurrentHashMap<ID, StanzaTransmitter>();
@@ -102,7 +102,7 @@ public class StateManager {
 
     /**
      * Associate a {@linkStanza Transmitter} with an {@link ID}
-     * 
+     *
      * @param id The ID
      * @param transmitter The transmitter that can be used to send messages to the associated ID
      */
@@ -112,7 +112,7 @@ public class StateManager {
 
     /**
      * Remove a {@linkStanza Transmitter} <-> {@link ID} association
-     * 
+     *
      * @param id The ID
      * @param transmitter The transmitter
      */
@@ -121,17 +121,15 @@ public class StateManager {
     }
 
     /**
-     * Times out states that haven't been touched in more than thirty minutes. Additionally this triggers a refresh of IDs that aren't 
+     * Times out states that haven't been touched in more than thirty minutes. Additionally this triggers a refresh of IDs that aren't
      * timed out, yet.
-     * 
+     *
      * @param timestamp - The timestamp to compare the lastSeen value to
      */
     public void timeOutStaleStates(long timestamp) {
         for (RTClientState state : new ArrayList<RTClientState>(states.values())) {
             if (state.isTimedOut(timestamp)) {
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("State for id " + state.getId() + " is timed out. Last seen: " + state.getLastSeen());
-                }
+                LOG.debug("State for id {} is timed out. Last seen: {}", state.getId(), state.getLastSeen());
                 state.getId().dispose(this, null);
             } else {
                 state.getId().trigger(ID.Events.REFRESH, this);
@@ -140,8 +138,8 @@ public class StateManager {
     }
 
     /**
-     * Checks if we already have a state associated with this client 
-     * 
+     * Checks if we already have a state associated with this client
+     *
      * @param id the {@link ID} representing the client
      * @return true if we already have a state associated with this client
      */

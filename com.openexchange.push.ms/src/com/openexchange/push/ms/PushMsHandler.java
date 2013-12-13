@@ -59,7 +59,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.context.ContextService;
@@ -70,7 +69,6 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.log.LogFactory;
 import com.openexchange.ms.Topic;
 import com.openexchange.session.Session;
 
@@ -81,7 +79,7 @@ import com.openexchange.session.Session;
  */
 public class PushMsHandler implements EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushMsHandler.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushMsHandler.class);
 
     private final DelayPushQueue delayPushQueue;
 
@@ -118,7 +116,7 @@ public class PushMsHandler implements EventHandler {
             try {
                 event = (CommonEvent) obj;
             } catch (final ClassCastException cce) {
-                LOG.warn("Unexpected type: " + cce.getMessage(), cce);
+                LOG.warn("Unexpected type: {}", cce.getMessage(), cce);
                 return;
             }
         }
@@ -129,7 +127,7 @@ public class PushMsHandler implements EventHandler {
             final ContextService contextService = Services.getService(ContextService.class);
             ctx = contextService.getContext(contextId);
         } catch (final OXException exc) {
-            LOG.error("cannot resolve context id: " + contextId, exc);
+            LOG.error("cannot resolve context id: {}", contextId, exc);
             return;
         }
 
@@ -167,7 +165,7 @@ public class PushMsHandler implements EventHandler {
             }
             break;
         default:
-            LOG.warn("Got event with unimplemented module: " + module);
+            LOG.warn("Got event with unimplemented module: {}", module);
         }
     }
 
@@ -177,7 +175,7 @@ public class PushMsHandler implements EventHandler {
             try {
                 publishTopic.publish(toPojo(e));
             } catch (final RuntimeException ex) {
-                LOG.error(ex.getMessage(), ex);
+                LOG.error("", ex);
             }
         }
     }
@@ -206,7 +204,7 @@ public class PushMsHandler implements EventHandler {
         try {
             publishTopic.publish(newPushMsObject(folderId, users, module, ctx, timestamp, e).writePojo());
         } catch (final RuntimeException ex) {
-            LOG.error(ex.getMessage(), ex);
+            LOG.error("", ex);
         }
     }
 

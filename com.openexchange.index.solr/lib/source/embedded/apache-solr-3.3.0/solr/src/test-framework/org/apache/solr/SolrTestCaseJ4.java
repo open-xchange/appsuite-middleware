@@ -216,7 +216,7 @@ public abstract class SolrTestCaseJ4 extends LuceneTestCase {
    *
    */
 
-  public static Logger log = LoggerFactory.getLogger(SolrTestCaseJ4.class);
+  public static org.slf4j.Logger log = LoggerFactory.getLogger(SolrTestCaseJ4.class);
 
   private static String factoryProp;
 

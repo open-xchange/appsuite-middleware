@@ -55,8 +55,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.mail.URLName;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
 import com.sun.mail.imap.QueuingIMAPStore.CountingQueue;
 import com.sun.mail.imap.QueuingIMAPStore.ThreadTrace;
 
@@ -70,7 +69,7 @@ import com.sun.mail.imap.QueuingIMAPStore.ThreadTrace;
 public final class QueuedIMAPProtocolWatcher {
 
     /** The logger */
-    static final Log LOG = LogFactory.getLog(QueuedIMAPProtocolWatcher.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QueuedIMAPProtocolWatcher.class);
 
     /**
      * Checks if watcher has been enabled.

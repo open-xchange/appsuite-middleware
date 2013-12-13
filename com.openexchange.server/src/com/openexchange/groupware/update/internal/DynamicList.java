@@ -53,8 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.groupware.update.UpdateTask;
 
 /**
@@ -64,7 +62,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public final class DynamicList implements UpdateTaskList<UpdateTask> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DynamicList.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DynamicList.class);
 
     private static final DynamicList SINGLETON = new DynamicList();
 
@@ -95,7 +93,7 @@ public final class DynamicList implements UpdateTaskList<UpdateTask> {
         if (added) {
             UpdateTaskCollection.getInstance().dirtyVersion();
         } else {
-            LOG.error("Update task \"" + updateTask.getClass().getName() + "\" is already registered.");
+            LOG.error("Update task \"{}\" is already registered.", updateTask.getClass().getName());
         }
         return added;
     }
@@ -108,7 +106,7 @@ public final class DynamicList implements UpdateTaskList<UpdateTask> {
     public void removeUpdateTask(final UpdateTask updateTask) {
         final UpdateTask removed = taskList.remove(updateTask.getClass());
         if (null == removed) {
-            LOG.error("Update task \"" + updateTask.getClass().getName() + "\" is unknown and could not be deregistered.");
+            LOG.error("Update task \"{}\" is unknown and could not be deregistered.", updateTask.getClass().getName());
         } else {
             UpdateTaskCollection.getInstance().dirtyVersion();
         }

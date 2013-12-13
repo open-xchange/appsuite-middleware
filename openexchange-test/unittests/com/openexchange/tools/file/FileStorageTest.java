@@ -53,7 +53,6 @@ import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import junit.framework.TestCase;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.tools.RandomString;
 import com.openexchange.tools.file.external.FileStorage;
@@ -65,7 +64,7 @@ import com.openexchange.tools.file.internal.LocalFileStorage;
  */
 public class FileStorageTest extends TestCase {
 
-    private static final Log LOG = LogFactory.getLog(FileStorageTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileStorageTest.class);
 
 
 

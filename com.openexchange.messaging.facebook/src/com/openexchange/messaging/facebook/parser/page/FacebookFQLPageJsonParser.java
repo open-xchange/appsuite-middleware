@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.facebook.parser.page;
 
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -136,7 +137,7 @@ public final class FacebookFQLPageJsonParser {
             for (final String name : pageElement.keySet()) {
                 final ItemHandler itemHandler = ITEM_HANDLERS.get(name);
                 if (null == itemHandler) {
-                    com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookFQLGroupJsonParser.class)).warn("Un-handled item: " + name);
+                    org.slf4j.LoggerFactory.getLogger(FacebookFQLGroupJsonParser.class).warn("Un-handled item: {}", name);
                 } else {
                     itemHandler.handleItem(pageElement, page);
                 }

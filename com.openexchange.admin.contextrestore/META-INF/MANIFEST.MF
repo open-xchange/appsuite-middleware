@@ -22,7 +22,8 @@ Import-Package: com.mysql.jdbc,
  com.openexchange.server.impl,
  org.apache.commons.io.output,
  org.apache.commons.logging,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j
 Require-Bundle: com.openexchange.admin.plugin.hosting,
  com.openexchange.admin.rmi,
  com.openexchange.admin

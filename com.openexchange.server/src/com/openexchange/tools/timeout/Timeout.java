@@ -61,7 +61,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public final class Timeout implements Runnable {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Timeout.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Timeout.class);
 
     private final Lock lock;
 
@@ -163,14 +163,12 @@ public final class Timeout implements Runnable {
                     } catch (final InterruptedException e) {
                         // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
                         Thread.currentThread().interrupt();
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 } while (enabled && loop);
             }
             if (enabled && target.isAlive()) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info(new StringBuilder("Timeout.run(): Stopping thread ").append(target.getName()).toString());
-                }
+                LOG.info("Timeout.run(): Stopping thread {}", target.getName());
                 target.interrupt();
             }
         } finally {

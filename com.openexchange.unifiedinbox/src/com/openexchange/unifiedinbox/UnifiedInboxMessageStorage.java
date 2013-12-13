@@ -65,7 +65,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
-import org.apache.commons.logging.Log;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -107,8 +106,7 @@ import com.openexchange.user.UserService;
  */
 public final class UnifiedInboxMessageStorage extends MailMessageStorage implements ISimplifiedThreadStructure {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(UnifiedInboxMessageStorage.class);
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UnifiedInboxMessageStorage.class);
 
     /*-
      * Members
@@ -263,7 +261,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                 }
                             }
                         } catch (final OXException e) {
-                            getLogger().debug(e.getMessage(), e);
+                            getLogger().debug("", e);
                             return GetMessagesResult.EMPTY_RESULT;
                         } finally {
                             closeSafe(mailAccess);
@@ -310,10 +308,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                     final GetMessagesResult result = completionService.take().get();
                     insertMessage(mailIds, messages, result.accountId, result.folder, result.mails, fullName, undelegatedAccountId);
                 }
-                if (DEBUG) {
-                    LOG.debug(new StringBuilder(64).append("Retrieval of ").append(mailIds.length).append(" messages from folder \"").append(
-                        fullName).append("\" took ").append(completionService.getDuration()).append("msec."));
-                }
+                LOG.debug("Retrieval of {} messages from folder \"{}\" took {}msec.", mailIds.length, fullName, completionService.getDuration());
+
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw MailExceptionCode.INTERRUPT_ERROR.create(e);
@@ -581,10 +577,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 for (int i = 0; i < length; i++) {
                     messages.addAll(completionService.take().get());
                 }
-                if (DEBUG) {
-                    LOG.debug(new StringBuilder(64).append("getThreadSortedMessages from folder \"").append(fullName).append("\" took ").append(
-                        completionService.getDuration()).append("msec."));
-                }
+                LOG.debug("getThreadSortedMessages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
+
                 // Sort them
                 final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null);
                 final Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
@@ -805,10 +799,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 for (int i = 0; i < length; i++) {
                     messages.addAll(completionService.take().get());
                 }
-                if (DEBUG) {
-                    LOG.debug(new StringBuilder(64).append("Searching messages from folder \"").append(fullName).append("\" took ").append(
-                        completionService.getDuration()).append("msec."));
-                }
+                LOG.debug("Searching messages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
+
                 // Sort them
                 final MailMessageComparator c = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getLocale());
                 Collections.sort(messages, c);
@@ -934,10 +926,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 for (int i = 0; i < length; i++) {
                     messages.addAll(completionService.take().get());
                 }
-                if (DEBUG) {
-                    LOG.debug(new StringBuilder(64).append("Searching messages from folder \"").append(fullName).append("\" took ").append(
-                        completionService.getDuration()).append("msec."));
-                }
+                LOG.debug("Searching messages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
                 // Sort them
                 final MailMessageComparator c = new MailMessageComparator(effectiveSortField, OrderDirection.DESC.equals(order), getLocale());
                 Collections.sort(messages, c);
@@ -1031,7 +1020,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             }
                             return messages;
                         } catch (final OXException e) {
-                            getLogger().debug(e.getMessage(), e);
+                            getLogger().debug("", e);
                             return Collections.emptyList();
                         } finally {
                             closeSafe(mailAccess);
@@ -1045,10 +1034,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 for (int i = 0; i < length; i++) {
                     messages.addAll(completionService.take().get());
                 }
-                if (DEBUG) {
-                    LOG.debug(new StringBuilder(64).append("Retrieving unread messages from folder \"").append(fullName).append("\" took ").append(
-                        completionService.getDuration()).append("msec."));
-                }
+                LOG.debug("Retrieving unread messages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
+
                 // Sort them
                 Collections.sort(messages, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getLocale()));
                 // Return as array
@@ -1114,7 +1101,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                 mailAccess.getMessageStorage().deleteMessages(folder, uids.toArray(new String[uids.size()]), hardDelete);
                             }
                         } catch (final OXException e) {
-                            getLogger().debug(e.getMessage(), e);
+                            getLogger().debug("", e);
                             return null;
                         } finally {
                             closeSafe(mailAccess);
@@ -1126,15 +1113,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             final ThreadPoolService executor = ThreadPools.getThreadPool();
             try {
                 // Invoke all and wait for being executed
-                if (DEBUG) {
-                    final long start = System.currentTimeMillis();
-                    executor.invokeAll(collection);
-                    final long dur = System.currentTimeMillis() - start;
-                    LOG.debug(new StringBuilder(64).append("Deleting ").append(mailIds.length).append(" messages in folder \"").append(
-                        fullName).append(" took ").append(dur).append("msec."));
-                } else {
-                    executor.invokeAll(collection);
-                }
+                executor.invokeAll(collection);
+
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw MailExceptionCode.INTERRUPT_ERROR.create(e);
@@ -1215,7 +1195,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                 mailAccess.getMessageStorage().updateMessageFlags(folder, uids.toArray(new String[uids.size()]), flags, set);
                             }
                         } catch (final OXException e) {
-                            getLogger().debug(e.getMessage(), e);
+                            getLogger().debug("", e);
                             return null;
                         } finally {
                             closeSafe(mailAccess);
@@ -1227,15 +1207,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             final ThreadPoolService executor = ThreadPools.getThreadPool();
             try {
                 // Invoke all and wait for being executed
-                if (DEBUG) {
-                    final long start = System.currentTimeMillis();
-                    executor.invokeAll(collection);
-                    final long dur = System.currentTimeMillis() - start;
-                    LOG.debug(new StringBuilder(64).append("Updating system/user flags of ").append(mailIds.length).append(
-                        " messages took ").append(dur).append("msec."));
-                } else {
-                    executor.invokeAll(collection);
-                }
+                executor.invokeAll(collection);
+
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw MailExceptionCode.INTERRUPT_ERROR.create(e);
@@ -1291,7 +1264,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                     colorLabel);
                             }
                         } catch (final OXException e) {
-                            getLogger().debug(e.getMessage(), e);
+                            getLogger().debug("", e);
                             return null;
                         } finally {
                             closeSafe(mailAccess);
@@ -1303,15 +1276,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             final ThreadPoolService executor = ThreadPools.getThreadPool();
             try {
                 // Invoke all and wait for being executed
-                if (DEBUG) {
-                    final long start = System.currentTimeMillis();
-                    executor.invokeAll(collection);
-                    final long dur = System.currentTimeMillis() - start;
-                    LOG.debug(new StringBuilder(64).append("Updating color flag of ").append(mailIds.length).append(" messages took ").append(
-                        dur).append("msec."));
-                } else {
-                    executor.invokeAll(collection);
-                }
+                executor.invokeAll(collection);
+
             } catch (final InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw MailExceptionCode.INTERRUPT_ERROR.create(e);

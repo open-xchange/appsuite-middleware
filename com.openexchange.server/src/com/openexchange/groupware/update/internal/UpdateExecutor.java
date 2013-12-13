@@ -49,10 +49,9 @@
 
 package com.openexchange.groupware.update.internal;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -72,7 +71,7 @@ import com.openexchange.groupware.update.UpdateTaskV2;
  */
 public final class UpdateExecutor {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UpdateExecutor.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateExecutor.class);
 
     private static final SchemaStore store = SchemaStore.getInstance();
 
@@ -112,7 +111,7 @@ public final class UpdateExecutor {
     }
 
     private void runUpdates(final boolean blocking) throws OXException {
-        LOG.info("Starting " + (blocking ? "blocking" : "background") + " updates on schema " + state.getSchema());
+        LOG.info("Starting {} updates on schema {}", (blocking ? "blocking" : "background"), state.getSchema());
         try {
             lockSchema(blocking);
         } catch (final OXException e) {
@@ -121,7 +120,7 @@ public final class UpdateExecutor {
                 try {
                     unlockSchema(blocking);
                 } catch (final OXException e1) {
-                    LOG.error(e1.getMessage(), e1);
+                    LOG.error("", e1);
                 }
             }
             throw e;
@@ -146,7 +145,7 @@ public final class UpdateExecutor {
                 final String taskName = task.getClass().getSimpleName();
                 boolean success = false;
                 try {
-                    LOG.info("Starting update task " + taskName + " on schema " + state.getSchema() + ".");
+                    LOG.info("Starting update task {} on schema {}.", taskName, state.getSchema());
                     if (task instanceof UpdateTaskV2) {
                         final ProgressState logger = new ProgressStatusImpl(taskName, state.getSchema());
                         final PerformParameters params = new PerformParametersImpl(state, contextId, logger);
@@ -156,16 +155,16 @@ public final class UpdateExecutor {
                     }
                     success = true;
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
                 if (success) {
-                    LOG.info("Update task " + taskName + " on schema " + state.getSchema() + " done.");
+                    LOG.info("Update task {} on schema {} done.", taskName, state.getSchema());
                 } else {
-                    LOG.info("Update task " + taskName + " on schema " + state.getSchema() + " failed.");
+                    LOG.info("Update task {} on schema {} failed.", taskName, state.getSchema());
                 }
                 addExecutedTask(task.getClass().getName(), success, poolId, state.getSchema());
             }
-            LOG.info("Finished " + (blocking ? "blocking" : "background") + " updates on schema " + state.getSchema());
+            LOG.info("Finished {} updates on schema {}", (blocking ? "blocking" : "background"), state.getSchema());
         } catch (final OXException e) {
             throw e;
         } catch (final Throwable t) {

@@ -49,7 +49,6 @@
 
 package com.openexchange.snippet;
 
-import org.apache.commons.logging.Log;
 
 /**
  * {@link GetSwitch}
@@ -58,7 +57,7 @@ import org.apache.commons.logging.Log;
  */
 public class GetSwitch implements PropertySwitch {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(GetSwitch.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetSwitch.class);
 
     /**
      * The snippet.

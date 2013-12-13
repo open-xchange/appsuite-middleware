@@ -57,14 +57,12 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
@@ -81,7 +79,7 @@ public final class CSVLibrary {
         super();
     }
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CSVLibrary.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVLibrary.class);
     public static final char CELL_DELIMITER = ',';
     public static final char ROW_DELIMITER = '\n';
 
@@ -175,7 +173,7 @@ public final class CSVLibrary {
             }
             return bob.toString();
         } catch (final UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw ImportExportExceptionCodes.UTF8_ENCODE_FAILED.create(e);
         } catch (final IOException e) {
             if ("Bad file descriptor".equals(e.getMessage())) {

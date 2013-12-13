@@ -69,7 +69,6 @@ import java.util.regex.Pattern;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
 import com.openexchange.ajax.AJAXServlet;
@@ -116,8 +115,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class FileResponseRenderer implements ResponseRenderer {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FileResponseRenderer.class);
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileResponseRenderer.class);
 
     /** The default in-memory threshold of 1MB. */
     private static final int DEFAULT_IN_MEMORY_THRESHOLD = 1024 * 1024; // 1MB
@@ -283,7 +281,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                     if ((stream instanceof ByteArrayInputStream) || (stream instanceof BufferedInputStream)) {
                         documentData = stream;
                     } else {
-                        documentData = new BufferedInputStream(stream);
+                        documentData = new BufferedInputStream(stream, 65536);
                     }
                 }
             }
@@ -613,9 +611,9 @@ public class FileResponseRenderer implements ResponseRenderer {
                 final String lmsg = toLowerCase(e.getMessage());
                 if ("broken pipe".equals(lmsg) || "connection reset".equals(lmsg)) {
                     // Assume client-initiated connection closure
-                    LOG.debug("Underlying (TCP) protocol communication aborted while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.debug("Underlying (TCP) protocol communication aborted while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
                 } else {
-                    LOG.warn("Lost connection to client while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.warn("Lost connection to client while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
                 }
             } catch (final com.sun.mail.util.MessageRemovedIOException e) {
                 sendErrorSafe(HttpServletResponse.SC_NOT_FOUND, "Message not found.", resp);
@@ -630,9 +628,9 @@ public class FileResponseRenderer implements ResponseRenderer {
                      * For the next write attempt by us, the peer's TCP stack will issue an RST,
                      * which results in this exception and message at the sender.
                      */
-                    LOG.debug("Client dropped connection while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.debug("Client dropped connection while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
                 } else {
-                    LOG.warn("Lost connection to client while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.warn("Lost connection to client while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
                 }
             }
         } catch (final Exception e) {
@@ -844,9 +842,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 throw ioe;
             }
             if (null == transformed) {
-                if (DEBUG) {
                     LOG.debug("Got no resulting input stream from transformation, trying to recover original input");
-                }
                 return handleFailure(file, stream, markSupported);
             }
             // Return immediately if not cacheable
@@ -895,15 +891,15 @@ public class FileResponseRenderer implements ResponseRenderer {
             // Return
             return new FileHolder(new ByteArrayInputStreamClosure(bytes), size, contentType, fileName);
         } catch (final RuntimeException e) {
-            if (DEBUG && file.repetitive()) {
+            if (LOG.isDebugEnabled() && file.repetitive()) {
                 try {
                     final File tmpFile = writeBrokenImage2Disk(file);
-                    LOG.error("Unable to transform image from " + file.getName() + ". Unparseable image file is written to disk at: " + tmpFile.getPath());
+                    LOG.error("Unable to transform image from {}. Unparseable image file is written to disk at: {}", file.getName(), tmpFile.getPath());
                 } catch (final Exception x) {
-                    LOG.error("Unable to transform image from " + file.getName());
+                    LOG.error("Unable to transform image from {}", file.getName());
                 }
             } else {
-                LOG.error("Unable to transform image from " + file.getName());
+                LOG.error("Unable to transform image from {}", file.getName());
             }
             return file.repetitive() ? file : null;
         }
@@ -918,7 +914,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 LOG.warn("Error resetting input stream", e);
             }
         }
-        LOG.warn("Unable to transform image from " + file.getName());
+        LOG.warn("Unable to transform image from {}", file.getName());
         return file.repetitive() ? file : null;
     }
 

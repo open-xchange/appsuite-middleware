@@ -55,8 +55,7 @@ import static com.openexchange.tools.update.Tools.createIndex;
 import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import org.slf4j.Logger;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
@@ -98,7 +97,7 @@ public final class FolderAddIndex2LastModified extends UpdateTaskAdapter {
     }
 
     private void createMyIndex(final Connection con, final String[] tables, final String name) {
-        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderAddIndex2LastModified.class));
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FolderAddIndex2LastModified.class);
         final String[] columns = { "cid", "changing_date", "module" };
         final StringBuilder sb = new StringBuilder(64);
         for (final String table : tables) {
@@ -128,8 +127,7 @@ public final class FolderAddIndex2LastModified extends UpdateTaskAdapter {
                     }
                 }
             } catch (final SQLException e) {
-                log.error(
-                    new StringBuilder("Problem adding index ").append(name).append(" on table ").append(table).append('.').toString(),
+                log.error("Problem adding index {} on table {}{}", name, table, '.',
                     e);
             }
         }

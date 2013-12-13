@@ -60,12 +60,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Entity;
 import com.openexchange.publish.PublicationStorage;
 import com.openexchange.publish.helpers.AbstractPublicationService;
@@ -78,7 +76,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class IsPublished implements AdditionalFolderField {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IsPublished.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IsPublished.class);
 
     private static final TIntSet ID_BLACKLIST;
     static {
@@ -180,7 +178,7 @@ public class IsPublished implements AdditionalFolderField {
             }
             return retval;
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return allFalse(folder.size());
     }

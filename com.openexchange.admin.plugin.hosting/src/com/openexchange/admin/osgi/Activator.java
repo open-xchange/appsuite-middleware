@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.osgi;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.PluginStarter;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.exceptions.OXGenericException;
@@ -60,7 +59,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.eventsystem.EventSystemService;
 import com.openexchange.i18n.I18nService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
@@ -69,7 +67,7 @@ import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
 
 public class Activator extends HousekeepingActivator {
 
-    private static final Log LOG = LogFactory.getLog(Activator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
     private PluginStarter starter = null;
 
@@ -91,7 +89,7 @@ public class Activator extends HousekeepingActivator {
             this.starter.start(context, configurationService);
             track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool())).open();
         } catch (final OXGenericException e) {
-            LOG.fatal(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

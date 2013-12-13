@@ -55,7 +55,6 @@ import java.net.Socket;
 import java.text.DecimalFormat;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajp13.coyote.sockethandler.CoyoteSocketHandler;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
@@ -71,7 +70,7 @@ import com.openexchange.config.ConfigurationService;
  */
 public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13ServerImpl.class));
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AJPv13ServerImpl.class);
 
     private static final DecimalFormat DF = new DecimalFormat("0000");
 
@@ -136,9 +135,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
             }
             AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.setNumActive(threadArr.length);
         } else {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("AJPv13Server is already running...");
-            }
+            LOG.info("AJPv13Server is already running...");
         }
     }
 
@@ -189,9 +186,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
             }
             AJPv13Monitors.AJP_MONITOR_SERVER_THREADS.setNumActive(0);
         } else {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("AJPv13Server is not running and thus does not need to be stopped");
-            }
+            LOG.info("AJPv13Server is not running and thus does not need to be stopped");
         }
     }
 
@@ -201,9 +196,7 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
     private void initializePools() {
         resetPools();
         socketHandler.startUp();
-        if (LOG.isInfoEnabled()) {
-            LOG.info("All pools initialized...");
-        }
+        LOG.info("All pools initialized...");
     }
 
     /**
@@ -247,20 +240,18 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
                     /*
                      * An unexpected socket error
                      */
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     stopServer();
                 } else {
                     /*
                      * Socket closed while being blocked in accept
                      */
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("AJP socket closed", e);
-                    }
+                    LOG.debug("AJP socket closed", e);
                     LOG.info("AJPv13Server down");
                     keepOnRunning = false;
                 }
             } catch (final IOException ex) {
-                LOG.error(ex.getMessage(), ex);
+                LOG.error("", ex);
                 keepOnRunning = false;
             }
         }
@@ -268,13 +259,13 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
 
     private static final class GateRunnable implements Runnable {
 
-        private final transient org.apache.commons.logging.Log logger;
+        private final transient org.slf4j.Logger logger;
 
         private final Runnable task;
 
         private final CountDownLatch latch;
 
-        public GateRunnable(final CountDownLatch latch, final Runnable task, final Log logger) {
+        public GateRunnable(final CountDownLatch latch, final Runnable task, final org.slf4j.Logger logger) {
             super();
             this.task = task;
             this.latch = latch;
@@ -287,10 +278,10 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
                 latch.await();
                 task.run();
             } catch (final InterruptedException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
                 Thread.currentThread().interrupt();
             } catch (final Exception e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
             }
         }
     }

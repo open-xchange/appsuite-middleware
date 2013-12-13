@@ -53,8 +53,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
@@ -84,7 +82,7 @@ public class AnchorsByLinkXPathStep extends AbstractStep<List<HtmlAnchor>, HtmlP
     private int intervalStart;
     private int intervalStop;
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AnchorsByLinkXPathStep.class));
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AnchorsByLinkXPathStep.class);
 
     public AnchorsByLinkXPathStep() {
         subpagesHref = new ArrayList<String>();
@@ -113,7 +111,7 @@ public class AnchorsByLinkXPathStep extends AbstractStep<List<HtmlAnchor>, HtmlP
         try {
             // add the first page as there should always be results there
             subpages.add(input);
-            LOG.debug("Input page is : " + input.getWebResponse().getContentAsString());
+            LOG.debug("Input page is : {}", input.getWebResponse().getContentAsString());
             // search for subpages
             for (final HtmlAnchor link : input.getAnchors()) {
                 // get the subpages
@@ -123,7 +121,7 @@ public class AnchorsByLinkXPathStep extends AbstractStep<List<HtmlAnchor>, HtmlP
                         subpagesHref.add(link.getHrefAttribute());
                         // remember its page for later
                         subpages.add((HtmlPage) link.click());
-                        LOG.debug("Subpage added : " + link.getHrefAttribute());
+                        LOG.debug("Subpage added : {}", link.getHrefAttribute());
                     }
 
                 }
@@ -148,7 +146,7 @@ public class AnchorsByLinkXPathStep extends AbstractStep<List<HtmlAnchor>, HtmlP
 
                             output.add(possibleLinkToResultpage);
                             outputHref.add(possibleLinkToResultpage.getHrefAttribute());
-                            LOG.info("Added this link to the list : " + possibleLinkToResultpage.getHrefAttribute());
+                            LOG.info("Added this link to the list : {}", possibleLinkToResultpage.getHrefAttribute());
 
                     }
                 }
@@ -160,7 +158,7 @@ public class AnchorsByLinkXPathStep extends AbstractStep<List<HtmlAnchor>, HtmlP
                 LOG.error("No links matching the criteria were found.");
                 LOG.info(input.getWebResponse().getContentAsString());
                 for (HtmlAnchor link : input.getAnchors()){
-                    LOG.info("Link available on the first page : " + link.getHrefAttribute());
+                    LOG.info("Link available on the first page : {}", link.getHrefAttribute());
                 }
             }
 

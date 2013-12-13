@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
 
 public class ContactTemplateHelperFactory implements TemplateHelperFactory {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ContactTemplateHelperFactory.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactTemplateHelperFactory.class);
 
 	private final ServiceLookup services;
 	
@@ -86,7 +86,7 @@ public class ContactTemplateHelperFactory implements TemplateHelperFactory {
                 final Object resultObject = result.getResultObject();
                 if (!(resultObject instanceof Map)) {
                     map = Collections.emptyMap();
-                    LOG.warn(resultObject.getClass().getName() + " is not a " + Map.class.getName() + "!");
+                    LOG.warn("{} is not a {}!", resultObject.getClass().getName(), Map.class.getName());
                 } else {
                     @SuppressWarnings("unchecked")
                     Map<String, Object> tmp = (Map<String, Object>) resultObject;

@@ -50,14 +50,12 @@
 package com.openexchange.authorization.standard;
 
 import java.lang.reflect.UndeclaredThrowableException;
-import org.apache.commons.logging.Log;
 import com.openexchange.authorization.AuthorizationExceptionCodes;
 import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.context.ContextExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.log.LogFactory;
 
 
 /**
@@ -66,7 +64,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class DefaultAuthorizationImpl implements AuthorizationService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DefaultAuthorizationImpl.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultAuthorizationImpl.class);
 
     private static final DefaultAuthorizationImpl INSTANCE = new DefaultAuthorizationImpl();
 
@@ -96,7 +94,7 @@ public final class DefaultAuthorizationImpl implements AuthorizationService {
         try {
             if (!ctx.isEnabled()) {
                 final OXException e = ContextExceptionCodes.CONTEXT_DISABLED.create(Integer.valueOf(ctx.getContextId()), ctx.getName());
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 throw AuthorizationExceptionCodes.USER_DISABLED.create(e);
             }
         } catch (final UndeclaredThrowableException e) {

@@ -55,8 +55,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -84,7 +82,7 @@ public class TaskReminderFolderZero implements UpdateTask {
     private static final String DELETE_REMINDER = "DELETE FROM reminder "
         + "WHERE cid=? AND object_id=?";
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TaskReminderFolderZero.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TaskReminderFolderZero.class);
 
     public TaskReminderFolderZero() {
         super();
@@ -130,7 +128,7 @@ public class TaskReminderFolderZero implements UpdateTask {
                  update.add(remind);
              }
         }
-        LOG.info("Fixing " + update.size() + " reminder and removing " + remove.size() + " not fixable reminder.");
+        LOG.info("Fixing {} reminder and removing {} not fixable reminder.", update.size(), remove.size());
         final Connection con = Database.get(contextId, true);
         try {
             con.setAutoCommit(false);
@@ -224,9 +222,7 @@ public class TaskReminderFolderZero implements UpdateTask {
             DBUtils.closeSQLStuff(null, stmt);
         }
         if (retval != update.size()) {
-            LOG.error(String.valueOf(update.size())
-                + " reminder should be changed, but only " + retval
-                + " have been changed.");
+            LOG.error("{} reminder should be changed, but only {} have been changed.", String.valueOf(update.size()), retval);
         }
         return retval;
     }
@@ -253,9 +249,7 @@ public class TaskReminderFolderZero implements UpdateTask {
             DBUtils.closeSQLStuff(null, stmt);
         }
         if (retval != remove.size()) {
-            LOG.error(String.valueOf(remove.size())
-                + " reminder should be removed, but only " + retval
-                + " have been removed.");
+            LOG.error("{} reminder should be removed, but only {} have been removed.", String.valueOf(remove.size()), retval);
         }
         return retval;
 

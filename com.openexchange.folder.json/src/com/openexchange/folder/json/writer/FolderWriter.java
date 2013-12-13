@@ -67,7 +67,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -100,8 +99,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class FolderWriter {
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(FolderWriter.class);
-    static final boolean WARN = LOG.isWarnEnabled();
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderWriter.class);
 
     /**
      * The default locale: en_US.
@@ -397,7 +395,7 @@ public final class FolderWriter {
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final String[] obj = folder.getSubfolderIDs();
                 if (null == obj) {
-                    LOG.warn("Got null as subfolders for folder " + folder.getID() + ". Marking this folder to hold subfolders...");
+                    LOG.warn("Got null as subfolders for folder {}. Marking this folder to hold subfolders...", folder.getID());
                     jsonPutter.put(FolderField.SUBFOLDERS.getName(), Boolean.TRUE);
                 } else {
                     jsonPutter.put(FolderField.SUBFOLDERS.getName(), Boolean.valueOf(obj.length > 0));
@@ -473,7 +471,7 @@ public final class FolderWriter {
 
             @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
-                LogProperties.putLogProperty(LogProperties.Name.SESSION_SESSION, folder.getSession());
+                LogProperties.putProperty(LogProperties.Name.SESSION_SESSION, folder.getSession());
                 final int obj = folder.getTotal();
                 jsonPutter.put(FolderField.TOTAL.getName(), -1 == obj ? JSONObject.NULL : Integer.valueOf(obj));
             }
@@ -753,9 +751,7 @@ public final class FolderWriter {
     private static FolderFieldWriter getPropertyByField(final int field, final TIntObjectMap<com.openexchange.folderstorage.FolderField> fields) {
         final com.openexchange.folderstorage.FolderField fieldNamePair = fields.get(field);
         if (null == fieldNamePair) {
-            if (WARN) {
-                LOG.warn("Unknown field: " + field, new Throwable());
-            }
+            LOG.warn("Unknown field: {}", field, new Throwable());
             return UNKNOWN_FIELD_FFW;
         }
         PropertyFieldWriter pw = PROPERTY_WRITERS.get(field);

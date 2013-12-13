@@ -75,7 +75,6 @@ import net.fortuna.ical4j.model.parameter.Role;
 import net.fortuna.ical4j.model.parameter.Rsvp;
 import net.fortuna.ical4j.model.property.Attendee;
 import net.fortuna.ical4j.model.property.Resources;
-import org.apache.commons.logging.Log;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
@@ -95,7 +94,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
 
@@ -104,7 +102,7 @@ import com.openexchange.resource.Resource;
  */
 public class Participants<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Participants.class));
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Participants.class);
 
     public static UserResolver userResolver = UserResolver.EMPTY;
 
@@ -170,9 +168,9 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             parameters.add(Rsvp.TRUE);
             component.getProperties().add(attendee);
         } catch (final URISyntaxException e) {
-            LOG.error(e.getMessage(), e); // Shouldn't happen
+            LOG.error("", e); // Shouldn't happen
         } catch (AddressException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -186,7 +184,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 try {
                     address = UserSettingMailStorage.getInstance().loadUserSettingMail(userParticipant.getIdentifier(), ctx).getSendAddr();
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     address = resolveUserMail(index, userParticipant, ctx);
                 }
             } else {
@@ -214,9 +212,9 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             }
             component.getProperties().add(attendee);
         } catch (final URISyntaxException e) {
-            LOG.error(e.getMessage(), e); // Shouldn't happen
+            LOG.error("", e); // Shouldn't happen
         } catch (AddressException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -303,7 +301,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 }
             }
             if (icalP == null) {
-                LOG.warn("Should not be possible to find a user ("+user.getMail()+") by their alias and then be unable to remove that alias  from list");
+                LOG.warn("Should not be possible to find a user ({}) by their alias and then be unable to remove that alias  from list", user.getMail());
             } else {
                 if (icalP.message != null) {
                     up.setConfirmMessage(icalP.message);

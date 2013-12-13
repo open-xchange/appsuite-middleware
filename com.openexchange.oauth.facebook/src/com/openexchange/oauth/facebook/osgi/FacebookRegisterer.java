@@ -53,7 +53,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -63,7 +62,6 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.facebook.FacebookService;
@@ -81,7 +79,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class FacebookRegisterer implements ServiceTrackerCustomizer<Object,Object> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookRegisterer.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FacebookRegisterer.class);
 
     private final BundleContext context;
     private final Lock lock = new ReentrantLock();
@@ -122,8 +120,8 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer<Object,Objec
         }
         if (needsRegistration) {
             LOG.info("Registering Facebook MetaData service.");
-            LOG.info("Parameter com.openexchange.facebook.apiKey : " + configurationService.getProperty("com.openexchange.facebook.apiKey"));
-            LOG.info("Parameter com.openexchange.facebook.secretKey :" + configurationService.getProperty("com.openexchange.facebook.secretKey"));
+            LOG.info("Parameter com.openexchange.facebook.apiKey : {}", configurationService.getProperty("com.openexchange.facebook.apiKey"));
+            LOG.info("Parameter com.openexchange.facebook.secretKey :{}", configurationService.getProperty("com.openexchange.facebook.secretKey"));
             final OAuthServiceMetaDataFacebookImpl facebookMetaDataService = new OAuthServiceMetaDataFacebookImpl(deferrer);
             registration = context.registerService(OAuthServiceMetaData.class, facebookMetaDataService, null);
             LOG.info("Registering Facebook service.");

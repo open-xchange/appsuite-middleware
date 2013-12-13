@@ -83,7 +83,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class OXFolderProperties implements Initialization, CacheAvailabilityListener {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OXFolderProperties.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXFolderProperties.class);
 
     private static OXFolderProperties instance = new OXFolderProperties();
 
@@ -238,16 +238,14 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
     }
 
     private void logInfo() {
-        if (LOG.isInfoEnabled()) {
-            final StringBuilder sb = new StringBuilder(512);
-            sb.append("\nFolder Properties & Folder Cache Properties:\n");
-            sb.append("\tENABLE_SHARED_FOLDER_CACHING=").append(enableSharedFolderCaching).append('\n');
-            sb.append("\tENABLE_DB_GROUPING=").append(enableDBGrouping).append('\n');
-            sb.append("\tENABLE_FOLDER_CACHE=").append(enableFolderCache).append('\n');
-            sb.append("\tENABLE_INTERNAL_USER_EDIT=").append(enableInternalUsersEdit).append('\n');
-            sb.append("\tIGNORE_SHARED_ADDRESSBOOK=").append(ignoreSharedAddressbook);
-            LOG.info(sb.toString());
-        }
+        final StringBuilder sb = new StringBuilder(512);
+        sb.append("\nFolder Properties & Folder Cache Properties:\n");
+        sb.append("\tENABLE_SHARED_FOLDER_CACHING=").append(enableSharedFolderCaching).append('\n');
+        sb.append("\tENABLE_DB_GROUPING=").append(enableDBGrouping).append('\n');
+        sb.append("\tENABLE_FOLDER_CACHE=").append(enableFolderCache).append('\n');
+        sb.append("\tENABLE_INTERNAL_USER_EDIT=").append(enableInternalUsersEdit).append('\n');
+        sb.append("\tIGNORE_SHARED_ADDRESSBOOK=").append(ignoreSharedAddressbook);
+        LOG.info(sb.toString());
     }
 
     private static final String WARN_FOLDER_PROPERTIES_INIT = "Folder properties have not been started.";
@@ -323,11 +321,11 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
             managementService.registerMBean(objectName, new GABRestorerMBeanImpl());
             return objectName;
         } catch (final MalformedObjectNameException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final NotCompliantMBeanException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return null;
     }
@@ -343,7 +341,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
             try {
                 managementService.unregisterMBean(objectName);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -390,7 +388,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
             }
             CacheFolderStorage.getInstance().removeFromGlobalCache(FolderStorage.GLOBAL_ADDRESS_BOOK_ID, FolderStorage.REAL_TREE_ID, contextId);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             if (null != con) {
                 Database.back(contextId, true, con);
@@ -407,7 +405,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
             ps.setInt(3, FolderObject.SYSTEM_LDAP_FOLDER_ID);
             ps.executeUpdate();
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             DBUtils.closeSQLStuff(ps);
         }

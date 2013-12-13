@@ -51,14 +51,12 @@ package com.openexchange.database.internal;
 
 import static com.openexchange.database.internal.Configuration.Property.CHECK_WRITE_CONS;
 import static com.openexchange.database.internal.Configuration.Property.REPLICATION_MONITOR;
-import org.apache.commons.logging.Log;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 
 /**
  * Contains the code to startup the complete database connection pooling and replication monitor.
@@ -67,7 +65,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class Initialization {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Initialization.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Initialization.class);
     private static final Initialization SINGLETON = new Initialization();
 
     private final Management management = new Management();
@@ -126,7 +124,7 @@ public final class Initialization {
         Server.setConfigDatabaseService(configDatabaseService);
         Server.start(configurationService);
         try {
-            LOG.info("Resolved server name \"" + Server.getServerName() + "\" to identifier " + Server.getServerId());
+            LOG.info("Resolved server name \"{}\" to identifier {}", Server.getServerName(), Server.getServerId());
         } catch (OXException e) {
             LOG.warn("Resolving server name to an identifier failed. This is normal until a server has been registered.", e);
         }

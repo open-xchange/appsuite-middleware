@@ -17,7 +17,8 @@ Import-Package: com.openexchange.exception,
  gnu.trove.map.hash,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Bundle-ClassPath: .,
  lib/dom4j-1.6.1.jar,
  lib/smack-3.2.1.jar,

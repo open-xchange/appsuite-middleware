@@ -60,7 +60,6 @@ import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
-import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
@@ -87,7 +86,7 @@ import com.sun.mail.imap.protocol.IMAPResponse;
  */
 public final class IMAPSort {
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPSort.class));
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPSort.class);
 
     /**
      * No instantiation
@@ -125,9 +124,7 @@ public final class IMAPSort {
                         final long start = System.currentTimeMillis();
                         seqNums = IMAPCommandsCollection.getServerSortList(imapFolder, sortCriteria, filter);
                         mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug(new com.openexchange.java.StringAllocator(128).append("IMAP sort took ").append((System.currentTimeMillis() - start)).append("msec").toString());
-                        }
+                        LOG.debug("IMAP sort took {}msec", (System.currentTimeMillis() - start));
                     }
                     if ((seqNums == null) || (seqNums.length == 0)) {
                         return new int[0];
@@ -167,10 +164,7 @@ public final class IMAPSort {
                         throw ((FolderClosedException) cause);
                     }
                 }
-                if (LOG.isWarnEnabled()) {
-                    final OXException imapException = IMAPException.create(IMAPException.Code.IMAP_SORT_FAILED, e, e.getMessage());
-                    LOG.warn(imapException.getMessage(), imapException);
-                }
+                LOG.warn("", IMAPException.create(IMAPException.Code.IMAP_SORT_FAILED, e, e.getMessage()));
             }
         }
         return null;
@@ -212,9 +206,7 @@ public final class IMAPSort {
                         final long start = System.currentTimeMillis();
                         seqNums = IMAPCommandsCollection.getServerSortList(imapFolder, sortCriteria, filter);
                         mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug(new com.openexchange.java.StringAllocator(128).append("IMAP sort took ").append((System.currentTimeMillis() - start)).append("msec").toString());
-                        }
+                        LOG.debug("IMAP sort took {}msec", (System.currentTimeMillis() - start));
                     }
                     if ((seqNums == null) || (seqNums.length == 0)) {
                         return EMPTY_MSGS;
@@ -224,10 +216,7 @@ public final class IMAPSort {
                     final long start = System.currentTimeMillis();
                     msgs = new MessageFetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), seqNums, fetchProfile, false, true, body).doCommand();
                     mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(new com.openexchange.java.StringAllocator(128).append("IMAP fetch for ").append(seqNums.length).append(" messages took ").append(
-                            (System.currentTimeMillis() - start)).append("msec").toString());
-                    }
+                    LOG.debug("IMAP fetch for {} messages took {}msec", seqNums.length, (System.currentTimeMillis() - start));
                     if ((msgs == null) || (msgs.length == 0)) {
                         return EMPTY_MSGS;
                     }
@@ -266,10 +255,7 @@ public final class IMAPSort {
                         throw ((FolderClosedException) cause);
                     }
                 }
-                if (LOG.isWarnEnabled()) {
-                    final OXException imapException = IMAPException.create(IMAPException.Code.IMAP_SORT_FAILED, e, e.getMessage());
-                    LOG.warn(imapException.getMessage(), imapException);
-                }
+                LOG.warn("", IMAPException.create(IMAPException.Code.IMAP_SORT_FAILED, e, e.getMessage()));
                 applicationSort = true;
             }
         }
@@ -399,7 +385,7 @@ public final class IMAPSort {
                             try {
                                 list.add(Long.parseLong(num));
                             } catch (final NumberFormatException e) {
-                                LOG.error(e.getMessage(), e);
+                                LOG.error("", e);
                                 throw new ProtocolException("Invalid UID: " + num, e);
                             }
                         }

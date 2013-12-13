@@ -85,7 +85,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 
 	private static final long serialVersionUID = 8555223354984992000L;
 
-	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MobilityProvisioningServlet.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobilityProvisioningServlet.class);
 
 	/**
 	 * Initializes

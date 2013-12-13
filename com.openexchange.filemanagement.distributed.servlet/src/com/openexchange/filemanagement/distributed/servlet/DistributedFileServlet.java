@@ -61,6 +61,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.java.Streams;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -99,7 +100,7 @@ public class DistributedFileServlet extends HttpServlet {
         OutputStream outStream = null;
         try {
             ManagedFile file = fileManagement.getByID(id);
-            inStream = new BufferedInputStream(file.getInputStream());
+            inStream = new BufferedInputStream(file.getInputStream(), 65536);
             resp.setContentType(file.getContentType());
 
             outStream = resp.getOutputStream();
@@ -109,10 +110,10 @@ public class DistributedFileServlet extends HttpServlet {
                 outStream.write(bytesRead);
             }
         } catch (OXException e) {
-            com.openexchange.log.Log.loggerFor(DistributedFileServlet.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(DistributedFileServlet.class).error("", e);
         } finally {
-            inStream.close();
-            outStream.close();
+            Streams.close(inStream);
+            Streams.close(outStream);
         }
     }
 
@@ -133,7 +134,7 @@ public class DistributedFileServlet extends HttpServlet {
         try {
             fileManagement.getByID(id);
         } catch (OXException e) {
-            com.openexchange.log.Log.loggerFor(DistributedFileServlet.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(DistributedFileServlet.class).error("", e);
         }
     }
 
@@ -149,7 +150,7 @@ public class DistributedFileServlet extends HttpServlet {
         try {
             fileManagement.removeByID(id);
         } catch (OXException e) {
-            com.openexchange.log.Log.loggerFor(DistributedFileServlet.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(DistributedFileServlet.class).error("", e);
         }
     }
 }

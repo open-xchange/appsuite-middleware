@@ -56,11 +56,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.tools.session.ServerSession;
 
@@ -71,7 +69,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class HasSubscriptions implements AdditionalFolderField {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HasSubscriptions.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HasSubscriptions.class);
 
     private static final Set<String> ID_BLACKLIST = new HashSet<String>(){{
         add(String.valueOf(FolderObject.SYSTEM_GLOBAL_FOLDER_ID));
@@ -137,7 +135,7 @@ public class HasSubscriptions implements AdditionalFolderField {
              }
              return retval;
          } catch (final OXException e) {
-             LOG.error(e.getMessage(), e);
+             LOG.error("", e);
          }
          return allFalse(folder.size());
      }

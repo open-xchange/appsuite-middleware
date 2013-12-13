@@ -55,8 +55,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
 import com.openexchange.dataretention.DataRetentionExceptionCodes;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link CSVDataRetentionConfig} - The configuration for CSV data retention.
@@ -65,7 +65,7 @@ import com.openexchange.dataretention.DataRetentionExceptionCodes;
  */
 public final class CSVDataRetentionConfig {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CSVDataRetentionConfig.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVDataRetentionConfig.class);
 
     private static volatile CSVDataRetentionConfig instance;
 
@@ -131,7 +131,7 @@ public final class CSVDataRetentionConfig {
      * @throws OXException If initialization fails
      */
     public void init(final ConfigurationService configurationService) throws OXException {
-        final StringBuilder logBuilder = LOG.isInfoEnabled() ? new StringBuilder(512).append("\nCSV data retention configuration:") : null;
+        final StringBuilder logBuilder = new StringBuilder(512).append("\nCSV data retention configuration:");
         // Directory
         {
             final String directoryStr = configurationService.getProperty("com.openexchange.dataretention.dir", "/var/log/open-xchange").trim();
@@ -153,7 +153,7 @@ public final class CSVDataRetentionConfig {
             try {
                 versionNumber = Integer.parseInt(versionNumberStr);
             } catch (final NumberFormatException e) {
-                LOG.error("Property \"com.openexchange.dataretention.versionNumber\" is not a number: " + versionNumberStr + ".Using fallback \"1\" instead.");
+                LOG.error("Property \"com.openexchange.dataretention.versionNumber\" is not a number: {}.Using fallback \"1\" instead.", versionNumberStr);
                 versionNumber = 1;
             }
             if (null != logBuilder) {
@@ -203,7 +203,7 @@ public final class CSVDataRetentionConfig {
             // Get all available IDs
             final Set<String> ids = new HashSet<String>(Arrays.asList(TimeZone.getAvailableIDs()));
             if (!ids.contains(tzStr)) {
-                LOG.error("Time zone ID \"" + tzStr + "\" is not supported. Using \"GMT\" as fallback.");
+                LOG.error("Time zone ID \"{}\" is not supported. Using \"GMT\" as fallback.", tzStr);
                 tzStr = "GMT";
             }
             timeZone = TimeZone.getTimeZone(tzStr);
@@ -221,16 +221,14 @@ public final class CSVDataRetentionConfig {
             try {
                 rotateLength = Long.parseLong(rl);
             } catch (final NumberFormatException e) {
-                LOG.error("Property \"com.openexchange.dataretention.rotateLength\" is not a number: " + rl + ".Using fallback \"0\" instead.");
+                LOG.error("Property \"com.openexchange.dataretention.rotateLength\" is not a number: {}.Using fallback \"0\" instead.", rl);
                 rotateLength = 0L;
             }
             if (null != logBuilder) {
                 logBuilder.append("\n\tcom.openexchange.dataretention.rotateLength=").append(rotateLength);
             }
         }
-        if (null != logBuilder) {
-            LOG.info(logBuilder.toString());
-        }
+        LOG.info(logBuilder.toString());
     }
 
     /**

@@ -55,7 +55,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import com.openexchange.caldav.CaldavProtocol;
@@ -69,7 +68,7 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FilterParser {
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FilterParser.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FilterParser.class);
 
     public Filter parse(Element rootElement) throws WebdavProtocolException {
         Filter filter = new Filter();
@@ -109,7 +108,7 @@ public class FilterParser {
                 Date startDate = format.parse(startAttr.getValue());
                 return startDate.getTime();
             } catch (ParseException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw WebdavProtocolException.generalError(new WebdavPath(), HttpServletResponse.SC_BAD_REQUEST);
             }
         }

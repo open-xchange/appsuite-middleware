@@ -50,8 +50,6 @@
 package com.openexchange.groupware.update.osgi;
 
 import java.util.Collection;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -66,7 +64,7 @@ import com.openexchange.groupware.update.internal.DynamicList;
  */
 public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer<UpdateTaskProviderService, UpdateTaskProviderService> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UpdateTaskCustomizer.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateTaskCustomizer.class);
 
     private final BundleContext context;
 
@@ -84,7 +82,7 @@ public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer<Upda
         boolean error = false;
         for (final UpdateTask task : collection) {
             if (!registry.addUpdateTask(task)) {
-                LOG.error("Update task \"" + task.getClass().getName() + "\" could not be registered.", new Exception());
+                LOG.error("Update task \"{}\" could not be registered.", task.getClass().getName(), new Exception());
                 error = true;
                 break;
             }

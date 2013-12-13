@@ -124,7 +124,6 @@ public class ValidationChain {
         if (failed) {
             if (null != exception) {
                 exception.setLogMessage(InfostoreExceptionCodes.VALIDATION_FAILED.getMessage(), message.toString());
-                exception.setForceLog(true);
                 throw exception;
             }
             throw InfostoreExceptionCodes.VALIDATION_FAILED.create(message.toString());

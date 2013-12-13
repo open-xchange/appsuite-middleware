@@ -70,7 +70,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public final class SMTPActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SMTPActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SMTPActivator.class);
 
     /**
      * Initializes a new {@link SMTPActivator}
@@ -85,23 +85,6 @@ public final class SMTPActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        /*
-         * Never stop the server even if a needed service is absent
-         */
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
-    }
-
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
-    }
-
-    @Override
     public void startBundle() throws Exception {
         try {
             Services.setServiceLookup(this);
@@ -112,7 +95,7 @@ public final class SMTPActivator extends HousekeepingActivator {
             dictionary.put("protocol", SMTPProvider.PROTOCOL_SMTP.toString());
             registerService(TransportProvider.class, SMTPProvider.getInstance(), dictionary);
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
 
@@ -124,7 +107,7 @@ public final class SMTPActivator extends HousekeepingActivator {
             cleanUp();
             Services.setServiceLookup(null);
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
     }

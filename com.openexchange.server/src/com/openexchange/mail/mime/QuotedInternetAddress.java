@@ -87,7 +87,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     private static final long serialVersionUID = -2523736473507495692L;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(QuotedInternetAddress.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QuotedInternetAddress.class);
 
     private static final boolean IGNORE_BOGUS_GROUP_NAME = getBooleanSystemProperty("mail.mime.address.ignorebogusgroupname", true);
 
@@ -989,7 +989,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         try {
             this.address = toACE(address);
         } catch (final AddressException e) {
-            LOG.error("ACE string could not be parsed from IDN string: " + address, e);
+            LOG.error("ACE string could not be parsed from IDN string: {}", address, e);
             this.address = address;
         }
     }
@@ -1042,7 +1042,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             try {
                 encodedPersonal = MimeUtility.encodeWord(personal, jcharset, null);
             } catch (final UnsupportedEncodingException ex) {
-                LOG.error(ex.getMessage(), ex);
+                LOG.error("", ex);
             }
         }
 
@@ -1067,7 +1067,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                     try {
                         encodedPersonal = MimeUtility.encodeWord(personal, jcharset, null);
                     } catch (final UnsupportedEncodingException ex) {
-                        LOG.error(ex.getMessage(), ex);
+                        LOG.error("", ex);
                     }
                 }
 
@@ -1075,13 +1075,13 @@ public final class QuotedInternetAddress extends InternetAddress {
                     try {
                         encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
                     } catch (final UnsupportedEncodingException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 } else if (!isAscii(personal)) {
                     try {
                         encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal, true), jcharset, null);
                     } catch (final UnsupportedEncodingException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
                 return new com.openexchange.java.StringAllocator(32).append(encodedPersonal).append(" <").append(address).append('>').toString();

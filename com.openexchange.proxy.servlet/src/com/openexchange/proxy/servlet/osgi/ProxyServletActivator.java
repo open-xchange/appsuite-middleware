@@ -82,11 +82,9 @@ public class ProxyServletActivator extends AbstractSessionServletActivator {
 
     @Override
     public void startBundle() throws Exception {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ProxyServletActivator.class));
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProxyServletActivator.class);
         try {
-            if (log.isInfoEnabled()) {
-                log.info("starting bundle: com.openexchange.proxy.servlet");
-            }
+            log.info("starting bundle: com.openexchange.proxy.servlet");
 
             registerSessionServlet(Constants.PATH, new ProxyServlet());
 
@@ -109,18 +107,16 @@ public class ProxyServletActivator extends AbstractSessionServletActivator {
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
             registrations.add(context.registerService(EventHandler.class, new ProxyEventHandler(), serviceProperties));
         } catch (final Exception e) {
-            log.error("Failed start-up of bundle com.openexchange.proxy.servlet: " + e.getMessage(), e);
+            log.error("Failed start-up of bundle com.openexchange.proxy.servlet: {}", e.getMessage(), e);
             throw e;
         }
     }
 
     @Override
     public void stopBundle() throws Exception {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ProxyServletActivator.class));
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProxyServletActivator.class);
         try {
-            if (log.isInfoEnabled()) {
-                log.info("stopping bundle: com.openexchange.proxy.servlet");
-            }
+            log.info("stopping bundle: com.openexchange.proxy.servlet");
             if (null != trackers) {
                 for (final ServiceTracker<?,?> serviceTracker : trackers) {
                     serviceTracker.close();
@@ -134,7 +130,7 @@ public class ProxyServletActivator extends AbstractSessionServletActivator {
                 registrations = null;
             }
         } catch (final Exception e) {
-            log.error("Failed shut-down of bundle com.openexchange.proxy.servlet: " + e.getMessage(), e);
+            log.error("Failed shut-down of bundle com.openexchange.proxy.servlet: {}", e.getMessage(), e);
             throw e;
         }
     }

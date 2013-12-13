@@ -72,7 +72,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class TransportProviderServiceTracker implements ServiceTrackerCustomizer<TransportProvider,TransportProvider> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TransportProviderServiceTracker.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TransportProviderServiceTracker.class);
 
     private final BundleContext context;
     private ServiceRegistration<CapabilityChecker> capabilityChecker;
@@ -96,20 +96,20 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
         }
         final Object protocol = reference.getProperty("protocol");
         if (null == protocol) {
-            LOG.error("Missing protocol in transport provider service: " + transportProvider.getClass().getName());
+            LOG.error("Missing protocol in transport provider service: {}", transportProvider.getClass().getName());
             context.ungetService(reference);
             return null;
         }
         try {
             if (TransportProviderRegistry.registerTransportProvider(protocol.toString(), transportProvider)) {
-                LOG.info(new StringBuilder(64).append("Transport provider for protocol '").append(protocol.toString()).append("' successfully registered"));
+                LOG.info("Transport provider for protocol '{}' successfully registered", protocol);
             } else {
-                LOG.warn(new StringBuilder(64).append("Transport provider for protocol '").append(protocol.toString()).append("' could not be added.").append("Another provider which supports the protocol has already been registered."));
+                LOG.warn("Transport provider for protocol '{}' could not be added.Another provider which supports the protocol has already been registered.", protocol);
                 context.ungetService(reference);
                 return null;
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             context.ungetService(reference);
             return null;
         }
@@ -154,10 +154,9 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
                 try {
                     final TransportProvider provider = service;
                     TransportProviderRegistry.unregisterTransportProvider(provider);
-                    LOG.info(new StringBuilder(64).append("Transport provider for protocol '").append(provider.getProtocol().toString()).append(
-                        "' successfully unregistered"));
+                    LOG.info("Transport provider for protocol '{}' successfully unregistered", provider.getProtocol());
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             } finally {
                 context.ungetService(reference);

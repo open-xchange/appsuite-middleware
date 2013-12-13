@@ -79,9 +79,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class MALPollPushListener implements PushListener {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MALPollPushListener.class));
-
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MALPollPushListener.class);
 
     private static final MailField[] FIELDS = new MailField[] { MailField.ID };
 
@@ -237,10 +235,7 @@ public final class MALPollPushListener implements PushListener {
             /*
              * Still in process...
              */
-            if (DEBUG_ENABLED) {
-                LOG.debug(new StringBuilder(64).append("Listener still in process for user ").append(userId).append(" in context ").append(
-                    contextId).append(". Return immediately.").toString());
-            }
+            LOG.debug("Listener still in process for user {} in context {}. Return immediately.", userId, contextId);
             return;
         }
         final ContextService contextService = MALPollServiceRegistry.getServiceRegistry().getService(ContextService.class, true);
@@ -262,7 +257,6 @@ public final class MALPollPushListener implements PushListener {
     }
 
     private void firstRun(final MailService mailService) throws OXException, OXException {
-        final long s = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         /*
          * First run
          */
@@ -280,14 +274,9 @@ public final class MALPollPushListener implements PushListener {
          * Synchronize
          */
         synchronizeIDs(mailService, hash, loadDBIDs);
-        if (DEBUG_ENABLED) {
-            final long d = System.currentTimeMillis() - s;
-            LOG.debug("First run took " + d + "msec");
-        }
     }
 
     private void subsequentRun(final MailService mailService) throws OXException, OXException {
-        final long s = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         /*
          * Subsequent run
          */
@@ -296,10 +285,6 @@ public final class MALPollPushListener implements PushListener {
             return;
         }
         synchronizeIDs(mailService, hash, true);
-        if (DEBUG_ENABLED) {
-            final long d = System.currentTimeMillis() - s;
-            LOG.debug("Subsequent run took " + d + "msec");
-        }
     }
 
     private void synchronizeIDs(final MailService mailService, final UUID hash, final boolean loadDBIDs) throws OXException, OXException {
@@ -311,9 +296,7 @@ public final class MALPollPushListener implements PushListener {
                 fetchedUids = gatherUIDs(mailService);
             } catch (final OXException e) {
                 if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e.getMessage(), e);
-                    }
+                    LOG.debug("", e);
                     /*
                      * Nothing to synchronize
                      */

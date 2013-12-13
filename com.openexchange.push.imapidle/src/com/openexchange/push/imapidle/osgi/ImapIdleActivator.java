@@ -74,7 +74,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public final class ImapIdleActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ImapIdleActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ImapIdleActivator.class);
 
     private String folder;
 
@@ -95,9 +95,7 @@ public final class ImapIdleActivator extends HousekeepingActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         getServiceRegistry().addService(clazz, getService(clazz));
         if (ThreadPoolService.class == clazz) {
             ImapIdlePushListenerRegistry.getInstance().openAll();
@@ -106,9 +104,7 @@ public final class ImapIdleActivator extends HousekeepingActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
         if (ThreadPoolService.class == clazz) {
             ImapIdlePushListenerRegistry.getInstance().closeAll();
         }
@@ -153,7 +149,7 @@ public final class ImapIdleActivator extends HousekeepingActivator {
             final String modestr =configurationService.getProperty("com.openexchange.push.imapidle.pushmode", PushMode.ALWAYS.toString());
             PushMode pushmode = PushMode.fromString(modestr);
             if( pushmode == null ) {
-                LOG.info("WARNING: " + modestr + " is an invalid setting for com.openexchange.push.imapidle.pushmode, using default");
+                LOG.info("WARNING: {} is an invalid setting for com.openexchange.push.imapidle.pushmode, using default", modestr);
                 pushmode = PushMode.ALWAYS;
             }
 
@@ -175,11 +171,11 @@ public final class ImapIdleActivator extends HousekeepingActivator {
             registerService(DeleteListener.class, new ImapIdleDeleteListener(), null);
             LOG.info("com.openexchange.push.imapidle bundle started");
             LOG.info(debug ? " debugging enabled" : "debugging disabled");
-            LOG.info("Foldername: " + folder);
-            LOG.info("Error delay: " + errordelay + "");
-            LOG.info("pushmode: " + pushmode);
+            LOG.info("Foldername: {}", folder);
+            LOG.info("Error delay: {}", errordelay);
+            LOG.info("pushmode: {}", pushmode);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -209,7 +205,7 @@ public final class ImapIdleActivator extends HousekeepingActivator {
              */
             folder = null;
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

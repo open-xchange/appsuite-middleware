@@ -71,7 +71,6 @@ import com.openexchange.imap.cache.NamespaceFoldersCache;
 import com.openexchange.imap.cache.RootSubfolderCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.services.Services;
-import com.openexchange.log.Log;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -87,7 +86,6 @@ import com.openexchange.session.Session;
 import com.openexchange.spamhandler.NoSpamHandler;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
-import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
@@ -99,9 +97,7 @@ import com.sun.mail.imap.IMAPStore;
  */
 public class IMAPDefaultFolderChecker {
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPDefaultFolderChecker.class));
-
-    static final boolean DEBUG = LOG.isDebugEnabled();
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPDefaultFolderChecker.class);
 
     protected static final String INBOX = "INBOX";
 
@@ -236,14 +232,6 @@ public class IMAPDefaultFolderChecker {
                         return null;
                     }
                     try {
-                        if (DEBUG) {
-                            final StringBuilder sb = new StringBuilder(2048);
-                            sb.append("\n\nDefault folder check for account ").append(accountId).append(" (");
-                            sb.append(imapConfig.getServer()).append(")\n");
-                            new Throwable().printStackTrace(new java.io.PrintWriter(new UnsynchronizedStringWriter(sb)));
-                            sb.append('\n');
-                            LOG.debug(sb.toString());
-                        }
                         /*
                          * Get INBOX folder
                          */
@@ -357,7 +345,6 @@ public class IMAPDefaultFolderChecker {
          * Sequentially check folders
          */
         final AtomicBoolean modified = new AtomicBoolean(false);
-        final long start = DEBUG ? System.currentTimeMillis() : 0L;
         for (int i = 0; i < names.length; i++) {
             final String fullName = fullNames[i];
             final int index = i;
@@ -373,8 +360,8 @@ public class IMAPDefaultFolderChecker {
                         spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
                         modified,
                         mailSessionCache);
-                } else if (DEBUG) {
-                    LOG.debug("Skipping check for " + names[index] + " due to SpamHandler.isCreateConfirmedHam()=false");
+                } else {
+                    LOG.debug("Skipping check for {} due to SpamHandler.isCreateConfirmedHam()=false", names[index]);
                 }
             } else if (StorageUtility.INDEX_CONFIRMED_SPAM == index) {
                 if (spamHandler.isCreateConfirmedSpam()) {
@@ -388,17 +375,13 @@ public class IMAPDefaultFolderChecker {
                         spamHandler.isUnsubscribeSpamFolders() ? 0 : -1,
                         modified,
                         mailSessionCache);
-                } else if (DEBUG) {
-                    LOG.debug("Skipping check for " + names[index] + " due to SpamHandler.isCreateConfirmedSpam()=false");
+                } else {
+                    LOG.debug("Skipping check for {} due to SpamHandler.isCreateConfirmedSpam()=false", names[index]);
                 }
             } else {
                 performTaskFor(index, prefix, fullName, names[index], sep, type, 1, modified, mailSessionCache);
             }
         } // End of for loop
-        if (DEBUG) {
-            LOG.debug(new StringBuilder(64).append("Default folders check for account ").append(accountId).append(" took ").append(
-                System.currentTimeMillis() - start).append("msec").toString());
-        }
         /*
          * Check for modifications
          */
@@ -465,14 +448,7 @@ public class IMAPDefaultFolderChecker {
             final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
             sb.append("Couldn't check default folder: ");
             sb.append((null == fullName ? (prefix + name) : fullName));
-            if (Log.appendTraceToMessage()) {
-                final String lineSeparator = System.getProperty("line.separator");
-                sb.append(lineSeparator).append(lineSeparator);
-                appendStackTrace(e.getStackTrace(), sb, new ClassNameMatcher(IMAPDefaultFolderChecker.class.getSimpleName()), lineSeparator);
-                LOG.warn(sb.toString());
-            } else {
-                LOG.warn(sb.toString(), e);
-            }
+            LOG.warn(sb.toString(), e);
             setDefaultMailFolder(index, null, cache);
             e.setCategory(Category.CATEGORY_WARNING);
             imapAccess.addWarnings(Collections.singleton(e));
@@ -496,14 +472,7 @@ public class IMAPDefaultFolderChecker {
             final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
             sb.append("Couldn't check default folder: ");
             sb.append((null == fullName ? (prefix + name) : fullName));
-            if (Log.appendTraceToMessage()) {
-                final String lineSeparator = System.getProperty("line.separator");
-                sb.append(lineSeparator).append(lineSeparator);
-                appendStackTrace(e.getStackTrace(), sb, new ClassNameMatcher(IMAPDefaultFolderChecker.class.getSimpleName()), lineSeparator);
-                LOG.warn(sb.toString());
-            } else {
-                LOG.warn(sb.toString(), e);
-            }
+            LOG.warn(sb.toString(), e);
             setDefaultMailFolder(index, null, cache);
             final OXException warning = MimeMailException.handleMessagingException(e, imapConfig, session).setCategory(Category.CATEGORY_WARNING);
             imapAccess.addWarnings(Collections.singleton(warning));
@@ -651,7 +620,6 @@ public class IMAPDefaultFolderChecker {
          * Check default folder
          */
         final StringBuilder tmp = new StringBuilder(32);
-        final long st = DEBUG ? System.currentTimeMillis() : 0L;
         final int prefixLen = prefix.length();
         final String fullName = prefixLen == 0 ? qualifiedName : tmp.append(prefix).append(qualifiedName).toString();
         {
@@ -672,12 +640,6 @@ public class IMAPDefaultFolderChecker {
                         IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, false);
                         modified.set(true);
                     }
-                }
-                if (DEBUG) {
-                    tmp.setLength(0);
-                    final long dur = System.currentTimeMillis() - st;
-                    LOG.debug(tmp.append("Default folder \"").append(fullName).append("\" successfully checked for IMAP account ").append(
-                        accountId).append(" (").append(imapConfig.getServer()).append(") in ").append(dur).append("msec.").toString());
                 }
                 return fullName;
             }
@@ -803,12 +765,6 @@ public class IMAPDefaultFolderChecker {
                 IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, false);
                 modified.set(true);
             }
-        }
-        if (DEBUG) {
-            final long dur = System.currentTimeMillis() - st;
-            LOG.debug(tmp.append("Default folder \"").append(f.getFullName()).append("\" successfully checked for IMAP account ").append(
-                accountId).append(" (").append(imapConfig.getServer()).append(") in ").append(dur).append("msec.").toString());
-            tmp.setLength(0);
         }
         return f.getFullName();
     }

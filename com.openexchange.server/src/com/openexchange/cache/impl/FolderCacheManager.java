@@ -62,7 +62,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
@@ -73,7 +72,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
@@ -90,7 +88,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class FolderCacheManager {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderCacheManager.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderCacheManager.class);
 
     private static volatile FolderCacheManager instance;
 
@@ -177,7 +175,7 @@ public final class FolderCacheManager {
                         try {
                             cacheService.freeCache(REGION_NAME);
                         } catch (final OXException e) {
-                            LOG.error(e.getMessage(), e);
+                            LOG.error("", e);
                         }
                     }
                 }
@@ -396,7 +394,7 @@ public final class FolderCacheManager {
                             final CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(folderId));
                             globalCache.removeFromGroup(cacheKey, String.valueOf(ctx.getContextId()));
                         } catch (final OXException e) {
-                            LOG.warn(e.getMessage(), e);
+                            LOG.warn("", e);
                         }
                     }
                 }
@@ -557,7 +555,7 @@ public final class FolderCacheManager {
                             final CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(folderObj.getObjectID()));
                             globalCache.removeFromGroup(cacheKey, String.valueOf(ctx.getContextId()));
                         } catch (final OXException e) {
-                            LOG.warn(e.getMessage(), e);
+                            LOG.warn("", e);
                         }
                     }
                 } else if (tmp instanceof Condition) {
@@ -619,7 +617,7 @@ public final class FolderCacheManager {
                 final CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(folderId));
                 globalCache.removeFromGroup(cacheKey, String.valueOf(ctx.getContextId()));
             } catch (final OXException e) {
-                LOG.warn(e.getMessage(), e);
+                LOG.warn("", e);
             }
         }
     }
@@ -669,7 +667,7 @@ public final class FolderCacheManager {
                     globalCache.removeFromGroup(cacheKey, String.valueOf(ctx.getContextId()));
                 }
             } catch (final OXException e) {
-                LOG.warn(e.getMessage(), e);
+                LOG.warn("", e);
             }
         }
     }
@@ -692,7 +690,7 @@ public final class FolderCacheManager {
                 final Cache globalCache = cacheService.getCache("GlobalFolderCache");
                 globalCache.clear();
             } catch (final OXException e) {
-                LOG.warn(e.getMessage(), e);
+                LOG.warn("", e);
             }
         }
     }

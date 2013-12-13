@@ -3,7 +3,6 @@ package com.openexchange.ajax.appointment.bugtests;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AppointmentTest;
@@ -20,7 +19,7 @@ public class Bug11250Test extends AppointmentTest {
 		CalendarObject.TITLE,
 	};
 
-	private static final Log LOG = LogFactory.getLog(Bug11250Test.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug11250Test.class);
 
 	public Bug11250Test(final String name) {
 		super(name);

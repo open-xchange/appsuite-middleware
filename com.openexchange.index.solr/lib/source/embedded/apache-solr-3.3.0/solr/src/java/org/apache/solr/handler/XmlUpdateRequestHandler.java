@@ -41,7 +41,7 @@ import java.util.HashMap;
  * Add documents to solr using the STAX XML parser.
  */
 public class XmlUpdateRequestHandler extends ContentStreamHandlerBase {
-  public static Logger log = LoggerFactory.getLogger(XmlUpdateRequestHandler.class);
+  public static org.slf4j.Logger log = LoggerFactory.getLogger(XmlUpdateRequestHandler.class);
   private static final XMLErrorLogger xmllog = new XMLErrorLogger(log);
 
   public static final String UPDATE_PROCESSOR = "update.processor";

@@ -76,8 +76,8 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "An array of resource objects as described in Resource response.")
 public final class GetAction extends AbstractResourceAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(GetAction.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(GetAction.class);
 
     /**
      * Initializes a new {@link GetAction}.

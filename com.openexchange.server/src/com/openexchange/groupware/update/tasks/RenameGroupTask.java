@@ -56,8 +56,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.i18n.Groups;
@@ -75,7 +73,7 @@ import com.openexchange.server.services.I18nServices;
  */
 public class RenameGroupTask extends UpdateTaskAdapter {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RenameGroupTask.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RenameGroupTask.class);
 
     /**
      * Initializes a new {@link RenameGroupTask}.
@@ -137,7 +135,7 @@ public class RenameGroupTask extends UpdateTaskAdapter {
                 LOG.warn("Was not able to update display name of standard group.");
             }
         } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             closeSQLStuff(stmt);
         }
@@ -155,7 +153,7 @@ public class RenameGroupTask extends UpdateTaskAdapter {
                 language = result.getString(1);
             }
         } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             closeSQLStuff(result, stmt);
         }

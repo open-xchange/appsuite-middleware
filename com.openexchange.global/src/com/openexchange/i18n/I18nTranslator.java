@@ -50,8 +50,6 @@
 package com.openexchange.i18n;
 
 import java.util.Locale;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * Implementation of a {@link Translator} backed with an {@link I18nService}.
@@ -60,9 +58,7 @@ import com.openexchange.log.LogFactory;
  */
 public class I18nTranslator implements Translator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(I18nTranslator.class));
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
-    private static final boolean WARN_ENABLED = LOG.isWarnEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(I18nTranslator.class);
 
     private final I18nService service;
 
@@ -81,14 +77,9 @@ public class I18nTranslator implements Translator {
         if (!service.hasKey(toTranslate)) {
             final Locale locale = service.getLocale();
             if (isEnUs(locale)) {
-                if (DEBUG_ENABLED) {
-                    final String message = new com.openexchange.java.StringAllocator(64).append("I18n service for locale ").append(locale).append(
-                        " has no translation for \"").append(toTranslate).append("\".").toString();
-                    LOG.warn(message, new Throwable(message));
-                }
-            } else if (WARN_ENABLED) {
-                LOG.warn(new com.openexchange.java.StringAllocator(64).append("I18n service for locale ").append(locale).append(" has no translation for \"").append(
-                    toTranslate).append("\".").toString());
+                LOG.warn("I18n service for locale {} has no translation for \"{}\".", locale, toTranslate, new Throwable());
+            } else {
+                LOG.warn("I18n service for locale {} has no translation for \"{}\".", locale, toTranslate);
             }
             return toTranslate;
         }

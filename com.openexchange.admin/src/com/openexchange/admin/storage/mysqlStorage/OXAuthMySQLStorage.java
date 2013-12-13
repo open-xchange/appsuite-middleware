@@ -55,7 +55,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -65,7 +64,6 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXAuthStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.GenericChecks;
-import com.openexchange.log.LogFactory;
 
 /**
  * Default mysql implementation for admin auth.
@@ -74,7 +72,7 @@ import com.openexchange.log.LogFactory;
  */
 public class OXAuthMySQLStorage extends OXAuthStorageInterface {
 
-    private final static Log log = LogFactory.getLog(OXAuthMySQLStorage.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXAuthMySQLStorage.class);
 
     /** */
     public OXAuthMySQLStorage() {
@@ -120,9 +118,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                         rs = prep.executeQuery();
                         if (!rs.next()) {
                             // auth failed , admin user not found in context
-                            if (log.isDebugEnabled()) {
-                                log.debug("Admin user \"" + authdata.getLogin() + "\" not found in context \"" + ctx.getId() + "\"!");
-                            }
+                                log.debug("Admin user \"{}\" not found in context \"{}\"!", authdata.getLogin(), ctx.getId());
                             return false;
                         } else {
                             String pwcrypt = rs.getString("userPassword");
@@ -135,16 +131,16 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                             return false;
                         }
                     } catch (final SQLException sql) {
-                        log.error(sql.getMessage(), sql);
+                        log.error("", sql);
                         throw new StorageException(sql.toString());
                     } catch (final PoolException ex) {
-                        log.error(ex.getMessage(), ex);
+                        log.error("", ex);
                         throw new StorageException(ex);
                     } catch (NoSuchAlgorithmException e) {
-                        log.error(e.getMessage(), e);
+                        log.error("", e);
                         throw new StorageException(e);
                     } catch (UnsupportedEncodingException e) {
-                        log.error(e.getMessage(), e);
+                        log.error("", e);
                         throw new StorageException(e);
                     } finally {
                         try {
@@ -181,7 +177,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
 //                            return true;
 //                        } else {
 //                            if (log.isDebugEnabled()) {
-//                                log.debug("Password for admin user \"" + authdata.getLogin() + "\" did not match!");
+//                                log.debug("Password for admin user \"{}\" did not match!", authdata.getLogin());
 //                            }
 //                            return false;
 //                        }
@@ -189,10 +185,10 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
 //                        return false;
 //                    }
 //                } catch (NoSuchAlgorithmException e) {
-//                    log.error(e.getMessage(), e);
+//                    log.error("", e);
 //                    throw new StorageException(e);
 //                } catch (UnsupportedEncodingException e) {
-//                    log.error(e.getMessage(), e);
+//                    log.error("", e);
 //                    throw new StorageException(e);
 //                }
 //
@@ -220,34 +216,28 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                 rs = prep.executeQuery();
                 if (!rs.next()) {
                     // auth failed , user not found in context
-                    if (log.isDebugEnabled()) {
-                        log.debug("User \"" + authdata.getLogin() + "\" not found in context \"" + ctx.getId() + "\"!");
-                    }
+                    log.debug("User \"{}\" not found in context \"{}\"!", authdata.getLogin(), ctx.getId());
                     return false;
-                } else {
-                    String pwcrypt = rs.getString("userPassword");
-                    String pwmech  = rs.getString("passwordMech");
-                    // now check via our crypt mech the password
-                    if ( GenericChecks.authByMech(pwcrypt, authdata.getPassword(), pwmech) ) {
-                        return true;
-                    } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Password for ser \"" + authdata.getLogin() + "\" did not match!");
-                        }
-                        return false;
-                    }
                 }
+                String pwcrypt = rs.getString("userPassword");
+                String pwmech  = rs.getString("passwordMech");
+                // now check via our crypt mech the password
+                if ( GenericChecks.authByMech(pwcrypt, authdata.getPassword(), pwmech) ) {
+                    return true;
+                }
+                log.debug("Password for ser \"{}\" did not match!", authdata.getLogin());
+                return false;
             } catch (final SQLException sql) {
-                log.error(sql.getMessage(), sql);
+                log.error("", sql);
                 throw new StorageException(sql.toString());
             } catch (final PoolException ex) {
-                log.error(ex.getMessage(), ex);
+                log.error("", ex);
                 throw new StorageException(ex);
             } catch (NoSuchAlgorithmException e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
                 throw new StorageException(e);
             } catch (UnsupportedEncodingException e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
                 throw new StorageException(e);
             } finally {
 

@@ -64,7 +64,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
-import org.apache.commons.logging.Log;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.TagArgument;
 import org.apache.jsieve.parser.generated.ParseException;
@@ -92,7 +91,6 @@ import com.openexchange.jsieve.export.SieveTextFilter.ClientRulesAndRequire;
 import com.openexchange.jsieve.export.SieveTextFilter.RuleListAndNextUid;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredentialsException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mailfilter.ajax.Credentials;
 import com.openexchange.mailfilter.ajax.Parameter;
 import com.openexchange.mailfilter.ajax.actions.AbstractRequest.Parameters;
@@ -112,7 +110,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  */
 public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 
-    private static final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailfilterAction.class));
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MailfilterAction.class);
 
     private static final ConcurrentMap<Key, MailfilterAction> INSTANCES = new ConcurrentHashMap<Key, MailfilterAction>();
 
@@ -347,10 +345,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 } else {
                     script = "";
                 }
-                if (log.isDebugEnabled()) {
-                    log.debug("The following sieve script will be parsed:\n"
-                        + script);
-                }
+                log.debug("The following sieve script will be parsed:\n{}", script);
                 final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
                 final RuleListAndNextUid readScriptFromString = sieveTextFilter.readScriptFromString(script);
                 final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(
@@ -453,9 +448,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                     position = clientrules.size() - 1;
                 }
                 final String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
-                if (log.isDebugEnabled()) {
-                    log.debug("The following sieve script will be written:\n" + writeback);
-                }
+                log.debug("The following sieve script will be written:\n{}", writeback);
                 writeScript(sieveHandler, activeScript, writeback);
 
                 return nextuid;
@@ -607,10 +600,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                     final String writeback = sieveTextFilter.writeback(
                         clientrulesandrequire, new HashSet<String>(
                             sieveHandler.getCapabilities().getSieve()));
-                    if (log.isDebugEnabled()) {
-                        log.debug("The following sieve script will be written:\n"
-                            + writeback);
-                    }
+                    log.debug("The following sieve script will be written:\n{}", writeback);
                     writeScript(sieveHandler, activeScript, writeback);
                 } else {
                     throw OXMailfilterExceptionCode.NO_ACTIVE_SCRIPT.create();
@@ -981,10 +971,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         if (null != msg) {
             if (msg.startsWith(OXMailfilterExceptionCode.ERR_PREFIX_REJECTED_ADDRESS)) {
                 ret.setCategory(Category.CATEGORY_USER_INPUT);
-                ret.setForceLog(true);
             } else if (msg.startsWith(OXMailfilterExceptionCode.ERR_PREFIX_INVALID_ADDRESS)) {
                 ret.setCategory(Category.CATEGORY_USER_INPUT);
-                ret.setForceLog(true);
             }
         }
         return ret;

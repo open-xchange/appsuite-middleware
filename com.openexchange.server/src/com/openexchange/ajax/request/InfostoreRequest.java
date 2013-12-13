@@ -61,7 +61,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -92,7 +91,6 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -112,7 +110,7 @@ public class InfostoreRequest extends CommonRequest {
 
     private final UserPermissionBits userPermissionBits;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreRequest.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreRequest.class);
 
     public InfostoreRequest(final ServerSession session, final JSONWriter w) {
         super(w);
@@ -502,7 +500,7 @@ public class InfostoreRequest extends CommonRequest {
                 try {
                     iter.close();
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -854,7 +852,7 @@ public class InfostoreRequest extends CommonRequest {
             w.endObject();
 
         } catch (final JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -910,7 +908,7 @@ public class InfostoreRequest extends CommonRequest {
             w.value(newTimestamp);
             w.endObject();
         } catch (final JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -1077,7 +1075,7 @@ public class InfostoreRequest extends CommonRequest {
             w.value(updated.getLastModified().getTime());
             w.endObject();
         } catch (final JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -1138,7 +1136,7 @@ public class InfostoreRequest extends CommonRequest {
             w.key(ResponseFields.DATA).value(metadata.getId());
             w.endObject();
         } catch (final JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
 
     }
@@ -1161,7 +1159,7 @@ public class InfostoreRequest extends CommonRequest {
                 w.value(currentVersion.getLastModified().getTime());
                 w.endObject();
             } catch (final JSONException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
 
         } catch (final Throwable t) {
@@ -1197,7 +1195,7 @@ public class InfostoreRequest extends CommonRequest {
             try {
                 w.object().key(ResponseFields.TIMESTAMP).value(currentVersion.getLastModified().getTime()).endObject();
             } catch (final JSONException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
 
         } catch (final Throwable t) {

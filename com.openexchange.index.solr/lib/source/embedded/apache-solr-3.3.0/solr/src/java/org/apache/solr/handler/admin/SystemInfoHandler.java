@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SystemInfoHandler extends RequestHandlerBase 
 {
-  private static Logger log = LoggerFactory.getLogger(SystemInfoHandler.class);
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(SystemInfoHandler.class);
   
   @Override
   public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp) throws Exception

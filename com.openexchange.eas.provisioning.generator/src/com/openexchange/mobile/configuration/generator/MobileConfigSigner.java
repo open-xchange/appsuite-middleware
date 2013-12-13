@@ -107,7 +107,7 @@ public class MobileConfigSigner extends Writer {
 
     private void init() throws IOException {
         this.process = pb.start();
-        this.input = new BufferedInputStream(this.process.getInputStream());
+        this.input = new BufferedInputStream(this.process.getInputStream(), 65536);
         this.output = new OutputStreamWriter(new BufferedOutputStream(this.process.getOutputStream()));
 
     }

@@ -55,7 +55,7 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.update.Tools.checkAndModifyColumns;
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
@@ -96,8 +96,8 @@ public final class InfostoreExtendFilenameTitleAndFilesizeTask extends UpdateTas
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        Log log = com.openexchange.log.Log.loggerFor(InfostoreExtendFilenameTitleAndFilesizeTask.class);
-        log.info("Performing update task " + InfostoreExtendFilenameTitleAndFilesizeTask.class.getSimpleName());
+        Logger log = org.slf4j.LoggerFactory.getLogger(InfostoreExtendFilenameTitleAndFilesizeTask.class);
+        log.info("Performing update task {}", InfostoreExtendFilenameTitleAndFilesizeTask.class.getSimpleName());
         Column[] colums = {
             new Column("title", "varchar(767)"),
             new Column("filename", "varchar(767)"),
@@ -118,7 +118,7 @@ public final class InfostoreExtendFilenameTitleAndFilesizeTask extends UpdateTas
             autocommit(connnection);
             Database.backNoTimeout(params.getContextId(), true, connnection);
         }
-        log.info(InfostoreExtendFilenameTitleAndFilesizeTask.class.getSimpleName() + " successfully performed.");
+        log.info("{} successfully performed.", InfostoreExtendFilenameTitleAndFilesizeTask.class.getSimpleName());
     }
 
 }

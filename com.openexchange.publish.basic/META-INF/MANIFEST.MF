@@ -71,7 +71,8 @@ Import-Package: com.openexchange.ajax.customizer.folder,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.service.event,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Export-Package: com.openexchange.publish.helpers,
  com.openexchange.publish.interfaces,
  com.openexchange.publish.osgi.tools,

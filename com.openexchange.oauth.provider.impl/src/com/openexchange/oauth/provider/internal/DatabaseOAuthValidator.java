@@ -63,7 +63,6 @@ import net.oauth.OAuthMessage;
 import net.oauth.OAuthProblemException;
 import net.oauth.OAuthValidator;
 import net.oauth.SimpleOAuthValidator;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
@@ -77,7 +76,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class DatabaseOAuthValidator extends SimpleOAuthValidator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DatabaseOAuthValidator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseOAuthValidator.class);
 
     /**
      * Initializes a new {@link DatabaseOAuthValidator} that rejects messages more than five minutes old or with a OAuth version other than
@@ -114,7 +113,7 @@ public final class DatabaseOAuthValidator extends SimpleOAuthValidator {
             }
             return removeOldNonces(currentTimeMsec, databaseService);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final String logMessage = e.getPlainLogMessage();
             final Object[] args = e.getLogArgs();
             throw new IOException(String.format(Locale.US, null == logMessage ? "I/O error." : logMessage, null == args ? new Object[0] : args), e);

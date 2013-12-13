@@ -27,4 +27,5 @@ Import-Package: com.openexchange.ajax,
  javax.net.ssl,
  org.apache.commons.logging,
  org.apache.log4j,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j

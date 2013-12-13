@@ -76,7 +76,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CachingUserConfigurationStorage.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CachingUserConfigurationStorage.class);
 
     private static final String CACHE_REGION_NAME = "UserConfiguration";
 
@@ -302,7 +302,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             try {
                 cache.put(key, userConfig, false);
             } catch (RuntimeException e) {
-                LOG.warn("Failed to add user configuration for context " + ctx.getContextId() + " and user " + userId + " to cache.", e);
+                LOG.warn("Failed to add user configuration for context {} and user {} to cache.", ctx.getContextId(), userId, e);
             }
             map.put(userId, userConfig.clone());
         }
@@ -336,7 +336,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             cache.remove(key);
             cache.remove(keyWithoutExtended);
         } catch (RuntimeException e) {
-            LOG.warn("Failed to remove user configuration for context " + ctx.getContextId() + " and user " + userId + " to cache.", e);
+            LOG.warn("Failed to remove user configuration for context {} and user {} to cache.", ctx.getContextId(), userId, e);
         }
         UserPermissionBitsStorage.getInstance().removeUserPermissionBits(userId, ctx);
     }

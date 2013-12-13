@@ -88,6 +88,7 @@ public final class MailTestSuite extends TestSuite {
         mailSuite.addTestSuite(AllAliasTest.class);
         mailSuite.addTestSuite(ListAliasTest.class);
         mailSuite.addTestSuite(GetStructureTest.class);
+        mailSuite.addTestSuite(Base64Test.class);
 
         /*mailSuite.addTestSuite(AlwaysTest.class);*/
 

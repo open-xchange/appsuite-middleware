@@ -49,6 +49,7 @@
 
 package com.openexchange.carddav;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -59,7 +60,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.carddav.resources.RootCollection;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -108,7 +108,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 	private static final String FOLDER_BLACKLIST_PROPERTY = "com.openexchange.carddav.ignoreFolders";
 	private static final String FOLDER_TRRE_ID_PROPERTY = "com.openexchange.carddav.tree";
 	private static final CarddavProtocol PROTOCOL = new CarddavProtocol();
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(GroupwareCarddavFactory.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupwareCarddavFactory.class);
 
 	private final FolderService folderService;
 	private final SessionHolder sessionHolder;
@@ -226,7 +226,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		try {
 			this.userService.setUserAttribute(getOverrideNextSyncTokenAttributeName(), value, this.getUser().getId(), this.getContext());
 		} catch (OXException e) {
-			LOG.error(e.getMessage(), e);
+			LOG.error("", e);
 		}
 	}
 
@@ -241,7 +241,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		try {
 			return this.userService.getUserAttribute(getOverrideNextSyncTokenAttributeName(), this.getUser().getId(), this.getContext());
 		} catch (OXException e) {
-			LOG.error(e.getMessage(), e);
+			LOG.error("", e);
 		}
 		return null;
 	}
@@ -287,7 +287,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		public Contact load(String uid) throws OXException {
 			Contact contact = this.get(uid);
 			if (null == contact) {
-					LOG.debug("Contact '" + uid + "' not found, unable to load.");
+					LOG.debug("Contact '{}' not found, unable to load.", uid);
 				return null;
 			} else {
 				return this.load(contact);
@@ -364,7 +364,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 					return folder;
 				}
 			}
-			LOG.warn("Folder '" + id + "' not found.");
+			LOG.warn("Folder '{}' not found.", id);
 			return null;
 		}
 
@@ -572,7 +572,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
             List<UserizedFolder> deletedFolders = this.getDeletedFolders(since);
             for (UserizedFolder deletedFolder : deletedFolders) {
                 List<Contact> deletedContacts = this.getDeletedContacts(since, deletedFolder.getID());
-                LOG.debug("Detected deleted folder: " + deletedFolder + ", containing " + deletedContacts.size() + " contacts.");
+                LOG.debug("Detected deleted folder: {}, containing {} contacts.", deletedFolder, deletedContacts.size());
                 contacts.addAll(deletedContacts);
 //                contacts.addAll(this.getDeletedContacts(since, deletedFolder.getID()));
             }
@@ -614,7 +614,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 				try {
 					ignoreFolders = factory.getConfigValue(FOLDER_BLACKLIST_PROPERTY, null);
 				} catch (OXException e) {
-			        LOG.error(e.getMessage(), e);
+			        LOG.error("", e);
 				}
 				if (null == ignoreFolders || 0 >= ignoreFolders.length()) {
 					this.folderBlacklist = new HashSet<String>(0);
@@ -633,7 +633,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		        try {
 					treeID = factory.getConfigValue(FOLDER_TRRE_ID_PROPERTY, FolderStorage.REAL_TREE_ID);
 				} catch (OXException e) {
-					LOG.warn("falling back to tree id '" + FolderStorage.REAL_TREE_ID +"'.", e);
+					LOG.warn("falling back to tree id ''{}''.", FolderStorage.REAL_TREE_ID, e);
 					treeID = FolderStorage.REAL_TREE_ID;
 				}
 	    	}
@@ -650,11 +650,11 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		public Contact get(String uid) throws OXException {
 			Contact contact = this.getUidCache().get(uid);
 			if (null == contact) {
-				LOG.debug("Contact with UID '" + uid + "' not found, trying to get contact by filename...");
+				LOG.debug("Contact with UID '{}' not found, trying to get contact by filename...", uid);
 				contact = getFilenameCache().get(uid);
 			}
 			if (null == contact) {
-				LOG.debug("Contact with UID '" + uid + "' not found.");
+				LOG.debug("Contact with UID '{}' not found.", uid);
 			}
 			return contact;
 		}
@@ -675,7 +675,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 				contact = factory.getContactService().getContact(factory.getSession(), inFolder, Integer.toString(objectId));
 			}
 			if (null == contact) {
-				LOG.warn("Contact '" + objectId + "' in folder '" + inFolder + "' not found.");
+				LOG.warn("Contact '{}' in folder '{}' not found.", objectId, inFolder);
 			}
 			return contact;
 		}
@@ -707,7 +707,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 						    continue;
 						}
 						if (false == contact.containsUid() && false == this.tryAddUID(contact, folder)) {
-							LOG.warn("No UID found in contact '" + contact.toString() + "', skipping.");
+							LOG.warn("No UID found in contact '{}', skipping.", contact);
 							continue;
 						}
 						contact.setParentFolderID(folderID);
@@ -732,14 +732,14 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 
 		private boolean tryAddUID(Contact contact, UserizedFolder folder) {
             if (Permission.WRITE_OWN_OBJECTS < folder.getOwnPermission().getWritePermission()) {
-            	LOG.debug("Adding uid for contact '" + contact.toString() + "'.");
+            	LOG.debug("Adding uid for contact '{}'.", contact);
 				try {
 					contact.setUid(UUID.randomUUID().toString());
 					factory.getContactService().updateContact(factory.getSession(), folder.getID(),
 							Integer.toString(contact.getObjectID()), contact, contact.getLastModified());
 					return true;
 				} catch (OXException e) {
-					LOG.error(e.getMessage(), e);
+					LOG.error("", e);
 				}
             }
 			return false;
@@ -750,7 +750,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 				try {
 					iterator.close();
 				} catch (final OXException e) {
-					LOG.error(e.getMessage(), e);
+					LOG.error("", e);
 				}
 			}
 		}

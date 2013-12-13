@@ -50,11 +50,9 @@
 package com.openexchange.databaseold;
 
 import java.sql.Connection;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
@@ -63,7 +61,7 @@ import com.openexchange.server.ServiceExceptionCode;
  */
 public final class Database {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Database.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Database.class);
 
     private static volatile DatabaseService databaseService;
 
@@ -167,7 +165,7 @@ public final class Database {
                 getDatabaseService().backReadOnly(con);
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -185,7 +183,7 @@ public final class Database {
                 getDatabaseService().backReadOnly(ctx, con);
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -193,7 +191,7 @@ public final class Database {
         try {
             getDatabaseService().backWritableAfterReading(ctx, con);
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -211,7 +209,7 @@ public final class Database {
                 getDatabaseService().backReadOnly(contextId, con);
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -219,7 +217,7 @@ public final class Database {
         try {
             getDatabaseService().backWritableAfterReading(contextId, con);
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -238,7 +236,7 @@ public final class Database {
                 getDatabaseService().backForUpdateTaskAfterReading(contextId, con);
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -251,7 +249,7 @@ public final class Database {
         try {
             getDatabaseService().back(poolId, con);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -275,7 +273,7 @@ public final class Database {
         try {
             getDatabaseService().backNoTimeoout(poolId, con);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

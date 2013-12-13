@@ -51,7 +51,6 @@ package com.openexchange.drive.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -87,7 +86,7 @@ import com.openexchange.timer.TimerService;
  */
 public class DriveActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DriveActivator.class);
 
     /**
      * Initializes a new {@link DriveActivator}.

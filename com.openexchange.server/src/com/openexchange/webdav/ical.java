@@ -66,8 +66,6 @@ import java.util.List;
 import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.ServiceException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
@@ -119,7 +117,7 @@ public final class ical extends PermissionServlet {
     /**
      * Logger.
      */
-    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ical.class));
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ical.class);
 
     private final static int[] APPOINTMENT_FIELDS = {
         DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.MODIFIED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED,
@@ -166,9 +164,7 @@ public final class ical extends PermissionServlet {
      */
     @Override
     public void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("GET");
-        }
+        LOG.debug("GET");
         final Session sessionObj = getSession(req);
         try {
             final Context context = ContextStorage.getInstance().getContext(sessionObj.getContextId());
@@ -244,13 +240,13 @@ public final class ical extends PermissionServlet {
                 }
                 patchers.forEachValue(PATCH_PROCEDURE);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } finally {
                 if (null != iter) {
                     try {
                         iter.close();
                     } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }
@@ -273,13 +269,13 @@ public final class ical extends PermissionServlet {
                     // }
                 }
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } finally {
                 if (null != itTask) {
                     try {
                         itTask.close();
                     } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }
@@ -289,7 +285,7 @@ public final class ical extends PermissionServlet {
             try {
                 emitter.writeSession(iSession, resp.getOutputStream());
             } catch (final ConversionError e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
 
             if (null == principal) {
@@ -306,10 +302,10 @@ public final class ical extends PermissionServlet {
             // addEntries(context, principal, entriesApp, entriesTask);
             // deleteEntries(context, principal, mapping, entriesApp, entriesTask);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         } catch (final ServiceException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
@@ -379,7 +375,7 @@ public final class ical extends PermissionServlet {
     // content_type = req.getContentType();
     //
     // if (LOG.isDebugEnabled()) {
-    // LOG.debug("read ical content_type: " + content_type);
+    // LOG.debug("read ical content_type: {}", content_type);
     // }
     //
     // calendarfolder_id = getCalendarFolderID(req);
@@ -584,7 +580,7 @@ public final class ical extends PermissionServlet {
     //
     // LOG.debug("STATUS: OK");
     // } else {
-    // LOG.warn("invalid versit object: " + vo.name);
+    // LOG.warn("invalid versit object: {}", vo.name);
     // }
     // } catch (final OXObjectNotFoundException exc) {
     // LOG.debug("object was already delete", exc);
@@ -896,7 +892,7 @@ public final class ical extends PermissionServlet {
      * principal.getId()); ps.setLong(2, context.getContextId()); rs = ps.executeQuery(); while (rs.next()) { final String client_id =
      * rs.getString(2); final int target_id = rs.getInt(3); final int module = rs.getInt(4); switch (module) { case Types.APPOINTMENT:
      * mapping.addAppointment(client_id, target_id); break; case Types.TASK: mapping.addTask(client_id, target_id); break; default:
-     * LOG.warn("Unknown iCal object mapping module " + module); } } } catch (final SQLException e) { throw new
+     * LOG.warn("Unknown iCal object mapping module {}", module); } } } catch (final SQLException e) { throw new
      * OXException(EnumComponent.ICAL, Category.CODE_ERROR, 9999, e.getMessage(), e); } finally { DBUtils.closeSQLStuff(rs, ps);
      * DBPool.closeReaderSilent(context, readCon); } return mapping; }
      */

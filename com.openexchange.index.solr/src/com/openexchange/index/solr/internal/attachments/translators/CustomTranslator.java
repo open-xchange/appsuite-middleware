@@ -49,7 +49,6 @@
 
 package com.openexchange.index.solr.internal.attachments.translators;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.groupware.attach.index.SearchTerm;
 import com.openexchange.index.solr.internal.config.FieldConfiguration;
 import com.openexchange.index.solr.internal.querybuilder.Configuration;
@@ -64,7 +63,7 @@ import com.openexchange.index.solr.internal.querybuilder.TranslationException;
  */
 public class CustomTranslator implements QueryTranslator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CustomTranslator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CustomTranslator.class);
 
     private Configuration config;
 

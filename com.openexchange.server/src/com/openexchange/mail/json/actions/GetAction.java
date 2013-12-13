@@ -78,9 +78,7 @@ import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
-import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -114,7 +112,7 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "(not IMAP: with timestamp): An JSON object containing all data of the requested mail. The fields of the object are listed in Detailed mail data. The fields id and attachment are not included. NOTE: Of course response is not a JSON object if either parameter hdr or parameter src are set to \"1\". Then the response contains plain text. Moreover if optional parameter save is set to \"1\" the complete message source is going to be directly written to output stream to open browser's save dialog.")
 public final class GetAction extends AbstractMailAction {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(com.openexchange.log.LogFactory.getLog(GetAction.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetAction.class);
 
     private static final byte[] CHUNK1 = "{\"data\":\"".getBytes();
     private static final byte[] CHUNK2 = "\"}".getBytes();
@@ -161,7 +159,6 @@ public final class GetAction extends AbstractMailAction {
     private static final Pattern SPLIT = Pattern.compile(" *, *");
 
     private AJAXRequestResult performGet(final MailRequest req) throws OXException {
-        final Props logProperties = LogProperties.getLogProperties();
         try {
             final ServerSession session = req.getSession();
             /*
@@ -230,8 +227,8 @@ public final class GetAction extends AbstractMailAction {
                     uid = tmp2;
                 }
             }
-            logProperties.put(LogProperties.Name.MAIL_MAIL_ID, uid);
-            logProperties.put(LogProperties.Name.MAIL_FULL_NAME, folderPath);
+            LogProperties.put(LogProperties.Name.MAIL_MAIL_ID, uid);
+            LogProperties.put(LogProperties.Name.MAIL_FULL_NAME, folderPath);
             AJAXRequestResult data = getJSONNullResult();
             if (showMessageSource) {
                 /*
@@ -287,7 +284,7 @@ public final class GetAction extends AbstractMailAction {
                     if (!MailExceptionCode.NO_CONTENT.equals(e)) {
                         throw e;
                     }
-                    LOG.debug(e.getMessage(), e);
+                    LOG.debug("", e);
                     fileHolder = new ThresholdFileHolder();
                     fileHolder.write(new byte[0]);
                 }
@@ -465,10 +462,7 @@ public final class GetAction extends AbstractMailAction {
             return data;
         } catch (final OXException e) {
             if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
-                LOG.warn(
-                    new com.openexchange.java.StringAllocator("Requested mail could not be found. ").append(
-                        "Most likely this is caused by concurrent access of multiple clients ").append(
-                        "while one performed a delete on affected mail.").toString(),
+                LOG.warn("Requested mail could not be found. Most likely this is caused by concurrent access of multiple clients while one performed a delete on affected mail.",
                     e);
                 final Object[] args = e.getDisplayArgs();
                 final String uid = null == args || 0 == args.length ? null : (null == args[0] ? null : args[0].toString());
@@ -476,7 +470,7 @@ public final class GetAction extends AbstractMailAction {
                     throw MailExceptionCode.PROCESSING_ERROR.create(e, new Object[0]);
                 }
             } else {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             throw e;
         } catch (final MessagingException e) {
@@ -489,8 +483,8 @@ public final class GetAction extends AbstractMailAction {
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            logProperties.remove(LogProperties.Name.MAIL_MAIL_ID);
-            logProperties.remove(LogProperties.Name.MAIL_FULL_NAME);
+            LogProperties.remove(LogProperties.Name.MAIL_MAIL_ID);
+            LogProperties.remove(LogProperties.Name.MAIL_FULL_NAME);
         }
     }
 

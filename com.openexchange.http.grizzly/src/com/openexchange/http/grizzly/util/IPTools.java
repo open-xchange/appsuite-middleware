@@ -53,19 +53,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.regex.PatternSyntaxException;
+import org.slf4j.Logger;
 import com.google.common.net.InetAddresses;
-import com.openexchange.http.grizzly.servletfilter.WrappingFilter;
-import com.openexchange.log.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link IPTools} Detects the first IP that isn't one of our known proxies and represents our new remoteIP.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class IPTools {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(WrappingFilter.class));
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(IPTools.class);
 
     public final static String COMMA_SEPARATOR = ",";
 
@@ -73,13 +72,13 @@ public class IPTools {
      * Detects the first IP that isn't one of our known proxies and represents our new remoteIP. This is done by removing all known proxies
      * from the list of forwarded-for header beginning frome the right side of the list. The rightmost leftover ip is then seen as our new
      * remote ip as it represents the first IP not known to us. <h4>Example:</h4>
-     * 
+     *
      * <pre>
      * remotes  = 192.168.32.50, 192.168.33.225, 192.168.33.224
      * known    = 192.168.33.225, 192.168.33.224
      * remoteIP = 192.168.32.50
      * </pre>
-     * 
+     *
      * @param forwardedIPs A String containing the forwarded ips separated by comma
      * @param knownProxies A List of Strings containing the known proxies
      * @return the first ip that isn't a known proxy iow. the remote IP or an empty String if no valid remote IP could be found
@@ -100,9 +99,7 @@ public class IPTools {
         }
         // Don't return invalid IPs
         if (!InetAddresses.isInetAddress(remoteIP)) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(remoteIP + " is not a valid IP. Discarding candidate for remote IP.");
-            }
+            LOG.debug("{} is not a valid IP. Discarding candidate for remote IP.", remoteIP);
             return "";
         }
         return remoteIP;
@@ -110,7 +107,7 @@ public class IPTools {
 
     /**
      * Takes a String of separated values, splits it at the separator, trims the split values and returns them as List.
-     * 
+     *
      * @param input String of separated values
      * @param separator the seperator as regular expression used to split the input around this separator
      * @return the split and trimmed input as List or an empty list
@@ -134,7 +131,7 @@ public class IPTools {
         }
         return trimmedSplits;
     }
-    
+
     /**
      * Takes a List of Strings representing IP addresses filters out the erroneous ones.
      * @param ipList a List of Strings representing IP addresses

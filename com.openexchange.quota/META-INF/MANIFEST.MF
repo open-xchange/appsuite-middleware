@@ -16,6 +16,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.session,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Export-Package: com.openexchange.quota
 Bundle-Activator: com.openexchange.quota.osgi.QuotaActivator

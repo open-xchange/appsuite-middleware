@@ -69,7 +69,7 @@ import com.openexchange.tools.iterator.ReadOnlyIterator;
  */
 public final class MailNotifyPushListenerRegistry {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailNotifyPushListenerRegistry.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailNotifyPushListenerRegistry.class);
 
 
     /**
@@ -136,9 +136,9 @@ public final class MailNotifyPushListenerRegistry {
      */
     public void fireEvent(final String mboxid) throws OXException {
         final PushListener listener;
-        LOG.debug("checking whether to fire event for " + mboxid);
+        LOG.debug("checking whether to fire event for {}", mboxid);
         if (null != (listener = map.get(mboxid))) {
-            LOG.debug("fireEvent, mboxid=" + mboxid);
+            LOG.debug("fireEvent, mboxid={}", mboxid);
             listener.notifyNewMail();
         }
 
@@ -154,7 +154,7 @@ public final class MailNotifyPushListenerRegistry {
     public boolean addPushListener(final int contextId, final int userId, final MailNotifyPushListener pushListener) throws OXException {
         boolean notYetPushed = true;
         for(final String id : getMboxIds(contextId, userId)) {
-            LOG.debug("adding alias " + id + " to map");
+            LOG.debug("adding alias {} to map", id);
             final boolean pushFailed = (null == map.putIfAbsent(id, pushListener) ? false : true);
             if( notYetPushed && pushFailed ) {
                 notYetPushed = false;
@@ -242,7 +242,7 @@ public final class MailNotifyPushListenerRegistry {
             try {
                 l.open();
             } catch (final OXException e) {
-                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailNotifyPushListenerRegistry.class)).error(
+                org.slf4j.LoggerFactory.getLogger(MailNotifyPushListenerRegistry.class).error(
                     MessageFormat.format("Opening mail push UDP listener failed. Removing listener from registry: {0}", l.toString()),
                     e);
                 i.remove();
@@ -281,7 +281,7 @@ public final class MailNotifyPushListenerRegistry {
 
     private boolean removeListener(final String[] mboxIds) {
         for(final String id : mboxIds) {
-            LOG.debug("removing alias" + id + " from map");
+            LOG.debug("removing alias{} from map", id);
             final MailNotifyPushListener listener = map.remove(id);
             if (null != listener) {
                 listener.close();

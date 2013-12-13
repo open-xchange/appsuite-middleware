@@ -113,8 +113,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     private static final long serialVersionUID = 3740098766897625419L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
-            .getLog(OCLPermission.class);
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OCLPermission.class);
 
     public static final int NO_PERMISSIONS = 0;
 
@@ -646,7 +645,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
         try {
             return ((OCLPermission) super.clone());
         } catch (final CloneNotSupportedException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
     }

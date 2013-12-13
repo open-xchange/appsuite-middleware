@@ -13,6 +13,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.server,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Export-Package: com.openexchange.utils.osgi,
  com.openexchange.utils.propertyhandling

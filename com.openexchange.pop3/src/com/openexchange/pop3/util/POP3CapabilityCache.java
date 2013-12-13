@@ -77,7 +77,7 @@ public final class POP3CapabilityCache {
     /**
      * The logger.
      */
-    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(POP3CapabilityCache.class));
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(POP3CapabilityCache.class);
 
     /**
      * The default capabilities providing only mandatory POP3 commands.
@@ -388,12 +388,7 @@ public final class POP3CapabilityCache {
                                 sb.append(c);
                             }
                         }
-                        /*
-                         * Assume default capabilities: USER, PASS, STAT, LIST, RETR, DELE, NOOP, RSET, QUIT
-                         */
-                        if (LOG.isWarnEnabled()) {
-                            LOG.warn(sb.insert(0, "POP3 CAPA command failed: ").toString());
-                        }
+                        LOG.warn(sb.insert(0, "POP3 CAPA command failed: ").toString());
                         return DEFAULT_CAPABILITIES;
                     } else if ('+' == pre) {
                         sb.append(pre);
@@ -413,9 +408,7 @@ public final class POP3CapabilityCache {
                         }
                         final String responseCode = sb.toString();
                         if (!responseCode.toUpperCase().startsWith("+OK")) {
-                            if (LOG.isWarnEnabled()) {
-                                LOG.warn(new StringBuilder("POP3 CAPA command failed: ").append(responseCode).toString());
-                            }
+                            LOG.warn("POP3 CAPA command failed: {}", responseCode);
                             return DEFAULT_CAPABILITIES;
                         }
                         sb.setLength(0);
@@ -454,12 +447,10 @@ public final class POP3CapabilityCache {
                         }
                         capabilities = sb.toString();
                     } else {
-                        if (LOG.isWarnEnabled()) {
-                            if (Character.isDefined(pre)) {
-                                LOG.warn(new StringBuilder("Unexpected CAPA response start: ").append(pre).toString());
-                            } else {
-                                LOG.warn(new StringBuilder("Invalid unicode character: ").append(((int) pre)).toString());
-                            }
+                        if (Character.isDefined(pre)) {
+                            LOG.warn("Unexpected CAPA response start: {}", pre);
+                        } else {
+                            LOG.warn("Invalid unicode character: {}", ((int) pre));
                         }
                         return DEFAULT_CAPABILITIES;
                     }
@@ -481,10 +472,10 @@ public final class POP3CapabilityCache {
                  */
                 return capabilities;
             } catch (final IOException e) {
-                LOG.warn("Failed reading capabilities from POP3 server \"" + key.getHostName() + "\". Read so far:" + sb.toString());
+                LOG.warn("Failed reading capabilities from POP3 server \"{}\". Read so far:{}", key.getHostName(), sb);
                 throw e;
             } catch (final RuntimeException e) {
-                LOG.warn("Fatally failed reading capabilities from POP3 server \"" + key.getHostName() + "\". Read so far:" + sb.toString());
+                LOG.warn("Fatally failed reading capabilities from POP3 server \"{}\". Read so far:{}", key.getHostName(), sb);
                 final IOException ioException = new IOException(e.getMessage());
                 ioException.initCause(e);
                 throw ioException;
@@ -493,7 +484,7 @@ public final class POP3CapabilityCache {
                     try {
                         s.close();
                     } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }

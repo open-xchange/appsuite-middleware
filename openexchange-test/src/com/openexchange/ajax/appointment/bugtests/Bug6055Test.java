@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.groupware.container.Appointment;
@@ -58,7 +57,7 @@ import com.openexchange.groupware.container.UserParticipant;
 
 public class Bug6055Test extends AppointmentTest {
 
-    private static final Log LOG = LogFactory.getLog(Bug6055Test.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug6055Test.class);
 
     public Bug6055Test(final String name) {
         super(name);

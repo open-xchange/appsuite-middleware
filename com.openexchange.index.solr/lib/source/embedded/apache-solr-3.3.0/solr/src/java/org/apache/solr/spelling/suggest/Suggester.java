@@ -46,7 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Suggester extends SolrSpellChecker {
-  private static final Logger LOG = LoggerFactory.getLogger(Suggester.class);
+  private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(Suggester.class);
   
   /** Location of the source data - either a path to a file, or null for the
    * current IndexReader.

@@ -65,7 +65,7 @@ import com.openexchange.spamhandler.SpamHandler;
  */
 public final class POP3Properties extends AbstractProtocolProperties implements IPOP3Properties {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(POP3Properties.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(POP3Properties.class);
 
     private static final POP3Properties instance = new POP3Properties();
 
@@ -194,9 +194,7 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
         logBuilder.append("\tSpam Handler: ").append(spamHandlerName).append('\n');
 
         logBuilder.append("Global POP3 properties successfully loaded!");
-        if (LOG.isInfoEnabled()) {
-            LOG.info(logBuilder.toString());
-        }
+        LOG.info(logBuilder.toString());
     }
 
     @Override

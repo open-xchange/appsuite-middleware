@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
-import org.apache.commons.logging.Log;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
 import com.openexchange.contact.storage.rdb.fields.Fields;
@@ -82,7 +81,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.l10n.SuperCollator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.search.SearchTerm;
 
 
@@ -93,7 +91,7 @@ import com.openexchange.search.SearchTerm;
  */
 public class Executor {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Executor.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Executor.class);
 
     /**
      * Initializes a new {@link Executor}.
@@ -979,24 +977,21 @@ public class Executor {
     private static ResultSet logExecuteQuery(final PreparedStatement stmt) throws SQLException {
         if (false == LOG.isDebugEnabled()) {
             return stmt.executeQuery();
-        } else {
-            long start = System.currentTimeMillis();
-            ResultSet resultSet = stmt.executeQuery();
-            LOG.debug("executeQuery: " + stmt.toString() + " - " + (System.currentTimeMillis() - start) + " ms elapsed.");
-            return resultSet;
         }
+        long start = System.currentTimeMillis();
+        ResultSet resultSet = stmt.executeQuery();
+        LOG.debug("executeQuery: {} - {} ms elapsed.", stmt.toString(), (System.currentTimeMillis() - start));
+        return resultSet;
     }
 
     private static int logExecuteUpdate(final PreparedStatement stmt) throws SQLException {
         if (false == LOG.isDebugEnabled()) {
             return stmt.executeUpdate();
-        } else {
-            long start = System.currentTimeMillis();
-            final int rowCount = stmt.executeUpdate();
-            LOG.debug("executeUpdate: " + stmt.toString() + " - " + rowCount + " rows affected, " +
-                (System.currentTimeMillis() - start) + " ms elapsed.");
-            return rowCount;
         }
+        long start = System.currentTimeMillis();
+        final int rowCount = stmt.executeUpdate();
+        LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), rowCount, (System.currentTimeMillis() - start));
+        return rowCount;
     }
 
 }

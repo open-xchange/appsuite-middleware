@@ -83,8 +83,8 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "An Array with all reminders which are scheduled until the specified time. Each reminder is described in Reminder response.")
 public final class RangeAction extends AbstractReminderAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RangeAction.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(RangeAction.class);
 
     /**
      * Initializes a new {@link RangeAction}.

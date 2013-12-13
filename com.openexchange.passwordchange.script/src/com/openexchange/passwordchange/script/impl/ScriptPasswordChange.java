@@ -71,8 +71,7 @@ import com.openexchange.user.UserService;
  */
 public final class ScriptPasswordChange extends PasswordChangeService {
 
-	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
-			.getLog(ScriptPasswordChange.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ScriptPasswordChange.class);
 
 	/**
 	 * Initializes a new {@link ScriptPasswordChange}
@@ -149,12 +148,12 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 		cmd[9] = "--newpassword";
 		cmd[10] = newpw; //
 
-		LOG.debug("Executing following command to change password: "+Arrays.toString(cmd));
+		LOG.debug("Executing following command to change password: {}", Arrays.toString(cmd));
 
 		try {
 		    final int ret = executePasswordUpdateShell(cmd);
 		    if(ret!=0) {
-		        LOG.error("Passwordchange script returned exit code != 0, ret="+ret);
+		        LOG.error("Passwordchange script returned exit code != 0, ret={}", ret);
 		        switch(ret){
 		        case 1:
 		            throw PasswordExceptionCode.PASSWORD_FAILED.create(" failed with return code "+ret+" ");
@@ -171,12 +170,12 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 		        }
 		    }
 		} catch (final IOException e) {
-			LOG.fatal("IO error while changing password for user "+usern+" in context "+cid+"\n",e);
+			LOG.error("IO error while changing password for user {} in context {}\n", usern, cid,e);
 			throw ServiceExceptionCode.IO_ERROR.create(e);
 		} catch (final InterruptedException e) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
-			LOG.fatal("Error while changing password for user "+usern+" in context "+cid+"\n",e);
+			LOG.error("Error while changing password for user {} in context {}\n", usern, cid,e);
 			throw ServiceExceptionCode.IO_ERROR.create(e);
 		}
 
@@ -192,7 +191,7 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 		String line = null;
 
 		while ((line = br.readLine()) != null){
-			LOG.debug("PWD CHANGE: "+line);
+			LOG.debug("PWD CHANGE: {}", line);
 		}
 
 		return proc.waitFor();

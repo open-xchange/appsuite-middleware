@@ -54,7 +54,6 @@ import java.io.Reader;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -87,7 +86,7 @@ import com.openexchange.session.Session;
  */
 public final class FacebookOAuthAccess {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FacebookOAuthAccess.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FacebookOAuthAccess.class);
 
     /**
      * Gets the Facebook OAuth access for given Facebook messaging account.
@@ -208,7 +207,7 @@ public final class FacebookOAuthAccess {
             final JSONObject error = object.getJSONObject("error");
             if ("OAuthException".equals(error.opt("type"))) {
                 final OXException e = OAuthExceptionCodes.TOKEN_EXPIRED.create(oauthAccount.getDisplayName());
-                LOG.error(e.getErrorCode() + " exceptionId=" + e.getExceptionId() + " JSON error object:\n" + error.toString(2));
+                LOG.error("{} exceptionId={} JSON error object:\n{}", e.getErrorCode(), e.getExceptionId(), error.toString(2));
                 throw e;
             }
             throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(object.getString("message"));

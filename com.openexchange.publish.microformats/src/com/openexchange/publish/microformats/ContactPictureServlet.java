@@ -59,7 +59,6 @@ import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -72,7 +71,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.session.Session;
@@ -93,7 +91,7 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
     private static final String SITE = "site";
     private static final String CONTACT_ID = "contactId";
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactPictureServlet.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactPictureServlet.class);
 
     private static OXMFPublicationService contactPublisher = null;
 
@@ -145,7 +143,7 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
         } catch (final Throwable t) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             t.printStackTrace(resp.getWriter());
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
         }
 
     }

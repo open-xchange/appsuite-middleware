@@ -36,6 +36,7 @@ Import-Package: com.hazelcast.core,
  javax.management.timer,
  org.apache.commons.logging,
  org.json,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j
 Export-Package: com.openexchange.report.appsuite,
  com.openexchange.report.appsuite.defaultHandlers

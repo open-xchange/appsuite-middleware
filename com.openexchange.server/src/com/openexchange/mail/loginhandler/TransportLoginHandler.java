@@ -85,7 +85,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class TransportLoginHandler implements LoginHandlerService {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TransportLoginHandler.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TransportLoginHandler.class);
 
     /**
      * Initializes a new {@link TransportLoginHandler}.
@@ -180,7 +180,7 @@ public final class TransportLoginHandler implements LoginHandlerService {
             try {
                 searchIterator.close();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

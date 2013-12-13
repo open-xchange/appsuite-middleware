@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.settings.tree.modules.mail;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -70,7 +68,7 @@ import com.openexchange.session.Session;
  */
 public class Module implements PreferencesItemService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Module.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Module.class);
 
     /**
      * Default constructor.
@@ -113,7 +111,7 @@ public class Module implements PreferencesItemService {
                     setting.setSingleValue(Boolean.TRUE);
                 } catch (final OXException e) {
                     setting.setSingleValue(Boolean.FALSE);
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 } finally {
                     if (null != mail) {
                         mail.close(true);

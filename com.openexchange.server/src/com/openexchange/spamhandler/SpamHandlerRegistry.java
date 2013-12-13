@@ -69,7 +69,7 @@ import com.openexchange.session.Session;
  */
 public final class SpamHandlerRegistry {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SpamHandlerRegistry.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamHandlerRegistry.class);
 
     /**
      * Dummy value to associate with an Object in the backing Map.
@@ -120,7 +120,7 @@ public final class SpamHandlerRegistry {
             handler = getSpamHandler0(mailAccount, new URLMailProviderGetter(mailAccount));
         } catch (final OXException e) {
             // Cannot occur
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return false;
         }
         return handler == null ? false : !SpamHandler.SPAM_HANDLER_FALLBACK.equals(handler.getSpamHandlerName());
@@ -247,20 +247,14 @@ public final class SpamHandlerRegistry {
      */
     public static SpamHandler getSpamHandler(final String registrationName) {
         if (null == registrationName) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder(64).append("Given registration name is null. Using fallback spam handler '").append(
-                    SpamHandler.SPAM_HANDLER_FALLBACK).append('\'').toString());
-            }
+            LOG.warn("Given registration name is null. Using fallback spam handler '{}'", SpamHandler.SPAM_HANDLER_FALLBACK);
             return NoSpamHandler.getInstance();
         } else if (SpamHandler.SPAM_HANDLER_FALLBACK.equals(registrationName) || unknownSpamHandlers.containsKey(registrationName)) {
             return NoSpamHandler.getInstance();
         }
         final SpamHandler spamHandler = spamHandlers.get(registrationName);
         if (null == spamHandler) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder(64).append("No spam handler found for registration name '").append(registrationName).append(
-                    "'. Using fallback '").append(SpamHandler.SPAM_HANDLER_FALLBACK).append('\'').toString());
-            }
+            LOG.warn("No spam handler found for registration name '{}'. Using fallback '{}'", registrationName, SpamHandler.SPAM_HANDLER_FALLBACK);
             unknownSpamHandlers.put(registrationName, PRESENT);
             return NoSpamHandler.getInstance();
         }
@@ -289,7 +283,7 @@ public final class SpamHandlerRegistry {
             unknownSpamHandlers.remove(registrationName);
             return true;
         } catch (final RuntimeException t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             return false;
         }
     }

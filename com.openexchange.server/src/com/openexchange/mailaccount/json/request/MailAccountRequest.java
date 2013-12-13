@@ -97,9 +97,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class MailAccountRequest {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccountRequest.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccountRequest.class);
 
     private final ServerSession session;
 
@@ -345,9 +343,7 @@ public final class MailAccountRequest {
                 mailAccess.getMailConfig());
             return root;
         } catch (final OXException e) {
-            if (DEBUG) {
-                LOG.debug("Composing mail account's folder tree failed.", e);
-            }
+            LOG.debug("Composing mail account's folder tree failed.", e);
             // TODO: How to indicate error if folder tree requested?
             return null;
         } finally {
@@ -397,9 +393,7 @@ public final class MailAccountRequest {
         // Get the appropriate mail provider by mail server URL
         final MailProvider mailProvider = MailProviderRegistry.getMailProviderByURL(mailServerURL);
         if (null == mailProvider) {
-            if (DEBUG) {
-                LOG.debug("Validating mail account failed. No mail provider found for URL: " + mailServerURL);
-            }
+            LOG.debug("Validating mail account failed. No mail provider found for URL: {}", mailServerURL);
             return null;
         }
         // Set marker
@@ -426,8 +420,7 @@ public final class MailAccountRequest {
                 try {
                     mailConfig.setPort(Integer.parseInt(sPort));
                 } catch (final NumberFormatException e) {
-                    LOG.warn(new com.openexchange.java.StringAllocator().append("Cannot parse port out of string: \"").append(sPort).append(
-                        "\". Using fallback 143 instead."), e);
+                    LOG.warn("Cannot parse port out of string: \"{}\". Using fallback 143 instead.", sPort, e);
                     mailConfig.setPort(143);
                 }
                 mailConfig.setServer(server.substring(0, pos));
@@ -456,9 +449,7 @@ public final class MailAccountRequest {
         // Get the appropriate transport provider by transport server URL
         final TransportProvider transportProvider = TransportProviderRegistry.getTransportProviderByURL(transportServerURL);
         if (null == transportProvider) {
-            if (DEBUG) {
-                LOG.debug("Validating mail account failed. No transport provider found for URL: " + transportServerURL);
-            }
+            LOG.debug("Validating mail account failed. No transport provider found for URL: {}", transportServerURL);
             return false;
         }
         // Create a transport access instance
@@ -490,8 +481,7 @@ public final class MailAccountRequest {
             try {
                 transportConfig.setPort(Integer.parseInt(sPort));
             } catch (final NumberFormatException e) {
-                LOG.warn(new com.openexchange.java.StringAllocator().append("Cannot parse port out of string: \"").append(sPort).append(
-                    "\". Using fallback 25 instead."), e);
+                LOG.warn("Cannot parse port out of string: \"{}\". Using fallback 25 instead.", sPort, e);
                 transportConfig.setPort(25);
             }
             transportConfig.setServer(server.substring(0, pos));
@@ -504,9 +494,7 @@ public final class MailAccountRequest {
             mailTransport.ping();
             close = true;
         } catch (final OXException e) {
-            if (DEBUG) {
-                LOG.debug("Validating transport account failed.", e);
-            }
+            LOG.debug("Validating transport account failed.", e);
             validated = false;
         } finally {
             if (close) {
@@ -592,7 +580,7 @@ public final class MailAccountRequest {
                     }
                 }
             } catch (final OXException e) {
-                LOG.warn(e.getMessage(), e);
+                LOG.warn("", e);
             }
         }
 

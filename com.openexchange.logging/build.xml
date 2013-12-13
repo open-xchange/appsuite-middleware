@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.logging overrides" basedir=".">
+
+    <description>
+        Add start level to ini file.
+    </description>
+
+    <import file="build-project.xml" />
+
+    <!-- We use start level 1 here to ensure an early startup of this bundle. -->
+    <target name="makeIni" description="Creates the .ini file to include this bundle when starting the OSGi framework.">
+        <propertyregex property="bundleName" input="${bundleFileOrDir}" regexp="^.*/(.*?)(\.jar)?$" select="\1" />
+        <propertyregex property="fileOrDir" input="${bundleFileOrDir}" regexp="^.*/(.*?(\.jar)?)$" select="\1" />
+        <echo file="${destDir}/${bundle.dDir}/${bundleName}.ini" message="${bundlesDir}/${fileOrDir}@1:start${line.separator}" />
+    </target>
+
+</project>

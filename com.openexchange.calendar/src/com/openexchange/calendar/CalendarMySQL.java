@@ -82,7 +82,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.caching.CacheKey;
@@ -134,7 +133,6 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaService;
@@ -216,7 +214,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     private static final String CAL_TABLE_NAME = "prg_dates";
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarMySQL.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarMySQL.class);
 
     private static final CalendarCollection COLLECTION = new CalendarCollection();
 
@@ -881,12 +879,10 @@ public class CalendarMySQL implements CalendarSqlImp {
                                 fillActiveDates(start, rr.getStart(), rr.getEnd(), activeDates, COLLECTION.exceedsHourOfDay(rr.getStart(), zone));
                             }
                         } else {
-                            if (LOG.isWarnEnabled()) {
-                                LOG.warn(StringCollection.convertArraytoString(new Object[] { "SKIP calculation for recurring appointment oid:uid:context ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()) }));
-                            }
+                            LOG.warn(StringCollection.convertArraytoString(new Object[] { "SKIP calculation for recurring appointment oid:uid:context ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()) }));
                         }
                     } catch (final OXException x) {
-                        LOG.error("Can not calculate invalid recurrence pattern for appointment "+oid+":"+c.getContextId(),x);
+                        LOG.error("Can not calculate invalid recurrence pattern for appointment {}:{}", oid, c.getContextId(),x);
                     }
                 } else {
                     fillActiveDates(start, s.getTime(), e.getTime(), activeDates, COLLECTION.exceedsHourOfDay(s.getTime(), Tools.getTimeZone(rs.getString(9))));
@@ -1937,10 +1933,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                     && participant.getIdentifier() == 0) {
                                 pi.setNull(6, 0);
                             } else {
-                                if (LOG.isDebugEnabled()) {
-                                    LOG.debug("Missing mandatory email address in participant "
-                                            + participant.getClass().getSimpleName(), new Throwable());
-                                }
+                                LOG.debug("Missing mandatory email address in participant {}", participant.getClass().getSimpleName(), new Throwable());
                                 throw OXCalendarExceptionCodes.EXTERNAL_PARTICIPANTS_MANDATORY_FIELD.create();
                             }
                         } else {
@@ -2093,7 +2086,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                         }
                                         if (reminder == null) {
                                             final OXException e = OXCalendarExceptionCodes.NEXT_REMINDER_FAILED.create(Autoboxing.I(cdao.getContext().getContextId()), Autoboxing.I(cdao.getObjectID()));
-                                            LOG.warn(e.getMessage(), e);
+                                            LOG.warn("", e);
                                         }
                                     }
                                 }
@@ -2248,7 +2241,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     }
                 }
             } else {
-                LOG.warn("Unknown type detected for Participant :" + type);
+                LOG.warn("Unknown type detected for Participant :{}", type);
             }
             if (participant != null && participants != null) {
                 participants.add(participant);
@@ -2312,7 +2305,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         }
                     }
                 } else {
-                    LOG.warn("Unknown type detected for Participant :" + type);
+                    LOG.warn("Unknown type detected for Participant :{}", type);
                 }
                 if (participant != null) {
                     participants.add(participant);
@@ -2970,7 +2963,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 try {
                     it.close();
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
             for (final ReminderObject reminder : toUpdate) {
@@ -3709,7 +3702,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Remove participants:");
                 for (UserParticipant d : deleted_userparticipants) {
-                    LOG.debug(d.getIdentifier());
+                    LOG.debug(Integer.toString(d.getIdentifier()));
                 }
             }
             retval = true;
@@ -3960,7 +3953,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 mo.executeUpdate();
             } else if (changes == 0) {
                 final OXException e = OXException.notFound("Object: " + oid + ", Context: " + so.getContextId() + ", User: " + uid);
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw e;
             } else {
                 LOG.warn(StringCollection.convertArraytoString(new Object[] { "Result of setUserConfirmation was ",
@@ -4056,7 +4049,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             } else {
                 writeCon.rollback();
                 final OXException e = OXCalendarExceptionCodes.COULD_NOT_FIND_PARTICIPANT.create();
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw e;
             }
         } catch (final SQLException sqle) {
@@ -4130,7 +4123,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             if (rs.next()) {
                 amount = rs.getInt(1);
             } else {
-                LOG.error("Object Not Found: " + "Unable to handle attachment action", new Throwable());
+                LOG.error("Object Not Found: Unable to handle attachment action", new Throwable());
                 throw OXException.notFound("");
             }
             amount += numberOfAttachments;
@@ -4549,7 +4542,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                 rsql.updateReminder(ro);
                             }
 
-                        } else if (LOG.isDebugEnabled()) {
+                        } else {
                             LOG.debug("No recurrence change! Leave corresponding reminder unchanged");
                         }
                     } else {
@@ -4666,7 +4659,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     mdao = FACTORY_REF.get().createAppointmentSql(so).getObjectById(edao.getRecurrenceID(), inFolder);
                 } catch (final OXException e) {
                     if (e.getCode() == OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.getNumber()) {
-                        LOG.debug("Unable to access Exception-Master (User-ID:" + uid + "/Folder-ID:" + inFolder + "/Exception-ID:" + cdao.getObjectID() + "/Master-ID" + edao.getRecurrenceID() + ")", e);
+                        LOG.debug("Unable to access Exception-Master (User-ID:{}/Folder-ID:{}/Exception-ID:{}/Master-ID{})", uid, inFolder, cdao.getObjectID(), edao.getRecurrenceID(), e);
                         takeCareOfMaster = false;
                     } else {
                         throw e;

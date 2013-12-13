@@ -55,8 +55,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -75,7 +73,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  */
 public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactsGlobalMoveUpdateTask.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactsGlobalMoveUpdateTask.class);
 
     public ContactsGlobalMoveUpdateTask() {
         super();
@@ -144,9 +142,7 @@ public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
                 OXFolderAccess oxa = null;
                 resultSet = st.executeQuery(SQL_QUERY);
 
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("UPDATING WRONG GLOBAL ADDRESSBOOK CONTACTS: MOVING BACK TO OWNER'S PRIVATE ADDRESSBOOK");
-                }
+                LOG.debug("UPDATING WRONG GLOBAL ADDRESSBOOK CONTACTS: MOVING BACK TO OWNER'S PRIVATE ADDRESSBOOK");
 
                 while (resultSet.next()) {
                     final int creator  = resultSet.getInt(1);
@@ -158,9 +154,7 @@ public final class ContactsGlobalMoveUpdateTask implements UpdateTask {
                     oxa = new OXFolderAccess(writeCon, ct);
                     des = oxa.getDefaultFolder(creator, FolderObject.CONTACT);
 
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn("UPDATING OPBJECT "+id+" IN CONTEXT "+cid+" MOVING TO "+des.getObjectID());
-                    }
+                    LOG.warn("UPDATING OPBJECT {} IN CONTEXT {} MOVING TO {}", id, cid, des.getObjectID());
 
                     final StringBuilder sb = new StringBuilder("UPDATE prg_contacts SET fid = ");
                     sb.append(des.getObjectID());

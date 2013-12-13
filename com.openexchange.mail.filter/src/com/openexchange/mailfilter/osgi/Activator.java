@@ -78,7 +78,7 @@ import com.openexchange.sessiond.SessiondService;
 
 public class Activator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Activator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
     private final AtomicBoolean mstarted;
 
@@ -104,20 +104,13 @@ public class Activator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         MailFilterServletServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
     }
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        /*
-         * Never stop the server even if a needed service is absent
-         */
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
         MailFilterServletServiceRegistry.getServiceRegistry().removeService(clazz);
     }
 
@@ -189,7 +182,7 @@ public class Activator extends DeferredActivator {
             capabilityRegistration = context.registerService(CapabilityChecker.class, new MailFilterChecker(), properties);
 
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -216,7 +209,7 @@ public class Activator extends DeferredActivator {
              */
             MailFilterServletServiceRegistry.getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } finally {
             mstarted.set(false);

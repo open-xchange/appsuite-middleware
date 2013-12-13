@@ -75,8 +75,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class AutosaveAction extends AbstractMailAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AutosaveAction.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(AutosaveAction.class);
 
     private static final String ATTACHMENTS = MailJSONField.ATTACHMENTS.getKey();
     private static final String CONTENT = MailJSONField.CONTENT.getKey();
@@ -140,9 +140,7 @@ public final class AutosaveAction extends AbstractMailAction {
                             // Huh... No drafts folder in default account
                             throw MailExceptionCode.FOLDER_NOT_FOUND.create("Drafts");
                         }
-                        LOG.warn(new com.openexchange.java.StringAllocator(64).append("Mail account ").append(accountId).append(" for user ").append(
-                            session.getUserId()).append(" in context ").append(session.getContextId()).append(
-                            " has no drafts folder. Saving draft to default account's draft folder."));
+                        LOG.warn("Mail account {} for user {} in context {} has no drafts folder. Saving draft to default account's draft folder.", accountId, session.getUserId(), session.getContextId());
                         // No drafts folder in detected mail account; auto-save to default account
                         accountId = MailAccount.DEFAULT_ID;
                         composedMail.setFolder(mailInterface.getDraftsFolder(accountId));

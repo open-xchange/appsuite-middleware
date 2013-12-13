@@ -62,8 +62,6 @@ import static com.openexchange.tools.update.Tools.existsIndex;
 import static com.openexchange.tools.update.Tools.existsPrimaryKey;
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -76,7 +74,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public class CorrectIndexes6_10 implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CorrectIndexes6_10.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CorrectIndexes6_10.class);
 
     public CorrectIndexes6_10() {
         super();
@@ -120,25 +118,25 @@ public class CorrectIndexes6_10 implements UpdateTask {
                 if (!existsPrimaryKey(con, table, columns)) {
                     String foreignKey = existsForeignKey(con, table, columns, documentTable, documentForeignKeyColumns);
                     if (null != foreignKey) {
-                        LOG.info("Removing foreign key on " + documentTable + " referencing " + table + " temporarily.");
+                        LOG.info("Removing foreign key on {} referencing {} temporarily.", documentTable, table);
                         dropForeignKey(con, documentTable, foreignKey);
                     }
-                    LOG.info("Removing old primary key (cid,id,folder_id) from table " + table + ".");
+                    LOG.info("Removing old primary key (cid,id,folder_id) from table {}.", table);
                     dropPrimaryKey(con, table);
-                    LOG.info("Creating new primary key (cid,id) on table " + table + ".");
+                    LOG.info("Creating new primary key (cid,id) on table {}.", table);
                     createPrimaryKey(con, table, columns);
                     if (null != foreignKey) {
                         foreignKey = existsForeignKey(con, table, columns, documentTable, documentForeignKeyColumns);
                         if (null == foreignKey) {
-                            LOG.info("Recreating foreign key on " + documentTable + " referencing " + table + ".");
+                            LOG.info("Recreating foreign key on {} referencing {}.", documentTable, table);
                             createForeignKey(con, documentTable, documentForeignKeyColumns, table, columns);
                         }
                     }
                 } else {
-                    LOG.info("New primary key (ci,id) already exists on table " + table + ".");
+                    LOG.info("New primary key (ci,id) already exists on table {}.", table);
                 }
             } catch (SQLException e) {
-                LOG.error("Problem correcting primary key on table " + table + ".", e);
+                LOG.error("Problem correcting primary key on table {}.", table, e);
             }
         }
     }
@@ -149,20 +147,20 @@ public class CorrectIndexes6_10 implements UpdateTask {
             try {
                 String indexName = existsIndex(con, table, new String[] { "last_modified" });
                 if (null != indexName) {
-                    LOG.info("Removing old index with columns (last_modified) on table " + table + ".");
+                    LOG.info("Removing old index with columns (last_modified) on table {}.", table);
                     dropIndex(con, table, indexName);
                 } else {
-                    LOG.info("Old index with columns (last_modified) on table " + table  + " not found.");
+                    LOG.info("Old index with columns (last_modified) on table {} not found.", table);
                 }
                 indexName = existsIndex(con, table, columns);
                 if (null == indexName) {
-                    LOG.info("Creating new index named lastModified with columns (cid,last_modified) on table " + table + ".");
+                    LOG.info("Creating new index named lastModified with columns (cid,last_modified) on table {}.", table);
                     createIndex(con, table, "lastModified", columns, false);
                 } else {
-                    LOG.info("New index named " + indexName + " with columns (cid,last_modified) already exists on table " + table + ".");
+                    LOG.info("New index named {} with columns (cid,last_modified) already exists on table {}.", indexName, table);
                 }
             } catch (SQLException e) {
-                LOG.error("Problem correcting indexes on table " + table + ".", e);
+                LOG.error("Problem correcting indexes on table {}.", table, e);
             }
         }
     }
@@ -173,13 +171,13 @@ public class CorrectIndexes6_10 implements UpdateTask {
             try {
                 String indexName = existsIndex(con, table, columns);
                 if (null != indexName) {
-                    LOG.info("Removing old index with columns (last_modified) on table " + table + ".");
+                    LOG.info("Removing old index with columns (last_modified) on table {}.", table);
                     dropIndex(con, table, indexName);
                 } else {
-                    LOG.info("Old index with columns (last_modified) on table " + table + " not found.");
+                    LOG.info("Old index with columns (last_modified) on table {} not found.", table);
                 }
             } catch (SQLException e) {
-                LOG.error("Problem correcting indexes on table " + table + ".", e);
+                LOG.error("Problem correcting indexes on table {}.", table, e);
             }
         }
     }
@@ -190,13 +188,13 @@ public class CorrectIndexes6_10 implements UpdateTask {
             try {
                 String indexName = existsIndex(con, table, columns);
                 if (null == indexName) {
-                    LOG.info("Creating new index named folder with columns (cid,folder_id) on table " + table + ".");
+                    LOG.info("Creating new index named folder with columns (cid,folder_id) on table {}.", table);
                     createIndex(con, table, "folder", columns, false);
                 } else {
-                    LOG.info("New index named " + indexName + " with columns (cid,folder_id) already exists on table " + table + ".");
+                    LOG.info("New index named {} with columns (cid,folder_id) already exists on table {}.", indexName, table);
                 }
             } catch (SQLException e) {
-                LOG.error("Problem correcting indexes on table " + table + ".", e);
+                LOG.error("Problem correcting indexes on table {}.", table, e);
             }
         }
     }

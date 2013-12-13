@@ -201,7 +201,7 @@ public class FileCopyOptimizer extends FileActionOptimizer {
                             readPermissions = Integer.valueOf(folder.getOwnPermission().getReadPermission());
                         }
                     } catch (OXException e) {
-                        LOG.debug("Error accessing folder referenced by checksum store: " + e.getMessage());
+                        LOG.debug("Error accessing folder referenced by checksum store: {}", e.getMessage());
                         if (false == indicatesInvalidation(e)) {
                             // mark not accessible
                             readPermissions = Integer.valueOf(FileStoragePermission.NO_PERMISSIONS);
@@ -224,7 +224,7 @@ public class FileCopyOptimizer extends FileActionOptimizer {
                 try {
                     matchingFile = session.getStorage().getFile(storedChecksum.getFileID().toUniqueID(), storedChecksum.getVersion());
                 } catch (OXException e) {
-                    LOG.debug("Error accessing file referenced by checksum store: " + e.getMessage());
+                    LOG.debug("Error accessing file referenced by checksum store: {}", e.getMessage());
                     if (indicatesInvalidation(e)) {
                         checksumsToInvalidate.add(storedChecksum);
                     }

@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.settings.tree.modules.mail.folder;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -58,7 +57,6 @@ import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mailaccount.MailAccount;
@@ -73,7 +71,7 @@ public class Drafts implements PreferencesItemService {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Drafts.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Drafts.class);
 
     /**
      * Default constructor.
@@ -121,7 +119,7 @@ public class Drafts implements PreferencesItemService {
                         try {
                             mail.close(true);
                         } catch (final OXException e) {
-                            LOG.error(e.getMessage(), e);
+                            LOG.error("", e);
                         }
                     }
                 }

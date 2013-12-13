@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -69,7 +68,7 @@ import com.openexchange.session.Session;
  */
 public class FolderBuffer {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FolderBuffer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderBuffer.class);
     private static final String UNDEFINED_PUSH_TOKEN = "{undefined}";
 
     private final int consolidationTime;
@@ -111,10 +110,7 @@ public class FolderBuffer {
         }
         long now = System.currentTimeMillis();
         long timeSinceFirstEvent = now - firstEventTime;
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("isDue(): now=" + now + ", firstEventTime=" + firstEventTime + ", lastEventTime=" + lastEventTime +
-                ", timeSinceFirstEvent=" + timeSinceFirstEvent + ", timeSinceLastEvent=" + (now - lastEventTime));
-        }
+        LOG.trace("isDue(): now={}, firstEventTime={}, lastEventTime={}, timeSinceFirstEvent={}, timeSinceLastEvent={}", now, firstEventTime, lastEventTime, timeSinceFirstEvent, (now - lastEventTime));
         if (timeSinceFirstEvent > maxDelayTime) {
             return true; // max delay time exceeded
         }
@@ -192,9 +188,7 @@ public class FolderBuffer {
                 folderIDs.add(folder.getId());
             }
         } catch (OXException e) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Error resolving path to rootfolder from event", e);
-            }
+            LOG.debug("Error resolving path to rootfolder from event", e);
         }
         return folderIDs;
     }

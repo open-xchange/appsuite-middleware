@@ -87,7 +87,7 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
  */
 public final class ContactJSONDataHandler implements DataHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ContactJSONDataHandler.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactJSONDataHandler.class);
 
     private static final String[] ARGS = {};
 
@@ -138,7 +138,7 @@ public final class ContactJSONDataHandler implements DataHandler {
                     /*
                      * No appropriate definition for current part of the VCard stream
                      */
-                    LOG.error("Could not recognize format of the following VCard data:\n" + Arrays.toString(chunk.getContent()));
+                    LOG.error("Could not recognize format of the following VCard data:\n{}", Arrays.toString(chunk.getContent()));
                 } else {
                     final VersitDefinition.Reader versitReader = def.getReader(
                         new UnsynchronizedByteArrayInputStream(chunk.getContent()),

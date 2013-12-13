@@ -1,7 +1,6 @@
 package com.openexchange.ajax.appointment;
 
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.groupware.container.Appointment;
@@ -41,7 +40,7 @@ public class UpdatesTest extends AppointmentTest {
 		Appointment.RECURRENCE_START
 	};
 
-	private static final Log LOG = LogFactory.getLog(UpdatesTest.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdatesTest.class);
 
 	public UpdatesTest(final String name) {
 		super(name);

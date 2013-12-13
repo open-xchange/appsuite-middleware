@@ -57,7 +57,6 @@ import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
@@ -72,7 +71,6 @@ import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedPushbackReader;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -103,7 +101,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
 
     private static final long serialVersionUID = -8060034833311074781L;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MultipleAdapterServletNew.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MultipleAdapterServletNew.class);
 
     private final AJAXActionServiceFactory factory;
 
@@ -187,16 +185,16 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
                 return;
             }
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         }  catch (final IllegalStateException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {
                 final OXException oxe = (OXException) cause;
-                LOG.error(oxe.getMessage(), oxe);
+                LOG.error("", oxe);
                 response.setException(oxe);
             } else {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 response.setException(AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()));
             }
         }
@@ -216,7 +214,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             }
         } catch (final JSONException e) {
             final OXException e1 = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
             sendError(resp);
         }
     }

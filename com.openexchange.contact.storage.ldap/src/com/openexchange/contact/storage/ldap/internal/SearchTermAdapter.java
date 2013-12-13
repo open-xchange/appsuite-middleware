@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.storage.ldap.internal;
 
+import org.slf4j.Logger;
 import com.openexchange.contact.storage.ldap.id.LdapIDResolver;
 import com.openexchange.contact.storage.ldap.mapping.LdapMapper;
 import com.openexchange.contact.storage.ldap.mapping.LdapMapping;
@@ -69,7 +70,7 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
  */
 public class SearchTermAdapter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(SearchTermAdapter.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SearchTermAdapter.class);
 
     private final String filter;
     private final LdapMapper mapper;
@@ -108,7 +109,7 @@ public class SearchTermAdapter {
          */
         LdapMapping<? extends Object> ldapMapping = mapper.getMapping(term);
         if (null == ldapMapping || null == ldapMapping.getLdapAttributeName(true)) {
-            LOG.debug("No LDAP attribute mapping for term '" + term.toString() + "' available, excluding from search filter.");
+            LOG.debug("No LDAP attribute mapping for term '{}' available, excluding from search filter.", term);
             return null;
         }
         /*

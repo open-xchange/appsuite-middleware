@@ -53,7 +53,6 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.Date;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -67,7 +66,6 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
@@ -80,7 +78,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class AppointmentWriter extends CalendarWriter {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AppointmentWriter.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppointmentWriter.class);
 
     private volatile CalendarCollectionService calColl;
 
@@ -281,7 +279,7 @@ public class AppointmentWriter extends CalendarWriter {
             }
             break;
         default:
-            LOG.warn("Column " + column + " is unknown for appointment.");
+            LOG.warn("Column {} is unknown for appointment.", column);
         }
     }
 

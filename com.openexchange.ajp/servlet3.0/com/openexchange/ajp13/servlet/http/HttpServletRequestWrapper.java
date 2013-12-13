@@ -78,7 +78,7 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public class HttpServletRequestWrapper extends ServletRequestWrapper implements HttpServletRequest {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HttpServletRequestWrapper.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpServletRequestWrapper.class);
 
     private String authType;
 
@@ -397,7 +397,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
         try {
             return Tools.parseHeaderDate(headerValue).getTime();
         } catch (final ParseException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw new IllegalArgumentException(e.getMessage());
         }
     }

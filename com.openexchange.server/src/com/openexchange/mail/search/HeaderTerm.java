@@ -54,7 +54,6 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import com.openexchange.log.LogFactory;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
@@ -120,7 +119,7 @@ public final class HeaderTerm extends SearchTerm<String[]> {
         try {
             val = msg.getHeader(hdr[0]);
         } catch (final MessagingException e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(HeaderTerm.class)).warn("Error during search.", e);
+            org.slf4j.LoggerFactory.getLogger(HeaderTerm.class).warn("Error during search.", e);
             return false;
         }
         if ((val == null || val.length == 0) && (hdr[1] == null)) {

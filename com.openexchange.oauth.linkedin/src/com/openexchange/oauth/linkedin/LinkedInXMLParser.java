@@ -57,7 +57,6 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -68,14 +67,13 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 public class LinkedInXMLParser {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinkedInXMLParser.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LinkedInXMLParser.class);
 
     private String getTextValue(final Element ele, final String tagName) {
         String textVal = null;
@@ -102,7 +100,7 @@ public class LinkedInXMLParser {
                 OXContainerConverter.loadImageFromURL(contact, imageUrl);
             }
         } catch (final ConverterException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
 
         // get the current job and company
@@ -185,11 +183,11 @@ public class LinkedInXMLParser {
             	throw OXException.general(message);
             }
         } catch (final ParserConfigurationException pce) {
-            LOG.error(pce);
+            LOG.error("", pce);
         } catch (final SAXException se) {
-            LOG.error(se);
+            LOG.error("", se);
         } catch (final IOException ioe) {
-            LOG.error(ioe);
+            LOG.error("", ioe);
         }
         return contacts;
     }
@@ -203,11 +201,11 @@ public class LinkedInXMLParser {
             final Contact contact = parse(root);
             return contact;
         } catch (final ParserConfigurationException pce) {
-            LOG.error(pce);
+            LOG.error("", pce);
         } catch (final SAXException se) {
-            LOG.error(se);
+            LOG.error("", se);
         } catch (final IOException ioe) {
-            LOG.error(ioe);
+            LOG.error("", ioe);
         }
         return null;
     }
@@ -232,7 +230,7 @@ public class LinkedInXMLParser {
                     OXContainerConverter.loadImageFromURL(contact, imageUrl);
                 }
             } catch (final ConverterException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
 
             // get the current job and company
@@ -361,7 +359,7 @@ public class LinkedInXMLParser {
                 contacts.add(parse(persons.optJSONObject(i)));
             } catch (final RuntimeException e) {
                 // Ignore
-                LOG.warn("Runtime error occurred: " + e.getMessage(), e);
+                LOG.warn("Runtime error occurred: {}", e.getMessage(), e);
             }
         }
         return contacts;

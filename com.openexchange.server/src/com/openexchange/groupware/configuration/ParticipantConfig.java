@@ -50,8 +50,6 @@
 package com.openexchange.groupware.configuration;
 
 import java.util.Properties;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 
 /**
@@ -65,7 +63,7 @@ public final class ParticipantConfig {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ParticipantConfig.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ParticipantConfig.class);
 
     /**
      * Singleton instance.
@@ -160,17 +158,17 @@ public final class ParticipantConfig {
     public void initialize(final ConfigurationService configuration) {
         final Properties props = configuration.getFile(FILENAME);
         if (null == props) {
-            LOG.info("Configuration file " + FILENAME + " is missing. Using defaults.");
+            LOG.info("Configuration file {} is missing. Using defaults.", FILENAME);
         } else {
             this.props.clear();
             this.props.putAll(props);
-            LOG.info("Read configuration file " + FILENAME + ".");
+            LOG.info("Read configuration file {}.", FILENAME);
         }
     }
 
     private void logNotInitialized() {
         if (props.isEmpty()) {
-            LOG.info("Configuration file " + FILENAME + " not read. Using defaults.");
+            LOG.info("Configuration file {} not read. Using defaults.", FILENAME);
         }
     }
 }

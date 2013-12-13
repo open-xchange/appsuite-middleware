@@ -64,8 +64,7 @@ import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
  */
 public class FolderCacheInvalidation implements GenericCacheInvalidationInterface {
 
-	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
-			.getLog(FolderCacheInvalidation.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderCacheInvalidation.class);
 
 	private static final String REMOTE_NAME = "FolderCacheInvalidation";
 
@@ -91,9 +90,7 @@ public class FolderCacheInvalidation implements GenericCacheInvalidationInterfac
 
 	@Override
     public void invalidateContext(final int contextId) throws RemoteException {
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("Method invalidateContext() not implemented");
-		}
+		LOG.trace("Method invalidateContext() not implemented");
 	}
 
 }

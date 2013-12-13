@@ -35,14 +35,6 @@ import static com.google.android.gcm.server.Constants.PARAM_TIME_TO_LIVE;
 import static com.google.android.gcm.server.Constants.TOKEN_CANONICAL_REG_ID;
 import static com.google.android.gcm.server.Constants.TOKEN_ERROR;
 import static com.google.android.gcm.server.Constants.TOKEN_MESSAGE_ID;
-
-import com.google.android.gcm.server.Result.Builder;
-
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
@@ -58,8 +50,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import com.google.android.gcm.server.Result.Builder;
 
 /**
  * Helper class to send messages to the GCM service using an API Key.
@@ -78,8 +73,8 @@ public class Sender {
   protected static final int MAX_BACKOFF_DELAY = 1024000;
 
   protected final Random random = new Random();
-  protected static final Logger logger =
-      Logger.getLogger(Sender.class.getName());
+
+  protected static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(Sender.class);
 
   private final String key;
 
@@ -118,10 +113,7 @@ public class Sender {
     boolean tryAgain;
     do {
       attempt++;
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Attempt #" + attempt + " to send message " +
-            message + " to regIds " + registrationId);
-      }
+      logger.debug("Attempt #{} to send message {} to regIds {}", attempt, message, registrationId);
       result = sendNoRetry(message, registrationId);
       tryAgain = result == null && attempt <= retries;
       if (tryAgain) {
@@ -176,44 +168,44 @@ public class Sender {
       String key = entry.getKey();
       String value = entry.getValue();
       if (key == null || value == null) {
-        logger.warning("Ignoring payload entry thas has null: " + entry);
+        logger.warn("Ignoring payload entry thas has null: {}", entry);
       } else {
         key = PARAM_PAYLOAD_PREFIX + key;
         addParameter(body, key, URLEncoder.encode(value, UTF8));
       }
     }
     String requestBody = body.toString();
-    logger.finest("Request body: " + requestBody);
+    logger.trace("Request body: {}", requestBody);
     HttpURLConnection conn;
     int status;
     try {
       conn = post(GCM_SEND_ENDPOINT, requestBody);
       status = conn.getResponseCode();
     } catch (IOException e) {
-      logger.log(Level.FINE, "IOException posting to GCM", e);
+      logger.debug("IOException posting to GCM", e);
       return null;
     }
     if (status / 100 == 5) {
-      logger.fine("GCM service is unavailable (status " + status + ")");
+      logger.debug("GCM service is unavailable (status {})", status);
       return null;
     }
     String responseBody;
     if (status != 200) {
       try {
         responseBody = getAndClose(conn.getErrorStream());
-        logger.finest("Plain post error response: " + responseBody);
+        logger.trace("Plain post error response: {}", responseBody);
       } catch (IOException e) {
         // ignore the exception since it will thrown an InvalidRequestException
         // anyways
         responseBody = "N/A";
-        logger.log(Level.FINE, "Exception reading response: ", e);
+        logger.info("Exception reading response: ", e);
       }
       throw new InvalidRequestException(status, responseBody);
     } else {
       try {
         responseBody = getAndClose(conn.getInputStream());
       } catch (IOException e) {
-        logger.log(Level.WARNING, "Exception reading response: ", e);
+        logger.warn("Exception reading response: ", e);
         // return null so it can retry
         return null;
       }
@@ -237,13 +229,11 @@ public class Sender {
         if (token.equals(TOKEN_CANONICAL_REG_ID)) {
           builder.canonicalRegistrationId(value);
         } else {
-          logger.warning("Invalid response from GCM: " + responseBody);
+          logger.warn("Invalid response from GCM: {}", responseBody);
         }
       }
       Result result = builder.build();
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Message created succesfully (" + result + ")");
-      }
+      logger.debug("Message created succesfully ({})", result);
       return result;
     } else if (token.equals(TOKEN_ERROR)) {
       return new Result.Builder().errorCode(value).build();
@@ -286,21 +276,17 @@ public class Sender {
     do {
       multicastResult = null;
       attempt++;
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Attempt #" + attempt + " to send message " +
-            message + " to regIds " + unsentRegIds);
-      }
+      logger.debug("Attempt #{} to send message {} to regIds {}", attempt, message, unsentRegIds);
       try {
         multicastResult = sendNoRetry(message, unsentRegIds);
       } catch(IOException e) {
         // no need for WARNING since exception might be already logged
-        logger.log(Level.FINEST, "IOException on attempt " + attempt, e);
+        logger.trace("IOException on attempt {}", attempt, e);
       }
       if (multicastResult != null) {
         long multicastId = multicastResult.getMulticastId();
-        logger.fine("multicast_id on attempt # " + attempt + ": " +
-            multicastId);
-        multicastIds.add(multicastId);
+        logger.debug("multicast_id on attempt # {}: {}", attempt, multicastId);
+        multicastIds.add(Long.valueOf(multicastId));
         unsentRegIds = updateStatus(unsentRegIds, results, multicastResult);
         tryAgain = !unsentRegIds.isEmpty() && attempt <= retries;
       } else {
@@ -405,36 +391,36 @@ public class Sender {
       jsonRequest.put(JSON_PAYLOAD, payload);
     }
     String requestBody = JSONValue.toJSONString(jsonRequest);
-    logger.finest("JSON request: " + requestBody);
+    logger.trace("JSON request: {}", requestBody);
     HttpURLConnection conn;
     int status;
     try {
       conn = post(GCM_SEND_ENDPOINT, "application/json", requestBody);
       status = conn.getResponseCode();
     } catch (IOException e) {
-      logger.log(Level.FINE, "IOException posting to GCM", e);
+      logger.debug("IOException posting to GCM", e);
       return null;
     }
     String responseBody;
     if (status != 200) {
       try {
         responseBody = getAndClose(conn.getErrorStream());
-        logger.finest("JSON error response: " + responseBody);
+        logger.trace("JSON error response: {}", responseBody);
       } catch (IOException e) {
         // ignore the exception since it will thrown an InvalidRequestException
         // anyways
         responseBody = "N/A";
-        logger.log(Level.FINE, "Exception reading response: ", e);
+        logger.debug("Exception reading response: ", e);
       }
       throw new InvalidRequestException(status, responseBody);
     }
     try {
       responseBody = getAndClose(conn.getInputStream());
     } catch(IOException e) {
-      logger.log(Level.WARNING, "IOException reading response", e);
+      logger.warn("IOException reading response", e);
       return null;
     }
-    logger.finest("JSON response: " + responseBody);
+    logger.trace("JSON response: {}", responseBody);
     JSONParser parser = new JSONParser();
     JSONObject jsonResponse;
     try {
@@ -475,7 +461,7 @@ public class Sender {
     // log exception, as IOException constructor that takes a message and cause
     // is only available on Java 6
     String msg = "Error parsing JSON response (" + responseBody + ")";
-    logger.log(Level.WARNING, msg, e);
+    logger.warn(msg, e);
     return new IOException(msg + ":" + e);
   }
 
@@ -485,7 +471,7 @@ public class Sender {
         closeable.close();
       } catch (IOException e) {
         // ignore error
-        logger.log(Level.FINEST, "IOException closing stream", e);
+        logger.trace("IOException closing stream", e);
       }
     }
   }
@@ -557,10 +543,10 @@ public class Sender {
       throw new IllegalArgumentException("arguments cannot be null");
     }
     if (!url.startsWith("https://")) {
-      logger.warning("URL does not use https: " + url);
+      logger.warn("URL does not use https: {}", url);
     }
-    logger.fine("Sending POST to " + url);
-    logger.finest("POST body: " + body);
+    logger.debug("Sending POST to {}", url);
+    logger.trace("POST body: {}", body);
     byte[] bytes = body.getBytes();
     HttpURLConnection conn = getConnection(url);
     conn.setDoOutput(true);

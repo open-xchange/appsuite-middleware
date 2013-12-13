@@ -69,8 +69,8 @@ import com.openexchange.osgi.ServiceRegistry;
  */
 public class VirtualFolderStorageActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(VirtualFolderStorageActivator.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(VirtualFolderStorageActivator.class);
 
     /**
      * Initializes a new {@link VirtualFolderStorageActivator}.
@@ -86,18 +86,14 @@ public class VirtualFolderStorageActivator extends HousekeepingActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         getServiceRegistry().addService(clazz, getService(clazz));
 
     }
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
         getServiceRegistry().removeService(clazz);
     }
 
@@ -132,7 +128,7 @@ public class VirtualFolderStorageActivator extends HousekeepingActivator {
             dictionary.put("tree", FolderStorage.ALL_TREE_ID);
             registerService(FolderStorage.class, VirtualFolderStorage.getInstance(), dictionary);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -146,7 +142,7 @@ public class VirtualFolderStorageActivator extends HousekeepingActivator {
              */
             getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

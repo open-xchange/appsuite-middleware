@@ -49,8 +49,6 @@
 
 package com.openexchange.sessiond.impl;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * This timer rotates the containers in the SessionHandler.
@@ -59,7 +57,7 @@ import com.openexchange.log.LogFactory;
  */
 public class LongSessionContainerRotator implements Runnable {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LongSessionContainerRotator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LongSessionContainerRotator.class);
 
     public LongSessionContainerRotator() {
         super();
@@ -70,7 +68,7 @@ public class LongSessionContainerRotator implements Runnable {
         try {
             SessionHandler.cleanUpLongTerm();
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
         }
     }
 }

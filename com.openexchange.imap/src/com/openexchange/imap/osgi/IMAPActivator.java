@@ -95,8 +95,8 @@ import com.openexchange.user.UserService;
  */
 public final class IMAPActivator extends HousekeepingActivator {
 
-    protected static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPActivator.class));
+    protected static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(IMAPActivator.class);
 
     private WhiteboardSecretService secretService;
 
@@ -116,19 +116,12 @@ public final class IMAPActivator extends HousekeepingActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        /*
-         * Never stop the server even if a needed service is absent
-         */
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
     }
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
     }
 
     @Override
@@ -255,7 +248,7 @@ public final class IMAPActivator extends HousekeepingActivator {
                                         ListLsubCache.clearCache(fa.getAccountId(), session);
                                     }
                                 } catch (final Exception e) {
-                                    LOG.error("Failed to handle event: " + event.getTopic(), e);
+                                    LOG.error("Failed to handle event: {}", event.getTopic(), e);
                                 }
                             }
                         }
@@ -264,7 +257,7 @@ public final class IMAPActivator extends HousekeepingActivator {
                 registerService(EventHandler.class, eventHandler, serviceProperties);
             }
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -284,7 +277,7 @@ public final class IMAPActivator extends HousekeepingActivator {
                 secretService = null;
             }
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

@@ -19,8 +19,8 @@
 
 package org.apache.jsieve;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import org.slf4j.Logger;
+
 
 /**
  * Specifies the positional extent of an element
@@ -30,7 +30,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class ScriptCoordinate {
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ScriptCoordinate.class));
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ScriptCoordinate.class);
 
     private final int startLineNumber;
     private final int startColumnNumber;
@@ -88,9 +88,7 @@ public final class ScriptCoordinate {
      * appended to the message, not null
      */
     public SyntaxException syntaxException(CharSequence message) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn(message);
-        }
+        LOG.warn(message.toString());
         logDiagnosticsInfo(LOG);
         final String fullMessage = addStartLineAndColumn(message);
         final SyntaxException result = new SyntaxException(fullMessage);
@@ -143,21 +141,17 @@ public final class ScriptCoordinate {
      * Logs diagnotic information about the script coordinate.
      * @param logger <code>Log</code>, not null
      */
-    public void logDiagnosticsInfo(Log logger) {
-        if (logger.isInfoEnabled()) {
-            logger.info("Expression starts line " + startLineNumber + " column " + startColumnNumber);
-            logger.info("Expression ends line " + endLineNumber + " column " + endColumnNumber);
-        }
+    public void logDiagnosticsInfo(Logger logger) {
+        logger.info("Expression starts line {} column {}", startLineNumber, startColumnNumber);
+        logger.info("Expression ends line {} column {}", endLineNumber, endColumnNumber);
     }
 
     /**
      * Logs diagnotic information about the script coordinate.
      * @param logger <code>Log</code>, not null
      */
-    public void debugDiagnostics(Log logger) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Expression starts line " + startLineNumber + " column " + startColumnNumber);
-            logger.debug("Expression ends line " + endLineNumber + " column " + endColumnNumber);
-        }
+    public void debugDiagnostics(Logger logger) {
+        logger.debug("Expression starts line {} column {}", startLineNumber, startColumnNumber);
+        logger.debug("Expression ends line {} column {}", endLineNumber, endColumnNumber);
     }
 }

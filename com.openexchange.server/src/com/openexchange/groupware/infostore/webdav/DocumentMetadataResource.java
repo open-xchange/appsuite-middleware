@@ -56,7 +56,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.groupware.EnumComponent;
@@ -73,7 +72,6 @@ import com.openexchange.groupware.infostore.utils.SetSwitch;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.session.SessionHolder;
@@ -91,8 +89,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
 public class DocumentMetadataResource extends AbstractResource implements
 		OXWebdavResource, OXExceptionConstants {
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory
-			.getLog(DocumentMetadataResource.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DocumentMetadataResource.class);
 
 	private final InfostoreWebdavFactory factory;
 

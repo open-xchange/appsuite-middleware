@@ -49,10 +49,8 @@
 
 package com.openexchange.secret.recovery.json.osgi;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.ServiceSet;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
@@ -64,7 +62,7 @@ import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 public class SecretRecoveryJSONActivator extends AJAXModuleActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SecretRecoveryJSONActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SecretRecoveryJSONActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -85,7 +83,7 @@ public class SecretRecoveryJSONActivator extends AJAXModuleActivator {
             registerModule(new SecretRecoveryActionFactory(new ExceptionOnAbsenceServiceLookup(this), secretMigrators, cleanUpServices), "recovery/secret");
             registerService(PreferencesItemService.class, new Enabled());
         } catch (final Exception x) {
-            LOG.error(x.getMessage(), x);
+            LOG.error("", x);
             throw x;
         }
 

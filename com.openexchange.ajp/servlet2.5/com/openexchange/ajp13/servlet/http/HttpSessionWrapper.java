@@ -71,7 +71,7 @@ import com.openexchange.java.HashKeyMap;
  */
 public class HttpSessionWrapper implements HttpSession {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HttpSessionWrapper.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpSessionWrapper.class);
 
     private static volatile int cookieTTL = -1;
 
@@ -293,7 +293,7 @@ public class HttpSessionWrapper implements HttpSession {
     public void setMaxInactiveInterval(final int maxInactiveIntervall) {
         final int cookieTTL = getCookieTTL();
         if (maxInactiveIntervall < 0 || maxInactiveIntervall > cookieTTL) {
-            LOG.warn("Specified maxInactiveIntervall is negative or exceeds max. cookie time-to-live. Using max. cookie time-to-live: " + cookieTTL + "seconds");
+            LOG.warn("Specified maxInactiveIntervall is negative or exceeds max. cookie time-to-live. Using max. cookie time-to-live: {}seconds", cookieTTL);
             this.maxInactiveIntervall = cookieTTL;
         } else {
             this.maxInactiveIntervall = maxInactiveIntervall;

@@ -77,7 +77,6 @@ import net.htmlparser.jericho.Source;
 import net.htmlparser.jericho.StartTag;
 import net.htmlparser.jericho.StartTagType;
 import net.htmlparser.jericho.Tag;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.services.ServiceRegistry;
@@ -85,7 +84,6 @@ import com.openexchange.java.AsciiReader;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link HtmlWhitelistFilter}
@@ -540,15 +538,13 @@ public final class HtmlWhitelistFilter {
      */
     public static void loadWhitelist() {
         synchronized (HTMLFilterHandler.class) {
-            final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HtmlWhitelistFilter.class));
+            final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HtmlWhitelistFilter.class);
             if (null == staticHTMLMap) {
                 String mapStr = null;
                 {
                     final File whitelist = ServiceRegistry.getInstance().getService(ConfigurationService.class).getFileByName("whitelist.properties");
                     if (null == whitelist) {
-                        if (LOG.isWarnEnabled()) {
-                            LOG.warn("Using default white list");
-                        }
+                        LOG.warn("Using default white list");
                         mapStr = new String(DEFAULT_WHITELIST);
                     } else {
                         BufferedReader reader = null;
@@ -566,9 +562,7 @@ public final class HtmlWhitelistFilter {
                             }
                             mapStr = sb.toString();
                         } catch (final Exception e) {
-                            if (LOG.isWarnEnabled()) {
-                                LOG.warn("Using default white list", e);
-                            }
+                            LOG.warn("Using default white list", e);
                             mapStr = new String(DEFAULT_WHITELIST);
                         } finally {
                             Streams.close(reader);

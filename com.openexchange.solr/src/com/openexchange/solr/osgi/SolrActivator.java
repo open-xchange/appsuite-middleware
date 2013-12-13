@@ -8,7 +8,6 @@ import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
 import org.apache.solr.core.CoreContainer;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventConstants;
@@ -31,7 +30,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -63,7 +61,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class SolrActivator extends HousekeepingActivator {
 
-    static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrActivator.class));
+    static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SolrActivator.class);
 
     private volatile DelegationSolrAccessImpl delegationAccess;
 
@@ -159,9 +157,9 @@ public class SolrActivator extends HousekeepingActivator {
                             scheduler.scheduleJob(jobDetail, trigger);
                         }
                     } catch (OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     } catch (SchedulerException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
 
@@ -206,7 +204,7 @@ public class SolrActivator extends HousekeepingActivator {
                     try {
                         service.registerMBean(solrMBeanName, solrMBean);
                     } catch (OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
 
@@ -215,14 +213,14 @@ public class SolrActivator extends HousekeepingActivator {
                     try {
                         service.unregisterMBean(solrMBeanName);
                     } catch (OXException e) {
-                        LOG.warn(e.getMessage(), e);
+                        LOG.warn("", e);
                     }
                 }
             });
         } catch (MalformedObjectNameException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (NotCompliantMBeanException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

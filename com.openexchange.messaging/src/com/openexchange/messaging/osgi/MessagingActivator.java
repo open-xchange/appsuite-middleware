@@ -76,11 +76,9 @@ public final class MessagingActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessagingActivator.class));
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MessagingActivator.class);
         try {
-            if (log.isInfoEnabled()) {
-                log.info("starting bundle: com.openexchange.messaging");
-            }
+            log.info("starting bundle: com.openexchange.messaging");
             /*
              * Start registry tracking
              */
@@ -91,18 +89,16 @@ public final class MessagingActivator extends HousekeepingActivator {
              */
             registerService(MessagingServiceRegistry.class, registry, null);
         } catch (final Exception e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessagingActivator.class));
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MessagingActivator.class);
         try {
-            if (log.isInfoEnabled()) {
-                log.info("stopping bundle: com.openexchange.messaging");
-            }
+            log.info("stopping bundle: com.openexchange.messaging");
             unregisterServices();
             /*
              * Stop registry
@@ -112,7 +108,7 @@ public final class MessagingActivator extends HousekeepingActivator {
                 registry = null;
             }
         } catch (final Exception e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }

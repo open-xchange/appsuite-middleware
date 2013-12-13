@@ -54,7 +54,6 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.strings.StringParser;
@@ -67,7 +66,7 @@ public class OXTemplateImpl implements OXTemplate{
 
     public static ServiceLookup services = null;
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(OXTemplateImpl.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXTemplateImpl.class);
 
 	private final Map<String, String> properties = new HashMap<String, String>();
 	private final OXTemplateExceptionHandler exceptionHandler;
@@ -107,7 +106,7 @@ public class OXTemplateImpl implements OXTemplate{
             exceptionHandler.handleTemplateException(TemplateErrorMessage.UnderlyingException.create(e, e.getMessage()), writer);
         } catch (final IOException e) {
             final OXException x = TemplateErrorMessage.IOException.create(e);
-            LOG.error(x.getMessage(), x);
+            LOG.error("", x);
             throw x;
         }
     }

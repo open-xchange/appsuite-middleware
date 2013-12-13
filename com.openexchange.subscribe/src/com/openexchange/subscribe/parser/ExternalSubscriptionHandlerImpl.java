@@ -67,7 +67,7 @@ package com.openexchange.subscribe.parser;
  */
 public class ExternalSubscriptionHandlerImpl extends ContactHandler {
 
-//    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExternalSubscriptionHandlerImpl.class));
+//    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExternalSubscriptionHandlerImpl.class);
 //
 //    public void handleSubscription(ExternalSubscription subscription) {
 //        try {
@@ -76,9 +76,9 @@ public class ExternalSubscriptionHandlerImpl extends ContactHandler {
 //            List<ContactObject> contacts = Arrays.asList(contactsForUser);
 //            storeContacts(new XingSubscriptionSession(subscription), subscription.getTargetFolder(), contacts);
 //        } catch (OXException e) {
-//            LOG.error(e.getMessage(), e);
+//            LOG.error("", e);
 //        } catch (OXException e) {
-//            LOG.error(e.getMessage(), e);
+//            LOG.error("", e);
 //        }
 //    }
 //

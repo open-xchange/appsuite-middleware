@@ -63,12 +63,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -81,7 +79,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbParticipantStorage.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbParticipantStorage.class);
 
     /**
      * Default constructor.
@@ -221,7 +219,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
             final OXException tske = TaskExceptionCode
                 .PARTICIPANT_DELETE_WRONG.create(Integer.valueOf(users.length),
                 Integer.valueOf(deleted));
-            LOG.error(tske.getMessage(), tske);
+            LOG.error("", tske);
         }
     }
 
@@ -354,7 +352,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
             final OXException exc = TaskExceptionCode
                 .PARTICIPANT_DELETE_WRONG.create(Integer.valueOf(addresses.length),
                 Integer.valueOf(deleted));
-            LOG.error(exc.getMessage(), exc);
+            LOG.error("", exc);
         }
     }
 
@@ -420,7 +418,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                     tmp = 0;
                 }
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 tmp = 0;
             }
             final int maxSize = tmp;
@@ -522,7 +520,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 tmp = 0;
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             tmp = 0;
         }
         final int maxSize = tmp;

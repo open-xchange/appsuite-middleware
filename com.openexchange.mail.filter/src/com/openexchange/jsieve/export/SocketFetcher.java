@@ -58,7 +58,6 @@ import java.security.PrivilegedAction;
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
-import org.apache.commons.logging.Log;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
@@ -68,13 +67,13 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
  */
 public final class SocketFetcher {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SocketFetcher.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SocketFetcher.class);
 
     private static final class PrivilegedActionImpl implements PrivilegedAction<Object> {
 
-        private final org.apache.commons.logging.Log logger;
+        private final org.slf4j.Logger logger;
 
-        public PrivilegedActionImpl(final Log logger) {
+        public PrivilegedActionImpl(final org.slf4j.Logger logger) {
             super();
             this.logger = logger;
         }
@@ -85,7 +84,7 @@ public final class SocketFetcher {
             try {
                 cl = Thread.currentThread().getContextClassLoader();
             } catch (final SecurityException ex) {
-                logger.error(ex.getMessage(), ex);
+                logger.error("", ex);
             }
             return cl;
         }
@@ -157,7 +156,7 @@ public final class SocketFetcher {
             try {
                 clsSockFact = cl.loadClass(sfClass);
             } catch (final ClassNotFoundException cex) {
-                LOG.error(cex.getMessage(), cex);
+                LOG.error("", cex);
             }
         }
         if (clsSockFact == null) {

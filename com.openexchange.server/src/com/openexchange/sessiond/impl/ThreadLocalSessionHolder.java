@@ -49,13 +49,11 @@
 
 package com.openexchange.sessiond.impl;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.session.SessionHolderExtended;
 
 
@@ -94,7 +92,7 @@ public class ThreadLocalSessionHolder implements SessionHolderExtended {
      */
     public void setSession(final ServerSession serverSession) {
         session.set(serverSession);
-        if (LogProperties.isEnabled() && serverSession != null) {
+        if (serverSession != null) {
             LogProperties.putSessionProperties(serverSession);
         }
     }
@@ -110,27 +108,12 @@ public class ThreadLocalSessionHolder implements SessionHolderExtended {
 
     @Override
     public Session optSessionObject() {
-        final ServerSession serverSession = session.get();
-        if (serverSession == null && LogProperties.isEnabled()) {
-            return LogProperties.getLogProperty(LogProperties.Name.SESSION_SESSION);
-        }
-        return serverSession;
+        return session.get();
     }
 
     @Override
     public ServerSession getSessionObject() {
-        final ServerSession serverSession = session.get();
-        if (serverSession == null) {
-        	if (LogProperties.isEnabled()) {
-        		final Session session = LogProperties.getLogProperty(LogProperties.Name.SESSION_SESSION);
-        		try {
-					return ServerSessionAdapter.valueOf(session);
-				} catch (final OXException e) {
-					return null;
-				}
-        	}
-        }
-        return serverSession;
+        return session.get();
     }
 
     @Override

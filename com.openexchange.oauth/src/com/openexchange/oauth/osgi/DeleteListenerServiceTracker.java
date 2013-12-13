@@ -62,7 +62,7 @@ import com.openexchange.oauth.internal.DeleteListenerRegistry;
  */
 public final class DeleteListenerServiceTracker implements ServiceTrackerCustomizer<OAuthAccountDeleteListener,OAuthAccountDeleteListener> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DeleteListenerServiceTracker.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeleteListenerServiceTracker.class);
 
     private final BundleContext context;
 
@@ -80,8 +80,7 @@ public final class DeleteListenerServiceTracker implements ServiceTrackerCustomi
         if (DeleteListenerRegistry.getInstance().addDeleteListener(addedService)) {
             return addedService;
         }
-        LOG.warn(new StringBuilder(64).append("Duplicate delete listener \"").append(addedService.getClass().getName()).append(
-            "\" is not be added to registry."));
+        LOG.warn("Duplicate delete listener \"{}\" is not be added to registry.", addedService.getClass().getName());
         // This service needs not to be tracked, thus return null
         context.ungetService(reference);
         return null;

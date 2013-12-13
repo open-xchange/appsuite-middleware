@@ -60,8 +60,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.threadpool.internal.CustomThreadFactory;
 import com.openexchange.threadpool.osgi.ThreadPoolActivator;
 import com.openexchange.timer.TimerService;
@@ -73,7 +71,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class ThreadPools {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ThreadPools.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPools.class);
 
     /**
      * Initializes a new {@link ThreadPools}.
@@ -204,9 +202,8 @@ public final class ThreadPools {
                 final Future<R> f = completionService.poll(timeoutMillis, TimeUnit.MILLISECONDS);
                 if (null != f) {
                     ret.add(f.get());
-                } else if (LOG.isWarnEnabled()) {
-                    LOG.warn(new StringBuilder(32).append("Completion service's task elapsed time-out of ").append(timeoutMillis).append(
-                        "msec").toString());
+                } else {
+                    LOG.warn("Completion service's task elapsed time-out of {}msec", timeoutMillis);
                 }
             }
             return ret;
@@ -556,16 +553,8 @@ public final class ThreadPools {
 
     private static class TrackableTaskAdapter<V> extends TaskAdapter<V> implements Trackable {
 
-        private final Props props;
-
         TrackableTaskAdapter(final Callable<V> callable) {
             super(callable);
-            this.props = LogProperties.optLogProperties(Thread.currentThread());
-        }
-
-        @Override
-        public Props optLogProperties() {
-            return props;
         }
     }
 
@@ -604,20 +593,6 @@ public final class ThreadPools {
             return callable.call();
         }
 
-    }
-
-    private static class TrackableRenamingTaskAdapter<V> extends RenamingTaskAdapter<V> implements Trackable {
-
-        private final Props props;
-        TrackableRenamingTaskAdapter(final Callable<V> callable, final String prefix) {
-            super(callable, prefix);
-            this.props = LogProperties.optLogProperties(Thread.currentThread());
-        }
-
-        @Override
-        public Props optLogProperties() {
-            return props;
-        }
     }
 
     private static class CurrentThreadExecutorService extends java.util.concurrent.AbstractExecutorService {
@@ -662,29 +637,11 @@ public final class ThreadPools {
      */
     public static abstract class TrackableCallable<V> implements Callable<V>, Trackable {
 
-        /** The properties */
-        protected final Props props;
-
         /**
          * Initializes a new {@link TrackableCallable}.
          */
         protected TrackableCallable() {
-            this(LogProperties.optLogProperties(Thread.currentThread()));
-        }
-
-        /**
-         * Initializes a new {@link TrackableCallable}.
-         *
-         * @param props The properties
-         */
-        protected TrackableCallable(final Props props) {
             super();
-            this.props = props;
-        }
-
-        @Override
-        public Props optLogProperties() {
-            return props;
         }
     }
 

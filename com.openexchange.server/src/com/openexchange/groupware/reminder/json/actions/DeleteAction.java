@@ -79,8 +79,8 @@ import com.openexchange.server.ServiceLookup;
 responseDescription = "An JSON array with the ids that was not deleted.")
 public final class DeleteAction extends AbstractReminderAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DeleteAction.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(DeleteAction.class);
 
     /**
      * Initializes a new {@link DeleteAction}.
@@ -113,7 +113,7 @@ public final class DeleteAction extends AbstractReminderAction {
                     reminderSql.deleteReminder(reminder);
                 }
             } catch (final OXException oxe) {
-                LOG.debug(oxe.getMessage(), oxe);
+                LOG.debug("", oxe);
                 if (ReminderExceptionCode.NOT_FOUND.equals(oxe)) {
                     response.put(id);
                     return new AJAXRequestResult(response, "json");
@@ -142,7 +142,7 @@ public final class DeleteAction extends AbstractReminderAction {
                         reminderSql.deleteReminder(reminder);
                     }
                 } catch (final OXException oxe) {
-                    LOG.debug(oxe.getMessage(), oxe);
+                    LOG.debug("", oxe);
                     if (ReminderExceptionCode.NOT_FOUND.equals(oxe)) {
                         response.put(id);
                         return new AJAXRequestResult(response, "json");

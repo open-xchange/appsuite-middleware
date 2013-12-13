@@ -58,8 +58,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -76,7 +74,7 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(NewInfostoreFolderTreeUpdateTask.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NewInfostoreFolderTreeUpdateTask.class);
 
     private OCLPermission systemPermission;
 
@@ -152,7 +150,7 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
     }
 
     private void processContext(final int cid, final long creatingTime) throws OXException {
-        LOG.info("Performing 'NewInfostoreFolderTreeUpdateTask' on context " + cid);
+        LOG.info("Performing 'NewInfostoreFolderTreeUpdateTask' on context {}", cid);
         final Connection writeCon = Database.getNoTimeout(cid, true);
         try {
             final int admin = getContextAdmin(cid, writeCon);
@@ -184,11 +182,11 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
             writeCon.commit(); // COMMIT
         } catch (final SQLException e) {
             rollback(writeCon);
-            LOG.info("Roll-back done in update task 'NewInfostoreFolderTreeUpdateTask' for context " + cid);
+            LOG.info("Roll-back done in update task 'NewInfostoreFolderTreeUpdateTask' for context {}", cid);
             throw err(e);
         } catch (final OXException e) {
             rollback(writeCon);
-            LOG.info("Roll-back done in update task 'NewInfostoreFolderTreeUpdateTask' for context " + cid);
+            LOG.info("Roll-back done in update task 'NewInfostoreFolderTreeUpdateTask' for context {}", cid);
             throw e;
         } finally {
             autocommit(writeCon);

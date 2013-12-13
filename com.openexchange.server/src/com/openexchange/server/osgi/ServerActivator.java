@@ -59,7 +59,6 @@ import javax.activation.MailcapCommandMap;
 import javax.servlet.ServletException;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
-import org.apache.commons.logging.Log;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.osgi.framework.BundleActivator;
@@ -144,8 +143,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.index.IndexFacadeService;
-import com.openexchange.log.CommonsLoggingLogger;
-import com.openexchange.log.LogFactory;
+import com.openexchange.log.Slf4jLogger;
 import com.openexchange.login.BlockingLoginHandlerService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.MailCounterImpl;
@@ -248,7 +246,7 @@ public final class ServerActivator extends HousekeepingActivator {
         }
     }
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServerActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServerActivator.class);
 
     /**
      * Constant for string: "identifier"
@@ -305,19 +303,14 @@ public final class ServerActivator extends HousekeepingActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        /*
-         * Never stop the server even if a needed service is absent
-         */
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
         if (CacheService.class.equals(clazz)) {
             final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
             if (null != reg) {
                 try {
                     reg.notifyAbsence();
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -326,9 +319,7 @@ public final class ServerActivator extends HousekeepingActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         ServerServiceRegistry.getInstance().addService(clazz, getService(clazz));
         if (CacheService.class.equals(clazz)) {
             final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
@@ -336,7 +327,7 @@ public final class ServerActivator extends HousekeepingActivator {
                 try {
                     reg.notifyAvailability();
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -356,7 +347,7 @@ public final class ServerActivator extends HousekeepingActivator {
         try {
             return Integer.parseInt(toParse.trim());
         } catch (NumberFormatException e) {
-            LOG.error("Not an integer: " + toParse, e);
+            LOG.error("Not an integer: {}", toParse, e);
             return defaultValue;
         }
     }
@@ -367,7 +358,7 @@ public final class ServerActivator extends HousekeepingActivator {
         CONTEXT = context;
         {
             // Set logger
-            JSONObject.setLogger(new CommonsLoggingLogger(JSONValue.class));
+            JSONObject.setLogger(new Slf4jLogger(JSONValue.class));
             // JSON configuration
             final ConfigurationService service = getService(ConfigurationService.class);
             JSONObject.setMaxSize(service.getIntProperty("com.openexchange.json.maxSize", 2500));

@@ -75,9 +75,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UpdatePerformer.class));
-
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdatePerformer.class);
 
     /**
      * Initializes a new {@link UpdatePerformer} from given session.
@@ -139,7 +137,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         if (null == storage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
-        final long start = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         if (null != timeStamp) {
             storageParameters.setTimeStamp(timeStamp);
         }
@@ -388,11 +385,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 }
             }
 
-            if (DEBUG_ENABLED) {
-                final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new StringBuilder().append("UpdatePerformer.doUpdate() took ").append(duration).append("msec for folder: ").append(
-                    folderId).toString());
-            }
         } catch (final OXException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);

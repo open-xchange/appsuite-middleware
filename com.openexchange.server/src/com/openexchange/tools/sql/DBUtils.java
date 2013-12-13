@@ -62,12 +62,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 
 /**
  * Utilities for database resource handling.
@@ -77,7 +75,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class DBUtils {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DBUtils.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DBUtils.class);
 
     public static final int IN_LIMIT = 1000;
 
@@ -110,7 +108,7 @@ public final class DBUtils {
             try {
                 result.close();
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -125,7 +123,7 @@ public final class DBUtils {
             try {
                 stmt.close();
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -175,9 +173,7 @@ public final class DBUtils {
             try {
                 rs.close();
             } catch (final SQLException e) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(e.getMessage(), e);
-                }
+                LOG.error("", e);
             }
         }
         /*
@@ -187,9 +183,7 @@ public final class DBUtils {
             try {
                 stmt.close();
             } catch (final SQLException e) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(e.getMessage(), e);
-                }
+                LOG.error("", e);
             }
         }
         /*
@@ -246,7 +240,7 @@ public final class DBUtils {
                 con.rollback();
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -264,7 +258,7 @@ public final class DBUtils {
                 con.setAutoCommit(true);
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

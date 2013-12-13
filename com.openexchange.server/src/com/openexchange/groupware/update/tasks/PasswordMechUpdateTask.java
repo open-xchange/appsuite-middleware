@@ -56,8 +56,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -73,7 +71,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public class PasswordMechUpdateTask implements UpdateTask {
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PasswordMechUpdateTask.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordMechUpdateTask.class);
 
 	@Override
     public int addedWithVersion() {

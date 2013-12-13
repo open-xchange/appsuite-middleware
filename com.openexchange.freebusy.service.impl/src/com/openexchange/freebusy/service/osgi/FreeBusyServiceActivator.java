@@ -49,7 +49,6 @@
 
 package com.openexchange.freebusy.service.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.context.ContextService;
 import com.openexchange.freebusy.provider.FreeBusyProvider;
@@ -58,7 +57,6 @@ import com.openexchange.freebusy.service.FreeBusyService;
 import com.openexchange.freebusy.service.impl.FreeBusyProviderRegistry;
 import com.openexchange.freebusy.service.impl.FreeBusyServiceImpl;
 import com.openexchange.freebusy.service.impl.FreeBusyServiceLookup;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -71,7 +69,7 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class FreeBusyServiceActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FreeBusyServiceActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FreeBusyServiceActivator.class);
 
     /**
      * Initializes a new {@link FreeBusyServiceActivator}.

@@ -59,7 +59,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrResponse;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -91,7 +90,7 @@ import com.openexchange.solr.SolrCoreIdentifier;
  */
 public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractSolrIndexAccess.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractSolrIndexAccess.class);
 
     private final Lock folderCacheLock = new ReentrantLock();
 

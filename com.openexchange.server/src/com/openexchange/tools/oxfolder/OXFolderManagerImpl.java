@@ -127,7 +127,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionConstants {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OXFolderManagerImpl.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXFolderManagerImpl.class);
 
     /**
      * No options.
@@ -1608,9 +1608,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 try {
                     next.onFolderDelete(folderID, ctx);
                 } catch (final OXException e) {
-                    LOG.error(
-                        new StringBuilder(128).append("Folder delete listener \"").append(next.getClass().getName()).append(
-                            "\" failed for folder ").append(folderID).append(" int context ").append(ctx.getContextId()),
+                    LOG.error("Folder delete listener \"{}\" failed for folder {} int context {}", next.getClass().getName(), folderID, ctx.getContextId(),
                         e);
                     throw e;
                 }
@@ -1653,7 +1651,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             try {
                 FolderCacheManager.getInstance().removeFolderObject(folderID, ctx);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         /*
@@ -1946,11 +1944,11 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     try {
                         FolderCacheManager.getInstance().removeFolderObject(fuids[i], ctx);
                     } catch (final OXException e) {
-                        LOG.warn(e.getMessage(), e);
+                        LOG.warn("", e);
                     }
                 }
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -2029,7 +2027,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             try {
                 tmp2 = DBUtils.getColumnSize(readCon, tableName, fields[i]);
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 tmp2 = -1;
             } finally {
                 if (closeReadCon) {

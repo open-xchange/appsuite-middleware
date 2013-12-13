@@ -79,7 +79,7 @@ public final class PasswordChangeServlet extends SessionServlet {
 
     private static final long serialVersionUID = 3129607149739575803L;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PasswordChangeServlet.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeServlet.class);
 
     private static final String PARAM_OLD_PASSWORD = "old_password";
 
@@ -211,7 +211,7 @@ public final class PasswordChangeServlet extends SessionServlet {
                 requestObject.getString(PARAM_OLD_PASSWORD)));
 
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         }
         /*

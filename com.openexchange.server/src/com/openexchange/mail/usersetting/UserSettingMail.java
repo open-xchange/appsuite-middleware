@@ -95,7 +95,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
                 /*
                  * Cannot occur since we are cloneable
                  */
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 final InternalError error = new InternalError(e.getMessage());
                 error.initCause(e);
                 throw error;
@@ -117,7 +117,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
      */
     private static final long serialVersionUID = -5787223065275414178L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UserSettingMail.class));
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserSettingMail.class);
 
     /*-
      * Integer constants for on/off options
@@ -353,7 +353,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
             }
             return clone;
         } catch (final CloneNotSupportedException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final InternalError error = new InternalError(e.getMessage());
             error.initCause(e);
             throw error;
@@ -749,7 +749,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
                 // TODO: Use account ID later on!!! Currently default mail account is passed.
                 spamHandlerFound = Boolean.valueOf(SpamHandlerRegistry.hasSpamHandler(storage.getDefaultMailAccount(userId, cid)));
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         return ((null != spamHandlerFound && spamHandlerFound.booleanValue()) && spamEnabled);

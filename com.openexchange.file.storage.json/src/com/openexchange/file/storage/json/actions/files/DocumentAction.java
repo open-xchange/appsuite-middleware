@@ -131,7 +131,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
                 if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
                     return inputStream;
                 }
-                return new BufferedInputStream(inputStream);
+                return new BufferedInputStream(inputStream, 65536);
             }
         };
 

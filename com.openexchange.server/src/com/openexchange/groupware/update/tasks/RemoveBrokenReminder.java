@@ -59,8 +59,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.ReminderExceptionCode;
@@ -79,7 +77,7 @@ public final class RemoveBrokenReminder implements UpdateTask {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RemoveBrokenReminder.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RemoveBrokenReminder.class);
 
     /**
      * Default constructor.

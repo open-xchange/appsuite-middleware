@@ -56,7 +56,6 @@ import static com.openexchange.file.storage.FileStorageEventConstants.UPDATE_FOL
 import static com.openexchange.file.storage.FileStorageEventConstants.UPDATE_TOPIC;
 import java.util.Arrays;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
@@ -90,7 +89,7 @@ public class ChecksumEventListener implements EventHandler {
         "OSX.OXDrive",
     });
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ChecksumEventListener.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ChecksumEventListener.class);
 
     /**
      * Initializes a new {@link ChecksumEventListener}.
@@ -100,16 +99,14 @@ public class ChecksumEventListener implements EventHandler {
     }
 
     @Override
-    public void handleEvent(Event event) {
+    public void handleEvent(final Event event) {
         try {
             Session session = FileStorageEventHelper.extractSession(event);
             if (null == session || isDriveSession(session)) {
                 // skip
                 return;
             }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(FileStorageEventHelper.createDebugMessage("event", event));
-            }
+            LOG.debug("{}", new Object() { @Override public String toString() { return FileStorageEventHelper.createDebugMessage("event", event);}});
             RdbChecksumStore checksumStore = new RdbChecksumStore(session.getContextId());
             String topic = event.getTopic();
             if (DELETE_TOPIC.equals(topic) || UPDATE_TOPIC.equals(topic) || CREATE_TOPIC.equals(topic)) {

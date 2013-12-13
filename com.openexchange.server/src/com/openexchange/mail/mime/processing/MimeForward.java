@@ -121,8 +121,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class MimeForward {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeForward.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(MimeForward.class);
 
     private static final String PREFIX_FWD = "Fwd: ";
 
@@ -730,9 +730,7 @@ public final class MimeForward {
                             ltz.locale,
                             ltz.timeZone)));
             } catch (final Exception t) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn(t.getMessage(), t);
-                }
+                LOG.warn("", t);
                 forwardPrefix = PATTERN_DATE.matcher(forwardPrefix).replaceFirst("");
             }
             try {
@@ -744,9 +742,7 @@ public final class MimeForward {
                             ltz.locale,
                             ltz.timeZone)));
             } catch (final Exception t) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn(t.getMessage(), t);
-                }
+                LOG.warn("", t);
                 forwardPrefix = PATTERN_TIME.matcher(forwardPrefix).replaceFirst("");
             }
 

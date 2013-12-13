@@ -18,7 +18,6 @@ package org.jolokia.osgi.servlet;
 
 import javax.servlet.*;
 
-import org.apache.commons.logging.Log;
 import org.jolokia.http.AgentServlet;
 import org.jolokia.osgi.JolokiaActivator;
 import org.jolokia.restrictor.Restrictor;
@@ -51,7 +50,7 @@ public class JolokiaServlet extends AgentServlet {
     private static final ThreadLocal<BundleContext> BUNDLE_CONTEXT_THREAD_LOCAL = new ThreadLocal<BundleContext>();
 
     // Internal Ox Logging
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(JolokiaServlet.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JolokiaServlet.class);
     
     /**
      * Constructor with an empty context

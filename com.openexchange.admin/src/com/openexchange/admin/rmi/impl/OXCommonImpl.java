@@ -49,7 +49,6 @@
 package com.openexchange.admin.rmi.impl;
 
 import static com.openexchange.java.Autoboxing.I;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Group;
@@ -67,7 +66,6 @@ import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
-import com.openexchange.log.LogFactory;
 
 /**
  * General abstraction class used by all impl classes
@@ -76,7 +74,7 @@ import com.openexchange.log.LogFactory;
  */
 public abstract class OXCommonImpl {
 
-    private final static Log log = LogFactory.getLog(OXCommonImpl.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXCommonImpl.class);
 
     protected final OXToolStorageInterface tool;
 
@@ -87,7 +85,7 @@ public abstract class OXCommonImpl {
     protected final void contextcheck(final Context ctx) throws InvalidCredentialsException {
         if (null == ctx || null == ctx.getId()) {
             final InvalidCredentialsException e = new InvalidCredentialsException("Client sent invalid context data object");
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -160,7 +158,7 @@ public abstract class OXCommonImpl {
         }
         if (tool.checkAndUpdateSchemaIfRequired(ctx)) {
             final DatabaseUpdateException databaseUpdateException = new DatabaseUpdateException("Database is locked or is now beeing updated, please try again later");
-            log.error(databaseUpdateException.getMessage(), databaseUpdateException);
+            log.error("", databaseUpdateException);
             throw databaseUpdateException;
         }
     }

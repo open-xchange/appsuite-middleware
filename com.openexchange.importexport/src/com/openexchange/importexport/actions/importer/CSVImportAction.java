@@ -55,7 +55,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.importexport.formats.Format;
@@ -64,7 +63,6 @@ import com.openexchange.importexport.importers.CSVContactImporter;
 import com.openexchange.importexport.importers.Importer;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 
 public class CSVImportAction extends AbstractImportAction implements AJAXActionService {
@@ -77,7 +75,7 @@ public class CSVImportAction extends AbstractImportAction implements AJAXActionS
         super(services);
     }
 
-    public static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CSVImportAction.class));
+    public static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVImportAction.class);
 
 	private Importer importer;
 
@@ -98,7 +96,7 @@ public class CSVImportAction extends AbstractImportAction implements AJAXActionS
 
             final File dir = new File(path);
             if (dir == null || !dir.isDirectory()) {
-                LOG.error("Directory " + path + " supposedly containing import mappers information wasn't actually a directory, defaulting to deprecated mappers as fallback.");
+                LOG.error("Directory {} supposedly containing import mappers information wasn't actually a directory, defaulting to deprecated mappers as fallback.", path);
                 return imp;
             }
             final File[] files = dir.listFiles();
@@ -109,7 +107,7 @@ public class CSVImportAction extends AbstractImportAction implements AJAXActionS
                     continue;
                 }
                 final Properties props = new Properties();
-                final InputStream in = new BufferedInputStream(new FileInputStream(file));
+                final InputStream in = new BufferedInputStream(new FileInputStream(file), 65536);
                 try {
                     props.load(in);
                 } finally {
@@ -120,7 +118,7 @@ public class CSVImportAction extends AbstractImportAction implements AJAXActionS
                 mapperAmount++;
             }
             if (mapperAmount == 0) {
-                LOG.error("Did not load any CSV importer mappings from directory " + path +  ".");
+                LOG.error("Did not load any CSV importer mappings from directory {}.", path);
             }
         } catch (final IOException e) {
             LOG.error("Failed when trying to load CSV importer mappings.", e);

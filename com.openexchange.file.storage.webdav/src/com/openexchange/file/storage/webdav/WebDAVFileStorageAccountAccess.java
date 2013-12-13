@@ -72,6 +72,7 @@ import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.client.methods.DavMethod;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
@@ -368,7 +369,7 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
                 try {
                     timeout = Integer.parseInt(sTimeout.trim());
                 } catch (final NumberFormatException e) {
-                    com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(WebDAVFileStorageAccountAccess.class)).warn(
+                    LoggerFactory.getLogger(WebDAVFileStorageAccountAccess.class).warn(
                         "Configuration property \"" + WebDAVConstants.WEBDAV_TIMEOUT + "\" is not a number: " + sTimeout);
                     timeout = TIMEOUT;
                 }

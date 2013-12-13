@@ -67,7 +67,7 @@ import com.openexchange.pop3.POP3ExceptionCode;
  */
 public final class POP3Config extends MailConfig {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(POP3Config.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(POP3Config.class);
 
     private static final String PROTOCOL_POP3_SECURE = "pop3s";
 

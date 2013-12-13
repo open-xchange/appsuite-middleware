@@ -52,8 +52,6 @@ package com.openexchange.ajax;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,7 +72,7 @@ public class Tasks extends DataServlet {
 
     private static final long serialVersionUID = 8092832647688901704L;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Tasks.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Tasks.class);
 
     @Override
     protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws IOException {
@@ -86,7 +84,7 @@ public class Tasks extends DataServlet {
             try {
                  jsonObj = convertParameter2JSONObject(httpServletRequest);
             } catch (final JSONException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
                 writeResponse(response, httpServletResponse, session);
                 return;
@@ -97,14 +95,14 @@ public class Tasks extends DataServlet {
             response.setData(responseObj);
         } catch (final OXException e) {
             if (e.getCategory() == Category.CATEGORY_USER_INPUT) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             } else {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             response.setException(e);
          } catch (final JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error(oje.getMessage(), oje);
+            LOG.error("", oje);
             response.setException(oje);
         }
         writeResponse(response, httpServletResponse, session);
@@ -125,7 +123,7 @@ public class Tasks extends DataServlet {
                 try {
                     jsonObj = convertParameter2JSONObject(httpServletRequest);
                 } catch (final JSONException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
                     writeResponse(response, httpServletResponse, session);
                     return;
@@ -153,13 +151,13 @@ public class Tasks extends DataServlet {
             }
         } catch (final JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error(oje.getMessage(), oje);
+            LOG.error("", oje);
             response.setException(oje);
         } catch (final OXException e) {
             if (e.getCategory() == Category.CATEGORY_USER_INPUT) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             } else {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             response.setException(e);
         }

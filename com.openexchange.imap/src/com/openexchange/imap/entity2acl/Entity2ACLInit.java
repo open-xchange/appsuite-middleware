@@ -49,7 +49,6 @@
 
 package com.openexchange.imap.entity2acl;
 
-import java.text.MessageFormat;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.config.IMAPProperties;
@@ -64,7 +63,7 @@ public final class Entity2ACLInit implements Initialization {
 
     private static final Entity2ACLInit instance = new Entity2ACLInit();
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Entity2ACLInit.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Entity2ACLInit.class);
 
     /**
      * @return The singleton instance of {@link Entity2ACLInit}
@@ -88,7 +87,7 @@ public final class Entity2ACLInit implements Initialization {
     @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
-            LOG.error(MessageFormat.format("{0} already started", Entity2ACLInit.class.getName()));
+            LOG.error("{} already started", Entity2ACLInit.class.getName());
             return;
         }
         Entity2ACLAutoDetector.initEntity2ACLMappings();
@@ -99,12 +98,7 @@ public final class Entity2ACLInit implements Initialization {
                     throw Entity2ACLExceptionCode.MISSING_SETTING.create("com.openexchange.imap.User2ACLImpl");
                 }
                 if ("auto".equalsIgnoreCase(classNameProp)) {
-                    /*
-                     * Try to detect dependent on IMAP server greeting
-                     */
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Auto-Detection for IMAP server implementation");
-                    }
+                    LOG.info("Auto-Detection for IMAP server implementation");
                     implementingClass = null;
                     return;
                 }
@@ -113,9 +107,7 @@ public final class Entity2ACLInit implements Initialization {
                     Entity2ACL.setInstance(className);
                 } else {
                     implementingClass = Class.forName(classNameProp).asSubclass(Entity2ACL.class);
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info(MessageFormat.format("Used IMAP server implementation: {0}", implementingClass.getName()));
-                    }
+                    LOG.info("Used IMAP server implementation: {}", implementingClass.getName());
                     Entity2ACL.setInstance(implementingClass.newInstance());
                 }
             }

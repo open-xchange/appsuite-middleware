@@ -54,7 +54,6 @@ import java.util.Hashtable;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
@@ -66,7 +65,6 @@ import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.login.ConfigurationProperty;
 
 /**
@@ -76,7 +74,7 @@ import com.openexchange.login.ConfigurationProperty;
  */
 public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, Object> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginServletRegisterer.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LoginServletRegisterer.class);
     private static final String SERVLET_PATH_APPENDIX = "login";
 
     private final BundleContext context;
@@ -158,7 +156,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
         final String prop = configService.getProperty(propertyName);
         if (prop == null) {
             final String defaultValue = property.getDefaultValue();
-            LOG.warn("Missing configuration property \"" + propertyName + "\". Using fall-back value: " + defaultValue);
+            LOG.warn("Missing configuration property \"{}\". Using fall-back value: {}", propertyName, defaultValue);
             params.put(propertyName, defaultValue);
         } else {
             params.put(propertyName, prop);

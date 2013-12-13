@@ -55,8 +55,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.Vector;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.exception.OXException;
@@ -79,7 +77,7 @@ public class ContactObjectsByVcardFileStep extends AbstractStep<Contact[], Page>
 
     private static final ContactSanitizer SANITIZER = new ContactSanitizer();
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactObjectsByVcardFileStep.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactObjectsByVcardFileStep.class);
 
     private List<String> unwantedLines = new ArrayList<String>();
 
@@ -98,7 +96,7 @@ public class ContactObjectsByVcardFileStep extends AbstractStep<Contact[], Page>
         final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
 
         String pageString = input.getWebResponse().getContentAsString();
-        LOG.debug("The page to scan for vCards is : " + pageString);
+        LOG.debug("The page to scan for vCards is : {}", pageString);
 
         while (pageString.contains("BEGIN:VCARD")) {
             final int beginIndex = pageString.indexOf("BEGIN:VCARD");
@@ -116,11 +114,11 @@ public class ContactObjectsByVcardFileStep extends AbstractStep<Contact[], Page>
                 SANITIZER.sanitize(contactObject);
                 contactObjects.add(contactObject);
             } catch (final VersitException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
             } catch (final ConverterException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
             } catch (final IOException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
             }
 
         }

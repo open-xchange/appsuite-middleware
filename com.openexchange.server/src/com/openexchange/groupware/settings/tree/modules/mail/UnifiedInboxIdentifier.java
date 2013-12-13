@@ -69,7 +69,7 @@ import com.openexchange.session.Session;
  */
 public class UnifiedInboxIdentifier implements PreferencesItemService {
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UnifiedInboxIdentifier.class));
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UnifiedInboxIdentifier.class);
 
     /**
      * Default constructor.
@@ -104,9 +104,7 @@ public class UnifiedInboxIdentifier implements PreferencesItemService {
                         setting.setSingleValue("null");
                     }
                 } catch (final OXException e) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn(e.getMessage(), e);
-                    }
+                    LOG.warn("", e);
                     setting.setSingleValue("null");
                     return;
                 }

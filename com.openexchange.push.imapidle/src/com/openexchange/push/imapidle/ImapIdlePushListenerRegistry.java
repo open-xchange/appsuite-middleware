@@ -56,9 +56,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.imapidle.services.ImapIdleServiceRegistry;
@@ -81,7 +79,7 @@ public final class ImapIdlePushListenerRegistry {
         DEBUG_ENABLED = Boolean.valueOf(debugEnabled);
     }
 
-    private static boolean isDebugEnabled(final Log logger) {
+    private static boolean isDebugEnabled(final org.slf4j.Logger logger) {
         final Boolean debug = DEBUG_ENABLED;
         return null == debug ? logger.isDebugEnabled() : debug.booleanValue();
     }
@@ -162,7 +160,7 @@ public final class ImapIdlePushListenerRegistry {
             try {
                 l.open();
             } catch (final OXException e) {
-                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ImapIdlePushListenerRegistry.class)).error(
+                org.slf4j.LoggerFactory.getLogger(ImapIdlePushListenerRegistry.class).error(
                     MessageFormat.format("Opening IMAP IDLE listener failed. Removing listener from registry: {0}", l.toString()),
                     e);
                 i.remove();
@@ -234,14 +232,9 @@ public final class ImapIdlePushListenerRegistry {
 
         });
         final SimpleKey key = SimpleKey.valueOf(contextId, userId);
-        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ImapIdlePushListenerRegistry.class));
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ImapIdlePushListenerRegistry.class);
         if (null == session) {
-            final String message = "Found no other valid & active session for user " + userId + " in context " + contextId  + ". Therefore shutting down associated IMAP IDLE push listener.";
-            if (isDebugEnabled(logger)) {
-                logger.info(message, new Throwable());
-            } else {
-                logger.info(message);
-            }
+            logger.info("Found no other valid & active session for user {} in context {}. Therefore shutting down associated IMAP IDLE push listener.", userId, contextId, new Throwable());
             return removeListener(key);
         }
         /*
@@ -263,12 +256,12 @@ public final class ImapIdlePushListenerRegistry {
         /*
          * Proceed with newly found session
          */
-        logger.info("Found another valid & active session for user " + userId + " in context " + contextId  + ". Reactivating IMAP IDLE push listener.");
+        logger.info("Found another valid & active session for user {} in context {}. Reactivating IMAP IDLE push listener.", userId, contextId);
         removeListener(key);
         final ImapIdlePushListener pushListener = ImapIdlePushListener.newInstance(session);
         if (null == map.putIfAbsent(key, pushListener)) {
             pushListener.open();
-            logger.info("Reactivated IMAP IDLE push listener for user " + userId + " in context " + contextId);
+            logger.info("Reactivated IMAP IDLE push listener for user {} in context {}", userId, contextId);
             return false;
         }
         return true;

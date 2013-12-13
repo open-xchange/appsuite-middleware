@@ -64,8 +64,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class RemoteCacheAdmin {
 
-	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
-			.getLog(RemoteCacheAdmin.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RemoteCacheAdmin.class);
 
 	private static final int REGISTRY_PORT = 57462;
 
@@ -86,9 +85,9 @@ public class RemoteCacheAdmin {
 						instance = new RemoteCacheAdmin();
 						initialized.set(true);
 					} catch (final RemoteException e) {
-						LOG.error(e.getMessage(), e);
+						LOG.error("", e);
 					} catch (final AlreadyBoundException e) {
-						LOG.error(e.getMessage(), e);
+						LOG.error("", e);
 					}
 				}
 			}
@@ -128,9 +127,7 @@ public class RemoteCacheAdmin {
 		 * Bind interface to registry
 		 */
 		registry.bind(gci.getRemoteName(), gci);
-		if (LOG.isInfoEnabled()) {
-			LOG.info("RemoteCacheAdmin started...");
-		}
+		LOG.info("RemoteCacheAdmin started...");
 	}
 
 }

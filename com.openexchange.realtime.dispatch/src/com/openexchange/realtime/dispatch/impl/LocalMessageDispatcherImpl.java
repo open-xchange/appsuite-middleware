@@ -53,14 +53,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.dispatch.DispatchExceptionCode;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
-import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.dispatch.management.ManagementHouseKeeper;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
@@ -69,18 +67,18 @@ import com.openexchange.realtime.util.StanzaSequenceGate;
 
 /**
  * {@link LocalMessageDispatcherImpl}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(MessageDispatcher.class));
+    static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LocalMessageDispatcherImpl.class);
 
     private final Map<String, Channel> channels = new ConcurrentHashMap<String, Channel>();
-    
+
     private final StanzaSequenceGate gate;
-    
+
     public LocalMessageDispatcherImpl() {
         gate = new StanzaSequenceGate(LocalMessageDispatcher.class.getSimpleName()) {
 
@@ -91,28 +89,24 @@ public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
                 if (channel == null) {
                     stanza.trace("Didn't find channel for protocol: " + protocol);
                     throw DispatchExceptionCode.UNKNOWN_CHANNEL.create(protocol);
-                } else {
-                    if (channel.isConnected(recipient)) {
-                        try {
-                            stanza.trace("Send to " + recipient.toString());
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Sending Stanza: " + stanza + " to " + recipient.toString());
-                            }
-                            channel.send(stanza, recipient);
-                        } catch (OXException e) {
-                            if (RealtimeExceptionCodes.RESOURCE_NOT_AVAILABLE.equals(e)) {
-                                throw DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString());
-                            } else {
-                                throw e;
-                            }
-                        } catch (RuntimeException e) {
-                            stanza.trace(e.toString(), e);
-                            throw DispatchExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+                }
+                if (channel.isConnected(recipient)) {
+                    try {
+                        stanza.trace("Send to " + recipient.toString());
+                        LOG.debug("Sending Stanza: {} to {}", stanza, recipient);
+                        channel.send(stanza, recipient);
+                    } catch (OXException e) {
+                        if (RealtimeExceptionCodes.RESOURCE_NOT_AVAILABLE.equals(e)) {
+                            throw DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString());
                         }
-                    } else {
-                        LOG.error(DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString()));
-                        throw DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString());
+                        throw e;
+                    } catch (RuntimeException e) {
+                        stanza.trace(e.toString(), e);
+                        throw DispatchExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
                     }
+                } else {
+                    LOG.error(DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString()).toString());
+                    throw DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString());
                 }
             }
         };

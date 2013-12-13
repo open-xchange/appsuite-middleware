@@ -67,7 +67,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.container.ThresholdFileHolder;
@@ -101,7 +100,7 @@ public class MailAttachment extends AJAXServlet {
 
     private static final long serialVersionUID = -3109402774466180271L;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MailAttachment.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAttachment.class);
 
     private static final String MULTIPART_BOUNDARY = "MULTIPART_BYTERANGES";
     private static final int BUFLEN = 2048;
@@ -340,9 +339,9 @@ public class MailAttachment extends AJAXServlet {
                     final String lmsg = toLowerCase(e.getMessage());
                     if ("broken pipe".equals(lmsg) || "connection reset".equals(lmsg)) {
                         // Assume client-initiated connection closure
-                        LOG.debug("Underlying (TCP) protocol communication aborted while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
+                        LOG.debug("Underlying (TCP) protocol communication aborted while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
                     } else {
-                        LOG.warn("Lost connection to client while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
+                        LOG.warn("Lost connection to client while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
                     }
                 } catch (final com.sun.mail.util.MessageRemovedIOException e) {
                     resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Message not found.");
@@ -356,9 +355,9 @@ public class MailAttachment extends AJAXServlet {
                          * For the next write attempt by us, the peer's TCP stack will issue an RST,
                          * which results in this exception and message at the sender.
                          */
-                        LOG.debug("Client dropped connection while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
+                        LOG.debug("Client dropped connection while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
                     } else {
-                        LOG.warn("Lost connection to client while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
+                        LOG.warn("Lost connection to client while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
                     }
                 }
             } finally {
@@ -368,7 +367,7 @@ public class MailAttachment extends AJAXServlet {
             callbackError(resp, outSelected, e);
         } catch (final Exception e) {
             final OXException exc = getWrappingOXException(e);
-            LOG.error(exc.getMessage(), exc);
+            LOG.error("", exc);
             callbackError(resp, outSelected, exc);
         }
     }
@@ -385,12 +384,8 @@ public class MailAttachment extends AJAXServlet {
      * @return The wrapping {@link AbstractOXException}
      */
     protected static final OXException getWrappingOXException(final Exception cause) {
-        if (LOG.isWarnEnabled()) {
-            final StringBuilder warnBuilder = new StringBuilder(140);
-            warnBuilder.append("An unexpected exception occurred, which is going to be wrapped for proper display.\n");
-            warnBuilder.append("For safety reason its original content is display here.");
-            LOG.warn(warnBuilder.toString(), cause);
-        }
+        final String lineSeparator = System.getProperty("line.separator");
+        LOG.warn("An unexpected exception occurred, which is going to be wrapped for proper display.{}For safety reason its original content is displayed here.", lineSeparator, cause);
         return new OXException(cause);
     }
 
@@ -415,16 +410,16 @@ public class MailAttachment extends AJAXServlet {
             writer.flush();
         } catch (final UnsupportedEncodingException uee) {
             uee.initCause(e);
-            LOG.error(uee.getMessage(), uee);
+            LOG.error("", uee);
         } catch (final IOException ioe) {
             ioe.initCause(e);
-            LOG.error(ioe.getMessage(), ioe);
+            LOG.error("", ioe);
         } catch (final IllegalStateException ise) {
             ise.initCause(e);
-            LOG.error(ise.getMessage(), ise);
+            LOG.error("", ise);
         } catch (final JSONException je) {
             je.initCause(e);
-            LOG.error(je.getMessage(), je);
+            LOG.error("", je);
         }
     }
 

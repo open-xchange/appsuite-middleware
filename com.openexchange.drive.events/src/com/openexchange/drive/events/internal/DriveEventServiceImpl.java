@@ -61,7 +61,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveConstants;
@@ -82,7 +81,7 @@ import com.openexchange.timer.TimerService;
  */
 public class DriveEventServiceImpl implements org.osgi.service.event.EventHandler, DriveEventService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveEventServiceImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DriveEventServiceImpl.class);
 
     private final List<DriveEventPublisher> publishers;
     private final ConcurrentMap<Integer, FolderBuffer> folderBuffers;
@@ -140,7 +139,7 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
      * @param event The event to distribute
      */
     public void notifyPublishers(DriveEvent event) {
-        LOG.debug("Publishing: " + event);
+        LOG.debug("Publishing: {}", event);
         for (DriveEventPublisher publisher : publishers) {
             if (event.isRemote() && publisher.isLocalOnly()) {
                 // skip
@@ -165,17 +164,12 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
     }
 
     @Override
-    public void handleEvent(Event event) {
-        /*
-         * check event
-         */
-        if (LOG.isTraceEnabled()) {
-            LOG.trace(FileStorageEventHelper.createDebugMessage("event", event));
-        }
+    public void handleEvent(final Event event) {
+
+        LOG.trace("{}", new Object() { @Override public String toString() { return FileStorageEventHelper.createDebugMessage("event", event);}});
+
         if (false == check(event)) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Unable to handle incomplete event: " + event);
-            }
+            LOG.debug("Unable to handle incomplete event: {}", event);
             return;
         }
         /*
@@ -183,7 +177,7 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
          */
         String fileName = (String)event.getProperty(FILE_NAME);
         if (false == Strings.isEmpty(fileName) && fileName.endsWith(DriveConstants.FILEPART_EXTENSION)) {
-            LOG.trace("Skipping event processing for temporary file: " + fileName);
+            LOG.trace("Skipping event processing for temporary file: {}", fileName);
             return;
         }
         Session session = (Session)event.getProperty(SESSION);
@@ -214,15 +208,15 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
 
     @Override
     public void registerPublisher(DriveEventPublisher publisher) {
-        if (publishers.add(publisher) && LOG.isDebugEnabled()) {
-            LOG.debug("Added drive event publisher: " + publisher);
+        if (publishers.add(publisher)) {
+            LOG.debug("Added drive event publisher: {}", publisher);
         }
     }
 
     @Override
     public void unregisterPublisher(DriveEventPublisher publisher) {
-        if (publishers.remove(publisher) && LOG.isDebugEnabled()) {
-            LOG.debug("Removed drive event publisher: " + publisher);
+        if (publishers.remove(publisher)) {
+            LOG.debug("Removed drive event publisher: {}", publisher);
         }
     }
 

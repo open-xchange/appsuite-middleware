@@ -57,7 +57,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
@@ -78,7 +77,7 @@ import com.openexchange.session.Session;
  */
 public final class WebDAVFileStorageService implements AccountAware {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(WebDAVFileStorageService.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebDAVFileStorageService.class);
 
     private static final String SERVICE_ID = WebDAVConstants.ID;
 
@@ -219,7 +218,7 @@ public final class WebDAVFileStorageService implements AccountAware {
         try {
             return compositeAccountManager.getAccountManagerFor(SERVICE_ID);
         } catch (final OXException e) {
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
             return getAccountManager0();
         }
     }

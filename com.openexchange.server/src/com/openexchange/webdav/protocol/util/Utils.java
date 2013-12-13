@@ -58,7 +58,7 @@ import com.openexchange.tools.TimeZoneUtils;
 
 public class Utils {
 
-	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Utils.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Utils.class);
 
 	// Taken from slide
 	/**
@@ -92,9 +92,7 @@ public class Utils {
                 }
             } catch (final ParseException e) {
             	// Ignore and try the others
-            	if (LOG.isDebugEnabled()) {
-            		LOG.debug(e.getMessage(), e);
-            	}
+            	LOG.debug("", e);
             }
         }
         return date;

@@ -66,7 +66,7 @@ import com.openexchange.mailaccount.MailAccount;
  */
 public final class MailAccountIMAPProperties extends MailAccountProperties implements IIMAPProperties {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccountIMAPProperties.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccountIMAPProperties.class);
 
     /**
      * Initializes a new {@link MailAccountIMAPProperties}.
@@ -120,8 +120,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
             return imapAuthEncStr;
         }
         final String fallback = IMAPProperties.getInstance().getImapAuthEnc();
-        LOG.error(new com.openexchange.java.StringAllocator(64).append("Authentication Encoding: Unsupported charset \"").append(imapAuthEncStr).append(
-            "\". Setting to fallback: ").append(fallback));
+        LOG.error("Authentication Encoding: Unsupported charset \"{}\". Setting to fallback: {}", imapAuthEncStr, fallback);
         return fallback;
     }
 

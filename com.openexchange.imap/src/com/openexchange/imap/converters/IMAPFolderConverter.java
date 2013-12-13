@@ -132,9 +132,7 @@ public final class IMAPFolderConverter {
         }
     }
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPFolderConverter.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPFolderConverter.class);
 
     private static final Rights RIGHTS_EMPTY = new Rights();
 
@@ -245,7 +243,7 @@ public final class IMAPFolderConverter {
                     return convertRootFolder((DefaultFolder) imapFolder, session, imapAccess.getIMAPConfig());
                 }
                 final IMAPConfig imapConfig = imapAccess.getIMAPConfig();
-                final long st = DEBUG ? System.currentTimeMillis() : 0L;
+                final long st = System.currentTimeMillis();
                 // Convert non-root folder
                 final IMAPMailFolder mailFolder = new IMAPMailFolder();
                 mailFolder.setRootFolder(false);
@@ -502,9 +500,7 @@ public final class IMAPFolderConverter {
                         try {
                             applyACL2Permissions(imapFolder, listEntry, session, imapConfig, mailFolder, ownRights, ctx);
                         } catch (final OXException e) {
-                            if (LOG.isWarnEnabled()) {
-                                LOG.warn("ACLs could not be parsed", e);
-                            }
+                            LOG.warn("ACLs could not be parsed", e);
                             mailFolder.removePermissions();
                             addOwnACL(mailFolder);
                         }
@@ -520,11 +516,7 @@ public final class IMAPFolderConverter {
                 } else {
                     mailFolder.setSupportsUserFlags(false);
                 }
-                if (DEBUG) {
-                    final long dur = System.currentTimeMillis() - st;
-                    LOG.debug(new com.openexchange.java.StringAllocator("IMAP folder \"").append(imapFullName).append("\" converted in ").append(dur).append(
-                        "msec.").toString());
-                }
+                LOG.debug("IMAP folder \"{}\" converted in {}msec.", imapFullName, System.currentTimeMillis() - st);
                 return mailFolder;
             }
         } catch (final MessagingException e) {
@@ -703,20 +695,13 @@ public final class IMAPFolderConverter {
             }
         } catch (final MessagingException e) {
             if (!ownRights.contains(Rights.Right.ADMINISTER)) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn(
-                        new com.openexchange.java.StringAllocator(256).append("ACLs could not be requested for folder ").append(imapFolder.getFullName()).append(
-                            ". A newer ACL extension (RFC 4314) seems to be supported by IMAP server ").append(imapConfig.getServer()).append(
-                            ", which denies GETACL command if no ADMINISTER right is granted."),
-                        e);
-                }
+                LOG.warn("ACLs could not be requested for folder {}. A newer ACL extension (RFC 4314) seems to be supported by IMAP server {}, which denies GETACL command if no ADMINISTER right is granted.", imapFolder.getFullName(), imapConfig.getServer(), e);
                 addOwnACL(mailFolder);
                 return;
             }
             throw MimeMailException.handleMessagingException(e);
         }
         final Entity2ACLArgs args = new Entity2ACLArgsImpl(imapConfig.getAccountId(), new StringAllocator(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString(), session.getUserId(), imapFolder.getFullName(), listEntry.getSeparator());
-        final com.openexchange.java.StringAllocator debugBuilder = DEBUG ? new com.openexchange.java.StringAllocator(128) : null;
         boolean userPermAdded = false;
         for (int j = 0; j < acls.length; j++) {
             final ACLPermission aclPerm = new ACLPermission();
@@ -727,19 +712,7 @@ public final class IMAPFolderConverter {
                     userPermAdded = true;
                     final Rights aclRights = acl.getRights();
                     if (!ownRights.equals(aclRights)) {
-                        if (DEBUG) {
-                            final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(64);
-                            tmp.append("Detected different rights for MYRIGHTS (");
-                            tmp.append(ownRights);
-                            tmp.append(") and GETACL (");
-                            tmp.append(aclRights);
-                            tmp.append(") for user ");
-                            tmp.append(session.getUserId());
-                            tmp.append(" in context ");
-                            tmp.append(session.getContextId());
-                            tmp.append(". Preferring GETACL rights as user's own-rights.");
-                            LOG.debug(tmp.toString());
-                        }
+                        LOG.debug("Detected different rights for MYRIGHTS ({}) and GETACL ({}) for user {} in context {}. Preferring GETACL rights as user''s own-rights.", ownRights, aclRights, session.getUserId(), session.getContextId());
                         final MailPermission ownPermission = mailFolder.getOwnPermission();
                         if (ownPermission instanceof ACLPermission) {
                             ((ACLPermission) ownPermission).parseRights(aclRights, imapConfig);
@@ -758,10 +731,7 @@ public final class IMAPFolderConverter {
                 if (!isUnknownEntityError(e)) {
                     throw e;
                 }
-                if (DEBUG) {
-                    debugBuilder.reinitTo(0);
-                    LOG.debug(debugBuilder.append("Cannot map ACL entity named \"").append(acl.getName()).append("\" to a system user").toString());
-                }
+                LOG.debug("Cannot map ACL entity named \"{}\" to a system user", acl.getName());
             }
         }
         /*
@@ -887,14 +857,14 @@ public final class IMAPFolderConverter {
                     handleCommandFailedException(((com.sun.mail.iap.CommandFailedException) nextException), folder.getFullName());
                     return null;
                 } else {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
                 /*
                  * Write empty string as rights. Nevertheless user may see folder!
                  */
                 return (Rights) RIGHTS_EMPTY.clone();
             } catch (final Throwable t) {
-                LOG.error(t.getMessage(), t);
+                LOG.error("", t);
                 /*
                  * Write empty string as rights. Nevertheless user may see folder!
                  */
@@ -912,14 +882,9 @@ public final class IMAPFolderConverter {
     private static void handleCommandFailedException(final com.sun.mail.iap.CommandFailedException e, final String fullName) {
         final String msg = e.getMessage().toLowerCase(Locale.ENGLISH);
         if (msg.indexOf("Mailbox doesn't exist") >= 0 || msg.indexOf("Mailbox does not exist") >= 0) {
-            /*
-             * This occurs when requesting MYRIGHTS on a shared or somehow non-existent folder. Just log a warning!
-             */
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(IMAPException.getFormattedMessage(IMAPException.Code.FOLDER_NOT_FOUND, fullName), e);
-            }
+            LOG.warn(IMAPException.getFormattedMessage(IMAPException.Code.FOLDER_NOT_FOUND, fullName), e);
         } else {
-            LOG.debug("Failed MYRIGHTS for: " + fullName, e);
+            LOG.debug("Failed MYRIGHTS for: {}", fullName, e);
         }
     }
 

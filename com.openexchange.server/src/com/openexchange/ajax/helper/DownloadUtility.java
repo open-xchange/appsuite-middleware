@@ -85,7 +85,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public final class DownloadUtility {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DownloadUtility.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DownloadUtility.class);
 
     private static volatile Integer maxLength;
     private static int htmlThreshold() {
@@ -707,7 +707,7 @@ public final class DownloadUtility {
                 tmp.append(Helper.encodeFilename(fileName, "UTF-8", internetExplorer));
             }
         } catch (final UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return fileName;
         }
         if ((null != baseCT) && (null == getFileExtension(fileName))) {

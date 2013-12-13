@@ -60,7 +60,7 @@ import com.openexchange.mailaccount.MailAccount;
  */
 public class MailAccountProperties implements IMailProperties {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccountProperties.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccountProperties.class);
 
     protected final Map<String, String> properties;
     protected final String url;
@@ -111,8 +111,7 @@ public class MailAccountProperties implements IMailProperties {
         final char defaultSep = defaultSepStr.trim().charAt(0);
         if (defaultSep <= 32) {
             final char fallback = MailProperties.getInstance().getDefaultSeparator();
-            LOG.error(new com.openexchange.java.StringAllocator(64).append("\tDefault Separator: Invalid separator (decimal ascii value=").append((int) defaultSep).append(
-                "). Setting to fallback: ").append(fallback).append('\n'));
+            LOG.error("\tDefault Separator: Invalid separator (decimal ascii value={}). Setting to fallback: {}{}", (int) defaultSep, fallback, '\n');
             return fallback;
         }
         return defaultSep;

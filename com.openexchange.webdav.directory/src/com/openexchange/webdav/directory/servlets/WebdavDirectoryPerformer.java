@@ -53,7 +53,6 @@ import java.util.EnumMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -94,7 +93,7 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WebdavDirectoryPerformer implements SessionHolder {
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(WebdavDirectoryPerformer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavDirectoryPerformer.class);
 
     private static WebdavDirectoryPerformer INSTANCE = null;
 
@@ -236,9 +235,7 @@ public class WebdavDirectoryPerformer implements SessionHolder {
             webdavRequest.setUrlPrefix("");
             final ServletWebdavResponse webdavResponse = new ServletWebdavResponse(resp);
 
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Executing " + action);
-            }
+            LOG.debug("Executing {}", action);
             actions.get(action).perform(webdavRequest, webdavResponse);
         } catch (final WebdavProtocolException x) {
             resp.setStatus(x.getStatus());

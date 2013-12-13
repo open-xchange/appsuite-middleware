@@ -60,8 +60,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * This interface provides an abstraction to the storage of the group
@@ -78,7 +76,7 @@ public abstract class OXGroupStorageInterface {
      */
     private static Class<? extends OXGroupStorageInterface> implementingClass;
 
-    private static final Log log = LogFactory.getLog(OXGroupStorageInterface.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXGroupStorageInterface.class);
 
     protected static AdminCache cache = null;
 
@@ -102,12 +100,12 @@ public abstract class OXGroupStorageInterface {
                     try {
                         implementingClass = Class.forName(className).asSubclass(OXGroupStorageInterface.class);
                     } catch (final ClassNotFoundException e) {
-                        log.error(e.getMessage(), e);
+                        log.error("", e);
                         throw new StorageException(e);
                     }
                 } else {
                     final StorageException storageException = new StorageException("Property for group_storage not defined");
-                    log.error(storageException.getMessage(), storageException);
+                    log.error("", storageException);
                     throw storageException;
                 }
             }
@@ -117,22 +115,22 @@ public abstract class OXGroupStorageInterface {
             cons = implementingClass.getConstructor(new Class[] {});
             return cons.newInstance(new Object[] {});
         } catch (final SecurityException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         } catch (final NoSuchMethodException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         } catch (final IllegalArgumentException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         } catch (final InstantiationException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         } catch (final IllegalAccessException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         } catch (final InvocationTargetException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         }
     }

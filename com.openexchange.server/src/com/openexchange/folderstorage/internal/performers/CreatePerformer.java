@@ -84,9 +84,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class CreatePerformer extends AbstractUserizedFolderPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CreatePerformer.class));
-
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CreatePerformer.class);
 
     private static final String CONTENT_TYPE_MAIL = MailContentType.getInstance().toString();
 
@@ -143,7 +141,6 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
         if (null == parentId) {
             throw FolderExceptionErrorMessage.MISSING_PARENT_ID.create(new Object[0]);
         }
-        final long start = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         final String treeId = toCreate.getTreeID();
         if (null == treeId) {
             throw FolderExceptionErrorMessage.MISSING_TREE_ID.create(new Object[0]);
@@ -279,13 +276,6 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                 }
             }
 
-            /*
-             * Debug out
-             */
-            if (DEBUG_ENABLED) {
-                final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new com.openexchange.java.StringAllocator().append("Create.doCreate() took ").append(duration).append("msec for folder: ").append(newId).toString());
-            }
             return newId;
         } catch (final OXException e) {
             for (final FolderStorage folderStorage : openedStorages) {

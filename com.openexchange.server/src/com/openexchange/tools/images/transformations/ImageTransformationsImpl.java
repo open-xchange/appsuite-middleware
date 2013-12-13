@@ -70,7 +70,6 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
-import org.apache.commons.logging.Log;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Directory;
@@ -82,7 +81,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.images.ImageTransformationUtility;
 import com.openexchange.tools.images.ImageTransformations;
@@ -101,7 +99,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class ImageTransformationsImpl implements ImageTransformations {
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ImageTransformationsImpl.class));
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ImageTransformationsImpl.class);
 
     private final InputStream sourceImageStream;
     private final List<ImageTransformation> transformations;
@@ -375,17 +373,17 @@ public class ImageTransformationsImpl implements ImageTransformations {
         try {
             parameters.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
         } catch (UnsupportedOperationException e) {
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
         }
         try {
             parameters.setProgressiveMode(ImageWriteParam.MODE_DEFAULT);
         } catch (UnsupportedOperationException e) {
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
         }
         try {
             parameters.setCompressionQuality(0.8f);
         } catch (UnsupportedOperationException e) {
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
         }
     }
 
@@ -401,7 +399,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
         try {
             return ImageIO.read(inputStream);
         } catch (final RuntimeException e) {
-            LOG.debug("error reading image from stream for " + formatName, e);
+            LOG.debug("error reading image from stream for {}", formatName, e);
             return null;
         } finally {
             Streams.close(inputStream);
@@ -422,15 +420,15 @@ public class ImageTransformationsImpl implements ImageTransformations {
             ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             managedFile = mfm.createManagedFile(inputStream);
             try {
-                metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(managedFile.getInputStream()), false);
+                metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(managedFile.getInputStream(), 65536), false);
             } catch (ImageProcessingException e) {
-                LOG.warn("error getting metadata for " + formatName, e);
+                LOG.warn("error getting metadata for {}", formatName, e);
             }
             return ImageIO.read(managedFile.getInputStream());
         } catch (OXException e) {
             throw new IOException("error accessing managed file", e);
         } catch (IllegalArgumentException e) {
-            LOG.debug("error reading image from stream for " + formatName, e);
+            LOG.debug("error reading image from stream for {}", formatName, e);
             return null;
         } finally {
             if (managedFile != null) {

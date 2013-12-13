@@ -66,7 +66,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractAttachmentHandler implements IAttachmentHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractAttachmentHandler.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractAttachmentHandler.class);
 
     protected final List<MailPart> attachments;
 
@@ -94,14 +94,12 @@ public abstract class AbstractAttachmentHandler implements IAttachmentHandler {
         if (usm.getUploadQuota() >= 0) {
             this.uploadQuota = usm.getUploadQuota();
         } else {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Upload quota is less than zero. Using global server property \"MAX_UPLOAD_SIZE\" instead.");
-            }
+            LOG.debug("Upload quota is less than zero. Using global server property \"MAX_UPLOAD_SIZE\" instead.");
             long tmp;
             try {
                 tmp = ServerConfig.getInt(ServerConfig.Property.MAX_UPLOAD_SIZE);
             } catch (final Exception e) {
-                LOG.warn(e.getMessage() + " Using no upload restrictions as fallback.", e);
+                LOG.warn("{} Using no upload restrictions as fallback.", e.getMessage(), e);
                 tmp = 0;
             }
             this.uploadQuota = tmp;

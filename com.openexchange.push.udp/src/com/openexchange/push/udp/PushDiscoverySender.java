@@ -52,9 +52,7 @@ package com.openexchange.push.udp;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import org.apache.commons.logging.Log;
 import com.openexchange.java.Charsets;
-import com.openexchange.log.LogFactory;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -65,7 +63,7 @@ import com.openexchange.timer.TimerService;
  */
 public class PushDiscoverySender implements Runnable {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushDiscoverySender.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushDiscoverySender.class);
 
     private final int multicastPort;
     private final InetAddress multicastAddress;
@@ -92,12 +90,12 @@ public class PushDiscoverySender implements Runnable {
     @Override
     public void run() {
         try {
-            LOG.debug("Sending multicast discovery package: \"" + packetData + "\".");
+            LOG.debug("Sending multicast discovery package: \"{}\".", packetData);
             final MulticastSocket multicastSocket = PushMulticastSocket.getPushMulticastSocket();
             final DatagramPacket datagramPacket = new DatagramPacket(packetBytes, packetBytes.length, multicastAddress, multicastPort);
             multicastSocket.send(datagramPacket);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

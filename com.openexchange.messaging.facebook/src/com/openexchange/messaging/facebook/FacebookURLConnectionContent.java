@@ -57,6 +57,7 @@ import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.BinaryContent;
 import com.openexchange.messaging.MessagingExceptionCodes;
@@ -221,7 +222,7 @@ public final class FacebookURLConnectionContent implements BinaryContent {
             try {
                 urlCon.getInputStream().close();
             } catch (final IOException e) {
-                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookURLConnectionContent.class)).error(e.getMessage(), e);
+                LoggerFactory.getLogger(FacebookURLConnectionContent.class).error("", e);
             }
         }
     }
@@ -231,7 +232,7 @@ public final class FacebookURLConnectionContent implements BinaryContent {
             try {
                 in.close();
             } catch (final IOException e) {
-                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookURLConnectionContent.class)).error(e.getMessage(), e);
+                LoggerFactory.getLogger(FacebookURLConnectionContent.class).error("", e);
             }
         }
     }

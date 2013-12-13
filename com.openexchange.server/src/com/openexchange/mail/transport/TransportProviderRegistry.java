@@ -69,7 +69,7 @@ import com.openexchange.session.Session;
  */
 public final class TransportProviderRegistry {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TransportProviderRegistry.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TransportProviderRegistry.class);
 
     /**
      * Concurrent map used as set for transport providers
@@ -106,11 +106,7 @@ public final class TransportProviderRegistry {
         final String transportServerURL = TransportConfig.getTransportServerURL(session, accountId);
         final String protocol;
         if (transportServerURL == null) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(new com.openexchange.java.StringAllocator(128).append("Missing transport server URL. Transport server URL not set in account ").append(
-                    accountId).append(" for user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).append(
-                    ". Using fallback protocol ").append(TransportProperties.getInstance().getDefaultTransportProvider()));
-            }
+            LOG.warn("Missing transport server URL. Transport server URL not set in account {} for user {} in context {}. Using fallback protocol {}", accountId, session.getUserId(), session.getContextId(), TransportProperties.getInstance().getDefaultTransportProvider());
             protocol = TransportProperties.getInstance().getDefaultTransportProvider();
         } else {
             protocol = extractProtocol(transportServerURL, TransportProperties.getInstance().getDefaultTransportProvider());
@@ -203,7 +199,7 @@ public final class TransportProviderRegistry {
         } catch (final OXException e) {
             throw e;
         } catch (final RuntimeException t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             return false;
         }
     }
@@ -260,7 +256,7 @@ public final class TransportProviderRegistry {
         } catch (final OXException e) {
             throw e;
         } catch (final RuntimeException t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             return removed;
         }
     }

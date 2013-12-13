@@ -54,7 +54,6 @@ import java.util.Hashtable;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventConstants;
@@ -187,14 +186,14 @@ public final class ResourceCacheActivator extends HousekeepingActivator {
                 this.objectName = objectName;
                 management.registerMBean(objectName, new ResourceCacheMBeanImpl());
             } catch (final MalformedObjectNameException e) {
-                final Log LOG = com.openexchange.log.Log.loggerFor(ResourceCacheActivator.class);
-                LOG.error(e.getMessage(), e);
+                final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResourceCacheActivator.class);
+                LOG.error("", e);
             } catch (final NotCompliantMBeanException e) {
-                final Log LOG = com.openexchange.log.Log.loggerFor(ResourceCacheActivator.class);
-                LOG.error(e.getMessage(), e);
+                final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResourceCacheActivator.class);
+                LOG.error("", e);
             } catch (final OXException e) {
-                final Log LOG = com.openexchange.log.Log.loggerFor(ResourceCacheActivator.class);
-                LOG.error(e.getMessage(), e);
+                final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResourceCacheActivator.class);
+                LOG.error("", e);
             }
         }
     }
@@ -205,8 +204,8 @@ public final class ResourceCacheActivator extends HousekeepingActivator {
             try {
                 management.unregisterMBean(objectName);
             } catch (final OXException e) {
-                final Log LOG = com.openexchange.log.Log.loggerFor(ResourceCacheActivator.class);
-                LOG.error(e.getMessage(), e);
+                final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResourceCacheActivator.class);
+                LOG.error("", e);
             } finally {
                 this.objectName = null;
             }

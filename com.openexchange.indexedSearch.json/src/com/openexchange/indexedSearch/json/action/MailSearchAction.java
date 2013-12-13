@@ -51,7 +51,6 @@ package com.openexchange.indexedSearch.json.action;
 
 import java.util.List;
 import javax.mail.internet.InternetAddress;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -83,7 +82,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class MailSearchAction extends AbstractIndexAction {
 
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(MailSearchAction.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailSearchAction.class);
 
     private final SearchHandler searchHandler;
 
@@ -102,7 +101,6 @@ public abstract class MailSearchAction extends AbstractIndexAction {
 
     @Override
     protected AJAXRequestResult perform(IndexAJAXRequest req) throws OXException, JSONException {
-        long start = System.currentTimeMillis();
         ServerSession session = req.getSession();
         String searchTerm = req.checkParameter("searchTerm");
 
@@ -135,12 +133,6 @@ public abstract class MailSearchAction extends AbstractIndexAction {
             String subject = mail.getSubject();
             json.put(MailJSONField.SUBJECT.getKey(), subject == null ? JSONObject.NULL : subject);
             jsonResult.put(json);
-        }
-
-
-        if (LOG.isDebugEnabled()) {
-            long diff = System.currentTimeMillis() - start;
-            LOG.debug("Duration: " + diff + "ms.");
         }
 
         return new AJAXRequestResult(jsonResult, "json");

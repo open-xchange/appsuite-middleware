@@ -52,13 +52,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
 import com.openexchange.admin.tools.PropertyHandler;
 
 public class PropertyHandlerExtended extends PropertyHandler {
 
-    private final static Log log = LogFactory.getLog(PropertyHandlerExtended.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PropertyHandlerExtended.class);
 
     // The following lines define the property values for the database implementations
     public static final String RESELLER_STORAGE = "RESELLER_STORAGE";
@@ -78,9 +77,9 @@ public class PropertyHandlerExtended extends PropertyHandler {
         try {
             addpropsfromfile(configfile.toString());
         } catch (final FileNotFoundException e) {
-            log.error("Unable to read file: " + configfile);
+            log.error("Unable to read file: {}", configfile);
         } catch (final IOException e) {
-            log.error("Problems reading file: " + configfile);
+            log.error("Problems reading file: {}", configfile);
         }
     }
 

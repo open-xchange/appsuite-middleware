@@ -47,7 +47,7 @@ import org.apache.solr.core.*;
  */
 
 public abstract class UpdateHandler implements SolrInfoMBean {
-  protected final static Logger log = LoggerFactory.getLogger(UpdateHandler.class);
+  protected final static org.slf4j.Logger log = LoggerFactory.getLogger(UpdateHandler.class);
 
   protected final SolrCore core;
   protected final IndexSchema schema;

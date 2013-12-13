@@ -57,11 +57,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogProperties;
 
 /**
@@ -71,7 +69,7 @@ import com.openexchange.log.LogProperties;
  */
 public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConfigDatabaseServiceImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigDatabaseServiceImpl.class);
 
     // ------------------------------------------------------------------------------------------------ //
 
@@ -88,7 +86,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
 
     private Connection get(final boolean write) throws OXException {
         final AssignmentImpl assign = assignmentService.getConfigDBAssignment();
-        LogProperties.putLogProperty(LogProperties.Name.DATABASE_SCHEMA, ForceLog.valueOf("configdb"));
+        LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, "configdb");
         return monitor.checkFallback(pools, assign, false, write);
         // TODO Enable the following if the configuration database gets a table replicationMonitor.
         // return ReplicationMonitor.checkActualAndFallback(pools, assign, false, write);
@@ -96,18 +94,18 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
 
     private static void back(final Connection con) {
         if (null == con) {
-            LogProperties.putLogProperty(LogProperties.Name.DATABASE_SCHEMA, null);
+            LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, null);
             final OXException e = DBPoolingExceptionCodes.NULL_CONNECTION.create();
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return;
         }
         try {
             con.close();
         } catch (SQLException e) {
             OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
         } finally {
-            LogProperties.putLogProperty(LogProperties.Name.DATABASE_SCHEMA, null);
+            LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, null);
         }
     }
 

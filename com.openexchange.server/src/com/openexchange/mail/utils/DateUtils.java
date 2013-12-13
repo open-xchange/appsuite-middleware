@@ -64,7 +64,7 @@ import java.util.regex.Pattern;
  */
 public final class DateUtils {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DateUtils.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DateUtils.class);
 
     private static final DateFormat DATEFORMAT_RFC822 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
 
@@ -91,9 +91,7 @@ public final class DateUtils {
                     return DATEFORMAT_RFC822_RETRY.parse(s);
                 }
             } catch (final ParseException e1) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace(e1.getMessage(), e1);
-                }
+                LOG.trace("", e1);
             }
             throw new IllegalArgumentException(e.getMessage());
         }

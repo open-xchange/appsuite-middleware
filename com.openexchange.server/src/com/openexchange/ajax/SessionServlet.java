@@ -75,7 +75,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.Header;
@@ -95,10 +94,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Strings;
-import com.openexchange.log.ForceLog;
-import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -125,11 +121,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private static final long serialVersionUID = -8308340875362868795L;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionServlet.class));
-
-    private static final boolean INFO = LOG.isInfoEnabled();
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionServlet.class);
 
     public static final String SESSION_KEY = "sessionObject";
 
@@ -312,17 +304,13 @@ public abstract class SessionServlet extends AJAXServlet {
      */
     protected void verifySession(final HttpServletRequest req, final SessiondService sessiondService, final String sessionId, final ServerSession session) throws OXException {
         if (!sessionId.equals(session.getSessionID())) {
-            if (INFO) {
-                LOG.info("Request's session identifier \"" + sessionId + "\" differs from the one indicated by SessionD service \"" + session.getSessionID() + "\".");
-            }
+            LOG.info("Request's session identifier \"{}\" differs from the one indicated by SessionD service \"{}\".", sessionId, session.getSessionID());
             throw SessionExceptionCodes.WRONG_SESSION.create();
         }
         final Context ctx = session.getContext();
         if (!ctx.isEnabled()) {
             sessiondService.removeSession(sessionId);
-            if (INFO) {
-                LOG.info("The context " + ctx.getContextId() + " associated with session is locked.");
-            }
+            LOG.info("The context {} associated with session is locked.", ctx.getContextId());
             throw SessionExceptionCodes.CONTEXT_LOCKED.create(ctx.getContextId(), ctx.getName());
         }
         checkIP(session, req.getRemoteAddr());
@@ -349,9 +337,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 if (maxConcurrentRequests > 0) {
                     counter = (AtomicInteger) session.getParameter(Session.PARAM_COUNTER);
                     if (null != counter && counter.incrementAndGet() > maxConcurrentRequests) {
-                        if (INFO) {
-                            LOG.info("User " + session.getUserId() + " in context " + session.getContextId() + " exceeded max. concurrent requests (" + maxConcurrentRequests + ").");
-                        }
+                        LOG.info("User {} in context {} exceeded max. concurrent requests ({}).", session.getUserId(), session.getContextId(), maxConcurrentRequests);
                         throw AjaxExceptionCodes.TOO_MANY_REQUESTS.create();
                     }
                 }
@@ -367,7 +353,7 @@ public abstract class SessionServlet extends AJAXServlet {
             resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
         } catch (final OXException e) {
             if (SessionExceptionCodes.getErrorPrefix().equals(e.getPrefix())) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 handleSessiondException(e, req, resp);
                 /*
                  * Return JSON response
@@ -510,7 +496,7 @@ public abstract class SessionServlet extends AJAXServlet {
             // IP is missing or changed
             if (doCheck && !isWhitelistedFromIPCheck(actual, ranges) && !isWhitelistedClient(session, whitelist) && !allowedSubnet.areInSameSubnet(actual, session.getLocalIp())) {
                 // kick client with changed IP address
-                if (INFO) {
+                {
                     final StringBuilder sb = new StringBuilder(96);
                     sb.append("Request to server denied (IP check activated) for session: ");
                     sb.append(session.getSessionID());
@@ -534,15 +520,8 @@ public abstract class SessionServlet extends AJAXServlet {
                     }
                 }
             }
-            if (DEBUG && !isWhitelistedFromIPCheck(actual, ranges) && !isWhitelistedClient(session, whitelist)) {
-                final StringBuilder sb = new StringBuilder(64);
-                sb.append("Session ");
-                sb.append(session.getSessionID());
-                sb.append(" requests now from ");
-                sb.append(actual);
-                sb.append(" but login came from ");
-                sb.append(session.getLocalIp());
-                LOG.debug(sb.toString());
+            if (LOG.isDebugEnabled() && !isWhitelistedFromIPCheck(actual, ranges) && !isWhitelistedClient(session, whitelist)) {
+                LOG.debug("Session {} requests now from {} but login came from {}", session.getSessionID(), actual, session.getLocalIp());
             }
         }
     }
@@ -584,10 +563,10 @@ public abstract class SessionServlet extends AJAXServlet {
             /*
              * Throw an error...
              */
-            if (INFO) {
+            {
                 final StringBuilder sb = new StringBuilder(32);
                 sb.append("Parameter \"").append(PARAMETER_SESSION).append("\" not found");
-                if (DEBUG) {
+                if (LOG.isDebugEnabled()) {
                     sb.append(": ");
                     final Enumeration<?> enm = req.getParameterNames();
                     while (enm.hasMoreElements()) {
@@ -642,8 +621,8 @@ public abstract class SessionServlet extends AJAXServlet {
     public static ServerSession getSession(final CookieHashSource source, final HttpServletRequest req, final String sessionId, final SessiondService sessiondService, final SessionSecretChecker optChecker) throws OXException {
         final Session session = sessiondService.getSession(sessionId);
         if (null == session) {
-            if (INFO && !"unset".equals(sessionId)) {
-                LOG.info("There is no session associated with session identifier: " + sessionId);
+            if (!"unset".equals(sessionId)) {
+                LOG.info("There is no session associated with session identifier: {}", sessionId);
             }
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
         }
@@ -660,9 +639,7 @@ public abstract class SessionServlet extends AJAXServlet {
             final Context context = ContextStorage.getInstance().getContext(session.getContextId());
             final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
             if (!user.isMailEnabled()) {
-                if (INFO) {
-                    LOG.info("User " + user.getId() + " in context " + context.getContextId() + " is not activated.");
-                }
+                LOG.info("User {} in context {} is not activated.", user.getId(), context.getContextId());
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
             }
             return ServerSessionAdapter.valueOf(session, context, user);
@@ -670,9 +647,7 @@ public abstract class SessionServlet extends AJAXServlet {
             if (ContextExceptionCodes.NOT_FOUND.equals(e)) {
                 // An outdated session; context absent
                 sessiondService.removeSession(sessionId);
-                if (INFO) {
-                    LOG.info("The context associated with session \"" + sessionId + "\" cannot be found. Obviously an outdated session which is invalidated now.");
-                }
+                LOG.info("The context associated with session \"{}\" cannot be found. Obviously an outdated session which is invalidated now.", sessionId);
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
             }
             if (UserExceptionCode.USER_NOT_FOUND.getPrefix().equals(e.getPrefix())) {
@@ -680,9 +655,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 if (UserExceptionCode.USER_NOT_FOUND.getNumber() == code || LdapExceptionCode.USER_NOT_FOUND.getNumber() == code) {
                     // An outdated session; user absent
                     sessiondService.removeSession(sessionId);
-                    if (INFO) {
-                        LOG.info("The user associated with session \"" + sessionId + "\" cannot be found. Obviously an outdated session which is invalidated now.");
-                    }
+                    LOG.info("The user associated with session \"{}\" cannot be found. Obviously an outdated session which is invalidated now.", sessionId);
                     throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
                 }
             }
@@ -707,9 +680,7 @@ public abstract class SessionServlet extends AJAXServlet {
             Cookie cookie = cookies.get(cookieName);
             if (null == cookie) {
                 LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), LoginServlet.getLoginConfiguration());
-                if (INFO) {
-                    LOG.info("Restored public session cookie for \"" + session.getLogin() + "\": " + cookieName);
-                }
+                 LOG.info("Restored public session cookie for \"{}\": {}", session.getLogin(), cookieName);
             }
 //            else {
 //                final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
@@ -717,7 +688,7 @@ public abstract class SessionServlet extends AJAXServlet {
 //                    removeOXCookies(req, resp, Collections.singletonList(cookieName));
 //                    LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), LoginServlet.getLoginConfiguration());
 //                    if (INFO) {
-//                        LOG.info("Restored public session cookie for \"" + session.getLogin() + "\": " + cookieName);
+//                        LOG.info("Restored public session cookie for \"{}\": {}", session.getLogin(), cookieName);
 //                    }
 //                }
 //            }
@@ -734,7 +705,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @throws OXException If the secrets differ
      */
     public static void checkSecret(final CookieHashSource source, final HttpServletRequest req, final Session session) throws OXException {
-        checkSecret(source, req, session, INFO);
+        checkSecret(source, req, session, true);
     }
 
     /**
@@ -750,7 +721,7 @@ public abstract class SessionServlet extends AJAXServlet {
         final String secret = extractSecret(source, req, session.getHash(), session.getClient(), (String) session.getParameter("user-agent"));
         if (secret == null || !session.getSecret().equals(secret)) {
             if (logInfo && null != secret) {
-                LOG.info("Session secret is different. Given secret \"" + secret + "\" differs from secret in session \"" + session.getSecret() + "\".");
+                LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
             }
             final OXException oxe = SessionExceptionCodes.WRONG_SESSION_SECRET.create();
             oxe.setProperty(SessionExceptionCodes.WRONG_SESSION_SECRET.name(), null == secret ? "null" : secret);
@@ -794,10 +765,8 @@ public abstract class SessionServlet extends AJAXServlet {
                     return cookie.getValue();
                 }
             }
-            if (INFO) {
-                LOG.info("Didn't find an appropriate Cookie for name \"" + (SECRET_PREFIX + getHash(cookieHash, req, hash, client)) + "\" (CookieHashSource=" + cookieHash.toString() + ") which provides the session secret.");
-            }
-        } else if (INFO) {
+            LOG.info("Didn''t find an appropriate Cookie for name \"{}\" (CookieHashSource={}) which provides the session secret.", (SECRET_PREFIX + getHash(cookieHash, req, hash, client)), cookieHash.toString());
+        } else {
             LOG.info("Missing Cookies in HTTP request. No session secret can be looked up.");
         }
         return null;
@@ -958,17 +927,16 @@ public abstract class SessionServlet extends AJAXServlet {
             return (ServerSession) req.getAttribute(PUBLIC_SESSION_KEY);
         }
         // No session found
-        final Props props = LogProperties.optLogProperties();
-        if (null != props) {
+        {
             final HttpServletRequest httpRequest = (HttpServletRequest) req;
-            props.put(LogProperties.Name.SERVLET_SERVLET_PATH, ForceLog.valueOf(httpRequest.getServletPath()));
+            LogProperties.put(LogProperties.Name.SERVLET_SERVLET_PATH, httpRequest.getServletPath());
             final String pathInfo = httpRequest.getPathInfo();
             if (null != pathInfo) {
-                props.put(LogProperties.Name.SERVLET_PATH_INFO, ForceLog.valueOf(pathInfo));
+                LogProperties.put(LogProperties.Name.SERVLET_PATH_INFO, pathInfo);
             }
             final String queryString = httpRequest.getQueryString();
             if (null != queryString) {
-                props.put(LogProperties.Name.SERVLET_QUERY_STRING, ForceLog.valueOf(queryString));
+                LogProperties.put(LogProperties.Name.SERVLET_QUERY_STRING, queryString);
             }
         }
         return null;

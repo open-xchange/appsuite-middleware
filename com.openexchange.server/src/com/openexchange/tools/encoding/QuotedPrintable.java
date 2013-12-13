@@ -49,7 +49,6 @@
 
 package com.openexchange.tools.encoding;
 
-import org.apache.commons.logging.Log;
 
 /**
  * QuotedPrintable
@@ -59,7 +58,7 @@ import org.apache.commons.logging.Log;
 
 public final class QuotedPrintable {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(QuotedPrintable.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QuotedPrintable.class);
 
     private QuotedPrintable() {
         super();
@@ -95,7 +94,7 @@ public final class QuotedPrintable {
                 }
             }
         } catch (final Exception exc) {
-            LOG.error(new StringBuilder("encode error: ").append(exc).toString(), exc);
+            LOG.error("encode error: {}", exc, exc);
         }
 
         return sb.toString();
@@ -126,7 +125,7 @@ public final class QuotedPrintable {
                 }
             }
         } catch (final Exception exc) {
-            LOG.error(exc.getMessage(), exc);
+            LOG.error("", exc);
         }
 
         return sb.toString();

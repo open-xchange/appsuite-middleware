@@ -52,7 +52,8 @@ package com.openexchange.groupware.update.tasks;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import org.apache.commons.logging.Log;
+import java.text.MessageFormat;
+import org.slf4j.Logger;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Mapping;
@@ -76,8 +77,7 @@ public class TaskModifiedByNotNull implements UpdateTask {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(TaskModifiedByNotNull
-        .class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(TaskModifiedByNotNull.class);
 
     /**
      * Default constructor.
@@ -139,8 +139,7 @@ public class TaskModifiedByNotNull implements UpdateTask {
             final int updated = stmt.executeUpdate("UPDATE " + table
                 + " SET " + changed_from + '=' + created_from + " WHERE "
                 + changed_from + " IS NULL");
-            LOG.info("Updated in " + updated + " rows " + changed_from + " to "
-                + created_from + " in table " + table);
+            LOG.info("Updated in {} rows {} to {} in table {}", updated, changed_from, created_from, table);
         } finally {
             DBUtils.closeSQLStuff(null, stmt);
         }
@@ -153,8 +152,7 @@ public class TaskModifiedByNotNull implements UpdateTask {
             stmt = con.createStatement();
             stmt.execute("ALTER TABLE " + table + " MODIFY " + changed_from
                 + " INT4 UNSIGNED NOT NULL");
-            LOG.info("Altered table " + table + " changed " + changed_from
-                + " to NOT NULL.");
+            LOG.info("Altered table {} changed {} to NOT NULL.", table, changed_from);
         } finally {
             DBUtils.closeSQLStuff(null, stmt);
         }

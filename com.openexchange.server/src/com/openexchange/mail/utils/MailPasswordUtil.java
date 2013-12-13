@@ -85,7 +85,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class MailPasswordUtil {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailPasswordUtil.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailPasswordUtil.class);
 
     /**
      * The key length.
@@ -215,7 +215,7 @@ public final class MailPasswordUtil {
             // Decrypting failed; retry with CryptoService
             final CryptoService crypto = ServerServiceRegistry.getInstance().getService(CryptoService.class);
             if (null == crypto) {
-                LOG.warn("MailPasswordUtil.decrypt(): Missing " + CryptoService.class.getSimpleName());
+                LOG.warn("MailPasswordUtil.decrypt(): Missing {}", CryptoService.class.getSimpleName());
                 throw e;
             }
             try {

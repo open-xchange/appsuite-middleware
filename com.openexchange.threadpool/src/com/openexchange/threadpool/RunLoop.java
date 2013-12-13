@@ -55,9 +55,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 
 
 /**
@@ -68,7 +66,7 @@ import com.openexchange.log.LogFactory;
  */
 public abstract class RunLoop<E> implements Runnable {
     
-    private static final Log LOG = LogFactory.getLog(RunLoop.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RunLoop.class);
     
     protected final BlockingQueue<E> queue = new LinkedBlockingDeque<E>();
 
@@ -121,7 +119,7 @@ public abstract class RunLoop<E> implements Runnable {
                 LOG.info("Returning from RunLoop due to interruption");
                 return;
             } catch (Throwable t) {
-                LOG.error(t.getMessage(), t);
+                LOG.error("", t);
             } finally {
                 handleLock.unlock();
             }

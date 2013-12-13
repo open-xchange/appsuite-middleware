@@ -14,6 +14,7 @@ Import-Package: com.openexchange.exception,
  com.openexchange.tools.strings,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Export-Package: com.openexchange.config.cascade
 Bundle-Activator: com.openexchange.config.cascade.osgi.ConfigCascadeActivator

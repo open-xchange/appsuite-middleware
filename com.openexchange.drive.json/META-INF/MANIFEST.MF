@@ -42,6 +42,7 @@ Import-Package: com.google.common.cache,
  org.json,
  org.osgi.framework,
  org.osgi.service.event,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Export-Package: com.openexchange.drive.json,
  com.openexchange.drive.json.json

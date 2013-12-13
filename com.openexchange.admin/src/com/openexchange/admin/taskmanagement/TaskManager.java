@@ -54,12 +54,10 @@ import java.util.Hashtable;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.exceptions.TaskManagerException;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.log.LogFactory;
 
 public class TaskManager {
 
@@ -67,7 +65,7 @@ public class TaskManager {
 
     private final PropertyHandler prop;
 
-    private static final Log log = LogFactory.getLog(TaskManager.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TaskManager.class);
 
     private final Hashtable<Integer, ExtendedFutureTask<?>> jobs = new Hashtable<Integer, ExtendedFutureTask<?>>();
 
@@ -89,7 +87,7 @@ public class TaskManager {
         @Override
         protected void done() {
             TaskManager.this.runningjobs--;
-            log.debug("Removing job number " + this.id);
+            log.debug("Removing job number {}", this.id);
             finishedJobs.add(this.id);
         }
     }
@@ -101,9 +99,7 @@ public class TaskManager {
         this.cache = ClientAdminThread.cache;
         this.prop = this.cache.getProperties();
         final int threadCount = Integer.parseInt(this.prop.getProp("CONCURRENT_JOBS", "2"));
-        if (log.isInfoEnabled()) {
-            log.info("AdminJobExecutor: running " + threadCount + " jobs parallel");
-        }
+        log.info("AdminJobExecutor: running {} jobs parallel", threadCount);
         this.executor = Executors.newFixedThreadPool(threadCount);
     }
 
@@ -114,9 +110,7 @@ public class TaskManager {
     public int addJob(final Callable<?> jobcall, final String typeofjob, final String furtherinformation, final int cid) {
         final Extended<?> job = new Extended(jobcall, typeofjob, furtherinformation, ++this.lastID, cid);
         this.jobs.put(this.lastID, job);
-        if (log.isDebugEnabled()) {
-        log.debug("Adding job number " + this.lastID);
-        }
+        log.debug("Adding job number {}", this.lastID);
         runningjobs++;
         this.executor.execute(job);
         return lastID;

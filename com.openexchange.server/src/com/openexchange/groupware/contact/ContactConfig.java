@@ -49,10 +49,9 @@
 
 package com.openexchange.groupware.contact;
 
+import java.text.MessageFormat;
 import java.util.Properties;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.log.LogFactory;
 
 /**
  * Configuration class for contact options.
@@ -64,7 +63,7 @@ public class ContactConfig {
 
     private static final ContactConfig SINGLETON = new ContactConfig();
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactConfig.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactConfig.class);
 
     private final Properties props = new Properties();
 
@@ -87,11 +86,11 @@ public class ContactConfig {
     public void initialize(ConfigurationService configuration) {
         final Properties props = configuration.getFile(FILENAME);
         if (null == props) {
-            LOG.info("Configuration file " + FILENAME + " is missing. Using defaults.");
+            LOG.info("Configuration file {} is missing. Using defaults.", FILENAME);
         } else {
             this.props.clear();
             this.props.putAll(props);
-            LOG.info("Read configuration file " + FILENAME + ".");
+            LOG.info("Read configuration file {}.", FILENAME);
         }
         parse();
     }
@@ -100,7 +99,7 @@ public class ContactConfig {
         try {
             maxImageSize = Long.parseLong(getString(Property.MAX_IMAGE_SIZE));
         } catch (NumberFormatException e) {
-            LOG.error("Unable to parse value of property " + Property.MAX_IMAGE_SIZE.propertyName + " in " + FILENAME + '.', e);
+            LOG.error("Unable to parse value of property {} in {}{}", Property.MAX_IMAGE_SIZE.propertyName, FILENAME, '.', e);
             maxImageSize = 33750000;
         }
     }
@@ -132,7 +131,7 @@ public class ContactConfig {
 
     private void logNotInitialized() {
         if (props.isEmpty()) {
-            LOG.info("Configuration file " + FILENAME + " not read. Using defaults.");
+            LOG.info("Configuration file {} not read. Using defaults.", FILENAME);
         }
     }
 

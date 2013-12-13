@@ -56,7 +56,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -82,7 +81,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * The {@link QueryAction} delivers a message, waits for a result and sends the result back to the client along with the acks and Stanzas
  * addressed to the client.
- * 
+ *
  *     <li> Query action examples:
  *       <ol>
  *         <li> Join a room via PUT
@@ -122,7 +121,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class QueryAction extends RTAction {
 
-    private final static Log LOG = com.openexchange.log.Log.loggerFor(QueryAction.class);
+    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QueryAction.class);
     private final ServiceLookup services;
     private final StanzaSequenceGate gate;
     private final StateManager stateManager;
@@ -146,9 +145,7 @@ public class QueryAction extends RTAction {
 
         if(!stateManager.isConnected(id)) {
             RealtimeException stateMissingException = RealtimeExceptionCodes.STATE_MISSING.create();
-            if(LOG.isDebugEnabled()) {
-                LOG.debug(stateMissingException.getMessage(), stateMissingException);
-            }
+            LOG.debug("", stateMissingException);
             Map<String, Object> errorMap = getErrorMap(stateMissingException, session);
             return new AJAXRequestResult(errorMap, "native");
         }
@@ -175,24 +172,22 @@ public class QueryAction extends RTAction {
 
         final Lock sendLock = new ReentrantLock();
         try {
-            LOG.debug(Thread.currentThread()+ ": Trying to lock");
+            LOG.debug("{}: Trying to lock", Thread.currentThread());
             sendLock.lock();
-            LOG.debug(Thread.currentThread()+ ": Got lock");
+            LOG.debug("{}: Got lock", Thread.currentThread());
             final Condition handled = sendLock.newCondition();
             if(gate.handle(stanza, stanza.getTo(), new CustomGateAction() {
 
                 @Override
                 public void handle(final Stanza stanza, ID recipient) {
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("Handling stanza: " + stanza);
-                    }
+                    LOG.debug("Handling stanza: {}", stanza);
                     try {
                         customActionResults.put("answer", services.getService(MessageDispatcher.class).sendSynchronously(stanza, request.isSet("timeout") ? request.getIntParameter("timeout") : TIMEOUT, TimeUnit.SECONDS));
                     } catch (OXException e) {
                         customActionResults.put("exception", e);
                     } catch (Throwable t) {
                         ExceptionUtils.handleThrowable(t);
-                        LOG.error(t.getMessage(), t);
+                        LOG.error("", t);
                         customActionResults.put("exception", new OXException(t));
                     }
                     customActionResults.put("done", Boolean.TRUE);
@@ -202,9 +197,7 @@ public class QueryAction extends RTAction {
                     } finally {
                         sendLock.unlock();
                     }
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("Done handling Stanza");
-                    }
+                    LOG.debug("Done handling Stanza");
                 }
 
             })) {
@@ -220,7 +213,7 @@ public class QueryAction extends RTAction {
             // If the sequence number isn't correct, wait for a given time until a valid sequence was constructed from incoming Stanzas
             if (!customActionResults.containsKey("done")) {
                 if(!handled.await(request.isSet("timeout") ? request.getIntParameter("timeout") : TIMEOUT, TimeUnit.SECONDS)) {
-                    LOG.debug("Timeout while waiting for correct sequence/handling Stanza:" + new StanzaWriter().write(stanza));
+                    LOG.debug("Timeout while waiting for correct sequence/handling Stanza:{}", new StanzaWriter().write(stanza));
                 }
             }
 
@@ -229,26 +222,26 @@ public class QueryAction extends RTAction {
                 throw RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(exception, exception.getMessage());
             }
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             RealtimeException re = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(e, e.getMessage());
             throw re;
         } catch (InterruptedException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             RealtimeException re = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(e, e.getMessage());
             throw re;
         } catch (Throwable e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             RealtimeException re = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(e, e.getMessage());
             throw re;
         } finally {
             sendLock.unlock();
         }
 
-        //Add the result Object to the response data 
+        //Add the result Object to the response data
         Object answer = customActionResults.get("answer");
         if (answer == null || !Stanza.class.isInstance(answer)) {
             RealtimeException noResponseException = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create("Request didn't yield any response.");
-            LOG.error(noResponseException.getMessage(), noResponseException);
+            LOG.error("", noResponseException);
             stanza.trace(noResponseException.getMessage(), noResponseException);
             queryActionResults.put(ERROR, exceptionToJSON(noResponseException, session));
         } else {
@@ -261,9 +254,7 @@ public class QueryAction extends RTAction {
         //additionally check for Stanzas that are addressed to the client and add them to the response
         List<JSONObject> stanzas = pollStanzas(stateEntry.state);
         queryActionResults.put(STANZAS, stanzas);
-        if(LOG.isDebugEnabled()) {
-            LOG.debug(RTResultFormatter.format(queryActionResults));
-        }
+        LOG.debug("{}", new Object() { @Override public String toString() { return RTResultFormatter.format(queryActionResults);}});
         return new AJAXRequestResult(queryActionResults, "native");
     }
 

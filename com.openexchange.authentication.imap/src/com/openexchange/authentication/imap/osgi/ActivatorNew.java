@@ -50,13 +50,11 @@
 package com.openexchange.authentication.imap.osgi;
 
 import static com.openexchange.authentication.imap.osgi.ImapAuthServiceRegistry.getServiceRegistry;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.imap.impl.IMAPAuthentication;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.DeferredActivator;
 import com.openexchange.osgi.ServiceRegistry;
@@ -64,7 +62,7 @@ import com.openexchange.user.UserService;
 
 public class ActivatorNew extends DeferredActivator {
 
-    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ActivatorNew.class));
+    private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ActivatorNew.class);
 
     private ServiceRegistration<AuthenticationService> registration;
 
@@ -81,9 +79,7 @@ public class ActivatorNew extends DeferredActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
 
         getServiceRegistry().addService(clazz, getService(clazz));
         // wenn alle services da und nicht authservice published, dann authservice publishen
@@ -94,9 +90,7 @@ public class ActivatorNew extends DeferredActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         getServiceRegistry().removeService(clazz);
         // wenn authservice gepublished, dann publish wegnehmen
         if (registration != null) {
@@ -125,7 +119,7 @@ public class ActivatorNew extends DeferredActivator {
                 registration = context.registerService(AuthenticationService.class, new IMAPAuthentication(), null);
             }
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
 
@@ -142,7 +136,7 @@ public class ActivatorNew extends DeferredActivator {
 
             getServiceRegistry().clearRegistry();
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
     }

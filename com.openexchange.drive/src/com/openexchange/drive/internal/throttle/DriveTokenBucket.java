@@ -54,7 +54,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Semaphore;
-import org.apache.commons.logging.Log;
 import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.drive.management.DriveConfig;
 import com.openexchange.exception.OXException;
@@ -70,7 +69,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DriveTokenBucket implements TokenBucket {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveTokenBucket.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DriveTokenBucket.class);
     private static final int BUCKET_FILLS_PER_SECOND = 4;
 
     private final ConcurrentMap<String, Semaphore> bucketsPerSession;
@@ -175,9 +174,7 @@ public class DriveTokenBucket implements TokenBucket {
             int permits = Math.min(maxPermists, overallBytesPerSecond - overallBucket.availablePermits());
             if (0 < permits) {
                 overallBucket.release(permits);
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Released " + permits + " permits for 'overall' bucket.");
-                }
+                LOG.trace("Released {} permits for 'overall' bucket.", permits);
             }
         }
         /*
@@ -192,14 +189,10 @@ public class DriveTokenBucket implements TokenBucket {
                 int permits = Math.min(maxPermits, clientBytesPerSecond - bucket.availablePermits());
                 if (0 < permits) {
                     bucket.release(permits);
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("Released " + permits + " permits for bucket semaphore of session " + entry.getKey());
-                    }
+                    LOG.trace("Released {} permits for bucket semaphore of session {}", permits, entry.getKey());
                 } else {
                     iterator.remove();
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("Removed bucket semaphore for session " + entry.getKey());
-                    }
+                    LOG.trace("Removed bucket semaphore for session {}", entry.getKey());
                 }
             }
         }
@@ -219,9 +212,7 @@ public class DriveTokenBucket implements TokenBucket {
             bucket = bucketsPerSession.putIfAbsent(sessionID, newBucket);
             if (null == bucket) {
                 bucket = newBucket;
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Created new bucket for " + sessionID);
-                }
+                LOG.trace("Created new bucket for {}", sessionID);
             }
         }
         return bucket;

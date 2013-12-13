@@ -66,7 +66,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class CodecUtils {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CodecUtils.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CodecUtils.class);
 
     private static final String ENCODING_QP = "quoted-printable";
 
@@ -150,14 +150,10 @@ public class CodecUtils {
             try {
                 result = decode(encoded, ENCODINGS[i], charset);
             } catch (final IOException e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(e.getMessage(), e);
-                }
+                LOG.debug("", e);
                 result = encoded;
             } catch (final MessagingException e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(e.getMessage(), e);
-                }
+                LOG.debug("", e);
                 result = encoded;
             }
             if (!encoded.equals(result)) {

@@ -61,7 +61,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.configuration.ConfigurationException;
@@ -88,7 +87,6 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Charsets;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
@@ -131,7 +129,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     private boolean includePrivateAppointments;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarSql.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarSql.class);
 
     /**
      * Initializes a new {@link CalendarSql}.
@@ -528,7 +526,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             if (cdao.isIgnoreOutdatedSequence() && cdao.getSequence() < edao.getSequence()) {
                 // Silently ignore updates on Appointments with an outdated Sequence. OLOX2-Requirement.
                 cdao.setLastModified(edao.getLastModified());
-                LOG.info("Ignored update on Appointment due to outdated sequence: " + edao.getContextID() + "-" + edao.getObjectID() + " (cid-objectId)");
+                LOG.info("Ignored update on Appointment due to outdated sequence: {}-{} (cid-objectId)", edao.getContextID(), edao.getObjectID());
                 return null;
             }
 
@@ -612,7 +610,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                         maxLength = DBUtils.getColumnSize(writecon, "prg_dates", fields[a]);
                         oxe.addProblematic(new SimpleTruncatedAttribute(id, maxLength, valueLength));
                     } catch (final SQLException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                         oxe.addTruncatedId(id);
                     }
 
@@ -1089,7 +1087,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         } catch(final OXException oxc) {
             throw oxc;
         } catch(final RuntimeException e) {
-            LOG.error(e.getMessage(), e); // Unfortunately the nested exception looses its stack trace.
+            LOG.error("", e); // Unfortunately the nested exception looses its stack trace.
             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, I(33));
         } finally {
             if (close_connection) {
@@ -1291,11 +1289,11 @@ public class CalendarSql implements AppointmentSQLInterface {
             CalendarSql.cimp = cimp;
             return cimp;
         } catch(final ClassNotFoundException cnfe) {
-            LOG.error(cnfe.getMessage(), cnfe);
+            LOG.error("", cnfe);
         } catch (final IllegalAccessException iae) {
-            LOG.error(iae.getMessage(), iae);
+            LOG.error("", iae);
         } catch (final InstantiationException ie) {
-            LOG.error(ie.getMessage(), ie);
+            LOG.error("", ie);
         }
         return null;
     }
@@ -1308,21 +1306,19 @@ public class CalendarSql implements AppointmentSQLInterface {
                 if (classname == null) {
                     classname = default_class;
                 }
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Using "+classname+" in CalendarSql");
-                }
+                LOG.debug("Using {} in CalendarSql", classname);
                 cimp = (CalendarSqlImp) Class.forName(classname).newInstance();
             }
         } catch(final ConfigurationException ce) {
-            LOG.error(ce.getMessage(), ce);
+            LOG.error("", ce);
         } catch(final ClassNotFoundException cnfe) {
-            LOG.error(cnfe.getMessage(), cnfe);
+            LOG.error("", cnfe);
         } catch (final IllegalAccessException iae) {
-            LOG.error(iae.getMessage(), iae);
+            LOG.error("", iae);
         } catch (final InstantiationException ie) {
-            LOG.error(ie.getMessage(), ie);
+            LOG.error("", ie);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

@@ -63,9 +63,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailInitialization;
@@ -99,7 +97,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     private static final long serialVersionUID = -2580495494392812083L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccess.class));
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccess.class);
 
     /*-
      * ############### MEMBERS ###############
@@ -139,6 +137,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     private Properties mailProperties;
 
     private transient Thread usingThread;
+    private transient Map<String, String> usingThreadProperties;
 
     private StackTraceElement[] trace;
 
@@ -220,6 +219,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     protected final void resetFields() {
         mailProperties = null;
         usingThread = null;
+        usingThreadProperties = null;
         trace = null;
     }
 
@@ -661,7 +661,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                     mailConfig.getLogin(),
                     Integer.valueOf(session.getContextId()),
                     e.getMessage());
-            LOG.error(mailExc.getMessage(), mailExc);
+            LOG.error("", mailExc);
             closeInternal();
             throw mailExc;
         }
@@ -709,7 +709,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                         return;
                     }
                 } catch (final Exception e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
             // Close mail connection
@@ -755,17 +755,17 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * Logs the trace of the thread that lastly obtained this access.
      *
      */
-    public void logTrace(final StringBuilder sBuilder, final org.apache.commons.logging.Log log) {
+    public void logTrace(final StringBuilder sBuilder, final org.slf4j.Logger log) {
         final Thread usingThread = this.usingThread;
         if (null != usingThread) {
-            final Props taskProps = LogProperties.optLogProperties(usingThread);
+            final Map<String, String> taskProps = usingThreadProperties;
             if (null != taskProps) {
                 final Map<String, String> sorted = new TreeMap<String, String>();
-                for (final Entry<String, Object> entry : taskProps.asMap().entrySet()) {
+                for (final Entry<String, String> entry : taskProps.entrySet()) {
                     final String propertyName = entry.getKey();
-                    final Object value = entry.getValue();
+                    final String value = entry.getValue();
                     if (null != value) {
-                        sorted.put(propertyName, value.toString());
+                        sorted.put(propertyName, value);
                     }
                 }
                 for (final Map.Entry<String, String> entry : sorted.entrySet()) {
@@ -782,11 +782,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             /*
              * Start at index 3
              */
-            if (Log.appendTraceToMessage()) {
-                for (int i = 3; i < length; i++) {
-                    sBuilder.append("    at ").append(traze[i]).append(lineSeparator);
-                }
-            } else {
+            {
                 final StackTraceElement[] tmp = new StackTraceElement[length - 3];
                 System.arraycopy(traze, 3, tmp, 0, tmp.length);
                 final Throwable thr = new Throwable();
@@ -796,23 +792,15 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             }
             if ((null != usingThread) && usingThread.isAlive()) {
                 final StackTraceElement[] trace = usingThread.getStackTrace();
-                final int tleng;
-                if (null != trace && (tleng = trace.length) > 0) {
+                if (null != trace && trace.length > 0) {
                     sBuilder.append("Current Using Thread: ").append(usingThread.getName()).append(lineSeparator);
                     /*
                      * Only possibility to get the current working position of a thread. This is only called if a thread is caught by
                      * MailAccessWatcher.
                      */
-                    if (Log.appendTraceToMessage()) {
-                        sBuilder.append("    at ").append(trace[0]);
-                        for (int i = 1; i < tleng; i++) {
-                            sBuilder.append(lineSeparator).append("    at ").append(trace[i]);
-                        }
-                    } else {
-                        final Throwable thr = new Throwable();
-                        thr.setStackTrace(trace);
-                        log.info(sBuilder.toString(), thr);
-                    }
+                    final Throwable thr = new Throwable();
+                    thr.setStackTrace(trace);
+                    log.info(sBuilder.toString(), thr);
                 }
             }
         }
@@ -828,14 +816,14 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     public final String getTrace() {
         final StringBuilder sBuilder = new StringBuilder(2048);
         {
-            final Props taskProps = LogProperties.optLogProperties(usingThread);
+            final Map<String, String> taskProps = usingThreadProperties;
             if (null != taskProps) {
                 final Map<String, String> sorted = new TreeMap<String, String>();
-                for (final Entry<String, Object> entry : taskProps.asMap().entrySet()) {
+                for (final Entry<String, String> entry : taskProps.entrySet()) {
                     final String propertyName = entry.getKey();
-                    final Object value = entry.getValue();
+                    final String value = entry.getValue();
                     if (null != value) {
-                        sorted.put(propertyName, value.toString());
+                        sorted.put(propertyName, value);
                     }
                 }
                 for (final Map.Entry<String, String> entry : sorted.entrySet()) {
@@ -919,6 +907,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     private final void applyNewThread() {
         usingThread = Thread.currentThread();
+        usingThreadProperties = LogProperties.getPropertyMap();
         /*
          * This is faster than Thread.getStackTrace() since a native method is used to fill thread's stack trace
          */

@@ -53,6 +53,7 @@ import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -114,8 +115,8 @@ public final class ClearAction extends AbstractFolderAction {
             try {
                 folderService.clearFolder(treeId, folderId, session);
             } catch (final OXException e) {
-                final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ClearAction.class));
-                log.error(e.getMessage(), e);
+                final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ClearAction.class);
+                log.error("", e);
                 responseArray.put(folderId);
                 e.setCategory(com.openexchange.exception.Category.CATEGORY_WARNING);
                 warnings.add(e);

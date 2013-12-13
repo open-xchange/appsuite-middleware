@@ -69,7 +69,7 @@ import com.openexchange.spamhandler.spamassassin.property.PropertyHandler;
  */
 public final class SpamAssassinSpamHandlerActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SpamAssassinSpamHandlerActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamAssassinSpamHandlerActivator.class);
 
     private static final Class<?>[] NEEDED_SERVICES = { MailService.class, ConfigurationService.class };
 
@@ -93,20 +93,13 @@ public final class SpamAssassinSpamHandlerActivator extends HousekeepingActivato
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        /*
-         * Never stop the server even if a needed service is absent
-         */
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
         ServiceRegistry.getInstance().removeService(clazz);
     }
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         ServiceRegistry.getInstance().addService(clazz, getService(clazz));
     }
 
@@ -161,7 +154,7 @@ public final class SpamAssassinSpamHandlerActivator extends HousekeepingActivato
              */
             ServiceRegistry.getInstance().clearRegistry();
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
     }
@@ -171,7 +164,7 @@ public final class SpamAssassinSpamHandlerActivator extends HousekeepingActivato
             thisBundle.stop();
             thisBundle = null;
         } catch (BundleException e) {
-            LOG.error("Can't stop bundle SpamHandler Spamassassin: " + e.getMessage(), e);
+            LOG.error("Can't stop bundle SpamHandler Spamassassin: {}", e.getMessage(), e);
         }
     }
 }

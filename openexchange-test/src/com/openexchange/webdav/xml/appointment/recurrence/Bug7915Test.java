@@ -1,13 +1,12 @@
 package com.openexchange.webdav.xml.appointment.recurrence;
 
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.container.Appointment;
 
 public class Bug7915Test extends AbstractRecurrenceTest {
 
-	private static final Log LOG = LogFactory.getLog(Bug7915Test.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug7915Test.class);
 
 	public Bug7915Test(final String name) {
 		super(name);

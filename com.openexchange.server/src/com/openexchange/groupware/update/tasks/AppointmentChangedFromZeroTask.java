@@ -53,8 +53,6 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -69,7 +67,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class AppointmentChangedFromZeroTask implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AppointmentChangedFromZeroTask.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppointmentChangedFromZeroTask.class);
 
     public AppointmentChangedFromZeroTask() {
         super();
@@ -87,9 +85,7 @@ public final class AppointmentChangedFromZeroTask implements UpdateTask {
 
     @Override
     public void perform(final Schema schema, final int contextId) throws OXException, OXException {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Performing update task to remove 0 set changed_from in appointments.");
-        }
+        LOG.info("Performing update task to remove 0 set changed_from in appointments.");
         final Connection con = Database.get(contextId, true);
         Statement st = null;
         try {
@@ -107,8 +103,6 @@ public final class AppointmentChangedFromZeroTask implements UpdateTask {
                 Database.back(contextId, true, con);
             }
         }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Update task to remove 0 set changed_from in appointments performed.");
-        }
+        LOG.info("Update task to remove 0 set changed_from in appointments performed.");
     }
 }

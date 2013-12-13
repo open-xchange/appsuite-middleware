@@ -1,6 +1,5 @@
 package com.openexchange.ajax.appointment.bugtests;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.groupware.container.Appointment;
@@ -11,7 +10,7 @@ import com.openexchange.webdav.xml.FolderTest;
 
 public class Bug4541Test extends AppointmentTest {
 
-	private static final Log LOG = LogFactory.getLog(Bug4541Test.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug4541Test.class);
 
 	public Bug4541Test(final String name) {
 		super(name);

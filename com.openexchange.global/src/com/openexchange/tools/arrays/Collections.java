@@ -58,9 +58,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
-import org.apache.commons.logging.Log;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 
 /**
  * Methods for easy handling of collections.
@@ -72,7 +70,7 @@ public final class Collections {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Collections.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Collections.class);
 
     /**
      * Prevent instantiation
@@ -389,10 +387,10 @@ public final class Collections {
             final ObjectInputStream in = new ObjectInputStream(fbos.getInputStream());
             return in.readObject();
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         } catch (final ClassNotFoundException cnfe) {
-            LOG.error(cnfe.getMessage(), cnfe);
+            LOG.error("", cnfe);
             return null;
         } finally {
             Streams.close(out);

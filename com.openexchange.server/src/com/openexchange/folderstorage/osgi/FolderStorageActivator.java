@@ -178,10 +178,7 @@ public final class FolderStorageActivator implements BundleActivator {
 
     }
 
-	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log
-			.valueOf(com.openexchange.log.LogFactory
-					.getLog(FolderStorageActivator.class));
-
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderStorageActivator.class);
 
 	private List<ServiceRegistration<?>> serviceRegistrations;
 
@@ -249,15 +246,9 @@ public final class FolderStorageActivator implements BundleActivator {
 				activator.start(context);
 			}
 
-			if (LOG.isInfoEnabled()) {
-				final StringBuilder sb = new StringBuilder(32);
-				sb.append("Bundle \"");
-				sb.append("com.openexchange.folderstorage");
-				sb.append("\" successfully started!");
-				LOG.info(sb.toString());
-			}
+			LOG.info("Bundle \"com.openexchange.folderstorage\" successfully started!");
 		} catch (final Exception e) {
-			LOG.error(e.getMessage(), e);
+			LOG.error("", e);
 			throw e;
 		}
 	}
@@ -304,15 +295,9 @@ public final class FolderStorageActivator implements BundleActivator {
 			// Unregister previously registered component
 
 
-			if (LOG.isInfoEnabled()) {
-				final StringBuilder sb = new StringBuilder(32);
-				sb.append("Bundle \"");
-				sb.append("com.openexchange.folderstorage");
-				sb.append("\" successfully stopped!");
-				LOG.info(sb.toString());
-			}
+			LOG.info("Bundle \"com.openexchange.folderstorage\" successfully stopped!");
 		} catch (final Exception e) {
-			LOG.error(e.getMessage(), e);
+			LOG.error("", e);
 			throw e;
 		}
 	}

@@ -101,11 +101,8 @@ public final class OSGiAJAXResultDecoratorRegistry implements AJAXResultDecorato
         if (null == map.putIfAbsent(service.getIdentifier(), service)) {
             return service;
         }
-        final org.apache.commons.logging.Log logger = com.openexchange.log.LogFactory.getLog(OSGiAJAXResultDecoratorRegistry.class);
-        if (logger.isWarnEnabled()) {
-            logger.warn(new com.openexchange.java.StringAllocator(128).append("Another AJAXResultDecorator is already registered with identifier: ").append(
-                service.getIdentifier()).toString());
-        }
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OSGiAJAXResultDecoratorRegistry.class);
+        logger.warn("Another AJAXResultDecorator is already registered with identifier: {}", service.getIdentifier());
         context.ungetService(reference);
         return null;
     }

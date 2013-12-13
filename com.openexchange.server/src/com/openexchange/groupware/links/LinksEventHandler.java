@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.event.impl.AppointmentEventInterface;
@@ -68,7 +67,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -82,7 +80,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class LinksEventHandler implements NoDelayEventInterface, AppointmentEventInterface, TaskEventInterface, ContactEventInterface, EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinksEventHandler.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LinksEventHandler.class);
 
     public LinksEventHandler() {
         super();
@@ -134,7 +132,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
     }
 
     @Override
-    public void handleEvent(Event event) {
+    public void handleEvent(final Event event) {
         if (FileStorageEventHelper.isInfostoreEvent(event)) {
             if (FileStorageEventHelper.isUpdateEvent(event)) {
                 try {
@@ -143,14 +141,12 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
                     ServerSession session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
                     updateLink(id, Types.INFOSTORE, folderId, session);
                 } catch (OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 } catch (NumberFormatException e) {
-                    LOG.debug("Error parsing numerical identifiers from event: " + e.getMessage() + ". Skipping.");
+                    LOG.debug("Error parsing numerical identifiers from event: {}. Skipping.", e.getMessage());
                 }
 
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(FileStorageEventHelper.createDebugMessage("UpdateEvent", event));
-                }
+                LOG.debug("{}", new Object() { @Override public String toString() { return FileStorageEventHelper.createDebugMessage("UpdateEvent", event);}});
             } else if (FileStorageEventHelper.isDeleteEvent(event)) {
                 try {
                     int id = Integer.parseInt(FileStorageEventHelper.extractObjectId(event));
@@ -158,14 +154,12 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
                     ServerSession session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
                     deleteLink(id, Types.INFOSTORE, folderId, session);
                 } catch (OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 } catch (NumberFormatException e) {
-                    LOG.debug("Error parsing numerical identifiers from event: " + e.getMessage() + ". Skipping.");
+                    LOG.debug("Error parsing numerical identifiers from event: {}. Skipping.", e.getMessage());
                 }
 
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(FileStorageEventHelper.createDebugMessage("DebugEvent", event));
-                }
+                LOG.debug("{}", new Object() { @Override public String toString() { return FileStorageEventHelper.createDebugMessage("DebugEvent", event);}});
             }
         }
     }
@@ -179,7 +173,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
         try {
             ct = ContextStorage.getStorageContext(contextId);
         } catch (final OXException e) {
-            LOG.error("ERROR: Unable to Delete Links from Object! cid=" + contextId + " oid=" + id + " fid=" + fid, e);
+            LOG.error("ERROR: Unable to Delete Links from Object! cid={} oid={} fid={}", contextId, id, fid, e);
             return;
         }
         // Check if any present
@@ -195,7 +189,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
                 return;
             }
         } catch (final Exception se) {
-            LOG.debug("DEBUG: Error occurred during look-up attempt. cid=" + contextId + " oid=" + id + " fid=" + fid, se);
+            LOG.debug("DEBUG: Error occurred during look-up attempt. cid={} oid={} fid={}", contextId, id, fid, se);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
             if (null != con) {
@@ -219,7 +213,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
             stmt.setInt(pos++, contextId);
             stmt.executeUpdate();
         } catch (final Exception se) {
-            LOG.error("ERROR: Unable to Delete Links from Object! cid=" + contextId + " oid=" + id + " fid=" + fid, se);
+            LOG.error("ERROR: Unable to Delete Links from Object! cid={} oid={} fid={}", contextId, id, fid, se);
         } finally {
             DBUtils.closeSQLStuff(stmt);
             if (null != con) {
@@ -245,8 +239,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
         try {
             ct = ContextStorage.getStorageContext(so.getContextId());
         } catch (final OXException e) {
-            LOG.error("UNABLE TO LOAD LINK OBJECT FOR UPDATE (cid=" + so.getContextId() + " uid=" + id + " type="
-                    + type + " fid=" + fid + ')', e);
+            LOG.error("UNABLE TO LOAD LINK OBJECT FOR UPDATE (cid={} uid={} type={} fid={}{}", so.getContextId(), id, type, fid, ')', e);
             return;
         }
 
@@ -274,8 +267,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
                 }
             }
         } catch (final Exception e) {
-            LOG.error("UNABLE TO LOAD LINK OBJECT FOR UPDATE (cid=" + so.getContextId() + " uid=" + id + " type="
-                    + type + " fid=" + fid + ')', e);
+            LOG.error("UNABLE TO LOAD LINK OBJECT FOR UPDATE (cid={} uid={} type={} fid={}{}", so.getContextId(), id, type, fid, ')', e);
         } finally {
             DBUtils.closeResources(rs, smt, writecon, false, ct);
             rs = null;
@@ -312,8 +304,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
                 } catch (final SQLException see) {
                     LOG.error("Uable to rollback Link Update", see);
                 }
-                LOG.error("ERROR: Unable to Update Links for Object! cid=" + so.getContextId() + " oid=" + id + " fid="
-                        + fid, se);
+                LOG.error("ERROR: Unable to Update Links for Object! cid={} oid={} fid={}", so.getContextId(), id, fid, se);
             } finally {
                 try {
                     writecon.setAutoCommit(true);

@@ -72,9 +72,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class DeletePerformer extends AbstractPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DeletePerformer.class));
-
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeletePerformer.class);
 
     /**
      * Initializes a new {@link DeletePerformer}.
@@ -132,7 +130,6 @@ public final class DeletePerformer extends AbstractPerformer {
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
-        final long start = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
         checkOpenedStorage(folderStorage, openedStorages);
         if (null != timeStamp) {
@@ -163,11 +160,6 @@ public final class DeletePerformer extends AbstractPerformer {
                      */
                     deleteVirtualFolder(folderId, treeId, folderStorage, openedStorages);
                 }
-            }
-            if (DEBUG_ENABLED) {
-                final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new com.openexchange.java.StringAllocator().append("Delete.doDelete() took ").append(duration).append("msec for folder: ").append(
-                    folderId).toString());
             }
             /*
              * Commit

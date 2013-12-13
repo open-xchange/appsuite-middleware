@@ -54,8 +54,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -70,7 +68,7 @@ import com.openexchange.tools.update.Tools;
  */
 public class ClearOrphanedInfostoreDocuments implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ClearOrphanedInfostoreDocuments.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ClearOrphanedInfostoreDocuments.class);
 
     @Override
     public int addedWithVersion() {
@@ -97,7 +95,7 @@ public class ClearOrphanedInfostoreDocuments implements UpdateTask {
             ForeignKeyOld fk = new ForeignKeyOld("infostore_document", "infostore_id", "infostore", "id");
 
             if( keys.contains(fk)) {
-                LOG.info("Foreign Key "+fk+" exists. Skipping Update Task.");
+                LOG.info("Foreign Key {} exists. Skipping Update Task.", fk);
                 return;
             }
 
@@ -122,13 +120,13 @@ public class ClearOrphanedInfostoreDocuments implements UpdateTask {
                     // Version 0 has no file.
                     Tools.removeFile(cid, fileStoreLocation);
                 } else if (0 != version) {
-                    LOG.warn("Found file version without location in filestore. cid:" + cid + ",id:" + id + ",version:" + version + ".");
+                    LOG.warn("Found file version without location in filestore. cid:{},id:{},version:{}.", cid, id, version);
                 }
                 counter++;
             }
-            LOG.info("Cleared "+counter+" orphaned documents");
+            LOG.info("Cleared {} orphaned documents", counter);
 
-            LOG.info("Adding foreign key: "+fk);
+            LOG.info("Adding foreign key: {}", fk);
 
             // Need one with CID as well, so FK system doesn't work.
             addKey.executeUpdate();

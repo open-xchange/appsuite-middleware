@@ -83,7 +83,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
 	 */
     private static final long serialVersionUID = -3158021272821196715L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(InfostoreDocumentMailPart.class));
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreDocumentMailPart.class);
 
     private transient final Session session;
     private transient final String documentId;
@@ -164,7 +164,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
                     try {
                         docInputSream.close();
                     } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                     docInputSream = null;
                 }

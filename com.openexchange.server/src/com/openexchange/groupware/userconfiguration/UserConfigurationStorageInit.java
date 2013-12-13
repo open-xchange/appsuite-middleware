@@ -62,7 +62,7 @@ import com.openexchange.server.Initialization;
  */
 public final class UserConfigurationStorageInit implements Initialization {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UserConfigurationStorageInit.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserConfigurationStorageInit.class);
 
     private static enum UserConfigurationImpl {
 
@@ -131,7 +131,7 @@ public final class UserConfigurationStorageInit implements Initialization {
     @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
-            LOG.error(UserConfigurationStorageInit.class.getName() + " already started");
+            LOG.error("{} already started", UserConfigurationStorageInit.class.getName());
             return;
         }
         // Initialize instance
@@ -143,18 +143,14 @@ public final class UserConfigurationStorageInit implements Initialization {
             final String className = getUserConfigurationImpl(classNameProp);
             final Class<? extends UserConfigurationStorage> implementingClass = Class.forName(className == null ? classNameProp : className).asSubclass(
                 UserConfigurationStorage.class);
-            if (LOG.isInfoEnabled()) {
-                LOG.info("UserConfigurationStorage implementation: " + implementingClass.getName());
-            }
+            LOG.info("UserConfigurationStorage implementation: {}", implementingClass.getName());
             UserConfigurationStorage.setInstance(implementingClass.newInstance());
 
             // Now for the permission bits
             final String bitClassName = getUserPermissionBitsImpl(classNameProp);
             final Class<? extends UserPermissionBitsStorage> bitsImplementingClass = Class.forName(bitClassName).asSubclass(UserPermissionBitsStorage.class);
 
-            if (LOG.isInfoEnabled()) {
-                LOG.info("UserPermissionBitsStorage implementation: " + bitsImplementingClass.getName());
-            }
+            LOG.info("UserPermissionBitsStorage implementation: {}", bitsImplementingClass.getName());
 
             UserPermissionBitsStorage.setInstance(bitsImplementingClass.newInstance());
 
@@ -173,7 +169,7 @@ public final class UserConfigurationStorageInit implements Initialization {
     @Override
     public void stop() throws OXException {
         if (!started.compareAndSet(true, false)) {
-            LOG.error(UserConfigurationStorageInit.class.getName() + " cannot be stopped since it has not been started before");
+            LOG.error("{} cannot be stopped since it has not been started before", UserConfigurationStorageInit.class.getName());
             return;
         }
         // Release instance

@@ -63,10 +63,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.commons.logging.Log;
 import com.google.common.base.Predicate;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
@@ -85,7 +83,7 @@ public abstract class Stanza implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Log LOG = LogFactory.getLog(Stanza.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Stanza.class);
 
     // recipient and sender
     private volatile ID to;

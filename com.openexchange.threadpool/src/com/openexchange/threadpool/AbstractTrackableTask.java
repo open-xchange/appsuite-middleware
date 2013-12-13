@@ -49,7 +49,6 @@
 
 package com.openexchange.threadpool;
 
-import com.openexchange.log.Props;
 
 /**
  * {@link AbstractTrackableTask} - An abstract {@code TrackableTask} which leaves {@code #afterExecute(Throwable)},
@@ -64,11 +63,6 @@ public abstract class AbstractTrackableTask<V> extends AbstractTask<V> implement
      */
     protected AbstractTrackableTask() {
         super();
-    }
-
-    @Override
-    public Props optLogProperties() {
-        return null;
     }
 
 }

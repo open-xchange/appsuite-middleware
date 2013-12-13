@@ -129,8 +129,8 @@ import com.openexchange.tools.regex.MatcherReplacer;
  */
 public final class MimeReply {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeReply.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(MimeReply.class);
 
     private static final String PREFIX_RE = "Re: ";
 
@@ -685,9 +685,7 @@ public final class MimeReply {
                                 ltz.locale,
                                 ltz.timeZone)));
                 } catch (final Exception e) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn(e.getMessage(), e);
-                    }
+                    LOG.warn("", e);
                     replyPrefix = PATTERN_DATE.matcher(replyPrefix).replaceFirst("");
                 }
 
@@ -700,9 +698,7 @@ public final class MimeReply {
                                 ltz.locale,
                                 ltz.timeZone)));
                 } catch (final Exception e) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn(e.getMessage(), e);
-                    }
+                    LOG.warn("", e);
                     replyPrefix = PATTERN_TIME.matcher(replyPrefix).replaceFirst("");
                 }
             }

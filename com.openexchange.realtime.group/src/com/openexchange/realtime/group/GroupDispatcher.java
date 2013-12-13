@@ -62,7 +62,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.Log;
 import com.openexchange.realtime.Component;
 import com.openexchange.realtime.Component.EvictionPolicy;
 import com.openexchange.realtime.ComponentHandle;
@@ -90,7 +89,7 @@ import com.openexchange.server.ServiceLookup;
 public class GroupDispatcher implements ComponentHandle {
 
     /** The logger constant. */
-    static final org.apache.commons.logging.Log LOG = Log.loggerFor(GroupDispatcher.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupDispatcher.class);
 
     /** The <code>ServiceLookup</code> reference. */
     public static final AtomicReference<ServiceLookup> SERVICE_REF = new AtomicReference<ServiceLookup>();
@@ -108,7 +107,7 @@ public class GroupDispatcher implements ComponentHandle {
 
     /** Action handler */
     private final ActionHandler handler;
-    
+
     private boolean isDisposed = false;
 
     /**
@@ -153,7 +152,7 @@ public class GroupDispatcher implements ComponentHandle {
                         onDispose(memberId != null ? memberId : id);
                     }
                 } catch (OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         });
@@ -302,9 +301,7 @@ public class GroupDispatcher implements ComponentHandle {
             added = ids.add(id);
         } while (!idsRef.compareAndSet(expected, ids));
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("joining:" + id.toString());
-        }
+        LOG.debug("joining:{}", id);
 
         stamps.put(id, stamp);
         id.on(ID.Events.DISPOSE, LEAVE);
@@ -323,9 +320,7 @@ public class GroupDispatcher implements ComponentHandle {
     public void leave(ID id) throws OXException {
         beforeLeave(id);
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("leaving:" + id.toString());
-        }
+        LOG.debug("leaving:{}", id);
 
         id.off("dispose", LEAVE);
 
@@ -488,9 +483,7 @@ public class GroupDispatcher implements ComponentHandle {
      * Called for a stanza if no other handler is found.
      */
     protected void defaultAction(Stanza stanza) {
-        if (LOG.isErrorEnabled()) {
-            LOG.error("Couldn't find matching handler for " + stanza.toString() + ". \nUse default");
-        }
+        LOG.error("Couldn't find matching handler for {}. \nUse default", stanza);
     }
 
     private final IDEventHandler LEAVE = new IDEventHandler() {
@@ -500,7 +493,7 @@ public class GroupDispatcher implements ComponentHandle {
             try {
                 leave(id);
             } catch (OXException e) {
-                LOG.error("Error while handling LEAVE for ID:" + id, e);
+                LOG.error("Error while handling LEAVE for ID:{}", id, e);
             }
         }
     };

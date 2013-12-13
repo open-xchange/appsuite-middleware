@@ -55,8 +55,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.TimerService;
 
@@ -71,13 +69,11 @@ public class ReminderPool implements Runnable {
 
 	private static final Set<ReminderObject> pool = new HashSet<ReminderObject>();
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReminderPool.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReminderPool.class);
 
 	public ReminderPool(final ReminderConfig reminderConfig) {
 		if (reminderConfig.isReminderEnabled()) {
-			if (LOG.isInfoEnabled()) {
-				LOG.info("Starting ReminderPool");
-			}
+			LOG.info("Starting ReminderPool");
 
 			//addReminderEvent(new ProjectsReminderEvent(), Types.PROJECT);
 
@@ -86,9 +82,7 @@ public class ReminderPool implements Runnable {
                 timer.schedule(this, reminderConfig.getReminderInterval());
             }
 		} else {
-			if (LOG.isInfoEnabled()) {
-				LOG.info("ReminderPool is disabled");
-			}
+			LOG.info("ReminderPool is disabled");
 		}
 	}
 

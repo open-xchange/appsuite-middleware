@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class ClearPerformer extends AbstractPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ClearPerformer.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ClearPerformer.class);
 
     /**
      * Initializes a new {@link ClearPerformer}.
@@ -119,14 +119,9 @@ public final class ClearPerformer extends AbstractPerformer {
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
-        final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
         final boolean started = folderStorage.startTransaction(storageParameters, true);
         try {
             folderStorage.clearFolder(treeId, folderId, storageParameters);
-            if (LOG.isDebugEnabled()) {
-                final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new com.openexchange.java.StringAllocator().append("Clear.doClear() took ").append(duration).append("msec for folder: ").append(folderId).toString());
-            }
             if (started) {
                 folderStorage.commitTransaction(storageParameters);
             }

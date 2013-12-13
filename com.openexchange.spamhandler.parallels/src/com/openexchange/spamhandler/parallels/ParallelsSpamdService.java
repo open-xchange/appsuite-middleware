@@ -60,7 +60,7 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -78,7 +78,8 @@ import com.openexchange.user.UserService;
 
 public class ParallelsSpamdService implements SpamdService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ParallelsSpamdService.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ParallelsSpamdService.class);
+
     private static final String POA_SPAM_PROVIDER_ATTRIBUTE_NAME = "POA_SPAM_PROVIDER";
 
     private final Configuration config;
@@ -97,8 +98,8 @@ public class ParallelsSpamdService implements SpamdService {
 
         /**
          * 1. sent primary email address via xmlrpc to smtpserver of user to port specified in config
-         * 
-         * 
+         *
+         *
          *   <?xml version="1.0"?>
 		 		<methodCall>
 				<methodName>pem.spamassassin</methodName>
@@ -112,26 +113,26 @@ public class ParallelsSpamdService implements SpamdService {
 				</param>
 				</params>
 				</methodCall>
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
+         *
+         *
+         *
+         *
+         *
+         *
+         *
+         *
+         *
+         *
+         *
+         *
+         *
+         *
          * 2. read response from xmlrpc and parse hostname and username
          * which will then be returned in the spamdprovider.
          * port of spamd process will always be read from config file.
-         * 
+         *
          * ERROR response:
-         * 
+         *
          * <?xml version="1.0" encoding="utf-8"?>
 <methodResponse>
 <fault>
@@ -158,7 +159,7 @@ public class ParallelsSpamdService implements SpamdService {
          *
          *
          *  SUCCESS RESPONSE:
-         * 
+         *
          *  <?xml version="1.0" encoding="utf-8"?>
 <methodResponse>
 <params>
@@ -182,15 +183,15 @@ public class ParallelsSpamdService implements SpamdService {
 </param>
 </params>
 </methodResponse>
-         * 
-         * 
-         * 
-         * 
-         * 
-         * 
+         *
+         *
+         *
+         *
+         *
+         *
          * 3. set attributes in session object to remember the spam settings
          * so that no 2nd request must be made to the xmlrpc to keep the load low.
-         * 
+         *
          */
 
         HttpClient http_client = new HttpClient();
@@ -201,7 +202,7 @@ public class ParallelsSpamdService implements SpamdService {
 
             // spamd port from configuration
             int spamd_provider_port = config.getPort();
-            LOG.debug("Using port " + spamd_provider_port + " for connections to spamd service");
+            LOG.debug("Using port {} for connections to spamd service", spamd_provider_port);
 
             // get the user object from the OX API to retrieve users primary mail address
             final User oxuser = getUser(session);
@@ -212,27 +213,23 @@ public class ParallelsSpamdService implements SpamdService {
             final java.net.URI tp = new java.net.URI(oxuser.getSmtpServer());// this will always be the smtp://host:port of the user
             final String xmlrpc_server = tp.getHost();
             int xml_rpc_port = config.getXmlPort();
-            LOG.debug("Using port " + xml_rpc_port + " for connections to xmlrpc service");
+            LOG.debug("Using port {} for connections to xmlrpc service", xml_rpc_port);
 
             final String URL_to_xmlrpc = "http://" +xmlrpc_server+":"+xml_rpc_port;
             post_method.setURI(new URI(URL_to_xmlrpc));
             post_method.setRequestHeader("Content-type", "text/xml;");
             post_method.setRequestBody(getXmlRpcRequestBody(xml_rpc_prim_email));
 
-            if(LOG.isDebugEnabled()){
-                LOG.debug("Using "+URL_to_xmlrpc+" to connect to xmlrpc service");
-                LOG.debug("Using email address "+xml_rpc_prim_email+" for xmlrpc request");
-            }
+            LOG.debug("Using {} to connect to xmlrpc service", URL_to_xmlrpc);
+            LOG.debug("Using email address {} for xmlrpc request", xml_rpc_prim_email);
 
 
             http_client.executeMethod(post_method);
 
             final String xml_rpc_response = post_method.getResponseBodyAsString();
 
-            if(LOG.isDebugEnabled()){
-                LOG.debug("Got response from xmlrpc service:");
-                LOG.debug(xml_rpc_response);
-            }
+            LOG.debug("Got response from xmlrpc service:");
+            LOG.debug(xml_rpc_response);
 
 
             // check if contains a "faultcode" part, if no, parse for data
@@ -271,32 +268,26 @@ public class ParallelsSpamdService implements SpamdService {
                         if((textFNList.item(0)).getNodeValue().trim().equals("server")){
                             // server ip ==
                             response_server = (textFNList_.item(0)).getNodeValue().trim();
-                            if(LOG.isDebugEnabled()){
-                                LOG.debug("Returning "+response_server+" as host to spamhandler");
-                            }
+                                LOG.debug("Returning {} as host to spamhandler", response_server);
                         }else{
                             // username ==
                             response_user = (textFNList_.item(0)).getNodeValue().trim();
-                            if(LOG.isDebugEnabled()){
-                                LOG.debug("Returning "+response_user+" as userame to spamhandler");
-                            }
+                            LOG.debug("Returning {} as userame to spamhandler", response_user);
                         }
 
                     }
                 }
                 final SpamdProvider sp_provider = getSpamdProvider(response_server, spamd_provider_port, response_user);
 
-                if(LOG.isDebugEnabled()){
-                    LOG.debug("Returning spamprovider informations from xmlrpc response");
-                }
+                LOG.debug("Returning spamprovider informations from xmlrpc response");
                 // return spamprovider to api
                 return sp_provider;
             }
-            LOG.error("got error response from xml-rpc service for primary mail "+xml_rpc_prim_email);
+            LOG.error("got error response from xml-rpc service for primary mail {}", xml_rpc_prim_email);
             LOG.error(xml_rpc_response);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create("got error response from xml-rpc service for primary mail "+xml_rpc_prim_email);
         } catch (final OXException e) {
-            LOG.fatal("error loading user object from session", e);
+            LOG.error("error loading user object from session", e);
             throw MailExceptionCode.SPAM_HANDLER_INIT_FAILED.create(e,"error loading user object from session");
         } catch (final URIException e) {
             LOG.error("error sending request to xmlrpc service",e);

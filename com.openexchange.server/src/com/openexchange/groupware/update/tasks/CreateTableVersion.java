@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
@@ -61,7 +59,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public final class CreateTableVersion implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CreateTableVersion.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CreateTableVersion.class);
 
 //    private static final String CREATE = "CREATE TABLE foobar (" +
 //            "version INT4 UNSIGNED NOT NULL," +

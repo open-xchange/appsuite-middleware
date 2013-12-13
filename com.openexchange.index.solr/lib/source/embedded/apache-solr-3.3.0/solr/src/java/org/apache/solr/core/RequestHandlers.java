@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 /**
  */
 final class RequestHandlers {
-  public static Logger log = LoggerFactory.getLogger(RequestHandlers.class);
+  public static org.slf4j.Logger log = LoggerFactory.getLogger(RequestHandlers.class);
 
   public static final String DEFAULT_HANDLER_NAME="standard";
   protected final SolrCore core;

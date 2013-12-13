@@ -58,8 +58,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarConfig;
@@ -93,7 +91,7 @@ public class ConflictHandler {
 
     public static final CalendarDataObject NO_CONFLICTS[] = new CalendarDataObject[0];
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConflictHandler.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConflictHandler.class);
     private final CalendarDataObject edao;
     private final CalendarCollection recColl;
 
@@ -110,9 +108,7 @@ public class ConflictHandler {
         if (cdao.getShownAs() == Appointment.FREE || !UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx).hasConflictHandling()) {
             return NO_CONFLICTS; // According to bug #5267 and modularisation concept
         } else if (!create && !cdao.containsStartDate() && !cdao.containsEndDate() && !cdao.containsParticipants() && !cdao.containsRecurrenceType() && !cdao.containsShownAs()) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Ignoring conflict checks because we detected an update and no start/end time, recurrence type or participants and shown as are changed!");
-            }
+            LOG.debug("Ignoring conflict checks because we detected an update and no start/end time, recurrence type or participants and shown as are changed!");
             return NO_CONFLICTS;
         } else if (cdao.isSingle() && cdao.containsEndDate() && recColl.checkMillisInThePast(cdao.getEndDate().getTime())) {
             return NO_CONFLICTS; // Past single apps should never conflict
@@ -157,7 +153,7 @@ public class ConflictHandler {
                 start = exceptionToCreate.getStartDate();
                 end = exceptionToCreate.getEndDate();
             }
-            
+
             if (request_participants) {
                 return resolveParticipantConflicts(start, end);
             }
@@ -166,7 +162,7 @@ public class ConflictHandler {
         if (request_participants) {
             return resolveParticipantsRecurring();
         }
-        
+
         // Using optimized method {@link #resolveResourceConflicts(Date, Date, RecurringResults)} for series appointments.
         final RecurringResultsInterface results = recColl.calculateRecurring(cdao, 0, 0, 0);
         final Date resultStart = new Date(results.getRecurringResult(0).getStart());
@@ -184,7 +180,7 @@ public class ConflictHandler {
         });
         return resultConflicts;
 	}
-    
+
     private CalendarDataObject getExceptionToCreate() throws OXException {
         CalendarDataObject clone = edao.clone();
         if (cdao.containsRecurrencePosition()) {
@@ -193,7 +189,7 @@ public class ConflictHandler {
         if (cdao.containsRecurrenceDatePosition()) {
             clone.setRecurrenceDatePosition(cdao.getRecurrenceDatePosition());
         }
-        
+
         recColl.setRecurrencePositionOrDateInDAO(clone, true);
 
         final RecurringResultsInterface rss = recColl.calculateRecurringIgnoringExceptions(edao, 0, 0, clone.getRecurrencePosition());
@@ -203,7 +199,7 @@ public class ConflictHandler {
         final RecurringResultInterface rs = rss.getRecurringResult(0);
         clone.setStartDate(new Date(rs.getStart()));
         clone.setEndDate(new Date(rs.getEnd()));
-        
+
         return clone;
     }
 

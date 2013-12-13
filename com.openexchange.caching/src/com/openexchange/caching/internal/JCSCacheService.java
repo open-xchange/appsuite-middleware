@@ -118,7 +118,7 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
         		c.dispose();
         	}
         } catch (final CacheException e) {
-        	LOG.error(e.getMessage(), e);
+        	LOG.error("", e);
         }
          */
     }

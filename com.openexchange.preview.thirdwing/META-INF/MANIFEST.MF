@@ -20,7 +20,8 @@ Import-Package: com.openexchange.config,
  com.openexchange.threadpool,
  com.openexchange.tools.regex,
  org.apache.commons.logging,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j
 DynamicImport-Package: *
 Bundle-ClassPath: .,
  lib/thirdwing.jar,

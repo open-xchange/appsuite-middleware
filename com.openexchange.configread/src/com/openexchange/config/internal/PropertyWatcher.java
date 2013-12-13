@@ -71,7 +71,7 @@ import com.openexchange.java.Streams;
  */
 public final class PropertyWatcher implements FileListener {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PropertyWatcher.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PropertyWatcher.class);
 
     private static final ConcurrentMap<String, PropertyWatcher> WATCHER_MAP = new ConcurrentHashMap<String, PropertyWatcher>();
 
@@ -174,11 +174,9 @@ public final class PropertyWatcher implements FileListener {
     public void onChange(final File file) {
         final InputStream fis;
         try {
-            fis = new BufferedInputStream(new FileInputStream(file));
+            fis = new BufferedInputStream(new FileInputStream(file), 65536);
         } catch (final FileNotFoundException e) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(e.getMessage(), e);
-            }
+            LOG.debug("", e);
             /*
              * Obviously file does no more exist
              */
@@ -200,7 +198,7 @@ public final class PropertyWatcher implements FileListener {
                 notifyListeners(false);
             }
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             Streams.close(fis);
         }

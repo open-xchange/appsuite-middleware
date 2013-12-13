@@ -55,7 +55,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.jws.WebService;
 import javax.xml.ws.Endpoint;
-import org.apache.commons.logging.Log;
 import org.apache.cxf.interceptor.DocLiteralInInterceptor;
 import org.apache.cxf.interceptor.Interceptor;
 import org.apache.cxf.message.Message;
@@ -75,7 +74,7 @@ import com.openexchange.soap.cxf.WebserviceName;
  */
 public class WebserviceCollector implements ServiceListener {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(WebserviceCollector.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebserviceCollector.class);
 
     private static final String WEBSERVICE_NAME = "WebserviceName";
 
@@ -248,10 +247,10 @@ public class WebserviceCollector implements ServiceListener {
                 serverEndpoint.getOutInterceptors().add(new com.openexchange.soap.cxf.interceptor.LoggingOutInterceptor());
             }
             oldEndpoint = endpoints.replace(name, endpoint);
-            LOG.info("Publishing endpoint succeeded. Published \"" + name + "\" under address \"" + address + "\".");
+            LOG.info("Publishing endpoint succeeded. Published \"{}\" under address \"{}\".", name, address);
         } catch (final Throwable t) {
             ExceptionUtils.handleThrowable(t);
-            LOG.error("Publishing endpoint failed. Couldn't publish \"" + name + "\" under address \"" + address + "\".", t);
+            LOG.error("Publishing endpoint failed. Couldn't publish \"{}\" under address \"{}\".", name, address, t);
             oldEndpoint = null;
         }
         if (oldEndpoint != null) {

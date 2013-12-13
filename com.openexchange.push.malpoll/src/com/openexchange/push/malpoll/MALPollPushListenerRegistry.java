@@ -55,8 +55,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.malpoll.services.MALPollServiceRegistry;
@@ -70,7 +68,7 @@ import com.openexchange.tools.Collections;
  */
 public final class MALPollPushListenerRegistry {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MALPollPushListenerRegistry.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MALPollPushListenerRegistry.class);
 
     private static final MALPollPushListenerRegistry instance = new MALPollPushListenerRegistry();
 
@@ -149,7 +147,7 @@ public final class MALPollPushListenerRegistry {
             try {
                 l.open();
             } catch (final OXException e) {
-                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MALPollPushListenerRegistry.class)).error(
+                org.slf4j.LoggerFactory.getLogger(MALPollPushListenerRegistry.class).error(
                     MessageFormat.format("Opening MAL Poll listener failed. Removing listener from registry: {0}", l.toString()),
                     e);
                 i.remove();
@@ -212,7 +210,7 @@ public final class MALPollPushListenerRegistry {
             try {
                 MALPollDBUtility.dropMailIDs(key.cid, key.user);
             } catch (final OXException e) {
-                LOG.error("DB tables could not be cleansed for removed push listener. User=" + key.user + ", context=" + key.cid, e);
+                LOG.error("DB tables could not be cleansed for removed push listener. User={}, context={}", key.user, key.cid, e);
             }
         }
         return true;
@@ -226,7 +224,7 @@ public final class MALPollPushListenerRegistry {
         try {
             MALPollDBUtility.dropMailIDs(key.cid, key.user);
         } catch (final OXException e) {
-            LOG.error("DB tables could not be cleansed for removed push listener. User=" + key.user + ", context=" + key.cid, e);
+            LOG.error("DB tables could not be cleansed for removed push listener. User={}, context={}", key.user, key.cid, e);
         }
         return true;
     }

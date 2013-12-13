@@ -52,8 +52,6 @@ package com.openexchange.sessiond.osgi;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -69,7 +67,7 @@ import com.openexchange.sessiond.impl.SessiondMBeanImpl;
  */
 final class ManagementRegisterer implements ServiceTrackerCustomizer<ManagementService,ManagementService> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementRegisterer.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagementRegisterer.class);
 
     private final BundleContext context;
     private ObjectName objectName;
@@ -104,11 +102,11 @@ final class ManagementRegisterer implements ServiceTrackerCustomizer<ManagementS
                 objectName = getObjectName("SessionD Toolkit", SessiondMBean.SESSIOND_DOMAIN);
                 management.registerMBean(objectName, new SessiondMBeanImpl());
             } catch (final MalformedObjectNameException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final NotCompliantMBeanException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -118,7 +116,7 @@ final class ManagementRegisterer implements ServiceTrackerCustomizer<ManagementS
             try {
                 management.unregisterMBean(objectName);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } finally {
                 objectName = null;
             }

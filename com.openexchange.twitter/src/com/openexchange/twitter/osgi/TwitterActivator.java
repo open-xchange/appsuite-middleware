@@ -70,11 +70,9 @@ public final class TwitterActivator extends HousekeepingActivator {
 
     @Override
     public void startBundle() throws Exception {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TwitterActivator.class));
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TwitterActivator.class);
         try {
-            if (log.isInfoEnabled()) {
-                log.info("starting bundle: com.openexchange.twitter");
-            }
+            log.info("starting bundle: com.openexchange.twitter");
             /*
              * Service trackers
              */
@@ -85,18 +83,16 @@ public final class TwitterActivator extends HousekeepingActivator {
              */
             registerService(TwitterService.class, new TwitterServiceImpl());
         } catch (final Exception e) {
-            log.error("Failed start-up of bundle com.openexchange.twitter: " + e.getMessage(), e);
+            log.error("Failed start-up of bundle com.openexchange.twitter: {}", e.getMessage(), e);
             throw e;
         }
     }
 
     @Override
     public void stopBundle() throws Exception {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TwitterActivator.class));
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TwitterActivator.class);
         try {
-            if (log.isInfoEnabled()) {
-                log.info("stopping bundle: com.openexchange.twitter");
-            }
+            log.info("stopping bundle: com.openexchange.twitter");
             /*
              * Unregister
              */
@@ -106,7 +102,7 @@ public final class TwitterActivator extends HousekeepingActivator {
              */
             closeTrackers();
         } catch (final Exception e) {
-            log.error("Failed shut-down of bundle com.openexchange.twitter: " + e.getMessage(), e);
+            log.error("Failed shut-down of bundle com.openexchange.twitter: {}", e.getMessage(), e);
             throw e;
         }
     }

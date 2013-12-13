@@ -66,7 +66,7 @@ import com.openexchange.threadpool.RunLoop;
  */
 public class SyntheticChannelRunLoop extends RunLoop<MessageDispatch> {
     
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(SyntheticChannelRunLoop.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SyntheticChannelRunLoop.class);
     
     public SyntheticChannelRunLoop(String name) {
         super(name);
@@ -103,7 +103,7 @@ public class SyntheticChannelRunLoop extends RunLoop<MessageDispatch> {
                 }
             }
         } catch (Exception e) {
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
         } finally {
             continueHandling();
         }

@@ -91,7 +91,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class OutlookFolderStorageActivator extends DeferredActivator {
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OutlookFolderStorageActivator.class));
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OutlookFolderStorageActivator.class);
 
     private List<ServiceRegistration<?>> serviceRegistrations;
 
@@ -113,18 +113,14 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         getServiceRegistry().addService(clazz, getService(clazz));
 
     }
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
         getServiceRegistry().removeService(clazz);
     }
 
@@ -205,7 +201,7 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
                             try {
                                 Update.updateIds(session.getContextId(), tree, session.getUserId(), newId, oldId, delim);
                             } catch (final Exception e) {
-                                LOG.error(e.getMessage(), e);
+                                LOG.error("", e);
                             }
 
                             final MemoryTable memoryTable = MemoryTable.optMemoryTableFor(session);
@@ -213,7 +209,7 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
                                 try {
                                     memoryTable.initializeTree(tree, session.getUserId(), session.getContextId());
                                 } catch (final Exception e) {
-                                    LOG.error(e.getMessage(), e);
+                                    LOG.error("", e);
                                 }
                             }
                         }
@@ -263,7 +259,7 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
                 serviceRegistrations.add(context.registerService(EventHandler.class.getName(), sessionEventHandler, dict));
             }
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -296,7 +292,7 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
              */
             getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

@@ -49,7 +49,6 @@
 
 package com.openexchange.realtime.presence.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -61,7 +60,7 @@ import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 
 public class PresenceActivator extends HousekeepingActivator {
 
-    private final static Log LOG = com.openexchange.log.Log.loggerFor(PresenceActivator.class);
+    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PresenceActivator.class);
 
     private PresencePublisher presencePublisher;
 
@@ -72,7 +71,7 @@ public class PresenceActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("Starting bundle: " + getClass().getCanonicalName());
+        LOG.info("Starting bundle: {}", getClass().getCanonicalName());
         Services.setServiceLookup(this);
         ResourceDirectory resourceDirectory = getService(ResourceDirectory.class);
         if (resourceDirectory == null) {
@@ -97,7 +96,7 @@ public class PresenceActivator extends HousekeepingActivator {
 
     @Override
     public void stopBundle() throws Exception {
-        LOG.info("Stopping bundle: " + getClass().getCanonicalName());
+        LOG.info("Stopping bundle: {}", getClass().getCanonicalName());
         super.stopBundle();
         Services.setServiceLookup(null);
     }

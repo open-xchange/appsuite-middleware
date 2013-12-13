@@ -58,7 +58,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.logging.Log;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IQueue;
 import com.hazelcast.core.ItemEvent;
@@ -74,7 +73,7 @@ import com.openexchange.ms.Queue;
  */
 public final class HzQueue<E> implements Queue<E> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HzQueue.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HzQueue.class);
 
     private static final String MESSAGE_DATA_OBJECT = HzDataUtility.MESSAGE_DATA_OBJECT;
 
@@ -119,11 +118,7 @@ public final class HzQueue<E> implements Queue<E> {
                 hzQueue.removeItemListener(hzListener);
             } catch (final RuntimeException e) {
                 // Removing message listener failed
-                if (LOG.isDebugEnabled()) {
-                    LOG.warn("Couldn't remove message listener from Hazelcast queue \"" + name + "\".", e);
-                } else {
-                    LOG.warn("Couldn't remove message listener from Hazelcast queue \"" + name + "\".");
-                }
+                LOG.warn("Couldn't remove message listener from Hazelcast queue \"{}\".", name, e);
             }
         }
     }

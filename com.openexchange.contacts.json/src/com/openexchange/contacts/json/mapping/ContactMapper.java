@@ -60,7 +60,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -102,7 +101,7 @@ import com.openexchange.session.Session;
  */
 public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactMapper.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactMapper.class);
     private static final ContactMapper INSTANCE = new ContactMapper();
 
     private ContactField[] allFields = null;
@@ -2707,7 +2706,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, String value) {
-                LOG.debug("Ignoring request to set 'image_url' in contact to '" + value + "'.");
+                LOG.debug("Ignoring request to set 'image_url' in contact to '{}'.", value);
             }
 
             @Override

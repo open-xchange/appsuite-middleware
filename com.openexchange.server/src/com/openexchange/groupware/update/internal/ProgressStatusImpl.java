@@ -49,8 +49,7 @@
 
 package com.openexchange.groupware.update.internal;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import java.text.MessageFormat;
 import com.openexchange.groupware.update.ProgressState;
 
 /**
@@ -60,7 +59,7 @@ import com.openexchange.groupware.update.ProgressState;
  */
 public class ProgressStatusImpl implements ProgressState {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ProgressStatusImpl.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ProgressStatusImpl.class);
 
     /**
      * Log every 10 seconds the state.
@@ -108,7 +107,7 @@ public class ProgressStatusImpl implements ProgressState {
         long now = System.currentTimeMillis();
         if (now > lastLogTime + logTimeDistance) {
             lastLogTime = now;
-            LOG.info("Update task " + taskName + " finished " + (state * 100 / total) + "% on schema " + schema + '.');
+            LOG.info("Update task {} finished {}% on schema {}{}", taskName, (state * 100 / total), schema, '.');
         }
     }
 }

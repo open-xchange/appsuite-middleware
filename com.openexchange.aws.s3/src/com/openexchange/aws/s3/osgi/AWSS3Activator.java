@@ -49,7 +49,6 @@
 
 package com.openexchange.aws.s3.osgi;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.aws.s3.internal.AWSS3FileStorageFactory;
 import com.openexchange.config.ConfigurationService;
@@ -63,7 +62,7 @@ import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
  */
 public class AWSS3Activator extends HousekeepingActivator {
 
-    private final static Log LOG = LogFactory.getLog(AWSS3Activator.class);
+    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AWSS3Activator.class);
 
     /**
      * Initializes a new {@link AWSS3Activator}.

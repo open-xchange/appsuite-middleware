@@ -62,7 +62,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.printing.blocks.CPFactory;
@@ -85,7 +84,6 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
@@ -102,7 +100,7 @@ public class CPServlet extends PermissionServlet {
 
     private static final long serialVersionUID = -5186422014968264569L;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CPServlet.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CPServlet.class);
 
     private static final String APPOINTMENTS = "appointments";
 
@@ -273,7 +271,7 @@ public class CPServlet extends PermissionServlet {
                 configView = configViewFactory.getView(session.getUserId(), session.getContextId());
                 retval = configView.get("ui/product/name", String.class);
             } catch (OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         if (null == retval) {
@@ -287,7 +285,7 @@ public class CPServlet extends PermissionServlet {
      * @throws IOException
      */
     private void writeException(final HttpServletResponse resp, final Throwable t) throws IOException {
-        LOG.error(t.getMessage(), t);
+        LOG.error("", t);
         final PrintWriter writer = resp.getWriter();
         writer.append(t.getMessage());
         // TODO Write HTML page as response

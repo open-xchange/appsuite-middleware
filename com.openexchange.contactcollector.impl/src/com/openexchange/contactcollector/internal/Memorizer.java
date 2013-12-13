@@ -50,9 +50,7 @@
 package com.openexchange.contactcollector.internal;
 
 import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
-
 import java.io.UnsupportedEncodingException;
-import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -63,15 +61,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
-
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-
 import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
@@ -107,7 +100,7 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class Memorizer implements Runnable {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServerUserSetting.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServerUserSetting.class);
 
     private static final boolean ALL_ALIASES = true;
 
@@ -189,7 +182,7 @@ public class Memorizer implements Runnable {
                 try {
                     memorizeContact(address, ctx, userConfig);
                 } catch (final OXException e) {
-                    LOG.warn("Contact collector run aborted for address: " + address.toUnicodeString(), e);
+                    LOG.warn("Contact collector run aborted for address: {}", address.toUnicodeString(), e);
                 }
             }
         }
@@ -209,11 +202,11 @@ public class Memorizer implements Runnable {
             contact = transformInternetAddress(address);
         } catch (final ParseException e) {
             // Decoding failed; ignore contact
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
             return -1;
         } catch (final UnsupportedEncodingException e) {
             // Decoding failed; ignore contact
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
             return -1;
         }
         /*
@@ -290,9 +283,7 @@ public class Memorizer implements Runnable {
             try {
                 set.add(new QuotedInternetAddress(aliase, false));
             } catch (final AddressException e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(MessageFormat.format("Alias could not be parsed to an internet address: {0}", aliase), e);
-                }
+                LOG.debug("Alias could not be parsed to an internet address: {}", aliase, e);
             }
         }
         return set;
@@ -306,7 +297,7 @@ public class Memorizer implements Runnable {
                 retval = folder.intValue();
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return retval;
     }
@@ -318,7 +309,7 @@ public class Memorizer implements Runnable {
             enabled = ServerUserSetting.getInstance().isContactCollectionEnabled(session.getContextId(), session.getUserId());
             enabledRight = ServerSessionAdapter.valueOf(session).getUserPermissionBits().isCollectEmailAddresses();
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return enabledRight && enabled != null && enabled.booleanValue();
     }

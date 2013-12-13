@@ -55,11 +55,9 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link UserConfiguration} - Represents a user configuration.
@@ -70,7 +68,7 @@ public class UserConfiguration implements Serializable, Cloneable {
 
     private static final long serialVersionUID = -8277899698366715803L;
 
-    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UserConfiguration.class));
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserConfiguration.class);
 
     /**
      * The permission bit for mail access.
@@ -349,7 +347,7 @@ public class UserConfiguration implements Serializable, Cloneable {
              */
             return clone;
         } catch (final CloneNotSupportedException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw new InternalError(e.getMessage());
         }
     }
@@ -871,12 +869,12 @@ public class UserConfiguration implements Serializable, Cloneable {
                 }
             } catch (final OXException x) {
                 if (UserExceptionCode.USER_NOT_FOUND.equals(x)) {
-                    LOG.debug(x.getMessage(), x);
+                    LOG.debug("", x);
                 } else {
-                    LOG.error(x.getMessage(), x);
+                    LOG.error("", x);
                 }
             } catch (final RuntimeException x) {
-                LOG.error(x.getMessage(), x);
+                LOG.error("", x);
             }
         }
         return retval;

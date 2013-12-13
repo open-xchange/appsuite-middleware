@@ -50,8 +50,6 @@
 package com.gargoylesoftware.htmlunit;
 
 import org.apache.commons.httpclient.Cookie;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 
 /**
@@ -61,7 +59,7 @@ import com.openexchange.log.LogFactory;
  */
 public class CrawlerCookieSpecWithQuirkyQuotes extends CrawlerCookieSpec {
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CrawlerCookieSpecWithQuirkyQuotes.class));
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CrawlerCookieSpecWithQuirkyQuotes.class);
 
     public CrawlerCookieSpecWithQuirkyQuotes(){
     }

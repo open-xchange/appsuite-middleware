@@ -64,14 +64,12 @@ import net.htmlparser.jericho.StartTagType;
 import net.htmlparser.jericho.StreamedSource;
 import net.htmlparser.jericho.Tag;
 import net.htmlparser.jericho.TagType;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.parser.HtmlHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link JerichoParser} - Parses specified real-life HTML document.
@@ -80,9 +78,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class JerichoParser {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(JerichoParser.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JerichoParser.class);
 
     public static final class ParsingDeniedException extends RuntimeException {
 
@@ -199,7 +195,6 @@ public final class JerichoParser {
      * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
      */
     public void parse(final String html, final JerichoHandler handler) {
-        final long st = DEBUG ? System.currentTimeMillis() : 0L;
         StreamedSource streamedSource = null;
         try {
             streamedSource = checkBody(html);
@@ -220,10 +215,6 @@ public final class JerichoParser {
                  * Handle current segment
                  */
                 handleSegment(handler, segment);
-            }
-            if (DEBUG) {
-                final long dur = System.currentTimeMillis() - st;
-                LOG.debug("\tJerichoParser.parse() took " + dur + "msec.");
             }
         } catch (final StackOverflowError parserOverflow) {
             throw new ParsingDeniedException("Parser overflow detected.", parserOverflow);

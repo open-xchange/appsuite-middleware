@@ -52,7 +52,6 @@ package com.openexchange.service.indexing.impl.internal.nonclustered;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
-import org.apache.commons.logging.Log;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -89,7 +88,7 @@ import com.openexchange.solr.SolrCoreIdentifier;
 @DisallowConcurrentExecution
 public class RunOrRescheduleAtTargetJob implements Job {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RunOrRescheduleAtTargetJob.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RunOrRescheduleAtTargetJob.class);
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -102,9 +101,7 @@ public class RunOrRescheduleAtTargetJob implements Job {
         }
 
         JobInfo jobInfo = (JobInfo) infoObject;
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Started execution of job " + jobInfo.toString() + ". Trigger: " + context.getTrigger().getKey());
-        }
+        LOG.debug("Started execution of job {}. Trigger: {}", jobInfo, context.getTrigger().getKey());
 
         try {
             SolrCoreIdentifier identifier = new SolrCoreIdentifier(jobInfo.contextId, jobInfo.userId, jobInfo.getModule());
@@ -146,7 +143,7 @@ public class RunOrRescheduleAtTargetJob implements Job {
                     if (!modules.containsModule(jobInfo.getModule())) {
                         if (LOG.isDebugEnabled()) {
                             OXException e = IndexExceptionCodes.INDEXING_NOT_ENABLED.create(jobInfo.getModule(), jobInfo.userId, jobInfo.contextId);
-                            LOG.debug("Skipping job execution because: " + e.getMessage());
+                            LOG.debug("Skipping job execution because: {}", e.getMessage());
                         }
 
                         return;
@@ -154,9 +151,7 @@ public class RunOrRescheduleAtTargetJob implements Job {
 
                     IndexManagementService managementService = Services.getService(IndexManagementService.class);
                     if (managementService.isLocked(jobInfo.contextId, jobInfo.userId, jobInfo.getModule())) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Skipping job execution because corresponding index is locked. " + jobInfo.toString());
-                        }
+                        LOG.debug("Skipping job execution because corresponding index is locked. {}", jobInfo);
 
                         return;
                     }
@@ -175,9 +170,7 @@ public class RunOrRescheduleAtTargetJob implements Job {
                         priority = (Integer) prioObj;
                     }
 
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Rescheduling job " + jobInfo.toString() + " at member " + owner + ".");
-                    }
+                    LOG.debug("Rescheduling job {} at member {}.", jobInfo, owner);
                     FutureTask<Object> task = new DistributedTask<Object>(
                         new ScheduleJobCallable(jobInfo, new Date(), interval, priority),
                         executor);
@@ -188,7 +181,7 @@ public class RunOrRescheduleAtTargetJob implements Job {
                 }
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -210,9 +203,7 @@ public class RunOrRescheduleAtTargetJob implements Job {
         }
 
         try {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Executing job " + jobInfo.toString());
-            }
+            LOG.debug("Executing job {}", jobInfo);
             indexingJob.execute(jobInfo);
         } catch (Throwable t) {
             String msg = "Error during IndexingJob execution. " + jobInfo.toString();

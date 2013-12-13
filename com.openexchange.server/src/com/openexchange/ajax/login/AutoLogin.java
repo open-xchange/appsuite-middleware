@@ -61,7 +61,6 @@ import java.util.concurrent.Future;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.LoginServlet;
@@ -75,7 +74,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
@@ -94,7 +92,7 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public class AutoLogin extends AbstractLoginRequestHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AutoLogin.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AutoLogin.class);
 
     private final LoginConfiguration conf;
 
@@ -128,7 +126,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
             final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
             if (null == sessiondService) {
                 final OXException se = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
-                LOG.error(se.getMessage(), se);
+                LOG.error("", se);
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
@@ -188,7 +186,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                             } catch (final ExecutionException e) {
                                 // Cannot occur
                                 final Throwable cause = e.getCause();
-                                LOG.warn("Modules could not be added to login JSON response: " + cause.getMessage(), cause);
+                                LOG.warn("Modules could not be added to login JSON response: {}", cause.getMessage(), cause);
                             }
                         }
 
@@ -226,7 +224,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
 
         } catch (final OXException e) {
             if (AjaxExceptionCodes.DISABLED_ACTION.equals(e)) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             } else {
                 e.log(LOG);
             }
@@ -244,7 +242,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
             response.setException(e);
         } catch (final JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error(oje.getMessage(), oje);
+            LOG.error("", oje);
             response.setException(oje);
         }
         // The magic spell to disable caching

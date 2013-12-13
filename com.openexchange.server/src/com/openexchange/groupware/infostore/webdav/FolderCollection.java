@@ -59,7 +59,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.Category;
@@ -76,7 +75,6 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -98,7 +96,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
 public class FolderCollection extends AbstractCollection implements OXWebdavResource {
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderCollection.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderCollection.class);
 	private final InfostoreWebdavFactory factory;
 	private WebdavPath url;
 	private final PropertyHelper propertyHelper;
@@ -671,9 +669,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		try {
 			url = parent().getUrl().dup().append(getDisplayName());
 		} catch (final OXException e) {
-			if (LOG.isErrorEnabled()) {
-				LOG.error(e.getMessage(), e);
-			}
+			LOG.error("", e);
 		}
 	}
 

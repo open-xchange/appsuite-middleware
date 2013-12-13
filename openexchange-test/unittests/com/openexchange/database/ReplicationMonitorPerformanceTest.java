@@ -69,7 +69,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Assert;
@@ -91,7 +90,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class ReplicationMonitorPerformanceTest {
 
-    private static final Log LOG = LogFactory.getLog(ReplicationMonitorPerformanceTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReplicationMonitorPerformanceTest.class);
 
     private static final int RUNS = 5;
 
@@ -136,7 +135,7 @@ public class ReplicationMonitorPerformanceTest {
                 + "PRIMARY KEY (`id`)"
                 + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
         } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             DBUtils.closeSQLStuff(stmt);
             db.releaseWriteConnection(context, writeCon);

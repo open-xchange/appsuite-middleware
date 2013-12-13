@@ -61,12 +61,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Publication;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.RateLimitedException;
@@ -79,7 +77,7 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public class OnlinePublicationServlet extends HttpServlet {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OnlinePublicationServlet.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OnlinePublicationServlet.class);
 
     private static final long serialVersionUID = 6966967169899449051L;
 
@@ -145,7 +143,7 @@ public class OnlinePublicationServlet extends HttpServlet {
                 return true;
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
         resp.getWriter().println("Cannot find the publication site.");

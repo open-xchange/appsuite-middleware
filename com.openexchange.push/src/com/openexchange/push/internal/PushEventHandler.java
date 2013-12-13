@@ -49,15 +49,12 @@
 
 package com.openexchange.push.internal;
 
-import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.PushUtility;
@@ -74,9 +71,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  */
 public final class PushEventHandler implements EventHandler {
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushEventHandler.class));
-
-    protected static final boolean DEBUG = LOG.isDebugEnabled();
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushEventHandler.class);
 
     public PushEventHandler() {
         super();
@@ -131,10 +126,8 @@ public final class PushEventHandler implements EventHandler {
                             final PushManagerService pushManager = pushManagersIterator.next();
                             // Stop listener for session
                             final boolean stopped = pushManager.stopListener(session);
-                            if (DEBUG && stopped) {
-                                LOG.debug(new StringBuilder(64).append("Stopped push listener for user ").append(session.getUserId()).append(
-                                    " in context ").append(session.getContextId()).append(" by push manager \"").append(
-                                    pushManager.toString()).append('"').toString());
+                            if (stopped) {
+                                LOG.debug("Stopped push listener for user {} in context {} by push manager \"{}{}", session.getUserId(), session.getContextId(), pushManager, '"');
                             }
                         } catch (final OXException e) {
                             LOG.error("Push error while stopping push listener.", e);
@@ -164,10 +157,8 @@ public final class PushEventHandler implements EventHandler {
                                         return;
                                     }
                                     final boolean stopped = pushManager.stopListener(session);
-                                    if (DEBUG && stopped) {
-                                        LOG.debug(new StringBuilder(64).append("Stopped push listener for user ").append(session.getUserId()).append(
-                                            " in context ").append(session.getContextId()).append(" by push manager \"").append(
-                                            pushManager.toString()).append('"').toString());
+                                    if (stopped) {
+                                        LOG.debug("Stopped push listener for user {} in context {} by push manager \"{}{}", session.getUserId(), session.getContextId(), pushManager, '"');
                                     }
                                 }
                             } catch (final OXException e) {
@@ -197,10 +188,8 @@ public final class PushEventHandler implements EventHandler {
                             final PushManagerService pushManager = pushManagersIterator.next();
                             // Initialize a new push listener for session
                             final PushListener pl = pushManager.startListener(session);
-                            if (DEBUG && null != pl) {
-                                LOG.debug(new StringBuilder(64).append("Started push listener for user ").append(session.getUserId()).append(
-                                    " in context ").append(session.getContextId()).append(" by push manager \"").append(
-                                    pushManager.toString()).append('"').toString());
+                            if (null != pl) {
+                                LOG.debug("Started push listener for user {} in context {} by push manager \"{}{}", session.getUserId(), session.getContextId(), pushManager, '"');
                             }
                         } catch (final OXException e) {
                             LOG.error("Push error while starting push listener.", e);
@@ -210,7 +199,7 @@ public final class PushEventHandler implements EventHandler {
                     }
                 }
             } catch (final Exception e) {
-                LOG.error(MessageFormat.format("Error while handling SessionD event \"{0}\": {1}", topic, e.getMessage()), e);
+                LOG.error("Error while handling SessionD event \"{}\": {}", topic, e.getMessage(), e);
             }
         }
     } // End of PushEventHandlerRunnable

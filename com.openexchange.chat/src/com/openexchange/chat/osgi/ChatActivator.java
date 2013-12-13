@@ -49,8 +49,6 @@
 
 package com.openexchange.chat.osgi;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.chat.ChatServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -78,7 +76,7 @@ public class ChatActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(ChatActivator.class));
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ChatActivator.class);
         log.info("Starting bundle: com.openexchange.chat");
         try {
             registry = new OSGiChatServiceRegistry();
@@ -91,7 +89,7 @@ public class ChatActivator extends HousekeepingActivator {
 
     @Override
     public void stopBundle() {
-        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(ChatActivator.class));
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ChatActivator.class);
         log.info("Stopping bundle: com.openexchange.chat");
         try {
             unregisterServices();

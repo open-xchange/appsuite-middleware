@@ -50,7 +50,6 @@
 package com.openexchange.freebusy.publisher.ews.osgi;
 
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.ews.EWSFactoryService;
@@ -58,7 +57,6 @@ import com.openexchange.freebusy.provider.InternalFreeBusyProvider;
 import com.openexchange.freebusy.publisher.ews.Tools;
 import com.openexchange.freebusy.publisher.ews.internal.EWSFreeBusyPublisherLookup;
 import com.openexchange.freebusy.publisher.ews.internal.Publisher;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -71,7 +69,7 @@ import com.openexchange.user.UserService;
  */
 public class EWSFreeBusyPublisherActivator extends HousekeepingActivator {
 
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EWSFreeBusyPublisherActivator.class));
+    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EWSFreeBusyPublisherActivator.class);
 
     private ScheduledTimerTask publishTask = null;
 
@@ -97,8 +95,7 @@ public class EWSFreeBusyPublisherActivator extends HousekeepingActivator {
             int delay = Tools.getConfigPropertyInt("com.openexchange.freebusy.publisher.ews.delay", 15);
             publishTask = EWSFreeBusyPublisherLookup.getService(TimerService.class).scheduleWithFixedDelay(
                 new Publisher(), initialDelay, delay, TimeUnit.MINUTES);
-            LOG.info("Scheduled first publication cycle to run in " + initialDelay +
-                " minutes, then repeating with a delay of " + delay + " minutes.");
+            LOG.info("Scheduled first publication cycle to run in {} minutes, then repeating with a delay of {} minutes.", initialDelay, delay);
         } catch (Exception e) {
             LOG.error("error starting com.openexchange.freebusy.publisher.ews", e);
             throw e;

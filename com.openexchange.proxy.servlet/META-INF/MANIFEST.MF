@@ -30,5 +30,6 @@ Import-Package: com.openexchange.ajax,
  org.osgi.framework,
  org.osgi.service.event,
  org.osgi.service.http,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Bundle-Activator: com.openexchange.proxy.servlet.osgi.ProxyServletActivator

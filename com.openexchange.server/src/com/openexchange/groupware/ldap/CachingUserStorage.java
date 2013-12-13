@@ -58,14 +58,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -77,7 +75,7 @@ public class CachingUserStorage extends UserStorage {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CachingUserStorage.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CachingUserStorage.class);
 
     private static final String REGION_NAME = "User";
 
@@ -211,9 +209,7 @@ public class CachingUserStorage extends UserStorage {
                 tmp = null;
             }
             if (null == tmp) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Cache MISS. Context: " + context.getContextId() + " User: " + uid);
-                }
+                LOG.trace("Cache MISS. Context: {} User: {}", context.getContextId(), uid);
                 identifier = delegate.getUserId(uid, context);
                 try {
                     cache.put(key, Integer.valueOf(identifier), false);
@@ -221,9 +217,7 @@ public class CachingUserStorage extends UserStorage {
                     throw LdapExceptionCode.CACHE_PROBLEM.create(e, new Object[0]).setPrefix("USR");
                 }
             } else {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Cache HIT. Context: " + context.getContextId() + " User: " + uid);
-                }
+                LOG.trace("Cache HIT. Context: {} User: {}", context.getContextId(), uid);
                 identifier = tmp.intValue();
             }
             return identifier;

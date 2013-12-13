@@ -64,16 +64,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
@@ -85,7 +82,7 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public final class LoginTools {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(LoginTools.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LoginTools.class);
 
     private LoginTools() {
         super();
@@ -146,11 +143,11 @@ public final class LoginTools {
     public static String parseClient(HttpServletRequest req, boolean strict, String defaultClient) throws OXException {
         return parseParameter(req, CLIENT_PARAM, strict, defaultClient);
     }
-    
+
     public static String parseToken(HttpServletRequest req) throws OXException {
         return parseParameter(req, TOKEN);
     }
-    
+
     public static String parseAppSecret(HttpServletRequest req) throws OXException {
         return parseParameter(req, APPSECRET);
     }
@@ -209,13 +206,12 @@ public final class LoginTools {
         final String httpSessionId = req.getSession(true).getId();
         // Add properties
         {
-            final Props props = LogProperties.getLogProperties();
-            props.put(LogProperties.Name.LOGIN_LOGIN, ForceLog.valueOf(Strings.abbreviate(login, 256)));
-            props.put(LogProperties.Name.LOGIN_CLIENT_IP, ForceLog.valueOf(clientIP));
-            props.put(LogProperties.Name.LOGIN_USER_AGENT, ForceLog.valueOf(userAgent));
-            props.put(LogProperties.Name.LOGIN_AUTH_ID, ForceLog.valueOf(authId));
-            props.put(LogProperties.Name.LOGIN_CLIENT, ForceLog.valueOf(client));
-            props.put(LogProperties.Name.LOGIN_VERSION, ForceLog.valueOf(version));
+            LogProperties.putProperty(LogProperties.Name.LOGIN_LOGIN, Strings.abbreviate(login, 256));
+            LogProperties.putProperty(LogProperties.Name.LOGIN_CLIENT_IP, clientIP);
+            LogProperties.putProperty(LogProperties.Name.LOGIN_USER_AGENT, userAgent);
+            LogProperties.putProperty(LogProperties.Name.LOGIN_AUTH_ID, authId);
+            LogProperties.putProperty(LogProperties.Name.LOGIN_CLIENT, client);
+            LogProperties.putProperty(LogProperties.Name.LOGIN_VERSION, version);
         }
         // Return
         return new LoginRequestImpl(
@@ -274,7 +270,7 @@ public final class LoginTools {
         if (conf.isInsecure()) {
             String oldIP = session.getLocalIp();
             if (null != newIP && !newIP.equals(oldIP)) {
-                LOG.info("Updating sessions IP address. authID: " + session.getAuthId() + ", sessionID: " + session.getSessionID() + ", old ip: " + oldIP + ", new ip: " + newIP);
+                LOG.info("Updating sessions IP address. authID: {}, sessionID: {}, old ip: {}, new ip: {}", session.getAuthId(), session.getSessionID(), oldIP, newIP);
                 session.setLocalIp(newIP);
             }
         }

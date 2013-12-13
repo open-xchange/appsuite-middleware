@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -76,7 +75,6 @@ import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.update.Tools;
 import edu.emory.mathcs.backport.java.util.Collections;
 
@@ -88,7 +86,7 @@ import edu.emory.mathcs.backport.java.util.Collections;
  */
 public class SchemaStoreImpl extends SchemaStore {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SchemaStoreImpl.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SchemaStoreImpl.class);
     private static final String TABLE_NAME = "updateTask";
     private static final String LOCKED = "LOCKED";
     private static final String BACKGROUND = "BACKGROUND";
@@ -116,7 +114,7 @@ public class SchemaStoreImpl extends SchemaStore {
                     try {
                         cache.putSafe(key, retval);
                     } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             } finally {
@@ -174,7 +172,7 @@ public class SchemaStoreImpl extends SchemaStore {
             try {
                 cache.remove(key);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         lockSchemaDB(schema, contextId, background);
@@ -182,7 +180,7 @@ public class SchemaStoreImpl extends SchemaStore {
             try {
                 cache.remove(key);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -322,7 +320,7 @@ public class SchemaStoreImpl extends SchemaStore {
             try {
                 cache.remove(key);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         unlockSchemaDB(schema, contextId, background);
@@ -330,7 +328,7 @@ public class SchemaStoreImpl extends SchemaStore {
             try {
                 cache.remove(key);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -536,7 +534,7 @@ public class SchemaStoreImpl extends SchemaStore {
             try {
                 cache.remove(key);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -634,7 +632,7 @@ public class SchemaStoreImpl extends SchemaStore {
         try {
             cache = cacheService.getCache("OXDBPoolCache");
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -644,7 +642,7 @@ public class SchemaStoreImpl extends SchemaStore {
             try {
                 cache.clear();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             cache = null;
         }

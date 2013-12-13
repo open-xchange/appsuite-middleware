@@ -50,7 +50,6 @@
 package com.openexchange.ajax.request;
 
 import static com.openexchange.mail.utils.StorageUtility.UNLIMITED_QUOTA;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -58,7 +57,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -70,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class QuotaRequest {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(QuotaRequest.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QuotaRequest.class);
 
     private QuotaFileStorage qfs;
 
@@ -138,11 +136,9 @@ public class QuotaRequest {
                     MailServletInterface.QUOTA_RESOURCE_STORAGE, MailServletInterface.QUOTA_RESOURCE_MESSAGE });
             } catch (final OXException e) {
                 if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e.getMessage(), e);
-                    }
+                    LOG.debug("", e);
                 } else {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
                 quotaInfo = new long[][] { { UNLIMITED_QUOTA, UNLIMITED_QUOTA }, { UNLIMITED_QUOTA, UNLIMITED_QUOTA } };
             }

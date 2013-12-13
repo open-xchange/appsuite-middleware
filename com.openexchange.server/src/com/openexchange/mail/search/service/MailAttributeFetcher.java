@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.search.service;
 
-import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -83,7 +82,7 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
  */
 public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMessage> {
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAttributeFetcher.class));
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAttributeFetcher.class);
 
     private static interface AttributeGetter {
 
@@ -121,7 +120,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
                 try {
                     return candidate.getContent();
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     return null;
                 }
             }
@@ -470,9 +469,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
     public <T> T getAttribute(final String attributeName, final MailMessage candidate) {
         final AttributeGetter getter = GETTERS.get(attributeName);
         if (null == getter) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info(MessageFormat.format("No getter for field: {0}", attributeName));
-            }
+            LOG.info("No getter for field: {}", attributeName);
             return null;
         }
         @SuppressWarnings("unchecked") final T retval = (T) getter.getObject(candidate);
@@ -491,9 +488,7 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
     public SearchTerm<?> getSearchTerm(final String attributeName, final SingleOperation operation, final Object constant) {
         final AttributeGetter getter = GETTERS.get(attributeName);
         if (null == getter) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info(MessageFormat.format("No getter for field: {0}", attributeName));
-            }
+            LOG.info("No getter for field: {}", attributeName);
             return null;
         }
         return getter.getSearchTerm(operation, constant);

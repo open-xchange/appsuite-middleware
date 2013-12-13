@@ -60,8 +60,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
 import com.openexchange.admin.reseller.rmi.OXResellerTools;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
@@ -81,7 +80,7 @@ import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
  */
 public class ResellerExtensionLoader implements Filter<Context, Context> {
 
-    private static final Log LOG = LogFactory.getLog(ResellerExtensionLoader.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResellerExtensionLoader.class);
 
     private final AdminCache cache;
 
@@ -163,7 +162,7 @@ public class ResellerExtensionLoader implements Filter<Context, Context> {
             try {
                 cache.pushConnectionForConfigDB(con);
             } catch (PoolException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

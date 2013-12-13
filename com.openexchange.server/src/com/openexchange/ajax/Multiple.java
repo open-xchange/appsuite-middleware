@@ -66,7 +66,6 @@ import java.util.concurrent.CompletionService;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -110,7 +109,7 @@ import com.openexchange.tools.session.ServerSession;
 public class Multiple extends SessionServlet {
 
     private static final long serialVersionUID = 3029074251138469122L;
-    private static final transient Log LOG = com.openexchange.log.Log.loggerFor(Multiple.class);
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Multiple.class);
 
     private static final String ACTION = PARAMETER_ACTION;
 
@@ -155,7 +154,7 @@ public class Multiple extends SessionServlet {
                 dataArray = new JSONArray(reader);
             } catch (final JSONException e) {
                 final OXException exc = OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
-                LOG.warn(exc.getMessage() + Tools.logHeaderForError(req), exc);
+                LOG.warn("{}{}", exc.getMessage(), Tools.logHeaderForError(req), exc);
                 dataArray = new JSONArray();
             } finally {
                 Streams.close(reader);
@@ -565,7 +564,7 @@ public class Multiple extends SessionServlet {
             /*
              * Cannot occur
              */
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return state;
     }
@@ -601,14 +600,14 @@ public class Multiple extends SessionServlet {
             try {
                 mi.close(true);
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
 
     private static void logError(final Object message, final Session session, final Exception e) {
         LogProperties.putSessionProperties(session);
-        LOG.error(message, e);
+        LOG.error(message.toString(), e);
     }
 
     private static final class CallableImpl implements Callable<Object> {

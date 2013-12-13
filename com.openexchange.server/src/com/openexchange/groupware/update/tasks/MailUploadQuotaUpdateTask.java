@@ -53,8 +53,6 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -68,7 +66,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public final class MailUploadQuotaUpdateTask implements UpdateTask {
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailUploadQuotaUpdateTask.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailUploadQuotaUpdateTask.class);
 
 	public MailUploadQuotaUpdateTask() {
 		super();

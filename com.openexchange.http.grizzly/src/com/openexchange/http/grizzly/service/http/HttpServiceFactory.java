@@ -96,8 +96,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
-import com.openexchange.log.Log;
-import com.openexchange.log.LogFactory;
+import org.slf4j.Logger;
 
 /**
  * Grizzly OSGi {@link HttpService} {@link ServiceFactory}.
@@ -108,7 +107,7 @@ import com.openexchange.log.LogFactory;
  */
 public class HttpServiceFactory implements ServiceFactory<HttpService> {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(HttpServiceFactory.class));
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpServiceFactory.class);
 
     private final OSGiMainHandler mainHttpHandler;
 
@@ -119,20 +118,14 @@ public class HttpServiceFactory implements ServiceFactory<HttpService> {
 
     @Override
     public HttpService getService(final Bundle bundle, final ServiceRegistration<HttpService> serviceRegistration) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder().append("Bundle: ").append(bundle).append(", is getting HttpService with serviceRegistration: ").append(
-                serviceRegistration).toString());
-        }
+        LOG.debug("Bundle: {}, is getting HttpService with serviceRegistration: {}", bundle, serviceRegistration);
 
         return new HttpServiceImpl(bundle);
     }
 
     @Override
     public void ungetService(final Bundle bundle, final ServiceRegistration<HttpService> serviceRegistration, final HttpService httpServiceObj) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder().append("Bundle: ").append(bundle).append(", is ungetting HttpService with serviceRegistration: ").append(
-                serviceRegistration).toString());
-        }
+        LOG.debug("Bundle: {}, is ungetting HttpService with serviceRegistration: {}", bundle, serviceRegistration);
         mainHttpHandler.uregisterAllLocal();
     }
 

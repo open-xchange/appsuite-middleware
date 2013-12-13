@@ -112,13 +112,13 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
         try {
             final File file = new File(arg);
             if (file.isFile()) {
-                is = new BufferedInputStream(new FileInputStream(new File(arg)));
+                is = new BufferedInputStream(new FileInputStream(new File(arg)), 65536);
             } else {
                 final URL url = new URL(arg);
                 final URLConnection connection = url.openConnection();
                 connection.setConnectTimeout(2500);
                 connection.setReadTimeout(2500);
-                is = new BufferedInputStream(connection.getInputStream());
+                is = new BufferedInputStream(connection.getInputStream(), 65536);
             }
             final String mimeType = detectDocumentType(is);
             /*

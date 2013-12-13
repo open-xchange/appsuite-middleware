@@ -74,7 +74,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.services.Services;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.Log;
 import com.openexchange.mail.mime.MimeMailException;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.ProtocolException;
@@ -95,9 +94,7 @@ import com.sun.mail.imap.protocol.IMAPResponse;
  */
 final class ListLsubCollection {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ListLsubCollection.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ListLsubCollection.class);
 
     private static final String ROOT_FULL_NAME = "";
 
@@ -219,17 +216,7 @@ final class ListLsubCollection {
     public void clear() {
         deprecated.set(true);
         stamp = 0;
-        if (DEBUG) {
-            if (Log.appendTraceToMessage()) {
-                final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator("Cleared LIST/LSUB cache.");
-                final String lineSeparator = System.getProperty("line.separator");
-                builder.append(lineSeparator);
-                appendStackTrace(new Throwable().getStackTrace(), builder, lineSeparator);
-                LOG.debug(builder.toString());
-            } else {
-                LOG.debug("Cleared LIST/LSUB cache.", new Throwable());
-            }
-        }
+        LOG.debug("Cleared LIST/LSUB cache.", new Throwable());
     }
 
     /**
@@ -340,7 +327,8 @@ final class ListLsubCollection {
             listMap.clear();
             lsubMap.clear();
         }
-        final long st = DEBUG ? System.currentTimeMillis() : 0L;
+        final boolean debug = LOG.isDebugEnabled();
+        final long st = debug ? System.currentTimeMillis() : 0L;
         /*
          * Perform LIST "" ""
          */
@@ -394,7 +382,7 @@ final class ListLsubCollection {
         /*
          * Debug logs
          */
-        if (DEBUG) {
+        if (debug) {
             final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
             {
                 final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>(listMap);
@@ -450,7 +438,7 @@ final class ListLsubCollection {
                             }
                         } catch (final Exception e) {
                             // Swallow failed STATUS command
-                            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ListLsubCollection.class)).debug(
+                            org.slf4j.LoggerFactory.getLogger(ListLsubCollection.class).debug(
                                 "STATUS command failed for " + imapFolder.getStore().toString(),
                                 e);
                         }
@@ -464,7 +452,7 @@ final class ListLsubCollection {
         if (doGetAcl) {
             initACLs(imapFolder);
         }
-        if (DEBUG) {
+        if (debug) {
             final long dur = System.currentTimeMillis() - st;
             final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(128);
             sb.append("LIST/LSUB cache");
@@ -498,7 +486,8 @@ final class ListLsubCollection {
         if (!((IMAPStore) imapFolder.getStore()).hasCapability("ACL")) {
             return;
         }
-        final long st = DEBUG ? System.currentTimeMillis() : 0L;
+        final boolean debug = LOG.isDebugEnabled();
+        final long st = debug ? System.currentTimeMillis() : 0L;
         final ConcurrentMap<String, ListLsubEntryImpl> primary;
         final ConcurrentMap<String, ListLsubEntryImpl> lookup;
         if (listMap.size() > lsubMap.size()) {
@@ -527,11 +516,11 @@ final class ListLsubCollection {
                     }
                 } catch (final Exception e) {
                     // Swallow failed ACL command
-                    LOG.debug("ACL/MYRIGHTS command failed for " + imapFolder.getStore().toString(), e);
+                    LOG.debug("ACL/MYRIGHTS command failed for {}", imapFolder.getStore(), e);
                 }
             }
         }
-        if (DEBUG) {
+        if (debug) {
             final long dur = System.currentTimeMillis() - st;
             final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
             sb.append("LIST/LSUB cache built GETACL entries in ").append(dur).append("msec.");
@@ -716,12 +705,10 @@ final class ListLsubCollection {
          */
         final String command = "LIST";
         final Response[] r;
-        if (DEBUG) {
+        {
             final String sCmd = new StringAllocator(command).append(" (SPECIAL-USE) \"\" \"*\"").toString();
             r = performCommand(protocol, sCmd);
-            LOG.debug((command) + " cache filled with >>" + sCmd + "<< which returned " + r.length + " response line(s).");
-        } else {
-            r = performCommand(protocol, new StringAllocator(command).append(" (SPECIAL-USE) \"\" \"*\"").toString());
+            LOG.debug("{0} cache filled with >>{}<< which returned {} response line(s).", (command), sCmd, r.length);
         }
         final Response response = r[r.length - 1];
         if (response.isOK()) {
@@ -768,16 +755,13 @@ final class ListLsubCollection {
         // Perform command
         final String command = lsub ? "LSUB" : "LIST";
         final Response[] r;
-        if (DEBUG) {
+        {
             final String sCmd = new StringAllocator(command).append(" \"\" \"*\"").toString();
             r = performCommand(protocol, sCmd);
-            LOG.debug((command) + " cache filled with >>" + sCmd + "<< which returned " + r.length + " response line(s).");
-        } else {
-            r = performCommand(protocol, new StringAllocator(command).append(" \"\" \"*\"").toString(), null);
+            LOG.debug("{} cache filled with >>{1}<< which returned {} response line(s).", (command), sCmd, r.length);
         }
         final Response response = r[r.length - 1];
         if (response.isOK()) {
-            final long st = DEBUG ? System.currentTimeMillis() : -1L;
             final ConcurrentMap<String, ListLsubEntryImpl> map = lsub ? lsubMap : listMap;
             final Map<String, List<ListLsubEntryImpl>> parentMap = new HashMap<String, List<ListLsubEntryImpl>>(4);
             final ListLsubEntryImpl rootEntry = map.get(ROOT_FULL_NAME);
@@ -844,10 +828,6 @@ final class ListLsubCollection {
 
             // Dispatch remaining untagged responses
             protocol.notifyResponseHandlers(r);
-            if (DEBUG) {
-                final long d = System.currentTimeMillis() - st;
-                LOG.debug(command + " cache filled within " + d + "msec.");
-            }
         } else {
             // Dispatch remaining untagged responses
             protocol.notifyResponseHandlers(r);
@@ -1251,20 +1231,21 @@ final class ListLsubCollection {
              * Dispatch remaining untagged responses
              */
             protocol.notifyResponseHandlers(r);
-            /*
-             * Debug logs
-             */
-            if (DEBUG) {
-                final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>();
-                tm.putAll(map);
-                final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
-                sb.append((lsub ? "LSUB" : "LIST") + " cache contains after adding single entry \"");
-                sb.append(fullName).append("\":\n");
-                for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
-                    sb.append('"').append(entry.getKey()).append("\"=").append(entry.getValue()).append('\n');
+            LOG.debug("{}", new Object() {
+
+                @Override
+                public String toString() {
+                    final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>();
+                    tm.putAll(map);
+                    final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
+                    sb.append((lsub ? "LSUB" : "LIST") + " cache contains after adding single entry \"");
+                    sb.append(fullName).append("\":\n");
+                    for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
+                        sb.append('"').append(entry.getKey()).append("\"=").append(entry.getValue()).append('\n');
+                    }
+                    return sb.toString();
                 }
-                LOG.debug(sb.toString());
-            }
+            });
             return retval;
         }
         /*
@@ -1300,7 +1281,7 @@ final class ListLsubCollection {
                         }
                     } catch (final Exception e) {
                         // Swallow failed STATUS command
-                        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ListLsubCollection.class)).debug(
+                        org.slf4j.LoggerFactory.getLogger(ListLsubCollection.class).debug(
                             "STATUS command failed for " + imapFolder.getStore().toString(),
                             e);
                     }
@@ -1320,7 +1301,7 @@ final class ListLsubCollection {
                         }
                     } catch (final Exception e) {
                         // Swallow failed ACL command
-                        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ListLsubCollection.class)).debug(
+                        org.slf4j.LoggerFactory.getLogger(ListLsubCollection.class).debug(
                             "ACL/MYRIGHTS command failed for " + imapFolder.getStore().toString(),
                             e);
                     }

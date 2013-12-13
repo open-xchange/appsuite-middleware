@@ -54,13 +54,11 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import javax.mail.MessagingException;
-import org.apache.commons.logging.Log;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.services.Services;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.config.MailProperties;
@@ -80,12 +78,9 @@ import com.sun.mail.imap.IMAPStore;
  */
 public final class IMAPStoreCache {
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IMAPStoreCache.class));
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPStoreCache.class);
 
-    protected static final boolean DEBUG = LOG.isDebugEnabled();
-
-    private static final int SHRINKER_MILLIS =
-        (MailProperties.getInstance().getMailAccessCacheShrinkerSeconds() <= 0 ? 3 : MailProperties.getInstance().getMailAccessCacheShrinkerSeconds()) * 1000;
+    private static final int SHRINKER_MILLIS = (MailProperties.getInstance().getMailAccessCacheShrinkerSeconds() <= 0 ? 3 : MailProperties.getInstance().getMailAccessCacheShrinkerSeconds()) * 1000;
 
     protected static final int IDLE_MILLIS = MailProperties.getInstance().getMailAccessCacheIdleSeconds() * 1000;
 
@@ -103,7 +98,7 @@ public final class IMAPStoreCache {
         final boolean checkConnected = null == service ? false : service.getBoolProperty("com.openexchange.imap.checkConnected", false);
         Container container = null == service ? Container.getDefault() : Container.containerFor(service.getProperty("com.openexchange.imap.storeContainerType", Container.getDefault().getId()));
         if (Container.UNBOUNDED.equals(container) && (null != service && service.getIntProperty("com.openexchange.imap.maxNumConnections", 0) > 0)) {
-            LOG.warn("Property \"com.openexchange.imap.storeContainerType\" is set to \"unbounded\", but \"com.openexchange.imap.maxNumConnections\" is greater than zero. Using default container \"" + Container.getDefault().getId() + "\" instead.");
+            LOG.warn("Property \"com.openexchange.imap.storeContainerType\" is set to \"unbounded\", but \"com.openexchange.imap.maxNumConnections\" is greater than zero. Using default container \"{}\" instead.", Container.getDefault().getId());
             container = Container.getDefault();
         }
         tmp = instance = new IMAPStoreCache(checkConnected, container);
@@ -163,7 +158,7 @@ public final class IMAPStoreCache {
             try {
                 closeElapsed();
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
 
@@ -345,14 +340,7 @@ public final class IMAPStoreCache {
          * Return connected IMAP store
          */
         try {
-            if (!DEBUG) {
-                return getContainer(accountId, server, port, login, session).getStore(imapSession, login, pw);
-            }
-            final long st = System.currentTimeMillis();
-            final IMAPStore store = getContainer(accountId, server, port, login, session).getStore(imapSession, login, pw);
-            final long dur = System.currentTimeMillis() - st;
-            LOG.debug("IMAPStoreCache.borrowIMAPStore() took " + dur + "msec.");
-            return store;
+            return getContainer(accountId, server, port, login, session).getStore(imapSession, login, pw);
         } catch (final InterruptedException e) {
             // Should not occur
             Thread.currentThread().interrupt();

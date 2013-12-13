@@ -2,7 +2,6 @@ package com.openexchange.ajax.appointment;
 
 import java.io.ByteArrayInputStream;
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import com.meterware.httpunit.PutMethodWebRequest;
@@ -21,7 +20,7 @@ import com.openexchange.tools.URLParameter;
 
 public class CopyTest extends AppointmentTest {
 
-	private static final Log LOG = LogFactory.getLog(CopyTest.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CopyTest.class);
 
 	public CopyTest(final String name) {
 		super(name);

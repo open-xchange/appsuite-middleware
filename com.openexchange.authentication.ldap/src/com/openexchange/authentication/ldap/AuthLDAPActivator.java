@@ -51,12 +51,10 @@ package com.openexchange.authentication.ldap;
 
 import java.util.Properties;
 import javax.security.auth.login.LoginException;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.DeferredActivator;
 
 /**
@@ -66,7 +64,7 @@ import com.openexchange.osgi.DeferredActivator;
  */
 public class AuthLDAPActivator extends DeferredActivator {
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AuthLDAPActivator.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AuthLDAPActivator.class);
 
 	private ServiceRegistration<AuthenticationService> registration;
 

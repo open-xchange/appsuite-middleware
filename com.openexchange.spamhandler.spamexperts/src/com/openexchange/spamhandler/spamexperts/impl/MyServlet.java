@@ -81,7 +81,7 @@ public final class MyServlet extends DataServlet {
 	 *
 	 */
 	private static final long serialVersionUID = -8914926421736440078L;
-	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MyServlet.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MyServlet.class);
 
 	public MyServlet() {
 		super();
@@ -108,7 +108,7 @@ public final class MyServlet extends DataServlet {
 			try {
 				jsonObj = convertParameter2JSONObject(req);
 			} catch (final JSONException e) {
-				LOG.error(e.getMessage(), e);
+				LOG.error("", e);
 				response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
 				writeResponse(response, resp, session);
 				return;
@@ -119,11 +119,11 @@ public final class MyServlet extends DataServlet {
 			response.setData(responseObj);
 
 		} catch (final OXException e) {
-			LOG.error(e.getMessage(), e);
+			LOG.error("", e);
 			response.setException(e);
 		} catch (final JSONException e) {
 			final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-			LOG.error(oje.getMessage(), oje);
+			LOG.error("", oje);
 			response.setException(oje);
 		}
 

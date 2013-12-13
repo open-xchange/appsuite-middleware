@@ -61,7 +61,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.properties.AdminProperties;
@@ -80,7 +79,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 
 /**
@@ -89,7 +87,7 @@ import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
  */
 public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDefaultValues {
 
-    private final static Log log = LogFactory.getLog(OXGroupMySQLStorage.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXGroupMySQLStorage.class);
 
     private void changeLastModifiedOnGroup(int ctxId, int groupId, Connection con) throws SQLException {
         PreparedStatement stmt = null;
@@ -309,7 +307,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             // set last modified
             changeLastModifiedOnGroup(ctxId, groupId, con);
             con.commit();
-            log.info("Group " + groupId + " changed!");
+            log.info("Group {} changed!", groupId);
         } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             rollback(con);
@@ -381,7 +379,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 changeLastModifiedOfGroupMembers(ctx, con, group.getMembers());
             }
             con.commit();
-            log.info("Group " + groupId + " created!");
+            log.info("Group {} created!", groupId);
         } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             rollback(con);
@@ -473,7 +471,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                                 cache.remove(key);
                             }
                         } catch (final OXException e) {
-                            log.error(e.getMessage(), e);
+                            log.error("", e);
                         } finally {
                             AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
                         }
@@ -484,7 +482,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             con.commit();
 
             for (Group group : groups) {
-                log.info("Group " + group.getId() + " deleted!");
+                log.info("Group {} deleted!", group.getId());
             }
         } catch (SQLException e) {
             log.error("SQL Error", e);

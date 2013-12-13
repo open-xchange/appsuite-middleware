@@ -51,7 +51,6 @@ package com.openexchange.snippet.rdb.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.Constants;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -94,7 +93,7 @@ public class RdbSnippetActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final Log logger = com.openexchange.log.Log.loggerFor(RdbSnippetActivator.class);
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RdbSnippetActivator.class);
         logger.info("Starting bundle: com.openexchange.snippet.rdb");
         try {
             Services.setServiceLookup(this);

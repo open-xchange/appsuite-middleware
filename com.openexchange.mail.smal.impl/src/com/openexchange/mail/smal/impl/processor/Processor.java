@@ -55,13 +55,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexFacadeService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
@@ -73,7 +71,6 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.index.MailUtility;
-import com.openexchange.mail.smal.impl.DebugInfo;
 import com.openexchange.mail.smal.impl.SmalMailAccess;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.mail.smal.impl.index.IndexAccessAdapter;
@@ -92,7 +89,7 @@ public class Processor {
     /**
      * The logger constant.
      */
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Processor.class));
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Processor.class);
 
     /**
      * The singleton instance.
@@ -210,7 +207,7 @@ public class Processor {
                     submitJob(mailAccess);
                 }
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } finally {
                 SmalMailAccess.closeUnwrappedInstance(mailAccess);
                 MailUtility.releaseAccess(facade, indexAccess);
@@ -232,16 +229,7 @@ public class Processor {
                 for (final MailMessage message : messages) {
                     documents.add(IndexDocumentHelper.documentFor(message, accountId));
                 }
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Starting addAttachments() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
-                    final long st = System.currentTimeMillis();
-                    indexAccess.addDocuments(documents);
-                    final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("Performed addAttachments() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" in " + dur + "msec. " + new DebugInfo(
-                        mailAccess));
-                } else {
-                    indexAccess.addDocuments(documents);
-                }
+                indexAccess.addDocuments(documents);
             } else if (strategy.addHeadersAndContent(messageCount, folderInfo)) { // headers + content
                 final MailMessage[] messages =
                     mailAccess.getMessageStorage().getAllMessages(
@@ -254,16 +242,7 @@ public class Processor {
                 for (final MailMessage message : messages) {
                     documents.add(IndexDocumentHelper.documentFor(message, accountId));
                 }
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Starting addContent() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
-                    final long st = System.currentTimeMillis();
-                    indexAccess.addDocuments(documents);
-                    final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("Performed addContent() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" in " + dur + "msec. " + new DebugInfo(
-                        mailAccess));
-                } else {
-                    indexAccess.addDocuments(documents);
-                }
+                indexAccess.addDocuments(documents);
             } else if (strategy.addHeadersOnly(messageCount, folderInfo)) { // headers only
                 final MailMessage[] messages =
                     mailAccess.getMessageStorage().getAllMessages(
@@ -276,16 +255,7 @@ public class Processor {
                 for (final MailMessage message : messages) {
                     documents.add(IndexDocumentHelper.documentFor(message, accountId));
                 }
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Starting addEnvelopeData() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
-                    final long st = System.currentTimeMillis();
-                    indexAccess.addDocuments(documents);
-                    final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("Performed addEnvelopeData() for " + documents.size() + " documents from \"" + folderInfo.getFullName() + "\" in " + dur + "msec. " + new DebugInfo(
-                        mailAccess));
-                } else {
-                    indexAccess.addDocuments(documents);
-                }
+                indexAccess.addDocuments(documents);
             } else {
                  submitJob(mailAccess);
             }
@@ -310,7 +280,7 @@ public class Processor {
 //            folderJob.setStorageMails(null == storageMails ? null : new ArrayList<MailMessage>(storageMails));
 //            indexingService.addJob(folderJob);
 //            if (LOG.isDebugEnabled()) {
-//                LOG.debug("Scheduled new job for \"" + folderInfo.getFullName() + "\" " + new DebugInfo(mailAccess));
+//                LOG.debug("Scheduled new job for \"{}\" {}", folderInfo.getFullName(), new DebugInfo(mailAccess));
 //            }
         }
     }

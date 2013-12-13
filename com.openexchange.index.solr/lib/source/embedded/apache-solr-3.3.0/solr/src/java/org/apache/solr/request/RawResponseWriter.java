@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 @Deprecated
 public class RawResponseWriter extends org.apache.solr.response.RawResponseWriter 
 {
-  private static Logger log = LoggerFactory.getLogger(RawResponseWriter.class.getName());
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(RawResponseWriter.class.getName());
 
   
   public RawResponseWriter(){

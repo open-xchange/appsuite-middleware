@@ -74,7 +74,7 @@ import com.sun.mail.imap.IMAPFolder;
  */
 final class IMAPSessionStorage {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPSessionStorage.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPSessionStorage.class);
 
     private final Object lock;
 
@@ -241,7 +241,7 @@ final class IMAPSessionStorage {
                     try {
                         MailMessageCache.getInstance().removeFolderMessages(accountId, fullName, userId, contextId);
                     } catch (final Exception e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
                 /*

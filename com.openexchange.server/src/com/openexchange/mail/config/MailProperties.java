@@ -60,12 +60,10 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailConfig.LoginSource;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
@@ -81,7 +79,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class MailProperties implements IMailProperties {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailProperties.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailProperties.class);
 
     private static volatile MailProperties instance;
 
@@ -512,7 +510,7 @@ public final class MailProperties implements IMailProperties {
                     /*
                      * Cannot occur
                      */
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
                 logBuilder.append("\tPartModifier Implementation: Unknown class \"").append(partModifierStr).append(fallbackPrefix).append(
                     DummyPartModifier.class.getName()).append('\n');
@@ -657,9 +655,7 @@ public final class MailProperties implements IMailProperties {
         }
 
         logBuilder.append("Global mail properties successfully loaded!");
-        if (LOG.isInfoEnabled()) {
-            LOG.info(logBuilder.toString());
-        }
+        LOG.info(logBuilder.toString());
     }
 
     /**

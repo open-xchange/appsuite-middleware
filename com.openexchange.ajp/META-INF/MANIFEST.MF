@@ -66,6 +66,7 @@ Import-Package: com.google.common.annotations,
  org.osgi.service.event,
  org.osgi.service.http,
  org.osgi.util.tracker,
+ org.slf4j,
  sun.misc
 Bundle-ClassPath: .
 Bundle-Activator: com.openexchange.ajp13.osgi.AJPv13Activator

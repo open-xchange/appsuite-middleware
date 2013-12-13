@@ -78,7 +78,7 @@ public class BlackWhiteListServlet extends DataServlet {
      */
     private static final long serialVersionUID = -929748663411398165L;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(BlackWhiteListServlet.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BlackWhiteListServlet.class);
 
     private static final String ADD = "add";
 
@@ -126,10 +126,10 @@ public class BlackWhiteListServlet extends DataServlet {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(PARAMETER_ACTION, action);
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
         }
         writeResponse(response, resp, session);

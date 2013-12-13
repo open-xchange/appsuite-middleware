@@ -78,7 +78,6 @@ import net.oauth.OAuthProblemException;
 import net.oauth.OAuthValidator;
 import net.oauth.server.OAuthServlet;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -95,7 +94,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class DatabaseOAuthProviderService extends AbstractOAuthProviderService implements OAuthProviderService {
 
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(DatabaseOAuthProviderService.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseOAuthProviderService.class);
 
     /*
      * Member section
@@ -210,8 +209,6 @@ public class DatabaseOAuthProviderService extends AbstractOAuthProviderService i
                 @Override
                 public void run() {
                     try {
-                        final boolean infoEnabled = LOG.isInfoEnabled();
-                        final long st = infoEnabled ? System.currentTimeMillis() : 0L;
                         final TIntSet processed = new TIntHashSet(contextIds.size());
                         final AtomicReference<OXException> errorRef = new AtomicReference<OXException>();
                         final List<int[]> delete = new LinkedList<int[]>();
@@ -337,10 +334,6 @@ public class DatabaseOAuthProviderService extends AbstractOAuthProviderService i
                                     databaseService.backWritable(cid, con);
                                 }
                             }
-                        }
-                        if (infoEnabled) {
-                            final long dur = System.currentTimeMillis() - st;
-                            LOG.info("DatabaseOAuthProviderService.loadConsumers(): Loading accessors took " + dur + "msec");
                         }
                     } catch (final Exception e) {
                         LOG.warn("Couldn't load OAuth accessors.", e);

@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
  */
 public class StreamingUpdateSolrServer extends CommonsHttpSolrServer
 {
-  static final Logger log = LoggerFactory.getLogger( StreamingUpdateSolrServer.class );
+  static final org.slf4j.Logger log = LoggerFactory.getLogger( StreamingUpdateSolrServer.class );
   
   final BlockingQueue<UpdateRequest> queue;
   final ExecutorService scheduler = Executors.newCachedThreadPool();

@@ -56,8 +56,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
@@ -95,7 +93,7 @@ public final class IDGenerator {
         }
     }
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IDGenerator.class));
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IDGenerator.class);
 
     /**
      * Used implementation.
@@ -448,9 +446,7 @@ public final class IDGenerator {
                     newId = result.getInt(1);
                 }
             } catch (final SQLException e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("SQL Problem: " + stmt);
-                }
+                LOG.debug("SQL Problem: {}", stmt);
                 throw e;
             } finally {
                 closeSQLStuff(result, stmt);
@@ -478,9 +474,7 @@ public final class IDGenerator {
                     newId = result.getInt(1);
                 }
             } catch (final SQLException e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("SQL Problem: " + stmt);
-                }
+                LOG.debug("SQL Problem: {}", stmt);
                 throw e;
             } finally {
                 closeSQLStuff(result, stmt);
@@ -579,9 +573,7 @@ public final class IDGenerator {
                     newId = result.getInt(1);
                 }
             } catch (final SQLException e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("SQL Problem: " + stmt);
-                }
+                LOG.debug("SQL Problem: {}", stmt);
                 throw e;
             } finally {
                 closeSQLStuff(result, stmt);
@@ -608,9 +600,7 @@ public final class IDGenerator {
                     newId = result.getInt(1);
                 }
             } catch (final SQLException e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("SQL Problem: " + stmt);
-                }
+                LOG.debug("SQL Problem: {}", stmt);
                 throw e;
             } finally {
                 closeSQLStuff(result, stmt);

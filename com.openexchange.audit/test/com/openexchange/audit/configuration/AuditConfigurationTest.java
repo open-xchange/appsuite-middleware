@@ -54,6 +54,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -65,7 +66,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * Unit tests for {@link AuditConfiguration}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4.1
  */
@@ -95,8 +96,8 @@ public class AuditConfigurationTest {
     @Test
     public void testGetFileAccessLogging_ServiceAvailableAndConfiguredTrue_ReturnTrue() throws OXException {
         PowerMockito.mockStatic(Services.class);
-        PowerMockito.when(Services.optService(ConfigurationService.class)).thenReturn(configurationService);
-        PowerMockito.when(this.configurationService.getProperty("com.openexchange.audit.logging.FileAccessLogging.enabled", "true")).thenReturn(
+        Mockito.when(Services.optService(ConfigurationService.class)).thenReturn(configurationService);
+        Mockito.when(this.configurationService.getProperty("com.openexchange.audit.logging.FileAccessLogging.enabled", "true")).thenReturn(
             "true");
 
         boolean fileAccessLogging = AuditConfiguration.getFileAccessLogging();
@@ -106,7 +107,7 @@ public class AuditConfigurationTest {
     @Test
     public void testGetFileAccessLogging_ServiceAvailableButNothingConfigured_ReturnFalse() throws OXException {
         PowerMockito.mockStatic(Services.class);
-        PowerMockito.when(Services.optService(ConfigurationService.class)).thenReturn(configurationService);
+        Mockito.when(Services.optService(ConfigurationService.class)).thenReturn(configurationService);
 
         boolean fileAccessLogging = AuditConfiguration.getFileAccessLogging();
         Assert.assertFalse(fileAccessLogging);

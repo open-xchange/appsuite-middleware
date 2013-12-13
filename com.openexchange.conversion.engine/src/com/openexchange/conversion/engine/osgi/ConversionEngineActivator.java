@@ -63,8 +63,8 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class ConversionEngineActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ConversionEngineActivator.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(ConversionEngineActivator.class);
 
     /**
      * Initializes a new {@link ConversionEngineActivator}
@@ -95,11 +95,9 @@ public final class ConversionEngineActivator extends HousekeepingActivator {
              * Register service
              */
             registerService(ConversionService.class, new ConversionServiceImpl());
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Conversion engine successfully started");
-            }
+            LOG.info("Conversion engine successfully started");
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -112,11 +110,9 @@ public final class ConversionEngineActivator extends HousekeepingActivator {
              * Clear registry
              */
             ConversionEngineRegistry.getInstance().clearAll();
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Conversion engine successfully stopped");
-            }
+            LOG.info("Conversion engine successfully stopped");
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

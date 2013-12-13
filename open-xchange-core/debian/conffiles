@@ -7,7 +7,6 @@ opt/open-xchange/etc/contact.properties
 opt/open-xchange/etc/contactcollector.properties
 opt/open-xchange/etc/event.properties
 opt/open-xchange/etc/excludedupdatetasks.properties
-opt/open-xchange/etc/file-logging.properties
 opt/open-xchange/etc/filestorage.properties
 opt/open-xchange/etc/foldercache.properties
 opt/open-xchange/etc/folderjson.properties
@@ -24,6 +23,7 @@ opt/open-xchange/etc/javamail.properties
 opt/open-xchange/etc/jolokia.properties
 opt/open-xchange/etc/ldap.properties
 opt/open-xchange/etc/login.properties
+opt/open-xchange/etc/logback.xml
 opt/open-xchange/etc/mailcache.ccf
 opt/open-xchange/etc/mail.properties
 opt/open-xchange/etc/mail-push.properties

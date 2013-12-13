@@ -65,8 +65,8 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class ControlActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ControlActivator.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(ControlActivator.class);
 
     private volatile Thread shutdownHookThread;
 
@@ -99,7 +99,7 @@ public final class ControlActivator extends HousekeepingActivator {
             Runtime.getRuntime().addShutdownHook(shutdownHookThread);
             this.shutdownHookThread = shutdownHookThread;
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -130,7 +130,7 @@ public final class ControlActivator extends HousekeepingActivator {
             // Do bundle clean-up
             cleanUp();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -138,9 +138,9 @@ public final class ControlActivator extends HousekeepingActivator {
     private static final class ManagementServiceTrackerCustomizer implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
 
         private final BundleContext bundleContext;
-        private final org.apache.commons.logging.Log logger;
+        private final org.slf4j.Logger logger;
 
-        ManagementServiceTrackerCustomizer(final BundleContext bundleContext, final org.apache.commons.logging.Log logger) {
+        ManagementServiceTrackerCustomizer(final BundleContext bundleContext, final org.slf4j.Logger logger) {
             super();
             this.bundleContext = bundleContext;
             this.logger = logger;

@@ -77,7 +77,7 @@ import com.openexchange.user.UserService;
  */
 public final class MDaemonEntity2ACL extends Entity2ACL {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MDaemonEntity2ACL.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MDaemonEntity2ACL.class);
 
     private static final MDaemonEntity2ACL INSTANCE = new MDaemonEntity2ACL();
 
@@ -155,19 +155,10 @@ public final class MDaemonEntity2ACL extends Entity2ACL {
         Arrays.sort(ids);
         final int pos = Arrays.binarySearch(ids, sessionUser);
         if (pos >= 0) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder().append("Found multiple users with login \"").append(pattern).append(
-                    "\" subscribed to IMAP server \"").append(serverUrl).append("\": ").append(Arrays.toString(ids)).append(
-                    "\nThe session user's ID is returned."));
-            }
+            LOG.warn("Found multiple users with login \"{}\" subscribed to IMAP server \"{}\": {}\nThe session user's ID is returned.", pattern, serverUrl, Arrays.toString(ids));
             return ids[pos];
         }
-        // Just select first user ID
-        if (LOG.isWarnEnabled()) {
-            LOG.warn(new StringBuilder().append("Found multiple users with login \"").append(pattern).append(
-                "\" subscribed to IMAP server \"").append(serverUrl).append("\": ").append(Arrays.toString(ids)).append(
-                "\nThe first found user is returned."));
-        }
+        LOG.warn("Found multiple users with login \"{}\" subscribed to IMAP server \"{}\": {}\nThe first found user is returned.", pattern, serverUrl, Arrays.toString(ids));
         return ids[0];
     }
 

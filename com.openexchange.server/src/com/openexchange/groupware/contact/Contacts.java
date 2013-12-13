@@ -81,7 +81,7 @@ import java.util.Set;
 import java.util.UUID;
 import javax.imageio.ImageIO;
 import javax.mail.internet.AddressException;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
@@ -105,7 +105,6 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
@@ -138,9 +137,7 @@ public final class Contacts {
 
     public static final int DATA_TRUNCATION = 54;
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Contacts.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(Contacts.class);
 
     /**
      * All available mappers as an array.
@@ -243,11 +240,8 @@ public final class Contacts {
         final int origWidth = bi.getWidth();
         int origType = bi.getType();
 
-        if (DEBUG) {
-            final StringBuilder logi = new StringBuilder(128).append("OUR IMAGE -> mime=").append(myMime).append(" / type=").append(
-                origType).append(" / width=").append(origWidth).append(" / height=").append(origHeigh).append(" / byte[] size=").append(
-                img.length);
-            LOG.debug(logi.toString());
+        {
+            LOG.debug("OUR IMAGE -> mime={} / type={} / width={} / height={} / byte[] size={}", myMime, origType, origWidth, origHeigh, img.length);
         }
         if ((origHeigh > scaledHeight) || (origWidth > scaledWidth)) {
             float ratio = 0;
@@ -266,10 +260,8 @@ public final class Contacts {
                     sWd = scaledWidth;
                     sHd = scaledWidth;
                 }
-                if (DEBUG) {
-                    LOG.debug(new StringBuilder(64).append("IMAGE SCALE Picture Heigh ").append(origHeigh).append(" Width ").append(
-                        origWidth).append(" -> Scale down to Heigh ").append(sHd).append(" Width ").append(sWd).append(" Ratio ").append(
-                        ratio).toString());
+                {
+                    LOG.debug("IMAGE SCALE Picture Heigh {} Width {} -> Scale down to Heigh {} Width {} Ratio {}", origHeigh, origWidth, sHd, sWd, ratio);
                 }
             } else if (origWidth > origHeigh) {
                 final float w1 = origWidth;
@@ -286,10 +278,8 @@ public final class Contacts {
                 sWd = Math.round(widthFloat);
                 sHd = Math.round(heighFloat);
 
-                if (DEBUG) {
-                    LOG.debug(new StringBuilder(64).append("IMAGE SCALE Picture Heigh ").append(origHeigh).append(" Width ").append(
-                        origWidth).append(" -> Scale down to Heigh ").append(sHd).append(" Width ").append(sWd).append(" Ratio ").append(
-                        ratio).toString());
+                {
+                    LOG.debug("IMAGE SCALE Picture Heigh {} Width {} -> Scale down to Heigh {} Width {} Ratio {}", origHeigh, origWidth, sHd, sWd, ratio);
                 }
 
             } else if (origWidth < origHeigh) {
@@ -307,10 +297,8 @@ public final class Contacts {
 
                 sWd = Math.round(widthFloat);
                 sHd = Math.round(heighFloat);
-                if (DEBUG) {
-                    LOG.debug(new StringBuilder(64).append("IMAGE SCALE Picture Heigh ").append(origHeigh).append(" Width ").append(
-                        origWidth).append(" -> Scale down to Heigh ").append(sHd).append(" Width ").append(sWd).append(" Ratio ").append(
-                        ratio).toString());
+                {
+                    LOG.debug("IMAGE SCALE Picture Heigh {} Width {} -> Scale down to Heigh {} Width {} Ratio {}", origHeigh, origWidth, sHd, sWd, ratio);
                 }
             }
 
@@ -459,9 +447,7 @@ public final class Contacts {
             writecon = DBPool.pickupWriteable(context);
             writecon.setAutoCommit(false);
             id = IDGenerator.getId(context, Types.CONTACT, writecon);
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Got ID from Generator -> " + id);
-            }
+            LOG.trace("Got ID from Generator -> {}", id);
             writecon.commit();
         } catch (final SQLException e) {
             rollback(writecon);
@@ -506,9 +492,8 @@ public final class Contacts {
             final Date ddd = new Date(lmd);
             contact.setLastModified(ddd);
 
-            if (DEBUG) {
-                LOG.debug(new StringBuilder(64).append("DEBUG: YOU WANT TO INSERT THIS: cid=").append(contextId).append(" oid=").append(
-                    contact.getObjectID()).append(" -> ").append(getStatementString(ps)).toString());
+            {
+                LOG.debug("DEBUG: YOU WANT TO INSERT THIS: cid={} oid={} -> {}", contextId, contact.getObjectID(), getStatementString(ps));
             }
 
             ps.execute();
@@ -674,10 +659,7 @@ public final class Contacts {
             }
 
             final java.util.Date server_date = original.getLastModified();
-            if (DEBUG) {
-                LOG.debug(new StringBuilder(
-                    "Compare Dates for Contact Update\nClient-Date=" + client_date.getTime() + "\nServer-Date=" + server_date.getTime()));
-            }
+            LOG.debug("Compare Dates for Contact Update\nClient-Date={}\nServer-Date={}", client_date.getTime(), server_date.getTime());
             if ((client_date != null) && (client_date.getTime() > -1) && (client_date.getTime() < server_date.getTime())) {
                 throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create();
             }
@@ -853,11 +835,6 @@ public final class Contacts {
 
             writecon.setAutoCommit(false);
 
-            if (DEBUG) {
-                LOG.debug(new StringBuilder(
-                    "DEBUG: YOU WANT TO UPDATE THIS: cid=" + ctx.getContextId() + " oid=" + co.getObjectID() + " -> " + getStatementString(ps)));
-            }
-
             if (co.getParentFolderID() != fid) {
                 // Fake a deletion on MOVE operation for MS Outlook prior to performing actual UPDATE
                 final Statement stmt = writecon.createStatement();
@@ -867,7 +844,7 @@ public final class Contacts {
                     try {
                         stmt.close();
                     } catch (final SQLException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }
@@ -1097,8 +1074,8 @@ public final class Contacts {
             }
 
             final java.util.Date server_date = original.getLastModified();
-            if (DEBUG) {
-                LOG.debug("Compare Dates for Contact Update\nClient-Date=" + lastModified.getTime() + "\nServer-Date=" + server_date.getTime());
+            {
+                LOG.debug("Compare Dates for Contact Update\nClient-Date={}\nServer-Date={}", lastModified.getTime(), server_date.getTime());
             }
             if ((lastModified != null) && (lastModified.getTime() > -1) && (lastModified.getTime() < server_date.getTime())) {
                 throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create();
@@ -1249,8 +1226,8 @@ public final class Contacts {
 
             writecon.setAutoCommit(false);
 
-            if (DEBUG) {
-                LOG.debug("INFO: YOU WANT TO UPDATE THIS: cid=" + ctx.getContextId() + " oid=" + contact.getObjectID() + " -> " + getStatementString(ps));
+            {
+                LOG.debug("INFO: YOU WANT TO UPDATE THIS: cid={} oid={} -> {}", ctx.getContextId(), contact.getObjectID(), getStatementString(ps));
             }
             ps.execute();
 
@@ -1629,8 +1606,8 @@ public final class Contacts {
                 ps.setString(7, dleo.getEmailaddress());
                 ps.setInt(8, cid);
 
-                if (DEBUG) {
-                    LOG.debug(new StringBuilder("WRITE DLIST ").append(getStatementString(ps)));
+                {
+                    LOG.debug("WRITE DLIST {}", getStatementString(ps));
                 }
 
                 ps.execute();
@@ -1772,8 +1749,8 @@ public final class Contacts {
                         }
                         ps.setString(8, dleo.getEmailaddress());
                         ps.setInt(12, cid);
-                        if (DEBUG) {
-                            LOG.debug(new StringBuilder("UPDATE DLIST ").append(getStatementString(ps)));
+                        {
+                            LOG.debug("UPDATE DLIST {}", getStatementString(ps));
                         }
                         ps.execute();
                     }
@@ -1795,8 +1772,8 @@ public final class Contacts {
             cs = new ContactMySql(null);
             ps = writecon.prepareStatement(cs.iFdeleteDistributionListEntriesByIds(cid));
             ps.setInt(1, id);
-            if (DEBUG) {
-                LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(getStatementString(ps)));
+            {
+                LOG.debug("DELETE FROM DLIST {}", getStatementString(ps));
             }
             ps.execute();
         } catch (final SQLException e) {
@@ -1818,8 +1795,8 @@ public final class Contacts {
                         ps.setInt(3, dleo.getEmailfield());
                     }
                     ps.setInt(4, cid);
-                    if (DEBUG) {
-                        LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(getStatementString(ps)));
+                    {
+                        LOG.debug("DELETE FROM DLIST {}", getStatementString(ps));
                     }
                     ps.execute();
                 }
@@ -1907,8 +1884,8 @@ public final class Contacts {
                 UUID uuid = UUID.randomUUID();
                 byte[] uuidBinary = UUIDs.toByteArray(uuid);
                 ps.setBytes(6, uuidBinary);
-                if (DEBUG) {
-                    LOG.debug(new StringBuilder("INSERT LINKAGE ").append(getStatementString(ps)));
+                {
+                    LOG.debug("INSERT LINKAGE {}", getStatementString(ps));
                 }
                 ps.addBatch();
             }
@@ -1985,8 +1962,8 @@ public final class Contacts {
                     ps.setInt(1, id);
                     ps.setInt(2, leo.getLinkID());
                     ps.setInt(3, cid);
-                    if (DEBUG) {
-                        LOG.debug(new StringBuilder("DELETE LINKAGE ENTRY").append(getStatementString(ps)));
+                    {
+                        LOG.debug("DELETE LINKAGE ENTRY{}", getStatementString(ps));
                     }
                     ps.execute();
                 }
@@ -2072,8 +2049,8 @@ public final class Contacts {
             ps.setString(3, mime);
             ps.setInt(4, cid);
             ps.setLong(5, lastModified);
-            if (DEBUG) {
-                LOG.debug(new StringBuilder("INSERT IMAGE ").append(getStatementString(ps)));
+            {
+                LOG.debug("INSERT IMAGE {}", getStatementString(ps));
             }
             ps.execute();
         } catch (final SQLException e) {
@@ -2098,8 +2075,8 @@ public final class Contacts {
             ps.setLong(5, lastModified);
             ps.setInt(6, contact_id);
             ps.setInt(7, cid);
-            if (DEBUG) {
-                LOG.debug(new StringBuilder("UPDATE IMAGE ").append(getStatementString(ps)));
+            {
+                LOG.debug("UPDATE IMAGE {}", getStatementString(ps));
             }
             ps.execute();
         } catch (final SQLException e) {
@@ -2146,7 +2123,7 @@ public final class Contacts {
             }
             return false;
         } catch (final SQLException e) {
-            LOG.error("UNABLE TO performContactReadCheckByID cid=" + ctx.getContextId() + " oid=" + objectId, e);
+            LOG.error("UNABLE TO performContactReadCheckByID cid={} oid={}", ctx.getContextId(), objectId, e);
             return false;
         } finally {
             closeSQLStuff(rs, stmt);
@@ -2205,7 +2182,7 @@ public final class Contacts {
             }
             return false;
         } catch (final SQLException e) {
-            LOG.error("UNABLE TO performContactReadCheckByID cid=" + ctx.getContextId() + " oid=" + objectId, e);
+            LOG.error("UNABLE TO performContactReadCheckByID cid={} oid={}", ctx.getContextId(), objectId, e);
             return false;
         } finally {
             closeSQLStuff(rs, stmt);
@@ -2240,7 +2217,7 @@ public final class Contacts {
             }
             return true;
         } catch (final OXException e) {
-            LOG.error("UNABLE TO PERFORM performContactReadCheck cid=" + ctx.getContextId() + " fid=" + folderId, e);
+            LOG.error("UNABLE TO PERFORM performContactReadCheck cid={} fid={}", ctx.getContextId(), folderId, e);
             return false;
         }
     }
@@ -2264,10 +2241,10 @@ public final class Contacts {
             return true;
         } catch (final SQLException e) {
             final OXException e1 = ContactExceptionCodes.SQL_PROBLEM.create(e);
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
             return false;
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return false;
         }
     }
@@ -2313,7 +2290,7 @@ public final class Contacts {
             }
             return false;
         } catch (final SQLException e) {
-            LOG.error("UNABLE TO performContactWriteCheckByID cid=" + ctx.getContextId() + " oid=" + objectId, e);
+            LOG.error("UNABLE TO performContactWriteCheckByID cid={} oid={}", ctx.getContextId(), objectId, e);
             return false;
         } finally {
             closeSQLStuff(rs, stmt);
@@ -2346,7 +2323,7 @@ public final class Contacts {
             }
             return true;
         } catch (final OXException e) {
-            LOG.error("UNABLE TO PERFORM performContactWriteCheck cid=" + ctx.getContextId() + " fid=" + folderId, e);
+            LOG.error("UNABLE TO PERFORM performContactWriteCheck cid={} fid={}", ctx.getContextId(), folderId, e);
             return false;
         }
     }
@@ -2392,7 +2369,7 @@ public final class Contacts {
             rs = st.executeQuery(cs.iFgetFolderSelectString(fid, cx.getContextId()));
             return (rs.next());
         } catch (final SQLException se) {
-            LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: " + cx.getContextId() + " Fid: " + fid + " Cause:" + se);
+            LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: {} Fid: {} Cause:{}", cx.getContextId(), fid, se);
             return false;
         } finally {
             closeResources(rs, st, readCon, true, cx);
@@ -2408,7 +2385,7 @@ public final class Contacts {
             rs = st.executeQuery(cs.iFgetFolderSelectString(fid, cx.getContextId()));
             return (rs.next());
         } catch (final SQLException se) {
-            LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: " + cx.getContextId() + " Fid: " + fid + " Cause:" + se);
+            LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: {} Fid: {} Cause:{}", cx.getContextId(), fid, se);
             return false;
         } finally {
             closeSQLStuff(rs, st);
@@ -2482,9 +2459,6 @@ public final class Contacts {
                 ec.delete(co);
             }
 
-            if (DEBUG) {
-                LOG.debug(cs.iFtrashContactsFromFolderUpdateString(fid, so.getContextId()));
-            }
             del.execute(cs.iFtrashContactsFromFolderUpdateString(fid, so.getContextId()));
         } catch (final OXException e) {
             throw ContactExceptionCodes.TRIGGERING_EVENT_FAILED.create(e, I(so.getContextId()), I(fid));
@@ -2600,16 +2574,7 @@ public final class Contacts {
                     }
 
                 } catch (final Exception oe) {
-                    if (LOG.isWarnEnabled()) {
-                        final StringBuilder sb = new StringBuilder(128);
-                        sb.append("WARNING: During the delete process 'delete all contacts from one user', a contact was found who has no folder.");
-                        sb.append("This contact will be modified and can be found in the administrator address book.");
-                        sb.append(" Context=").append(contextId);
-                        sb.append(" Folder=").append(fid);
-                        sb.append(" User=").append(uid);
-                        sb.append(" Contact=").append(oid);
-                        LOG.warn(sb.toString());
-                    }
+                    LOG.warn("WARNING: During the delete process ''delete all contacts from one user'', a contact was found who has no folder. This contact will be modified and can be found in the administrator address book. Context={} Folder={} User={} Contact={}", contextId, fid, uid, oid);
                     folder_error = true;
                     delete = true;
                 }
@@ -2625,7 +2590,7 @@ public final class Contacts {
                         final int admin_folder = xx.getObjectID();
                         cs.iFgiveUserContacToAdmin(del, oid, admin_folder, ct);
                     } catch (final Exception oxee) {
-                        LOG.error("ERROR: It was not possible to move this contact (without paren folder) to the admin address book!." + "This contact will be deleted." + "Context " + contextId + " Folder " + fid + " User" + uid + " Contact" + oid, oxee);
+                        LOG.error("ERROR: It was not possible to move this contact (without paren folder) to the admin address book!.This contact will be deleted.Context {} Folder {} User{} Contact{}", contextId, fid, uid, oid, oxee);
 
                         folder_error = false;
                     }
@@ -2685,7 +2650,7 @@ public final class Contacts {
                     try {
                         tmp = DBUtils.getColumnSize(con, table, fields[i]);
                     } catch (final SQLException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                         tmp = 0;
                     }
                     final int maxSize = tmp;
@@ -2759,7 +2724,7 @@ public final class Contacts {
             final Timestamp timestamp = rs.getTimestamp(pos);
             return rs.wasNull() ? null : timestamp;
         } catch (final SQLException e) {
-            LOG.warn("TIMESTAMP field could not be read: " + e.getMessage());
+            LOG.warn("TIMESTAMP field could not be read: {}", e.getMessage());
             return null;
         }
     }

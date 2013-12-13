@@ -73,7 +73,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
@@ -111,7 +110,6 @@ import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.ConfigurationProperty;
 import com.openexchange.login.Interface;
@@ -140,7 +138,7 @@ public class LoginServlet extends AJAXServlet {
 
     private static final long serialVersionUID = 7680745138705836499L;
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginServlet.class));
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LoginServlet.class);
 
     /** The log properties for login-related information. */
     protected static final Set<LogProperties.Name> LOG_PROPERTIES;
@@ -155,6 +153,7 @@ public class LoginServlet extends AJAXServlet {
         set.add(LogProperties.Name.LOGIN_VERSION);
         set.add(LogProperties.Name.SESSION_SESSION_ID);
         set.add(LogProperties.Name.SESSION_USER_ID);
+        set.add(LogProperties.Name.SESSION_USER_NAME);
         set.add(LogProperties.Name.SESSION_CONTEXT_ID);
         set.add(LogProperties.Name.SESSION_CLIENT_ID);
         set.add(LogProperties.Name.SESSION_SESSION);
@@ -310,7 +309,7 @@ public class LoginServlet extends AJAXServlet {
                 final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
                 if (sessiondService == null) {
                     final OXException se = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
-                    LOG.error(se.getMessage(), se);
+                    LOG.error("", se);
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -325,7 +324,7 @@ public class LoginServlet extends AJAXServlet {
                             if (null == oldIP || SessionServlet.isWhitelistedFromIPCheck(oldIP, conf.getRanges())) {
                                 final String newIP = req.getRemoteAddr();
                                 if (!newIP.equals(oldIP)) {
-                                    LOG.info("Changing IP of session " + session.getSessionID() + " with authID: " + session.getAuthId() + " from " + oldIP + " to " + newIP + '.');
+                                    LOG.info("Changing IP of session {} with authID: {} from {} to {}{}", session.getSessionID(), session.getAuthId(), oldIP, newIP, '.');
                                     session.setLocalIp(newIP);
                                 }
                             }
@@ -338,9 +337,9 @@ public class LoginServlet extends AJAXServlet {
                 if (session == null) {
                     // Unknown random token; throw error
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("No session could be found for random token: " + randomToken, new Throwable());
-                    } else if (LoginServlet.LOG.isInfoEnabled()) {
-                        LOG.info("No session could be found for random token: " + randomToken);
+                        LOG.debug("No session could be found for random token: {}", randomToken, new Throwable());
+                    } else {
+                        LOG.info("No session could be found for random token: {}", randomToken);
                     }
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
@@ -353,16 +352,16 @@ public class LoginServlet extends AJAXServlet {
                     final Context context = ContextStorage.getInstance().getContext(session.getContextId());
                     final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
                     if (!context.isEnabled() || !user.isMailEnabled()) {
-                        LOG.info("Status code 403 (FORBIDDEN): Either context " + context.getContextId() + " or user " + user.getId() + " not enabled");
+                        LOG.info("Status code 403 (FORBIDDEN): Either context {} or user {} not enabled", context.getContextId(), user.getId());
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
                 } catch (final UndeclaredThrowableException e) {
-                    LOG.info("Status code 403 (FORBIDDEN): Unexpected error occurred during login: " + e.getMessage());
+                    LOG.info("Status code 403 (FORBIDDEN): Unexpected error occurred during login: {}", e.getMessage());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (final OXException e) {
-                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: " + session.getContextId() + '/' + session.getUserId());
+                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}{}{}", session.getContextId(), '/', session.getUserId());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -397,21 +396,12 @@ public class LoginServlet extends AJAXServlet {
                 try {
                     final String sessionId = req.getParameter(PARAMETER_SESSION);
                     if (null == sessionId) {
-                        if (LoginServlet.LOG.isInfoEnabled()) {
-                            final StringBuilder sb = new StringBuilder(32);
-                            sb.append("Parameter \"").append(PARAMETER_SESSION).append("\" not found for action ").append(ACTION_CHANGEIP);
-                            LOG.info(sb.toString());
-                        }
+                        LOG.info("Parameter \"{}\" not found for action {}", PARAMETER_SESSION, ACTION_CHANGEIP);
                         throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
                     }
                     final String newIP = req.getParameter(LoginFields.CLIENT_IP_PARAM);
                     if (null == newIP) {
-                        if (LoginServlet.LOG.isInfoEnabled()) {
-                            final StringBuilder sb = new StringBuilder(32);
-                            sb.append("Parameter \"").append(LoginFields.CLIENT_IP_PARAM).append("\" not found for action ").append(
-                                ACTION_CHANGEIP);
-                            LOG.info(sb.toString());
-                        }
+                        LOG.info("Parameter \"{}\" not found for action {}", LoginFields.CLIENT_IP_PARAM, ACTION_CHANGEIP);
                         throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.CLIENT_IP_PARAM);
                     }
                     final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
@@ -425,28 +415,24 @@ public class LoginServlet extends AJAXServlet {
                             session.getHash(),
                             session.getClient());
                         if (secret == null || !session.getSecret().equals(secret)) {
-                            if (LoginServlet.LOG.isInfoEnabled() && null != secret) {
-                                LOG.info("Session secret is different. Given secret \"" + secret + "\" differs from secret in session \"" + session.getSecret() + "\".");
+                            if (null != secret) {
+                                LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
                             }
                             throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
                         }
                         final String oldIP = session.getLocalIp();
                         if (!newIP.equals(oldIP)) {
                             // In case changing IP is intentionally requested by client, log it only if DEBUG aka FINE log level is enabled
-                            if (LOG.isDebugEnabled()) {
-                                LOG.info("Changing IP of session " + session.getSessionID() + " with authID: " + session.getAuthId() + " from " + oldIP + " to " + newIP + '.');
-                            }
+                            LOG.info("Changing IP of session {} with authID: {} from {} to {}", session.getSessionID(), session.getAuthId(), oldIP, newIP);
                             session.setLocalIp(newIP);
                         }
                         response.setData("1");
                     } else {
-                        if (LoginServlet.LOG.isInfoEnabled()) {
-                            LOG.info("There is no session associated with session identifier: " + sessionId);
-                        }
+                        LOG.info("There is no session associated with session identifier: {}", sessionId);
                         throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
                     }
                 } catch (final OXException e) {
-                    LOG.debug(e.getMessage(), e);
+                    LOG.debug("", e);
                     response.setException(e);
                 }
                 Tools.disableCaching(resp);
@@ -479,7 +465,7 @@ public class LoginServlet extends AJAXServlet {
                 final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
                 if (sessiondService == null) {
                     final OXException se = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
-                    LOG.error(se.getMessage(), se);
+                    LOG.error("", se);
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -494,7 +480,7 @@ public class LoginServlet extends AJAXServlet {
                             if (null == oldIP || SessionServlet.isWhitelistedFromIPCheck(oldIP, conf.getRanges())) {
                                 final String newIP = req.getRemoteAddr();
                                 if (!newIP.equals(oldIP)) {
-                                    LOG.info("Changing IP of session " + session.getSessionID() + " with authID: " + session.getAuthId() + " from " + oldIP + " to " + newIP + '.');
+                                    LOG.info("Changing IP of session {} with authID: {} from {} to {}{}", session.getSessionID(), session.getAuthId(), oldIP, newIP, '.');
                                     session.setLocalIp(newIP);
                                 }
                             }
@@ -507,9 +493,9 @@ public class LoginServlet extends AJAXServlet {
                 if (session == null) {
                     // Unknown random token; throw error
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("No session could be found for random token: " + randomToken, new Throwable());
-                    } else if (LoginServlet.LOG.isInfoEnabled()) {
-                        LOG.info("No session could be found for random token: " + randomToken);
+                        LOG.debug("No session could be found for random token: {}", randomToken, new Throwable());
+                    } else {
+                        LOG.info("No session could be found for random token: {}", randomToken);
                     }
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
@@ -522,16 +508,16 @@ public class LoginServlet extends AJAXServlet {
                     final Context context = ContextStorage.getInstance().getContext(session.getContextId());
                     final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
                     if (!context.isEnabled() || !user.isMailEnabled()) {
-                        LOG.info("Status code 403 (FORBIDDEN): Either context " + context.getContextId() + " or user " + user.getId() + " not enabled");
+                        LOG.info("Status code 403 (FORBIDDEN): Either context {} or user {} not enabled", context.getContextId(), user.getId());
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
                 } catch (final UndeclaredThrowableException e) {
-                    LOG.info("Status code 403 (FORBIDDEN): Unexpected error occurred during login: " + e.getMessage());
+                    LOG.info("Status code 403 (FORBIDDEN): Unexpected error occurred during login: {}", e.getMessage());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (final OXException e) {
-                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: " + session.getContextId() + '/' + session.getUserId());
+                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}{}{}", session.getContextId(), '/', session.getUserId());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -582,9 +568,9 @@ public class LoginServlet extends AJAXServlet {
             final File templateFile = new File(templateFileLocation);
             try {
                 errorPageTemplate = IOTools.getFileContents(templateFile);
-                LOG.info("Found an error page template at " + templateFileLocation);
+                LOG.info("Found an error page template at {}", templateFileLocation);
             } catch (final FileNotFoundException e) {
-                LOG.error("Could not find an error page template at " + templateFileLocation + ", using default.");
+                LOG.error("Could not find an error page template at {}, using default.", templateFileLocation);
                 errorPageTemplate = ERROR_PAGE_TEMPLATE;
             }
         }
@@ -667,7 +653,7 @@ public class LoginServlet extends AJAXServlet {
                 return;
             }
         } finally {
-            LogProperties.removeLogProperties(LOG_PROPERTIES);
+            LogProperties.removeProperties(LOG_PROPERTIES);
         }
     }
 
@@ -686,7 +672,7 @@ public class LoginServlet extends AJAXServlet {
                 doAuthHeaderLogin(req, resp);
 
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 resp.addHeader("WWW-Authenticate", "NEGOTIATE");
                 resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
@@ -746,7 +732,7 @@ public class LoginServlet extends AJAXServlet {
     }
 
     public static void logAndSendException(final HttpServletResponse resp, final OXException e) throws IOException {
-        LOG.debug(e.getMessage(), e);
+        LOG.debug("", e);
         Tools.disableCaching(resp);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         final Response response = new Response();
@@ -817,11 +803,11 @@ public class LoginServlet extends AJAXServlet {
                 SettingStorage.getInstance(session).readValues(setting);
                 json.put(modules, convert2JS(setting));
             } catch (final OXException e) {
-                LOG.warn("Modules could not be added to login JSON response: " + e.getMessage(), e);
+                LOG.warn("Modules could not be added to login JSON response: {}", e.getMessage(), e);
             } catch (final JSONException e) {
-                LOG.warn("Modules could not be added to login JSON response: " + e.getMessage(), e);
+                LOG.warn("Modules could not be added to login JSON response: {}", e.getMessage(), e);
             } catch (final Exception e) {
-                LOG.warn("Modules could not be added to login JSON response: " + e.getMessage(), e);
+                LOG.warn("Modules could not be added to login JSON response: {}", e.getMessage(), e);
             }
         }
     }
@@ -945,7 +931,7 @@ public class LoginServlet extends AJAXServlet {
              */
             cookie.setMaxAge(conf.getCookieExpiry());
         }
-        final String domain = getDomainValue(null == serverName ? LogProperties.<String> getLogProperty(LogProperties.Name.AJP_SERVER_NAME) : serverName);
+        final String domain = getDomainValue(null == serverName ? LogProperties.getLogProperty(LogProperties.Name.AJP_SERVER_NAME) : serverName);
         if (null != domain) {
             cookie.setDomain(domain);
         }

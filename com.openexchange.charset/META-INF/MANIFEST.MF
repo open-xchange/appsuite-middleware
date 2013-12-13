@@ -13,4 +13,5 @@ Import-Package: com.openexchange.java,
  org.cliffc.high_scale_lib,
  org.osgi.framework,
  org.osgi.util.tracker,
+ org.slf4j,
  sun.misc

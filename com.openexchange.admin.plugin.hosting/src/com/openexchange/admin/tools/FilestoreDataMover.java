@@ -57,8 +57,6 @@ import java.util.Collection;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
@@ -74,7 +72,7 @@ import com.openexchange.admin.tools.ShellExecutor.ArrayOutput;
  */
 public class FilestoreDataMover implements Callable<Void> {
 
-    private final static Log log = LogFactory.getLog(FilestoreDataMover.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FilestoreDataMover.class);
 
     private String src = null;
 
@@ -160,18 +158,18 @@ public class FilestoreDataMover implements Callable<Void> {
         try {
             copy();
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             // Because the client side only knows of the exceptions defined in the core we have
             // to throw the trace as string
             throw new StorageException(e.toString());
         } catch (final IOException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InterruptedException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final ProgrammErrorException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
         return null;

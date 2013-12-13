@@ -53,8 +53,6 @@ import gnu.trove.TCollections;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.io.Serializable;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
@@ -82,7 +80,7 @@ public class CalendarFolderObject implements Serializable {
 
     private final boolean fill_shared;
 
-    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarFolderObject.class));
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarFolderObject.class);
 
     public static final String IDENTIFIER = "CalendarFolderObject@";
 
@@ -156,9 +154,7 @@ public class CalendarFolderObject implements Serializable {
                     publicReadableOwnSet.add(folderid);
                 }
             } else {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("Got an unknown folder type :" + type + " for folderid " + folderid);
-                }
+                LOG.warn("Got an unknown folder type :{} for folderid {}", type, folderid);
             }
         } else if (fill_shared) {
             if (sharedfolder == EMPTY) {

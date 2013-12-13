@@ -55,7 +55,7 @@ import javax.xml.stream.XMLStreamException;
  * </pre>
  */
 public final class SystemIdResolver implements EntityResolver, EntityResolver2 {
-  private static final Logger log = LoggerFactory.getLogger(SystemIdResolver.class);
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(SystemIdResolver.class);
 
   public static final String RESOURCE_LOADER_URI_SCHEME = "solrres";
   public static final String RESOURCE_LOADER_AUTHORITY_ABSOLUTE = "@";

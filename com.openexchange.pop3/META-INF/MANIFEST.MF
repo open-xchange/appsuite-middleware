@@ -61,7 +61,8 @@ Import-Package: com.openexchange.api2,
  javax.net.ssl,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .
 Bundle-Activator: com.openexchange.pop3.osgi.POP3Activator

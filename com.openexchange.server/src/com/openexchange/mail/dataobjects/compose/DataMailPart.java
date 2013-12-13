@@ -91,7 +91,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
 
     private static final int DEFAULT_BUF_SIZE = 0x2000;
 
-    private static transient final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DataMailPart.class));
+    private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DataMailPart.class);
 
     private static final int MB = 1048576;
 
@@ -278,7 +278,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
                 }
                 throw MailExceptionCode.NO_CONTENT.create();
             } catch (final MailConfigException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 dataSource = new MessageDataSource(new byte[0], "application/octet-stream");
             }
         }
@@ -324,25 +324,17 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
-        if (LOG.isInfoEnabled()) {
-            LOG.info(new com.openexchange.java.StringAllocator("Data mail part exeeds ").append(
-                Float.valueOf(TransportProperties.getInstance().getReferencedPartLimit() / MB).floatValue()).append(
-                "MB limit. A temporary disk copy has been created: ").append(file.getFile().getName()));
-        }
+        LOG.info("Data mail part exeeds {}MB limit. A temporary disk copy has been created: {}", Float.valueOf(TransportProperties.getInstance().getReferencedPartLimit() / MB).floatValue(), file.getFile().getName());
     }
 
     @Override
     public void loadContent() throws OXException {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("DataSourceMailPart.loadContent()");
-        }
+        LOG.trace("DataSourceMailPart.loadContent()");
     }
 
     @Override
     public void prepareForCaching() {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("DataSourceMailPart.prepareForCaching()");
-        }
+        LOG.trace("DataSourceMailPart.prepareForCaching()");
     }
 
     /**

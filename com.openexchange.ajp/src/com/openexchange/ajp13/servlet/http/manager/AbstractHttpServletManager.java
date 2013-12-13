@@ -78,8 +78,8 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
     /**
      * The logger.
      */
-    protected static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractHttpServletManager.class));
+    protected static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(AbstractHttpServletManager.class);
 
     /**
      * The empty class array.
@@ -110,7 +110,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
      * Creates the static servlets identified by servlet constructor map.
      */
     private final void createServlets(final Map<String, Constructor<?>> servletConstructorMap) {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractHttpServletManager.class));
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractHttpServletManager.class);
         final ServletConfigLoader configLoader = ServletConfigLoader.getDefaultInstance();
         if (null == configLoader) {
             log.error("Aborting servlets' initialization: HTTP service has not been initialized since default servlet configuration loader is null.");
@@ -124,7 +124,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
                 path =
                     new URI(entry.getKey().charAt(0) == '/' ? id : new com.openexchange.java.StringAllocator(id.length() + 1).append('/').append(id).toString()).normalize().toString();
             } catch (final URISyntaxException e) {
-                log.error("Invalid servlet path skipped: " + entry.getKey());
+                log.error("Invalid servlet path skipped: {}", entry.getKey());
                 continue;
             }
             ServletQueue servletQueue = null;
@@ -166,14 +166,12 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
                         servletQueue.enqueue(servletInstance);
                     }
                 } catch (final Throwable t) {
-                    log.error(t.getMessage(), t);
+                    log.error("", t);
                 }
             }
             servletPool.put(path, servletQueue);
         }
-        if (log.isInfoEnabled()) {
-            log.info("All Servlet Instances created & initialized");
-        }
+        log.info("All Servlet Instances created & initialized");
     }
 
     protected final void registerServlet0(final String id, final HttpServlet servlet, final Dictionary<String, String> initParams) throws ServletException {
@@ -239,8 +237,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
                     final String canonicalName = previous.get().getClass().getCanonicalName();
                     configLoader.removeConfig(canonicalName);
                     if (LOG.isInfoEnabled()) {
-                        LOG.info(new StringBuilder(64).append("Previous servlet \"").append(canonicalName).append("\" unregistered from \"").append(
-                            path).append('"'));
+                        LOG.info("Previous servlet \"{}\" unregistered from \"{}{}", canonicalName, path, '"'));
                     }
                      *
                      */
@@ -263,10 +260,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
                         "\" has already been registered before.").toString());
                 }
             }
-            if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder(64).append("New servlet \"").append(servlet.getClass().getCanonicalName()).append(
-                    "\" successfully registered to \"").append(path).append('"'));
-            }
+            LOG.info("New servlet \"{}\" successfully registered to \"{}\"", servlet.getClass().getCanonicalName(), path);
         } catch (final URISyntaxException e) {
             final ServletException se = new ServletException("Servlet path is not a valid URI", e);
             se.initCause(e);
@@ -284,9 +278,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
             }
             final ServletQueue servletQueue = servletPool.remove(path);
             if (null == servletQueue) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("Servlet un-registration failed. No servlet is bound to path: " + path);
-                }
+                LOG.warn("Servlet un-registration failed. No servlet is bound to path: {}", path);
                 return;
             }
             configLoader.removeConfig(servletQueue.get().getClass().getCanonicalName());
@@ -306,7 +298,7 @@ public abstract class AbstractHttpServletManager implements IHttpServletManager 
         } catch (final URISyntaxException e) {
             final ServletException se = new ServletException("Servlet path is not a valid URI", e);
             se.initCause(e);
-            LOG.error("Unregistering servlet failed. Servlet path is not a valid URI: " + id, se);
+            LOG.error("Unregistering servlet failed. Servlet path is not a valid URI: {}", id, se);
         }
     }
 

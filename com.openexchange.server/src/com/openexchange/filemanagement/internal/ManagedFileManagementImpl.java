@@ -88,7 +88,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ManagedFileManagementImpl.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagedFileManagementImpl.class);
 
     private static final int DELAY = 10000;
 
@@ -117,13 +117,13 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     private static class FileManagementTask implements Runnable {
 
-        private final org.apache.commons.logging.Log logger;
+        private final org.slf4j.Logger logger;
 
         private final ConcurrentMap<String, ManagedFileImpl> tfiles;
 
         private final int time2live;
 
-        public FileManagementTask(final ConcurrentMap<String, ManagedFileImpl> files, final int time2live, final org.apache.commons.logging.Log logger) {
+        public FileManagementTask(final ConcurrentMap<String, ManagedFileImpl> files, final int time2live, final org.slf4j.Logger logger) {
             super();
             tfiles = files;
             this.time2live = time2live;
@@ -143,7 +143,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                     }
                 }
             } catch (final Throwable t) {
-                logger.error(t.getMessage(), t);
+                logger.error("", t);
             }
         }
     }
@@ -235,14 +235,14 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                 } else {
                     final File tmp = File.createTempFile(prefix, suffix, directory);
                     if (!tmpFile.delete()) {
-                        LOG.warn("Temporary file could not be deleted: " + tmpFile.getPath());
+                        LOG.warn("Temporary file could not be deleted: {}", tmpFile.getPath());
                     }
                     tmpFile = tmp;
                     tmpFile.deleteOnExit();
                 }
             } catch (final IOException e) {
-                if (tmpFile != null && !tmpFile.delete() && LOG.isWarnEnabled()) {
-                    LOG.warn("Temporary file could not be deleted: " + tmpFile.getPath(), e);
+                if (tmpFile != null && !tmpFile.delete()) {
+                    LOG.warn("Temporary file could not be deleted: {}", tmpFile.getPath(), e);
                 }
                 throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
             }
@@ -314,14 +314,14 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                     final File tmp = File.createTempFile(PREFIX, SUFFIX, directory);
                     copyFile(tmpFile, tmp);
                     if (!tmpFile.delete()) {
-                        LOG.warn("Temporary file could not be deleted: " + tmpFile.getPath());
+                        LOG.warn("Temporary file could not be deleted: {}", tmpFile.getPath());
                     }
                     tmpFile = tmp;
                     tmpFile.deleteOnExit();
                 }
             } catch (final IOException e) {
-                if (tmpFile != null && !tmpFile.delete() && LOG.isWarnEnabled()) {
-                    LOG.warn("Temporary file could not be deleted: " + tmpFile.getPath(), e);
+                if (tmpFile != null && !tmpFile.delete()) {
+                    LOG.warn("Temporary file could not be deleted: {}", tmpFile.getPath(), e);
                 }
                 throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
             } finally {

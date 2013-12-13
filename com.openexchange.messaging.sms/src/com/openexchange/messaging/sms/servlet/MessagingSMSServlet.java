@@ -75,7 +75,7 @@ public final class MessagingSMSServlet extends PermissionServlet {
 
     private static final long serialVersionUID = 1541427953784271108L;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MessagingSMSServlet.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MessagingSMSServlet.class);
 
     public MessagingSMSServlet() {
         super();
@@ -128,7 +128,7 @@ public final class MessagingSMSServlet extends PermissionServlet {
             response.setException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e));
         } catch (final RuntimeException e) {
             final OXException create = SMSMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            LOG.error(create.getMessage(), create);
+            LOG.error("", create);
             response.setException(create);
         }
 

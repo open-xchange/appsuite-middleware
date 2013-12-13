@@ -97,7 +97,6 @@ import javax.mail.internet.ParseException;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
-import org.apache.commons.logging.Log;
 import org.apache.james.mime4j.io.LineReaderInputStream;
 import org.apache.james.mime4j.io.LineReaderInputStreamAdaptor;
 import org.apache.james.mime4j.stream.DefaultFieldBuilder;
@@ -152,10 +151,7 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
  */
 public final class MimeMessageUtility {
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(MimeMessageUtility.class);
-    private static final boolean TRACE = LOG.isTraceEnabled();
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-    private static final boolean WARN = LOG.isWarnEnabled();
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeMessageUtility.class);
 
     private static final Set<HeaderName> ENCODINGS;
 
@@ -572,7 +568,7 @@ public final class MimeMessageUtility {
         try {
             return new ContentType(hdr).getParameter(PARAM_NAME);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
     }
@@ -870,9 +866,7 @@ public final class MimeMessageUtility {
                      */
                     lastMatch = m.end();
                 } catch (final UnsupportedEncodingException e) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Unsupported character-encoding in encoded-word: " + m.group(), e);
-                    }
+                    LOG.debug("Unsupported character-encoding in encoded-word: {}", m.group(), e);
                     sb.append(handleUnsupportedEncoding(m));
                     lastMatch = m.end();
                 } catch (final ParseException e) {
@@ -898,7 +892,7 @@ public final class MimeMessageUtility {
                     /*
                      * Invalid quoted-printable
                      */
-                    LOG.warn("Cannot decode quoted-printable: " + e.getMessage(), e);
+                    LOG.warn("Cannot decode quoted-printable: {}", e.getMessage(), e);
                     return asciiText;
                 }
             } else if ("B".equalsIgnoreCase(transferEncoding)) {
@@ -907,7 +901,7 @@ public final class MimeMessageUtility {
                 /*
                  * Unknown transfer-encoding; just return current match
                  */
-                LOG.warn("Unknown transfer-encoding: " + transferEncoding);
+                LOG.warn("Unknown transfer-encoding: {}", transferEncoding);
                 return asciiText;
             }
             detectedCharset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(rawBytes));
@@ -918,7 +912,7 @@ public final class MimeMessageUtility {
             /*
              * Even detected charset is unknown... giving up
              */
-            LOG.warn("Unknown character-encoding: " + detectedCharset);
+            LOG.warn("Unknown character-encoding: {}", detectedCharset);
             return asciiText;
         }
     }
@@ -1009,11 +1003,11 @@ public final class MimeMessageUtility {
                     }
                     lastMatch = m.end();
                 } catch (final UnsupportedEncodingException e) {
-                    LOG.warn("Unsupported character-encoding in encoded-word: " + m.group(), e);
+                    LOG.warn("Unsupported character-encoding in encoded-word: {}", m.group(), e);
                     sb.append(m.group());
                     lastMatch = m.end();
                 } catch (final ParseException e) {
-                    LOG.warn("String is not an encoded-word as per RFC 2047: " + m.group(), e);
+                    LOG.warn("String is not an encoded-word as per RFC 2047: {}", m.group(), e);
                     sb.append(m.group());
                     lastMatch = m.end();
                 }
@@ -1101,7 +1095,7 @@ public final class MimeMessageUtility {
             }
         } catch (final java.io.UnsupportedEncodingException e) {
             // Cannot occur
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return retval.toString();
     }
@@ -1219,9 +1213,7 @@ public final class MimeMessageUtility {
                 final List<InternetAddress> addrList = new ArrayList<InternetAddress>(sAddrs.size());
                 for (final String sAddr : sAddrs) {
                     final QuotedInternetAddress tmp = new QuotedInternetAddress(sAddr, strict);
-                    if (TRACE) {
-                        LOG.trace(tmp);
-                    }
+                    LOG.trace(tmp.toString());
                     addrList.add(tmp);
                 }
                 // Hm... single parse did not fail, throw original exception instead
@@ -1230,19 +1222,12 @@ public final class MimeMessageUtility {
                 if (failOnError) {
                     for (final String sAddr : sAddrs) {
                         final QuotedInternetAddress tmp = new QuotedInternetAddress(sAddr, strict);
-                        if (TRACE) {
-                            LOG.trace(tmp);
-                        }
+                        LOG.trace(tmp.toString());
                     }
                     // Hm... single parse did not fail, throw original exception instead
                     throw e;
                 }
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(
-                        new com.openexchange.java.StringAllocator(128).append("Internet addresses could not be properly parsed, ").append(
-                            "using plain addresses' string representation instead.").toString(),
-                        e);
-                }
+                LOG.debug("Internet addresses could not be properly parsed, using plain addresses' string representation instead.", e);
                 addrs = PlainTextAddress.getAddresses(splitAddrs(al).toArray(new String[0]));
             }
         }
@@ -1257,7 +1242,7 @@ public final class MimeMessageUtility {
             /*
              * Cannot occur since default charset is checked on global mail configuration initialization
              */
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return addrs;
     }
@@ -1392,7 +1377,7 @@ public final class MimeMessageUtility {
             return new com.openexchange.java.StringAllocator(len + 2).append('"').append(
                 encode ? MimeUtility.encodeWord(replaced) : replaced).append('"').toString();
         } catch (final UnsupportedEncodingException e) {
-            LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
+            LOG.error("Unsupported encoding in a message detected and monitored: \"{}{}", e.getMessage(), '"', e);
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             return phrase;
         }
@@ -1926,8 +1911,8 @@ public final class MimeMessageUtility {
         InputStream in = null;
         BufferedOutputStream out = null;
         try {
-            in = new BufferedInputStream(new FileInputStream(file));
-            out = new BufferedOutputStream(new FileOutputStream(newTempFile));
+            in = new BufferedInputStream(new FileInputStream(file), 65536);
+            out = new BufferedOutputStream(new FileOutputStream(newTempFile), 65536);
             {
                 @SuppressWarnings("resource") final LineReaderInputStream instream = new LineReaderInputStreamAdaptor(in, -1);
                 int lineCount = 0;
@@ -2007,9 +1992,7 @@ public final class MimeMessageUtility {
         if (mailPart.containsHeader(HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();
             if (!CharsetDetector.isValid(cs)) {
-                com.openexchange.java.StringAllocator sb = null;
                 if (null != cs) {
-                    sb = new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
                     mailInterfaceMonitor.addUnsupportedEncodingExceptions(cs);
                 }
                 if (contentType.startsWith(PRIMARY_TEXT)) {
@@ -2017,16 +2000,8 @@ public final class MimeMessageUtility {
                     if ("US-ASCII".equalsIgnoreCase(cs)) {
                         cs = "ISO-8859-1";
                     }
-                    if (DEBUG && null != sb) {
-                        sb.append(" Using auto-detected encoding: \"").append(cs).append('"');
-                        LOG.warn(sb.toString());
-                    }
                 } else {
                     cs = MailProperties.getInstance().getDefaultMimeCharset();
-                    if (DEBUG && null != sb) {
-                        sb.append(" Using fallback encoding: \"").append(cs).append('"');
-                        LOG.warn(sb.toString());
-                    }
                 }
             }
             charset = cs;
@@ -2068,12 +2043,7 @@ public final class MimeMessageUtility {
         } catch (final java.io.CharConversionException e) {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "ISO-8859-1";
-            if (WARN) {
-                LOG.warn(
-                    new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(
-                        charset).append("\". Using fallback charset \"").append(fallback).append("\" instead."),
-                    e);
-            }
+            LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback, e);
             return MessageUtility.readMailPart(mailPart, fallback);
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {

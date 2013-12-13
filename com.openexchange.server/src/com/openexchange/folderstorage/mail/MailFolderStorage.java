@@ -140,7 +140,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class MailFolderStorage implements FolderStorage {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailFolderStorage.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailFolderStorage.class);
 
     private static final String PRIVATE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
 
@@ -458,7 +458,7 @@ public final class MailFolderStorage implements FolderStorage {
                     storageParameters.getUserId(),
                     storageParameters.getContextId());
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             if (fullname.startsWith(trashFullname)) {
                 // Special handling
@@ -508,7 +508,7 @@ public final class MailFolderStorage implements FolderStorage {
                     storageParameters.getUserId(),
                     storageParameters.getContextId());
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             if (!hardDelete) {
                 // New folder in trash folder

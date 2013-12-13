@@ -59,6 +59,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.UnsupportedCharsetException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -69,13 +70,11 @@ import javax.mail.internet.AddressException;
 import javax.security.sasl.Sasl;
 import javax.security.sasl.SaslClient;
 import javax.security.sasl.SaslException;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredentialsException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
 
@@ -94,7 +93,7 @@ public class SieveHandler {
 	/**
      * The logger.
      */
-    private static Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(SieveHandler.class));
+    private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SieveHandler.class);
 
     /**
      * The constant for CRLF (carriage-return line-feed).
@@ -220,9 +219,7 @@ public class SieveHandler {
 
     private void measureEnd(final String method) {
         this.mEnd = System.currentTimeMillis();
-        if (log.isDebugEnabled()) {
-            log.debug("SieveHandler." + method + "() took " + (this.mEnd - this.mStart) + "ms to perform");
-        }
+        log.debug("SieveHandler.{}() took {}ms to perform", method, (this.mEnd - this.mStart));
     }
 
     /**
@@ -966,7 +963,7 @@ public class SieveHandler {
                 final OXSieveHandlerException oxSieveHandlerException = new OXSieveHandlerException("The " + description + " \""
                     + username
                     + "\" could not be transformed to punycode.", this.sieve_host, this.sieve_host_port, null);
-                log.error(oxSieveHandlerException.getMessage(), e);
+                log.error("", e);
                 throw oxSieveHandlerException;
             }
         } else {
@@ -1127,7 +1124,7 @@ public class SieveHandler {
             try {
                 return Integer.parseInt(matcher.group(1));
             } catch (final NumberFormatException e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
                 return -1;
             }
         }

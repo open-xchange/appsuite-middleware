@@ -49,14 +49,12 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.event.impl.FolderEventInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -66,7 +64,7 @@ public class PropertyCleaner implements FolderEventInterface, EventHandler {
 	private final PropertyStore infoProperties;
 	private final PropertyStore folderProperties;
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PropertyCleaner.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PropertyCleaner.class);
 
 	public PropertyCleaner(final PropertyStore folderProperties, final PropertyStore infoProperties){
 		this.folderProperties = folderProperties;
@@ -87,12 +85,12 @@ public class PropertyCleaner implements FolderEventInterface, EventHandler {
 			folderProperties.removeAll(folderObj.getObjectID(), sessionObj.getContext());
 			folderProperties.commit();
 		} catch (final OXException e) {
-			LOG.error(e.getMessage(), e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
+			LOG.error("", e); // What shall we do with the drunken Exception? what shall we do with the drunken Exception? What shall we do with the drunken Exception early in the morning?
 		} finally {
 			try {
 				folderProperties.finish();
 			} catch (final OXException e) {
-			    LOG.error(e.getMessage(), e);
+			    LOG.error("", e);
 			}
 		}
 	}
@@ -103,7 +101,7 @@ public class PropertyCleaner implements FolderEventInterface, EventHandler {
 	}
 
     @Override
-    public void handleEvent(Event event) {
+    public void handleEvent(final Event event) {
         if (FileStorageEventHelper.isInfostoreEvent(event) && FileStorageEventHelper.isUpdateEvent(event)) {
             try {
                 ServerSession session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
@@ -112,21 +110,19 @@ public class PropertyCleaner implements FolderEventInterface, EventHandler {
                 infoProperties.removeAll(id, session.getContext());
                 infoProperties.commit();
             } catch (OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (NumberFormatException e) {
                 // Obviously no numeric identifier; therefore not related to InfoStore file storage
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             } finally {
                 try {
                     infoProperties.finish();
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
 
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(FileStorageEventHelper.createDebugMessage("UpdateEvent", event));
-            }
+            LOG.debug("{}",new Object() { @Override public String toString() { return FileStorageEventHelper.createDebugMessage("UpdateEvent", event);}});
         }
     }
 }

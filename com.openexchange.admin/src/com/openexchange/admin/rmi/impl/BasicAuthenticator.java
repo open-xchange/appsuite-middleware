@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.rmi.impl;
 
-import org.apache.commons.logging.Log;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -64,7 +63,6 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXAuthStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.log.LogFactory;
 
 /**
  *
@@ -72,7 +70,7 @@ import com.openexchange.log.LogFactory;
  */
 public class BasicAuthenticator extends OXCommonImpl {
 
-    private final static Log LOG = LogFactory.getLog (BasicAuthenticator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BasicAuthenticator.class);
 
     private OXAuthStorageInterface sqlAuth = null;
     private OXAuthStorageInterface fileAuth = null;
@@ -128,9 +126,7 @@ public class BasicAuthenticator extends OXCommonImpl {
                             final Object property = servicereference.getProperty("name");
                             if (null != property && property.toString().equalsIgnoreCase("BasicAuthenticator")) {
                                 final BasicAuthenticatorPluginInterface authplug = (BasicAuthenticatorPluginInterface) this.context.getService(servicereference);
-                                if (LOG.isDebugEnabled()) {
-                                    LOG.debug("Calling doAuthentication for plugin: " + bundlename);
-                                }
+                                LOG.debug("Calling doAuthentication for plugin: {}", bundlename);
                                 authplug.doAuthentication(authdata);
                                 // leave
                                 return;
@@ -147,7 +143,7 @@ public class BasicAuthenticator extends OXCommonImpl {
             }
             if(!fileAuth.authenticate(authdata)){
                 final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Authentication failed");
-                LOG.error("Master authentication for user: " + authdata.getLogin(), invalidCredentialsException);
+                LOG.error("Master authentication for user: {}", authdata.getLogin(), invalidCredentialsException);
                 throw invalidCredentialsException;
             }
         }
@@ -181,8 +177,7 @@ public class BasicAuthenticator extends OXCommonImpl {
             if (!OXToolStorageInterface.getInstance().existsContext(ctx)) {
                 final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
                         "Authentication failed");
-                LOG.error("Requested context " + ctx.getId()
-                        + " does not exist!", invalidCredentialsException);
+                LOG.error("Requested context {} does not exist!", ctx.getId(), invalidCredentialsException);
                 throw invalidCredentialsException;
             }
         }
@@ -192,7 +187,7 @@ public class BasicAuthenticator extends OXCommonImpl {
             if (!sqlAuth.authenticate(authdata, ctx)) {
                 final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
                         "Authentication failed");
-                LOG.error("Admin authentication for user " + authdata.getLogin(),invalidCredentialsException);
+                LOG.error("Admin authentication for user {}", authdata.getLogin(),invalidCredentialsException);
                 throw invalidCredentialsException;
             }
         }
@@ -213,8 +208,7 @@ public class BasicAuthenticator extends OXCommonImpl {
         if (!OXToolStorageInterface.getInstance().existsContext(ctx)) {
             final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(
                     "Authentication failed for user " + authdata.getLogin());
-            LOG.error("Requested context " + ctx.getId()
-                    + " does not exist!", invalidCredentialsException);
+            LOG.error("Requested context {} does not exist!", ctx.getId(), invalidCredentialsException);
             throw invalidCredentialsException;
         }
 

@@ -64,7 +64,7 @@ import com.openexchange.smtp.services.Services;
  */
 public final class SMTPProperties extends AbstractProtocolProperties implements ISMTPProperties {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SMTPProperties.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SMTPProperties.class);
 
     private static final SMTPProperties instance = new SMTPProperties();
 
@@ -166,9 +166,7 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
         }
 
         logBuilder.append("Global SMTP properties successfully loaded!");
-        if (LOG.isInfoEnabled()) {
-            LOG.info(logBuilder.toString());
-        }
+        LOG.info(logBuilder.toString());
 
     }
 

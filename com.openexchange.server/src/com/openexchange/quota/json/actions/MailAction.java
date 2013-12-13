@@ -73,8 +73,8 @@ import com.openexchange.server.ServiceLookup;
 }, responseDescription = "A JSON Object containing the fields \"use\" and \"quota\". \"use\" represents the use mail quota and the field \"quota\" represents the maximum. -1 represents an unlimited quota.")
 public final class MailAction extends AbstractQuotaAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAction.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(MailAction.class);
 
     /**
      * Initializes a new {@link MailAction}.
@@ -95,11 +95,9 @@ public final class MailAction extends AbstractQuotaAction {
                     MailServletInterface.QUOTA_RESOURCE_STORAGE, MailServletInterface.QUOTA_RESOURCE_MESSAGE });
             } catch (final OXException e) {
                 if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e.getMessage(), e);
-                    }
+                    LOG.debug("", e);
                 } else {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
                 quotaInfo = new long[][] { { UNLIMITED_QUOTA, UNLIMITED_QUOTA }, { UNLIMITED_QUOTA, UNLIMITED_QUOTA } };
             }

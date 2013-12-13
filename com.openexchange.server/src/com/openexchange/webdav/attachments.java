@@ -55,7 +55,6 @@ import java.net.URLDecoder;
 import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
@@ -72,7 +71,6 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.login.Interface;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
@@ -117,7 +115,7 @@ public final class attachments extends OXServlet {
         ATTACHMENT_BASE.setTransactional(true);
     }
 
-    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(attachments.class));
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(attachments.class);
 
     @Override
     protected Interface getInterface() {
@@ -239,14 +237,14 @@ public final class attachments extends OXServlet {
             xo.output(output_doc, resp.getOutputStream());
         } catch (final TransactionException exc) {
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.toString());
-            LOG.error(exc.getMessage(), exc);
+            LOG.error("", exc);
             exc.printStarterTrace();
             rollbackTransaction();
         } catch (final OXException exc) {
             if (exc.getCategory() == Category.CATEGORY_PERMISSION_DENIED) {
-                LOG.debug(exc.getMessage(), exc);
+                LOG.debug("", exc);
             } else {
-                LOG.error(exc.getMessage(), exc);
+                LOG.error("", exc);
             }
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.toString());
             rollbackTransaction();

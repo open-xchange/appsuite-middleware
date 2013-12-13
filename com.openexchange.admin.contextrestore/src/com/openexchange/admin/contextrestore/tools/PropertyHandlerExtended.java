@@ -52,13 +52,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.log.LogFactory;
 
 public class PropertyHandlerExtended extends PropertyHandler {
 
-    private final static Log log = LogFactory.getLog(PropertyHandlerExtended.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PropertyHandlerExtended.class);
 
     // The following lines define the property values for the database implementations
     public static final String CONTEXT_RESTORE_STORAGE = "CONTEXT_RESTORE_STORAGE";
@@ -78,9 +76,9 @@ public class PropertyHandlerExtended extends PropertyHandler {
         try {
             addpropsfromfile(configfile.toString());
         } catch (final FileNotFoundException e) {
-            log.error("Unable to read file: " + configfile);
+            log.error("Unable to read file: {}", configfile);
         } catch (final IOException e) {
-            log.error("Problems reading file: " + configfile);
+            log.error("Problems reading file: {}", configfile);
         }
     }
 

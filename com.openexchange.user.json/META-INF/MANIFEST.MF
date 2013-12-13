@@ -65,3 +65,4 @@ Import-Package: com.openexchange.ajax,
  org.osgi.service.http,
  org.osgi.util.tracker
 Bundle-Activator: com.openexchange.user.json.osgi.UserJSONActivator
+Require-Bundle: slf4j.api

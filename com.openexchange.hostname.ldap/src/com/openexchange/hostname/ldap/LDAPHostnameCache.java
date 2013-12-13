@@ -69,7 +69,7 @@ public class LDAPHostnameCache {
 
     private static final Object[] EMPTY_ARGS = new Object[0];
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(LDAPHostnameCache.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LDAPHostnameCache.class);
 
     private static volatile LDAPHostnameCache singleton;
 

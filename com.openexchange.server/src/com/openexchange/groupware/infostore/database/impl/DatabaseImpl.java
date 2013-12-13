@@ -63,7 +63,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
@@ -84,7 +83,6 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Autoboxing;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -95,7 +93,7 @@ import com.openexchange.tools.session.ServerSession;
 
 public class DatabaseImpl extends DBService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DatabaseImpl.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseImpl.class);
 
     private final static int DOCUMENT_VERSION_NUMBER_WITHOUT_FILE = 0;
 
@@ -225,7 +223,7 @@ public class DatabaseImpl extends DBService {
             result.close();
             stmt.close();
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             close(stmt, result);
@@ -260,7 +258,7 @@ public class DatabaseImpl extends DBService {
             result.close();
             stmt.close();
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             close(stmt, result);
@@ -589,7 +587,7 @@ public class DatabaseImpl extends DBService {
             } catch (final OXException e1) {
                 throw e1;
             }
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } catch (final OXException e) {
             try {
@@ -597,7 +595,7 @@ public class DatabaseImpl extends DBService {
             } catch (final OXException e1) {
                 throw e1;
             }
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } finally {
             close(stmt, null);
@@ -669,7 +667,7 @@ public class DatabaseImpl extends DBService {
                 _strReturnArray.add(result.getString(1));
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             close(stmt, result);
@@ -887,7 +885,7 @@ public class DatabaseImpl extends DBService {
             result.close();
             stmt.close();
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, "");
         } finally {
             releaseReadConnection(ctx, con);
@@ -918,7 +916,7 @@ public class DatabaseImpl extends DBService {
             }
 
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             close(stmt, result);
@@ -944,7 +942,7 @@ public class DatabaseImpl extends DBService {
                 retval = true;
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             close(stmt, result);
@@ -1050,7 +1048,7 @@ public class DatabaseImpl extends DBService {
                     deleteVersionAction.undo();
                     throw e;
                 } catch (final OXException e1) {
-                    LOG.fatal("Can't roll back deleting versions. Run the consistency tool.", e1);
+                    LOG.error("Can't roll back deleting versions. Run the consistency tool.", e1);
                 }
             }
 
@@ -1103,7 +1101,7 @@ public class DatabaseImpl extends DBService {
             final String[] filesArray = files.toArray(new String[files.size()]);
             fileStorage.deleteFiles(filesArray);
         } catch (final SQLException x) {
-            LOG.error(x.getMessage(), x);
+            LOG.error("", x);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, x.toString());
         } catch (final OXException x) {
             throw x;
@@ -1150,7 +1148,7 @@ public class DatabaseImpl extends DBService {
 //            try {
 //                ec.delete(documentMetadata);
 //            } catch (final OXException e) {
-//                LOG.error(e.getMessage(), e);
+//                LOG.error("", e);
 //            }
 //        }
     }

@@ -54,7 +54,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
@@ -63,7 +62,6 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.subscribe.helpers.DocumentMetadataHolder;
 import com.openexchange.subscribe.helpers.HTTPToolkit;
@@ -80,7 +78,7 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdaterStrategy<DocumentMetadataHolder> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DocumentMetadataHolderFolderUpdaterStrategy.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DocumentMetadataHolderFolderUpdaterStrategy.class);
 
     final UserService users;
     final UserPermissionService userPermissions;
@@ -173,7 +171,7 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
         try {
             return HTTPToolkit.grabStream(dataLink, false);
         } catch (final IOException e) {
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
         }
         return null;
     }
@@ -205,7 +203,7 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
                 try {
                     file.close();
                 } catch (final IOException e) {
-                    LOG.debug(e.getMessage(), e);
+                    LOG.debug("", e);
                 }
             }
         }

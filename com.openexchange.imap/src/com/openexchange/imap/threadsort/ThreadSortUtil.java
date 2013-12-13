@@ -61,7 +61,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -81,7 +80,7 @@ import com.sun.mail.imap.protocol.IMAPResponse;
  */
 public final class ThreadSortUtil {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ThreadSortUtil.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadSortUtil.class);
 
     /**
      * Prevent instantiation
@@ -290,7 +289,7 @@ public final class ThreadSortUtil {
      * @throws MessagingException If a messaging error occurs
      */
     public static String getThreadResponse(final IMAPFolder imapFolder, final String sortRange) throws MessagingException {
-        final Log log = LOG;
+        final org.slf4j.Logger log = LOG;
         final Object val = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
@@ -301,9 +300,7 @@ public final class ThreadSortUtil {
                     final long start = System.currentTimeMillis();
                     r = p.command(command, null);
                     final long dur = System.currentTimeMillis() - start;
-                    if (log.isInfoEnabled()) {
-                        log.info('"' + command + "\" for \"" + imapFolder.getFullName() + "\" (" + imapFolder.getStore().toString() + ") took " + dur + "msec.");
-                    }
+                    log.info("{}{}\" for \"{}\" ({}) took {}msec.", '"', command, imapFolder.getFullName(), imapFolder.getStore(), dur);
                     mailInterfaceMonitor.addUseTime(dur);
                 }
                 final Response response = r[r.length - 1];
@@ -499,8 +496,8 @@ public final class ThreadSortUtil {
             final MailMessage mail = mails[i];
             final int mailLevel = mail.getThreadLevel();
             if (mailLevel > level) {
-                if (LOG.isWarnEnabled() && mailLevel != level + 1) {
-                    LOG.warn("Unexpected thread level! Expected=" + (level + 1) + ", Actual=" + mailLevel);
+                if (mailLevel != level + 1) {
+                    LOG.warn("Unexpected thread level! Expected={}, Actual={}", (level + 1), mailLevel);
                 }
                 final ThreadSortMailMessage parent = newList.get(newList.size() - 1);
                 final List<ThreadSortMailMessage> sublist = new ArrayList<ThreadSortMailMessage>();

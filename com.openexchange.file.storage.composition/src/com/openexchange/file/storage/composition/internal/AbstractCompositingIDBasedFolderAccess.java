@@ -63,7 +63,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
@@ -92,7 +91,7 @@ import com.openexchange.tx.TransactionException;
  */
 public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractService<Transaction> implements IDBasedFolderAccess {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractCompositingIDBasedFolderAccess.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractCompositingIDBasedFolderAccess.class);
 
     private final ThreadLocal<Map<String, FileStorageAccountAccess>> connectedAccounts = new ThreadLocal<Map<String, FileStorageAccountAccess>>();
     private final ThreadLocal<List<FileStorageAccountAccess>> accessesToClose = new ThreadLocal<List<FileStorageAccountAccess>>();
@@ -450,19 +449,17 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
 //        return properties;
 //    }
 
-    private void fire(Event event) {
+    private void fire(final Event event) {
         EventAdmin eventAdmin = getEventAdmin();
         if (null != eventAdmin) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Publishing: " + dump(event));
-            }
+            LOG.debug("Publishing: {}", new Object() { @Override public String toString() { return dump(event);} });
             eventAdmin.postEvent(event);
-        } else if (LOG.isWarnEnabled()) {
-            LOG.warn("Unable to access event admin, unable to publish event " + dump(event));
+        } else {
+            LOG.warn("Unable to access event admin, unable to publish event {}", dump(event));
         }
     }
 
-    private static String dump(Event event) {
+    static String dump(Event event) {
         if (null != event) {
             return new StringAllocator().append(event.getTopic())
                 .append(": folderId=").append(event.getProperty(FileStorageEventConstants.FOLDER_ID))

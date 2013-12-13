@@ -55,7 +55,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
@@ -63,7 +62,6 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.settings.SharedNode;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 
 /**
  * This class is a container for the settings tree.
@@ -71,7 +69,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class ConfigTree {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigTree.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigTree.class);
 
     private static final ConfigTree SINGLETON = new ConfigTree();
 
@@ -237,7 +235,7 @@ public final class ConfigTree {
             removeSharedValue(getSettingByPath(tree, item.getPath()));
         } catch (final OXException e) {
             if (LOG.isDebugEnabled()) {
-                LOG.warn(e.getMessage(), e);
+                LOG.warn("", e);
             } else {
                 final String message = e.getMessage();
                 if (toLowerCase(message).indexOf("/io.ox/") < 0) {
@@ -427,10 +425,10 @@ public final class ConfigTree {
             }
         } catch (final InstantiationException e) {
             final OXException se = SettingExceptionCodes.INIT.create(e);
-            LOG.error(se.getMessage(), se);
+            LOG.error("", se);
         } catch (final IllegalAccessException e) {
             final OXException se = SettingExceptionCodes.INIT.create(e);
-            LOG.error(se.getMessage(), se);
+            LOG.error("", se);
         }
         tree = null;
     }

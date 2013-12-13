@@ -55,9 +55,7 @@ import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
@@ -67,7 +65,7 @@ public class WebdavLogAction extends AbstractAction {
         add("AUTHORIZATION");
     }};
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebdavLogAction.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavLogAction.class);
 	private boolean logBody;
 	private boolean logResponse;
 
@@ -89,9 +87,7 @@ public class WebdavLogAction extends AbstractAction {
 			b.append("exists: "); b.append(resource.exists()); b.append('\n');
 			b.append("isCollection: "); b.append(resource.isCollection()); b.append('\n');
 
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(b.toString());
-			}
+			LOG.debug(b.toString());
 
 			if(LOG.isTraceEnabled()) {
 				if(logBody) {
@@ -107,11 +103,9 @@ public class WebdavLogAction extends AbstractAction {
 			b = new StringBuilder();
 			b.append("DONE URL: "); b.append(req.getUrl()); b.append(' '); b.append(res.getStatus()); b.append('\n');
 
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(b.toString());
-			}
+			LOG.debug(b.toString());
 
-			if(LOG.isTraceEnabled() && logResponse) {
+			if(logResponse) {
 				LOG.trace(((CapturingWebdavResponse)res).getBodyAsString());
 			}
 
@@ -121,14 +115,12 @@ public class WebdavLogAction extends AbstractAction {
 			b.append("WebdavException: ");
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(b.toString(),x);
-			} else if(LOG.isErrorEnabled() && x.getStatus() == HttpServletResponse.SC_INTERNAL_SERVER_ERROR) {
-				LOG.error("The request: "+b.toString()+" caused an internal server error: "+x.getMessage(),x);
+			} else if (x.getStatus() == HttpServletResponse.SC_INTERNAL_SERVER_ERROR) {
+				LOG.error("The request: {} caused an internal server error: {}", b, x.getMessage(),x);
 			}
 			throw x;
 		} catch (final RuntimeException x) {
-			if (LOG.isErrorEnabled()) {
-				LOG.error("RuntimeException In WebDAV for request: "+b.toString(),x);
-			}
+			LOG.error("RuntimeException In WebDAV for request: {}", b,x);
 			throw x;
 		}
 	}
@@ -144,9 +136,7 @@ public class WebdavLogAction extends AbstractAction {
 					b.append(line);
 					b.append('\n');
 				}
-				if (LOG.isTraceEnabled()) {
-					LOG.trace(b);
-				}
+				LOG.trace(b.toString());
 			} catch (final IOException x) {
 				LOG.debug("",x);
 			} finally {

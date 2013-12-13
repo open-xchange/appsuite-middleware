@@ -52,7 +52,6 @@ package com.openexchange.ajax.writer;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,7 +59,6 @@ import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 
 /**
@@ -70,7 +68,7 @@ import com.openexchange.session.Session;
  */
 public class TaskWriter extends CalendarWriter {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TaskWriter.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TaskWriter.class);
 
     private Session session;
 
@@ -149,7 +147,7 @@ public class TaskWriter extends CalendarWriter {
             writeValue(task.getAlarm(), tz, json);
             break;
         default:
-            LOG.warn("Column " + column + " is unknown for tasks.");
+            LOG.warn("Column {} is unknown for tasks.", column);
         }
     }
 

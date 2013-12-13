@@ -59,13 +59,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.osgi.BodyParserRegistry;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -77,7 +75,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class AJAXRequestDataTools {
 
-    private static final Log LOG = LogFactory.getLog(AJAXRequestDataTools.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AJAXRequestDataTools.class);
 
     private static final String PARAMETER_ACTION = AJAXServlet.PARAMETER_ACTION;
 

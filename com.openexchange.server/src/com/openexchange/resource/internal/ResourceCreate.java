@@ -76,7 +76,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class ResourceCreate {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ResourceCreate.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResourceCreate.class);
 
     private final User user;
 

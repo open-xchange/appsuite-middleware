@@ -56,8 +56,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Arrays;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
@@ -95,7 +93,7 @@ public final class MALPollModifyTableTask extends UpdateTaskAdapter {
         }
         try {
 
-            final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(MALPollModifyTableTask.class));
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MALPollModifyTableTask.class);
 
             boolean contentDropped = false;
 
@@ -147,7 +145,7 @@ public final class MALPollModifyTableTask extends UpdateTaskAdapter {
             }
 
             con.commit(); // COMMIT
-            log.info("Update task " + MALPollModifyTableTask.class.getName() + " successfully performed.");
+            log.info("Update task {} successfully performed.", MALPollModifyTableTask.class.getName());
         } catch (final SQLException e) {
             rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
@@ -164,7 +162,7 @@ public final class MALPollModifyTableTask extends UpdateTaskAdapter {
         return Tools.isVARCHAR(con, table, "hash");
     }
 
-    private void dropAllContent(final Connection con, final Log log) throws SQLException {
+    private void dropAllContent(final Connection con, final org.slf4j.Logger log) throws SQLException {
         PreparedStatement stmt = null;
         try {
             log.info("Clearing table malPollUid.");
@@ -180,10 +178,10 @@ public final class MALPollModifyTableTask extends UpdateTaskAdapter {
         }
     }
 
-    private void modifyHashColumn(final Connection con, final String table, final Log log) throws SQLException {
+    private void modifyHashColumn(final Connection con, final String table, final org.slf4j.Logger log) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            log.info("Modifying column hash from table " + table + ".");
+            log.info("Modifying column hash from table {}.", table);
             stmt = con.prepareStatement("ALTER TABLE " + table + " MODIFY COLUMN hash BINARY(16) NOT NULL");
             stmt.executeUpdate();
         } finally {
@@ -191,8 +189,8 @@ public final class MALPollModifyTableTask extends UpdateTaskAdapter {
         }
     }
 
-    private void createColumn(final Connection con, final String tableName, final String columnName, final Log log) throws SQLException {
-        log.info("Adding column " + columnName + " to table " + tableName + ".");
+    private void createColumn(final Connection con, final String tableName, final String columnName, final org.slf4j.Logger log) throws SQLException {
+        log.info("Adding column {} to table {}.", columnName, tableName);
         final PreparedStatement stmt =
             con.prepareStatement("ALTER TABLE " + tableName + " ADD COLUMN " + columnName + " INT4 unsigned NOT NULL");
         try {
@@ -202,14 +200,14 @@ public final class MALPollModifyTableTask extends UpdateTaskAdapter {
         }
     }
 
-    private void dropPrimaryKey(final Connection con, final String tableName, final Log log) throws SQLException {
-        log.info("Removing old primary key from table " + tableName + ".");
+    private void dropPrimaryKey(final Connection con, final String tableName, final org.slf4j.Logger log) throws SQLException {
+        log.info("Removing old primary key from table {}.", tableName);
         Tools.dropPrimaryKey(con, tableName);
     }
 
-    private void addPrimaryKey(final Connection con, final String tableName, final Log log) throws SQLException {
+    private void addPrimaryKey(final Connection con, final String tableName, final org.slf4j.Logger log) throws SQLException {
         final String[] columns = new String[] { "cid", "hash", "uid" };
-        log.info("Creating new primary key " + Arrays.toString(columns) + " on table " + tableName + ".");
+        log.info("Creating new primary key {} on table {}.", Arrays.toString(columns), tableName);
         Tools.createPrimaryKey(con, tableName, columns, new int[] {-1, -1, 32});
     }
 

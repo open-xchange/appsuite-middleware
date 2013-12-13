@@ -57,12 +57,10 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.DefaultOAuthToken;
@@ -81,7 +79,7 @@ import com.openexchange.session.Session;
  */
 public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OAuthServiceMetaDataMSNImpl.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OAuthServiceMetaDataMSNImpl.class);
 
     private static final String API_KEY = "com.openexchange.oauth.msn.apiKey";
 
@@ -137,7 +135,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
             };
 
         } catch (UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return super.initOAuth(callbackUrl, session);
     }
@@ -204,7 +202,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
             }
             return token;
         } catch (UnsupportedEncodingException x) {
-            LOG.error(x.getMessage(), x);
+            LOG.error("", x);
         } catch (IOException e) {
             throw OAuthExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (JSONException e) {

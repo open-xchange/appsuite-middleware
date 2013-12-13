@@ -50,6 +50,7 @@
 package com.openexchange.server.impl;
 
 import java.util.Arrays;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -84,7 +85,7 @@ public class EffectivePermission extends OCLPermission {
 
     private static final long serialVersionUID = -1303754404748836561L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(EffectivePermission.class));
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EffectivePermission.class);
 
     /**
      * The configuration profile of the current logged in user
@@ -338,7 +339,7 @@ public class EffectivePermission extends OCLPermission {
                 folderModule = folderAccess.getFolderModule(fuid);
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return userConfigIsValid;
         }
         if (permissionBits.getUserId() == getEntity()) {

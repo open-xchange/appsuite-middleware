@@ -81,10 +81,7 @@ public class AddByIdsJob extends AbstractMailJob {
             }
 
             MailJobInfo info = (MailJobInfo) jobInfo;
-            long start = System.currentTimeMillis();
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(this.getClass().getSimpleName() + " started performing. " + info.toString());
-            }
+            LOG.debug("{} started performing. {}", this.getClass().getSimpleName(), info);
 
             checkJobInfo();
             IndexFacadeService indexFacade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
@@ -104,11 +101,6 @@ public class AddByIdsJob extends AbstractMailJob {
                 SmalMailAccess.closeUnwrappedInstance(mailAccess);
                 closeIndexAccess(mailIndex);
                 closeIndexAccess(attachmentIndex);
-
-                if (LOG.isDebugEnabled()) {
-                    long diff = System.currentTimeMillis() - start;
-                    LOG.debug(this.getClass().getSimpleName() + " lasted " + diff + "ms. " + info.toString());
-                }
             }
         } catch (Exception e) {
             throw new OXException(e);

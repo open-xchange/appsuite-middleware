@@ -51,8 +51,6 @@ package com.openexchange.consistency.osgi;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -69,7 +67,7 @@ import com.openexchange.management.ManagementService;
  */
 public final class MBeanRegisterer implements ServiceTrackerCustomizer<ManagementService,ManagementService> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MBeanRegisterer.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MBeanRegisterer.class);
 
     private final BundleContext context;
 
@@ -85,17 +83,17 @@ public final class MBeanRegisterer implements ServiceTrackerCustomizer<Managemen
         final ManagementService managementService = context.getService(reference);
         try {
             name = MBeanNamer.getName();
-            LOG.info("Registering consistency MBean under name: " + name);
+            LOG.info("Registering consistency MBean under name: {}", name);
             managementService.registerMBean(name, new OsgiOXConsistency());
         } catch (final OXException e) {
             final OXException e1 = ConsistencyExceptionCodes.REGISTRATION_FAILED.create(e);
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
         } catch (final MalformedObjectNameException e) {
             final OXException e1 = ConsistencyExceptionCodes.REGISTRATION_FAILED.create(e);
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
         } catch (final NullPointerException e) {
             final OXException e1 = ConsistencyExceptionCodes.REGISTRATION_FAILED.create(e);
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
         }
         return managementService;
     }
@@ -108,12 +106,12 @@ public final class MBeanRegisterer implements ServiceTrackerCustomizer<Managemen
     @Override
     public void removedService(final ServiceReference<ManagementService> reference, final ManagementService service) {
         final ManagementService managementService = service;
-        LOG.info("Unregistering consistency MBean with name " + name);
+        LOG.info("Unregistering consistency MBean with name {}", name);
         try {
             managementService.unregisterMBean(name);
         } catch (final OXException e) {
             final OXException e1 = ConsistencyExceptionCodes.UNREGISTRATION_FAILED.create(e);
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
         }
         name = null;
         context.ungetService(reference);

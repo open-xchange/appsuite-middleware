@@ -65,7 +65,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class UnifiedInboxEnablement implements PreferencesItemService {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UnifiedInboxEnablement.class));
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UnifiedInboxEnablement.class);
 
     /**
      * Default constructor.
@@ -100,15 +100,13 @@ public class UnifiedInboxEnablement implements PreferencesItemService {
                 try {
                     management = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class, true);
                 } catch (final OXException e) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn(e.getMessage(), e);
-                    }
+                    LOG.warn("", e);
                     return Boolean.FALSE;
                 }
                 try {
                     return Boolean.valueOf(management.getUnifiedINBOXAccountID(settings.getUserId(), settings.getCid()) >= 0);
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     return Boolean.FALSE;
                 }
             }
@@ -120,13 +118,7 @@ public class UnifiedInboxEnablement implements PreferencesItemService {
                 try {
                     management = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class, true);
                 } catch (final OXException e) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn(
-                            new StringBuilder().append(enable ? "Enabling" : "Disabling").append(" of Unified Mail for user ").append(
-                                settings.getUserId()).append(" in context ").append(settings.getCid()).append(" aborted: ").append(
-                                e.getMessage()),
-                            e);
-                    }
+                    LOG.warn("{} of Unified Mail for user {} in context {} aborted: {}", enable ? "Enabling" : "Disabling", settings.getUserId(), settings.getCid(), e.getMessage(), e);
                     return;
                 }
                 try {
@@ -140,7 +132,7 @@ public class UnifiedInboxEnablement implements PreferencesItemService {
                         management.deleteUnifiedINBOX(userId, cid);
                     }
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         };

@@ -71,7 +71,7 @@ public class Guess extends AbstractConfigSource {
 
     private static final List<String> POP3_PREFIXES = Arrays.asList("", "pop3.", "mail.");
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(Guess.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Guess.class);
 
     @Override
     public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) {

@@ -78,7 +78,7 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
  */
 public class DumperMessageHandler implements MailMessageHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DumperMessageHandler.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DumperMessageHandler.class);
 
     private final boolean bodyOnly;
 
@@ -120,7 +120,7 @@ public class DumperMessageHandler implements MailMessageHandler {
         try {
             strBuilder.append("Content:\n").append(MessageUtility.readMailPart(part, "US-ASCII"));
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return true;
     }
@@ -231,7 +231,7 @@ public class DumperMessageHandler implements MailMessageHandler {
         try {
             strBuilder.append("Content:\n").append(MessageUtility.readStream(part.getInputStream(), "US-ASCII"));
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return true;
     }
@@ -329,7 +329,7 @@ public class DumperMessageHandler implements MailMessageHandler {
                 throw MimeMailException.handleMessagingException(e);
             }
         } else {
-            LOG.error("Ignoring nested message. Cannot handle part's content which should be a RFC822 message according to its content type: " + (null == content ? "null" : content.getClass().getSimpleName()));
+            LOG.error("Ignoring nested message. Cannot handle part's content which should be a RFC822 message according to its content type: {}", (null == content ? "null" : content.getClass().getSimpleName()));
             return true;
         }
         final DumperMessageHandler handler = new DumperMessageHandler(bodyOnly);
@@ -425,7 +425,7 @@ public class DumperMessageHandler implements MailMessageHandler {
         try {
             strBuilder.append("Content:\n").append(MessageUtility.readStream(part.getInputStream(), "US-ASCII"));
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return true;
     }

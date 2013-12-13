@@ -96,7 +96,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 
     private static final long serialVersionUID = 1097727980840011436L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ReferencedMailPart.class));
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReferencedMailPart.class);
 
     protected static final int DEFAULT_BUF_SIZE = 0x2000;
 
@@ -194,11 +194,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                 copy2File(referencedPart.getInputStream());
                 setHeaders(referencedPart);
             }
-            if (LOG.isInfoEnabled()) {
-                LOG.info(new com.openexchange.java.StringAllocator("Referenced mail part exeeds ").append(
-                    Float.valueOf(TransportProperties.getInstance().getReferencedPartLimit() / MB).floatValue()).append(
-                    "MB limit. A temporary disk copy has been created: ").append(file.getFile().getName()));
-            }
+            LOG.info("Referenced mail part exeeds {}MB limit. A temporary disk copy has been created: {}", Float.valueOf(TransportProperties.getInstance().getReferencedPartLimit() / MB).floatValue(), file.getFile().getName());
         }
         if (!containsFileName() && referencedPart.containsFileName()) {
             setFileName(referencedPart.getFileName());
@@ -315,7 +311,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                 }
                 throw MailExceptionCode.NO_CONTENT.create();
             } catch (final MailConfigException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 dataSource = new MessageDataSource(new byte[0], "application/octet-stream");
             }
         }
@@ -363,7 +359,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
                 try {
                     fis.close();
                 } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -405,16 +401,12 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 
     @Override
     public void loadContent() {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("ReferencedMailPart.loadContent()");
-        }
+        LOG.trace("ReferencedMailPart.loadContent()");
     }
 
     @Override
     public void prepareForCaching() {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("ReferencedMailPart.prepareForCaching()");
-        }
+        LOG.trace("ReferencedMailPart.prepareForCaching()");
     }
 
     /**

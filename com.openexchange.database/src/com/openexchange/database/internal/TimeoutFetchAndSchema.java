@@ -51,7 +51,6 @@ package com.openexchange.database.internal;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.internal.wrapping.ConnectionReturnerFactory;
 import com.openexchange.exception.OXException;
@@ -64,7 +63,7 @@ import com.openexchange.pooling.PoolingException;
  */
 final class TimeoutFetchAndSchema implements FetchAndSchema {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(TimeoutFetchAndSchema.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TimeoutFetchAndSchema.class);
     private final ReplicationMonitor monitor;
 
     TimeoutFetchAndSchema(ReplicationMonitor monitor) {
@@ -105,7 +104,7 @@ final class TimeoutFetchAndSchema implements FetchAndSchema {
             try {
                 pool.back(retval);
             } catch (PoolingException e1) {
-                LOG.error(e1.getMessage(), e1);
+                LOG.error("", e1);
             }
             throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
         }

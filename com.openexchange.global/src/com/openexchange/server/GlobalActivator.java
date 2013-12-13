@@ -54,7 +54,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -65,11 +64,8 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.meta.MetaContributorRegistry;
 import com.openexchange.ajax.meta.internal.MetaContributorTracker;
 import com.openexchange.exception.internal.I18nCustomizer;
-import com.openexchange.exception.internal.SuppressedLoggingCheckerTracker;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.java.ConcurrentList;
-import com.openexchange.log.LogFactory;
-import com.openexchange.log.LogWrapperFactory;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.tools.strings.CompositeParser;
 import com.openexchange.tools.strings.DateStringParser;
@@ -82,8 +78,6 @@ import com.openexchange.tools.strings.TimeSpanParser;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GlobalActivator implements BundleActivator {
-
-    private static final Log LOG = LogFactory.getLog(GlobalActivator.class);
 
     private volatile Initialization initialization;
     private volatile ServiceTracker<StringParser,StringParser> parserTracker;
@@ -101,6 +95,7 @@ public final class GlobalActivator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GlobalActivator.class);
         try {
             final Initialization initialization = new com.openexchange.server.ServerInitialization();
             this.initialization = initialization;
@@ -112,25 +107,8 @@ public final class GlobalActivator implements BundleActivator {
             this.trackers = trackers;
             trackers.add(new ServiceTracker<I18nService, I18nService>(context, I18nService.class, new I18nCustomizer(context)));
 
-            final ServiceTracker<LogWrapperFactory, LogWrapperFactory> logWrapperTracker = new ServiceTracker<LogWrapperFactory, LogWrapperFactory>(context, LogWrapperFactory.class, null);
-			LogFactory.FACTORY.set(new LogWrapperFactory() {
-
-				@Override
-                public Log wrap(final String name, final Log log) {
-                    Log retval = log;
-                    for (final LogWrapperFactory factory : logWrapperTracker.getTracked().values()) {
-                        retval = factory.wrap(name, retval);
-                    }
-                    return retval;
-                }
-			});
-
-            trackers.add(logWrapperTracker);
-
             final MetaContributorTracker metaContributors = new MetaContributorTracker(context);
             trackers.add(metaContributors);
-
-            trackers.add(new SuppressedLoggingCheckerTracker(context));
 
             for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
@@ -138,9 +116,9 @@ public final class GlobalActivator implements BundleActivator {
 
             metaContributorsRegistration = context.registerService(MetaContributorRegistry.class, metaContributors, null);
 
-            LOG.info("Global bundle successfully started");
+            logger.info("Global bundle successfully started");
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            logger.error("", e);
             throw e;
         }
     }
@@ -225,6 +203,7 @@ public final class GlobalActivator implements BundleActivator {
 
     @Override
     public void stop(final BundleContext context) throws Exception {
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GlobalActivator.class);
         try {
             final List<ServiceTracker<?, ?>> trackers = this.trackers;
             if (null != trackers) {
@@ -247,9 +226,9 @@ public final class GlobalActivator implements BundleActivator {
                 this.metaContributorsRegistration = null;
             }
 
-            LOG.debug("Global bundle successfully stopped");
+            logger.debug("Global bundle successfully stopped");
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            logger.error("", e);
             throw e;
         }
     }

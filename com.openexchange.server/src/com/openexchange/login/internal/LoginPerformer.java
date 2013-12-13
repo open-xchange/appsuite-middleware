@@ -59,7 +59,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 import javax.security.auth.login.LoginException;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.Cookie;
@@ -79,7 +78,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.login.Blocking;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
@@ -104,7 +102,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class LoginPerformer {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginPerformer.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LoginPerformer.class);
 
     private static final LoginPerformer SINGLETON = new LoginPerformer();
 
@@ -324,9 +322,7 @@ public final class LoginPerformer {
         }
         final Session session = sessiondService.getSession(sessionId);
         if (null == session) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("No session found for ID: " + sessionId);
-            }
+            LOG.debug("No session found for ID: {}", sessionId);
             return null;
         }
         // Get context
@@ -473,7 +469,7 @@ public final class LoginPerformer {
         } catch (final OXException e) {
             e.log(LOG);
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

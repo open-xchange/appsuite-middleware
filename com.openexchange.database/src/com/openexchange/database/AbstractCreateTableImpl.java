@@ -67,8 +67,8 @@ import com.openexchange.java.StringAllocator;
  */
 public abstract class AbstractCreateTableImpl implements CreateTableService {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractCreateTableImpl.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(AbstractCreateTableImpl.class);
 
     /**
      * Initializes a new {@link AbstractCreateTableImpl}.
@@ -86,7 +86,7 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
                 final String tableName = extractTableName(create);
                 if (null != tableName) {
                     if (tableExists(con, tableName)) {
-                        LOG.info("A table with name \"" + tableName + "\" already exists. Aborting table creation.");
+                        LOG.info("A table with name \"{}\" already exists. Aborting table creation.", tableName);
                     } else {
                         try {
                             stmt.execute(create);
@@ -99,7 +99,7 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
                 final String procedureName = extractProcedureName(create);
                 if (null != procedureName) {
                     if (procedureExists(con, procedureName)) {
-                        LOG.info("A procedure with name \"" + procedureName + "\" already exists. Aborting procedure creation.");
+                        LOG.info("A procedure with name \"{}\" already exists. Aborting procedure creation.", procedureName);
                     } else {
                         try {
                             stmt.execute(create);

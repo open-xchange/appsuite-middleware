@@ -59,7 +59,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -89,7 +88,7 @@ import com.sun.syndication.io.ParsingFeedException;
  */
 public class RssAction implements AJAXActionService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RssAction.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RssAction.class);
 
     private static final int NOT_FOUND = 404;
 
@@ -148,17 +147,17 @@ public class RssAction implements AJAXActionService {
                         oxe.setCategory(Category.CATEGORY_WARNING);
                         warnings.add(oxe);
                     } catch (final FeedException e) {
-                        LOG.warn("Could not load RSS feed from: " + url, e);
+                        LOG.warn("Could not load RSS feed from: {}", url, e);
                     } catch (final FetcherException e) {
                         final int responseCode = e.getResponseCode();
                         if (responseCode <= 0) {
                             // No response code available
-                            LOG.warn("Could not load RSS feed from: " + url, e);
+                            LOG.warn("Could not load RSS feed from: {}", url, e);
                         }
                         if (NOT_FOUND == responseCode) {
-                            LOG.debug("Resource could not be found: " + url, e);
+                            LOG.debug("Resource could not be found: {}", url, e);
                         } else {
-                            LOG.warn("Could not load RSS feed from: " + url, e);
+                            LOG.warn("Could not load RSS feed from: {}", url, e);
                         }
                     }
                 }

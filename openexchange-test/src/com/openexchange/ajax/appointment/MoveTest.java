@@ -1,7 +1,6 @@
 package com.openexchange.ajax.appointment;
 
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -11,7 +10,7 @@ import com.openexchange.groupware.container.FolderObject;
 
 public class MoveTest extends AppointmentTest {
 
-	private static final Log LOG = LogFactory.getLog(MoveTest.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MoveTest.class);
 
 	public MoveTest(final String name) {
 		super(name);

@@ -57,7 +57,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
@@ -93,7 +92,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public final class Mp3CoverExtractor implements CoverExtractor {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Mp3CoverExtractor.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Mp3CoverExtractor.class);
 
     /**
      * Initializes a new {@link Mp3CoverExtractor}.
@@ -169,7 +168,7 @@ public final class Mp3CoverExtractor implements CoverExtractor {
                             return coverFile;
                         }
                     } else {
-                        LOG.warn("Extracting cover image from MP3 failed. Unknown frame body class: " + body.getClass().getName());
+                        LOG.warn("Extracting cover image from MP3 failed. Unknown frame body class: {}", body.getClass().getName());
                     }
                 }
             } else if (isSupported(managedFile.getContentType()) || isSupportedFileExt(managedFile.getFileName())) {

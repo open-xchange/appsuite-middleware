@@ -50,7 +50,6 @@
 package com.openexchange.messaging.sms.osgi;
 
 import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -63,7 +62,7 @@ import com.openexchange.exception.OXException;
  */
 public class ServletRegisterer {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ServletRegisterer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServletRegisterer.class);
 
     /**
      * The {@link DefaultDeferringURLService} reference.

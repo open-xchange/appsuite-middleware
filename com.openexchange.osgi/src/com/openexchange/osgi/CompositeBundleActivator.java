@@ -50,10 +50,8 @@
 package com.openexchange.osgi;
 
 import java.util.Stack;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import com.openexchange.log.LogFactory;
 
 /**
  * With this abstract class multiple activators in a bundle can be joined.
@@ -62,7 +60,7 @@ import com.openexchange.log.LogFactory;
  */
 public abstract class CompositeBundleActivator implements BundleActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CompositeBundleActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CompositeBundleActivator.class);
 
     /**
      * The stack of activated {@link BundleActivator}s.
@@ -88,7 +86,7 @@ public abstract class CompositeBundleActivator implements BundleActivator {
                 if (null == first) {
                     first = e;
                 }
-                LOG.error("Exception while running activator " + activator.getClass().getName(), e);
+                LOG.error("Exception while running activator {}", activator.getClass().getName(), e);
             }
         }
         if (null != first) {
@@ -107,7 +105,7 @@ public abstract class CompositeBundleActivator implements BundleActivator {
                 if (null == first) {
                     first = e;
                 }
-                LOG.error("Exception while stopping activator " + activator.getClass().getName(), e);
+                LOG.error("Exception while stopping activator {}", activator.getClass().getName(), e);
             }
         }
         if (null != first) {

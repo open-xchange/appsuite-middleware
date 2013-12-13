@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.storage.ldap.internal;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -58,10 +59,10 @@ import javax.naming.ldap.Control;
 import javax.naming.ldap.LdapContext;
 import javax.naming.ldap.PagedResultsResponseControl;
 import javax.naming.ldap.SortKey;
+import org.slf4j.Logger;
 import com.openexchange.contact.storage.ldap.LdapExceptionCodes;
 import com.openexchange.contact.storage.ldap.config.LdapConfig.SearchScope;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.Log;
 import com.openexchange.session.Session;
 
 /**
@@ -71,7 +72,7 @@ import com.openexchange.session.Session;
  */
 public class LdapExecutor  {
 
-    private static org.apache.commons.logging.Log LOG = Log.loggerFor(LdapExecutor.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapExecutor.class);
 
     private final LdapFactory factory;
     private final LdapContext context;
@@ -113,9 +114,9 @@ public class LdapExecutor  {
             do {
                 this.context.setRequestControls(factory.createRequestControls(sortKeys, cookie, deleted));
                 Date start = new Date();
-                LOG.debug("Search [" + baseDN + "]: " + filter);
+                LOG.debug("Search [{}]: {}", baseDN, filter);
                 List<LdapResult> ldapResults = LdapResult.getResults(context.search(baseDN, filter, searchControls));
-                LOG.debug("Got " + ldapResults.size() + " results, " + (new Date().getTime() - start.getTime()) + "ms eleapsed.");
+                LOG.debug("Got {} results, {}ms eleapsed.", ldapResults.size(), (new Date().getTime() - start.getTime()));
                 results.addAll(ldapResults);
                 cookie = extractPagedResultsCookie();
             } while (null != cookie);
@@ -151,7 +152,7 @@ public class LdapExecutor  {
             LOG.debug("Search []: (objectClass=*)");
             Date start = new Date();
             List<LdapResult> ldapResults = LdapResult.getResults(context.search("", "(objectClass=*)", searchControls));
-            LOG.debug("Got " + ldapResults.size() + " results, " + (new Date().getTime() - start.getTime()) + "ms eleapsed.");
+            LOG.debug("Got {} results, {}ms eleapsed.", ldapResults.size(), (new Date().getTime() - start.getTime()));
             for (LdapResult ldapResult : ldapResults) {
                 String defaultNamingContext = (String)ldapResult.getAttribute("defaultNamingContext");
                 if (null != defaultNamingContext) {

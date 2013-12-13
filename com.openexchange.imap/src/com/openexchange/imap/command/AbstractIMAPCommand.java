@@ -100,9 +100,7 @@ public abstract class AbstractIMAPCommand<T> {
 
     private static final class CallbackIMAPProtocolCommand implements IMAPFolder.ProtocolCommand {
 
-        private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CallbackIMAPProtocolCommand.class));
-
-        private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
+        private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CallbackIMAPProtocolCommand.class);
 
         private final AbstractIMAPCommand<?> abstractIMAPCommand;
         private final IMAPFolder imapFolder;

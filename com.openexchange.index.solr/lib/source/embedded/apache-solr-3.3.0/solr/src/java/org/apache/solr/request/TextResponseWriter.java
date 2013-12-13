@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 @Deprecated
 public abstract class TextResponseWriter extends org.apache.solr.response.TextResponseWriter 
 {
-  private static Logger log = LoggerFactory.getLogger(TextResponseWriter.class.getName());
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(TextResponseWriter.class.getName());
 
   public TextResponseWriter(Writer writer, SolrQueryRequest req, SolrQueryResponse rsp) {
     super(writer, req, rsp);

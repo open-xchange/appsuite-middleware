@@ -51,7 +51,6 @@ package com.openexchange.http.event;
 
 import java.net.InetSocketAddress;
 import java.text.MessageFormat;
-import org.apache.commons.logging.Log;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
@@ -71,7 +70,7 @@ public final class HttpMessengerEventHandler implements EventHandler {
 
     private static final String TALKINGSTICK = "__talkingstick";
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HttpMessengerEventHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpMessengerEventHandler.class);
 
     private final String mapName;
     private final ServiceLookup services;
@@ -89,7 +88,7 @@ public final class HttpMessengerEventHandler implements EventHandler {
         final Member localMember = hzInstance.getCluster().getLocalMember();
         final String thisUuid = localMember.getUuid();
         if (null == map.putIfAbsent(TALKINGSTICK, thisUuid)) {
-            LOG.info(MessageFormat.format("{0} will handle events for {1}", getHostNameFrom(localMember), HttpMessengerEventHandler.class.getName()));
+            LOG.info("{} will handle events for {}", getHostNameFrom(localMember), HttpMessengerEventHandler.class.getName());
         }
     }
 
@@ -119,19 +118,19 @@ public final class HttpMessengerEventHandler implements EventHandler {
                 talkingStickHolder = map.putIfAbsent(TALKINGSTICK, thisUuid);
                 if (null == talkingStickHolder) {
                     talkingStickHolder = thisUuid;
-                    LOG.info(MessageFormat.format("{0} will handle events for {1}", getHostNameFrom(localMember), HttpMessengerEventHandler.class.getName()));
+                    LOG.info("{} will handle events for {}", getHostNameFrom(localMember), HttpMessengerEventHandler.class.getName());
                 }
             }
             if (talkingStickHolder.equals(thisUuid)) {
                 // It is about us to handle this event
 
-                LOG.info("Handling event " + event.getTopic());
+                LOG.info("Handling event {}", event.getTopic());
 
                 // TODO: Pass event to registered HTTP listeners
 
             }
         } catch (final Exception e) {
-            LOG.warn(MessageFormat.format("Could not handle event {0}. Reason: {1}", event.getTopic(), e.getMessage()), e);
+            LOG.warn("Could not handle event {}. Reason: {}", event.getTopic(), e.getMessage(), e);
         }
     }
 

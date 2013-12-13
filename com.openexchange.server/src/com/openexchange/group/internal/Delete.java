@@ -55,10 +55,8 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupEventConstants;
@@ -84,7 +82,7 @@ public final class Delete {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Delete.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Delete.class);
 
     /**
      * Context.
@@ -156,7 +154,7 @@ public final class Delete {
             try {
                 throw GroupExceptionCodes.NO_GROUP_DELETE.create(GroupTools.getGroupZero(ctx).getDisplayName());
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw GroupExceptionCodes.NO_GROUP_DELETE.create(I(GroupStorage.GROUP_ZERO_IDENTIFIER));
             }
         }

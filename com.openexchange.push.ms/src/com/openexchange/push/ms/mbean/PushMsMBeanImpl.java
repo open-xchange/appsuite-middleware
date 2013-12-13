@@ -51,7 +51,6 @@ package com.openexchange.push.ms.mbean;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.ms.PushMsInit;
 import com.openexchange.push.ms.osgi.PushMsActivator;
@@ -78,8 +77,8 @@ public class PushMsMBeanImpl extends StandardMBean implements PushMsMBean {
             try {
                 init.init();
             } catch (OXException e) {
-                final Log LOG = com.openexchange.log.Log.loggerFor(PushMsMBeanImpl.class);
-                LOG.error(e.getMessage(), e);
+                final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushMsMBeanImpl.class);
+                LOG.error("", e);
             }
         }
     }

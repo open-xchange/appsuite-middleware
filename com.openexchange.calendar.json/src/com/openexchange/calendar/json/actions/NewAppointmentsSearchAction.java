@@ -94,8 +94,8 @@ import com.openexchange.tools.iterator.SearchIterator;
 }, responseDescription = "An array with appointment data. Each array element describes one appointment and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public final class NewAppointmentsSearchAction extends AppointmentAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(NewAppointmentsSearchAction.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(NewAppointmentsSearchAction.class);
 
     /**
      * Initializes a new {@link NewAppointmentsSearchAction}.
@@ -158,7 +158,7 @@ public final class NewAppointmentsSearchAction extends AppointmentAction {
                         recuResults = recColl.calculateRecurring(appointmentobject, startUTC.getTime(), endUTC.getTime(), 0);
                         processed = true;
                     } catch (final OXException x) {
-                        LOG.error("Can not calculate recurrence " + appointmentobject.getObjectID() + ":" + req.getSession().getContextId(), x);
+                        LOG.error("Can not calculate recurrence {}:{}", appointmentobject.getObjectID(), req.getSession().getContextId(), x);
                     }
                     if (recuResults != null && recuResults.size() > 0) {
                         final RecurringResultInterface result = recuResults.getRecurringResult(0);

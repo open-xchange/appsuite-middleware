@@ -75,8 +75,8 @@ import com.openexchange.osgi.ServiceRegistry;
  */
 public final class MessagingFolderStorageActivator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessagingFolderStorageActivator.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(MessagingFolderStorageActivator.class);
 
     private ServiceRegistration<FolderStorage> folderStorageRegistration;
 
@@ -96,17 +96,13 @@ public final class MessagingFolderStorageActivator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         getServiceRegistry().addService(clazz, getService(clazz));
     }
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
         getServiceRegistry().removeService(clazz);
     }
 
@@ -138,7 +134,7 @@ public final class MessagingFolderStorageActivator extends DeferredActivator {
             dictionary.put("tree", FolderStorage.REAL_TREE_ID);
             folderStorageRegistration = context.registerService(FolderStorage.class, new MessagingFolderStorage(), dictionary);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -162,7 +158,7 @@ public final class MessagingFolderStorageActivator extends DeferredActivator {
              */
             getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

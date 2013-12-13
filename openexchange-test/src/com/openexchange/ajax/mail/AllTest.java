@@ -50,7 +50,6 @@
 package com.openexchange.ajax.mail;
 
 import javax.mail.internet.InternetAddress;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AllRequest;
@@ -66,7 +65,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
  */
 public final class AllTest extends AbstractMailTest {
 
-    private static final Log LOG = LogFactory.getLog(AllTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AllTest.class);
 
     String mailObject_25kb;
 

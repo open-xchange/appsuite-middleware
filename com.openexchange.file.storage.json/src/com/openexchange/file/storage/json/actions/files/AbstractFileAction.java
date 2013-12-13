@@ -51,7 +51,6 @@ package com.openexchange.file.storage.json.actions.files;
 
 import java.util.Date;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,7 +62,6 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.json.FileMetadataWriter;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -74,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AbstractFileAction implements AJAXActionService {
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractFileAction.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractFileAction.class);
 
 
     private static final FileMetadataWriter fileWriter = new FileMetadataWriter();
@@ -188,11 +186,11 @@ public abstract class AbstractFileAction implements AJAXActionService {
             throw x;
         } catch (final NullPointerException e) {
             failure(req,e);
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, "Null dereference.");
         } catch (final RuntimeException e) {
             failure(req,e);
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             after(req);

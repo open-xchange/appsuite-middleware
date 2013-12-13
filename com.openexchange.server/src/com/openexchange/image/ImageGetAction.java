@@ -52,7 +52,6 @@ package com.openexchange.image;
 import java.io.InputStream;
 import java.util.Map.Entry;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -77,9 +76,7 @@ import com.openexchange.tools.session.ServerSession;
 @DispatcherNotes(defaultFormat = "file", allowPublicSession = true)
 public class ImageGetAction implements AJAXActionService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ImageGetAction.class);
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-    private static final boolean WARN = LOG.isWarnEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ImageGetAction.class);
 
     /**
      * Initializes a new {@link ImageGetAction}.
@@ -97,9 +94,8 @@ public class ImageGetAction implements AJAXActionService {
         {
             final String serlvetRequestURI = requestData.getSerlvetRequestURI();
             if (null == serlvetRequestURI) {
-                if (DEBUG) {
-                    LOG.debug("Missing path information in image URL.");
-                }
+                LOG.debug("Missing path information in image URL.");
+
                 throw AjaxExceptionCodes.BAD_REQUEST.create("Unknown image location.");
             }
             for (Entry<String, String> entry : ImageActionFactory.alias2regName.entrySet()) {
@@ -110,9 +106,8 @@ public class ImageGetAction implements AJAXActionService {
                 }
             }
             if (registrationName == null) {
-                if (DEBUG) {
-                    LOG.debug("Request URI cannot be resolved to an image location: " + serlvetRequestURI);
-                }
+                LOG.debug("Request URI cannot be resolved to an image location: {}", serlvetRequestURI);
+
                 throw AjaxExceptionCodes.BAD_REQUEST.create("Unknown image location.");
             }
         }
@@ -122,15 +117,13 @@ public class ImageGetAction implements AJAXActionService {
             ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class, true);
             dataSource = (ImageDataSource) conversionService.getDataSource(registrationName);
         } catch (OXException e) {
-            if (DEBUG) {
-                LOG.debug("Missing ConversionService reference.", e);
-            }
+            LOG.debug("Missing ConversionService reference.", e);
+
             throw AjaxExceptionCodes.BAD_REQUEST.create();
         }
         if (dataSource == null) {
-            if (DEBUG) {
-                LOG.debug("Data source cannot be found for: " + registrationName);
-            }
+            LOG.debug("Data source cannot be found for: {}", registrationName);
+
             throw AjaxExceptionCodes.BAD_REQUEST.create("Invalid image location.");
         }
         ImageLocation imageLocation = dataSource.parseRequest(requestData);
@@ -154,9 +147,8 @@ public class ImageGetAction implements AJAXActionService {
             requestResult = new AJAXRequestResult();
             obtainImageData(dataSource, imageLocation, session, requestResult);
         } catch (OXException e) {
-            if (WARN) {
-                LOG.warn("Retrieving image failed.", e);
-            }
+            LOG.warn("Retrieving image failed.", e);
+
             if (ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e)) {
                 throw AjaxExceptionCodes.HTTP_ERROR.create(e, Integer.valueOf(HttpServletResponse.SC_NOT_FOUND), e.getSoleMessage());
             }

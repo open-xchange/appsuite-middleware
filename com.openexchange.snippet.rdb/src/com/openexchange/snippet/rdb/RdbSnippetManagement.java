@@ -73,7 +73,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
@@ -106,7 +105,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class RdbSnippetManagement implements SnippetManagement {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RdbSnippetManagement.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbSnippetManagement.class);
 
     private static DatabaseService getDatabaseService() {
         return getService(DatabaseService.class);
@@ -175,7 +174,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 final ComposedConfigProperty<Boolean> property = factory.getView(userId, contextId).property("com.openexchange.snippet.rdb.supportsAttachments", boolean.class);
                 supportsAttachments = property.isDefined() ? property.get().booleanValue() : false;
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 supportsAttachments = false;
             }
             this.supportsAttachments = supportsAttachments;
@@ -485,7 +484,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
             rollback = true;
             /*-
              * Obtain identifier
-             * 
+             *
              * Yes, please use "com.openexchange.snippet.mime" since both implementations use shared table 'snippet'.
              */
             final int id = getIdGeneratorService().getId("com.openexchange.snippet.mime", contextId);
@@ -608,11 +607,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 stmt.setLong(++pos, contextId);
                 stmt.setLong(++pos, userId);
                 stmt.setString(++pos, Integer.toString(id));
-                if (LOG.isDebugEnabled()) {
-                    final String query = stmt.toString();
-                    LOG.debug(new com.openexchange.java.StringAllocator(query.length() + 32).append("Trying to perform SQL update query for attributes ").append(
-                        modifiableProperties).append(" :\n").append(query.substring(query.indexOf(':') + 1)));
-                }
+                LOG.debug("Trying to perform SQL update query for attributes {} :\n{}", modifiableProperties, stmt.toString().substring(stmt.toString().indexOf(':') + 1));
                 stmt.executeUpdate();
                 closeSQLStuff(stmt);
                 stmt = null;

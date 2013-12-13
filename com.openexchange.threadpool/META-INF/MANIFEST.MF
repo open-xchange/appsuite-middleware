@@ -20,6 +20,7 @@ Import-Package: com.openexchange.config,
  org.osgi.framework,
  org.osgi.service.event,
  org.osgi.util.tracker,
+ org.slf4j,
  sun.misc
 Export-Package: com.openexchange.threadpool,
  com.openexchange.threadpool.behavior,

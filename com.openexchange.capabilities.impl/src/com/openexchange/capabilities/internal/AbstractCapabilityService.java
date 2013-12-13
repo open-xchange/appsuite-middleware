@@ -64,7 +64,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.Capability;
@@ -99,7 +98,7 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public abstract class AbstractCapabilityService implements CapabilityService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractCapabilityService.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractCapabilityService.class);
 
     private static final Object PRESENT = new Object();
 
@@ -228,7 +227,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         try {
             return service.getCache(REGION_NAME_CONTEXT);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
     }
@@ -241,7 +240,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         try {
             return service.getCache(REGION_NAME_USER);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
     }
@@ -513,7 +512,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                         return false;
                     }
                 } catch (final Exception e) {
-                    LOG.warn("Could not check availability for capability '" + cap + "'. Assuming as absent this time.", e);
+                    LOG.warn("Could not check availability for capability '{}'. Assuming as absent this time.", cap, e);
                 }
             }
         }

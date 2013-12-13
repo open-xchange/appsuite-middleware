@@ -52,8 +52,6 @@
 package com.openexchange.webdav.xml;
 
 import java.util.ArrayList;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import com.openexchange.exception.OXException;
@@ -71,7 +69,7 @@ import com.openexchange.webdav.xml.fields.FolderFields;
 
 public class FolderParser extends FolderChildParser {
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderParser.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderParser.class);
 
 	public FolderParser(final Session sessionObj) {
 		this.sessionObj = sessionObj;
@@ -96,9 +94,7 @@ public class FolderParser extends FolderChildParser {
 
 	protected void parseElementFolder(final FolderObject folderobject, final XmlPullParser parser) throws Exception {
 		if (!hasCorrectNamespace(parser)) {
-			if (LOG.isTraceEnabled()) {
-				LOG.trace("unknown namespace in tag: " + parser.getName());
-			}
+			LOG.trace("unknown namespace in tag: {}", parser.getName());
 			parser.nextText();
 			return ;
 		}

@@ -12,7 +12,8 @@ Import-Package: com.openexchange.exception,
  com.openexchange.threadpool,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Bundle-Activator: com.openexchange.caching.events.osgi.CacheEventServiceActivator
 Export-Package: com.openexchange.caching.events
 Require-Bundle: com.hazelcast;resolution:=optional

@@ -59,6 +59,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import javax.mail.internet.InternetAddress;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contexts.Context;
@@ -77,7 +78,7 @@ import com.openexchange.session.Session;
  */
 public abstract class ComposedMailMessage extends MailMessage {
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ComposedMailMessage.class));
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ComposedMailMessage.class);
 
     /**
      * Serial version UID
@@ -231,7 +232,7 @@ public abstract class ComposedMailMessage extends MailMessage {
                             try {
                                 mfm.removeByID(fileId);
                             } catch (final OXException e) {
-                                LOG.warn(e.getMessage(), e);
+                                LOG.warn("", e);
                             }
                         }
                     } else if (ComposedPartType.DATA.equals(composedMailPart.getType())) {
@@ -240,20 +241,19 @@ public abstract class ComposedMailMessage extends MailMessage {
                             try {
                                 mfm.removeByID(fileId);
                             } catch (final OXException e) {
-                                LOG.warn(e.getMessage(), e);
+                                LOG.warn("", e);
                             }
                         }
                     } else if (ComposedPartType.FILE.equals(composedMailPart.getType())) {
                         final File f = ((UploadFileMailPart) (composedMailPart)).getUploadFile();
                         if (f.exists() && !f.delete()) {
-                            LOG.warn(new com.openexchange.java.StringAllocator().append("Temporary store file '").append(f.getName()).append(
-                                "' could not be deleted."));
+                            LOG.warn("Temporary store file '{}' could not be deleted.", f.getName());
                         }
                     }
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

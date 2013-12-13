@@ -51,8 +51,6 @@ package com.openexchange.subscribe.crawler;
 
 import java.util.ArrayList;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -69,7 +67,7 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
  */
 public class CalendarObjectsByICalFileStep extends AbstractStep<CalendarDataObject[], Page> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarObjectsByICalFileStep.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarObjectsByICalFileStep.class);
 
     public CalendarObjectsByICalFileStep() {
 
@@ -82,7 +80,7 @@ public class CalendarObjectsByICalFileStep extends AbstractStep<CalendarDataObje
 
         if (null != input) {
             try {
-                LOG.debug("This should be an iCal-File : \n" + input.getWebResponse().getContentAsString());
+                LOG.debug("This should be an iCal-File : \n{}", input.getWebResponse().getContentAsString());
                 String iCalFile = input.getWebResponse().getContentAsString();
                 ICalParser iCalParser = workflow.getActivator().getICalParser();
 
@@ -102,9 +100,9 @@ public class CalendarObjectsByICalFileStep extends AbstractStep<CalendarDataObje
                 }
 
             } catch (ConversionError e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (FailingHttpStatusCodeException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         output = new CalendarDataObject[events.size()];

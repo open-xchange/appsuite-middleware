@@ -57,8 +57,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.context.ContextService;
@@ -78,7 +76,7 @@ import com.openexchange.push.udp.registry.PushServiceRegistry;
  */
 public class PushHandler implements EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushHandler.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushHandler.class);
 
     public PushHandler() {
         super();
@@ -95,7 +93,7 @@ public class PushHandler implements EventHandler {
             try {
                 event = (CommonEvent) obj;
             } catch (final ClassCastException cce) {
-                LOG.warn("Unexpected type: " + cce.getMessage(), cce);
+                LOG.warn("Unexpected type: {}", cce.getMessage(), cce);
                 return;
             }
         }
@@ -107,7 +105,7 @@ public class PushHandler implements EventHandler {
             final ContextService contextService = PushServiceRegistry.getServiceRegistry().getService(ContextService.class);
             ctx = contextService.getContext(contextId);
         } catch (final OXException exc) {
-            LOG.error("cannot resolve context id: " + contextId, exc);
+            LOG.error("cannot resolve context id: {}", contextId, exc);
             return;
         }
 
@@ -142,7 +140,7 @@ public class PushHandler implements EventHandler {
             }
             break;
         default:
-            LOG.warn("Got event with unimplemented module: " + module);
+            LOG.warn("Got event with unimplemented module: {}", module);
         }
     }
 
@@ -153,9 +151,9 @@ public class PushHandler implements EventHandler {
         try {
             PushOutputQueue.add(new PushObject(folderId, module, ctx.getContextId(), users, false, timestamp));
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
         }
     }
 

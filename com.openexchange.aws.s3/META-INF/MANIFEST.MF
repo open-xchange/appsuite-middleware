@@ -31,5 +31,6 @@ Import-Package: com.amazonaws,
  com.openexchange.tools.file.external,
  javax.servlet.http;version="2.5.0",
  org.apache.commons.logging,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j
 Bundle-Activator: com.openexchange.aws.s3.osgi.AWSS3Activator

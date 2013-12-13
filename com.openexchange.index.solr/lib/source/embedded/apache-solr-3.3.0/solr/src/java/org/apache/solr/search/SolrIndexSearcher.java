@@ -57,7 +57,7 @@ public class SolrIndexSearcher extends IndexSearcher implements SolrInfoMBean {
   public static final AtomicLong numCloses = new AtomicLong();
 
 
-  private static Logger log = LoggerFactory.getLogger(SolrIndexSearcher.class);
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(SolrIndexSearcher.class);
   private final SolrCore core;
   private final IndexSchema schema;
   private String indexDir;

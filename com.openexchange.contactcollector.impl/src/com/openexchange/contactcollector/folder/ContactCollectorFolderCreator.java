@@ -52,7 +52,6 @@ package com.openexchange.contactcollector.folder;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import org.apache.commons.logging.Log;
 import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -60,7 +59,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.log.LogFactory;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.NonTransient;
@@ -80,7 +78,7 @@ import com.openexchange.tools.oxfolder.OXFolderSQL;
  */
 public class ContactCollectorFolderCreator implements LoginHandlerService, NonTransient {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactCollectorFolderCreator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactCollectorFolderCreator.class);
 
     /**
      * Initializes a new {@link ContactCollectorFolderCreator}.
@@ -153,7 +151,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
                     System.currentTimeMillis()).getObjectID();
         } catch (final OXException folderException) {
             if (folderException.isPrefix("FLD") && folderException.getCode() == OXFolderExceptionCode.NO_DUPLICATE_FOLDER.getNumber()) {
-                LOG.info(new StringBuilder("Found Folder with name of contact collect folder. Guess this is the dedicated folder."));
+                LOG.info("Found Folder with name of contact collect folder. Guess this is the dedicated folder.");
                 collectFolderID = OXFolderSQL.lookUpFolder(parent, folderName, FolderObject.CONTACT, con, ctx);
             }
         }
@@ -166,10 +164,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
         session.setParameter("__ccf#", folder);
         serverUserSetting.setContactCollectOnMailAccess(cid, userId, serverUserSetting.isContactCollectOnMailAccess(cid, userId).booleanValue());
         serverUserSetting.setContactCollectOnMailTransport(cid, userId, serverUserSetting.isContactCollectOnMailTransport(cid, userId).booleanValue());
-        if (LOG.isInfoEnabled()) {
-            LOG.info(new StringBuilder("Contact collector folder (id=").append(collectFolderID).append(
-                ") successfully created for user ").append(userId).append(" in context ").append(cid));
-        }
+        LOG.info("Contact collector folder (id={}) successfully created for user {} in context {}", collectFolderID, userId, cid);
     }
 
     private static boolean isConfigured(final ServerUserSetting setting, final int cid, final int userId) throws OXException {

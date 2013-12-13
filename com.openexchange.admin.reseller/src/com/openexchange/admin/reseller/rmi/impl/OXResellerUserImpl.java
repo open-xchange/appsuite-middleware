@@ -49,8 +49,7 @@
 
 package com.openexchange.admin.reseller.rmi.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
@@ -68,7 +67,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  */
 public class OXResellerUserImpl implements OXUserPluginInterface {
 
-    private final Log log = LogFactory.getLog(this.getClass());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXResellerUserImpl.class);
 
     private OXResellerStorageInterface oxresell = null;
 

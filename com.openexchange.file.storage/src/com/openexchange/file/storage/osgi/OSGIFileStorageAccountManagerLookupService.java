@@ -51,7 +51,6 @@ package com.openexchange.file.storage.osgi;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -62,7 +61,6 @@ import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 
 /**
@@ -145,11 +143,9 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
                 }
             }
             if (null == accountManager) {
-                final Log logger = com.openexchange.log.Log.loggerFor(OSGIFileStorageAccountManagerLookupService.class);
+                final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OSGIFileStorageAccountManagerLookupService.class);
                 final String ls = System.getProperty("line.separator");
-                logger.warn(ls + "    There is no file storage service available that provides account \"" + accountId + "\"." + ls +
-                            "    Please ensure the appropriate " + FileStorageService.class.getSimpleName() + " is up and running." + ls +
-                            "    Refer to /opt/open-xchange/sbin/listservices");
+                logger.warn("{}    There is no file storage service available that provides account \"{}\".{}    Please ensure the appropriate {} is up and running.{}    Refer to /opt/open-xchange/sbin/listservices", ls, accountId, ls, FileStorageService.class.getSimpleName(), ls);
                 return null;
             }
             session.setParameter(paramName, accountManager);
@@ -190,11 +186,9 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
                 if (null == providers.putIfAbsent(service, PRESENT)) {
                     return service;
                 }
-                final Log logger = LogFactory.getLog(OSGIFileStorageAccountManagerLookupService.Customizer.class);
-                if (logger.isWarnEnabled()) {
-                    logger.warn(new StringBuilder(128).append("File storage account manager provider ").append(service.getClass().getSimpleName()).append(
-                        " could not be added. Provider is already present.").toString());
-                }
+                final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OSGIFileStorageAccountManagerLookupService.Customizer.class);
+                logger.warn(new StringBuilder(128).append("File storage account manager provider ").append(service.getClass().getSimpleName()).append(
+                    " could not be added. Provider is already present.").toString());
             }
             /*
              * Adding to registry failed

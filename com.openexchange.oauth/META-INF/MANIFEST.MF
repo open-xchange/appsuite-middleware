@@ -60,7 +60,8 @@ Import-Package: com.openexchange.config,
  org.scribe.model,
  org.scribe.oauth,
  org.scribe.services,
- org.scribe.utils
+ org.scribe.utils,
+ org.slf4j
 Export-Package: com.openexchange.oauth
 Bundle-ClassPath: .
 Bundle-Activator: com.openexchange.oauth.osgi.Activator

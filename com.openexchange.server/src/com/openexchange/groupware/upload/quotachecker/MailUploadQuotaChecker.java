@@ -65,7 +65,7 @@ import com.openexchange.session.Session;
  */
 public final class MailUploadQuotaChecker extends UploadQuotaChecker {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailUploadQuotaChecker.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailUploadQuotaChecker.class);
 
     private final long uploadQuota;
 
@@ -90,7 +90,7 @@ public final class MailUploadQuotaChecker extends UploadQuotaChecker {
             try {
                 globalQuota = ServerConfig.getInt(Property.MAX_UPLOAD_SIZE);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 globalQuota = 0;
             }
             if (globalQuota > 0) {
@@ -123,7 +123,7 @@ public final class MailUploadQuotaChecker extends UploadQuotaChecker {
             try {
                 globalQuota = ServerConfig.getInt(Property.MAX_UPLOAD_SIZE);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 globalQuota = 0;
             }
             if (globalQuota > 0) {

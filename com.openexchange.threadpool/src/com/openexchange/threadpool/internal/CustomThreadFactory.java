@@ -54,7 +54,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.commons.logging.Log;
 import com.openexchange.java.StringAllocator;
 
 /**
@@ -64,7 +63,7 @@ import com.openexchange.java.StringAllocator;
  */
 public final class CustomThreadFactory implements java.util.concurrent.ThreadFactory {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CustomThreadFactory.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CustomThreadFactory.class);
 
     private final AtomicInteger threadNumber;
     private final String namePrefix;

@@ -62,7 +62,6 @@ import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -93,7 +92,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
 import com.openexchange.json.OXJSONWriter;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.exceptions.OXAborted;
@@ -128,7 +126,7 @@ public class Attachment extends PermissionServlet {
         ATTACHMENT_BASE.setTransactional(true);
     }
 
-    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Attachment.class));
+    private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Attachment.class);
 
 
     private long maxUploadSize = -2;
@@ -208,7 +206,7 @@ public class Attachment extends PermissionServlet {
                      */
                     throw (IOException) e.getCause();
                 }
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -256,7 +254,7 @@ public class Attachment extends PermissionServlet {
                  */
                 throw (IOException) e.getCause();
             }
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -347,9 +345,7 @@ public class Attachment extends PermissionServlet {
             }
 
         } catch (final JSONException e) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error(e.getMessage(), e);
-            }
+            LOG.error("", e);
         }
     }
 
@@ -466,7 +462,7 @@ public class Attachment extends PermissionServlet {
                 attachment.setId(AttachmentBase.NEW);
 
                 final long modified = ATTACHMENT_BASE.attachToObject(attachment, new BufferedInputStream(new FileInputStream(
-                    uploadFile.getTmpFile())), session, ctx, user, userConfig);
+                    uploadFile.getTmpFile()), 65536), session, ctx, user, userConfig);
                 if (modified > timestamp) {
                     timestamp = modified;
                 }
@@ -482,7 +478,7 @@ public class Attachment extends PermissionServlet {
             try {
                 ATTACHMENT_BASE.rollback();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             handle(res, t, ResponseFields.ERROR, session);
             return;
@@ -490,7 +486,7 @@ public class Attachment extends PermissionServlet {
             try {
                 ATTACHMENT_BASE.rollback();
             } catch (final OXException x) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             handle(res, AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage()), ResponseFields.ERROR, session);
             return;
@@ -498,7 +494,7 @@ public class Attachment extends PermissionServlet {
             try {
                 ATTACHMENT_BASE.rollback();
             } catch (final OXException x) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             handle(res, AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage()), ResponseFields.ERROR, session);
             return;

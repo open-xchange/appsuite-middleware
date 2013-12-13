@@ -52,8 +52,6 @@
 package com.openexchange.groupware.configuration;
 
 import java.util.Properties;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 
 /**
@@ -65,7 +63,7 @@ import com.openexchange.config.ConfigurationService;
 @Deprecated
 public abstract class AbstractConfigWrapper {
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractConfigWrapper.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractConfigWrapper.class);
 
 	public static String parseProperty(final Properties prop, final String name, final String value) {
 		String tmp = null;
@@ -81,7 +79,7 @@ public abstract class AbstractConfigWrapper {
 			try {
 				return Integer.parseInt(tmp);
 			} catch (final NumberFormatException ex) {
-				LOG.warn("property no parsable: " + name + ':' + value);
+				LOG.warn("property no parsable: {}{}{}", name, ':', value);
 			}
 		}
 		return value;
@@ -105,7 +103,7 @@ public abstract class AbstractConfigWrapper {
 				try {
 					ports[a] = Integer.parseInt(s[a]);
 				} catch (final NumberFormatException ex) {
-					LOG.warn("port in port range no parsable: " + s[a]);
+					LOG.warn("port in port range no parsable: {}", s[a]);
 				}
 			}
 

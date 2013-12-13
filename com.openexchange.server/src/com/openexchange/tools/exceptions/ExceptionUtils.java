@@ -68,17 +68,14 @@ package com.openexchange.tools.exceptions;
 
 import java.util.Map;
 import java.util.TreeMap;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 
 /**
  * Utilities for handling <tt>Throwable</tt>s and <tt>Exception</tt>s.
  */
 public class ExceptionUtils {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExceptionUtils.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExceptionUtils.class);
 
     private static final String MARKER = " ---=== /!\\ ===--- ";
 
@@ -89,18 +86,17 @@ public class ExceptionUtils {
      */
     public static void handleThrowable(final Throwable t) {
         if (t instanceof ThreadDeath) {
-            final Props props = LogProperties.optLogProperties();
-            final Map<String, Object> taskProperties = null == props ? null : props.asMap();
+            final Map<String, String> taskProperties = LogProperties.getPropertyMap();
             if (null == taskProperties) {
-                LOG.fatal(MARKER + "Thread death" + MARKER, t);
+                LOG.error("{}Thread death{}", MARKER, MARKER, t);
             } else {
                 final StringBuilder logBuilder = new StringBuilder(512);
                 final Map<String, String> sorted = new TreeMap<String, String>();
-                for (final Map.Entry<String, Object> entry : taskProperties.entrySet()) {
+                for (final Map.Entry<String, String> entry : taskProperties.entrySet()) {
                     final String propertyName = entry.getKey();
-                    final Object value = entry.getValue();
+                    final String value = entry.getValue();
                     if (null != value) {
-                        sorted.put(propertyName, value.toString());
+                        sorted.put(propertyName, value);
                     }
                 }
                 for (final Map.Entry<String, String> entry : sorted.entrySet()) {
@@ -111,25 +107,24 @@ public class ExceptionUtils {
                 logBuilder.append(MARKER);
                 logBuilder.append("Thread death");
                 logBuilder.append(MARKER);
-                LOG.fatal(logBuilder.toString(), t);
+                LOG.error(logBuilder.toString(), t);
             }
             throw (ThreadDeath) t;
         }
         if (t instanceof VirtualMachineError) {
-            final Props props = LogProperties.optLogProperties();
-            final Map<String, Object> taskProperties = null == props ? null : props.asMap();
+            final Map<String, String> taskProperties = LogProperties.getPropertyMap();
             if (null == taskProperties) {
-                LOG.fatal(
+                LOG.error(
                     MARKER + "The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating." + MARKER,
                     t);
             } else {
                 final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(512);
                 final Map<String, String> sorted = new TreeMap<String, String>();
-                for (final Map.Entry<String, Object> entry : taskProperties.entrySet()) {
+                for (final Map.Entry<String, String> entry : taskProperties.entrySet()) {
                     final String propertyName = entry.getKey();
-                    final Object value = entry.getValue();
+                    final String value = entry.getValue();
                     if (null != value) {
-                        sorted.put(propertyName, value.toString());
+                        sorted.put(propertyName, value);
                     }
                 }
                 for (final Map.Entry<String, String> entry : sorted.entrySet()) {
@@ -140,7 +135,7 @@ public class ExceptionUtils {
                 logBuilder.append(MARKER);
                 logBuilder.append("The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.");
                 logBuilder.append(MARKER);
-                LOG.fatal(logBuilder.toString(), t);
+                LOG.error(logBuilder.toString(), t);
             }
             throw (VirtualMachineError) t;
         }

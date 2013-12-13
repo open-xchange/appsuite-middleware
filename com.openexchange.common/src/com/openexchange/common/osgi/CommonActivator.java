@@ -50,11 +50,10 @@
 package com.openexchange.common.osgi;
 
 import javax.activation.MailcapCommandMap;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.LoggerFactory;
 import com.openexchange.mailcap.OXMailcapCommandMap;
 
 
@@ -76,7 +75,7 @@ public final class CommonActivator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        final Log logger = LogFactory.getLog(CommonActivator.class);
+        final org.slf4j.Logger logger = LoggerFactory.getLogger(CommonActivator.class);
         logger.info("Starting bundle: com.openexchange.common");
         try {
             // Add any start-up operations here
@@ -102,14 +101,14 @@ public final class CommonActivator implements BundleActivator {
                 mailcapRegistration = context.registerService(MailcapCommandMap.class, new OXMailcapCommandMap(mailcap), null);
             }
         } catch (final Exception e) {
-            logger.info("Starting bundle 'com.openexchange.common' failed: " + e.getMessage(), e);
+            logger.error("Starting bundle ''com.openexchange.common'' failed", e);
             throw e;
         }
     }
 
     @Override
     public void stop(final BundleContext context) throws Exception {
-        final Log logger = LogFactory.getLog(CommonActivator.class);
+        final org.slf4j.Logger logger = LoggerFactory.getLogger(CommonActivator.class);
         logger.info("Stopping bundle: com.openexchange.common");
         try {
             // Add any shut-down operations here
@@ -120,7 +119,7 @@ public final class CommonActivator implements BundleActivator {
             }
             com.mysql.jdbc.AbandonedConnectionCleanupThread.shutdown();
         } catch (final Exception e) {
-            logger.info("Stopping bundle 'com.openexchange.common' failed: " + e.getMessage(), e);
+            logger.error("Stopping bundle 'com.openexchange.common' failed", e);
             throw e;
         }
     }

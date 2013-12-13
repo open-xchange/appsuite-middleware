@@ -26,5 +26,5 @@ import org.slf4j.LoggerFactory;
  * @version $Id: BaseTokenFilterFactory.java 923109 2010-03-15 08:09:34Z uschindler $
  */
 public abstract class BaseTokenFilterFactory extends BaseTokenStreamFactory implements TokenFilterFactory {
-  public static final Logger log = LoggerFactory.getLogger(BaseTokenFilterFactory.class);
+  public static final org.slf4j.Logger log = LoggerFactory.getLogger(BaseTokenFilterFactory.class);
 }

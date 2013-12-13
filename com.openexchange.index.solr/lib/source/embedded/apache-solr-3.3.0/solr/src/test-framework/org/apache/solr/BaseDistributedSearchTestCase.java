@@ -81,7 +81,7 @@ public abstract class BaseDistributedSearchTestCase extends SolrTestCaseJ4 {
   protected Map<String, Integer> handle = new HashMap<String, Integer>();
 
   protected String id = "id";
-  public static Logger log = LoggerFactory.getLogger(BaseDistributedSearchTestCase.class);
+  public static org.slf4j.Logger log = LoggerFactory.getLogger(BaseDistributedSearchTestCase.class);
   
   public static RandVal rint = new RandVal() {
     @Override

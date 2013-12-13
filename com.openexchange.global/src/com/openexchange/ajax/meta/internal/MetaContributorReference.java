@@ -51,7 +51,6 @@ package com.openexchange.ajax.meta.internal;
 
 import java.util.Collection;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -70,7 +69,7 @@ import com.openexchange.session.Session;
  */
 public class MetaContributorReference implements MetaContributor {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MetaContributorReference.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MetaContributorReference.class);
 
     private final ServiceReference<MetaContributor> reference;
     private final BundleContext context;

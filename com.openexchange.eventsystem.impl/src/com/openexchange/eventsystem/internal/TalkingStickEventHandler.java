@@ -51,7 +51,7 @@ package com.openexchange.eventsystem.internal;
 
 import java.net.InetSocketAddress;
 import java.text.MessageFormat;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
@@ -70,7 +70,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public final class TalkingStickEventHandler implements EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(TalkingStickEventHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TalkingStickEventHandler.class);
 
     private static final String TALKINGSTICK = "__talkingstick";
 
@@ -94,7 +94,7 @@ public final class TalkingStickEventHandler implements EventHandler {
         final Member localMember = hzInstance.getCluster().getLocalMember();
         final String thisUuid = localMember.getUuid();
         if (null == map.putIfAbsent(TALKINGSTICK, thisUuid)) {
-            LOG.info(MessageFormat.format("{0} will handle events for {1}", getHostNameFrom(localMember), eventHandler.getClass().getName()));
+            LOG.info("{} will handle events for {}", getHostNameFrom(localMember), eventHandler.getClass().getName());
         }
     }
 
@@ -124,7 +124,7 @@ public final class TalkingStickEventHandler implements EventHandler {
                 talkingStickHolder = map.putIfAbsent(TALKINGSTICK, thisUuid);
                 if (null == talkingStickHolder) {
                     talkingStickHolder = thisUuid;
-                    LOG.info(MessageFormat.format("{0} will handle events for {1}", getHostNameFrom(localMember), eventHandler.getClass().getName()));
+                    LOG.info("{} will handle events for {}", getHostNameFrom(localMember), eventHandler.getClass().getName());
                 }
             }
             if (talkingStickHolder.equals(thisUuid)) {
@@ -132,7 +132,7 @@ public final class TalkingStickEventHandler implements EventHandler {
                 eventHandler.handleEvent(event);
             }
         } catch (final Exception e) {
-            LOG.warn(MessageFormat.format("Could not handle event {0} with handler {1}", event.getTopic(), eventHandler.getClass().getName()), e);
+            LOG.warn("Could not handle event {} with handler {}", event.getTopic(), eventHandler.getClass().getName(), e);
         }
     }
 

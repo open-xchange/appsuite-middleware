@@ -53,8 +53,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 
 /**
@@ -64,7 +62,7 @@ import com.openexchange.session.Session;
  */
 public final class UserLockManagement {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UserLockManagement.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserLockManagement.class);
 
     private static final UserLockManagement INSTANCE = new UserLockManagement();
 
@@ -103,10 +101,7 @@ public final class UserLockManagement {
         final ConcurrentMap<Integer, ReadWriteLock> userMap = map.remove(Integer.valueOf(session.getContextId()));
         if (null != userMap) {
             userMap.remove(Integer.valueOf(session.getUserId()));
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(new com.openexchange.java.StringAllocator("Cleaned folder locks for user ").append(session.getUserId()).append(
-                    " in context ").append(session.getContextId()).toString());
-            }
+            LOG.debug("Cleaned folder locks for user {} in context {}", session.getUserId(), session.getContextId());
         }
     }
 
@@ -117,9 +112,7 @@ public final class UserLockManagement {
      */
     public void dropFor(final int contextId) {
         map.remove(Integer.valueOf(contextId));
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned folder locks for context ").append(contextId).toString());
-        }
+        LOG.debug("Cleaned folder locks for context {}", contextId);
     }
 
     /**

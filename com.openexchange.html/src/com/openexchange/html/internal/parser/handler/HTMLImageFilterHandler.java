@@ -84,7 +84,7 @@ import com.openexchange.java.Stringer;
  */
 public class HTMLImageFilterHandler implements HtmlHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HTMLImageFilterHandler.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HTMLImageFilterHandler.class);
 
     /**
      * The {@link DefaultDeferringURLService} reference.
@@ -234,7 +234,7 @@ public class HTMLImageFilterHandler implements HtmlHandler {
                     imageURLFound = true;
                 }
             } catch (final StackOverflowError e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 attributes.remove(BACKGROUND);
             }
         }
@@ -256,7 +256,7 @@ public class HTMLImageFilterHandler implements HtmlHandler {
                         imageURLFound = true;
                     }
                 } catch (final StackOverflowError e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     attributes.remove(BACKGROUND);
                 }
             }

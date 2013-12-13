@@ -52,7 +52,6 @@ package com.openexchange.soap.cxf.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
 import org.apache.cxf.Bus;
 import org.apache.cxf.BusFactory;
 import org.apache.cxf.common.logging.LogUtils;
@@ -66,7 +65,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.soap.cxf.interceptor.TransformGenericElementsInterceptor;
-import com.openexchange.soap.cxf.logger.CommonsLoggingLogger;
+import com.openexchange.soap.cxf.logger.Slf4jLogger;
 
 /**
  * {@link CXFActivator} - The activator for CXF bundle.
@@ -83,10 +82,9 @@ public class CXFActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.loggerFor(CXFActivator.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CXFActivator.class);
         try {
             log.info("Starting Bundle: com.openexchange.soap.cxf");
-            LogUtils.setLoggerClass(CommonsLoggingLogger.class);
             final BundleContext context = this.context;
             final String alias = "/webservices";
             final String alias2 = "/servlet/axis2/services";
@@ -132,7 +130,6 @@ public class CXFActivator extends HousekeepingActivator {
                         boolean servletRegistered = false;
                         boolean collectorOpened = false;
                         try {
-                            System.setProperty("org.apache.cxf.Logger", "com.openexchange.soap.cxf.logger.CommonsLoggingLogger");
                             System.setProperty(StaxUtils.ALLOW_INSECURE_PARSER, "true");
                             // System.setProperty("org.apache.cxf.servlet.base-address", "http://localhost/foo/");
                             final CXFNonSpringServlet cxfServlet = new CXFNonSpringServlet();
@@ -159,9 +156,9 @@ public class CXFActivator extends HousekeepingActivator {
                                 }
                                 // Registration
                                 httpService.registerServlet(alias, cxfServlet, config, null);
-                                log.info("Registered CXF Servlet under: " + alias);
+                                log.info("Registered CXF Servlet under: {}", alias);
                                 httpService.registerServlet(alias2, cxfServlet, config, null);
-                                log.info("Registered CXF Servlet under: " + alias2);
+                                log.info("Registered CXF Servlet under: {}", alias2);
                                 servletRegistered = true;
                             }
                             /*
@@ -194,9 +191,9 @@ public class CXFActivator extends HousekeepingActivator {
                              */
                             return httpService;
                         } catch (final ServletException e) {
-                            log.error("Couldn't register CXF Servlet: " + e.getMessage(), e);
+                            log.error("Couldn't register CXF Servlet: {}", e.getMessage(), e);
                         } catch (final NamespaceException e) {
-                            log.error("Couldn't register CXF Servlet: " + e.getMessage(), e);
+                            log.error("Couldn't register CXF Servlet: {}", e.getMessage(), e);
                         } catch (final RuntimeException e) {
                             if (servletRegistered) {
                                 try {
@@ -217,7 +214,7 @@ public class CXFActivator extends HousekeepingActivator {
                                     this.collector = null;
                                 }
                             }
-                            log.error("Couldn't register CXF Servlet: " + e.getMessage(), e);
+                            log.error("Couldn't register CXF Servlet: {}", e.getMessage(), e);
                         }
                         context.ungetService(reference);
                         return null;
@@ -226,7 +223,7 @@ public class CXFActivator extends HousekeepingActivator {
                 track(HttpService.class, trackerCustomizer);
                 openTrackers();
         } catch (final Exception e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }

@@ -62,7 +62,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -76,7 +75,6 @@ import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.Assignment;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.pipesnfilters.DataSource;
 import com.openexchange.tools.pipesnfilters.Filter;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
@@ -86,7 +84,7 @@ public class OXContextMySQLStorageCommon {
 
     public static final String LOG_ERROR_CLOSING_STATEMENT = "Error closing statement";
 
-    private static final Log log = LogFactory.getLog(OXContextMySQLStorageCommon.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXContextMySQLStorageCommon.class);
 
     private final OXUtilMySQLStorageCommon oxutilcommon;
 
@@ -322,15 +320,13 @@ public class OXContextMySQLStorageCommon {
             if (!rs.next()) {
                 // throw new OXContextException("Unable to determine db_schema of context " + context_id);
                 cs2dbBroken = true;
-                log.error("Unable to determine db_schema of context " + contextId);
+                log.error("Unable to determine db_schema of context {}", contextId);
             } else {
                 dbSchema = rs.getString(1);
                 poolId = rs.getInt(2);
             }
             stmt2.close();
-            if (log.isDebugEnabled()) {
-                log.debug("Deleting context_server2dbpool mapping for context " + contextId);
-            }
+            log.debug("Deleting context_server2dbpool mapping for context {}", contextId);
             // delete context from context_server2db_pool
             stmt2 = configCon.prepareStatement("DELETE FROM context_server2db_pool WHERE cid=?");
             stmt2.setInt(1, contextId);
@@ -340,7 +336,7 @@ public class OXContextMySQLStorageCommon {
             try {
                 com.openexchange.databaseold.Database.reset(contextId);
             } catch (final OXException e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
             }
 
             if (!cs2dbBroken) {
@@ -361,27 +357,21 @@ public class OXContextMySQLStorageCommon {
                             throw new StorageException("Unable to determine authentication data of pool_id " + poolId);
                         }
                         final Database db = new Database(rs3.getString("login"), rs3.getString("password"), rs3.getString("driver"), rs3.getString("url"), dbSchema);
-                        if (log.isDebugEnabled()) {
-                            log.debug("Deleting database " + dbSchema);
-                        }
+                        log.debug("Deleting database {}", dbSchema);
                         oxutilcommon.deleteDatabase(db);
                         stmt3.close();
                     }
                     stmt2.close();
                 } catch (final Exception e) {
-                    log.error("Problem deleting database while doing rollback, cid=" + contextId + ": ", e);
+                    log.error("Problem deleting database while doing rollback, cid={}: ", contextId, e);
                 }
             }
-            if (log.isDebugEnabled()) {
-                log.debug("Deleting login2context entries for context " + contextId);
-            }
+            log.debug("Deleting login2context entries for context {}", contextId);
             stmt = configCon.prepareStatement("DELETE FROM login2context WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.executeUpdate();
             stmt.close();
-            if (log.isDebugEnabled()) {
-                log.debug("Deleting context entry for context " + contextId);
-            }
+            log.debug("Deleting context entry for context {}", contextId);
             stmt = configCon.prepareStatement("DELETE FROM context WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.executeUpdate();
@@ -465,7 +455,7 @@ public class OXContextMySQLStorageCommon {
                 configCon.commit();
             }
         } catch (final SQLException e) {
-            log.error("SQL Error removing/rollback entries from configdb for context " + contextId, e);
+            log.error("SQL Error removing/rollback entries from configdb for context {}", contextId, e);
         }
     }
 

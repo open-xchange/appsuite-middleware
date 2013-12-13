@@ -60,7 +60,6 @@ import com.openexchange.groupware.attach.AttachmentConfig;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
-import com.openexchange.log.Log;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -70,7 +69,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public abstract class AbstractAttachmentAction implements AJAXActionService {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractAttachmentAction.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractAttachmentAction.class);
 
     protected static final AttachmentParser PARSER = new AttachmentParser();
 

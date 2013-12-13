@@ -103,7 +103,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.http.server.Response;
@@ -135,7 +134,7 @@ import com.openexchange.tools.exceptions.ExceptionUtils;
  */
 public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(OSGiMainHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OSGiMainHandler.class);
 
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -164,11 +163,11 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         boolean invoked = false;
         String alias = request.getDecodedRequestURI();
         String originalAlias = alias;
-        LOG.debug("Serviceing URI: " + alias);
+        LOG.debug("Serviceing URI: {}", alias);
         // first lookup needs to be done for full match.
         boolean cutOff = false;
         while (true) {
-            LOG.debug("CutOff: " + cutOff + ", alias: " + alias);
+            LOG.debug("CutOff: {}, alias: {}", cutOff, alias);
             alias = OSGiCleanMapper.map(alias, cutOff);
             if (alias == null) {
                 if (cutOff) {
@@ -191,9 +190,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                 } catch (Throwable t) {
                     ExceptionUtils.handleThrowable(t);
                     StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
-                    if (LogProperties.isEnabled()) {
-                        logBuilder.append(LogProperties.getAndPrettyPrint(LogProperties.Name.SESSION_SESSION));
-                    }
+                    logBuilder.append(LogProperties.getAndPrettyPrint(LogProperties.Name.SESSION_SESSION));
                     appendRequestInfo(logBuilder, request);
                     LOG.error(logBuilder.toString(), t);
                     // 500 - Internal Server Error
@@ -361,8 +358,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
             if (mapper.isLocalyRegisteredAlias(alias)) {
                 mapper.doUnregister(alias, true);
             } else {
-                LOG.warn(new StringBuilder(128).append("Bundle: ").append(bundle).append(" tried to unregister not owned alias '").append(
-                    alias).append('\'').toString());
+                LOG.warn("Bundle: {} tried to unregister not owned alias '{}{}", bundle, alias, '\'');
                 throw new IllegalArgumentException(new StringBuilder(64).append("Alias '").append(alias).append(
                     "' was not registered by you.").toString());
             }
@@ -381,7 +377,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         lock.lock();
         try {
             for (String alias : mapper.getLocalAliases()) {
-                LOG.debug(new StringBuilder().append("Unregistering '").append(alias).append("'").toString());
+                LOG.debug("Unregistering '{}'", alias);
                 // remember not to call Servlet.destroy() owning bundle might be stopped already.
                 mapper.doUnregister(alias, false);
             }
@@ -402,7 +398,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
             Set<String> aliases = OSGiCleanMapper.getAllAliases();
             while (!aliases.isEmpty()) {
                 String alias = ((TreeSet<String>) aliases).first();
-                LOG.debug(new StringBuilder().append("Unregistering '").append(alias).append("'").toString());
+                LOG.debug("Unregistering '{}'", alias);
                 // remember not to call Servlet.destroy() owning bundle might be stopped already.
                 mapper.doUnregister(alias, false);
             }
@@ -496,17 +492,13 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         OSGiServletHandler osgiServletHandler;
 
         if (mapper.containsContext(httpContext)) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Reusing ServletHandler");
-            }
+            LOG.debug("Reusing ServletHandler");
             // new servlet handler for same configuration, different servlet and alias
             List<OSGiServletHandler> servletHandlers = mapper.getContext(httpContext);
             osgiServletHandler = servletHandlers.get(0).newServletHandler(servlet);
             servletHandlers.add(osgiServletHandler);
         } else {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Creating new ServletHandler");
-            }
+            LOG.debug("Creating new ServletHandler");
             HashMap<String, String> params;
             if (initparams != null) {
                 params = new HashMap<String, String>(initparams.size());
@@ -535,7 +527,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         final MappingData mappingData = request.obtainMappingData();
         //Change contextPath from "/" to the empty Sring for the default context in the httpservice
         mappingData.contextPath.setString("");
-        
+
         mappingData.wrapperPath.setString(alias);
 
         if (alias.length() != originalAlias.length()) {

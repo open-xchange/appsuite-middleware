@@ -58,6 +58,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -68,7 +69,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.management.MBeanException;
-import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -78,7 +78,6 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.log.LogFactory;
 import com.openexchange.report.internal.Tools;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -93,26 +92,26 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public abstract class Consistency implements ConsistencyMBean {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Consistency.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Consistency.class);
 
     @Override
     public List<String> listMissingFilesInContext(final int contextId) throws MBeanException {
         try {
-            LOG.info("Listing missing files in context " + contextId);
+            LOG.info("Listing missing files in context {}", contextId);
             final DoNothingSolver doNothing = new DoNothingSolver();
             final RecordSolver recorder = new RecordSolver();
             final Context ctx = getContext(contextId);
             checkOneContext(ctx, recorder, recorder, recorder, doNothing, getDatabase(), getAttachments(), getFileStorage(ctx));
             return recorder.getProblems();
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Error e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -120,17 +119,17 @@ public abstract class Consistency implements ConsistencyMBean {
     @Override
     public Map<Integer, List<String>> listMissingFilesInFilestore(final int filestoreId) throws MBeanException {
         try {
-            LOG.info("Listing missing files in filestore " + filestoreId);
+            LOG.info("Listing missing files in filestore {}", filestoreId);
             return listMissing(getContextsForFilestore(filestoreId));
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Error e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -138,17 +137,17 @@ public abstract class Consistency implements ConsistencyMBean {
     @Override
     public Map<Integer, List<String>> listMissingFilesInDatabase(final int databaseId) throws MBeanException {
         try {
-            LOG.info("List missing files in database " + databaseId);
+            LOG.info("List missing files in database {}", databaseId);
             return listMissing(getContextsForDatabase(databaseId));
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Error e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -159,14 +158,14 @@ public abstract class Consistency implements ConsistencyMBean {
             LOG.info("List all missing files");
             return listMissing(getAllContexts());
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Error e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -174,21 +173,21 @@ public abstract class Consistency implements ConsistencyMBean {
     @Override
     public List<String> listUnassignedFilesInContext(final int contextId) throws MBeanException {
         try {
-            LOG.info("List all unassigned files in context " + contextId);
+            LOG.info("List all unassigned files in context {}", contextId);
             final DoNothingSolver doNothing = new DoNothingSolver();
             final RecordSolver recorder = new RecordSolver();
             final Context ctx = getContext(contextId);
             checkOneContext(ctx, doNothing, doNothing, doNothing, recorder, getDatabase(), getAttachments(), getFileStorage(ctx));
             return recorder.getProblems();
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Error e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -196,17 +195,17 @@ public abstract class Consistency implements ConsistencyMBean {
     @Override
     public Map<Integer, List<String>> listUnassignedFilesInFilestore(final int filestoreId) throws MBeanException {
         try {
-            LOG.info("List all unassigned files in filestore " + filestoreId);
+            LOG.info("List all unassigned files in filestore {}", filestoreId);
             return listUnassigned(getContextsForFilestore(filestoreId));
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Error e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -214,17 +213,17 @@ public abstract class Consistency implements ConsistencyMBean {
     @Override
     public Map<Integer, List<String>> listUnassignedFilesInDatabase(final int databaseId) throws MBeanException {
         try {
-            LOG.info("List all unassigned files in database " + databaseId);
+            LOG.info("List all unassigned files in database {}", databaseId);
             return listUnassigned(getContextsForDatabase(databaseId));
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Error e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -235,14 +234,14 @@ public abstract class Consistency implements ConsistencyMBean {
             LOG.info("List all unassigned files");
             return listUnassigned(getAllContexts());
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Error e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -254,9 +253,7 @@ public abstract class Consistency implements ConsistencyMBean {
     private void deleteContextFromConfigDB(final Connection configCon, final int contextId) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Deleting context_server2dbpool mapping for context " + contextId);
-            }
+                LOG.debug("Deleting context_server2dbpool mapping for context {}", contextId);
             // delete context from context_server2db_pool
             stmt = configCon.prepareStatement("DELETE FROM context_server2db_pool WHERE cid=?");
             stmt.setInt(1, contextId);
@@ -266,19 +263,15 @@ public abstract class Consistency implements ConsistencyMBean {
             try {
                 com.openexchange.databaseold.Database.reset(contextId);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
 
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Deleting login2context entries for context " + contextId);
-            }
+                LOG.debug("Deleting login2context entries for context {}", contextId);
             stmt = configCon.prepareStatement("DELETE FROM login2context WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.executeUpdate();
             stmt.close();
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Deleting context entry for context " + contextId);
-            }
+                LOG.debug("Deleting context entry for context {}", contextId);
             stmt = configCon.prepareStatement("DELETE FROM context WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.executeUpdate();
@@ -289,7 +282,7 @@ public abstract class Consistency implements ConsistencyMBean {
             }
         }
     }
-    
+
     @Override
     public List<String> checkOrRepairConfigDB(final boolean repair) throws MBeanException {
         if( repair ) {
@@ -297,7 +290,7 @@ public abstract class Consistency implements ConsistencyMBean {
         } else {
             LOG.info("List inconsistent configdb");
         }
-        
+
         Connection confCon = null;
         Connection poolCon = null;
         PreparedStatement stmt = null;
@@ -339,14 +332,14 @@ public abstract class Consistency implements ConsistencyMBean {
                     ctxs.remove(ctx);
                 }
                 if( ctxs.size() > 0 ) {
-                    LOG.info("Schema " + schema + " is broken");
+                    LOG.info("Schema {} is broken", schema);
                     for(final Integer ctx : ctxs) {
                         if( repair ) {
-                            LOG.info("Deleting inconsistent entry for context " + ctx + " from configdb");
-                            deleteContextFromConfigDB(confCon, ctx.intValue()); 
+                            LOG.info("Deleting inconsistent entry for context {} from configdb", ctx);
+                            deleteContextFromConfigDB(confCon, ctx.intValue());
                             ret.add("Deleted inconsistent entry for context " + ctx + " from configdb");
                         } else {
-                            LOG.info("Context " + ctx + " does not exist anymore");
+                            LOG.info("Context {} does not exist anymore", ctx);
                             ret.add("Context " + ctx + " does not exist anymore");
                         }
                     }
@@ -363,11 +356,11 @@ public abstract class Consistency implements ConsistencyMBean {
             stmt = null;
             return ret;
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } finally {
@@ -412,14 +405,14 @@ public abstract class Consistency implements ConsistencyMBean {
             repairMe.add(getContext(contextId));
             repair(repairMe, resolverPolicy);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Error e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -429,14 +422,14 @@ public abstract class Consistency implements ConsistencyMBean {
         try {
             repair(getContextsForFilestore(filestoreId), resolverPolicy);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Error e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -446,14 +439,14 @@ public abstract class Consistency implements ConsistencyMBean {
         try {
             repair(getContextsForDatabase(databaseId), resolverPolicy);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Error e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -463,14 +456,14 @@ public abstract class Consistency implements ConsistencyMBean {
         try {
             repair(getAllContexts(), resolverPolicy);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Error e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -492,13 +485,11 @@ public abstract class Consistency implements ConsistencyMBean {
     // Taken from original consistency tool //
 
     private void output(final String text) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info(text);
-        }
+        LOG.info(text);
     }
 
     private void erroroutput(final Exception e) {
-        LOG.error(e.getMessage(), e);
+        LOG.error("", e);
     }
 
     private void outputSet(final SortedSet<String> set) {
@@ -528,27 +519,27 @@ public abstract class Consistency implements ConsistencyMBean {
 
         // We believe in the worst case, so lets check the storage first, so
         // that the state file is recreated
-        LOG.info("Checking context " + ctx.getContextId() + ". Using solvers db: " + dbSolver.description() + " attachments: " + attachmentSolver.description() + " snippets: " + snippetSolver.description() + " files: " + fileSolver.description());
+        LOG.info("Checking context {}. Using solvers db: {} attachments: {} snippets: {} files: {}", ctx.getContextId(), dbSolver.description(), attachmentSolver.description(), snippetSolver.description(), fileSolver.description());
         stor.recreateStateFile();
 
         LOG.info("Listing all files in filestore");
         final SortedSet<String> filestoreset = stor.getFileList();
-        LOG.info("Found " + filestoreset.size() + " files in the filestore for this context");
+        LOG.info("Found {} files in the filestore for this context", filestoreset.size());
         LOG.info("Loading all attachments");
         final SortedSet<String> attachmentset = attach.getAttachmentFileStoreLocationsperContext(ctx);
-        LOG.info("Found " + attachmentset.size() + " attachments");
+        LOG.info("Found {} attachments", attachmentset.size());
         final SortedSet<String> snippetset = getSnippetFileStoreLocationsperContext(ctx);
-        LOG.info("Found " + attachmentset.size() + " attachments");
+        LOG.info("Found {} attachments", attachmentset.size());
         SortedSet<String> dbfileset;
         try {
             LOG.info("Loading all infostore filestore locations");
             dbfileset = database.getDocumentFileStoreLocationsperContext(ctx);
-            LOG.info("Found " + dbfileset.size() + " infostore filepaths");
+            LOG.info("Found {} infostore filepaths", dbfileset.size());
             final SortedSet<String> joineddbfileset = new TreeSet<String>(dbfileset);
             joineddbfileset.addAll(attachmentset);
             joineddbfileset.addAll(snippetset);
 
-            LOG.info("Found " + joineddbfileset.size() + " filestore ids in total. There are " + filestoreset.size() + " files in the filespool. A difference of " + Math.abs(joineddbfileset.size() - filestoreset.size()));
+            LOG.info("Found {} filestore ids in total. There are {} files in the filespool. A difference of {}", joineddbfileset.size(), filestoreset.size(), Math.abs(joineddbfileset.size() - filestoreset.size()));
 
             // Build the difference set of the database set, so that the final
             // dbfileset contains all the members that aren't in the filestoreset
@@ -793,8 +784,8 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class CreateDummyFileForInfoitem extends CreateDummyFile implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CreateDummyFileForInfoitem.class));
+        private static final org.slf4j.Logger LOG1 =
+            org.slf4j.LoggerFactory.getLogger(CreateDummyFileForInfoitem.class);
 
         private final DatabaseImpl database;
 
@@ -815,8 +806,8 @@ public abstract class Consistency implements ConsistencyMBean {
                     final int changed =
                         database.modifyDocument(old_identifier, identifier, "\nCaution! The file has changed", "text/plain", ctx);
                     database.commit();
-                    if (changed == 1 && LOG1.isInfoEnabled()) {
-                        LOG1.info("Modified entry for identifier " + old_identifier + " in context " + ctx.getContextId() + " to new " + "dummy identifier " + identifier);
+                    if (changed == 1) {
+                        LOG1.info(MessageFormat.format("Modified entry for identifier {0} in context {1} to new dummy identifier {2}", old_identifier, ctx.getContextId(), identifier));
                     }
                 } catch (final OXException e) {
                     LOG1.error("", e);
@@ -852,8 +843,8 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class CreateDummyFileForAttachment extends CreateDummyFile implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CreateDummyFileForAttachment.class));
+        private static final org.slf4j.Logger LOG1 =
+            org.slf4j.LoggerFactory.getLogger(CreateDummyFileForAttachment.class);
 
         private final AttachmentBase attachments;
 
@@ -878,8 +869,8 @@ public abstract class Consistency implements ConsistencyMBean {
                     final int changed =
                         attachments.modifyAttachment(old_identifier, identifier, "\nCaution! The file has changed", "text/plain", ctx);
                     attachments.commit();
-                    if (changed == 1 && LOG1.isInfoEnabled()) {
-                        LOG1.info("Created dummy entry for: " + old_identifier + ". New identifier is: " + identifier);
+                    if (changed == 1) {
+                        LOG1.info(MessageFormat.format("Created dummy entry for: {0}. New identifier is: {1}", old_identifier, identifier));
                     }
                 } catch (final OXException e) {
                     LOG1.error("", e);
@@ -916,8 +907,8 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class CreateDummyFileForSnippet extends CreateDummyFile implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CreateDummyFileForSnippet.class));
+        private static final org.slf4j.Logger LOG1 =
+            org.slf4j.LoggerFactory.getLogger(CreateDummyFileForSnippet.class);
 
         public CreateDummyFileForSnippet(final FileStorage storage) {
             super(storage);
@@ -982,8 +973,8 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class RemoveFile implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RemoveFile.class));
+        private static final org.slf4j.Logger LOG1 =
+            org.slf4j.LoggerFactory.getLogger(RemoveFile.class);
 
         private final FileStorage storage;
 
@@ -995,8 +986,8 @@ public abstract class Consistency implements ConsistencyMBean {
         public void solve(final Context ctx, final Set<String> problems) throws OXException {
             try {
                 for (final String identifier : problems) {
-                    if (storage.deleteFile(identifier) && LOG1.isInfoEnabled()) {
-                        LOG1.info("Deleted identifier: " + identifier);
+                    if (storage.deleteFile(identifier)) {
+                        LOG1.info(MessageFormat.format("Deleted identifier: {0}", identifier));
                     }
                 }
                 /*
@@ -1016,8 +1007,8 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class DeleteInfoitem implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DeleteInfoitem.class));
+        private static final org.slf4j.Logger LOG1 =
+            org.slf4j.LoggerFactory.getLogger(DeleteInfoitem.class);
 
         private final DatabaseImpl database;
 
@@ -1035,11 +1026,11 @@ public abstract class Consistency implements ConsistencyMBean {
                     database.setRequestTransactional(true);
                     final int[] numbers = database.removeDocument(identifier, ctx);
                     database.commit();
-                    if (numbers[0] == 1 && LOG1.isInfoEnabled()) {
-                        LOG1.info("Have to change infostore version number " + "for entry: " + identifier);
+                    if (numbers[0] == 1) {
+                        LOG1.info(MessageFormat.format("Have to change infostore version number for entry: {0}", identifier));
                     }
-                    if (numbers[1] == 1 && LOG1.isInfoEnabled()) {
-                        LOG1.info("Deleted entry " + identifier + " from " + "infostore_documents.");
+                    if (numbers[1] == 1) {
+                        LOG1.info(MessageFormat.format("Deleted entry {0} from infostore_documents.", identifier));
                     }
                 } catch (final OXException e) {
                     LOG1.error("", e);
@@ -1067,8 +1058,8 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class DeleteAttachment implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DeleteAttachment.class));
+        private static final org.slf4j.Logger LOG1 =
+            org.slf4j.LoggerFactory.getLogger(DeleteAttachment.class);
 
         private final AttachmentBase attachments;
 
@@ -1087,11 +1078,11 @@ public abstract class Consistency implements ConsistencyMBean {
                     attachments.startTransaction();
                     final int[] numbers = attachments.removeAttachment(identifier, ctx);
                     attachments.commit();
-                    if (numbers[0] == 1 && LOG1.isInfoEnabled()) {
-                        LOG1.info("Inserted entry for identifier " + identifier + " and Context " + ctx.getContextId() + " in " + "del_attachments");
+                    if (numbers[0] == 1) {
+                        LOG1.info(MessageFormat.format("Inserted entry for identifier {0} and Context {1} in del_attachments", identifier, ctx.getContextId()));
                     }
-                    if (numbers[1] == 1 && LOG1.isInfoEnabled()) {
-                        LOG1.info("Removed attachment database entry for: " + identifier);
+                    if (numbers[1] == 1) {
+                        LOG1.info(MessageFormat.format("Removed attachment database entry for: {0}", identifier));
                     }
                 } catch (final OXException e) {
                     LOG1.debug("", e);
@@ -1129,8 +1120,8 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class DeleteSnippet implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DeleteSnippet.class));
+        private static final org.slf4j.Logger LOG1 =
+            org.slf4j.LoggerFactory.getLogger(DeleteSnippet.class);
 
         public DeleteSnippet() {
             super();
@@ -1292,8 +1283,8 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class CreateInfoitem implements ProblemSolver {
 
-        private static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CreateInfoitem.class));
+        private static final org.slf4j.Logger LOG1 =
+            org.slf4j.LoggerFactory.getLogger(CreateInfoitem.class);
 
         private static final String description = "This file needs attention";
 
@@ -1335,8 +1326,8 @@ public abstract class Consistency implements ConsistencyMBean {
                         database.startTransaction();
                         final int[] numbers = database.saveDocumentMetadata(identifier, document, user, ctx);
                         database.commit();
-                        if (numbers[2] == 1 && LOG1.isInfoEnabled()) {
-                            LOG1.info("Dummy entry for " + identifier + " in database " + "created. The admin of this context has now " + "a new document");
+                        if (numbers[2] == 1) {
+                            LOG1.info(MessageFormat.format("Dummy entry for {0} in database created. The admin of this context has now a new document", identifier));
                         }
                     } catch (final OXException e) {
                         LOG1.error("", e);
@@ -1386,5 +1377,5 @@ public abstract class Consistency implements ConsistencyMBean {
         }
         return retval;
     }
-    
+
 }

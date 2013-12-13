@@ -2,9 +2,9 @@
 package com.openexchange.filemanagement.distributed.osgi;
 
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
@@ -13,7 +13,6 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.filemanagement.DistributedFileManagement;
 import com.openexchange.filemanagement.distributed.DistributedFileManagementImpl;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.ServiceLookup;
@@ -25,7 +24,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public class DistributedFileManagementActivator extends HousekeepingActivator {
 
-    private static Log LOG = LogFactory.getLog(DistributedFileManagementActivator.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DistributedFileManagementActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -91,7 +90,7 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
         if (null != mapConfigs && !mapConfigs.isEmpty()) {
             for (String mapName : mapConfigs.keySet()) {
                 if (mapName.startsWith("distributedFiles-")) {
-                    LOG.info("Using distributed map '" + mapName + "'.");
+                    LOG.info("Using distributed map '{}'.", mapName);
                     return mapName;
                 }
             }

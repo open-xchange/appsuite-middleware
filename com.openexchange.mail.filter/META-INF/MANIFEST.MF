@@ -48,7 +48,8 @@ Import-Package: com.openexchange.ajax,
  org.json,
  org.osgi.framework,
  org.osgi.service.event,
- org.osgi.service.http
+ org.osgi.service.http,
+ org.slf4j
 Export-Package: com.openexchange.jsieve.commands,
  com.openexchange.jsieve.export,
  com.openexchange.jsieve.export.exceptions,

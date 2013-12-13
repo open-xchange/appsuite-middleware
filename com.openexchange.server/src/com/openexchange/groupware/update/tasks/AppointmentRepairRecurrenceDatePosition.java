@@ -57,8 +57,6 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -81,7 +79,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AppointmentRepairRecurrenceDatePosition.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppointmentRepairRecurrenceDatePosition.class);
 
     public AppointmentRepairRecurrenceDatePosition() {
         super();
@@ -101,9 +99,7 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
 
     @Override
     public void perform(final Schema schema, final int contextId) throws OXException, OXException {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Performing update task to repair the recurrence date position of appointment change exceptions.");
-        }
+        LOG.info("Performing update task to repair the recurrence date position of appointment change exceptions.");
         final Connection con = Database.get(contextId, true);
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -113,10 +109,10 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
             result = stmt.executeQuery();
             while (result.next()) {
                 final CalendarDataObject appointment = fillAppointment(result);
-                LOG.info("Repairing in context " + appointment.getContextID() + " appointment " + appointment.getObjectID() + ".");
+                LOG.info("Repairing in context {} appointment {}.", appointment.getContextID(), appointment.getObjectID());
                 try {
                     if (!appointment.containsRecurrencePosition()) {
-                        LOG.info("Unable to repair appointment " + appointment.getObjectID() + " in context " + appointment.getContextID() + ". Recurrence position is missing.");
+                        LOG.info("Unable to repair appointment {} in context {}. Recurrence position is missing.", appointment.getObjectID(), appointment.getContextID());
                         continue;
                     }
                     final long recurrence_date_position;
@@ -152,9 +148,7 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
                 Database.back(contextId, true, con);
             }
         }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Update task to repair the recurrence date position of appointment change exceptions performed.");
-        }
+        LOG.info("Update task to repair the recurrence date position of appointment change exceptions performed.");
     }
 
     private void writeRecurrenceDatePosition(final Connection con, final int cid, final int id, final long recurrenceDatePosition) {
@@ -167,7 +161,7 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
             stmt.setInt(3, id);
             final int changed = stmt.executeUpdate();
             if (1 != changed) {
-                LOG.error("Updated " + changed + " appointments instead of 1.");
+                LOG.error("Updated {} appointments instead of 1.", changed);
             }
         } catch (final SQLException e) {
             LOG.error("SQL psroblem while repairing recurrence date position.", e);

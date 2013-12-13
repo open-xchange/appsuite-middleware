@@ -19,6 +19,7 @@ Import-Package: javax.activation;version="1.1.0",
  org.apache.commons.logging,
  org.json,
  org.mozilla.universalchardet,
+ org.slf4j,
  sun.misc
 Export-Package: com.damienmiller,
  com.davekoelle,

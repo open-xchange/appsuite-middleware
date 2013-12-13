@@ -67,7 +67,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
-import org.apache.commons.logging.Log;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.data.conversion.ical.ConversionError;
@@ -95,7 +94,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.osgi.ImportExportServices;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.TimeZoneUtils;
@@ -127,7 +125,7 @@ public class ICalImporter extends AbstractImporter {
     private static final int APP = 0;
 	private static final int TASK = 1;
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ICalImporter.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalImporter.class);
 
 	@Override
     public boolean canImport(final ServerSession session, final Format format,
@@ -320,7 +318,7 @@ public class ICalImporter extends AbstractImporter {
 					importResult.setDate(task.getLastModified());
 					importResult.setFolder(String.valueOf(taskFolderId));
 				} catch (final OXException e) {
-					LOG.error(e.getMessage(), e);
+					LOG.error("", e);
 					importResult.setException(e);
 				}
 
@@ -482,7 +480,7 @@ public class ICalImporter extends AbstractImporter {
 					}
 				} catch (final OXException e) {
 					OXException ne = makeMoreInformative(e);
-					//LOG.error(ne.getMessage(), ne); //removed logging, because this would be a user error spamming our log.
+					//LOG.error("", ne); //removed logging, because this would be a user error spamming our log.
 					importResult.setException(ne);
 				}
 				final List<ConversionWarning> warningList = warningMap.get(index);

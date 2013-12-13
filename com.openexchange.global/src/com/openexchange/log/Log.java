@@ -49,66 +49,39 @@
 
 package com.openexchange.log;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.log.Loggable.Level;
+
 
 /**
  * {@link Log} - The <code>org.apache.commons.logging.Log</code> using {@link LogService}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @deprecated Use slf4j logger
  */
+@Deprecated
 public final class Log implements org.apache.commons.logging.Log {
 
-    private static final AtomicBoolean APPEND_TRACE_TO_MESSAGE = new AtomicBoolean();
-
     /**
-     * Sets whether to prefer to append stack traces to message itself or pass them as separate argument.
-     *
-     * @param appendTraceToMessage <code>true</code> to append stack traces to message; otherwise <code>false</code>
-     */
-    public static void setAppendTraceToMessage(final boolean appendTraceToMessage) {
-        APPEND_TRACE_TO_MESSAGE.set(appendTraceToMessage);
-    }
-
-    /**
-     * Checks whether to prefer to append stack traces to message itself or pass them as separate argument.
-     *
-     * @return <code>true</code> to append stack traces to message; otherwise <code>false</code>
-     */
-    public static boolean appendTraceToMessage() {
-        return APPEND_TRACE_TO_MESSAGE.get();
-    }
-
-    private static final AtomicReference<LogService> LOGSERVICE_REFERENCE = new AtomicReference<LogService>();
-
-    /**
-     * Sets the log service.
-     *
-     * @param logService The log service
-     */
-    public static void set(final LogService logService) {
-        LOGSERVICE_REFERENCE.set(logService);
-    }
-
-    /**
-     * Gets the appropriate {@link org.apache.commons.logging.Log logger} for specified class.
+     * Gets the appropriate {@link org.slf4j.Logger logger} for specified class.
      *
      * @param clazz The class
      * @return The logger.
+     * @deprecated Use slf4j logger
      */
+    @Deprecated
     public static org.apache.commons.logging.Log loggerFor(final Class<?> clazz) {
-        return valueOf(com.openexchange.log.LogFactory.getLog(clazz));
+        return valueOf(org.apache.commons.logging.LogFactory.getLog(clazz));
     }
 
     /**
-     * Gets the appropriate {@link org.apache.commons.logging.Log logger} for specified class.
+     * Gets the appropriate {@link org.slf4j.Logger logger} for specified class.
      *
      * @param clazz The class name
      * @return The logger.
+     * @deprecated Use slf4j logger
      */
+    @Deprecated
     public static org.apache.commons.logging.Log loggerFor(final String clazz) {
-        return valueOf(com.openexchange.log.LogFactory.getLog(clazz));
+        return valueOf(org.apache.commons.logging.LogFactory.getLog(clazz));
     }
 
     /**
@@ -116,9 +89,11 @@ public final class Log implements org.apache.commons.logging.Log {
      *
      * @param log The {@link org.apache.commons.logging.Log} instance
      * @return The appropriate instance
+     * @deprecated Use slf4j logger
      */
+    @Deprecated
     public static org.apache.commons.logging.Log valueOf(final org.apache.commons.logging.Log log) {
-        if ((log instanceof Log) || (log instanceof PropertiesAppendingLogWrapper)) {
+        if (log instanceof Log) {
             return log;
         }
         return new Log(log);
@@ -128,7 +103,10 @@ public final class Log implements org.apache.commons.logging.Log {
 
     /**
      * Initializes a new {@link Log}.
+     *
+     * @deprecated Use slf4j logger
      */
+    @Deprecated
     private Log(final org.apache.commons.logging.Log delegate) {
         super();
         this.delegate = delegate;
@@ -166,122 +144,62 @@ public final class Log implements org.apache.commons.logging.Log {
 
     @Override
     public void trace(final Object message) {
-        final LogService logService = LOGSERVICE_REFERENCE.get();
-        if (null == logService) {
-            delegate.trace(message);
-        } else {
-            logService.log(logService.loggableFor(Level.TRACE, delegate, message));
-        }
+        delegate.trace(message);
     }
 
     @Override
     public void trace(final Object message, final Throwable t) {
-        final LogService logService = LOGSERVICE_REFERENCE.get();
-        if (null == logService) {
-            delegate.trace(message, t);
-        } else {
-            logService.log(logService.loggableFor(Level.TRACE, delegate, message, t));
-        }
+        delegate.trace(message, t);
     }
 
     @Override
     public void debug(final Object message) {
-        final LogService logService = LOGSERVICE_REFERENCE.get();
-        if (null == logService) {
-            delegate.debug(message);
-        } else {
-            logService.log(logService.loggableFor(Level.DEBUG, delegate, message));
-        }
+        delegate.debug(message);
     }
 
     @Override
     public void debug(final Object message, final Throwable t) {
-        final LogService logService = LOGSERVICE_REFERENCE.get();
-        if (null == logService) {
-            delegate.debug(message, t);
-        } else {
-            logService.log(logService.loggableFor(Level.DEBUG, delegate, message, t));
-        }
+        delegate.debug(message, t);
     }
 
     @Override
     public void info(final Object message) {
-        final LogService logService = LOGSERVICE_REFERENCE.get();
-        if (null == logService) {
-            delegate.info(message);
-        } else {
-            logService.log(logService.loggableFor(Level.INFO, delegate, message));
-        }
+        delegate.info(message);
     }
 
     @Override
     public void info(final Object message, final Throwable t) {
-        final LogService logService = LOGSERVICE_REFERENCE.get();
-        if (null == logService) {
-            delegate.info(message, t);
-        } else {
-            logService.log(logService.loggableFor(Level.INFO, delegate, message, t));
-        }
+        delegate.info(message, t);
     }
 
     @Override
     public void warn(final Object message) {
-        final LogService logService = LOGSERVICE_REFERENCE.get();
-        if (null == logService) {
-            delegate.warn(message);
-        } else {
-            logService.log(logService.loggableFor(Level.WARNING, delegate, message));
-        }
+        delegate.warn(message);
     }
 
     @Override
     public void warn(final Object message, final Throwable t) {
-        final LogService logService = LOGSERVICE_REFERENCE.get();
-        if (null == logService) {
-            delegate.warn(message, t);
-        } else {
-            logService.log(logService.loggableFor(Level.WARNING, delegate, message, t));
-        }
+        delegate.warn(message, t);
     }
 
     @Override
     public void error(final Object message) {
-        final LogService logService = LOGSERVICE_REFERENCE.get();
-        if (null == logService) {
-            delegate.error(message);
-        } else {
-            logService.log(logService.loggableFor(Level.ERROR, delegate, message));
-        }
+        delegate.error(message);
     }
 
     @Override
     public void error(final Object message, final Throwable t) {
-        final LogService logService = LOGSERVICE_REFERENCE.get();
-        if (null == logService) {
-            delegate.error(message, t);
-        } else {
-            logService.log(logService.loggableFor(Level.ERROR, delegate, message, t));
-        }
+        delegate.error(message, t);
     }
 
     @Override
     public void fatal(final Object message) {
-        final LogService logService = LOGSERVICE_REFERENCE.get();
-        if (null == logService) {
-            delegate.fatal(message);
-        } else {
-            logService.log(logService.loggableFor(Level.FATAL, delegate, message));
-        }
+        delegate.fatal(message);
     }
 
     @Override
     public void fatal(final Object message, final Throwable t) {
-        final LogService logService = LOGSERVICE_REFERENCE.get();
-        if (null == logService) {
-            delegate.fatal(message, t);
-        } else {
-            logService.log(logService.loggableFor(Level.FATAL, delegate, message, t));
-        }
+        delegate.fatal(message, t);
     }
 
 }

@@ -52,7 +52,6 @@ package com.openexchange.index.solr.internal.mail.translators;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.ParseException;
@@ -97,7 +96,7 @@ import com.openexchange.mail.search.ToTerm;
  */
 public class CustomLuceneTranslator implements QueryTranslator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CustomLuceneTranslator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CustomLuceneTranslator.class);
 
     private Configuration config;
 
@@ -142,7 +141,7 @@ public class CustomLuceneTranslator implements QueryTranslator {
             this.config = config;
             this.fieldConfig = fieldConfig;
         }
-        
+
         public Query getQuery() {
             return query;
         }
@@ -154,7 +153,7 @@ public class CustomLuceneTranslator implements QueryTranslator {
                 LOG.warn("AND term was empty. Skipping in search query...");
                 return;
             }
-            
+
             BooleanQuery booleanQuery = new BooleanQuery();
             TranslatorVisitor visitor;
             for (int i = 0; i < terms.length; i++) {
@@ -166,7 +165,7 @@ public class CustomLuceneTranslator implements QueryTranslator {
                     booleanQuery.add(queryForTerm, Occur.MUST);
                 }
             }
-            
+
             query = booleanQuery;
         }
 
@@ -177,7 +176,7 @@ public class CustomLuceneTranslator implements QueryTranslator {
                 LOG.warn("AND term was empty. Skipping in search query...");
                 return;
             }
-            
+
             BooleanQuery booleanQuery = new BooleanQuery();
             TranslatorVisitor visitor;
             for (int i = 0; i < terms.length; i++) {
@@ -189,7 +188,7 @@ public class CustomLuceneTranslator implements QueryTranslator {
                     booleanQuery.add(queryForTerm, Occur.SHOULD);
                 }
             }
-            
+
             query = booleanQuery;
         }
 
@@ -274,14 +273,14 @@ public class CustomLuceneTranslator implements QueryTranslator {
             if ((flags & MailMessage.FLAG_READ_ACK) > 0) {
                 appendFlag(booleanQuery, MailIndexField.FLAG_READ_ACK, set);
             }
-            
+
             query = booleanQuery;
         }
 
         private void appendFlag(BooleanQuery booleanQuery, MailIndexField mailField, boolean value) {
             Set<String> solrFields = fieldConfig.getSolrFields(mailField);
             if (solrFields == null || solrFields.isEmpty()) {
-                LOG.warn("Did not find index fields for parameter " + mailField.toString() + ". Skipping this field in search query...");
+                LOG.warn("Did not find index fields for parameter {}. Skipping this field in search query...", mailField);
                 return;
             }
 
@@ -292,7 +291,7 @@ public class CustomLuceneTranslator implements QueryTranslator {
         public void visit(SizeTerm term) {
             Set<String> solrFields = fieldConfig.getSolrFields(MailIndexField.SIZE);
             if (solrFields == null || solrFields.isEmpty()) {
-                LOG.warn("Did not find index fields for parameter " + MailIndexField.SIZE.toString() + ". Skipping this field in search query...");
+                LOG.warn("Did not find index fields for parameter {}. Skipping this field in search query...", MailIndexField.SIZE);
                 return;
             }
 
@@ -378,10 +377,10 @@ public class CustomLuceneTranslator implements QueryTranslator {
         private void constructQuery(IndexField indexField, SearchTerm<String> term) {
             Set<String> solrFields = fieldConfig.getSolrFields(indexField);
             if (solrFields == null || solrFields.isEmpty()) {
-                LOG.warn("Did not find index fields for field " + indexField.toString() + ". Skipping this field in search query...");
+                LOG.warn("Did not find index fields for field {}. Skipping this field in search query...", indexField);
                 return;
             }
-            
+
             String pattern = LuceneQueryTools.escapeButWildcards(term.getPattern());
             Iterator<String> it = solrFields.iterator();
             if (solrFields.size() == 1) {

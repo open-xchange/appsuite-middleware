@@ -54,13 +54,11 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.damienmiller.BCrypt;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
@@ -71,7 +69,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class UserStorage {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UserStorage.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserStorage.class);
 
     /**
      * The instance
@@ -394,7 +392,7 @@ public abstract class UserStorage {
                         instance = tmp;
                     } catch (final OXException e) {
                         // Cannot occur
-                        LOG.warn(e.getMessage(), e);
+                        LOG.warn("", e);
                     }
                 }
             }
@@ -415,7 +413,7 @@ public abstract class UserStorage {
         try {
             return getInstance().getUser(uid, context);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
     }
@@ -431,7 +429,7 @@ public abstract class UserStorage {
         try {
             return getInstance().getUser(uid, ContextStorage.getStorageContext(contextId));
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
     }

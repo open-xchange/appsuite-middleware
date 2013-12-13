@@ -56,7 +56,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -76,7 +75,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RdbUserPermissionBitsStorage.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbUserPermissionBitsStorage.class);
 
     /**
      * Initializes a new {@link RdbUserPermissionBitsStorage}.

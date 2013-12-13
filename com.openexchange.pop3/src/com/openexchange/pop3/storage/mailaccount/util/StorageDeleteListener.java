@@ -55,7 +55,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Locale;
 import java.util.Map;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
@@ -149,7 +148,7 @@ public final class StorageDeleteListener implements MailAccountDeleteListener {
                     try {
                         enableForeignKeyChecks(con);
                     } catch (final SQLException e) {
-                        com.openexchange.log.Log.valueOf(LogFactory.getLog(StorageDeleteListener.class)).error(e.getMessage(), e);
+                        org.slf4j.LoggerFactory.getLogger(StorageDeleteListener.class).error("", e);
                     }
                 }
             }

@@ -55,8 +55,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.version.Version;
 
 /**
@@ -66,7 +64,7 @@ import com.openexchange.version.Version;
  */
 public final class version extends HttpServlet {
 
-    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(version.class));
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(version.class);
 
     /**
      * For serialization.
@@ -91,7 +89,7 @@ public final class version extends HttpServlet {
             pw.println(Version.getInstance().getVersionString());
             pw.flush();
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 }

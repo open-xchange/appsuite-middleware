@@ -54,7 +54,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -62,7 +61,6 @@ import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -74,7 +72,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class RdbSettingStorage extends SettingStorage {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbSettingStorage.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbSettingStorage.class);
 
     /**
      * SQL statement for loading one specific user setting.
@@ -178,10 +176,8 @@ public class RdbSettingStorage extends SettingStorage {
             if (null != value && value.isWritable()) {
                 value.writeValue(session, ctx, user, setting);
             } else {
-                if (LOG.isDebugEnabled()) {
-                    final OXException e = SettingExceptionCodes.NO_WRITE.create(setting.getName());
-                    LOG.debug(e.getMessage(), e);
-                }
+                final OXException e = SettingExceptionCodes.NO_WRITE.create(setting.getName());
+                LOG.debug("", e);
             }
         } else {
             saveInternal(con, setting);

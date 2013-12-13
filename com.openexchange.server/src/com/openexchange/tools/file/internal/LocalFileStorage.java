@@ -65,10 +65,8 @@ import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.file.external.FileStorageCodes;
 
 public class LocalFileStorage extends DefaultFileStorage {
@@ -135,7 +133,7 @@ public class LocalFileStorage extends DefaultFileStorage {
         SPECIAL_FILENAMES = Collections.unmodifiableSet(tmp);
     }
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LocalFileStorage.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LocalFileStorage.class);
 
     /**
      * This lock is used to avoid threads from creating a filestore dir simultaneously.
@@ -489,9 +487,7 @@ public class LocalFileStorage extends DefaultFileStorage {
     public void recreateStateFile() throws OXException {
         lock(LOCK_TIMEOUT);
         try {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Repairing.");
-            }
+            LOG.info("Repairing.");
             final State state = repairState();
             saveState(state);
         } finally {
@@ -629,7 +625,7 @@ public class LocalFileStorage extends DefaultFileStorage {
         final long lastModified = lock.lastModified();
         if (lastModified > 0 && lastModified + maxLifeTime < System.currentTimeMillis()) {
             unlock();
-            LOG.error("Deleting a very old stale lock file here " + lock.getAbsolutePath() + ". Assuming it has not been removed by a crashed/restarted application.");
+            LOG.error("Deleting a very old stale lock file here {}. Assuming it has not been removed by a crashed/restarted application.", lock.getAbsolutePath());
         }
         final long failTime = System.currentTimeMillis() + timeout;
         boolean created = false;
@@ -640,9 +636,7 @@ public class LocalFileStorage extends DefaultFileStorage {
             } catch (final IOException e) {
                 // Try again to create the file.
                 ioe = e;
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(e.getMessage(), e);
-                }
+                LOG.debug("", e);
             }
             if (!created) {
                 try {
@@ -651,7 +645,7 @@ public class LocalFileStorage extends DefaultFileStorage {
                     // Should not be interrupted.
                     // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
                     Thread.currentThread().interrupt();
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         } while (!created && System.currentTimeMillis() < failTime);
@@ -669,7 +663,7 @@ public class LocalFileStorage extends DefaultFileStorage {
         final File lock = new File(storage, LOCK_FILENAME);
         if (!lock.delete()) {
             if (lock.exists()) {
-                LOG.error("Couldn't delete lock file: " + lock.getAbsolutePath() + ". This will probably leave a stale lockfile behind rendering this filestorage unusable, delete in manually.");
+                LOG.error("Couldn't delete lock file: {}. This will probably leave a stale lockfile behind rendering this filestorage unusable, delete in manually.", lock.getAbsolutePath());
                 throw FileStorageCodes.UNLOCK.create();
             }
         }
@@ -838,9 +832,7 @@ public class LocalFileStorage extends DefaultFileStorage {
         lock(LOCK_TIMEOUT);
         try {
             if (!exists(STATEFILENAME)) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Repairing.");
-                }
+                LOG.info("Repairing.");
                 final State state = repairState();
                 saveState(state);
             }

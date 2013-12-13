@@ -99,7 +99,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class OXFolderAdminHelper {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OXFolderAdminHelper.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXFolderAdminHelper.class);
 
     private static final boolean ADMIN_EDITABLE = false;
 
@@ -153,7 +153,7 @@ public final class OXFolderAdminHelper {
         try {
             admin = getContextAdminID(cid, readCon);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return false;
         }
         if (admin != userId) {
@@ -197,7 +197,7 @@ public final class OXFolderAdminHelper {
         try {
             admin = getContextAdminID(cid, writeCon);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return;
         }
         for (final int id : CHANGEABLE_PUBLIC_FOLDERS) {
@@ -297,7 +297,7 @@ public final class OXFolderAdminHelper {
                         CalendarCache.getInstance().invalidateGroup(cid);
                     }
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             } catch (final SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -390,7 +390,7 @@ public final class OXFolderAdminHelper {
         try {
             final int[] perms = getPermissionValue(cid, globalAddressBookId, OCLPermission.ALL_GROUPS_AND_USERS, readCon);
             if (null != perms) {
-                LOG.warn("Cannot look-up individual user permission: Global permission is active on global address book folder.\nReturning global permission instead. user=" + userId + ", context=" + cid);
+                LOG.warn("Cannot look-up individual user permission: Global permission is active on global address book folder.\nReturning global permission instead. user={}, context={}", userId, cid);
                 return (perms[0] == OCLPermission.NO_PERMISSIONS);
             }
         } catch (final SQLException e) {
@@ -462,7 +462,7 @@ public final class OXFolderAdminHelper {
                 /*
                  * Global permission enabled for global address book folder
                  */
-                LOG.warn("Cannot update individual permission on global address book folder since global permission is active. user=" + userId + ", context=" + cid);
+                LOG.warn("Cannot update individual permission on global address book folder since global permission is active. user={}, context={}", userId, cid);
                 // updateGABWritePermission(cid, enable, writeCon);
                 return;
             }
@@ -568,7 +568,7 @@ public final class OXFolderAdminHelper {
                         }
                     }
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         } catch (final SQLException e) {
@@ -726,7 +726,7 @@ public final class OXFolderAdminHelper {
                 OXFolderSQL.updateLastModified(globalAddressBookId, creatingTime, mailAdmin, writeCon, ctx);
             } catch (final OXException e) {
                 // Cannot occur
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         } else {
             createGlobalAddressBook(cid, mailAdmin, writeCon, creatingTime);
@@ -800,9 +800,7 @@ public final class OXFolderAdminHelper {
         if (!checkFolderExistence(cid, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, writeCon)) {
             createSystemPublicInfostoreFolder(cid, mailAdmin, writeCon, creatingTime);
         }
-        if (LOG.isInfoEnabled()) {
-            LOG.info(new StringBuilder("All System folders successfully created for context ").append(cid).toString());
-        }
+        LOG.info("All System folders successfully created for context {}", cid);
         /*
          * Add mailadmin's folder rights to context's system folders and create his standard folders
          */
@@ -869,9 +867,7 @@ public final class OXFolderAdminHelper {
             cid,
             writeCon);
         addUserToOXFolders(mailAdmin, mailAdminDisplayName, language, cid, writeCon);
-        if (LOG.isInfoEnabled()) {
-            LOG.info(new StringBuilder("Folder rights for mail admin successfully added for context ").append(cid).toString());
-        }
+        LOG.info("Folder rights for mail admin successfully added for context {}", cid);
     }
 
     /**
@@ -1316,7 +1312,7 @@ public final class OXFolderAdminHelper {
                 }
             }
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -1342,7 +1338,7 @@ public final class OXFolderAdminHelper {
             }
         } catch (final Exception e) {
             // Ignore
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         /*
          * Update last-modified time stamp
@@ -1532,7 +1528,7 @@ public final class OXFolderAdminHelper {
             final int globalAddressBookId = FolderObject.SYSTEM_LDAP_FOLDER_ID;
             final boolean globalPermEnabled = checkGlobalGABPermissionExistence(cid, writeCon);
             if (globalPermEnabled) {
-                LOG.warn("Individual user permission not added to global address book folder since global permission is active. user=" + userId + ", context=" + cid);
+                LOG.warn("Individual user permission not added to global address book folder since global permission is active. user={}, context={}", userId, cid);
             } else {
                 if (!checkPermissionExistence(cid, globalAddressBookId, userId, writeCon)) {
                     final OCLPermission p = new OCLPermission();
@@ -1558,18 +1554,7 @@ public final class OXFolderAdminHelper {
             if (defaultTaskName == null || defaultTaskName.length() == 0) {
                 defaultTaskName = DEFAULT_TASK_NAME;
             }
-            /*
-             * GlobalConfig.loadLanguageCodes(propfile); String stdCalFolderName = GlobalConfig.getCode(language +
-             * "oxfolder_standardfolder_calendar"); if (stdCalFolderName == null || stdCalFolderName.length() == 0) { stdCalFolderName = "My
-             * Calendar"; } String stdConFolderName = GlobalConfig.getCode(language + "oxfolder_standardfolder_contact"); if
-             * (stdConFolderName == null || stdConFolderName.length() == 0) { stdConFolderName = "My Contacts"; } String stdTaskFolderName =
-             * GlobalConfig.getCode(language + "oxfolder_standardfolder_task"); if (stdTaskFolderName == null || stdTaskFolderName.length()
-             * == 0) { stdTaskFolderName = "My Tasks"; }
-             */
-            if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder("Folder names determined for default folders:\n\t").append("Calendar=").append(defaultCalName).append(
-                    "\tContact=").append(defaultConName).append("\tTask=").append(defaultTaskName).toString());
-            }
+            LOG.info("Folder names determined for default folders:\n\tCalendar={}\tContact={}\tTask={}", defaultCalName, defaultConName, defaultTaskName);
             /*
              * Insert default calendar folder
              */
@@ -1592,9 +1577,7 @@ public final class OXFolderAdminHelper {
             fo.setModule(FolderObject.CALENDAR);
             int newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
-            if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder("User's default CALENDAR folder successfully created").toString());
-            }
+            LOG.info("User's default CALENDAR folder successfully created");
             /*
              * Insert default contact folder
              */
@@ -1602,9 +1585,7 @@ public final class OXFolderAdminHelper {
             fo.setModule(FolderObject.CONTACT);
             newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
-            if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder("User's default CONTACT folder successfully created").toString());
-            }
+            LOG.info("User's default CONTACT folder successfully created");
             /*
              * Insert default contact folder
              */
@@ -1612,9 +1593,7 @@ public final class OXFolderAdminHelper {
             fo.setModule(FolderObject.TASK);
             newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
-            if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder("User's default TASK folder successfully created").toString());
-            }
+            LOG.info("User's default TASK folder successfully created");
             /*
              * Insert default infostore folder
              */
@@ -1627,14 +1606,12 @@ public final class OXFolderAdminHelper {
             fo.setModule(FolderObject.INFOSTORE);
             newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
-            if (LOG.isInfoEnabled()) {
-                LOG.info("User's default INFOSTORE folder successfully created");
-                LOG.info("All user default folders were successfully created");
-                /*
-                 * TODO: Set standard special folders (projects, ...) located beneath system user folder
-                 */
-                LOG.info(new StringBuilder("User ").append(userId).append(" successfully created").append(" in context ").append(cid).toString());
-            }
+            LOG.info("User's default INFOSTORE folder successfully created");
+            LOG.info("All user default folders were successfully created");
+            /*
+             * TODO: Set standard special folders (projects, ...) located beneath system user folder
+             */
+            LOG.info("User {} successfully created in context {}", userId, cid);
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
@@ -1684,9 +1661,7 @@ public final class OXFolderAdminHelper {
             fo.setModule(FolderObject.INFOSTORE);
             final int newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
-            if (LOG.isInfoEnabled()) {
-                LOG.info("User's default INFOSTORE folder successfully created");
-            }
+            LOG.info("User's default INFOSTORE folder successfully created");
             return newFolderId;
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());

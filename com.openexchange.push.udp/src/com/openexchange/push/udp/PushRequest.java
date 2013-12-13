@@ -54,10 +54,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
-import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 
 /**
  * {@link PushRequest}
@@ -78,9 +76,7 @@ public class PushRequest {
 
     private int currentLength;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushRequest.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushRequest.class);
 
     private static final Pattern PATTERN_SPLIT = Pattern.compile("\1");
 
@@ -129,9 +125,7 @@ public class PushRequest {
 
                 registerObj = new RegisterObject(userId, contextId, hostAddress.getHostAddress(), port, false);
 
-                if (DEBUG) {
-                    LOG.debug("register package: user id=" + userId + ",host address=" + hostAddress + ",port=" + port);
-                }
+                    LOG.debug("register package: user id={},host address={},port={}", userId, hostAddress, port);
 
                 RegisterHandler.addRegisterObject(registerObj);
                 PushOutputQueue.add(registerObj, true);
@@ -149,9 +143,7 @@ public class PushRequest {
 
                 registerObj = new RegisterObject(userId, contextId, hostAddress.getHostAddress(), port, true);
 
-                if (DEBUG) {
-                    LOG.debug("register sync package: " + registerObj);
-                }
+                    LOG.debug("register sync package: {}", registerObj);
 
                 RegisterHandler.addRegisterObject(registerObj);
                 break;
@@ -169,9 +161,7 @@ public class PushRequest {
 
                 final PushObject pushObject = new PushObject(folderId, module, contextId, users, true, timestamp);
 
-                if (DEBUG) {
-                    LOG.debug("push sync package: " + pushObject);
-                }
+                    LOG.debug("push sync package: {}", pushObject);
 
                 PushOutputQueue.add(pushObject);
                 break;
@@ -191,9 +181,7 @@ public class PushRequest {
                 remoteHostObject.setHost(hostAddress);
                 remoteHostObject.setPort(port);
 
-                if (DEBUG) {
-                    LOG.debug("remost host register request: " + remoteHostObject);
-                }
+                    LOG.debug("remost host register request: {}", remoteHostObject);
 
                 PushOutputQueue.addRemoteHostObject(remoteHostObject);
                 break;
@@ -201,11 +189,11 @@ public class PushRequest {
                 throw PushUDPExceptionCode.INVALID_TYPE.create(null, Integer.valueOf(type));
             }
         } catch (final OXException e) {
-            LOG.error("PushRequest: " + e, e);
+            LOG.error("PushRequest: {}", e, e);
         } catch (final UnknownHostException e) {
-            LOG.error("PushRequest: Remote host registration failed: " + e.getMessage(), e);
+            LOG.error("PushRequest: Remote host registration failed: {}", e.getMessage(), e);
         } catch (final Exception e) {
-            LOG.error("PushRequest: " + e, e);
+            LOG.error("PushRequest: {}", e, e);
         }
     }
 
@@ -221,9 +209,7 @@ public class PushRequest {
         System.arraycopy(datagramPacket.getData(), 0, b, 0, b.length);
         final String data = new String(b);
 
-        if (DEBUG) {
-            LOG.debug("push request data: " + data);
-        }
+            LOG.debug("push request data: {}", data);
 
         /*
          * Split: MAGIC\1Length\1Data

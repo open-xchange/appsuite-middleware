@@ -30,5 +30,6 @@ Import-Package: com.openexchange.ajax.requesthandler,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 

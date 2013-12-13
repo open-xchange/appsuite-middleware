@@ -50,7 +50,6 @@
 package com.openexchange.push.malpoll.osgi;
 
 import static com.openexchange.push.malpoll.services.MALPollServiceRegistry.getServiceRegistry;
-import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.concurrent.Executor;
 import org.osgi.service.event.EventAdmin;
@@ -87,7 +86,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class MALPollActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MALPollActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MALPollActivator.class);
 
     private ScheduledTimerTask scheduledTimerTask;
 
@@ -115,9 +114,7 @@ public final class MALPollActivator extends HousekeepingActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         getServiceRegistry().addService(clazz, getService(clazz));
         if (TimerService.class == clazz) {
             MALPollPushListenerRegistry.getInstance().openAll();
@@ -130,9 +127,7 @@ public final class MALPollActivator extends HousekeepingActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
         if (TimerService.class == clazz) {
             MALPollPushListenerRegistry.getInstance().closeAll();
             stopScheduledTask(getService(TimerService.class));
@@ -176,9 +171,8 @@ public final class MALPollActivator extends HousekeepingActivator {
                     try {
                         period = Long.parseLong(tmp.trim());
                     } catch (final NumberFormatException e) {
-                        LOG.error(MessageFormat.format(
-                            "Unable to parse com.openexchange.push.malpoll.period: {0}. Using default 300000 (5 Minutes) instead.",
-                            tmp));
+                        LOG.error("Unable to parse com.openexchange.push.malpoll.period: {}. Using default 300000 (5 Minutes) instead.",
+                            tmp);
                         period = 300000L;
                     }
                 }
@@ -222,7 +216,7 @@ public final class MALPollActivator extends HousekeepingActivator {
             registerService(MailAccountDeleteListener.class, new MALPollMailAccountDeleteListener(), null);
             registerService(DeleteListener.class, new MALPollDeleteListener(), null);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -254,7 +248,7 @@ public final class MALPollActivator extends HousekeepingActivator {
             folder = null;
             period = 300000L;
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -263,7 +257,7 @@ public final class MALPollActivator extends HousekeepingActivator {
         /*
          * Create either an executor starter or a caller-run starter
          */
-        final org.apache.commons.logging.Log log = LOG;
+        final org.slf4j.Logger log = LOG;
         final Starter starter;
         if (parallel) {
             /*
@@ -295,7 +289,7 @@ public final class MALPollActivator extends HousekeepingActivator {
                     try {
                         l.checkNewMail();
                     } catch (final OXException e) {
-                        log.error(e.getMessage(), e);
+                        log.error("", e);
                     }
                 }
             };
@@ -314,11 +308,9 @@ public final class MALPollActivator extends HousekeepingActivator {
                             starter.start(l);
                         }
                     }
-                    if (log.isDebugEnabled()) {
-                        log.debug("Global run for checking new mails done.");
-                    }
+                    log.debug("Global run for checking new mails done.");
                 } catch (final Exception e) {
-                    log.error(e.getMessage(), e);
+                    log.error("", e);
                 }
             }
 

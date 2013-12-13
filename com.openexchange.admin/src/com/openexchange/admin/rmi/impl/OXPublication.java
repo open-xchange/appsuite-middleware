@@ -50,7 +50,6 @@
 package com.openexchange.admin.rmi.impl;
 
 import java.rmi.RemoteException;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.rmi.OXPublicationInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -63,7 +62,6 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
@@ -73,7 +71,7 @@ import com.openexchange.publish.PublicationTargetDiscoveryService;
  */
 public class OXPublication extends OXCommonImpl implements OXPublicationInterface {
 
-    private final static Log log = LogFactory.getLog(OXPublication.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXPublication.class);
 
     private final BasicAuthenticator basicauth;
 
@@ -106,7 +104,7 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
                 }
             }
         } catch (OXException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
         } catch (InvalidCredentialsException e) {
             throw new RemoteException(e.getMessage());
         } catch (StorageException e) {
@@ -141,7 +139,7 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
                 }
             }
         } catch (OXException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
         } catch (InvalidCredentialsException e) {
             throw new RemoteException(e.getMessage());
         } catch (StorageException e) {

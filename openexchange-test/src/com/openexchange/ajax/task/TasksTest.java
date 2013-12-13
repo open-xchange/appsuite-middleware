@@ -62,7 +62,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -87,7 +86,7 @@ public class TasksTest extends AbstractAJAXTest {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(TasksTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TasksTest.class);
     /**
      * Proxy attribute for the private task folder of the user.
      */

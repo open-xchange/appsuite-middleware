@@ -53,14 +53,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.report.appsuite.ContextReport;
 import com.openexchange.report.appsuite.ContextReportCumulator;
 import com.openexchange.report.appsuite.Report;
@@ -81,7 +79,7 @@ import com.openexchange.tools.file.QuotaFileStorage;
  */
 public class CapabilityHandler implements ReportUserHandler, ReportContextHandler, UserReportCumulator, ContextReportCumulator, ReportFinishingTouches {
 
-    private static final Log LOG = LogFactory.getLog(CapabilityHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CapabilityHandler.class);
 
 
     @Override
@@ -99,7 +97,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             contextReport.set("macdetail-quota", "quota", quota);
 
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -146,7 +144,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             }
 
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

@@ -63,7 +63,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
@@ -92,7 +91,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, SecretEncryptionStrategy<GenericProperty> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RdbFileStorageAccountStorage.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbFileStorageAccountStorage.class);
 
     /**
      * The {@link DatabaseService} class.
@@ -222,7 +221,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             final FileStorageServiceRegistry registry = getService(FileStorageServiceRegistry.class);
             if (!registry.containsFileStorageService(serviceId)) {
                 // No such file storage service known
-                LOG.warn("Unknown file storage service: " + serviceId);
+                LOG.warn("Unknown file storage service: {}", serviceId);
                 return null;
             }
             final FileStorageService fsService = registry.getFileStorageService(serviceId);

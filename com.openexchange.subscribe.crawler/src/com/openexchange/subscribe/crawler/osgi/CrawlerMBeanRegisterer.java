@@ -54,13 +54,11 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.management.ManagementService;
 import com.openexchange.subscribe.crawler.commandline.CrawlerUpdateMBean;
 import com.openexchange.subscribe.crawler.commandline.CrawlerUpdateMBeanImpl;
@@ -75,7 +73,7 @@ public class CrawlerMBeanRegisterer implements ServiceTrackerCustomizer<Object,O
 
     private final BundleContext context;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CrawlerMBeanRegisterer.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CrawlerMBeanRegisterer.class);
 
     private ManagementService managementService;
 
@@ -111,13 +109,13 @@ public class CrawlerMBeanRegisterer implements ServiceTrackerCustomizer<Object,O
                 final ObjectName objectName = new ObjectName(CrawlerUpdateMBean.DOMAIN_NAME , "name", "CrawlerUpdateMBeanImpl");
                 managementService.registerMBean(objectName, new CrawlerUpdateMBeanImpl(configurationService, activator));
             } catch (final MalformedObjectNameException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final NotCompliantMBeanException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final RuntimeException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         return obj;
@@ -138,11 +136,11 @@ public class CrawlerMBeanRegisterer implements ServiceTrackerCustomizer<Object,O
                 try {
                     managementService.unregisterMBean(new ObjectName(CrawlerUpdateMBean.DOMAIN_NAME , "name", "CrawlerUpdateMBeanImpl"));
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 } catch (final MalformedObjectNameException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 } catch (final RuntimeException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
                 managementService = null;
             }

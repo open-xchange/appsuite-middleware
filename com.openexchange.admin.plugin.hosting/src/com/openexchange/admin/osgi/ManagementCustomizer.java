@@ -51,13 +51,11 @@ package com.openexchange.admin.osgi;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.admin.monitoring.Monitor;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.management.ManagementService;
 
 /**
@@ -66,7 +64,7 @@ import com.openexchange.management.ManagementService;
  */
 public final class ManagementCustomizer implements ServiceTrackerCustomizer<ManagementService,ManagementService> {
 
-    private static final Log LOG = LogFactory.getLog(ManagementCustomizer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagementCustomizer.class);
 
     private final BundleContext context;
 
@@ -84,11 +82,11 @@ public final class ManagementCustomizer implements ServiceTrackerCustomizer<Mana
             objName = new ObjectName("com.openexchange.admin.monitor", "name", "CallMonitor");
             management.registerMBean(objName, new Monitor());
         } catch (final MalformedObjectNameException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final NullPointerException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return management;
     }
@@ -105,7 +103,7 @@ public final class ManagementCustomizer implements ServiceTrackerCustomizer<Mana
             try {
                 management.unregisterMBean(objName);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             objName = null;
         }

@@ -62,7 +62,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.output.XMLOutputter;
@@ -74,7 +73,6 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.FreeBusyInformation;
 import com.openexchange.exception.OXException;
 import com.openexchange.freebusy.FreeBusyData;
-import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -91,7 +89,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
 public class ScheduleOutboxCollection extends CommonCollection {
 
     private static final String CALDAV_NS = CaldavProtocol.CAL_NS.getURI();
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ScheduleOutboxCollection.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ScheduleOutboxCollection.class);
 
     private final GroupwareCaldavFactory factory;
 

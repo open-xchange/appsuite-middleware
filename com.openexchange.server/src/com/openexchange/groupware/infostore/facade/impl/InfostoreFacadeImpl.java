@@ -69,7 +69,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.ReuseReadConProvider;
@@ -129,7 +128,6 @@ import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaService;
@@ -167,7 +165,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     private static final InfostoreFilenameReserver filenameReserver = new SelectForUpdateFilenameReserver();
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreFacadeImpl.class));
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreFacadeImpl.class);
 
     private static final boolean INDEXING_ENABLED = false; //TODO: remove switch once we index infoitems
 
@@ -392,7 +390,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         try {
             limit = getFileStorage(session.getContext()).getQuota();
         } catch (OXException e) {
-            LOG.warn("Error getting file storage quota for context " + session.getContextId(), e);
+            LOG.warn("Error getting file storage quota for context {}", session.getContextId(), e);
         }
         if (com.openexchange.file.storage.Quota.UNLIMITED != limit) {
             usage = getFileStorage(session.getContext()).getUsage();
@@ -446,7 +444,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 }
             }, Integer.valueOf(document.getId()), Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw InfostoreExceptionCodes.NUMBER_OF_VERSIONS_FAILED.create(
                 e,
                 I(document.getId()),
@@ -2032,9 +2030,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     IndexAccess<DocumentMetadata> infostoreIndex = null;
                     IndexAccess<Attachment> attachmentIndex = null;
                     try {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Deleting infostore document");
-                        }
+                        LOG.debug("Deleting infostore document");
 
                         infostoreIndex = indexFacade.acquireIndexAccess(Types.INFOSTORE, userId, context.getContextId());
                         attachmentIndex = indexFacade.acquireIndexAccess(Types.ATTACHMENT, userId, context.getContextId());
@@ -2055,9 +2051,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                         }
                     } catch (Exception e) {
                         if ((e instanceof OXException) && (IndexExceptionCodes.INDEX_LOCKED.equals((OXException) e) || IndexExceptionCodes.INDEXING_NOT_ENABLED.equals((OXException) e))) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Could not remove document from infostore index.");
-                            }
+                            LOG.debug("Could not remove document from infostore index.");
                         } else {
                             LOG.error("Error while deleting documents from index.", e);
                         }
@@ -2097,9 +2091,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     IndexAccess<DocumentMetadata> infostoreIndex = null;
                     IndexAccess<Attachment> attachmentIndex = null;
                     try {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Indexing infostore document");
-                        }
+                        LOG.debug("Indexing infostore document");
 
                         infostoreIndex = indexFacade.acquireIndexAccess(Types.INFOSTORE, userId, context.getContextId());
                         attachmentIndex = indexFacade.acquireIndexAccess(Types.ATTACHMENT, userId, context.getContextId());
@@ -2136,9 +2128,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                         }
                     } catch (Exception e) {
                         if ((e instanceof OXException) && (IndexExceptionCodes.INDEX_LOCKED.equals((OXException) e) || IndexExceptionCodes.INDEXING_NOT_ENABLED.equals((OXException) e))) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Could index document to infostore index.");
-                            }
+                            LOG.debug("Could index document to infostore index.");
                         } else {
                             LOG.error("Error while indexing document.", e);
                         }

@@ -62,7 +62,6 @@ import javax.mail.Part;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
-import org.apache.commons.logging.Log;
 import com.openexchange.calendar.itip.generators.AttachmentMemory;
 import com.openexchange.calendar.itip.generators.NotificationConfiguration;
 import com.openexchange.calendar.itip.generators.NotificationMail;
@@ -88,7 +87,6 @@ import com.openexchange.groupware.userconfiguration.CapabilityUserConfigurationS
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.html.HtmlService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -110,7 +108,7 @@ import com.openexchange.user.UserService;
  */
 public class DefaultMailSenderService implements MailSenderService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DefaultMailSenderService.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultMailSenderService.class);
 
     private final ITipEmitter iTipEmitter;
 
@@ -196,7 +194,7 @@ public class DefaultMailSenderService implements MailSenderService {
             try {
                 fromAddr = getUserSettingMail(session.getUserId(), serverSession.getContext()).getSendAddr();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 fromAddr = UserStorage.getStorageUser(session.getUserId(), serverSession.getContext()).getMail();
             }
         } else {
@@ -333,9 +331,9 @@ public class DefaultMailSenderService implements MailSenderService {
 				multipart.addBodyPart(bodyPart);
 			}
 		} catch (IOException x) {
-			LOG.error(x.getMessage(), x);
+			LOG.error("", x);
 		} catch (MessagingException x) {
-			LOG.error(x.getMessage(), x);
+			LOG.error("", x);
 		}
 	}
 

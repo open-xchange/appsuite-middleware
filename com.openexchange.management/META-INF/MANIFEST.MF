@@ -19,5 +19,6 @@ Import-Package: com.openexchange.exception,
  javax.management.remote,
  javax.management.remote.rmi,
  javax.management.timer,
- org.apache.commons.logging
+ org.apache.commons.logging,
+ org.slf4j
 Export-Package: com.openexchange.management

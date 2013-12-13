@@ -49,12 +49,8 @@
 
 package com.openexchange.threadpool.osgi;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
@@ -64,17 +60,8 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.java.Strings;
-import com.openexchange.log.Log;
-import com.openexchange.log.LogProperties;
-import com.openexchange.log.LogPropertyName;
-import com.openexchange.log.LogPropertyName.LogLevel;
-import com.openexchange.log.LogService;
-import com.openexchange.log.ReportedThrowableHandler;
-import com.openexchange.log.internal.LogServiceImpl;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.sessionCount.SessionThreadCounterImpl;
@@ -98,8 +85,6 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
 
     private volatile ThreadPoolServiceImpl threadPool;
 
-    private volatile LogServiceImpl logService;
-
     /**
      * Initializes a new {@link ThreadPoolActivator}.
      */
@@ -109,12 +94,9 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ThreadPoolActivator.class);
+        final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolActivator.class);
         try {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("starting bundle: com.openexchange.threadpool");
-            }
-            configureLogProperties();
+            LOG.info("starting bundle: com.openexchange.threadpool");
             /*
              * Initialize thread pool
              */
@@ -124,25 +106,6 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             if (init.isPrestartAllCoreThreads()) {
                 threadPool.prestartAllCoreThreads();
             }
-            // Log configuration       Fix for bug 24724: Pass stack trace as separate argument to log routine, rather than appending it into log message
-
-            final NearRegistryServiceTracker<ReportedThrowableHandler> reportedThrowableHandlerRegistry = new NearRegistryServiceTracker<ReportedThrowableHandler>(context, ReportedThrowableHandler.class);
-            rememberTracker(reportedThrowableHandlerRegistry);
-            final int queueCapacity = confService.getIntProperty("com.openexchange.log.queueCapacity", -1);
-            final boolean appendTraceToMessage = confService.getBoolProperty("com.openexchange.log.appendTraceToMessage", false);
-            Log.setAppendTraceToMessage(appendTraceToMessage);
-            final int maxMessageLength = confService.getIntProperty("com.openexchange.log.maxMessageLength", -1);
-            final boolean reporting = confService.getBoolProperty("com.openexchange.log.reporting", false);
-            final LogServiceImpl logService;
-            if (reporting) {
-                final NearRegistryServiceTracker<ReportedThrowableHandler> registry = new NearRegistryServiceTracker<ReportedThrowableHandler>(context, ReportedThrowableHandler.class);
-                rememberTracker(registry);
-                logService = new LogServiceImpl(threadPool, queueCapacity, maxMessageLength, registry);
-            } else {
-                logService = new LogServiceImpl(threadPool, queueCapacity, maxMessageLength, null);
-            }
-            this.logService = logService;
-            Log.set(logService);
             /*
              * Service trackers
              */
@@ -162,7 +125,6 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             final TimerService timerService = new CustomThreadPoolExecutorTimerService(threadPool.getThreadPoolExecutor());
             REF_TIMER.set(timerService);
             registerService(TimerService.class, timerService);
-            registerService(LogService.class, logService);
             /*
              * Register SessionThreadCounter service
              */
@@ -222,73 +184,16 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
              */
             openTrackers();
         } catch (final Exception e) {
-            LOG.error("Failed start-up of bundle com.openexchange.threadpool: " + e.getMessage(), e);
+            LOG.error("Failed start-up of bundle com.openexchange.threadpool: {}", e.getMessage(), e);
             throw e;
         }
     }
 
-    private void configureLogProperties() {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.loggerFor(ThreadPoolActivator.class);
-        final ConfigurationService service = getService(ConfigurationService.class);
-        final String property = service.getProperty("com.openexchange.log.propertyNames");
-        if (null == property) {
-            LogProperties.configuredProperties(Collections.<LogPropertyName> emptyList());
-        } else {
-            final List<String> list = Arrays.asList(Strings.splitByComma(property));
-            final List<LogPropertyName> names = new ArrayList<LogPropertyName>(list.size());
-            for (final String configuredName : list) {
-                if (!isEmpty(configuredName)) {
-                    final int pos = configuredName.indexOf('(');
-                    if (pos < 0) {
-                        final LogProperties.Name name = LogProperties.Name.nameFor(configuredName);
-                        if (null == name) {
-                            log.warn("Unknown log property: " + configuredName);
-                        } else {
-                            names.add(new LogPropertyName(name, LogLevel.ALL));
-                        }
-                    } else {
-                        final String propertyName = configuredName.substring(0, pos);
-                        if (!isEmpty(propertyName)) {
-                            final LogProperties.Name name = LogProperties.Name.nameFor(propertyName);
-                            if (null == name) {
-                                log.warn("Unknown log property: " + configuredName);
-                            } else {
-                                final int closing = configuredName.indexOf(')', pos + 1);
-                                if (closing < 0) { // No closing parenthesis
-                                    names.add(new LogPropertyName(name, LogLevel.ALL));
-                                } else {
-                                    names.add(new LogPropertyName(
-                                        name,
-                                        LogLevel.logLevelFor(configuredName.substring(pos + 1, closing))));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            LogProperties.configuredProperties(names);
-        }
-    }
-
-    private static boolean isEmpty(final String s) {
-        if (s.length() == 0) {
-            return true;
-        }
-        boolean retval = true;
-        final int length = s.length();
-        for (int i = 0; i < length && retval; i++) {
-            retval = Strings.isWhitespace(s.charAt(i));
-        }
-        return retval;
-    }
-
     @Override
     protected void stopBundle() throws Exception {
-        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ThreadPoolActivator.class);
+        final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolActivator.class);
         try {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("stopping bundle: com.openexchange.threadpool");
-            }
+            LOG.info("stopping bundle: com.openexchange.threadpool");
             REF_THREAD_POOL.set(null);
             REF_TIMER.set(null);
             cleanUp();
@@ -296,12 +201,6 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             /*
              * Stop thread pool
              */
-            final LogServiceImpl logService = this.logService;
-            if (null != logService) {
-                logService.stop();
-                this.logService = null;
-                Log.set(null);
-            }
             final ThreadPoolServiceImpl threadPool = this.threadPool;
             if (null != threadPool) {
                 try {
@@ -314,7 +213,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
                 }
             }
         } catch (final Exception e) {
-            LOG.error("Failed shut-down of bundle com.openexchange.threadpool: " + e.getMessage(), e);
+            LOG.error("Failed shut-down of bundle com.openexchange.threadpool: {}", e.getMessage(), e);
             throw e;
         }
     }
@@ -326,18 +225,14 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ThreadPoolActivator.class));
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Appeared service: " + clazz.getName());
-        }
+        final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolActivator.class);
+        LOG.info("Appeared service: {}", clazz.getName());
     }
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ThreadPoolActivator.class));
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Disappeared service: " + clazz.getName());
-        }
+        final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolActivator.class);
+        LOG.info("Disappeared service: {}", clazz.getName());
     }
 
 }

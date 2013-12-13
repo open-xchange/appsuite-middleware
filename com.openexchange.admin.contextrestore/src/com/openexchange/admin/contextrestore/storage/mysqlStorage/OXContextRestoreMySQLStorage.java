@@ -64,7 +64,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.contextrestore.dataobjects.UpdateTaskEntry;
 import com.openexchange.admin.contextrestore.dataobjects.UpdateTaskInformation;
 import com.openexchange.admin.contextrestore.dataobjects.VersionInformation;
@@ -77,7 +76,6 @@ import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 
 /**
  * This class contains all the mysql database related code
@@ -87,7 +85,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStorage {
 
-    private final static Log LOG = LogFactory.getLog(OXContextRestoreMySQLStorage.class);
+    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXContextRestoreMySQLStorage.class);
 
     @Override
     public String restorectx(final Context ctx, final PoolIdSchemaAndVersionInfo poolidandschema, String configdbname) throws SQLException, IOException, OXContextRestoreException, StorageException {
@@ -118,7 +116,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
                         prepareStatement.execute();
                         prepareStatement.close();
                     } catch (SQLException e) {
-                        LOG.error("Executing the following SQL statement failed: " + line, e);
+                        LOG.error("Executing the following SQL statement failed: {}", line, e);
                         throw e;
                     }
                 }
@@ -142,7 +140,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
                         prepareStatement2.execute();
                         prepareStatement2.close();
                     } catch (SQLException e) {
-                        LOG.error("Executing the following SQL statement failed: " + line, e);
+                        LOG.error("Executing the following SQL statement failed: {}", line, e);
                         throw e;
                     }
                 }
@@ -275,7 +273,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
             try {
                 result.close();
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -294,7 +292,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
                 try {
                     stmt.close();
                 } catch (final SQLException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -325,7 +323,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
                 con.setAutoCommit(true);
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

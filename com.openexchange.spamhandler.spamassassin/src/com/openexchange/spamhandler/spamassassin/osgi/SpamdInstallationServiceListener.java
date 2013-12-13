@@ -49,10 +49,10 @@
 
 package com.openexchange.spamhandler.spamassassin.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import com.openexchange.spamhandler.spamassassin.api.SpamdService;
 
 
@@ -77,8 +77,8 @@ public class SpamdInstallationServiceListener implements ServiceTrackerCustomize
         if (null == ServiceRegistry.getInstance().getService(SpamdService.class)) {
             ServiceRegistry.getInstance().addService(SpamdService.class, service);
         } else {
-            final Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SpamdInstallationServiceListener.class));
-            log.error("Duplicate SpamdInstallationService detected: " + serviceReference.getClass().getName());
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SpamdInstallationServiceListener.class);
+            log.error("Duplicate SpamdInstallationService detected: {}", serviceReference.getClass().getName());
         }
         return service;
     }

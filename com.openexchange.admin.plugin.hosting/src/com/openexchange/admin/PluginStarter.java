@@ -53,7 +53,6 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
@@ -63,11 +62,10 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.log.LogFactory;
 
 public class PluginStarter {
 
-    private static Log LOG = LogFactory.getLog(PluginStarter.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PluginStarter.class);
 
     private static com.openexchange.admin.rmi.impl.OXContext oxctx_v2 = null;
 
@@ -101,15 +99,13 @@ public class PluginStarter {
 
             // startJMX();
 
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Loading context implementation: " + prop.getProp(PropertyHandlerExtended.CONTEXT_STORAGE, null));
-                LOG.debug("Loading util implementation: " + prop.getProp(PropertyHandlerExtended.UTIL_STORAGE, null));
-            }
+            LOG.debug("Loading context implementation: {}", prop.getProp(PropertyHandlerExtended.CONTEXT_STORAGE, null));
+            LOG.debug("Loading util implementation: {}", prop.getProp(PropertyHandlerExtended.UTIL_STORAGE, null));
         } catch (final RemoteException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final StorageException e) {
-            LOG.fatal("Error while creating one instance for RMI interface", e);
+            LOG.error("Error while creating one instance for RMI interface", e);
             throw e;
         }
     }

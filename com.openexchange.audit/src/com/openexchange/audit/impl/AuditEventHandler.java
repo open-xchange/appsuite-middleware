@@ -55,7 +55,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Queue;
 import org.apache.commons.lang.Validate;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.api2.FolderSQLInterface;
@@ -85,7 +84,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class AuditEventHandler implements EventHandler {
 
-    private static Log LOG = com.openexchange.log.Log.loggerFor(AuditEventHandler.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AuditEventHandler.class);
 
     private static final SimpleDateFormat logDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -101,7 +100,7 @@ public class AuditEventHandler implements EventHandler {
                 LOG.info("Using global Logging instance.");
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -110,7 +109,7 @@ public class AuditEventHandler implements EventHandler {
      */
     @Override
     public void handleEvent(final Event event) {
-        Validate.notNull(event, "Event mustn't be null.");
+        Validate.notNull(event, "Event must not be null.");
 
         if (!LOG.isInfoEnabled()) {
             // Not allowed to log
@@ -131,7 +130,7 @@ public class AuditEventHandler implements EventHandler {
                 LOG.info(infoMsg);
             }
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -444,7 +443,7 @@ public class AuditEventHandler implements EventHandler {
                 retval = iter.next().getFolderName() + "/" + retval;
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
 
         return retval;

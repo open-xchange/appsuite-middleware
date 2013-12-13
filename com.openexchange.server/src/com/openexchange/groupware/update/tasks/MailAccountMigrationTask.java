@@ -124,7 +124,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
                 sb.append(currentContextId);
                 sb.append(":\n");
                 sb.append(e.getMessage());
-                final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccountMigrationTask.class));
+                final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccountMigrationTask.class);
                 LOG.error(sb.toString(), e);
             }
             state.incrementState();
@@ -184,33 +184,23 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
 
     private static void iterateUsersPerContext(final List<Integer> users, final int contextId) throws OXException {
         final Context ctx = new ContextImpl(contextId);
-        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccountMigrationTask.class));
+        final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccountMigrationTask.class);
         // First check (and possibly insert) a sequence for specified context
         checkAndInsertMailAccountSequence(ctx);
-        final StringBuilder sb = new StringBuilder(256);
         for (final Integer userId : users) {
             // Check for default account
             if (existsPrimaryMailAccount(userId.intValue(), contextId)) {
-                if (LOG.isInfoEnabled()) {
-                    sb.setLength(0);
-                    LOG.info(sb.append("Default mail account already exists for user ").append(userId).append(" in context ").append(
-                        ctx.getContextId()));
-                }
+                LOG.info("Default mail account already exists for user {} in context {}", userId, ctx.getContextId());
                 continue;
             }
-            // Default account does not exist
-            if (LOG.isTraceEnabled()) {
-                sb.setLength(0);
-                LOG.trace(sb.append("Creating default mail account for user ").append(userId).append(" in context ").append(
-                    ctx.getContextId()));
-            }
+            LOG.trace("Creating default mail account for user {} in context {}", userId, ctx.getContextId());
             // Create default account
             final User user = loadUser(ctx, userId.intValue());
             final UserSettingMail usm = loadUserSettingMail(ctx, userId.intValue());
             try {
-                handleUser(user, getNameProvderFromUSM(usm), ctx, sb, LOG);
+                handleUser(user, getNameProvderFromUSM(usm), ctx, LOG);
             } catch (final OXException e) {
-                LOG.error("Default mail account for user " + user.getId() + " in context " + contextId + " could not be created", e);
+                LOG.error("Default mail account for user {} in context {} could not be created", user.getId(), contextId, e);
             }
         }
     }
@@ -234,17 +224,13 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
         }
     }
 
-    private static void handleUser(final User user, final FolderNameProvider folderNameProvdider, final Context ctx, final StringBuilder sb, final org.apache.commons.logging.Log LOG) throws OXException, OXException {
+    private static void handleUser(final User user, final FolderNameProvider folderNameProvdider, final Context ctx, final org.slf4j.Logger LOG) throws OXException, OXException {
         /*
          * Insert
          */
         final MailAccountDescription account = createAccountDescription(user, folderNameProvdider);
         insertDefaultMailAccount(account, user.getId(), ctx);
-        if (LOG.isInfoEnabled()) {
-            sb.setLength(0);
-            LOG.info(sb.append("Created default mail account for user ").append(user.getId()).append(" in context ").append(
-                ctx.getContextId()));
-        }
+        LOG.info("Created default mail account for user {} in context {}", user.getId(), ctx.getContextId());
     }
 
     private static MailAccountDescription createAccountDescription(final User user, final FolderNameProvider folderNameProvdider) throws OXException {

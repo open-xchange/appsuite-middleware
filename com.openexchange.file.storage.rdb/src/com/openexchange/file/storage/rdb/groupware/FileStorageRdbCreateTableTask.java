@@ -54,6 +54,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -114,10 +115,8 @@ public final class FileStorageRdbCreateTableTask extends AbstractCreateTableImpl
     public void perform(final PerformParameters params) throws com.openexchange.exception.OXException {
         final int contextId = params.getContextId();
         createTable("filestorageAccount", getMessagingAccountTable(), contextId);
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FileStorageRdbCreateTableTask.class));
-        if (logger.isInfoEnabled()) {
-            logger.info("UpdateTask '" + FileStorageRdbCreateTableTask.class.getSimpleName() + "' successfully performed!");
-        }
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(FileStorageRdbCreateTableTask.class);
+        logger.info("UpdateTask ''{}'' successfully performed!", FileStorageRdbCreateTableTask.class.getSimpleName());
     }
 
     @Override

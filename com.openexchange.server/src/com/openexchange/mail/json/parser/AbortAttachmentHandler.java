@@ -64,7 +64,7 @@ import com.openexchange.session.Session;
  */
 public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbortAttachmentHandler.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbortAttachmentHandler.class);
 
     private TextBodyMailPart textPart;
 
@@ -84,8 +84,8 @@ public final class AbortAttachmentHandler extends AbstractAttachmentHandler {
     public void addAttachment(final MailPart attachment) throws OXException {
         if (doAction) {
             final long size = attachment.getSize();
-            if (size <= 0 && LOG.isDebugEnabled()) {
-                LOG.debug(new com.openexchange.java.StringAllocator("Missing size: ").append(size).toString(), new Throwable());
+            if (size <= 0) {
+                LOG.debug("Missing size: {}", size, new Throwable());
             }
             if (uploadQuotaPerFile > 0 && size > uploadQuotaPerFile) {
                 final String fileName = attachment.getFileName();

@@ -81,7 +81,7 @@ public class AnalyzeAction extends AbstractITipAction {
             try {
                 writer.write(anAnalysis, object);
             } catch (JSONException e) {
-                LOG.error(e.getMessage(), e); // Shouldn't happen
+                LOG.error("", e); // Shouldn't happen
             }
             array.put(object);
         }

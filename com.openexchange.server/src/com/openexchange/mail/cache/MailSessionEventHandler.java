@@ -49,13 +49,10 @@
 
 package com.openexchange.mail.cache;
 
-import java.text.MessageFormat;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.event.EventPool;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -76,12 +73,7 @@ public final class MailSessionEventHandler implements EventHandler {
     /**
      * The logger constant.
      */
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailSessionEventHandler.class));
-
-    /**
-     * Whether logger allows debug.
-     */
-    static final boolean DEBUG = LOG.isDebugEnabled();
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailSessionEventHandler.class);
 
     /**
      * Gets the topics.
@@ -136,7 +128,7 @@ public final class MailSessionEventHandler implements EventHandler {
                     }
                 }
             } catch (final Exception e) {
-                LOG.error(MessageFormat.format("Error while handling session event \"{0}\": {1}", topic, e.getMessage()), e);
+                LOG.error("Error while handling session event \"{}\": {}", topic, e.getMessage(), e);
             }
         }
 
@@ -156,11 +148,9 @@ public final class MailSessionEventHandler implements EventHandler {
             try {
                 MailMessageCache.getInstance().removeUserMessages(userId, contextId);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
-            if (DEBUG) {
-                LOG.debug(new com.openexchange.java.StringAllocator("All session-related caches cleared for removed session ").append(session.getSessionID()).toString());
-            }
+            LOG.debug("All session-related caches cleared for removed session {}", session.getSessionID());
             /*
              * Pooled events: Last session removed?
              */
@@ -169,10 +159,7 @@ public final class MailSessionEventHandler implements EventHandler {
                 final EventPool eventPool = EventPool.getInstance();
                 if (null != eventPool) {
                     eventPool.removeByUser(userId, contextId);
-                    if (DEBUG) {
-                        LOG.debug(new com.openexchange.java.StringAllocator("Removed all pooled mail events for user ").append(userId).append(" in context ").append(
-                            contextId).toString());
-                    }
+                    LOG.debug("Removed all pooled mail events for user {} in context {}", userId, contextId);
                 }
             }
         }

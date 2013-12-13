@@ -60,7 +60,7 @@ import org.apache.solr.servlet.cache.Method;
  */
 public class SolrDispatchFilter implements Filter
 {
-  final Logger log = LoggerFactory.getLogger(SolrDispatchFilter.class);
+  final org.slf4j.Logger log = LoggerFactory.getLogger(SolrDispatchFilter.class);
 
   protected CoreContainer cores;
   protected String pathPrefix = null; // strip this from the beginning of a path

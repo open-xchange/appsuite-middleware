@@ -58,13 +58,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.http.requestwatcher.osgi.Services;
 import com.openexchange.http.requestwatcher.osgi.services.RequestRegistryEntry;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -78,7 +76,7 @@ import com.openexchange.timer.TimerService;
 public class RequestWatcherServiceImpl implements RequestWatcherService {
 
     /** The logger. */
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(RequestWatcherServiceImpl.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RequestWatcherServiceImpl.class);
 
     /** The request number */
     private static final AtomicLong NUMBER = new AtomicLong();
@@ -125,7 +123,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                             }
                             final String entries = sb.toString();
                             if (!entries.isEmpty()) {
-                                LOG.debug(sb);
+                                LOG.debug(sb.toString());
                             }
                         }
                         final RequestRegistryEntry requestRegistryEntry = descendingEntryIterator.next();
@@ -153,29 +151,25 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
 
                     // If we have additional log properties from the ThreadLocal add it to the logBuilder
                     {
-                        final Props logProperties = LogProperties.optLogProperties(entry.getThread());
-                        if (logProperties != null) {
-                            Map<String, Object> propertyMap = logProperties.asMap();
-                            // Sort the properties for readability
-                            Map<String, String> sorted = new TreeMap<String, String>();
-                            for (Entry<String, Object> propertyEntry : propertyMap.entrySet()) {
-                                String propertyName = propertyEntry.getKey();
-                                Object value = propertyEntry.getValue();
-                                if (null != value) {
-                                    if (LogProperties.Name.SESSION_SESSION_ID.getName().equals(propertyName) && !isValidSession(value.toString())) {
-                                        // Non-existent or elapsed session
-                                        entry.getThread().interrupt();
-                                        requestRegistry.remove(entry);
-                                        return;
-                                    }
-                                    sorted.put(propertyName, value.toString());
+                        // Sort the properties for readability
+                        Map<String, String> sorted = new TreeMap<String, String>();
+                        for (Entry<String, String> propertyEntry : LogProperties.getPropertyMap().entrySet()) {
+                            String propertyName = propertyEntry.getKey();
+                            String value = propertyEntry.getValue();
+                            if (null != value) {
+                                if (LogProperties.Name.SESSION_SESSION_ID.getName().equals(propertyName) && !isValidSession(value.toString())) {
+                                    // Non-existent or elapsed session
+                                    entry.getThread().interrupt();
+                                    requestRegistry.remove(entry);
+                                    return;
                                 }
+                                sorted.put(propertyName, value);
                             }
-                            logBuilder.append("with properties:").append(lineSeparator);
-                            // And add them to the logBuilder
-                            for (Map.Entry<String, String> propertyEntry : sorted.entrySet()) {
-                                logBuilder.append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue()).append(lineSeparator);
-                            }
+                        }
+                        logBuilder.append("with properties:").append(lineSeparator);
+                        // And add them to the logBuilder
+                        for (Map.Entry<String, String> propertyEntry : sorted.entrySet()) {
+                            logBuilder.append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue()).append(lineSeparator);
                         }
                     }
 

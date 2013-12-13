@@ -59,7 +59,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
@@ -520,12 +519,12 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
              */
             final List<Callable<Void>> tasks = new LinkedList<Callable<Void>>();
             initTasks(con, tasks);
-            final Log log = com.openexchange.log.Log.loggerFor(CreateMissingPrimaryKeys.class);
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CreateMissingPrimaryKeys.class);
             for (final Callable<Void> task : tasks) {
                 try {
                     task.call();
                 } catch (final SQLException e) {
-                    log.warn("ALTER TABLE failed with: >>" + e.getMessage() + "<<\nStatement: >>" + task.toString() + "<<");
+                    log.warn("ALTER TABLE failed with: >>{}<<\nStatement: >>{}<<", e.getMessage(), task);
                 }
             }
             con.commit();

@@ -52,11 +52,9 @@ package com.openexchange.configjump.generic;
 import java.util.Properties;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.configjump.ConfigJumpService;
-import com.openexchange.log.LogFactory;
 
 /**
  * This class maintains the service registrations.
@@ -64,7 +62,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class Services {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Services.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Services.class);
 
     private final BundleContext context;
 

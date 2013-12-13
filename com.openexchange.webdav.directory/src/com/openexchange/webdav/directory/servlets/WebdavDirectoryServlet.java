@@ -53,7 +53,6 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.Interface;
 import com.openexchange.tools.session.ServerSession;
@@ -71,7 +70,8 @@ import com.openexchange.webdav.protocol.WebdavStatus;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WebdavDirectoryServlet extends OXServlet {
-    private static final transient Log LOG = com.openexchange.log.Log.loggerFor(WebdavDirectoryServlet.class);
+
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavDirectoryServlet.class);
 
     @Override
     protected Interface getInterface() {

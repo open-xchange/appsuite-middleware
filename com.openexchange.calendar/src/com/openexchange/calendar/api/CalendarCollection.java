@@ -72,7 +72,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.commons.logging.Log;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.calendar.CachedCalendarIterator;
@@ -118,7 +117,6 @@ import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
@@ -177,9 +175,7 @@ public final class CalendarCollection implements CalendarCollectionService {
     public static final TimeZone ZONE_UTC = TimeZone.getTimeZone("UTC");
 
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarCollection.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarCollection.class);
 
     public CalendarCollection() {
         super();
@@ -280,72 +276,50 @@ public final class CalendarCollection implements CalendarCollectionService {
 
     private void checkAndCorrectErrors(final CalendarDataObject cdao) {
         if (cdao.getInterval() > MAX_OCCURRENCESE) {
-            final OXException exc =
-                    OXCalendarExceptionCodes.RECURRING_VALUE_CONSTRAINT.create(Integer.valueOf(cdao.getInterval()), Integer
-                            .valueOf(MAX_OCCURRENCESE));
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(exc.getMessage() + " Auto-corrected to " + MAX_OCCURRENCESE, exc);
-            }
+            final OXException exc = OXCalendarExceptionCodes.RECURRING_VALUE_CONSTRAINT.create(Integer.valueOf(cdao.getInterval()), Integer.valueOf(MAX_OCCURRENCESE));
+            LOG.warn("{} Auto-corrected to {}", exc.getMessage(), MAX_OCCURRENCESE, exc);
             cdao.setInterval(MAX_OCCURRENCESE);
         }
         if (cdao.getOccurrence() > MAX_OCCURRENCESE) {
-            final OXException exc =
-                    OXCalendarExceptionCodes.RECURRING_VALUE_CONSTRAINT.create(Integer.valueOf(cdao.getOccurrence()), Integer
-                            .valueOf(MAX_OCCURRENCESE));
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(exc.getMessage() + " Auto-corrected to " + MAX_OCCURRENCESE, exc);
-            }
+            final OXException exc = OXCalendarExceptionCodes.RECURRING_VALUE_CONSTRAINT.create(Integer.valueOf(cdao.getOccurrence()), Integer.valueOf(MAX_OCCURRENCESE));
+            LOG.warn("{} Auto-corrected to {}", exc.getMessage(), MAX_OCCURRENCESE, exc);
             cdao.setOccurrence(MAX_OCCURRENCESE);
         }
         if (cdao.getRecurrenceType() == CalendarObject.DAILY) {
             if (cdao.getInterval() < 1) {
-                if (DEBUG) {
-                    LOG.debug("Auto correction (daily), set interval to 1, the given interval was: "+cdao.getInterval());
-                }
+                LOG.debug("Auto correction (daily), set interval to 1, the given interval was: {}", cdao.getInterval());
                 cdao.setInterval(1);
             }
         } else if (cdao.getRecurrenceType() == CalendarObject.WEEKLY) {
             if (cdao.getInterval() < 1) {
-                if (DEBUG) {
-                    LOG.debug("Auto correction (weekly), set interval to 1, the given interval was: "+cdao.getInterval());
-                }
+                LOG.debug("Auto correction (weekly), set interval to 1, the given interval was: {}", cdao.getInterval());
                 cdao.setInterval(1);
             }
             if (cdao.getDays() < 1) {
-                if (DEBUG) {
-                    LOG.debug("Auto correction (weekly), set day to CalendarDataObject.MONDAY, the given day was: "+cdao.getDays());
-                }
+                LOG.debug("Auto correction (weekly), set day to CalendarDataObject.MONDAY, the given day was: {}", cdao.getDays());
                 cdao.setDays(CalendarObject.MONDAY);
             }
         } else if (cdao.getRecurrenceType() == CalendarObject.MONTHLY) {
             if (cdao.getInterval() < 1) {
-                if (DEBUG) {
-                    LOG.debug("Auto correction (montly), set interval to 1, the given interval was: "+cdao.getInterval());
-                }
+                LOG.debug("Auto correction (montly), set interval to 1, the given interval was: {}", cdao.getInterval());
                 cdao.setInterval(1);
             }
             if (cdao.containsDays() && cdao.getDays() != 0 && (getDay(cdao.getDays()) == -1)) {
-                //if (getDay(cdao.getDays()) == -1) {
-                if (DEBUG) {
-                    LOG.debug("Auto correction (monthly), set day to CalendarDataObject.MONDAY, the given day was: "+cdao.getDays());
-                }
+                // if (getDay(cdao.getDays()) == -1) {
+                LOG.debug("Auto correction (monthly), set day to CalendarDataObject.MONDAY, the given day was: {}", cdao.getDays());
                 cdao.setDays(CalendarObject.MONDAY);
-                //}
+                // }
             }
         } else if (cdao.getRecurrenceType() == CalendarObject.YEARLY) {
             if (cdao.getMonth() < 0 || cdao.getMonth() > 12) {
-                if (DEBUG) {
-                    LOG.debug("Auto correction (monthy), set month to 1, the given interval was: "+cdao.getMonth());
-                }
+                LOG.debug("Auto correction (monthy), set month to 1, the given interval was: {}", cdao.getMonth());
                 cdao.setMonth(Calendar.JANUARY);
             }
             if (cdao.containsDays() && (getDay(cdao.getDays()) == -1)) {
-                //if (getDay(cdao.getDays()) == -1) {
-                if (DEBUG) {
-                    LOG.debug("Auto correction (yearly), set day to CalendarDataObject.MONDAY, the given day was: "+cdao.getDays());
-                }
+                // if (getDay(cdao.getDays()) == -1) {
+                LOG.debug("Auto correction (yearly), set day to CalendarDataObject.MONDAY, the given day was: {}", cdao.getDays());
                 cdao.setDays(CalendarObject.MONDAY);
-                //}
+                // }
             }
         }
     }
@@ -641,7 +615,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             convertDSString(cdao);
             return true;
         } catch (final OXException e) {
-            LOG.error("fillDAO:convertDSString error: " + e.getMessage(), e);
+            LOG.error("fillDAO:convertDSString error: {}", e.getMessage(), e);
         }
         return false;
     }
@@ -671,7 +645,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             if (interval > MAX_OCCURRENCESE) {
                 final OXException exc = OXCalendarExceptionCodes.RECURRING_VALUE_CONSTRAINT.create(Integer.valueOf(interval), Integer
                     .valueOf(MAX_OCCURRENCESE));
-                LOG.warn(exc.getMessage() + " Auto-corrected to " + MAX_OCCURRENCESE, exc);
+                LOG.warn("{} Auto-corrected to {}", exc.getMessage(), MAX_OCCURRENCESE, exc);
                 interval = MAX_OCCURRENCESE;
             }
             final int weekdays = cdao.getDays();
@@ -681,7 +655,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             if (occurrences > MAX_OCCURRENCESE) {
                 final OXException exc = OXCalendarExceptionCodes.RECURRING_VALUE_CONSTRAINT.create(Integer.valueOf(occurrences),
                     Integer.valueOf(MAX_OCCURRENCESE));
-                LOG.warn(exc.getMessage() + " Auto-corrected to " + MAX_OCCURRENCESE, exc);
+                LOG.warn("{} Auto-corrected to {}", exc.getMessage(), MAX_OCCURRENCESE, exc);
                 occurrences = MAX_OCCURRENCESE;
             }
             if (!cdao.containsUntil() && !cdao.containsOccurrence()) {
@@ -828,7 +802,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         if (rs != null) {
             return new Date(rs.getEnd());
         }
-        LOG.warn("Unable to calculate until date :" + cdao.toString());
+        LOG.warn("Unable to calculate until date :{}", cdao);
         return new Date(cdao.getStartDate().getTime() + Constants.MILLI_YEAR);
     }
 
@@ -1011,7 +985,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
                     calc_timezone = calDataObject.getTimezone();
                 } else {
                     final OXException e = OXCalendarExceptionCodes.TIMEZONE_MISSING.create();
-                    LOG.warn(e.getMessage(), e);
+                    LOG.warn("", e);
                 }
             }
             recurringStart = calDataObject.getRecurringStart();
@@ -1082,7 +1056,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
     private int getDay(final int cd) {
         final Integer retval = DAY_MAP.get(Integer.valueOf(cd));
         if (retval == null) {
-            LOG.error("Unusable getDay parameter (days) :" + cd, new Throwable());
+            LOG.error("Unusable getDay parameter (days) :{}", cd, new Throwable());
             return -1;
         }
         return retval.intValue();
@@ -1580,7 +1554,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         try {
             rresults = calculateRecurringIgnoringExceptions(clone, 0, 0, CalendarCollectionService.MAX_OCCURRENCESE);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return new Date(maxEnd);
         }
         if (rresults == null) {
@@ -1738,11 +1712,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
                 }
             }
         } catch (final OXException e) {
-            if (DEBUG) {
-                LOG.warn("ERROR getting read permissions: " + e.getMessage(), e);
-            } else {
-                LOG.warn("ERROR getting read permissions: " + e.getMessage());
-            }
+            LOG.warn("ERROR getting read permissions: {}", e.getMessage(), e);
             return false;
         } catch (final RuntimeException e) {
             LOG.error("ERROR getting read permissions", e);
@@ -2140,7 +2110,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         try {
             return rsql.existsReminder(oid, uid, Types.APPOINTMENT);
         } catch (final OXException ex) {
-            LOG.error(ex);
+            LOG.error("", ex);
         }
         return false;
     }
@@ -2167,14 +2137,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
 
     @Override
     public void debugRecurringResult(final RecurringResultInterface rr) {
-        if (DEBUG) {
-            LOG.debug(Integer.valueOf(rr.getPosition()));
-            LOG.debug(" : ");
-            LOG.debug(StringCollection.date2String(new Date(rr.getStart())));
-            LOG.debug(" ");
-            LOG.debug(StringCollection.date2String(new Date(rr.getEnd())));
-            LOG.debug("");
-        }
+        LOG.debug("{} : {} {}", Integer.toString(rr.getPosition()), StringCollection.date2String(new Date(rr.getStart())), StringCollection.date2String(new Date(rr.getEnd())));
     }
 
     @Override
@@ -2534,7 +2497,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             try {
                 cache.add(cfo.getObjectKey(), cfo.getGroupKey(), cfo);
             } catch (final com.openexchange.exception.OXException ex) {
-                LOG.error(ex.getMessage(), ex);
+                LOG.error("", ex);
             }
         } else {
             cfo = (CalendarFolderObject) o;

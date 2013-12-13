@@ -102,7 +102,6 @@ import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.util.MsisdnCheck;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailAccess;
@@ -148,7 +147,7 @@ import com.sun.mail.smtp.SMTPMessage;
  */
 public final class SMTPTransport extends MailTransport {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SMTPTransport.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SMTPTransport.class);
 
     /**
      * The SMTP protocol name.
@@ -760,7 +759,6 @@ public final class SMTPTransport extends MailTransport {
             /*
              * Fill message dependent on send type
              */
-            final long startPrep = System.currentTimeMillis();
             final SMTPMessageFiller smtpFiller = new SMTPMessageFiller(smtpConfig.getSMTPProperties(), session, ctx, usm);
             smtpFiller.setAccountId(accountId);
             composedMail.setFiller(smtpFiller);
@@ -786,10 +784,6 @@ public final class SMTPTransport extends MailTransport {
                  * Drop special "x-original-headers" header
                  */
                 smtpMessage.removeHeader("x-original-headers");
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(new StringBuilder(128).append("SMTP mail prepared for transport in ").append(
-                        System.currentTimeMillis() - startPrep).append("msec").toString());
-                }
                 final long start = System.currentTimeMillis();
                 final Transport transport = getSMTPSession().getTransport(SMTP);
                 try {
@@ -903,7 +897,7 @@ public final class SMTPTransport extends MailTransport {
             try {
                 tmpPass = new String(password.getBytes(Charsets.forName(getTransportConfig0().getSMTPProperties().getSmtpAuthEnc())), Charsets.ISO_8859_1);
             } catch (final UnsupportedCharsetException e) {
-                LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
+                LOG.error("Unsupported encoding in a message detected and monitored: \"{}{}", e.getMessage(), '"', e);
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             }
         }
@@ -1157,11 +1151,7 @@ public final class SMTPTransport extends MailTransport {
     }
 
     private static String getHostName() {
-        final Props logProperties = LogProperties.optLogProperties();
-        if (null == logProperties) {
-            return getStaticHostName();
-        }
-        final String serverName = logProperties.get(LogProperties.Name.AJP_SERVER_NAME);
+        final String serverName = LogProperties.getLogProperty(LogProperties.Name.AJP_SERVER_NAME);
         if (null == serverName) {
             return getStaticHostName();
         }

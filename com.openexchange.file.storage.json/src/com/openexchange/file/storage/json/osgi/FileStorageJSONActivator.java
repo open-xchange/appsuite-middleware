@@ -64,7 +64,6 @@ import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.i18n.I18nService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.rdiff.RdiffService;
 
 /**
@@ -92,7 +91,7 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
             registerService(FileMetadataParserService.class, FileMetadataParser.getInstance(), null);
             registerService(ResultConverter.class, new FileConverter());
         } catch (final Exception x) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(FileStorageJSONActivator.class)).error(x.getMessage(), x);
+            org.slf4j.LoggerFactory.getLogger(FileStorageJSONActivator.class).error("", x);
             throw x;
         }
     }

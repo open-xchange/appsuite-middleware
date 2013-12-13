@@ -58,8 +58,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -77,7 +75,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
 
     private static final InfostoreQueryCatalog QUERIES = InfostoreFacadeImpl.QUERIES;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreIterator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreIterator.class);
 
     public static InfostoreIterator loadDocumentIterator(final int id, final int version, final DBProvider provider, final Context ctx) {
         final String query = QUERIES.getSelectDocument(id, version, ctx.getContextId());
@@ -246,9 +244,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
             for(final Object arg : args) {
                 stmt.setObject(i++,arg);
             }
-            if(LOG.isTraceEnabled()) {
-                LOG.trace(stmt.toString());
-            }
+            LOG.trace("{}", stmt);
             //System.out.println(stmt.toString());
             rs = stmt.executeQuery();
         } catch (final SQLException x) {

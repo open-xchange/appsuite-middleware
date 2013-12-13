@@ -57,8 +57,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.database.internal.Configuration.Property;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -70,7 +68,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class Timer {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Timer.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Timer.class);
 
     private final Lock waitingLock = new ReentrantLock();
 

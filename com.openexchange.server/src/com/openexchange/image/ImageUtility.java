@@ -64,7 +64,6 @@ import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Charsets;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.session.Session;
 
 /**
@@ -205,12 +204,9 @@ public final class ImageUtility {
                  * Compose relative URL
                  */
                 prefix = "";
-                final Props properties = LogProperties.optLogProperties();
-                if (null == properties) {
-                    route = null;
-                } else {
-                    final String ajpRoute = properties.<String> get(LogProperties.Name.AJP_HTTP_SESSION);
-                    route = null == ajpRoute ? properties.<String> get(LogProperties.Name.GRIZZLY_HTTP_SESSION) : ajpRoute;
+                {
+                    final String ajpRoute = LogProperties.getLogProperty(LogProperties.Name.AJP_HTTP_SESSION);
+                    route = null == ajpRoute ? LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_HTTP_SESSION) : ajpRoute;
                 }
             } else {
                 /*
@@ -294,7 +290,7 @@ public final class ImageUtility {
             return URLEncoder.encode(text, UTF_8);
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ImageUtility.class)).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(ImageUtility.class).error("", e);
             return text;
         }
     }
@@ -313,7 +309,7 @@ public final class ImageUtility {
             checksum.update(string.getBytes(Charsets.UTF_8));
             return checksum.getFormattedValue();
         } catch (final NoSuchAlgorithmException e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ImageUtility.class)).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(ImageUtility.class).error("", e);
         }
         return null;
     }
@@ -343,9 +339,9 @@ public final class ImageUtility {
             checksum.update(string.getBytes(UTF_8));
             return checksum.getFormattedValue();
         } catch (final NoSuchAlgorithmException e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ImageUtility.class)).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(ImageUtility.class).error("", e);
         } catch (final UnsupportedEncodingException e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ImageUtility.class)).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(ImageUtility.class).error("", e);
         }
         return null;
     }

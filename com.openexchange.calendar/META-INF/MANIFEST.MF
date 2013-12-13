@@ -121,7 +121,8 @@ Import-Package: cern.colt,
  javax.mail.internet.idn,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Export-Package: com.openexchange.calendar,
  com.openexchange.calendar.itip,
  com.openexchange.calendar.itip.generators,

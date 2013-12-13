@@ -75,7 +75,7 @@ import com.openexchange.spamhandler.SpamHandler;
  */
 public final class IMAPProperties extends AbstractProtocolProperties implements IIMAPProperties {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPProperties.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPProperties.class);
 
     private static final IMAPProperties instance = new IMAPProperties();
 
@@ -327,7 +327,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                                         }
                                         sb.append(desc);
                                     } catch (final RuntimeException e) {
-                                        LOG.warn("Max. Number of External Connections: Invalid entry: " + desc, e);
+                                        LOG.warn("Max. Number of External Connections: Invalid entry: {}", desc, e);
                                     }
                                 }
                             }
@@ -382,9 +382,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         logBuilder.append("\tSpam Handler: ").append(spamHandlerName).append('\n');
 
         logBuilder.append("Global IMAP properties successfully loaded!");
-        if (LOG.isInfoEnabled()) {
-            LOG.info(logBuilder.toString());
-        }
+
+        LOG.info(logBuilder.toString());
     }
 
     @Override

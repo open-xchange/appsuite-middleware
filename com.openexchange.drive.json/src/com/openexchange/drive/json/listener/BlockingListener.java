@@ -55,7 +55,6 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DriveAction;
@@ -74,7 +73,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class BlockingListener extends DefaultLongPollingListener {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(BlockingListener.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BlockingListener.class);
 
     private final ReentrantLock lock;
     private final Condition hasEvent;
@@ -99,7 +98,7 @@ public class BlockingListener extends DefaultLongPollingListener {
         lock.lock();
         try {
             if (null == this.event) {
-                LOG.debug("Awaiting events for max. " + timeout + "ms...");
+                LOG.debug("Awaiting events for max. {}ms...", timeout);
                 hasEvent.await(timeout, TimeUnit.MILLISECONDS);
             } else {
                 LOG.debug("Stored event available, no need to wait.");
@@ -115,7 +114,7 @@ public class BlockingListener extends DefaultLongPollingListener {
         if (null == data) {
             LOG.debug("No event available.");
         } else {
-            LOG.debug("Available event: " + data);
+            LOG.debug("Available event: {}", data);
         }
         return createResult(data);
     }
@@ -136,7 +135,7 @@ public class BlockingListener extends DefaultLongPollingListener {
     @Override
     public void onEvent(DriveEvent event) {
         if (false == isInteresting(event)) {
-            LOG.debug("Skipping uninteresting event: " + event);
+            LOG.debug("Skipping uninteresting event: {}", event);
             return;
         }
         lock.lock();

@@ -57,7 +57,6 @@ import java.util.Locale;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.logging.Log;
 import org.xml.sax.SAXException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
@@ -83,7 +82,6 @@ import com.openexchange.index.solr.internal.mail.SolrMailIndexAccess;
 import com.openexchange.index.solr.internal.querybuilder.BuilderException;
 import com.openexchange.index.solr.internal.querybuilder.SimpleQueryBuilder;
 import com.openexchange.index.solr.internal.querybuilder.SolrQueryBuilder;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.session.Session;
 import com.openexchange.solr.SchemaAndConfigStore;
@@ -100,7 +98,7 @@ import com.openexchange.user.UserService;
  */
 public class SolrIndexFacadeService implements IndexFacadeService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrIndexFacadeService.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SolrIndexFacadeService.class);
 
     private final ConcurrentHashMap<SolrCoreIdentifier, AbstractSolrIndexAccess<?>> accessMap;
 
@@ -168,7 +166,7 @@ public class SolrIndexFacadeService implements IndexFacadeService {
                         LOG.debug(sb.toString());
                     }
                 } catch (Throwable e) {
-                    LOG.error("Exception during timer task execution: " + e.getMessage(), e);
+                    LOG.error("Exception during timer task execution: {}", e.getMessage(), e);
                 }
 
             }

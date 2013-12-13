@@ -52,7 +52,6 @@ package com.openexchange.tools.webdav;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.logging.Log;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
@@ -60,7 +59,6 @@ import com.google.common.cache.RemovalNotification;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.session.Session;
@@ -73,7 +71,7 @@ import com.openexchange.tools.encoding.Base64;
  */
 public class WebDAVSessionStore {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebDAVSessionStore.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebDAVSessionStore.class);
 
     private static final WebDAVSessionStore instance = new WebDAVSessionStore();
 
@@ -133,28 +131,20 @@ public class WebDAVSessionStore {
     }
 
     private static Session login(LoginRequest loginRequest) throws OXException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("WebDAV Login: " + loginRequest.getLogin() + "...");
-        }
+        LOG.debug("WebDAV Login: {}...", loginRequest.getLogin());
         Session session = LoginPerformer.getInstance().doLogin(loginRequest).getSession();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Added WebDAV session " + session);
-        }
+        LOG.debug("Added WebDAV session {}", session);
         return session;
     }
 
     private static void logout(Session session) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("WebDAV Logout: " + session + "...");
-        }
+        LOG.debug("WebDAV Logout: {}...", session);
         try {
             Session removedSession = LoginPerformer.getInstance().doLogout(session.getSessionID());
-            if (LOG.isDebugEnabled()) {
-                if (null != removedSession) {
-                    LOG.debug("Removed WebDAV session " + removedSession);
-                } else {
-                    LOG.debug("WebDAV session " + session + " not removed.");
-                }
+            if (null != removedSession) {
+                LOG.debug("Removed WebDAV session {}", removedSession);
+            } else {
+                LOG.debug("WebDAV session {} not removed.", session);
             }
         } catch (OXException e) {
             LOG.warn("Error removing WebDAV session", e);

@@ -57,7 +57,7 @@ import java.util.zip.InflaterInputStream;
  * @since solr 1.4
  */
 public class SnapPuller {
-  private static final Logger LOG = LoggerFactory.getLogger(SnapPuller.class.getName());
+  private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(SnapPuller.class.getName());
 
   private final String masterUrl;
 

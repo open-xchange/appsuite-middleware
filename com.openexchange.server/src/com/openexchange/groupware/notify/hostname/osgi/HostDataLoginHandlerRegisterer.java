@@ -51,7 +51,6 @@ package com.openexchange.groupware.notify.hostname.osgi;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -67,7 +66,7 @@ import com.openexchange.systemname.SystemNameService;
  */
 public final class HostDataLoginHandlerRegisterer implements ServiceTrackerCustomizer<SystemNameService, SystemNameService> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HostDataLoginHandlerRegisterer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HostDataLoginHandlerRegisterer.class);
 
     private final Lock lock = new ReentrantLock();
     private final BundleContext context;
@@ -96,7 +95,7 @@ public final class HostDataLoginHandlerRegisterer implements ServiceTrackerCusto
             lock.unlock();
         }
         if (!needsRegistration && registration != null) {
-            LOG.warn("Found multiple SysteNameService instances. Ignoring " + service.getClass().getName());
+            LOG.warn("Found multiple SysteNameService instances. Ignoring {}", service.getClass().getName());
             foundService = null;
             context.ungetService(reference);
         }

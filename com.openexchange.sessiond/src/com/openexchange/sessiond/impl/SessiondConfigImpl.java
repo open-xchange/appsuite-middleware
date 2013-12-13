@@ -50,10 +50,8 @@
 package com.openexchange.sessiond.impl;
 
 import static com.openexchange.sessiond.SessiondProperty.SESSIOND_AUTOLOGIN;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.log.LogFactory;
 
 /**
  * SessionConfig
@@ -62,8 +60,8 @@ import com.openexchange.log.LogFactory;
  */
 public class SessiondConfigImpl implements SessiondConfigInterface {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessiondConfigImpl.class));
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondConfigImpl.class);
+
     private static final long SHORT_CONTAINER_LIFE_TIME = 6L * 60L * 1000L;
     private static final long LONG_CONTAINER_LIFE_TIME = 60L * 60L * 1000L;
 
@@ -79,19 +77,13 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
 
     public SessiondConfigImpl(final ConfigurationService conf) {
         maxSession = conf.getIntProperty("com.openexchange.sessiond.maxSession", maxSession);
-        if (DEBUG) {
-            LOG.debug("Sessiond property: com.openexchange.sessiond.maxSession=" + maxSession);
-        }
+        LOG.debug("Sessiond property: com.openexchange.sessiond.maxSession={}", maxSession);
 
         maxSessionsPerUser = conf.getIntProperty("com.openexchange.sessiond.maxSessionPerUser", maxSessionsPerUser);
-        if (DEBUG) {
-            LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionPerUser=" + maxSessionsPerUser);
-        }
+        LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionPerUser={}", maxSessionsPerUser);
 
         maxSessionsPerClient = conf.getIntProperty("com.openexchange.sessiond.maxSessionPerClient", maxSessionsPerClient);
-        if (DEBUG) {
-            LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionPerClient=" + maxSessionsPerClient);
-        }
+        LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionPerClient={}", maxSessionsPerClient);
 
         sessionShortLifeTime = conf.getIntProperty("com.openexchange.sessiond.sessionDefaultLifeTime", (int) sessionShortLifeTime);
         String tmp = conf.getProperty("com.openexchange.sessiond.sessionLongLifeTime", "1W");
@@ -105,18 +97,12 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
         if (longLifeTime < sessionShortLifeTime) {
             longLifeTime = sessionShortLifeTime;
         }
-        if (DEBUG) {
-            LOG.debug("Sessiond property: com.openexchange.sessiond.sessionDefaultLifeTime=" + sessionShortLifeTime);
-        }
-        if (DEBUG) {
-            LOG.debug("Sessiond property: com.openexchange.sessiond.sessionLongLifeTime=" + longLifeTime);
-        }
+        LOG.debug("Sessiond property: com.openexchange.sessiond.sessionDefaultLifeTime={}", sessionShortLifeTime);
+        LOG.debug("Sessiond property: com.openexchange.sessiond.sessionLongLifeTime={}", longLifeTime);
 
         tmp = conf.getProperty("com.openexchange.sessiond.randomTokenTimeout", "30000");
         randomTokenTimeout = ConfigTools.parseTimespan(tmp);
-        if (DEBUG) {
-            LOG.debug("Sessiond property: com.openexchange.sessiond.randomTokenTimeout=" + randomTokenTimeout);
-        }
+        LOG.debug("Sessiond property: com.openexchange.sessiond.randomTokenTimeout={}", randomTokenTimeout);
 
         tmp = conf.getProperty(SESSIOND_AUTOLOGIN.getPropertyName(), SESSIOND_AUTOLOGIN.getDefaultValue());
         autoLogin = Boolean.parseBoolean(tmp.trim());

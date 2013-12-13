@@ -99,7 +99,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
      */
     private static final long serialVersionUID = -7510487764376433468L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(POP3Access.class));
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(POP3Access.class);
 
     private static final ConcurrentMap<LoginKey, Future<Object>> SYNCHRONIZER_MAP = new ConcurrentHashMap<LoginKey, Future<Object>>();
 
@@ -218,7 +218,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             if (null == providerName) {
                 final OXException e =
                     POP3ExceptionCode.MISSING_POP3_STORAGE_NAME.create(Integer.valueOf(user), Integer.valueOf(cid));
-                LOG.debug("Using fallback storage \"mailaccount\".\n" + e.getMessage(), e);
+                LOG.debug("Using fallback storage \"mailaccount\".\n{}", e.getMessage(), e);
                 providerName = MailAccountPOP3StorageProvider.NAME;
                 /*
                  * Add to properties if marker is absent
@@ -289,9 +289,8 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     @Override
     public void setCacheable(final boolean cacheable) {
-        if (cacheable && LOG.isWarnEnabled()) {
-            final UnsupportedOperationException e = new UnsupportedOperationException("POP3Access.setCacheable() not supported");
-            LOG.warn(e.getMessage(), e);
+        if (cacheable) {
+            LOG.warn("", new UnsupportedOperationException("POP3Access.setCacheable() not supported"));
         }
     }
 
@@ -301,7 +300,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             try {
                 folderStorage.releaseResources();
             } catch (final OXException e) {
-                LOG.error(new StringBuilder("Error while closing POP3 folder storage: ").append(e.getMessage()).toString(), e);
+                LOG.error("Error while closing POP3 folder storage: {}", e.getMessage(), e);
             } finally {
                 folderStorage = null;
             }
@@ -310,7 +309,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             try {
                 messageStorage.releaseResources();
             } catch (final OXException e) {
-                LOG.error(new StringBuilder("Error while closing POP3 message storage: ").append(e.getMessage()).toString(), e);
+                LOG.error("Error while closing POP3 message storage: {}", e.getMessage(), e);
             } finally {
                 messageStorage = null;
 
@@ -410,7 +409,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             try {
                 pop3Store.close();
             } catch (final MessagingException e) {
-                LOG.warn(e.getMessage(), e);
+                LOG.warn("", e);
             }
             /*
              * Add warning if non-secure

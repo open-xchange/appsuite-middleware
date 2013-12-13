@@ -48,7 +48,7 @@ import org.apache.solr.common.util.XMLErrorLogger;
  */
 public class XMLResponseParser extends ResponseParser
 {
-  public static Logger log = LoggerFactory.getLogger(XMLResponseParser.class);
+  public static org.slf4j.Logger log = LoggerFactory.getLogger(XMLResponseParser.class);
   private static final XMLErrorLogger xmllog = new XMLErrorLogger(log);
 
   // reuse the factory among all parser instances so things like string caches

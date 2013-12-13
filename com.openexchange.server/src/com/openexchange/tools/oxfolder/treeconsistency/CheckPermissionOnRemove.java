@@ -54,6 +54,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.List;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.cache.impl.FolderCacheManager;
@@ -78,8 +79,7 @@ import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
  */
 public final class CheckPermissionOnRemove extends CheckPermission {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory
-            .getLog(CheckPermissionOnRemove.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CheckPermissionOnRemove.class);
 
     /**
      * Initializes a new {@link CheckPermissionOnRemove}
@@ -226,22 +226,13 @@ public final class CheckPermissionOnRemove extends CheckPermission {
             final ToDoPermission toDoPermission = iterator.value();
             final int[] users = toDoPermission.getUsers();
             for (final int user : users) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Auto-Delete system-folder-read permission for user "
-                            + UserStorage.getStorageUser(user, ctx).getDisplayName() + " from folder " + fid);
-                }
+                LOG.debug("Auto-Delete system-folder-read permission for user {} from folder {}", UserStorage.getStorageUser(user, ctx).getDisplayName(), fid);
                 deleteSystemFolderReadPermission(fid, user);
             }
             final int[] groups = toDoPermission.getGroups();
             for (final int group : groups) {
-                if (LOG.isDebugEnabled()) {
-                    try {
-                        LOG.debug("Auto-Delete system-folder-read permission for group "
-                                + GroupStorage.getInstance().getGroup(group, ctx).getDisplayName() + " from folder " + fid);
-                    } catch (final OXException e) {
-                        LOG.trace("Logging failed", e);
-                    }
-                }
+                LOG.debug("Auto-Delete system-folder-read permission for group {} from folder {}", GroupStorage.getInstance().getGroup(group, ctx).getDisplayName(), fid);
+
                 deleteSystemFolderReadPermission(fid, group);
             }
             /*
@@ -264,7 +255,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
                     CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
                 }
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

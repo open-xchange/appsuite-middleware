@@ -49,7 +49,6 @@
 
 package com.openexchange.realtime.dispatch.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceReference;
@@ -65,7 +64,7 @@ import com.openexchange.realtime.dispatch.management.ManagementHouseKeeper;
 
 public class RealtimeDispatchActivator extends HousekeepingActivator {
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(RealtimeDispatchActivator.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RealtimeDispatchActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {

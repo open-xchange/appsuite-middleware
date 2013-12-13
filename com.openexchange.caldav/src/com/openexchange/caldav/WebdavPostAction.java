@@ -53,9 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.action.AbstractAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
@@ -69,7 +67,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
  */
 public class WebdavPostAction extends AbstractAction {
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebdavPostAction.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavPostAction.class);
 
     protected final GroupwareCaldavFactory factory;
 

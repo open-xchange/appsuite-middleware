@@ -54,7 +54,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -86,7 +85,7 @@ import com.openexchange.session.Session;
  */
 public final class QuotaActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(QuotaActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QuotaActivator.class);
 
     /** The {@link DatabaseService} reference. */
     static final AtomicReference<DatabaseService> DATABASE_SERVICE_REFERENCE = new AtomicReference<DatabaseService>();
@@ -152,7 +151,7 @@ public final class QuotaActivator extends HousekeepingActivator {
         });
         openTrackers();
         // Register pre-defined quota restrictions
-        final Log log = LOG;
+        final org.slf4j.Logger log = LOG;
         registerService(QuotaRestriction.class, new QuotaRestriction() {
 
             @Override

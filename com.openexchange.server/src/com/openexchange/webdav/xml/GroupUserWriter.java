@@ -54,7 +54,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import javax.mail.internet.InternetAddress;
-import org.apache.commons.logging.Log;
 import org.jdom2.Element;
 import org.jdom2.output.XMLOutputter;
 import com.openexchange.contact.ContactFieldOperand;
@@ -67,7 +66,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -150,7 +148,7 @@ public class GroupUserWriter extends ContactWriter {
 
     protected Element parent = null;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(GroupUserWriter.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupUserWriter.class);
 
     public GroupUserWriter(final User userObj, final Context ctx, final Session sessionObj, final Element parent) {
         super(userObj, ctx, sessionObj);

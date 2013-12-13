@@ -49,8 +49,6 @@
 
 package com.openexchange.authorization.standard.osgi;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.authorization.standard.DefaultAuthorizationImpl;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -61,7 +59,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class AuthorizationServiceActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AuthorizationServiceActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AuthorizationServiceActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -70,19 +68,12 @@ public class AuthorizationServiceActivator extends HousekeepingActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        /*
-         * Never stop the server even if a needed service is absent
-         */
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
     }
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
     }
 
     @Override
@@ -91,14 +82,10 @@ public class AuthorizationServiceActivator extends HousekeepingActivator {
             /*
              * (Re-)Initialize service registry with available services
              */
-            {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("starting bundle: com.openexchange.authorization.standard");
-                }
-                registerService(AuthorizationService.class, DefaultAuthorizationImpl.getInstance(), null);
-            }
+            LOG.info("starting bundle: com.openexchange.authorization.standard");
+            registerService(AuthorizationService.class, DefaultAuthorizationImpl.getInstance(), null);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -112,7 +99,7 @@ public class AuthorizationServiceActivator extends HousekeepingActivator {
              */
             // getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONValue;
+import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -63,9 +64,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.json.cache.JsonCacheService;
 import com.openexchange.json.cache.JsonCaches;
-import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailListField;
@@ -90,9 +89,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class SimpleThreadStructureAction extends AbstractMailAction implements MailRequestSha1Calculator {
 
-    protected static final org.apache.commons.logging.Log LOG = Log.loggerFor(SimpleThreadStructureAction.class);
-
-    protected static final boolean DEBUG = LOG.isDebugEnabled();
+    protected static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SimpleThreadStructureAction.class);
 
     /**
      * Initializes a new {@link SimpleThreadStructureAction}.
@@ -114,7 +111,6 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
         if (cache && CACHABLE_FORMATS.contains(req.getRequest().getFormat())) {
             final JsonCacheService jsonCache = JsonCaches.getCache();
             if (jsonCache != null) {
-                final long st = DEBUG ? System.currentTimeMillis() : 0L;
                 final String sha1Sum = getSha1For(req);
                 final String id = "com.openexchange.mail." + sha1Sum;
                 final ServerSession session = req.getSession();
@@ -145,10 +141,6 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                 } else {
                     result = new AJAXRequestResult(jsonValue, "json");
                     result.setResponseProperty("cached", Boolean.TRUE);
-                    if (DEBUG) {
-                        final long dur = System.currentTimeMillis() - st;
-                        LOG.debug("\tSimpleThreadStructureAction.perform(): JSON cache look-up took " + dur + "msec");
-                    }
                 }
                 /*-
                  * Update cache with separate thread
@@ -171,14 +163,9 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                                 return;
                             }
                             locked = true;
-                            final long st = DEBUG ? System.currentTimeMillis() : 0L;
                             mailInterface = MailServletInterface.getInstance(session);
                             final AJAXRequestResult requestResult = perform0(mailRequest, mailInterface, true);
                             MailConverter.getInstance().convert(mailRequest.getRequest(), requestResult, session, null);
-                            if (DEBUG) {
-                                final long dur = System.currentTimeMillis() - st;
-                                LOG.debug("\tSimpleThreadStructureAction.perform(): JSON cache update took " + dur + "msec");
-                            }
                         } catch (final Exception e) {
                             // Something went wrong
                             try {
@@ -232,7 +219,6 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
      * Performs the request w/o cache look-up.
      */
     protected AJAXRequestResult perform0(final MailRequest req, final MailServletInterface mailInterface, final boolean cache) throws OXException {
-        final Props props = LogProperties.getLogProperties();
         final Set<LogProperties.Name> names = EnumSet.noneOf(LogProperties.Name.class);
         try {
             /*
@@ -241,12 +227,8 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             final String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
             {
                 final FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(folderId);
-                if (!props.put(LogProperties.Name.MAIL_FULL_NAME, arg.getFullname())) {
-                    names.add(LogProperties.Name.MAIL_FULL_NAME);
-                }
-                if (!props.put(LogProperties.Name.MAIL_ACCOUNT_ID, Integer.toString(arg.getAccountId()))) {
-                    names.add(LogProperties.Name.MAIL_ACCOUNT_ID);
-                }
+                LogProperties.put(LogProperties.Name.MAIL_FULL_NAME, arg.getFullname());
+                LogProperties.put(LogProperties.Name.MAIL_ACCOUNT_ID, Integer.toString(arg.getAccountId()));
             }
             int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
             final String sort = req.getParameter(AJAXServlet.PARAMETER_SORT);
@@ -397,10 +379,6 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             return result.setDurationByStart(start);
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            for (final LogProperties.Name name : names) {
-                props.remove(name);
-            }
         }
     }
 

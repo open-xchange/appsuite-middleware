@@ -57,8 +57,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -73,7 +71,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public class CorrectWrongAppointmentFolder implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CorrectWrongAppointmentFolder.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CorrectWrongAppointmentFolder.class);
 
     public CorrectWrongAppointmentFolder() {
         super();
@@ -116,13 +114,9 @@ public class CorrectWrongAppointmentFolder implements UpdateTask {
                 final int member = result.getInt(pos++);
                 final int folderId = getPrivateFolder(con, cid, member);
                 if (-1 == folderId) {
-                    LOG.info("Unable to correct folder of participant "
-                        + member + " for appointment " + appId + " in context "
-                        + cid + ".");
+                    LOG.info("Unable to correct folder of participant {} for appointment {} in context {}.", member, appId, cid);
                 } else {
-                    LOG.info("Setting folder to " + folderId + " of participant "
-                        + member + " for appointment " + appId + " in context "
-                        + cid + ".");
+                    LOG.info("Setting folder to {} of participant {} for appointment {} in context {}.", folderId, member, appId, cid);
                     correctFolder(con, cid, appId, member, folderId);
                 }
             }
@@ -151,7 +145,7 @@ public class CorrectWrongAppointmentFolder implements UpdateTask {
             stmt.setInt(pos++, member);
             stmt.execute();
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             closeSQLStuff(null, stmt);
         }
@@ -176,7 +170,7 @@ public class CorrectWrongAppointmentFolder implements UpdateTask {
                 folderId = result.getInt(1);
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             closeSQLStuff(result, stmt);
         }

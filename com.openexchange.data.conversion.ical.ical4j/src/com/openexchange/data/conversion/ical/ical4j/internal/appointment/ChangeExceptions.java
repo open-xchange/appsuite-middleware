@@ -56,7 +56,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.RecurrenceId;
-import org.apache.commons.logging.Log;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
@@ -68,7 +67,6 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 
 /**
  * Writes the recurrence identifier into change exception appointments to get the series not displayed at the change exceptions original
@@ -77,7 +75,7 @@ import com.openexchange.log.LogFactory;
  */
 public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent, Appointment> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ChangeExceptions.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ChangeExceptions.class);
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
     private static volatile CalendarCollectionService calendarCollection;
@@ -110,7 +108,7 @@ public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent
                     date = EmitterTools.toDateTime(EmitterTools.calculateExactTime(cloned, changeException));
                 }
             } catch (final OXException e) {
-                LOG.warn(e.getMessage(), e);
+                LOG.warn("", e);
                 date = EmitterTools.toDate(changeException);
             }
         } else {

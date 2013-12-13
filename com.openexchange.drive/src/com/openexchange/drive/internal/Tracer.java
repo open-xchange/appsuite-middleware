@@ -50,7 +50,6 @@
 package com.openexchange.drive.internal;
 
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.java.StringAllocator;
 
@@ -61,7 +60,7 @@ import com.openexchange.java.StringAllocator;
  */
 public class Tracer {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Tracer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Tracer.class);
     private static final int MAX_SIZE = 20000;
 
     private final StringAllocator traceLog;
@@ -84,9 +83,7 @@ public class Tracer {
     public void trace(Object message) {
         if (isTraceEnabled()) {
             String msg = String.valueOf(message);
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(msg);
-            }
+            LOG.trace(msg);
             if (null != traceLog) {
                 int remainingCapacity = MAX_SIZE - traceLog.length();
                 if (0 < remainingCapacity) {

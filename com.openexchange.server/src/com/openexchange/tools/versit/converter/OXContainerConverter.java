@@ -178,7 +178,7 @@ public class OXContainerConverter {
 
     private static final String P_CLASS = "CLASS";
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OXContainerConverter.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXContainerConverter.class);
 
     private static final String CHARSET_ISO_8859_1 = "ISO-8859-1";
 
@@ -193,7 +193,7 @@ public class OXContainerConverter {
         try {
             domain = InetAddress.getLocalHost().getCanonicalHostName();
         } catch (final UnknownHostException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         atdomain = new StringBuilder().append('@').append(domain).toString();
     }
@@ -240,9 +240,7 @@ public class OXContainerConverter {
     }
 
     public void close() {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("OXContainerConverter.close()");
-        }
+        LOG.trace("OXContainerConverter.close()");
     }
 
     public boolean isSendFloating() {
@@ -382,7 +380,7 @@ public class OXContainerConverter {
             AddAlarms(taskContainer, object);
             return taskContainer;
         } catch (final Exception e) {
-            LOG.error(e);
+            LOG.error(e.toString());
             throw new ConverterException(e);
         }
     }
@@ -591,10 +589,7 @@ public class OXContainerConverter {
                             loadImageFromURL(contactContainer, url);
                             value = null;
                         } catch (final MalformedURLException e) {
-                            // Not a valid URL
-                            if (LOG.isTraceEnabled()) {
-                                LOG.trace(e.getMessage(), e);
-                            }
+                            LOG.trace("", e);
                         }
                     }
                 }
@@ -986,7 +981,7 @@ public class OXContainerConverter {
                     } else if (value instanceof String) {
                         cats.addAll(Arrays.asList(value.toString().split(" *, *")));
                     } else {
-                        LOG.error("Unexpected class: " + value.getClass().getName());
+                        LOG.error("Unexpected class: {}", value.getClass().getName());
                     }
                 }
             }
@@ -1038,7 +1033,7 @@ public class OXContainerConverter {
         				int targetHeight = Integer.parseInt(matcher.group(4));
         				return new Rectangle(offsetLeft, offsetBottom, targetWidth, targetHeight);
     				} catch (NumberFormatException e) {
-    					LOG.warn("unable to parse clipping rectangle from " + text, e);
+    					LOG.warn("unable to parse clipping rectangle from {}", text, e);
     				}
     			}
     		}
@@ -1198,7 +1193,7 @@ public class OXContainerConverter {
                 if (maxSize > 0 && bytes.length > maxSize) {
                     final ConverterException e = new ConverterException(
                         "Contact image is " + bytes.length + " bytes large and limit is " + maxSize + " bytes. Image is therefore ignored.");
-                    LOG.warn(e.getMessage(), e);
+                    LOG.warn("", e);
                     bytes = null;
                 }
             } finally {
@@ -1764,7 +1759,7 @@ public class OXContainerConverter {
                 final CalendarCollectionService calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
                 result = calColl.calculateFirstRecurring(app);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw new ConverterException(e);
             }
             if (result.size() == 1) {
@@ -1813,7 +1808,7 @@ public class OXContainerConverter {
                 try {
                     addProperty(object, "PHOTO", "VALUE", new String[] { "URI" }, new URI(new String(imageData, Charsets.ISO_8859_1)));
                 } catch (final UnsupportedCharsetException e2) {
-                    LOG.error(e2);
+                    LOG.error(e2.toString());
                     throw new ConverterException(e2);
                 } catch (final URISyntaxException e) {
                     // Insert raw base64-encoded image bytes
@@ -2226,7 +2221,7 @@ public class OXContainerConverter {
                 object.addProperty(property);
             }
         } catch (final Exception e) {
-            LOG.error(e);
+            LOG.error(e.toString());
             throw new ConverterException(e);
         }
     }
@@ -2250,7 +2245,7 @@ public class OXContainerConverter {
                 object.addProperty(property);
             }
         } catch (final Exception e) {
-            LOG.error(e);
+            LOG.error(e.toString());
             throw new ConverterException(e);
         }
     }

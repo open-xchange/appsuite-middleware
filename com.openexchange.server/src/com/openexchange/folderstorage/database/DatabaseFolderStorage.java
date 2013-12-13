@@ -146,8 +146,8 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DatabaseFolderStorage.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(DatabaseFolderStorage.class);
 
     private static final String PARAM_CONNECTION = DatabaseParameterConstants.PARAM_CONNECTION;
 
@@ -363,12 +363,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         try {
             con = optParameter(ConnectionMode.class, PARAM_CONNECTION, params);
         } catch (final OXException e) {
-            /*
-             * Already committed
-             */
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Storage already committed:\n" + params.getCommittedTrace(), e);
-            }
+            LOG.warn("Storage already committed:\n{}", params.getCommittedTrace(), e);
             return;
         }
         if (null == con) {
@@ -1475,7 +1470,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         try {
             con = optParameter(ConnectionMode.class, PARAM_CONNECTION, params);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return;
         }
         if (null == con) {
