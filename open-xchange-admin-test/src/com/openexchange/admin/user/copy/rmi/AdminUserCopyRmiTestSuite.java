@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.admin;
+package com.openexchange.admin.user.copy.rmi;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -55,17 +55,19 @@ import org.junit.runners.Suite.SuiteClasses;
 
 
 /**
- * RMI tests for admin
+ * RMI tests for admin user copy
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4.2
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    DBWeightTest.class
+    RoundtripTest.class,
+    UserCopyTest.class,
+    UserExistsTest.class
 })
-public class AdminTestSuite {
+public class AdminUserCopyRmiTestSuite {
 
-    private AdminTestSuite() {
+    private AdminUserCopyRmiTestSuite() {
     }
 }

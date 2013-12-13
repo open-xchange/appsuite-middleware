@@ -47,25 +47,26 @@
  *
  */
 
-package com.openexchange.admin.rmi;
+package com.openexchange.admin.tools;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
-public class AllTests {
 
-    public AllTests() {
-        super();
-    }
+/**
+ * RMI tests for admin tools
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4.2
+ */
+@RunWith(Suite.class)
+@SuiteClasses({
+    Bug19733Test.class,
+    NetUtilTest.class
+})
+public class AdminToolsTestSuite {
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite(AllTests.class.getName());
-        suite.addTest(ContextTest.suite());
-        suite.addTest(Bug16865Test.suite());
-        suite.addTest(Bug19379Test.suite());
-        suite.addTest(UtilTest.suite());
-        suite.addTest(new JUnit4TestAdapter(Bug27065Test.class));
-        return suite;
+    private AdminToolsTestSuite() {
     }
 }

@@ -47,26 +47,31 @@
  *
  */
 
-package com.openexchange.admin;
+package com.openexchange.admin.console.util;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+
 
 /**
- * {@link UnitTests}
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * RMI tests for admin console util
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4.2
  */
-public final class UnitTests {
+@RunWith(Suite.class)
+@SuiteClasses({
+    ChangeFilestoreTest.class,
+    CreateReasonTest.class,
+    ListDatabasesTest.class,
+    ListFilestoreTest.class,
+    ListReasonTest.class,
+    ListServerTest.class,
+    RegisterFilestoreTest.class
+})
+public class AdminConsoleUtilTestSuite {
 
-    public UnitTests() {
-        super();
-    }
-
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTest(new JUnit4TestAdapter(DBWeightTest.class));
-        return tests;
+    private AdminConsoleUtilTestSuite() {
     }
 }

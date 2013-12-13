@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.admin;
+package com.openexchange.admin.console;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -55,17 +55,19 @@ import org.junit.runners.Suite.SuiteClasses;
 
 
 /**
- * RMI tests for admin
+ * RMI tests for admin console
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4.2
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    DBWeightTest.class
+    HostingCLITest.class,
+    StatisticToolsTest.class,
+    UniqueCLTParameterTest.class
 })
-public class AdminTestSuite {
+public class AdminConsoleTestSuite {
 
-    private AdminTestSuite() {
+    private AdminConsoleTestSuite() {
     }
 }
