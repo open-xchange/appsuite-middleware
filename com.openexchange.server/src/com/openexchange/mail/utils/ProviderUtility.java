@@ -119,18 +119,21 @@ public final class ProviderUtility {
             return fallback;
         }
         final int len = serverUrl.length();
-        char c = '\0';
         String protocol = null;
         /*
          * Parse protocol out of URL
          */
-        for (int i = 0; (i < len) && ((c = serverUrl.charAt(i)) != '/'); i++) {
+        final int pos = serverUrl.indexOf(':');
+        if (pos <= 0) {
+            return fallback;
+        }
+        char c = '\0';
+        for (int i = pos; (null == protocol) && (i < len) && ((c = serverUrl.charAt(i)) != '/'); i++) {
             if ((c == ':') && ((c = serverUrl.charAt(i + 1)) == '/') && ((c = serverUrl.charAt(i + 2)) == '/')) {
                 final String s = serverUrl.substring(0, i).toLowerCase(Locale.ENGLISH);
                 if (isValidProtocol(s)) {
                     protocol = s;
                 }
-                break;
             }
         }
         if (null == protocol) {

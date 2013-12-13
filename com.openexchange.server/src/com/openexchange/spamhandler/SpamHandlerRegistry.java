@@ -55,7 +55,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -117,7 +116,8 @@ public final class SpamHandlerRegistry {
     public static boolean hasSpamHandler(final MailAccount mailAccount) {
         final SpamHandler handler;
         try {
-            handler = getSpamHandler0(mailAccount, new URLMailProviderGetter(mailAccount));
+            final MailProvider provider = MailProviderRegistry.getRealMailProvider(mailAccount.getMailProtocol());
+            handler = getSpamHandler0(mailAccount, new StaticMailProviderGetter(provider));
         } catch (final OXException e) {
             // Cannot occur
             LOG.error("", e);
@@ -373,18 +373,19 @@ public final class SpamHandlerRegistry {
         }
     }
 
-    private static final class URLMailProviderGetter implements MailProviderGetter {
+    private static final class StaticMailProviderGetter implements MailProviderGetter {
 
-        private final MailAccount mailAccount;
+        private final MailProvider mailProvider;
 
-        public URLMailProviderGetter(final MailAccount mailAccount) {
+        public StaticMailProviderGetter(final MailProvider mailProvider) {
             super();
-            this.mailAccount = mailAccount;
+            this.mailProvider = mailProvider;
         }
 
         @Override
         public MailProvider getMailProvider() {
-            return MailProviderRegistry.getMailProviderByURL(MailConfig.getMailServerURL(mailAccount));
+            return mailProvider;
         }
+
     }
 }
