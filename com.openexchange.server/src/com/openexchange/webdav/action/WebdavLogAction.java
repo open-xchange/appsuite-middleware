@@ -105,7 +105,7 @@ public class WebdavLogAction extends AbstractAction {
 
 			LOG.debug(b.toString());
 
-			if(logResponse) {
+			if(logResponse && LOG.isTraceEnabled() && CapturingWebdavResponse.class.isInstance(res)) {
 				LOG.trace(((CapturingWebdavResponse)res).getBodyAsString());
 			}
 
