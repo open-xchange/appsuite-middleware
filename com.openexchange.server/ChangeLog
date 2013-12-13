@@ -2,6 +2,7 @@
 
  - Fix for bug 30294: Properly detect availability of spam handler(s)
  - Fix for bug 30305: Added null guard for values passed to MDC map
+ - Fix for bug 30306: Always include logging WebDAV handler in handler cycle to support dynamically changing log level
 
 * 2013-12-13 - marc.arens@open-xchange.com
 
