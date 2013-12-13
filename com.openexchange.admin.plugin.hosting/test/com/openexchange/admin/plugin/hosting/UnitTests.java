@@ -47,25 +47,25 @@
  *
  */
 
-package com.openexchange.admin;
+package com.openexchange.admin.plugin.hosting;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-
+import com.openexchange.admin.storage.mysqlStorage.DBWeightComparatorTest;
 
 /**
- * RMI tests for admin
+ * Unit tests for the bundle com.openexchange.admin.plugin.hosting
  * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4.2
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    DBWeightTest.class
+    DBWeightComparatorTest.class
 })
-public class AdminTestSuite {
+public class UnitTests {
 
-    private AdminTestSuite() {
+    public UnitTests() {
     }
 }
