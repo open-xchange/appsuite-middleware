@@ -860,7 +860,7 @@ if [ -e /opt/open-xchange/etc/file-logging.properties -a $MODIFIED -eq 1 ]; then
 fi
 rm -f /opt/open-xchange/etc/file-logging.properties
 if [ -e /opt/open-xchange/etc/log4j.xml ]; then
-    cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/appender[@name='ASYNC']/appender-ref -r -
+    cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/appender[@name=\'ASYNC\']/appender-ref -r -
 <configuration>
     <appender name="ASYNC">
         <appender-ref ref="SYSLOG"/>
