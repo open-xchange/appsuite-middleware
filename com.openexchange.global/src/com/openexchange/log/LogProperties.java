@@ -391,7 +391,10 @@ public final class LogProperties {
         }
         for (int i = 0; i < length; i+=2) {
             final LogProperties.Name name = (LogProperties.Name) args[i];
-            MDC.put(name.getName(), String.valueOf(args[i + 1]));
+            final Object arg = args[i + 1];
+            if (null != arg) {
+                MDC.put(name.getName(), arg.toString());
+            }
         }
     }
 
