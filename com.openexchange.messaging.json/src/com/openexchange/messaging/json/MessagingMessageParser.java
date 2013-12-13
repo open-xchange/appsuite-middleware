@@ -245,7 +245,7 @@ public class MessagingMessageParser {
                         /*
                          * Initialize input stream
                          */
-                        final InputStream in = new BufferedInputStream(registry.get(identifier));
+                        final InputStream in = new BufferedInputStream(registry.get(identifier), 65536);
                         try {
                             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192 << 1);
                             final byte[] buf = new byte[8192];
@@ -483,7 +483,7 @@ public class MessagingMessageParser {
                 /*
                  * Initialize input stream
                  */
-                final InputStream in = new BufferedInputStream(registry.get(identifier));
+                final InputStream in = new BufferedInputStream(registry.get(identifier), 65536);
                 try {
                     final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192 << 1);
                     final byte[] buf = new byte[8192];

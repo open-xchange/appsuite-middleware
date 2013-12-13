@@ -200,7 +200,7 @@ public class TikaTextXtractService extends AbstractTextXtractService {
             if (tempFile == null) {
                 tikaInputStream = inputStream;
             } else {
-                tikaInputStream = new BufferedInputStream(new FileInputStream(tempFile));
+                tikaInputStream = new BufferedInputStream(new FileInputStream(tempFile), 65536);
             }
             return tika.parseToString(tikaInputStream);
         } catch (IOException e) {

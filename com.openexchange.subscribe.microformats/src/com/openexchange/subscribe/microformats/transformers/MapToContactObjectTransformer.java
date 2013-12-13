@@ -403,7 +403,7 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
             urlCon.setReadTimeout(2500);
             urlCon.connect();
             mimeType = urlCon.getContentType();
-            final BufferedInputStream in = new BufferedInputStream(urlCon.getInputStream());
+            final BufferedInputStream in = new BufferedInputStream(urlCon.getInputStream(), 65536);
             try {
                 final ByteArrayOutputStream buffer = new UnsynchronizedByteArrayOutputStream();
                 final byte[] bbuf = new byte[8192];

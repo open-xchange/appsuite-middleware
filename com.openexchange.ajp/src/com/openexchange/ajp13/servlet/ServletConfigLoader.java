@@ -199,7 +199,7 @@ public final class ServletConfigLoader {
         final Properties props = new Properties();
         InputStream in = null;
         try {
-            in = new BufferedInputStream(new FileInputStream(propFile));
+            in = new BufferedInputStream(new FileInputStream(propFile), 65536);
             props.load(in);
         } catch (final IOException x) {
             return null;

@@ -170,7 +170,7 @@ public abstract class TemplateListResourceBundle extends ResourceBundle {
     }
 
     protected final InputStream stream(final String fileName) throws IOException {
-        return new BufferedInputStream(new FileInputStream(new File(templatePath, fileName)));
+        return new BufferedInputStream(new FileInputStream(new File(templatePath, fileName)), 65536);
     }
 
     protected String uniqueName() {

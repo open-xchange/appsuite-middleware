@@ -495,7 +495,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
          */
         if (null != tidyMessagesFilename) {
             try {
-                return new BufferedInputStream(new FileInputStream(tidyMessagesFilename));
+                return new BufferedInputStream(new FileInputStream(tidyMessagesFilename), 65536);
             } catch (final IOException e) {
                 LOG.warn("File providing JTidy messages could not be found: {}", tidyMessagesFilename, e);
             }

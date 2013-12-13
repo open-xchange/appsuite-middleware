@@ -174,7 +174,7 @@ public final class PropertyWatcher implements FileListener {
     public void onChange(final File file) {
         final InputStream fis;
         try {
-            fis = new BufferedInputStream(new FileInputStream(file));
+            fis = new BufferedInputStream(new FileInputStream(file), 65536);
         } catch (final FileNotFoundException e) {
             LOG.debug("", e);
             /*

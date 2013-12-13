@@ -49,7 +49,6 @@
 
 package com.openexchange.textxtraction;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -95,7 +94,7 @@ public abstract class AbstractTextXtractService implements TextXtractService {
              * Generate an InputStream that supports mark()/reset()
              */
             if (file.isFile()) {
-                input = new BufferedInputStream(new FileInputStream(file));
+                input = Streams.bufferedInputStreamFor(new FileInputStream(file));
             } else {
                 input = TikaInputStream.get(new URL(resource));
             }

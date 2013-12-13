@@ -101,7 +101,7 @@ public class POTranslationsDiscoverer extends FileDiscoverer {
                     LOG.warn(".po file does not match name pattern: {}", file);
                 } else {
                     final File poFile = new File(directory, file);
-                    input = new BufferedInputStream(new FileInputStream(poFile));
+                    input = new BufferedInputStream(new FileInputStream(poFile), 65536);
                     // POParser remembers headers of PO file. Therefore a new one is needed for every file.
                     final Translations translations = new POParser().parse(input, poFile.getAbsolutePath());
                     translations.setLocale(l);

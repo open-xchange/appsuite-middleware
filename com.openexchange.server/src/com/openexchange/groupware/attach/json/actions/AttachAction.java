@@ -84,7 +84,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.log.Log;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -292,7 +291,7 @@ public final class AttachAction extends AbstractAttachmentAction {
                 final long modified =
                     ATTACHMENT_BASE.attachToObject(
                         attachment,
-                        new BufferedInputStream(new FileInputStream(uploadFile.getTmpFile())),
+                        new BufferedInputStream(new FileInputStream(uploadFile.getTmpFile()), 65536),
                         session,
                         ctx,
                         user,

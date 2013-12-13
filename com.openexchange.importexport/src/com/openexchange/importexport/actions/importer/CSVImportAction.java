@@ -107,7 +107,7 @@ public class CSVImportAction extends AbstractImportAction implements AJAXActionS
                     continue;
                 }
                 final Properties props = new Properties();
-                final InputStream in = new BufferedInputStream(new FileInputStream(file));
+                final InputStream in = new BufferedInputStream(new FileInputStream(file), 65536);
                 try {
                     props.load(in);
                 } finally {

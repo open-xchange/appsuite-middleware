@@ -49,7 +49,6 @@
 
 package com.openexchange.tools.versit.filetokenizer;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -101,7 +100,7 @@ public class VCardTokenizer {
      */
     public VCardTokenizer(final InputStream is) throws IOException {
         streamAsBytes = new UnsynchronizedByteArrayOutputStream();
-        vcard = new BufferedInputStream(is);
+        vcard = Streams.bufferedInputStreamFor(is);
     }
 
     /**

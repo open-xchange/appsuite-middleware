@@ -59,7 +59,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -282,7 +281,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                     if ((stream instanceof ByteArrayInputStream) || (stream instanceof BufferedInputStream)) {
                         documentData = stream;
                     } else {
-                        documentData = new BufferedInputStream(stream);
+                        documentData = new BufferedInputStream(stream, 65536);
                     }
                 }
             }

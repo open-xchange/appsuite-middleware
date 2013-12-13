@@ -187,12 +187,12 @@ public class TimoutHttpURLFeedFetcher extends HttpURLFeedFetcher {
     }
 
     private SyndFeed readSyndFeedFromStream(InputStream inputStream, URLConnection connection) throws IOException, IllegalArgumentException, FeedException {
-        BufferedInputStream is;
+        InputStream is;
         if ("gzip".equalsIgnoreCase(connection.getContentEncoding())) {
             // handle gzip encoded content
-            is = new BufferedInputStream(new GZIPInputStream(inputStream));
+            is = new GZIPInputStream(inputStream, 65536);
         } else {
-            is = new BufferedInputStream(inputStream);
+            is = new BufferedInputStream(inputStream, 65536);
         }
 
         //InputStreamReader reader = new InputStreamReader(is, ResponseHandler.getCharacterEncoding(connection));

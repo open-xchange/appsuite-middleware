@@ -82,7 +82,7 @@ public class FileUtils {
 			InputStream input = null;
 			try {
 				int totalBytesRead = 0;
-				input = new BufferedInputStream(new FileInputStream(file));
+				input = new BufferedInputStream(new FileInputStream(file), 65536);
 				while (totalBytesRead < result.length) {
 					int bytesRemaining = result.length - totalBytesRead;
 					int bytesRead = input.read(result, totalBytesRead, bytesRemaining);
@@ -114,7 +114,7 @@ public class FileUtils {
 	        InputStream input = null;
 	        try {
 
-	            input = new BufferedInputStream(new FileInputStream(file));
+	            input = new BufferedInputStream(new FileInputStream(file), 65536);
 
 	        } finally {
 	            log.info("Closing input stream.");

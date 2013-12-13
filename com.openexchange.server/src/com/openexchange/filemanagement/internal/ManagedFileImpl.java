@@ -227,7 +227,7 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
         }
         touch();
         try {
-            final CallbackInputStream retval = new CallbackInputStream(new BufferedInputStream(new FileInputStream(file)), this);
+            final CallbackInputStream retval = new CallbackInputStream(new BufferedInputStream(new FileInputStream(file), 65536), this);
             listeners.offer(retval);
             return retval;
         } catch (final FileNotFoundException e) {

@@ -100,7 +100,7 @@ public class DistributedFileServlet extends HttpServlet {
         OutputStream outStream = null;
         try {
             ManagedFile file = fileManagement.getByID(id);
-            inStream = new BufferedInputStream(file.getInputStream());
+            inStream = new BufferedInputStream(file.getInputStream(), 65536);
             resp.setContentType(file.getContentType());
 
             outStream = resp.getOutputStream();

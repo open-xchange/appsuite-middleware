@@ -49,16 +49,14 @@
 
 package com.openexchange.publish.online.infostore;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -68,6 +66,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.java.Streams;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.online.infostore.util.InfostorePublicationUtils;
@@ -210,20 +209,16 @@ public class InfostorePublicationServlet extends HttpServlet {
     }
 
     private void write(final InputStream is, final HttpServletResponse resp) throws IOException {
-        BufferedInputStream bis = null;
-        OutputStream output = null;
         try {
-            bis = new BufferedInputStream(is);
-            output = new BufferedOutputStream(resp.getOutputStream());
-            int i;
-            while((i = bis.read()) != -1) {
-                output.write(i);
+            final ServletOutputStream out = resp.getOutputStream();
+            final int buflen = 65536;
+            final byte[] buf = new byte[buflen];
+            for (int read; (read = is.read(buf, 0, buflen)) > 0;) {
+                out.write(buf, 0, read);
             }
-            output.flush();
+            out.flush();
         } finally {
-            if(bis != null) {
-                bis.close();
-            }
+            Streams.close(is);
         }
     }
 

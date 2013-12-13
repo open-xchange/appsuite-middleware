@@ -1911,8 +1911,8 @@ public final class MimeMessageUtility {
         InputStream in = null;
         BufferedOutputStream out = null;
         try {
-            in = new BufferedInputStream(new FileInputStream(file));
-            out = new BufferedOutputStream(new FileOutputStream(newTempFile));
+            in = new BufferedInputStream(new FileInputStream(file), 65536);
+            out = new BufferedOutputStream(new FileOutputStream(newTempFile), 65536);
             {
                 @SuppressWarnings("resource") final LineReaderInputStream instream = new LineReaderInputStreamAdaptor(in, -1);
                 int lineCount = 0;

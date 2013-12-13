@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,69 +47,52 @@
  *
  */
 
-
-package com.openexchange.importexport.importers;
+package com.openexchange.java;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.importexport.ImportResult;
-import com.openexchange.importexport.formats.Format;
-import com.openexchange.java.Streams;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
-public class FacebookArchiveImporter extends AbstractImporter {
+/**
+ * {@link FastBufferedInputStream} - Extends {@link BufferedInputStream} and provides an improved implementation for {@link #available()}:
+ * <p>
+ * This method returns positive value if something is available, otherwise it will return zero.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public class FastBufferedInputStream extends BufferedInputStream {
 
-
-    public FacebookArchiveImporter(ServiceLookup services) {
-        super(services);
-        delegate = new FacebookFriendsImporter(services);
+    /**
+     * Creates a <code>FastBufferedInputStream</code> and saves its argument, the input stream <code>in</code>, for later use.
+     * <p>
+     * An internal buffer array of size <code>65536</code> is created and stored in <code>buf</code>.
+     *
+     * @param in the underlying input stream.
+     */
+    public FastBufferedInputStream(final InputStream in) {
+        super(in, 65536);
     }
 
-    protected FacebookFriendsImporter delegate = null;
-
-    @Override
-    protected String getNameForFieldInTruncationError(final int id, final OXException dataTruncation) {
-        // Nothing to do
-        return null;
+    /**
+     * Creates a <code>FastBufferedInputStream</code> with the specified buffer size, and saves its argument, the input stream <code>in</code>,
+     * for later use. An internal buffer array of length <code>size</code> is created and stored in <code>buf</code>.
+     *
+     * @param in the underlying input stream.
+     * @param size the buffer size.
+     * @exception IllegalArgumentException If <code>size &lt;= 0</code>.
+     */
+    public FastBufferedInputStream(final InputStream in, final int size) {
+        super(in, size);
     }
 
     @Override
-    public boolean canImport(final ServerSession sessObj, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
-        return format == Format.FacebookArchive;
-    }
-
-    @Override
-    public List<ImportResult> importData(final ServerSession sessObj, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
-        List<ImportResult> results = new LinkedList<ImportResult>();
-
-        ZipInputStream zis = null;
-        try {
-            zis = new ZipInputStream(new BufferedInputStream(is, 65536));
-            ZipEntry entry;
-
-            while ((entry = zis.getNextEntry()) != null) {
-                if (!entry.getName().endsWith("/friends.html")) {
-                    continue;
-                }
-
-                results = delegate.importData(sessObj, format, zis, folders, optionalParams);
-            }
-        } catch (final IOException e) {
-            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FacebookArchiveImporter.class);
-            log.error("Unexpected exception.", e);
-        } finally {
-            Streams.close(zis, is);
+    public int available() throws IOException {
+        // This method returns positive value if something is available, otherwise it will return zero.
+        if (in == null) {
+            throw new IOException("Stream closed");
         }
-
-        return results;
+        final int n = count - pos;
+        return n > 0 ? n : in.available();
     }
 
 }

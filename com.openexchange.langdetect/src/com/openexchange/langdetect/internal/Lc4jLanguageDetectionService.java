@@ -147,7 +147,7 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
     public void loadLanguageCodes(final File languageCodesFile) throws OXException {
         BufferedInputStream inputStream = null;
         try {
-            inputStream = new BufferedInputStream(new FileInputStream(languageCodesFile));
+            inputStream = new BufferedInputStream(new FileInputStream(languageCodesFile), 65536);
             final Properties properties = new Properties();
             properties.load(inputStream);
             languageCodes.clear();

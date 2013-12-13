@@ -462,7 +462,7 @@ public class Attachment extends PermissionServlet {
                 attachment.setId(AttachmentBase.NEW);
 
                 final long modified = ATTACHMENT_BASE.attachToObject(attachment, new BufferedInputStream(new FileInputStream(
-                    uploadFile.getTmpFile())), session, ctx, user, userConfig);
+                    uploadFile.getTmpFile()), 65536), session, ctx, user, userConfig);
                 if (modified > timestamp) {
                     timestamp = modified;
                 }

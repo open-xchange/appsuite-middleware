@@ -284,7 +284,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     private static Properties loadProperties(final File propFile) throws IOException {
-        final InputStream fis = new BufferedInputStream(new FileInputStream(propFile));
+        final InputStream fis = new BufferedInputStream(new FileInputStream(propFile), 65536);
         try {
             final Properties tmp = new Properties();
             tmp.load(fis);

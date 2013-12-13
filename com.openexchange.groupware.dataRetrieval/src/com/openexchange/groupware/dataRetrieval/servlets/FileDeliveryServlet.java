@@ -146,7 +146,7 @@ public class FileDeliveryServlet extends HttpServlet {
     }
 
     private InputStream setHeaders(final InputStream stream, final FileMetadata metadata, final HttpServletRequest req, final HttpServletResponse resp) throws OXException, IOException {
-        final InputStream in = new BufferedInputStream(stream); // FIXME: How come backends don't supply correct size? This has memory implications that are not so nice.
+        final InputStream in = new BufferedInputStream(stream, 65536); // FIXME: How come backends don't supply correct size? This has memory implications that are not so nice.
         final ByteArrayOutputStream out = new ByteArrayOutputStream((int) metadata.getSize());
         int count = 0;
         int value = 0;

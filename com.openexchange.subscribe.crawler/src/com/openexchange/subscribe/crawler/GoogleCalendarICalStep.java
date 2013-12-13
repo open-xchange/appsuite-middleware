@@ -49,7 +49,6 @@
 
 package com.openexchange.subscribe.crawler;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -68,6 +67,7 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.java.Streams;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 /**
@@ -100,8 +100,8 @@ public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], U
             // Unzip
             int buflen = 1024;
             // BufferedOutputStream dest = null;
-            ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-            ZipInputStream zis = new ZipInputStream(new BufferedInputStream(bis));
+            ByteArrayInputStream bis = Streams.newByteArrayInputStream(bytes);
+            ZipInputStream zis = new ZipInputStream(bis);
             ZipEntry entry;
             ICalParser iCalParser = workflow.getActivator().getICalParser();
             while ((entry = zis.getNextEntry()) != null) {

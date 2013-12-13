@@ -88,7 +88,7 @@ public class ScribeHTTPPutRequestBuilder extends
 	public HTTPPutRequestBuilder body(InputStream body) throws OXException {
 		InputStreamReader isr;
 		try {
-			isr = new InputStreamReader(new BufferedInputStream(body), com.openexchange.java.Charsets.UTF_8);
+			isr = new InputStreamReader(new BufferedInputStream(body, 65536), com.openexchange.java.Charsets.UTF_8);
 		} catch (UnsupportedCharsetException e1) {
 			return null;
 		}

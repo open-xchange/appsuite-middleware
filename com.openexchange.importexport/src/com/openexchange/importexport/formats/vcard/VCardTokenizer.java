@@ -101,7 +101,7 @@ public class VCardTokenizer {
      */
     public VCardTokenizer(final InputStream is) throws IOException {
         streamAsBytes = new UnsynchronizedByteArrayOutputStream();
-        vcard = new BufferedInputStream(is);
+        vcard = new BufferedInputStream(is, 65536);
     }
 
     /**

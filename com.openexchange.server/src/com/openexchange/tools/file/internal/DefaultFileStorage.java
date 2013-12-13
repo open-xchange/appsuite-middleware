@@ -153,7 +153,7 @@ public abstract class DefaultFileStorage implements FileStorage {
     @Override
     public InputStream getFile(String name) throws OXException {
         try {
-            return new BufferedInputStream(new FileInputStream(file(name)));
+            return new BufferedInputStream(new FileInputStream(file(name)), 65536);
         } catch (FileNotFoundException e) {
             throw FileStorageCodes.FILE_NOT_FOUND.create(e, name);
         }

@@ -420,7 +420,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
             ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             managedFile = mfm.createManagedFile(inputStream);
             try {
-                metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(managedFile.getInputStream()), false);
+                metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(managedFile.getInputStream(), 65536), false);
             } catch (ImageProcessingException e) {
                 LOG.warn("error getting metadata for {}", formatName, e);
             }
