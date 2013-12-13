@@ -117,7 +117,7 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
                " id INT4 unsigned NOT NULL," +
                " referenceId VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
                " fileName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL," +
-               " INDEX (cid, user, id)" +
+               " PRIMARY KEY (cid, user, id)" +
                ") ENGINE=InnoDB";
     }
 
