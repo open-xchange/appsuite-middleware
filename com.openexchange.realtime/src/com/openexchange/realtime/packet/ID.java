@@ -525,11 +525,18 @@ public class ID implements Serializable {
 
         return lock;
     }
-    
-    public void dispose(Object source, Map<String, Object> properties) {
+
+    /**
+     * Dispose this ID.
+     * 
+     * @param source The event source
+     * @param properties The event properties
+     * @return False if the ID wasn't disposed due to a veto or an ongoing dispose call
+     */
+    public boolean dispose(Object source, Map<String, Object> properties) {
         Boolean currentValue = DISPOSING.putIfAbsent(this, Boolean.TRUE);
         if (currentValue == Boolean.TRUE) {
-            return;
+            return false;
         }
         try {
             Map<String, Object> vetoProperties = new HashMap<String, Object>();
@@ -537,7 +544,9 @@ public class ID implements Serializable {
             Boolean veto = (Boolean) vetoProperties.get("veto");
             if (veto == null || !veto) {
                 this.trigger(Events.DISPOSE, source, properties);
+                return true;
             }
+            return false;
         } finally {
             DISPOSING.remove(this);
         }

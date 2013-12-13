@@ -60,6 +60,8 @@ import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.Component;
 import com.openexchange.realtime.RealtimeConfig;
+import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
+import com.openexchange.realtime.cleanup.LocalRealtimeCleanupImpl;
 import com.openexchange.realtime.management.ManagementHouseKeeper;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
@@ -126,6 +128,11 @@ public class RealtimeActivator extends HousekeepingActivator {
 
         registerService(Channel.class, new DevNullChannel());
 
+        //Add the node-wide cleanup service and start tracking Janitors 
+        LocalRealtimeCleanupImpl localRealtimeCleanup = new LocalRealtimeCleanupImpl(context);
+        rememberTracker(localRealtimeCleanup);
+        registerService(LocalRealtimeCleanup.class, localRealtimeCleanup);
+
         //Expose all ManagementObjects for this bundle
         managementHouseKeeper.exposeManagementObjects();
         openTrackers();
@@ -137,6 +144,7 @@ public class RealtimeActivator extends HousekeepingActivator {
         //Conceal all ManagementObjects for this bundle and remove them from the housekeeper
         ManagementHouseKeeper.getInstance().cleanup();
         realtimeConfig.stop();
+        super.cleanUp();
     }
 
 }

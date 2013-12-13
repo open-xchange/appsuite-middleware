@@ -58,6 +58,7 @@ import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
+import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.impl.LocalMessageDispatcherImpl;
 import com.openexchange.realtime.dispatch.management.ManagementHouseKeeper;
@@ -97,8 +98,9 @@ public class RealtimeDispatchActivator extends HousekeepingActivator {
         managementHouseKeeper.initialize(this);
 
         final LocalMessageDispatcher dispatcher = new LocalMessageDispatcherImpl();
-
         registerService(LocalMessageDispatcher.class, dispatcher);
+        RealtimeJanitor gate = dispatcher.getGate();
+        registerService(RealtimeJanitor.class, gate);
 
         track(Channel.class, new SimpleRegistryListener<Channel>() {
 

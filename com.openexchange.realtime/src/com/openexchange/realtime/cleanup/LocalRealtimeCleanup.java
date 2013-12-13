@@ -47,52 +47,16 @@
  *
  */
 
-package com.openexchange.realtime.dispatch;
-
-import java.util.Map;
-import java.util.Set;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.cleanup.RealtimeJanitor;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
-
+package com.openexchange.realtime.cleanup;
 
 /**
- * {@link LocalMessageDispatcher}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * {@link LocalRealtimeCleanup} - A central service that can be used for node-wide cleanup tasks of realtime components. The realtime
+ * framework has to manage various states at different places. Under certain conditions e.g. a client leaves or a {@link GroupDispatcher}
+ * gets disposed those states have to be cleaned. Therefore the {@link LocalRealtimeCleanup} collects all {@link RealtimeCleanup}s from the
+ * service registry (see OSGI whiteboard pattern) and instructs the Janitors to cleanup.
+ * 
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface LocalMessageDispatcher {
-    
-    /**
-     * Push a {@link Stanza} to a set of given recipients. The recipients must be reachable locally.
-     * That means the corresponding {@link ID} must have the resource field set and that resource must be
-     * registered on this node.
-     *
-     * @param stanza The stanza to send
-     * @param recipients The local recipients for this stanza
-     * @return A map of IDs that could not be reached because of an occurred exception.
-     * @throws OXException If send operation fails for any reason
-     */
-    public Map<ID, OXException> send(Stanza stanza, Set<ID> recipients) throws OXException;
-    
-    /**
-     * Add a Channel that can be used to send Stanzas to this MessageDispatcher
-     * @param channel a Channel that can be used to send Stanzas
-     */
-    public void addChannel(final Channel channel);
-
-    /**
-     * Remove a Channel that can be used to send Stanzas from this MessageDispatcher
-     * @param channel a Channel that can be used to send Stanzas
-     */
-    public void removeChannel(final Channel channel);
-
-    /**
-     * Get the gate associated with this MessageDispatcher
-     * @return the gate associated with this MessageDispatcher
-     */
-    public RealtimeJanitor getGate();
+public interface LocalRealtimeCleanup extends RealtimeCleanup {
 
 }

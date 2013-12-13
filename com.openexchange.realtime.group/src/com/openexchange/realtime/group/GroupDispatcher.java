@@ -66,6 +66,7 @@ import com.openexchange.log.Log;
 import com.openexchange.realtime.Component;
 import com.openexchange.realtime.Component.EvictionPolicy;
 import com.openexchange.realtime.ComponentHandle;
+import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.commands.LeaveCommand;
 import com.openexchange.realtime.packet.ID;
@@ -352,7 +353,15 @@ public class GroupDispatcher implements ComponentHandle {
             properties.put("id", id);
             onDispose(id);
             isDisposed = true;
-            this.id.dispose(this, properties);
+            boolean disposed = this.id.dispose(this, properties);
+            /*
+             * If nobody vetoed the disposal of this GroupDispatcher we have to issue a cluster wide cleanup to remove entries from
+             * StanzaSequenceGate instances
+             */
+            if(disposed) {
+                GlobalRealtimeCleanup globalRealtimeCleanup = SERVICE_REF.get().getService(GlobalRealtimeCleanup.class);
+                globalRealtimeCleanup.cleanupForId(this.id);
+            }
         }
     }
 

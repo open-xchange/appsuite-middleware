@@ -57,6 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.Channel;
+import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.dispatch.DispatchExceptionCode;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
@@ -141,5 +142,10 @@ public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
     @Override
     public void removeChannel(final Channel channel) {
         channels.remove(channel.getProtocol());
+    }
+
+    @Override
+    public RealtimeJanitor getGate() {
+        return gate;
     }
 }

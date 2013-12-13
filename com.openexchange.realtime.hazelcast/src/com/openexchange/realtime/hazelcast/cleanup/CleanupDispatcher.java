@@ -47,77 +47,39 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.channel;
+package com.openexchange.realtime.hazelcast.cleanup;
 
 import java.io.Serializable;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Callable;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.directory.ResourceDirectory;
-import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
-import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
 import com.openexchange.realtime.hazelcast.Services;
-import com.openexchange.realtime.hazelcast.Utils;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link StanzaDispatcher}
- *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * {@link CleanupDispatcher} - Issues a cleanup on the LocalRealtimeCleanup service.
+ * 
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class StanzaDispatcher implements Callable<Map<ID, OXException>>, Serializable {
+public class CleanupDispatcher implements Callable<Void>, Serializable {
 
-    private static final long serialVersionUID = 7824598922472715144L;
-    private final Stanza stanza;
-    private final Set<ID> targets;
+    private static final long serialVersionUID = 2669822501149210448L;
 
-    /**
-     * Initializes a new {@link StanzaDispatcher}.
-     * @throws OXException
-     */
-    public StanzaDispatcher() throws OXException {
-        this(null, null);
-    }
+    private final ID id;
 
     /**
-     * Initializes a new {@link StanzaDispatcher}.
-     *
-     * @param stanza The stanza to dispatch
-     * @throws OXException
+     * Initializes a new {@link CleanupDispatcher}.
+     * 
+     * @param id the ID to clean up for.
      */
-    public StanzaDispatcher(Stanza stanza, Set<ID> targets) throws OXException {
-        super();
-        this.targets = targets;
-        this.stanza = stanza;
-        if (stanza != null) {
-            stanza.transformPayloads("native");
-        }
+    public CleanupDispatcher(ID id) {
+        this.id = id;
     }
 
     @Override
-    public Map<ID, OXException> call() throws Exception {
-        stanza.trace("Received remote delivery. Dispatching locally");
-        LocalMessageDispatcher dispatcher = Services.getService(LocalMessageDispatcher.class);
-        Map<ID, OXException> exceptions = dispatcher.send(stanza, targets);
-        /*
-         * The Stanza was delivered to this node because the ResourceDirectory listed this node in the routing info. If the Resource isn't
-         * available anylonger we remove it from the ResourceDirectory and try to send the Stanza again. This will succeed if the Channel
-         * can conjure the Resource.
-         */
-        if (Utils.shouldResend(exceptions, stanza)) {
-            final ResourceDirectory directory = Services.optService(ResourceDirectory.class);
-            if (null != directory) {
-                directory.remove(stanza.getTo());
-            }
-            final MessageDispatcher messageDispatcher = Services.getService(MessageDispatcher.class);
-            if (null != messageDispatcher) {
-                messageDispatcher.send(stanza);
-            }
-        }
-        return exceptions;
-
+    public Void call() throws Exception {
+        LocalRealtimeCleanup localRealtimeCleanup = Services.getService(LocalRealtimeCleanup.class);
+        localRealtimeCleanup.cleanupForId(id);
+        return null;
     }
 
 }

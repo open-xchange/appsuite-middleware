@@ -52,6 +52,7 @@ package com.openexchange.realtime.group.osgi;
 import org.osgi.framework.BundleActivator;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.GroupCommand;
 import com.openexchange.realtime.group.GroupDispatcher;
@@ -66,7 +67,7 @@ public class RTGroupActivator extends HousekeepingActivator implements BundleAct
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[]{MessageDispatcher.class, PayloadTreeConverter.class, ThreadPoolService.class};
+        return new Class[]{MessageDispatcher.class, PayloadTreeConverter.class, ThreadPoolService.class, GlobalRealtimeCleanup.class};
     }
 
     @Override

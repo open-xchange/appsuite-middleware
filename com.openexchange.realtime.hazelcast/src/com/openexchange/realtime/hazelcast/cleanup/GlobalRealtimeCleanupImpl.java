@@ -47,52 +47,38 @@
  *
  */
 
-package com.openexchange.realtime.dispatch;
+package com.openexchange.realtime.hazelcast.cleanup;
 
-import java.util.Map;
 import java.util.Set;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.cleanup.RealtimeJanitor;
+import java.util.concurrent.ExecutorService;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.Member;
+import com.hazelcast.core.MultiTask;
+import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
+import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
-
 
 /**
- * {@link LocalMessageDispatcher}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * {@link GlobalRealtimeCleanupImpl}
+ * 
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface LocalMessageDispatcher {
-    
-    /**
-     * Push a {@link Stanza} to a set of given recipients. The recipients must be reachable locally.
-     * That means the corresponding {@link ID} must have the resource field set and that resource must be
-     * registered on this node.
-     *
-     * @param stanza The stanza to send
-     * @param recipients The local recipients for this stanza
-     * @return A map of IDs that could not be reached because of an occurred exception.
-     * @throws OXException If send operation fails for any reason
-     */
-    public Map<ID, OXException> send(Stanza stanza, Set<ID> recipients) throws OXException;
-    
-    /**
-     * Add a Channel that can be used to send Stanzas to this MessageDispatcher
-     * @param channel a Channel that can be used to send Stanzas
-     */
-    public void addChannel(final Channel channel);
+public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup {
 
-    /**
-     * Remove a Channel that can be used to send Stanzas from this MessageDispatcher
-     * @param channel a Channel that can be used to send Stanzas
-     */
-    public void removeChannel(final Channel channel);
-
-    /**
-     * Get the gate associated with this MessageDispatcher
-     * @return the gate associated with this MessageDispatcher
-     */
-    public RealtimeJanitor getGate();
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(GlobalRealtimeCleanupImpl.class);
+    
+    @Override
+    public void cleanupForId(ID id) {
+        HazelcastInstance hazelcastInstance;
+        try {
+            hazelcastInstance = HazelcastAccess.getHazelcastInstance();
+            ExecutorService executorService = hazelcastInstance.getExecutorService();
+            Set<Member> clusterMembers = hazelcastInstance.getCluster().getMembers();
+            MultiTask<Void> cleanUpTask = new MultiTask<Void>(new CleanupDispatcher(id), clusterMembers);
+            executorService.execute(cleanUpTask);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
 
 }

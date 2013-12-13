@@ -62,12 +62,15 @@ import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
+import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
+import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.handle.StanzaStorage;
 import com.openexchange.realtime.hazelcast.Services;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
+import com.openexchange.realtime.hazelcast.cleanup.GlobalRealtimeCleanupImpl;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
 import com.openexchange.realtime.hazelcast.impl.GlobalMessageDispatcherImpl;
 import com.openexchange.realtime.hazelcast.impl.HazelcastStanzaStorage;
@@ -86,7 +89,8 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastInstance.class, LocalMessageDispatcher.class, ManagementService.class, TimerService.class };
+        return new Class<?>[] { HazelcastInstance.class, LocalMessageDispatcher.class, ManagementService.class, TimerService.class,
+            LocalRealtimeCleanup.class };
     }
 
     @Override
@@ -125,6 +129,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         managementHouseKeeper.addManagementObject(directory.getManagementObject());
         
         GlobalMessageDispatcherImpl globalDispatcher = new GlobalMessageDispatcherImpl(directory);
+        GlobalRealtimeCleanup globalCleanup = new GlobalRealtimeCleanupImpl();
         
         track(Channel.class, new SimpleRegistryListener<Channel>() {
 
@@ -144,6 +149,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         registerService(MessageDispatcher.class, globalDispatcher);
         registerService(StanzaStorage.class, new HazelcastStanzaStorage());
         registerService(Channel.class, globalDispatcher.getChannel());
+        registerService(GlobalRealtimeCleanup.class, globalCleanup);
         
         directory.addChannel(globalDispatcher.getChannel());
         managementHouseKeeper.exposeManagementObjects();

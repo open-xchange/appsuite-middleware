@@ -47,52 +47,42 @@
  *
  */
 
-package com.openexchange.realtime.dispatch;
+package com.openexchange.realtime.cleanup;
 
-import java.util.Map;
-import java.util.Set;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.cleanup.RealtimeJanitor;
+import java.util.Collection;
+import java.util.SortedMap;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
-
 
 /**
- * {@link LocalMessageDispatcher}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * {@link LocalRealtimeCleanupImpl}
+ * 
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface LocalMessageDispatcher {
-    
-    /**
-     * Push a {@link Stanza} to a set of given recipients. The recipients must be reachable locally.
-     * That means the corresponding {@link ID} must have the resource field set and that resource must be
-     * registered on this node.
-     *
-     * @param stanza The stanza to send
-     * @param recipients The local recipients for this stanza
-     * @return A map of IDs that could not be reached because of an occurred exception.
-     * @throws OXException If send operation fails for any reason
-     */
-    public Map<ID, OXException> send(Stanza stanza, Set<ID> recipients) throws OXException;
-    
-    /**
-     * Add a Channel that can be used to send Stanzas to this MessageDispatcher
-     * @param channel a Channel that can be used to send Stanzas
-     */
-    public void addChannel(final Channel channel);
+public class LocalRealtimeCleanupImpl extends ServiceTracker<RealtimeJanitor, RealtimeJanitor> implements LocalRealtimeCleanup {
+
+    public LocalRealtimeCleanupImpl(BundleContext bundleContext) {
+        super(bundleContext, RealtimeJanitor.class, null);
+    }
+
+    @Override
+    public void cleanupForId(ID id) {
+        Collection<RealtimeJanitor> janitors = getJanitors();
+        for (RealtimeJanitor realtimeJanitor : janitors) {
+            realtimeJanitor.cleanupForId(id);
+        }
+    }
 
     /**
-     * Remove a Channel that can be used to send Stanzas from this MessageDispatcher
-     * @param channel a Channel that can be used to send Stanzas
+     * Get all currently tracked {@link RealtimeJanitor}s
+     * 
+     * @return all currently tracked {@link RealtimeJanitor}s
      */
-    public void removeChannel(final Channel channel);
-
-    /**
-     * Get the gate associated with this MessageDispatcher
-     * @return the gate associated with this MessageDispatcher
-     */
-    public RealtimeJanitor getGate();
+    private Collection<RealtimeJanitor> getJanitors() {
+        SortedMap<ServiceReference<RealtimeJanitor>, RealtimeJanitor> trackedJanitors = getTracked();
+        return trackedJanitors.values();
+    }
 
 }

@@ -62,6 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
 import com.openexchange.management.ManagementAware;
 import com.openexchange.management.ManagementObject;
+import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.management.StanzaSequenceGateMBean;
@@ -78,7 +79,7 @@ import com.openexchange.realtime.packet.Stanza;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequenceGateMBean> {
+public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequenceGateMBean>, RealtimeJanitor {
 
     private static org.apache.commons.logging.Log LOG = Log.loggerFor(StanzaSequenceGate.class);
 
@@ -345,10 +346,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
         if(LOG.isDebugEnabled()) {
             LOG.debug("Freeing Ressources for SequencePrincipal: " + sequencePrincipal);
         }
-        AtomicLong removedSequence = sequenceNumbers.remove(sequencePrincipal);
-        if(removedSequence == null) {
-            LOG.error("Couldn't remove sequenceNumber for SequencePrincipal: " + sequencePrincipal);
-        }
+        sequenceNumbers.remove(sequencePrincipal);
         inboxes.remove(sequencePrincipal);
         notifyManagementSequenceNumbers();
         notifyManagementInboxes();
@@ -379,7 +377,12 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
         }
 
     }
-    
+
+    @Override
+    public void cleanupForId(ID id) {
+        freeResourcesFor(id);
+    }
+
     // Management calls
     //======================================================================================================================================
     
