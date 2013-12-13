@@ -335,7 +335,7 @@ public class LogbackCLT {
     private static final void printUsage(int exitCode) {
         HelpFormatter hf = new HelpFormatter();
         hf.setWidth(120);
-        hf.printHelp("logconf [-a | -d] [ [-u <userid> -c <contextid>] \n | [-s <sessionid>] \n  | [-c <contextid>] ] \n-l <loglevel> <logger name 1> ... <logger name n> \n-lf \n-ll \n-oec <category 1> ... <category n> \n-le \n-h", 
+        hf.printHelp("logconf [ [-a | -d] [ [-u <userid> -c <contextid>] | [-s <sessionid>] | [-c <contextid>] ] ] [-l <loglevel> <logger name 1> ... <logger name n>] [-lf] [-ll] [-oec <category 1> ... <category n>] [-le] [-h]", 
             null, 
             options, 
             "\n\nThe flags -a and -d are mutually exclusive.\n\n\nValid log levels: " + validLogLevels + "\nValid categories: " + getValidCategories());
