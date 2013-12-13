@@ -859,9 +859,8 @@ if [ -e /opt/open-xchange/etc/file-logging.properties -a $MODIFIED -eq 1 ]; then
     mv /opt/open-xchange/etc/logback.xml.new /opt/open-xchange/etc/logback.xml
 fi
 rm -f /opt/open-xchange/etc/file-logging.properties
-MODIFIED=$(rpm --verify open-xchange-log4j | grep log4j.xml | grep 5 | wc -l)
 if [ -e /opt/open-xchange/etc/log4j.xml ]; then
-    cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /tmp/logback.xml -x /configuration/appender[@name='ASYNC']/appender-ref -r -
+    cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/appender[@name='ASYNC']/appender-ref -r -
 <configuration>
     <appender name="ASYNC">
         <appender-ref ref="SYSLOG"/>
@@ -869,6 +868,7 @@ if [ -e /opt/open-xchange/etc/log4j.xml ]; then
 </configuration>
 EOF
     mv /opt/open-xchange/etc/logback.xml.new /opt/open-xchange/etc/logback.xml
+    MODIFIED=$(rpm --verify open-xchange-log4j | grep log4j.xml | grep 5 | wc -l)
     if [ $MODIFIED -eq 1 ]; then
         # Configuration has been modified after installation. Try to migrate.
         /opt/open-xchange/sbin/extractLog4JModifications -i /opt/open-xchange/etc/log4j.xml | /opt/open-xchange/sbin/convertJUL2Logback | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/logger -r - -d @name

@@ -57,6 +57,7 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardIdsTask;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardPrincipalTask;
+import com.openexchange.groupware.update.tasks.AddSnippetAttachmentPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.AddUUIDForDListTables;
 import com.openexchange.groupware.update.tasks.AddUUIDForInfostoreReservedPaths;
 import com.openexchange.groupware.update.tasks.AddUUIDForUpdateTaskTable;
@@ -708,6 +709,9 @@ public final class InternalList {
 
         // Extende folder tables by "meta" JSON BLOB
         list.add(new com.openexchange.groupware.update.tasks.AddMetaForOXFolderTable());
+        
+        // Add primary key to snippetAttachment table, fix for bug 30293
+        list.add(new AddSnippetAttachmentPrimaryKeyUpdateTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
