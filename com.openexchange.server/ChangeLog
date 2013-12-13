@@ -1,3 +1,7 @@
+* 2013-12-13 - marc.arens@open-xchange.com
+
+ - Fix for bug 30128: Implement service to allow cascading cleanup per ID
+
 * 2013-12-13 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 30293: Added primary key to CreateTableService & added UpdateTask for existing tables
