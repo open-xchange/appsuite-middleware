@@ -19,5 +19,6 @@ Import-Package: com.openexchange.database,
  com.openexchange.tools.sql,
  com.openexchange.user,
  org.apache.commons.logging,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j
 Bundle-Activator: com.openexchange.passwordchange.database.osgi.DatabasePasswordChangeActivator

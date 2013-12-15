@@ -25,6 +25,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.sql.tools,
  com.openexchange.tools.id,
  org.apache.commons.logging,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j
 Bundle-Activator: com.openexchange.frontend.uwa.osgi.UWAWidgetActivator
 Export-Package: com.openexchange.frontend.uwa

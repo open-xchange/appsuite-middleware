@@ -16,7 +16,8 @@ Import-Package: com.openexchange.exception,
  javax.crypto.spec,
  org.apache.commons.codec.binary,
  org.apache.commons.logging,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j
 Export-Package: com.openexchange.crypto
 Bundle-ClassPath: .,
  lib/PBKDF2-1.0.4.jar
