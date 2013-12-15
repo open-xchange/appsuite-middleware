@@ -60,13 +60,11 @@ import com.openexchange.realtime.packet.ID;
 
 /**
  * {@link GlobalRealtimeCleanupImpl}
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(GlobalRealtimeCleanupImpl.class);
-    
     @Override
     public void cleanupForId(ID id) {
         HazelcastInstance hazelcastInstance;
@@ -77,7 +75,7 @@ public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup {
             MultiTask<Void> cleanUpTask = new MultiTask<Void>(new CleanupDispatcher(id), clusterMembers);
             executorService.execute(cleanUpTask);
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(GlobalRealtimeCleanupImpl.class).error("", e);
         }
     }
 
