@@ -204,7 +204,7 @@ public class NotifyingCache implements Cache, CacheListener {
 
     @Override
     public void put(Serializable key, Serializable val, ElementAttributes attr) throws OXException {
-        put(key, val, attr);
+        put(key, val, attr, true);
     }
 
     @Override
