@@ -498,7 +498,9 @@ public class RESTUtility {
      */
     public static Date parseDate(final String date) {
         try {
-            return dateFormat.parse(date);
+            synchronized (dateFormat) {
+                return dateFormat.parse(date);
+            }
         } catch (final java.text.ParseException e) {
             return null;
         }
