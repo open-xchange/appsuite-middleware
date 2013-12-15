@@ -55,7 +55,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -94,8 +94,8 @@ public final class ServerUserSettingLoader  {
         try {
             return loadFor(userId, contextId);
         } catch (final Exception e) {
-            final Log logger = com.openexchange.log.Log.loggerFor(ServerUserSettingLoader.class);
-            logger.error(e.getMessage(), e);
+            final Logger logger = org.slf4j.LoggerFactory.getLogger(ServerUserSettingLoader.class);
+            logger.error("", e);
             return null;
         }
     }
