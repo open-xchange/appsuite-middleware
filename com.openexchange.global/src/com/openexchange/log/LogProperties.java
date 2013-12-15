@@ -55,8 +55,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -502,7 +504,6 @@ public final class LogProperties {
      *
      * @param name The property name
      * @param value The property value
-     * @see #isEnabled()
      */
     public static void put(final LogProperties.Name name, final Object value) {
         putProperty(name, value);
@@ -513,7 +514,6 @@ public final class LogProperties {
      *
      * @param name The property name
      * @param value The property value
-     * @see #isEnabled()
      */
     public static void putProperty(final LogProperties.Name name, final Object value) {
         if (null == name) {
@@ -585,7 +585,15 @@ public final class LogProperties {
      * @param nonMatching The property names to ignore
      */
     public static String getAndPrettyPrint(final Collection<LogProperties.Name> nonMatching) {
-        String logString = "";
+        final Set<String> nonMatchingNames;
+        if (null == nonMatching) {
+            nonMatchingNames = null;
+        } else {
+            nonMatchingNames = new HashSet<String>(nonMatching.size());
+            for (final LogProperties.Name name : nonMatching) {
+                nonMatchingNames.add(name.getName());
+            }
+        }
         // If we have additional log properties from the ThreadLocal add it to the logBuilder
         final StringAllocator logBuilder = new StringAllocator(1024);
         // Sort the properties for readability
@@ -593,7 +601,7 @@ public final class LogProperties {
         final String sep = System.getProperty("line.separator");
         for (final Entry<String, String> propertyEntry : getPropertyMap().entrySet()) {
             final String propertyName = propertyEntry.getKey();
-            if (null == nonMatching || !nonMatching.contains(propertyName)) {
+            if (null == nonMatchingNames || !nonMatchingNames.contains(propertyName)) {
                 final String value = propertyEntry.getValue();
                 if (null != value) {
                     sorted.put(propertyName, value);
@@ -604,8 +612,7 @@ public final class LogProperties {
         for (final Map.Entry<String, String> propertyEntry : sorted.entrySet()) {
             logBuilder.append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue()).append(sep);
         }
-        logString = logBuilder.toString();
-        return logString;
+        return logBuilder.toString();
     }
 
     /**
