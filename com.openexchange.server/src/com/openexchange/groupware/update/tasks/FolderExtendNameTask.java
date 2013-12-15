@@ -55,7 +55,7 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.update.Tools.checkAndModifyColumns;
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
@@ -96,8 +96,8 @@ public final class FolderExtendNameTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        Log log = com.openexchange.log.Log.loggerFor(FolderExtendNameTask.class);
-        log.info("Performing update task " + FolderExtendNameTask.class.getSimpleName());
+        Logger log = org.slf4j.LoggerFactory.getLogger(FolderExtendNameTask.class);
+        log.info("Performing update task {}", FolderExtendNameTask.class.getSimpleName());
         Connection connnection = Database.getNoTimeout(params.getContextId(), true);
         try {
             connnection.setAutoCommit(false);
