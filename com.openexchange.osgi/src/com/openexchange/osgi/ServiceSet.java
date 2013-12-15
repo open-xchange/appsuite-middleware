@@ -96,7 +96,7 @@ public @ThreadSafe class ServiceSet<E> implements NavigableSet<E>, SimpleRegistr
                     r2 = Long.valueOf(null == i2 ? 0L : i2.longValue());
                 }
 
-                if (r1 == r2) {
+                if (longValue(r1) == longValue(r2)) {
                     r1 = serviceIds.get(o1);
                     r2 = serviceIds.get(o2);
                 }
@@ -107,6 +107,10 @@ public @ThreadSafe class ServiceSet<E> implements NavigableSet<E>, SimpleRegistr
                     r2 = Long.valueOf(0L);
                 }
                 return (int) (r1.longValue() - r2.longValue());
+            }
+
+            private long longValue(final Long l) {
+                return null == l ? -1L : l.longValue();
             }
         });
     }
