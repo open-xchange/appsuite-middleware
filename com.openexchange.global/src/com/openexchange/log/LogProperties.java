@@ -627,8 +627,7 @@ public final class LogProperties {
      */
     @Deprecated
     public static Props getLogProperties() {
-        // TODO Auto-generated method stub
-        return null;
+        return new Props();
     }
 
 }
