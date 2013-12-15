@@ -52,13 +52,11 @@ package com.openexchange.ajax.writer;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.math.BigDecimal;
-import java.text.MessageFormat;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -83,7 +81,7 @@ import com.openexchange.tools.TimeZoneUtils;
 public class DataWriter {
 
     /** The logger */
-    static final Log LOG = com.openexchange.log.Log.loggerFor(DataWriter.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DataWriter.class);
 
     protected TimeZone timeZone;
 
@@ -732,7 +730,7 @@ public class DataWriter {
                     try {
                         contributor.contributeTo(mapp, id, session);
                     } catch (final Exception e) {
-                        LOG.warn(MessageFormat.format("Cannot contribute to entity (contributor={0}, entity={1})", contributor.getClass().getName(), Integer.valueOf(objectID)), e);
+                        LOG.warn("Cannot contribute to entity (contributor={0}, entity={1})", contributor.getClass().getName(), Integer.valueOf(objectID), e);
                     }
                 }
                 return mapp;
