@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
@@ -80,7 +79,7 @@ public class EnhancedTaskOrAppointment {
 	public EnhancedTaskOrAppointment(ServiceLookup services, Context ctx) throws OXException {
 		this(null, services, ctx);
 	}
-	
+
 	public EnhancedTaskOrAppointment(Map<String, Object> taskOrAppointment, ServiceLookup services, Context ctx) throws OXException {
 		super();
 		this.services = services;
@@ -118,14 +117,14 @@ public class EnhancedTaskOrAppointment {
 		if (participants != null) {
 			for (Object o : participants) {
 				Map<String, Object> participant = (Map<String, Object>) o;
-				if (participant.get("type") == Integer.valueOf(Participant.RESOURCE)) {
+				if (Integer.valueOf(Participant.RESOURCE).equals(participant.get("type"))) {
 					resources.add(resolveResource(participant));
-				} else if (participant.get("type") == Integer.valueOf(Participant.EXTERNAL_USER)) {
+				} else if (Integer.valueOf(Participant.EXTERNAL_USER).equals(participant.get("type"))) {
 					Integer status = (Integer) participant.get("status");
 					getList(status).add(
 						new SimpleParticipant().setDisplayName(participant.get("display_name") + " (" + participant.get("mail") + ")"));
 				}
-				
+
 			}
 		}
 	}
@@ -223,17 +222,17 @@ public class EnhancedTaskOrAppointment {
 		return new SimpleParticipant().setDisplayName(displayName);
 	}
 
-	
-	
+
+
 	// applying for the price for the Worlds Ugliest Hack
 	public EnhancedTaskOrAppointment resolveAllParticipants(final List<Object> users, final List<Object> participants, final List<Object> confirmations) throws OXException {
-		
+
 		Map<String,Object> dummyTOA = new HashMap<String,Object>(){{
 				put("users", users);
 				put("participants", participants);
 				put("confirmations", participants);
 		}};
-		
+
 		return new EnhancedTaskOrAppointment(dummyTOA, services, ctx);
 	}
 }
