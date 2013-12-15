@@ -1161,7 +1161,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         }
         {
             Restriction subadminCanCreateSubadminsRestriction = new Restriction(Restriction.SUBADMIN_CAN_CREATE_SUBADMINS, "false");
-            if( ! restrictions.contains(subadminCanCreateSubadminsRestriction) ) { // Contains is solelšy performed by name
+            if( ! restrictions.contains(subadminCanCreateSubadminsRestriction) ) { // Contains is solely performed by name
                 restrictions.add(subadminCanCreateSubadminsRestriction);
             }
         }
