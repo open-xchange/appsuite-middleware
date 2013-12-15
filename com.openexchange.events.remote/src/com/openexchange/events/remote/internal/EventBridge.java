@@ -53,10 +53,10 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventHandler;
+import org.slf4j.Logger;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.ms.Message;
@@ -77,7 +77,7 @@ public class EventBridge implements MessageListener<Map<String, Object>>, EventH
      */
     public static final String TOPIC_PREFIX = "com/openexchange/";
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(EventBridge.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(EventBridge.class);
     private static final String TOPIC_NAME = "remoteEvents-0";
     private static final String POJO_PACKAGE = "java.lang.";
 
@@ -96,9 +96,7 @@ public class EventBridge implements MessageListener<Map<String, Object>>, EventH
         this.eventAdmin = eventAdmin;
         this.messagingTopic = messagingService.getTopic(TOPIC_NAME);
         this.messagingTopic.addMessageListener(this);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Using topic " + messagingTopic.getName() + " for remote event distribution.");
-        }
+        LOG.debug("Using topic {} for remote event distribution.", messagingTopic.getName());
     }
 
     @Override
@@ -119,9 +117,7 @@ public class EventBridge implements MessageListener<Map<String, Object>>, EventH
         /*
          * wrap event and publish remote
          */
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Publishing remote: " + event);
-        }
+        LOG.trace("Publishing remote: {}", event);
         messagingTopic.publish(toRemote(event));
     }
 
@@ -137,9 +133,7 @@ public class EventBridge implements MessageListener<Map<String, Object>>, EventH
                  * publish locally
                  */
                 Event event = toLocal(remoteEvent);
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Publishing locally: " + event);
-                }
+                LOG.trace("Publishing locally: {}", event);
                 eventAdmin.postEvent(event);
             }
         }

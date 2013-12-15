@@ -51,10 +51,10 @@ package com.openexchange.events.remote.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.events.remote.internal.EventBridge;
@@ -70,8 +70,6 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class RemoteEventsActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RemoteEventsActivator.class);
-
     /**
      * Initializes a new {@link RemoteEventsActivator}.
      */
@@ -86,7 +84,8 @@ public class RemoteEventsActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("starting bundle: \"com.openexchange.remote.events\"");
+        final Logger logger = org.slf4j.LoggerFactory.getLogger(RemoteEventsActivator.class);
+        logger.info("starting bundle: \"com.openexchange.remote.events\"");
         Services.set(this);
         /*
          * setup remote session obfuscation
@@ -105,7 +104,8 @@ public class RemoteEventsActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: \"com.openexchange.remote.events\"");
+        final Logger logger = org.slf4j.LoggerFactory.getLogger(RemoteEventsActivator.class);
+        logger.info("stopping bundle: \"com.openexchange.remote.events\"");
         RemoteSession.OBFUSCATION_KEY.set(null);
         Services.set(null);
         super.stopBundle();
