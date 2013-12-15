@@ -1160,8 +1160,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         if( restrictions == null ) {
             restrictions = new HashSet<Restriction>();
         }
-        if( ! restrictions.contains(Restriction.SUBADMIN_CAN_CREATE_SUBADMINS) ) {
-            restrictions.add(new Restriction(Restriction.SUBADMIN_CAN_CREATE_SUBADMINS, "false"));
+        if( ! restrictions.contains(new Restriction(Restriction.SUBADMIN_CAN_CREATE_SUBADMINS, null)) ) {
+            restrictions.add(new Restriction(Restriction.SUBADMIN_CAN_CREATE_SUBADMINS, "false"));s
         }
         if (restrictions != null && restrictions.size() > 0) {
             Connection con = null;
