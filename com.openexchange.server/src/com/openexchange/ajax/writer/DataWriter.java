@@ -730,7 +730,7 @@ public class DataWriter {
                     try {
                         contributor.contributeTo(mapp, id, session);
                     } catch (final Exception e) {
-                        LOG.warn("Cannot contribute to entity (contributor={0}, entity={1})", contributor.getClass().getName(), Integer.valueOf(objectID), e);
+                        LOG.warn("Cannot contribute to entity (contributor={}, entity={})", contributor.getClass().getName(), Integer.valueOf(objectID), e);
                     }
                 }
                 return mapp;
