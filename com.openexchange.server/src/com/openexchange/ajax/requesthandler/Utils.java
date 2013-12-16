@@ -105,7 +105,7 @@ public final class Utils {
      * @param s The string to parse
      * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
      */
-    private static final int getUnsignedInteger(final String s) {
+    public static final int getUnsignedInteger(final String s) {
         if (s == null) {
             return -1;
         }
