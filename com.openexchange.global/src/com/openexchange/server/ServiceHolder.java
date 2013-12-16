@@ -275,7 +275,9 @@ public abstract class ServiceHolder<S> {
         }
         countActive.incrementAndGet();
         if (serviceUsageInspection) {
-            LOG.warn("Found thread using two (or more) services without ungetting service.", new Throwable());
+            if (usingThreads.containsKey(Thread.currentThread())) {
+                LOG.warn("Found thread using two (or more) services without ungetting service.", new Throwable());
+            }
             final Thread thread = Thread.currentThread();
             Map<ServiceProxy, Object> proxySet = usingThreads.get(thread);
             if (null == proxySet) {
