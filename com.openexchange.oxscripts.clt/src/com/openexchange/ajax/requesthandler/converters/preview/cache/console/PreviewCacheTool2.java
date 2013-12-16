@@ -76,7 +76,7 @@ public final class PreviewCacheTool2 {
         sOptions = new Options();
         sOptions.addOption("h", "help", false, "Prints a help text");
         sOptions.addOption("c", "context", true, "Required. The context identifier");
-        sOptions.addOption("i", "invalids", true, "An optional comma-separated list of those MIME types that should be considered as broken/corrupt");
+        sOptions.addOption("i", "invalids", true, "An optional comma-separated list of those MIME types that should be considered as broken/corrupt. Default is \"application/force-download, application/x-download, application/$suffix\"");
     }
 
     /**
