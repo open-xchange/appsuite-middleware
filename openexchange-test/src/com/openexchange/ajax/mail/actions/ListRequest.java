@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mail.actions;
 
 import com.openexchange.ajax.framework.CommonListRequest;
+import com.openexchange.ajax.mail.FolderAndID;
 
 /**
  * {@link ListRequest}
@@ -57,6 +58,8 @@ import com.openexchange.ajax.framework.CommonListRequest;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ListRequest extends CommonListRequest {
+
+    public static final int[] DEFAULT_COLUMNS = { 600, 601, 612, 602, 603, 607, 610, 608, 611, 614, 102, 604, 609 };
 
     /**
      * Default constructor.
@@ -75,5 +78,17 @@ public class ListRequest extends CommonListRequest {
 
     public ListRequest(final String[][] folderAndMailIds, final String alias, final boolean failOnError) {
         super(AbstractMailRequest.MAIL_URL, folderAndMailIds, alias, failOnError);
+    }
+
+    public ListRequest(final FolderAndID[] mailPaths, final int[] columns) {
+        this(ListRequest.toFolderAndMailIds(mailPaths), columns, true);
+    }
+
+    public static final String[][] toFolderAndMailIds(final FolderAndID[] mailPaths) {
+        final String[][] retval = new String[mailPaths.length][];
+        for (int i = 0; i < retval.length; i++) {
+            retval[i] = new String[] { mailPaths[i].folderId, mailPaths[i].id };
+        }
+        return retval;
     }
 }

@@ -47,31 +47,30 @@
  *
  */
 
-package com.openexchange.ajax.mail.netsol;
+package com.openexchange.ajax.mail;
 
 /**
  * {@link FolderAndID}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
 public final class FolderAndID {
 
-	public final String folderId;
+    public final String folderId;
 
-	public final String id;
+    public final String id;
 
-	/**
-	 * Initializes a new {@link FolderAndID}
-	 */
-	public FolderAndID(final String folderId, final String id) {
-		super();
-		this.folderId = folderId;
-		this.id = id;
-	}
+    /**
+     * Initializes a new {@link FolderAndID}
+     */
+    public FolderAndID(final String folderId, final String id) {
+        super();
+        this.folderId = folderId;
+        this.id = id;
+    }
 
-	@Override
-	public String toString() {
-		return new StringBuilder(16).append("folder=").append(folderId).append(" id=").append(id).toString();
-	}
+    @Override
+    public String toString() {
+        return new StringBuilder(16).append("folder=").append(folderId).append(" id=").append(id).toString();
+    }
 }

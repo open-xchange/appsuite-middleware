@@ -55,6 +55,7 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.AbstractMailTest;
+import com.openexchange.ajax.mail.FolderAndID;
 import com.openexchange.ajax.mail.netsol.actions.NetsolAllRequest;
 import com.openexchange.ajax.mail.netsol.actions.NetsolDeleteRequest;
 import com.openexchange.exception.OXException;
