@@ -70,6 +70,8 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.jul.LevelChangePropagator;
 import ch.qos.logback.classic.spi.LoggerContextListener;
+import ch.qos.logback.classic.spi.TurboFilterList;
+import com.openexchange.logging.mbean.RankingAwareTurboFilterList;
 import com.openexchange.test.mock.MockUtils;
 
 /**
@@ -98,17 +100,19 @@ public class ActivatorTest {
     public void setUp() {
         PowerMockito.mockStatic(LoggerFactory.class);
 
-        PowerMockito.when(loggerContext.getLogger(Matchers.anyString())).thenReturn(logger);
+        Mockito.when(loggerContext.getLogger(Mockito.anyString())).thenReturn(logger);
+        Mockito.when(LoggerFactory.getILoggerFactory()).thenReturn(loggerContext);
 
-        MockUtils.injectValueIntoPrivateField(Activator.class, "logger", activatorLogger);
-        MockUtils.injectValueIntoPrivateField(this.activator, "loggerContext", loggerContext);
+        MockUtils.injectValueIntoPrivateField(Activator.class, "LOGGER", activatorLogger);
     }
 
     @Test
     public void testOverrideLoggerLevels_loggerNotAvailable_LogWarning() {
         PowerMockito.when(loggerContext.getLogger(Matchers.anyString())).thenReturn(null);
 
-        activator.overrideLoggerLevels();
+        Mockito.mock(LoggerContext.class);
+
+        activator.overrideLoggerLevels(loggerContext);
 
         Mockito.verify(loggerContext, Mockito.atLeast(1)).getLogger(Matchers.anyString());
         Mockito.verify(activatorLogger, Mockito.atLeast(1)).warn(Matchers.anyString(), Matchers.any());
@@ -116,7 +120,7 @@ public class ActivatorTest {
 
     @Test
     public void testOverrideLoggerLevels_contextAndLoggerAvailable_SetNewLogLevel() {
-        activator.overrideLoggerLevels();
+        activator.overrideLoggerLevels(loggerContext);
 
         Mockito.verify(logger, Mockito.atLeast(1)).setLevel(Level.INFO);
         Mockito.verify(loggerContext, Mockito.atLeast(1)).getLogger(Matchers.anyString());
@@ -128,16 +132,17 @@ public class ActivatorTest {
         BundleContext bundleContext = PowerMockito.mock(BundleContext.class);
         Bundle bundle = PowerMockito.mock(Bundle.class);
         Mockito.when(bundleContext.getBundle()).thenReturn(bundle);
+        PowerMockito.when(loggerContext.getTurboFilterList()).thenReturn(new TurboFilterList());
 
         Activator activatorSpy = Mockito.spy(activator);
-        Mockito.doNothing().when(activatorSpy).overrideLoggerLevels();
+        Mockito.doNothing().when(activatorSpy).overrideLoggerLevels(loggerContext);
         Mockito.doNothing().when(activatorSpy).configureJavaUtilLogging();
-        Mockito.doNothing().when(activatorSpy).installJulLevelChangePropagator();
-        Mockito.doNothing().when(activatorSpy).registerLoggingConfigurationMBean(bundleContext);
+        Mockito.doNothing().when(activatorSpy).installJulLevelChangePropagator(loggerContext);
+        Mockito.doNothing().when(activatorSpy).registerLoggingConfigurationMBean(Matchers.eq(bundleContext), Mockito.eq(loggerContext), (RankingAwareTurboFilterList) Mockito.any());
 
         activatorSpy.start(bundleContext);
 
-        Mockito.verify(activatorSpy, Mockito.times(1)).overrideLoggerLevels();
+        Mockito.verify(activatorSpy, Mockito.times(1)).overrideLoggerLevels(loggerContext);
     }
 
     @Test
@@ -145,16 +150,17 @@ public class ActivatorTest {
         BundleContext bundleContext = PowerMockito.mock(BundleContext.class);
         Bundle bundle = PowerMockito.mock(Bundle.class);
         Mockito.when(bundleContext.getBundle()).thenReturn(bundle);
+        PowerMockito.when(loggerContext.getTurboFilterList()).thenReturn(new TurboFilterList());
 
         Activator activatorSpy = Mockito.spy(activator);
-        Mockito.doNothing().when(activatorSpy).overrideLoggerLevels();
+        Mockito.doNothing().when(activatorSpy).overrideLoggerLevels(loggerContext);
         Mockito.doNothing().when(activatorSpy).configureJavaUtilLogging();
-        Mockito.doNothing().when(activatorSpy).installJulLevelChangePropagator();
-        Mockito.doNothing().when(activatorSpy).registerLoggingConfigurationMBean(bundleContext);
+        Mockito.doNothing().when(activatorSpy).installJulLevelChangePropagator(loggerContext);
+        Mockito.doNothing().when(activatorSpy).registerLoggingConfigurationMBean(Matchers.eq(bundleContext), Mockito.eq(loggerContext), (RankingAwareTurboFilterList) Mockito.any());
 
         activatorSpy.start(bundleContext);
 
-        Mockito.verify(activatorSpy, Mockito.times(1)).installJulLevelChangePropagator();
+        Mockito.verify(activatorSpy, Mockito.times(1)).installJulLevelChangePropagator(loggerContext);
     }
 
     @Test
@@ -162,7 +168,7 @@ public class ActivatorTest {
         Activator activatorSpy = Mockito.spy(activator);
         Mockito.doReturn(false).when(activatorSpy).hasInstanceOf(Matchers.anyCollection(), Matchers.any(Class.class));
 
-        activatorSpy.installJulLevelChangePropagator();
+        activatorSpy.installJulLevelChangePropagator(loggerContext);
 
         Mockito.verify(loggerContext, Mockito.atLeast(1)).addListener((LoggerContextListener) Matchers.any());
     }
@@ -172,7 +178,7 @@ public class ActivatorTest {
         Activator activatorSpy = Mockito.spy(activator);
         Mockito.doReturn(true).when(activatorSpy).hasInstanceOf(Matchers.anyCollection(), Matchers.any(Class.class));
 
-        activatorSpy.installJulLevelChangePropagator();
+        activatorSpy.installJulLevelChangePropagator(loggerContext);
 
         Mockito.verify(loggerContext, Mockito.never()).addListener((LoggerContextListener) Matchers.any());
     }

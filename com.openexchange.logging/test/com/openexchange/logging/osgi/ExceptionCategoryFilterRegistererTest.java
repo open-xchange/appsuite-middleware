@@ -54,11 +54,10 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import ch.qos.logback.classic.LoggerContext;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.logging.mbean.ExceptionCategoryFilter;
-import com.openexchange.test.mock.MockUtils;
+import com.openexchange.logging.mbean.RankingAwareTurboFilterList;
 
 
 /**
@@ -75,9 +74,11 @@ public class ExceptionCategoryFilterRegistererTest {
          * When ConfigurationService appears again, the old filter shall be removed and registered again.
          */
         BundleContext bundleContext = Mockito.mock(BundleContext.class);
-        ExceptionCategoryFilterRegisterer ecfr = new ExceptionCategoryFilterRegisterer(bundleContext);
-        LoggerContext lc = (LoggerContext) MockUtils.getValueFromField(ecfr, "loggerContext");
-        Assert.assertEquals(0, lc.getTurboFilterList().size());
+
+        RankingAwareTurboFilterList turboFilterList = new RankingAwareTurboFilterList();
+
+        ExceptionCategoryFilterRegisterer ecfr = new ExceptionCategoryFilterRegisterer(bundleContext, turboFilterList);
+        Assert.assertEquals(0, turboFilterList.size());
 
         ConfigurationService configMock = Mockito.mock(ConfigurationService.class);
         ServiceReference<ConfigurationService> refMock = Mockito.mock(ServiceReference.class);
@@ -85,12 +86,12 @@ public class ExceptionCategoryFilterRegistererTest {
 
         Mockito.doReturn("ERROR").when(configMock).getProperty(Mockito.matches("com.openexchange.log.suppressedCategories"), Mockito.matches("USER_INPUT"), (PropertyListener) Mockito.any());
         ecfr.addingService(refMock);
-        Assert.assertEquals(1, lc.getTurboFilterList().size());
+        Assert.assertEquals(1, turboFilterList.size());
         Assert.assertEquals(ExceptionCategoryFilter.getCategories(), "ERROR");
 
         Mockito.doReturn("TRY_AGAIN").when(configMock).getProperty(Mockito.matches("com.openexchange.log.suppressedCategories"), Mockito.matches("USER_INPUT"), (PropertyListener) Mockito.any());
         ecfr.addingService(refMock);
-        Assert.assertEquals(1, lc.getTurboFilterList().size());
+        Assert.assertEquals(1, turboFilterList.size());
         Assert.assertEquals(ExceptionCategoryFilter.getCategories(), "TRY_AGAIN");
     }
 

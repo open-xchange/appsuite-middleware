@@ -51,28 +51,77 @@ package com.openexchange.logging.mbean;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Marker;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.Category.EnumType;
 import com.openexchange.exception.OXException;
 
 /**
  * {@link ExceptionCategoryFilter}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ExceptionCategoryFilter extends TurboFilter {
+public class ExceptionCategoryFilter extends ExtendedTurboFilter {
 
-    private static Set<Category.EnumType> categories = new HashSet<Category.EnumType>();
+    /** Dummy object */
+    private static final Object PRESENT = new Object();
+
+    /** The map used to manage categories */
+    private static final ConcurrentMap<Category.EnumType, Object> CATEGORIES = new ConcurrentHashMap<Category.EnumType, Object>();
+
+    private static String generateName() {
+        final ConcurrentMap<EnumType, Object> categories = CATEGORIES;
+        if (categories.isEmpty()) {
+            return ExceptionCategoryFilter.class.getSimpleName();
+        }
+
+        final StringBuilder nameBuilder = new StringBuilder(1024).append(ExceptionCategoryFilter.class.getSimpleName());
+        boolean added = false;
+        for (final Category.EnumType category : categories.keySet()) {
+            if (null != category) {
+                if (!added) {
+                    nameBuilder.append(':');
+                    added = true;
+                }
+                nameBuilder.append(category.getName());
+            }
+        }
+        return nameBuilder.toString();
+    }
+
+    // ----------------------------------------------------------------------------- //
+
+    /**
+     * Initializes a new {@link ExceptionCategoryFilter}.
+     */
+    public ExceptionCategoryFilter() {
+        super();
+    }
+
+    /**
+     * Adapts filter name to changed category set.
+     */
+    public void adaptName() {
+        setName(generateName());
+    }
+
+    @Override
+    public int getRanking() {
+        // Return default ranking
+        return DEFAULT_RANKING;
+    }
 
     @Override
     public FilterReply decide(Marker marker, Logger logger, Level level, String format, Object[] params, Throwable t) {
         if (OXException.class.isInstance(t)) {
             Category category = ((OXException) t).getCategory();
-            if (ExceptionCategoryFilter.categories.contains(category.getType())) {
+            if (ExceptionCategoryFilter.CATEGORIES.containsKey(category.getType())) {
                 t.setStackTrace(new StackTraceElement[] {});
             }
         }
@@ -81,10 +130,10 @@ public class ExceptionCategoryFilter extends TurboFilter {
     }
 
     public static void setCategories(Set<String> categories) {
-        ExceptionCategoryFilter.categories.clear();
+        ExceptionCategoryFilter.CATEGORIES.clear();
         for (String category : categories) {
             try {
-            ExceptionCategoryFilter.categories.add(Category.EnumType.valueOf(Category.EnumType.class, category));
+            ExceptionCategoryFilter.CATEGORIES.put(Category.EnumType.valueOf(Category.EnumType.class, category), PRESENT);
             } catch (IllegalArgumentException e) {
                 //Skip this value
             }
@@ -93,15 +142,15 @@ public class ExceptionCategoryFilter extends TurboFilter {
 
     public static void setCategories(String categories) {
         Set<String> c = new HashSet<String>();
-        for (String category : categories.split(",")) {
+        for (String category : categories.split(" *, *")) {
             c.add(category.trim());
         }
         setCategories(c);
     }
-    
+
     public static String getCategories() {
         StringBuilder sb = new StringBuilder();
-        for (Category.EnumType c : categories) {
+        for (Category.EnumType c : CATEGORIES.keySet()) {
             sb.append(c.getName()).append(", ");
         }
         return sb.substring(0, sb.length()-2);

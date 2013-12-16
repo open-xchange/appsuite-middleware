@@ -52,12 +52,11 @@ package com.openexchange.logging.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.LoggerFactory;
-import ch.qos.logback.classic.LoggerContext;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.logging.mbean.ExceptionCategoryFilter;
+import com.openexchange.logging.mbean.RankingAwareTurboFilterList;
 
 /**
  * {@link ExceptionCategoryFilterRegisterer}
@@ -66,40 +65,55 @@ import com.openexchange.logging.mbean.ExceptionCategoryFilter;
  */
 public class ExceptionCategoryFilterRegisterer implements ServiceTrackerCustomizer<ConfigurationService, ConfigurationService>, PropertyListener {
 
-    private final LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-
     private final BundleContext context;
+    private volatile ExceptionCategoryFilter exceptionCategoryFilter = null;
+    private final RankingAwareTurboFilterList rankingAwareTurboFilterList;
 
-    private ExceptionCategoryFilter exceptionCategoryFilter = null;
-
-    public ExceptionCategoryFilterRegisterer(final BundleContext context) {
+    public ExceptionCategoryFilterRegisterer(final BundleContext context, final RankingAwareTurboFilterList rankingAwareTurboFilterList) {
         super();
         this.context = context;
+        this.rankingAwareTurboFilterList = rankingAwareTurboFilterList;
     }
 
     @Override
     public ConfigurationService addingService(ServiceReference<ConfigurationService> reference) {
         ConfigurationService service = context.getService(reference);
-        String suppressedCategories = service.getProperty(
-            "com.openexchange.log.suppressedCategories",
-            "USER_INPUT",
-            this);
+        String suppressedCategories = service.getProperty("com.openexchange.log.suppressedCategories", "USER_INPUT", this);
         ExceptionCategoryFilter.setCategories(suppressedCategories);
 
+        ExceptionCategoryFilter exceptionCategoryFilter = this.exceptionCategoryFilter;
         if (exceptionCategoryFilter == null) {
-            exceptionCategoryFilter = new ExceptionCategoryFilter();
-            loggerContext.addTurboFilter(exceptionCategoryFilter);
+            synchronized (this) {
+                exceptionCategoryFilter = this.exceptionCategoryFilter;
+                if (exceptionCategoryFilter == null) {
+                    exceptionCategoryFilter = new ExceptionCategoryFilter();
+                    rankingAwareTurboFilterList.addTurboFilter(exceptionCategoryFilter);
+                    this.exceptionCategoryFilter = exceptionCategoryFilter;
+                }
+            }
         }
+        exceptionCategoryFilter.adaptName();
 
         return service;
     }
 
     @Override
     public void modifiedService(ServiceReference<ConfigurationService> reference, ConfigurationService service) {
+        // Nothing to do
     }
 
     @Override
     public void removedService(ServiceReference<ConfigurationService> reference, ConfigurationService service) {
+        ExceptionCategoryFilter exceptionCategoryFilter = this.exceptionCategoryFilter;
+        if (exceptionCategoryFilter != null) {
+            synchronized (this) {
+                exceptionCategoryFilter = this.exceptionCategoryFilter;
+                if (exceptionCategoryFilter != null) {
+                    rankingAwareTurboFilterList.removeTurboFilter(exceptionCategoryFilter);
+                    this.exceptionCategoryFilter = null;
+                }
+            }
+        }
     }
 
     @Override
