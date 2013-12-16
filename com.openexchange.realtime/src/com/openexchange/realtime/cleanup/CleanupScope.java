@@ -51,13 +51,10 @@ package com.openexchange.realtime.cleanup;
 
 
 /**
- * {@link LocalRealtimeCleanup} - A central service that can be used for node-wide cleanup tasks of realtime components. The realtime
- * framework has to manage various states at different places. Under certain conditions e.g. a client leaves or a {@link GroupDispatcher}
- * gets disposed those states have to be cleaned. Therefore the {@link LocalRealtimeCleanup} collects all {@link RealtimeCleanup}s from the
- * service registry (see OSGI whiteboard pattern) and instructs the Janitors to cleanup.
- * 
+ * {@link CleanupScope} - Enumeration of different cleanup scopes.
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface LocalRealtimeCleanup extends RealtimeCleanup {
-
+public enum CleanupScope {
+    STANZASEQUENCE
 }

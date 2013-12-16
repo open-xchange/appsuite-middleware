@@ -58,7 +58,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.RealtimeConfig;
+import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.directory.DefaultResource;
+import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
@@ -68,6 +70,7 @@ import com.openexchange.realtime.json.protocol.NextSequence;
 import com.openexchange.realtime.json.protocol.TracingDemand;
 import com.openexchange.realtime.json.util.RTResultFormatter;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.util.IDMap;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -110,6 +113,18 @@ public class EnrolAction extends RTAction {
         enrolActionResults.put(STANZAS, stanzas);
 
         ResourceDirectory resourceDirectory = JSONServiceRegistry.getInstance().getService(ResourceDirectory.class);
+
+        /*
+         * The user might have been migrated from another node where he was active and created states on multiple nodes e.g.
+         * StanzaSequenceGate of LocalMessageDispatchers during remote delivery of Stanzas. We have to clean those states or otherwise
+         * StanzaSequenceGates will drop Stanzas due to the NextSequence Stanza that will be returned by this Action.
+         */
+        IDMap<Resource> idMap = resourceDirectory.get(constructedId);
+        if (!idMap.isEmpty()) {
+            GlobalRealtimeCleanup globalRealtimeCleanup = JSONServiceRegistry.getInstance().getService(GlobalRealtimeCleanup.class);
+            globalRealtimeCleanup.cleanSequenceNumbersForId(constructedId);
+        }
+
         try {
             resourceDirectory.set(constructedId, new DefaultResource());
         } catch (OXException e) {

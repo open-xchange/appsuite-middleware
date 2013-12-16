@@ -49,6 +49,8 @@
 
 package com.openexchange.realtime.cleanup;
 
+import java.util.Collection;
+import com.openexchange.realtime.packet.ID;
 
 /**
  * {@link RealtimeJanitor} - A service that can be instructed to execute different housekeeping and cleanup tasks. The service should be
@@ -56,9 +58,22 @@ package com.openexchange.realtime.cleanup;
  * {@link LocalRealtimeCleanup} service that just collects all {@link RealtimeJanitor}s from the service registry (see OSGI whiteboard
  * pattern).
  * 
- *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface RealtimeJanitor extends RealtimeCleanup {
+public interface RealtimeJanitor {
 
+    /**
+     * Clean up states that were kept for the given id.
+     * 
+     * @param id
+     */
+    void cleanupForId(ID id, CleanupScope... scopes);
+
+    /**
+     * Get the scopes this Janitor is able to clean up. This can be used to register the RealtimeJanitor service for different scopes in the
+     * OSGI service registry.
+     * 
+     * @return the scopes this RealtimeJanitor is able to clean up.
+     */
+    Collection<CleanupScope> getScopes();
 }

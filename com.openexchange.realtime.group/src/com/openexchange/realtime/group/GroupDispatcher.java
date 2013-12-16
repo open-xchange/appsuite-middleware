@@ -355,7 +355,7 @@ public class GroupDispatcher implements ComponentHandle {
              */
             if(disposed) {
                 GlobalRealtimeCleanup globalRealtimeCleanup = SERVICE_REF.get().getService(GlobalRealtimeCleanup.class);
-                globalRealtimeCleanup.cleanupForId(this.id);
+                globalRealtimeCleanup.cleanSequenceNumbersForId(this.id);
             }
         }
     }

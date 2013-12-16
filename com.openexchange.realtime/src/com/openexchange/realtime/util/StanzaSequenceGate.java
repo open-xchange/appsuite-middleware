@@ -50,6 +50,7 @@
 package com.openexchange.realtime.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -62,6 +63,7 @@ import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementAware;
 import com.openexchange.management.ManagementObject;
+import com.openexchange.realtime.cleanup.CleanupScope;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
@@ -362,7 +364,13 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
     }
 
     @Override
-    public void cleanupForId(ID id) {
+    public Collection<CleanupScope> getScopes() {
+        return Collections.singletonList(CleanupScope.STANZASEQUENCE);
+    }
+
+    @Override
+    public void cleanupForId(ID id, CleanupScope... scopes) {
+        //We don't care about the scope, yet. We only have sequence numbers related stuff to clean.
         freeResourcesFor(id);
     }
 

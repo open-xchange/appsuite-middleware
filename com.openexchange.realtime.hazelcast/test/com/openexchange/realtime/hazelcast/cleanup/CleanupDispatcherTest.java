@@ -47,17 +47,37 @@
  *
  */
 
-package com.openexchange.realtime.cleanup;
+package com.openexchange.realtime.hazelcast.cleanup;
+
+import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
+import com.openexchange.realtime.cleanup.CleanupScope;
+import com.openexchange.realtime.packet.ID;
 
 
 /**
- * {@link LocalRealtimeCleanup} - A central service that can be used for node-wide cleanup tasks of realtime components. The realtime
- * framework has to manage various states at different places. Under certain conditions e.g. a client leaves or a {@link GroupDispatcher}
- * gets disposed those states have to be cleaned. Therefore the {@link LocalRealtimeCleanup} collects all {@link RealtimeCleanup}s from the
- * service registry (see OSGI whiteboard pattern) and instructs the Janitors to cleanup.
- * 
+ * {@link CleanupDispatcherTest}
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface LocalRealtimeCleanup extends RealtimeCleanup {
+public class CleanupDispatcherTest {
+
+    @Test(expected=IllegalArgumentException.class)
+    public void testCleanupDispatcherNullId() {
+        CleanupDispatcher cleanupDispatcher = new CleanupDispatcher(null, null);
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void testCleanupDispatcherNullScope() {
+        ID marens = new ID("ox", "marc.arens", "premium", "uniqueResource");
+        CleanupDispatcher cleanupDispatcher = new CleanupDispatcher(marens, null);
+    }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void testCleanupDispatcher() {
+        ID marens = new ID("ox", "marc.arens", "premium", "uniqueResource");
+        CleanupDispatcher cleanupDispatcher = new CleanupDispatcher(marens, CleanupScope.STANZASEQUENCE);
+        assertNotNull(cleanupDispatcher);
+    }
 
 }
