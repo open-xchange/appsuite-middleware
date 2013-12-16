@@ -52,6 +52,7 @@ package com.openexchange.ajax.mail.netsol;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.mail.FolderAndID;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.ajax.mail.netsol.actions.NetsolGetRequest;
 import com.openexchange.ajax.mail.netsol.actions.NetsolGetResponse;
