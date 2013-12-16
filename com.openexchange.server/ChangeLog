@@ -2,7 +2,50 @@
 
  - Fix for bug 27640: Properly decode "Subject" header in JSON MIME representation
 
-* 2013-12-03 - thorben.betten@open-xchange.com
+* 2013-12-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30119: Avoid superfluous database updates on JSlob write-back requests
+ - Fix for bug 30114: Properly sanitize CSS selectors
+
+* 2013-11-29 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 29495: Removed port 587 from list of secure smtp ports
+ - Fix for bug 30050: Extended logging for folders
+
+* 2013-11-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30069: Fixed regex to match a publication URL to support any word character, but not only alphabetic ones
+
+* 2013-11-29 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 29655: Added possibility to change appointments, if external organizer and UID is given (OLOX2 requirement).
+
+* 2013-11-29 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30070: Use single operation for moving and renaming folders 
+
+* 2013-11-28 - marcus.klein@open-xchange.com
+
+ - Fix for bug 30063: Do no try to roll back to the save point if MySQL did already a complete transaction rollback.
+ - Fix for bug 30051: Added missing build step for de_CH l10n package to install the PO file during package build.
+
+* 2013-11-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30065: Changed misleading wording on no-op login request
+
+* 2013-11-27 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 29982: Correct handling of URLs as database hostnames
+
+* 2013-11-27 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29853: Check for duplicate folder name during insert/update
+ - Fix for bug 30049: Added missing import to javax.management
+  
+* 2013-11-26 - marcus.klein@open-xchange.com
+
+ - Fix for bug 29734: Marked paths.perfMap not as configuration file anymore.
+ - Fix for bug 29981: Be resilient against concurrent reads and modifications.
 
  - Fix for bug 29816: Added "TLSv1" to enabled protocols accepted by Open-Xchange as a client
 
