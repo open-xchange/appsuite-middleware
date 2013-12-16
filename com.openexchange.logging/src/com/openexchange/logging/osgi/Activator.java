@@ -56,6 +56,7 @@ import org.apache.commons.lang.Validate;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -66,8 +67,10 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.jul.LevelChangePropagator;
 import ch.qos.logback.classic.spi.LoggerContextListener;
 import ch.qos.logback.classic.turbo.TurboFilter;
+import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.logging.mbean.IncludeStackTraceServiceImpl;
 import com.openexchange.logging.mbean.LogbackConfiguration;
 import com.openexchange.logging.mbean.LogbackConfigurationMBean;
 import com.openexchange.logging.mbean.RankingAwareTurboFilterList;
@@ -93,6 +96,7 @@ public class Activator implements BundleActivator {
     private volatile ServiceTracker<ManagementService, ManagementService> managementTracker;
     private volatile ServiceTracker<ConfigurationService, ConfigurationService> configurationTracker;
     private volatile RankingAwareTurboFilterList rankingAwareTurboFilterList;
+    private volatile ServiceRegistration<IncludeStackTraceService> includeStackTraceServiceRegistration;
 
     /*
      * Do not implement HousekeepingActivator, track services if you need them!
@@ -132,9 +136,13 @@ public class Activator implements BundleActivator {
         this.rankingAwareTurboFilterList = rankingAwareTurboFilterList;
         loggerContext.addTurboFilter(rankingAwareTurboFilterList);
 
-        registerLoggingConfigurationMBean(context, loggerContext, rankingAwareTurboFilterList);
+        final IncludeStackTraceServiceImpl serviceImpl = new IncludeStackTraceServiceImpl();
 
-        registerExceptionCategoryFilter(context, rankingAwareTurboFilterList);
+        registerLoggingConfigurationMBean(context, loggerContext, rankingAwareTurboFilterList, serviceImpl);
+
+        registerExceptionCategoryFilter(context, rankingAwareTurboFilterList, serviceImpl);
+
+        registerIncludeStackTraceService(serviceImpl, context);
     }
 
     @Override
@@ -160,6 +168,12 @@ public class Activator implements BundleActivator {
             loggerContext.getTurboFilterList().remove(rankingAwareTurboFilterList);
             rankingAwareTurboFilterList.clear();
             this.rankingAwareTurboFilterList = null;
+        }
+
+        final ServiceRegistration<IncludeStackTraceService> includeStackTraceServiceRegistration = this.includeStackTraceServiceRegistration;
+        if (null != includeStackTraceServiceRegistration) {
+            includeStackTraceServiceRegistration.unregister();
+            this.includeStackTraceServiceRegistration = null;
         }
     }
 
@@ -212,7 +226,7 @@ public class Activator implements BundleActivator {
     /**
      * Register the LoggingConfigurationMBean
      */
-    protected void registerLoggingConfigurationMBean(final BundleContext context, final LoggerContext loggerContext, final RankingAwareTurboFilterList turboFilterList) {
+    protected void registerLoggingConfigurationMBean(final BundleContext context, final LoggerContext loggerContext, final RankingAwareTurboFilterList turboFilterList, final IncludeStackTraceServiceImpl serviceImpl) {
         try {
             final ServiceTracker<ManagementService, ManagementService> tracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new ServiceTrackerCustomizer<ManagementService, ManagementService>() {
 
@@ -226,7 +240,7 @@ public class Activator implements BundleActivator {
                         final ObjectName logbackConfObjName = new ObjectName(LogbackConfigurationMBean.DOMAIN, LogbackConfigurationMBean.KEY, LogbackConfigurationMBean.VALUE);
                         this.logbackConfObjName = logbackConfObjName;
                         // Register MBean
-                        final LogbackConfiguration logbackConfiguration = new LogbackConfiguration(loggerContext, turboFilterList);
+                        final LogbackConfiguration logbackConfiguration = new LogbackConfiguration(loggerContext, turboFilterList, serviceImpl);
                         this.logbackConfiguration = logbackConfiguration;
                         managementService.registerMBean(logbackConfObjName, logbackConfiguration);
                         return managementService;
@@ -271,10 +285,14 @@ public class Activator implements BundleActivator {
         LOGGER.info("LoggingConfigurationMBean successfully registered.");
     }
 
-    protected void registerExceptionCategoryFilter(final BundleContext context, final RankingAwareTurboFilterList turboFilterList) {
-        final ServiceTracker<ConfigurationService, ConfigurationService> tracker = new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, new ExceptionCategoryFilterRegisterer(context, turboFilterList));
+    protected void registerExceptionCategoryFilter(final BundleContext context, final RankingAwareTurboFilterList turboFilterList, IncludeStackTraceServiceImpl serviceImpl) {
+        final ServiceTracker<ConfigurationService, ConfigurationService> tracker = new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, new ExceptionCategoryFilterRegisterer(context, turboFilterList, serviceImpl));
         configurationTracker = tracker;
         tracker.open();
+    }
+
+    protected void registerIncludeStackTraceService(final IncludeStackTraceServiceImpl serviceImpl, final BundleContext context) {
+        includeStackTraceServiceRegistration = context.registerService(IncludeStackTraceService.class, serviceImpl, null);
     }
 
 }

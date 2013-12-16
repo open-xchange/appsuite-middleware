@@ -71,6 +71,7 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.jul.LevelChangePropagator;
 import ch.qos.logback.classic.spi.LoggerContextListener;
 import ch.qos.logback.classic.spi.TurboFilterList;
+import com.openexchange.logging.mbean.IncludeStackTraceServiceImpl;
 import com.openexchange.logging.mbean.RankingAwareTurboFilterList;
 import com.openexchange.test.mock.MockUtils;
 
@@ -138,7 +139,7 @@ public class ActivatorTest {
         Mockito.doNothing().when(activatorSpy).overrideLoggerLevels(loggerContext);
         Mockito.doNothing().when(activatorSpy).configureJavaUtilLogging();
         Mockito.doNothing().when(activatorSpy).installJulLevelChangePropagator(loggerContext);
-        Mockito.doNothing().when(activatorSpy).registerLoggingConfigurationMBean(Matchers.eq(bundleContext), Mockito.eq(loggerContext), (RankingAwareTurboFilterList) Mockito.any());
+        Mockito.doNothing().when(activatorSpy).registerLoggingConfigurationMBean(Matchers.eq(bundleContext), Mockito.eq(loggerContext), (RankingAwareTurboFilterList) Mockito.any(), (IncludeStackTraceServiceImpl) Mockito.any());
 
         activatorSpy.start(bundleContext);
 
@@ -156,7 +157,7 @@ public class ActivatorTest {
         Mockito.doNothing().when(activatorSpy).overrideLoggerLevels(loggerContext);
         Mockito.doNothing().when(activatorSpy).configureJavaUtilLogging();
         Mockito.doNothing().when(activatorSpy).installJulLevelChangePropagator(loggerContext);
-        Mockito.doNothing().when(activatorSpy).registerLoggingConfigurationMBean(Matchers.eq(bundleContext), Mockito.eq(loggerContext), (RankingAwareTurboFilterList) Mockito.any());
+        Mockito.doNothing().when(activatorSpy).registerLoggingConfigurationMBean(Matchers.eq(bundleContext), Mockito.eq(loggerContext), (RankingAwareTurboFilterList) Mockito.any(), (IncludeStackTraceServiceImpl) Mockito.any());
 
         activatorSpy.start(bundleContext);
 

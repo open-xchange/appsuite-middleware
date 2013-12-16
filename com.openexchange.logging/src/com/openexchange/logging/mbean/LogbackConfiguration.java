@@ -90,6 +90,7 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     private final Map<String, String[]> methodParameterDescriptions;
     private final TurboFilterCache turboFilterCache;
     private final RankingAwareTurboFilterList rankingAwareTurboFilterList;
+    private final IncludeStackTraceServiceImpl traceServiceImpl;
 
     /**
      * Initializes a new {@link LogbackConfiguration}.
@@ -98,10 +99,11 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
      *
      * @throws NotCompliantMBeanException
      */
-    public LogbackConfiguration(final LoggerContext loggerContext, final RankingAwareTurboFilterList rankingAwareTurboFilterList) throws NotCompliantMBeanException {
+    public LogbackConfiguration(final LoggerContext loggerContext, final RankingAwareTurboFilterList rankingAwareTurboFilterList, final IncludeStackTraceServiceImpl traceServiceImpl) throws NotCompliantMBeanException {
         super(LogbackConfigurationMBean.class);
         this.loggerContext = loggerContext;
         this.rankingAwareTurboFilterList = rankingAwareTurboFilterList;
+        this.traceServiceImpl = traceServiceImpl;
 
         // Initialize members
         configurator = new JoranConfigurator();
@@ -268,10 +270,14 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     }
 
     @Override
+    public void includeStackTraceForUser(final int userID, final int contextID, final boolean enable) {
+        traceServiceImpl.addTuple(userID, contextID, enable);
+    }
+
+    @Override
     protected final String getDescription(MBeanInfo info) {
         return DESCRIPTION;
     }
-
 
     @Override
     protected final String getDescription(MBeanOperationInfo info) {
