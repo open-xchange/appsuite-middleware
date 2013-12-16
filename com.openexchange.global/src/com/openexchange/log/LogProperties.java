@@ -202,6 +202,10 @@ public final class LogProperties {
          */
         GRIZZLY_USER_AGENT("com.openexchange.grizzly.userAgent"),
         /**
+         * com.openexchange.request.trackingId
+         */
+        REQUEST_TRACKING_ID("com.openexchange.request.trackingId"),
+        /**
          * javax.servlet.servletPath
          */
         SERVLET_SERVLET_PATH("javax.servlet.servletPath"),
