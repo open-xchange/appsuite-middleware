@@ -66,4 +66,14 @@ public interface ResourceCacheMBean {
      * @throws MBeanException If operation fails
      */
     void clearFor(int contextId) throws MBeanException;
+
+    /**
+     * Sanitizes broken/corrupt MIME types currently held in database for specified context.
+     *
+     * @param contextId The context identifier
+     * @param invalids A comma-separated list of MIME types that should be considered as broken/corrupt
+     * @return A result description
+     * @throws MBeanException If operation fails
+     */
+    String sanitizeMimeTypesInDatabaseFor(int contextId, String invalids) throws MBeanException;
 }
