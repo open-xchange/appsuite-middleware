@@ -82,19 +82,19 @@ import com.openexchange.logging.mbean.LogbackConfigurationMBean;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class LogbackCLT {
-    
+
     private static final String serviceURL = "service:jmx:rmi:///jndi/rmi://localhost:9999/server";
-    
+
     private static final String validLogLevels = "{OFF, ERROR, WARN, INFO, DEBUG, TRACE, ALL}";
-    
+
     private static final Options options = new Options();
     static {
         Option add = createOption("a", "add", false, false, "Flag to add the filter", true);
         Option del = createOption("d", "delete", false, false, "Flag to delete the filter", true);
-        
+
         OptionGroup og = new OptionGroup();
         og.addOption(add).addOption(del);
-        
+
         options.addOption(createOption("u", "user", true, false, "The user id for which to enable logging", false));
         options.addOption(createOption("c", "context", true, false, "The context id for which to enable logging", false));
         options.addOption(createOption("oec", "override-exception-categories", true, false, "Override the exception categories to be suppressed", false));
@@ -104,13 +104,14 @@ public class LogbackCLT {
         options.addOption(createOption("ll", "list-loggers", false, true, "Get a list with all loggers of the system\nCan optionally have a list with loggers as arguments, i.e. -ll <logger1> <logger2> OR the keyword 'dynamic' that instructs the command line tool to fetch all dynamically modified loggers. Any other keyword is then ignored, and a full list will be retrieved.", false));
         options.addOption(createOption("lf", "list-filters", false, false, "Get a list with all logging filters of the system", false));
         options.addOption(createOption("le", "list-exception-category", false, false, "Get a list with all supressed exception categories", false));
+        options.addOption(createOption("is", "include-stacktraces", false, false, "Sets whether to include stack trace information in HTTP-API JSON responses", false));
         options.addOptionGroup(og);
     }
-    
+
     /**
      * Create an {@link Option} with the {@link OptionBuilder}
-     * 
-     * @param shortName short name of the option 
+     *
+     * @param shortName short name of the option
      * @param longName long name of the option
      * @param hasArgs whether it has arguments
      * @param hasOptArgs whether it has optional arguments
@@ -125,20 +126,20 @@ public class LogbackCLT {
 
     /**
      * @param args
-     * @throws ParseException 
+     * @throws ParseException
      */
     public static void main(String[] args) {
         CommandLineParser parser = new PosixParser();
-        
+
         try {
             CommandLine cl = parser.parse(options, args);
             String method = null;
             Object[] params = null;
-            
+
             String sessionID = null;
             int contextID = 0;
             int userID = 0;
-            
+
             if (cl.hasOption("s")) {
                 sessionID = cl.getOptionValue("s");
                 method = cl.hasOption("a") ? "filterSession" : "removeSessionFilter";
@@ -147,8 +148,13 @@ public class LogbackCLT {
                 contextID = getIntValue(cl.getOptionValue("c"));
                 if (cl.hasOption("u")) {
                     userID = getIntValue(cl.getOptionValue("u"));
-                    method = cl.hasOption("a") ? "filterUser" : "removeUserFilter";
-                    params = new Object[]{userID, contextID};
+                    if (cl.hasOption("is")) {
+                        method = "includeStackTraceForUser";
+                        params = new Object[]{Integer.valueOf(userID), Integer.valueOf(contextID), cl.hasOption("a") ? Boolean.TRUE : Boolean.FALSE};
+                    } else {
+                        method = cl.hasOption("a") ? "filterUser" : "removeUserFilter";
+                        params = new Object[]{userID, contextID};
+                    }
                 } else {
                     method = cl.hasOption("a") ? "filterContext" : "removeContextFilter";
                     params = new Object[]{contextID};
@@ -163,17 +169,18 @@ public class LogbackCLT {
                     for (Object o : oneArrayToRuleThemAll) {
                         if (o instanceof String) {
                             String s = ((String) o).toUpperCase();
-                            if (isValidCategory(s))
+                            if (isValidCategory(s)) {
                                 builder.append(s).append(",");
+                            }
                         } else {
                             printUsage(-1);
                         }
                     }
-                    params = new Object[] {builder.subSequence(0, builder.length() - 1).toString()};    
+                    params = new Object[] {builder.subSequence(0, builder.length() - 1).toString()};
                 } else {
                     printUsage(-1);
                 }
-                
+
             } else if (cl.hasOption("l")) {
                 String level = cl.getOptionValue("l");
                 String[] logLevelValues = cl.getArgs();
@@ -204,10 +211,10 @@ public class LogbackCLT {
             } else {
                 printUsage(-1);
             }
-            
+
             invokeMBeanMethod(method, params, getSignatureOf(method));
             System.exit(1);
-            
+
         } catch (ParseException e) {
             System.out.println(e.getMessage());
             printUsage(-1);
@@ -227,7 +234,7 @@ public class LogbackCLT {
             JMXServiceURL jmxServiceURL = new JMXServiceURL(serviceURL);
             JMXConnector jmxConnector = JMXConnectorFactory.connect(jmxServiceURL);
             MBeanServerConnection mbeanServerConnection = jmxConnector.getMBeanServerConnection();
-            
+
             Object o = mbeanServerConnection.invoke(logbackConfObjName, methodName, params, signature);
             if (o instanceof Set) {
                 Set<String> set = (Set<String>) o;
@@ -268,27 +275,29 @@ public class LogbackCLT {
         }
         System.exit(-1);
     }
-    
+
     /**
-     * Validate whether the specified log level is in a recognized logback {@link Level} 
+     * Validate whether the specified log level is in a recognized logback {@link Level}
      * @param value loglevel
      * @return true/false
      */
     private static final boolean isValidLogLevel(String value) {
         Level l = Level.toLevel(value, null);
-        if (l != null)
+        if (l != null) {
             return true;
+        }
         StringBuilder builder = new StringBuilder();
         builder.append("Error: Unknown log level: \"").append(value).append("\".")
                 .append("Requires a valid log level: ").append(validLogLevels).append("\n");
         printUsage(-1);
-        
+
         return false;
     }
-    
+
     private static final boolean isValidCategory(String category) {
-        if (category == null || category.equals("null"))
+        if (category == null || category.equals("null")) {
             return false;
+        }
         try {
             Category.EnumCategory.valueOf(Category.EnumCategory.class, category);
                 return true;
@@ -301,7 +310,7 @@ public class LogbackCLT {
         }
         return false;
     }
-    
+
     private static final String getValidCategories() {
         StringBuilder builder = new StringBuilder();
         builder.append("{");
@@ -311,7 +320,7 @@ public class LogbackCLT {
         builder.setCharAt(builder.length() - 2, '}');
         return builder.toString();
     }
-    
+
     /**
      * Get the int value
      * @param value
@@ -326,22 +335,22 @@ public class LogbackCLT {
         }
         return -1;
     }
-    
+
     /**
      * Print usage
-     * 
+     *
      * @param exitCode
      */
     private static final void printUsage(int exitCode) {
         HelpFormatter hf = new HelpFormatter();
         hf.setWidth(120);
-        hf.printHelp("logconf [ [-a | -d] [ [-u <userid> -c <contextid>] | [-s <sessionid>] | [-c <contextid>] ] ] [-l <loglevel> <logger name 1> ... <logger name n>] [-lf] [-ll] [-oec <category 1> ... <category n>] [-le] [-h]", 
-            null, 
-            options, 
+        hf.printHelp("logconf [ [-a | -d] [ [-u <userid> -c <contextid>] | [-s <sessionid>] | [-c <contextid>] ] ] [-l <loglevel> <logger name 1> ... <logger name n>] [-lf] [-ll] [-oec <category 1> ... <category n>] [-le] [-h]",
+            null,
+            options,
             "\n\nThe flags -a and -d are mutually exclusive.\n\n\nValid log levels: " + validLogLevels + "\nValid categories: " + getValidCategories());
         System.exit(exitCode);
     }
-    
+
     /**
      * Get the signature of the specified method as an array of Strings
      * @param methodName
@@ -358,7 +367,7 @@ public class LogbackCLT {
                     break;
                 }
             }
-            
+
             if (types != null && types.length > 0) {
                 signature = new String[types.length];
                 int s = 0;
@@ -367,7 +376,7 @@ public class LogbackCLT {
                 }
                 return signature;
             }
-            
+
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
