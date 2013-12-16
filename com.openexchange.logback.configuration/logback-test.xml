@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<configuration scan="true" scanPeriod="30 seconds" debug="true">
+<configuration scan="true" scanPeriod="30 seconds" debug="false">
     <!-- sends logs to logback-beagle -->
     <!-- http://logback.qos.ch/beagle/index.html -->
     <!-- <consolePlugin /> -->
 
-    <!-- Enable JMX default configurator -->
-    <jmxConfigurator />
+    <!-- Uncomment to enable JMX default configurator -->
+    <!-- jmxConfigurator /-->
 
-    <!-- 	Propagates changes made to the level of any logback-classic logger onto the java.util.logging framework. 
-    		If this listener will be deleted, ox backend will add it programmatically.-->
+    <!--
+    Propagates changes made to the level of any logback-classic logger onto the java.util.logging framework. 
+    If this listener will be deleted, ox backend will add it programmatically.
+    -->
     <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder">
-            <pattern>%date %-5level [%thread] %class.%method\(%class{0}.java:%line\)%n%message%n%lmdc%exception{full}</pattern>
+            <pattern>%date{"yyyy-MM-dd'T'HH:mm:ss,SSSZ"} %-5level [%thread] %class.%method\(%class{0}.java:%line\)%n%message%n%lmdc%exception{full}</pattern>
         </encoder>
     </appender>
 
@@ -30,7 +32,7 @@
 
     <!--
     Important note:
-    The following options ensure, that all login relevant information is logged correctly. Such information is essential to detect
+    The following option ensures, that all login relevant information is logged correctly. Such information is essential to detect
     and to address session issues, potentially caused by 3rd parties.
     Open-Xchange strongly suggests NOT to modify this configuration setting unless you are forced to do so by specific legal
     requirements, e.g. privacy regulations.
@@ -50,24 +52,18 @@
     <logger name="com.hazelcast" level="WARN"/>
     <logger name="org.glassfish.grizzly" level="WARN"/>
 
+    <logger name="org.jaudiotagger" level="ERROR"/>
+    <logger name="com.openexchange.documentconverter.impl.Manager" level="WARN"/>
+    <logger name="com.gargoylesoftware.htmlunit" level="WARN"/>
+
     <!-- Set to DEBUG to log SOAP requests for debugging purpose -->
     <logger name="org.apache.cxf" level="WARN"/>
     <logger name="com.openexchange.soap.cxf.logger" level="WARN"/>
 
-    <!-- Set org.jaudiotagger to ERROR -->
-    <logger name="org.jaudiotagger" level="ERROR"/>
-
-    <!-- Set global documentconverter logging level to WARN -->
-    <logger name="com.openexchange.documentconverter.impl.Manager" level="WARN"/>
-
-    <!-- Reduce log level for htmlunit.jar -->
-    <logger name="com.gargoylesoftware.htmlunit" level="WARN"/>
+    <!-- Set this to DEBUG to log all exceptions -->
+    <logger name="com.openexchange.ajax.requesthandler.DispatcherServlet" level="INFO"/>
 
     <!-- Log access to UI files -->
     <!-- <logger name="com.openexchange.appsuite" level="DEBUG"/> -->
-
-    <!-- A switch to control which exceptions are logged to the log file -->
-    <!-- Set this to DEBUG to log all exceptions -->
-    <logger name="com.openexchange.ajax.requesthandler.DispatcherServlet" level="INFO"/>
 
 </configuration>
