@@ -71,8 +71,6 @@ import com.openexchange.subscribe.SubscriptionSource;
  */
 public class FacebookSubscribeService extends AbstractSubscribeService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FacebookSubscribeService.class);
-
     private final SubscriptionSource source = new SubscriptionSource();
     private final OAuthServiceMetaData facebookMetaData;
     private final FacebookService facebookService;

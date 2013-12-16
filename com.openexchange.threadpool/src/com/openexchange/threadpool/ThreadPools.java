@@ -233,6 +233,24 @@ public final class ThreadPools {
     };
 
     /**
+     * Takes from given completion service using {@link #DEFAULT_EXCEPTION_FACTORY} and returns its results as a list.
+     *
+     * @param <R> The result type
+     * @param completionService The completion service to take from
+     * @param size The number of tasks performed by completion service
+     * @return A list of results taken from completion service
+     * @throws OXException If taking from completion service fails
+     * @throws IllegalStateException If cause is neither a {@link RuntimeException} nor an {@link Error} but a checked exception
+     * @throws RuntimeException If cause is an unchecked {@link RuntimeException}
+     * @throws Error If cause is an unchecked {@link Error}
+     * @see #launderThrowable(ExecutionException, Class)
+     * @see #DEFAULT_EXCEPTION_FACTORY
+     */
+    public static <R> java.util.List<R> takeCompletionService(final CompletionService<R> completionService, final int size) throws OXException {
+        return takeCompletionService(completionService, size, DEFAULT_EXCEPTION_FACTORY);
+    }
+
+    /**
      * Takes from given completion service and returns its results as a list.
      *
      * @param <R> The result type
@@ -267,14 +285,30 @@ public final class ThreadPools {
     }
 
     /**
-     * Takes from given completion service, ignoring its results.
+     * Awaits completion of given completion service using {@link #DEFAULT_EXCEPTION_FACTORY}, ignoring its results.
+     *
+     * @param <R> The result type
+     * @param completionService The completion service to take from
+     * @param size The number of tasks performed by completion service
+     * @throws OXException If taking from completion service fails
+     * @throws IllegalStateException If cause is neither a {@link RuntimeException} nor an {@link Error} but a checked exception
+     * @throws RuntimeException If cause is an unchecked {@link RuntimeException}
+     * @throws Error If cause is an unchecked {@link Error}
+     * @see #launderThrowable(ExecutionException, Class)
+     * @see #DEFAULT_EXCEPTION_FACTORY
+     */
+    public static <R> void awaitCompletionService(final CompletionService<R> completionService, final int size) throws OXException {
+        awaitCompletionService(completionService, size, DEFAULT_EXCEPTION_FACTORY);
+    }
+
+    /**
+     * Awaits completion of given completion service, ignoring its results.
      *
      * @param <R> The result type
      * @param <E> The exception type
      * @param completionService The completion service to take from
      * @param size The number of tasks performed by completion service
      * @param factory The exception factory to launder a possible {@link ExecutionException} or {@link InterruptedException}
-     * @return A list of results taken from completion service
      * @throws E If taking from completion service fails
      * @throws IllegalStateException If cause is neither a {@link RuntimeException} nor an {@link Error} but a checked exception
      * @throws RuntimeException If cause is an unchecked {@link RuntimeException}
