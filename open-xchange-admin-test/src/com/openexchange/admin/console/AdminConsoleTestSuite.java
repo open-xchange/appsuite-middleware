@@ -47,43 +47,27 @@
  *
  */
 
-package com.openexchange.admin;
+package com.openexchange.admin.console;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import com.openexchange.admin.rmi.AdminCoreTest;
-import com.openexchange.admin.rmi.AllTests;
-import com.openexchange.admin.rmi.GroupTest;
-import com.openexchange.admin.rmi.ResourceTest;
-import com.openexchange.admin.rmi.TaskMgmtTest;
-import com.openexchange.admin.rmi.UserTest;
-import com.openexchange.admin.tools.Bug19733Test;
-import com.openexchange.admin.tools.NetUtilTest;
-import com.openexchange.admin.user.copy.rmi.RoundtripTest;
-import com.openexchange.admin.user.copy.rmi.UserCopyTest;
-import com.openexchange.admin.user.copy.rmi.UserExistsTest;
+import org.junit.runners.Suite.SuiteClasses;
 
+
+/**
+ * RMI tests for admin console
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4.2
+ */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({
-      AdminCoreTest.class,
-      UserTest.class,
-      GroupTest.class,
-      ResourceTest.class,
-      TaskMgmtTest.class,
-      NetUtilTest.class,
-      Bug19733Test.class,
-      DBWeightTest.class,
-      AllTests.class,
-      RoundtripTest.class,
-      UserCopyTest.class,
-      UserExistsTest.class
+@SuiteClasses({
+    HostingCLITest.class,
+    StatisticToolsTest.class,
+    UniqueCLTParameterTest.class
 })
-public class AdminTestSuite {
-    
-    // the class remains completely empty, 
-    // being used only as a holder for the above annotations
+public class AdminConsoleTestSuite {
 
-    private AdminTestSuite() {
-        super();
+    private AdminConsoleTestSuite() {
     }
 }

@@ -53,7 +53,7 @@ import java.util.EnumMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.drive.DriveClientType;
@@ -62,7 +62,6 @@ import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.Initialization;
 import com.openexchange.tools.strings.TimeSpanParser;
 
@@ -73,7 +72,7 @@ import com.openexchange.tools.strings.TimeSpanParser;
  */
 public class DriveConfig implements Initialization {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DriveConfig.class));
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(DriveConfig.class);
     private static final DriveConfig instance = new DriveConfig();
 
     /**
@@ -379,8 +378,7 @@ public class DriveConfig implements Initialization {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, cleanerIntervalValue);
         }
         if (MILLIS_PER_HOUR > cleanerInterval) {
-            LOG.warn("The configured interval of '" + cleanerIntervalValue +
-                "' is smaller than the allowed minimum of one hour. Falling back to '1h' instead.");
+            LOG.warn("The configured interval of ''{}'' is smaller than the allowed minimum of one hour. Falling back to ''1h'' instead.", cleanerIntervalValue);
             cleanerInterval = MILLIS_PER_HOUR;
         }
         String cleanerMaxAgeValue = configService.getProperty("com.openexchange.drive.cleaner.maxAge", "1D");
@@ -390,8 +388,7 @@ public class DriveConfig implements Initialization {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, cleanerMaxAgeValue);
         }
         if (MILLIS_PER_HOUR > cleanerMaxAge) {
-            LOG.warn("The configured interval of '" + cleanerMaxAgeValue +
-                "' is smaller than the allowed minimum of one hour. Falling back to '1h' instead.");
+            LOG.warn("The configured interval of ''{}'' is smaller than the allowed minimum of one hour. Falling back to ''1h'' instead.", cleanerMaxAgeValue);
             cleanerMaxAge = MILLIS_PER_HOUR;
         }
         /*

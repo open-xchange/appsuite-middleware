@@ -503,6 +503,9 @@ public final class StringAllocator extends AbstractStringAllocator implements ja
 
     @Override
     public String toString() {
+        if (0 == count) {
+            return "";
+        }
         final Constructor<String> stringConstructor = STRING_CONSTRUCTOR;
         if (null == stringConstructor) {
             // Create a copy, don't share the array

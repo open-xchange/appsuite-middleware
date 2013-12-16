@@ -47,51 +47,27 @@
  *
  */
 
-package com.openexchange.ajax.mail.netsol.actions;
+package com.openexchange.admin.user.copy.rmi;
 
-import com.openexchange.ajax.framework.CommonListRequest;
-import com.openexchange.ajax.mail.actions.AbstractMailRequest;
-import com.openexchange.ajax.mail.netsol.FolderAndID;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+
 
 /**
- * {@link NetsolListRequest}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * RMI tests for admin user copy
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4.2
  */
-public class NetsolListRequest<CommonListResponse> extends CommonListRequest {
+@RunWith(Suite.class)
+@SuiteClasses({
+    RoundtripTest.class,
+    UserCopyTest.class,
+    UserExistsTest.class
+})
+public class AdminUserCopyRmiTestSuite {
 
-	private static final int[] DEFAULT_COLUMNS = { 600, 601, 612, 602, 603, 607, 610, 608, 611, 614, 102, 604, 609 };
-
-	/**
-	 * Default constructor.
-	 */
-	public NetsolListRequest(final String[][] folderAndMailIds, final int[] columns) {
-		super(AbstractMailRequest.MAIL_URL, folderAndMailIds, columns);
-	}
-
-	public NetsolListRequest(final String[][] folderAndMailIds, final int[] columns, final boolean failOnError) {
-		super(AbstractMailRequest.MAIL_URL, folderAndMailIds, columns, failOnError);
-	}
-
-	public NetsolListRequest(final FolderAndID[] mailPaths) {
-		this(mailPaths, DEFAULT_COLUMNS, true);
-	}
-
-	public NetsolListRequest(final FolderAndID[] mailPaths, final int[] columns) {
-		this(mailPaths, columns, true);
-	}
-
-	public NetsolListRequest(final FolderAndID[] mailPaths, final int[] columns, final boolean failOnError) {
-		super(AbstractMailRequest.MAIL_URL, toFolderAndMailIds(mailPaths), columns, failOnError);
-	}
-
-	private static final String[][] toFolderAndMailIds(final FolderAndID[] mailPaths) {
-		final String[][] retval = new String[mailPaths.length][];
-		for (int i = 0; i < retval.length; i++) {
-			retval[i] = new String[] { mailPaths[i].folderId, mailPaths[i].id };
-		}
-		return retval;
-	}
-
+    private AdminUserCopyRmiTestSuite() {
+    }
 }

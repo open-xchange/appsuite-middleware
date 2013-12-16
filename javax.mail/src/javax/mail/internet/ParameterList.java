@@ -532,16 +532,18 @@ public class ParameterList {
 	    }
 	    return;
 	}
-	name = name.trim().toLowerCase(Locale.ENGLISH);
-	if (decodeParameters) {
-	    try {
-		putEncodedName(name, value);
-	    } catch (ParseException pex) {
-		// ignore it
-		list.put(name, value);
-	    }
-	} else
-	    list.put(name, value);
+	if (name != null) {
+	    name = name.trim().toLowerCase(Locale.ENGLISH);
+	    if (decodeParameters) {
+	        try {
+	            putEncodedName(name, value);
+	        } catch (ParseException pex) {
+	            // ignore it
+	            list.put(name, value);
+	        }
+	    } else
+	        list.put(name, value);
+    }
     }
 
     /**

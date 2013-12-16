@@ -56,8 +56,8 @@ import org.json.JSONObject;
 import com.openexchange.ajax.conversion.actions.ConvertRequest;
 import com.openexchange.ajax.conversion.actions.ConvertResponse;
 import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.mail.FolderAndID;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
-import com.openexchange.ajax.mail.netsol.FolderAndID;
 import com.openexchange.ajax.mail.netsol.NetsolTestConstants;
 import com.openexchange.ajax.mail.netsol.actions.NetsolDeleteRequest;
 import com.openexchange.ajax.mail.netsol.actions.NetsolGetRequest;
@@ -72,123 +72,122 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  * {@link ICalMailPartImportTest}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
 public class ICalMailPartImportTest extends AbstractConversionTest {
 
-	private static final byte[] ICAL_BYTES = String.valueOf(
-			"BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\n" + "DTSTART;VALUE=DATE:20061221\n" + "DTEND;VALUE=DATE:20070106\n"
-					+ "SUMMARY:Weihnachtsferien\n" + "UID:" + UUID.randomUUID().toString() + "\n" + "SEQUENCE:8\n"
-					+ "DTSTAMP:20060520T163834Z\n" + "END:VEVENT\n" + "END:VCALENDAR").getBytes();
+    private static final byte[] ICAL_BYTES = String.valueOf(
+            "BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\n" + "DTSTART;VALUE=DATE:20061221\n" + "DTEND;VALUE=DATE:20070106\n"
+                    + "SUMMARY:Weihnachtsferien\n" + "UID:" + UUID.randomUUID().toString() + "\n" + "SEQUENCE:8\n"
+                    + "DTSTAMP:20060520T163834Z\n" + "END:VEVENT\n" + "END:VCALENDAR").getBytes();
 
-	/**
-	 * Initializes a new {@link ICalMailPartImportTest}
-	 *
-	 * @param name
-	 *            The name
-	 */
-	public ICalMailPartImportTest(final String name) {
-		super(name);
-	}
+    /**
+     * Initializes a new {@link ICalMailPartImportTest}
+     *
+     * @param name
+     *            The name
+     */
+    public ICalMailPartImportTest(final String name) {
+        super(name);
+    }
 
-	/**
-	 * Tests the <code>action=convert</code> request
-	 *
-	 * @throws Throwable
-	 */
-	public void testICalImport() throws Throwable {
-		final String[] mailFolderAndMailID;
-		try {
-			/*
-			 * Create a mail with VCard attachment
-			 */
-			final JSONObject mailObject_25kb = new JSONObject();
-			{
-				mailObject_25kb.put(MailJSONField.FROM.getKey(), getClient().getValues().getSendAddress());
-				mailObject_25kb.put(MailJSONField.RECIPIENT_TO.getKey(), getClient().getValues().getSendAddress());
-				mailObject_25kb.put(MailJSONField.RECIPIENT_CC.getKey(), "");
-				mailObject_25kb.put(MailJSONField.RECIPIENT_BCC.getKey(), "");
-				mailObject_25kb.put(MailJSONField.SUBJECT.getKey(), "The mail subject");
-				mailObject_25kb.put(MailJSONField.PRIORITY.getKey(), "3");
+    /**
+     * Tests the <code>action=convert</code> request
+     *
+     * @throws Throwable
+     */
+    public void testICalImport() throws Throwable {
+        final String[] mailFolderAndMailID;
+        try {
+            /*
+             * Create a mail with VCard attachment
+             */
+            final JSONObject mailObject_25kb = new JSONObject();
+            {
+                mailObject_25kb.put(MailJSONField.FROM.getKey(), getClient().getValues().getSendAddress());
+                mailObject_25kb.put(MailJSONField.RECIPIENT_TO.getKey(), getClient().getValues().getSendAddress());
+                mailObject_25kb.put(MailJSONField.RECIPIENT_CC.getKey(), "");
+                mailObject_25kb.put(MailJSONField.RECIPIENT_BCC.getKey(), "");
+                mailObject_25kb.put(MailJSONField.SUBJECT.getKey(), "The mail subject");
+                mailObject_25kb.put(MailJSONField.PRIORITY.getKey(), "3");
 
-				final JSONObject bodyObject = new JSONObject();
-				bodyObject.put(MailJSONField.CONTENT_TYPE.getKey(), MailContentType.ALTERNATIVE.toString());
-				bodyObject.put(MailJSONField.CONTENT.getKey(), NetsolTestConstants.MAIL_TEXT_BODY);
+                final JSONObject bodyObject = new JSONObject();
+                bodyObject.put(MailJSONField.CONTENT_TYPE.getKey(), MailContentType.ALTERNATIVE.toString());
+                bodyObject.put(MailJSONField.CONTENT.getKey(), NetsolTestConstants.MAIL_TEXT_BODY);
 
-				final JSONArray attachments = new JSONArray();
-				attachments.put(bodyObject);
+                final JSONArray attachments = new JSONArray();
+                attachments.put(bodyObject);
 
-				mailObject_25kb.put(MailJSONField.ATTACHMENTS.getKey(), attachments);
-			}
+                mailObject_25kb.put(MailJSONField.ATTACHMENTS.getKey(), attachments);
+            }
 
-			InputStream in = null;
-			try {
-				in = new UnsynchronizedByteArrayInputStream(ICAL_BYTES);
-				/*
-				 * Perform send
-				 */
-				final NetsolSendResponse response = Executor.execute(getSession(),
-						new NetsolSendRequest(mailObject_25kb.toString(), in, "text/calendar; charset=US-ASCII",
-								"ical.ics"));
-				assertTrue("Send failed", response.getFolderAndID() != null);
-				assertTrue("Duration corrupt", response.getRequestDuration() > 0);
-				mailFolderAndMailID = response.getFolderAndID();
-			} finally {
-				if (null != in) {
-					in.close();
-				}
-			}
+            InputStream in = null;
+            try {
+                in = new UnsynchronizedByteArrayInputStream(ICAL_BYTES);
+                /*
+                 * Perform send
+                 */
+                final NetsolSendResponse response = Executor.execute(getSession(),
+                        new NetsolSendRequest(mailObject_25kb.toString(), in, "text/calendar; charset=US-ASCII",
+                                "ical.ics"));
+                assertTrue("Send failed", response.getFolderAndID() != null);
+                assertTrue("Duration corrupt", response.getRequestDuration() > 0);
+                mailFolderAndMailID = response.getFolderAndID();
+            } finally {
+                if (null != in) {
+                    in.close();
+                }
+            }
 
-			mailFolderAndMailID[1] = parseMailId(mailFolderAndMailID[1]);
+            mailFolderAndMailID[1] = parseMailId(mailFolderAndMailID[1]);
 
-			try {
-				/*
-				 * Get previously sent mail
-				 */
-				final FolderAndID mailPath = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
-				final NetsolGetResponse resp = Executor.execute(getSession(),
-						new NetsolGetRequest(mailPath, true));
-				final JSONObject mailObject = (JSONObject) resp.getData();
-				final JSONArray attachments = mailObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
-				final int len = attachments.length();
-				String sequenceId = null;
-				for (int i = 0; i < len && sequenceId == null; i++) {
-					final JSONObject attachObj = attachments.getJSONObject(i);
-					if (attachObj.getString(MailJSONField.CONTENT_TYPE.getKey()).startsWith("text/calendar")) {
-						sequenceId = attachObj.getString(MailListField.ID.getKey());
-					}
-				}
-				/*
-				 * Trigger conversion
-				 */
-				final JSONObject jsonBody = new JSONObject();
-				final JSONObject jsonSource = new JSONObject().put("identifier", "com.openexchange.mail.ical");
-				jsonSource.put("args", new JSONArray().put(
-						new JSONObject().put("com.openexchange.mail.conversion.fullname", mailFolderAndMailID[0])).put(
-						new JSONObject().put("com.openexchange.mail.conversion.mailid", mailFolderAndMailID[1])).put(
-						new JSONObject().put("com.openexchange.mail.conversion.sequenceid", sequenceId)));
-				jsonBody.put("datasource", jsonSource);
-				final JSONObject jsonHandler = new JSONObject().put("identifier", "com.openexchange.ical");
-				jsonHandler.put("args", new JSONArray().put(
-						new JSONObject().put("com.openexchange.groupware.calendar.folder", getPrivateCalendarFolder()))
-						.put(new JSONObject().put("com.openexchange.groupware.task.folder", getPrivateTaskFolder())));
-				jsonBody.put("datahandler", jsonHandler);
-				final ConvertResponse convertResponse = (ConvertResponse) Executor.execute(getSession(),
-						new ConvertRequest(jsonBody, true));
-				final String[][] sa = convertResponse.getFoldersAndIDs();
+            try {
+                /*
+                 * Get previously sent mail
+                 */
+                final FolderAndID mailPath = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
+                final NetsolGetResponse resp = Executor.execute(getSession(),
+                        new NetsolGetRequest(mailPath, true));
+                final JSONObject mailObject = (JSONObject) resp.getData();
+                final JSONArray attachments = mailObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
+                final int len = attachments.length();
+                String sequenceId = null;
+                for (int i = 0; i < len && sequenceId == null; i++) {
+                    final JSONObject attachObj = attachments.getJSONObject(i);
+                    if (attachObj.getString(MailJSONField.CONTENT_TYPE.getKey()).startsWith("text/calendar")) {
+                        sequenceId = attachObj.getString(MailListField.ID.getKey());
+                    }
+                }
+                /*
+                 * Trigger conversion
+                 */
+                final JSONObject jsonBody = new JSONObject();
+                final JSONObject jsonSource = new JSONObject().put("identifier", "com.openexchange.mail.ical");
+                jsonSource.put("args", new JSONArray().put(
+                        new JSONObject().put("com.openexchange.mail.conversion.fullname", mailFolderAndMailID[0])).put(
+                        new JSONObject().put("com.openexchange.mail.conversion.mailid", mailFolderAndMailID[1])).put(
+                        new JSONObject().put("com.openexchange.mail.conversion.sequenceid", sequenceId)));
+                jsonBody.put("datasource", jsonSource);
+                final JSONObject jsonHandler = new JSONObject().put("identifier", "com.openexchange.ical");
+                jsonHandler.put("args", new JSONArray().put(
+                        new JSONObject().put("com.openexchange.groupware.calendar.folder", getPrivateCalendarFolder()))
+                        .put(new JSONObject().put("com.openexchange.groupware.task.folder", getPrivateTaskFolder())));
+                jsonBody.put("datahandler", jsonHandler);
+                final ConvertResponse convertResponse = (ConvertResponse) Executor.execute(getSession(),
+                        new ConvertRequest(jsonBody, true));
+                final String[][] sa = convertResponse.getFoldersAndIDs();
 
-				assertFalse("Missing response on action=convert", sa == null);
-				assertTrue("Unexpected response length", sa.length == 1);
+                assertFalse("Missing response on action=convert", sa == null);
+                assertTrue("Unexpected response length", sa.length == 1);
 
-			} finally {
-				if (mailFolderAndMailID != null) {
-					final FolderAndID mailPath = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
-					Executor.execute(getSession(), new NetsolDeleteRequest(new FolderAndID[] { mailPath }, true));
-				}
-			}
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
+            } finally {
+                if (mailFolderAndMailID != null) {
+                    final FolderAndID mailPath = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
+                    Executor.execute(getSession(), new NetsolDeleteRequest(new FolderAndID[] { mailPath }, true));
+                }
+            }
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 }

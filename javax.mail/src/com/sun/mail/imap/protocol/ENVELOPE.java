@@ -86,7 +86,9 @@ public class ENVELOPE implements Item {
 	String s = r.readString();
 	if (s != null) {
 	    try {
+	    synchronized (mailDateFormat) {
 		date = mailDateFormat.parse(s);
+	    }
 	    } catch (Exception pex) {
 		// We need to be *very* tolerant about bogus dates (and
 		// there's lot of 'em around), so we ignore any 

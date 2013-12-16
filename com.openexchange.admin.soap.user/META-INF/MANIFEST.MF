@@ -42,6 +42,7 @@ Import-Package: com.openexchange.admin.rmi,
  javax.xml.ws.wsaddressing,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Bundle-Activator: com.openexchange.admin.soap.user.osgi.SoapUserActivator
 Bundle-ClassPath: .

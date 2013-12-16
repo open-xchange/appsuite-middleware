@@ -69,7 +69,7 @@ public final class Log implements org.apache.commons.logging.Log {
      */
     @Deprecated
     public static org.apache.commons.logging.Log loggerFor(final Class<?> clazz) {
-        return valueOf(org.apache.commons.logging.LogFactory.getLog(clazz));
+        return org.apache.commons.logging.LogFactory.getLog(clazz);
     }
 
     /**
@@ -81,7 +81,7 @@ public final class Log implements org.apache.commons.logging.Log {
      */
     @Deprecated
     public static org.apache.commons.logging.Log loggerFor(final String clazz) {
-        return valueOf(org.apache.commons.logging.LogFactory.getLog(clazz));
+        return org.apache.commons.logging.LogFactory.getLog(clazz);
     }
 
     /**
@@ -93,10 +93,7 @@ public final class Log implements org.apache.commons.logging.Log {
      */
     @Deprecated
     public static org.apache.commons.logging.Log valueOf(final org.apache.commons.logging.Log log) {
-        if (log instanceof Log) {
-            return log;
-        }
-        return new Log(log);
+        return log;
     }
 
     private final org.apache.commons.logging.Log delegate;

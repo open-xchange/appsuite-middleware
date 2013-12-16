@@ -15,5 +15,6 @@ Import-Package: com.openexchange.exception,
  gnu.trove.map,
  gnu.trove.map.hash,
  org.apache.commons.logging,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j
 Export-Package: com.openexchange.tx

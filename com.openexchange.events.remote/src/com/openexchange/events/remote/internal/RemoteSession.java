@@ -55,8 +55,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -73,7 +72,7 @@ public class RemoteSession implements PutIfAbsent {
 
     public static final AtomicReference<String> OBFUSCATION_KEY = new AtomicReference<String>();
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RemoteSession.class));
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(RemoteSession.class);
 
     /**
      * Deserializes a session from a map that was previously wrapped via {@link RemoteSession#wrap}.
@@ -284,7 +283,7 @@ public class RemoteSession implements PutIfAbsent {
         try {
             return Services.getService(CryptoService.class, true).encrypt(string, obfuskationKey);
         } catch (OXException e) {
-            LOG.error("Error obfuscating string", e);
+            LOGGER.error("Error obfuscating string", e);
             return string;
         }
     }
@@ -300,7 +299,7 @@ public class RemoteSession implements PutIfAbsent {
         try {
             return Services.getService(CryptoService.class, true).decrypt(string, obfuskationKey);
         } catch (OXException e) {
-            LOG.error("Error unobfuscate string", e);
+            LOGGER.error("Error unobfuscate string", e);
             return string;
         }
     }

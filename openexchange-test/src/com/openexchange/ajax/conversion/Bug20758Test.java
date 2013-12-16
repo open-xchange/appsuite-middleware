@@ -106,8 +106,8 @@ import com.openexchange.ajax.conversion.actions.ConvertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.mail.FolderAndID;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
-import com.openexchange.ajax.mail.netsol.FolderAndID;
 import com.openexchange.ajax.mail.netsol.NetsolTestConstants;
 import com.openexchange.ajax.mail.netsol.actions.NetsolGetRequest;
 import com.openexchange.ajax.mail.netsol.actions.NetsolGetResponse;
@@ -118,7 +118,7 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Bug20758Test extends AbstractConversionTest {
@@ -134,7 +134,7 @@ public class Bug20758Test extends AbstractConversionTest {
     private String ical2;
 
     public Bug20758Test(String name) {
-        super(name);   
+        super(name);
     }
 
     @Override
@@ -145,9 +145,9 @@ public class Bug20758Test extends AbstractConversionTest {
         client2 = new AJAXClient(User.User1);
 
         client1.getValues().setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
-        
+
         uuid = UUID.randomUUID().toString();
-        
+
         ical1 = new StringBuilder()
         .append("BEGIN:VCALENDAR\n")
         .append("VERSION:2.0\n")
@@ -166,51 +166,51 @@ public class Bug20758Test extends AbstractConversionTest {
         .append("END:VEVENT\n")
         .append("END:VCALENDAR")
         .toString();
-        
-        ical2 = "BEGIN:VCALENDAR\n" + 
-        		"PRODID:Open-Xchange\n" + 
-        		"VERSION:2.0\n" + 
-        		"CALSCALE:GREGORIAN\n" + 
-        		"METHOD:REQUEST\n" + 
-        		"BEGIN:VEVENT\n" + 
-        		"DTSTAMP:20111201T082524Z\n" + 
-        		"SUMMARY:Test 20829\n" + 
-        		"DTSTART;TZID=Europe/Berlin:20111202T123000\n" + 
-        		"DTEND;TZID=Europe/Berlin:20111202T133000\n" + 
-        		"CLASS:PUBLIC\n" + 
-        		"LOCATION:12:30\n" + 
-        		"TRANSP:OPAQUE\n" + 
-        		"UID:6f7d7ef0-8def-4997-8427-2612b7095865\n" + 
-        		"CREATED:20111201T082524Z\n" + 
-        		"LAST-MODIFIED:20111201T082524Z\n" + 
-        		"ORGANIZER:" + client1.getValues().getSendAddress() + "\n" + 
-        		"ATTENDEE;ROLE=REQ-PARTICIPANT;CUTYPE=INDIVIDUAL:mailto:" + client1.getValues().getSendAddress() + "\n" + 
-        		"ATTENDEE;CUTYPE=INDIVIDUAL;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT;RSVP=TRUE:mailto:" + client2.getValues().getSendAddress() + "\n" + 
-        		"END:VEVENT\n" + 
-        		"BEGIN:VTIMEZONE\n" + 
-        		"TZID:Europe/Berlin\n" + 
-        		"TZURL:http://tzurl.org/zoneinfo-outlook/Europe/Berlin\n" + 
-        		"X-LIC-LOCATION:Europe/Berlin\n" + 
-        		"BEGIN:DAYLIGHT\n" + 
-        		"TZOFFSETFROM:+0100\n" + 
-        		"TZOFFSETTO:+0200\n" + 
-        		"TZNAME:CEST\n" + 
-        		"DTSTART:19700329T020000\n" + 
-        		"RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\n" + 
-        		"END:DAYLIGHT\n" + 
-        		"BEGIN:STANDARD\n" + 
-        		"TZOFFSETFROM:+0200\n" + 
-        		"TZOFFSETTO:+0100\n" + 
-        		"TZNAME:CET\n" + 
-        		"DTSTART:19701025T030000\n" + 
-        		"RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\n" + 
-        		"END:STANDARD\n" + 
-        		"END:VTIMEZONE\n" + 
-        		"END:VCALENDAR";
-        
+
+        ical2 = "BEGIN:VCALENDAR\n" +
+        "PRODID:Open-Xchange\n" +
+        "VERSION:2.0\n" +
+        "CALSCALE:GREGORIAN\n" +
+        "METHOD:REQUEST\n" +
+        "BEGIN:VEVENT\n" +
+        "DTSTAMP:20111201T082524Z\n" +
+        "SUMMARY:Test 20829\n" +
+        "DTSTART;TZID=Europe/Berlin:20111202T123000\n" +
+        "DTEND;TZID=Europe/Berlin:20111202T133000\n" +
+        "CLASS:PUBLIC\n" +
+        "LOCATION:12:30\n" +
+        "TRANSP:OPAQUE\n" +
+        "UID:6f7d7ef0-8def-4997-8427-2612b7095865\n" +
+        "CREATED:20111201T082524Z\n" +
+        "LAST-MODIFIED:20111201T082524Z\n" +
+        "ORGANIZER:" + client1.getValues().getSendAddress() + "\n" +
+        "ATTENDEE;ROLE=REQ-PARTICIPANT;CUTYPE=INDIVIDUAL:mailto:" + client1.getValues().getSendAddress() + "\n" +
+        "ATTENDEE;CUTYPE=INDIVIDUAL;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT;RSVP=TRUE:mailto:" + client2.getValues().getSendAddress() + "\n" +
+        "END:VEVENT\n" +
+        "BEGIN:VTIMEZONE\n" +
+        "TZID:Europe/Berlin\n" +
+        "TZURL:http://tzurl.org/zoneinfo-outlook/Europe/Berlin\n" +
+        "X-LIC-LOCATION:Europe/Berlin\n" +
+        "BEGIN:DAYLIGHT\n" +
+        "TZOFFSETFROM:+0100\n" +
+        "TZOFFSETTO:+0200\n" +
+        "TZNAME:CEST\n" +
+        "DTSTART:19700329T020000\n" +
+        "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\n" +
+        "END:DAYLIGHT\n" +
+        "BEGIN:STANDARD\n" +
+        "TZOFFSETFROM:+0200\n" +
+        "TZOFFSETTO:+0100\n" +
+        "TZNAME:CET\n" +
+        "DTSTART:19701025T030000\n" +
+        "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\n" +
+        "END:STANDARD\n" +
+        "END:VTIMEZONE\n" +
+        "END:VCALENDAR";
+
         mailFolderAndMailID1 = createMail(ical1);
         sequenceId1 = getSequenceIdForMail(client1, mailFolderAndMailID1);
-        
+
         mailFolderAndMailID2 = createMail(ical2);
         sequenceId2 = getSequenceIdForMail(client1, mailFolderAndMailID2);
     }
@@ -219,7 +219,7 @@ public class Bug20758Test extends AbstractConversionTest {
         JSONObject jsonObject = internal(mailFolderAndMailID1, sequenceId1, new JSONArray());
         assertEquals("Wrong timezone", "Europe/Berlin", jsonObject.get("timezone"));
         assertEquals("Wrong start date", 1321367400000L, jsonObject.get("start_date")); //15.11.2011 14:30
-        
+
         jsonObject = internal(mailFolderAndMailID2, sequenceId2, new JSONArray());
         assertEquals("Wrong timezone", "Europe/Berlin", jsonObject.get("timezone"));
         assertEquals("Wrong start date", 1322829000000L, jsonObject.get("start_date")); //02.12.2011 12:30
@@ -229,7 +229,7 @@ public class Bug20758Test extends AbstractConversionTest {
         JSONObject jsonObject = internal(mailFolderAndMailID2, sequenceId2, new JSONArray().put(new JSONObject().put("com.openexchange.groupware.calendar.timezone", "UTC")));
         assertEquals("Wrong timezone", "America/New_York", jsonObject.get("timezone"));
         assertEquals("Wrong start date", 1321345800000L, jsonObject.get("start_date")); //15.11.2011 08:30
-        
+
         jsonObject = internal(mailFolderAndMailID2, sequenceId2, new JSONArray());
         assertEquals("Wrong timezone", "Europe/Berlin", jsonObject.get("timezone"));
         assertEquals("Wrong start date", 1322807400000L, jsonObject.get("start_date")); //02.12.2011 06:30
@@ -252,7 +252,7 @@ public class Bug20758Test extends AbstractConversionTest {
 
     protected String[] createMail(String ical) throws Exception {
         byte[] ICAL_BYTES = ical.getBytes();
-    
+
         JSONObject mail = new JSONObject();
         mail.put(MailJSONField.FROM.getKey(), client1.getValues().getSendAddress());
         mail.put(MailJSONField.RECIPIENT_TO.getKey(), client2.getValues().getSendAddress() + "," + client2.getValues().getSendAddress());
@@ -260,28 +260,28 @@ public class Bug20758Test extends AbstractConversionTest {
         mail.put(MailJSONField.RECIPIENT_BCC.getKey(), "");
         mail.put(MailJSONField.SUBJECT.getKey(), "New Event");
         mail.put(MailJSONField.PRIORITY.getKey(), "3");
-        
+
         JSONObject bodyObject = new JSONObject();
         bodyObject.put(MailJSONField.CONTENT_TYPE.getKey(), MailContentType.ALTERNATIVE.toString());
         bodyObject.put(MailJSONField.CONTENT.getKey(), NetsolTestConstants.MAIL_TEXT_BODY);
-        
+
         JSONArray attachments = new JSONArray();
         attachments.put(bodyObject);
-        
+
         mail.put(MailJSONField.ATTACHMENTS.getKey(), attachments);
-        
+
         UnsynchronizedByteArrayInputStream in = new UnsynchronizedByteArrayInputStream(ICAL_BYTES);
-    
+
         NetsolSendResponse response = Executor.execute(client1.getSession(), new NetsolSendRequest(mail.toString(), in, "text/calendar; charset=US-ASCII", "ical.ics"));
         assertTrue("Send failed", response.getFolderAndID() != null);
         assertTrue("Duration corrupt", response.getRequestDuration() > 0);
         String[] mailFolderAndMailID = response.getFolderAndID();
-        
+
         mailFolderAndMailID[1] = parseMailId(mailFolderAndMailID[1]);
 
         return mailFolderAndMailID;
     }
-    
+
     protected String getSequenceIdForMail(AJAXClient c, String[] mailFolderAndMailID) throws Exception {
         FolderAndID fai = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
         NetsolGetResponse resp = Executor.execute(c.getSession(), new NetsolGetRequest(fai, true));
@@ -295,7 +295,7 @@ public class Bug20758Test extends AbstractConversionTest {
                 sequenceId = attachObj.getString(MailListField.ID.getKey());
             }
         }
-        
+
         return sequenceId;
     }
 

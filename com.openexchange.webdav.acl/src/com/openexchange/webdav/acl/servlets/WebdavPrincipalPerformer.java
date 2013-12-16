@@ -226,12 +226,8 @@ public class WebdavPrincipalPerformer implements SessionHolder{
         final AbstractAction defaultHeader = new WebdavDefaultHeaderAction();
         final AbstractAction ifMatch = new WebdavIfMatchAction();
 
-        if (logAction.isEnabled()) {
-            lifeCycle.setNext(logAction);
-            logAction.setNext(defaultHeader);
-        } else {
-            lifeCycle.setNext(defaultHeader);
-        }
+        lifeCycle.setNext(logAction);
+        logAction.setNext(defaultHeader);
         defaultHeader.setNext(ifMatch);
 
         AbstractAction a = ifMatch;

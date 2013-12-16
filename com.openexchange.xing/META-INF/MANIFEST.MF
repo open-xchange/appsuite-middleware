@@ -76,7 +76,8 @@ Import-Package: com.openexchange.capabilities,
  org.apache.http.util,
  org.json,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Export-Package: com.openexchange.xing,
  com.openexchange.xing.exception,
  com.openexchange.xing.session

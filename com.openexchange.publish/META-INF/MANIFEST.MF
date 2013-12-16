@@ -12,5 +12,6 @@ Import-Package: com.openexchange.context,
  com.openexchange.groupware.contexts,
  com.openexchange.i18n,
  com.openexchange.log,
- org.apache.commons.logging
+ org.apache.commons.logging,
+ org.slf4j
 Export-Package: com.openexchange.publish

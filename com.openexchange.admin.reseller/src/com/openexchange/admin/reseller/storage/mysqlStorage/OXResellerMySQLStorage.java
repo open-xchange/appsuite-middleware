@@ -62,7 +62,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import org.slf4j.Logger;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.OXResellerTools;
@@ -1160,8 +1159,11 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         if( restrictions == null ) {
             restrictions = new HashSet<Restriction>();
         }
-        if( ! restrictions.contains(Restriction.SUBADMIN_CAN_CREATE_SUBADMINS) ) {
-            restrictions.add(new Restriction(Restriction.SUBADMIN_CAN_CREATE_SUBADMINS, "false"));
+        {
+            Restriction subadminCanCreateSubadminsRestriction = new Restriction(Restriction.SUBADMIN_CAN_CREATE_SUBADMINS, "false");
+            if( ! restrictions.contains(subadminCanCreateSubadminsRestriction) ) { // Contains is solely performed by name
+                restrictions.add(subadminCanCreateSubadminsRestriction);
+            }
         }
         if (restrictions != null && restrictions.size() > 0) {
             Connection con = null;

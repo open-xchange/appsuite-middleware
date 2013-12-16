@@ -103,7 +103,7 @@ public class MonitoringMapConsistencyJob implements Job {
             int removed = 0;
             if (collection != null && !collection.isEmpty()) {
                 Set<String> clusteredJobs = new HashSet<String>(collection);
-                clusteredJobs.remove(localJobs);
+                clusteredJobs.removeAll(localJobs);
                 removed = clusteredJobs.size();
                 for (String job : clusteredJobs) {
                     monitoredJobs.remove(nodeName, job);

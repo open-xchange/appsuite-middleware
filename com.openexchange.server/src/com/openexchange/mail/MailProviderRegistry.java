@@ -160,7 +160,7 @@ public final class MailProviderRegistry {
      * Gets the mail provider appropriate for specified protocol.
      *
      * @param protocolName The mail protocol; e.g. <code>"imap"</code>
-     * @return The appropriate mail provider
+     * @return The appropriate mail provider or <code>null</code>
      */
     public static MailProvider getMailProvider(final String protocolName) {
         if (null == protocolName) {

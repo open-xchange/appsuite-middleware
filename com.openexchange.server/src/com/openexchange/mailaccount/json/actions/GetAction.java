@@ -49,14 +49,13 @@
 
 package com.openexchange.mailaccount.json.actions;
 
-import java.text.MessageFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.meta.MetaContributor;
 import com.openexchange.ajax.meta.MetaContributorRegistry;
@@ -91,7 +90,7 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "A JSON object representing the desired mail account. See mail account data.")
 public final class GetAction extends AbstractMailAccountAction implements MailAccountFields {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(GetAction.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(GetAction.class);
 
     public static final String ACTION = AJAXServlet.ACTION_GET;
 
@@ -159,7 +158,7 @@ public final class GetAction extends AbstractMailAccountAction implements MailAc
                 try {
                     contributor.contributeTo(mapp, id, session);
                 } catch (final Exception e) {
-                    LOG.warn(MessageFormat.format("Cannot contribute to entity (contributor={0}, entity={1})", contributor.getClass().getName(), Integer.valueOf(accountId)), e);
+                    LOG.warn("Cannot contribute to entity (contributor={}, entity={})", contributor.getClass().getName(), Integer.valueOf(accountId), e);
                 }
             }
             return mapp;

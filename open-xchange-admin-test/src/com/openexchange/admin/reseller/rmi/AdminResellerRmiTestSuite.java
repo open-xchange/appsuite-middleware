@@ -47,31 +47,27 @@
  *
  */
 
-package com.openexchange.ajax.mail.netsol;
+package com.openexchange.admin.reseller.rmi;
+
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+
 
 /**
- * {@link FolderAndID}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * RMI tests for admin reseller 
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4.2
  */
-public final class FolderAndID {
+@RunWith(Suite.class)
+@SuiteClasses({
+    OXResellerContextTest.class,
+    OXResellerInterfaceTest.class,
+    OXResellerUserTest.class
+})
+public class AdminResellerRmiTestSuite {
 
-	public final String folderId;
-
-	public final String id;
-
-	/**
-	 * Initializes a new {@link FolderAndID}
-	 */
-	public FolderAndID(final String folderId, final String id) {
-		super();
-		this.folderId = folderId;
-		this.id = id;
-	}
-
-	@Override
-	public String toString() {
-		return new StringBuilder(16).append("folder=").append(folderId).append(" id=").append(id).toString();
-	}
+    private AdminResellerRmiTestSuite() {
+    }
 }

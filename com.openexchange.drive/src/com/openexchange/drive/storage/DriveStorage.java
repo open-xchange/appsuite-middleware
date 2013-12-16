@@ -76,6 +76,7 @@ import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -496,6 +497,14 @@ public class DriveStorage {
      * @throws OXException
      */
     public List<File> getFilesInFolder(String folderID, boolean all, String pattern, List<Field> fields) throws OXException {
+        FileStorageFolder folder = getFolderAccess().getFolder(folderID);
+        if (null == folder) {
+            throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderID, rootFolderID.getAccountId(), rootFolderID.getService(),
+                session.getServerSession().getUserId(), session.getServerSession().getContextId());
+        }
+        if (null == folder.getOwnPermission() || FileStoragePermission.READ_OWN_OBJECTS > folder.getOwnPermission().getReadPermission()) {
+            return Collections.emptyList();
+        }
         SearchIterator<File> filesIterator = getFilesIterator(folderID, pattern, null != fields ? fields : DriveConstants.FILE_FIELDS);
         if (all) {
             return Filter.apply(filesIterator, new FileNameFilter() {

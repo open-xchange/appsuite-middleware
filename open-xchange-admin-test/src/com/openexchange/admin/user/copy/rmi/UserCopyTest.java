@@ -56,14 +56,14 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import junit.framework.Assert;
 import org.junit.Test;
-import com.openexchange.admin.rmi.AbstractTest;
+import com.openexchange.admin.rmi.AbstractRMITest;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 
-public class UserCopyTest extends AbstractTest {
+public class UserCopyTest extends AbstractRMITest {
 
     private static final String PASSWORD = "secret";
     private static final String OXADMINMASTER = "oxadminmaster";
@@ -91,7 +91,7 @@ public class UserCopyTest extends AbstractTest {
             Assert.assertEquals("The given source user object is null", e.getMessage());
         }
     }
-    
+
     @Test
     public final void testMoveUserNoUserId() throws Throwable {
         final OXUserCopyInterface oxu = getUserMoveClient();
@@ -106,7 +106,7 @@ public class UserCopyTest extends AbstractTest {
             Assert.assertEquals("The given source user object has no id", e.getMessage());
         }
     }
-    
+
     @Test
     public final void testMoveUserNoSrcContext() throws Throwable {
         final OXUserCopyInterface oxu = getUserMoveClient();
@@ -121,7 +121,7 @@ public class UserCopyTest extends AbstractTest {
             Assert.assertEquals("Client sent invalid source context data object", e.getMessage());
         }
     }
-    
+
     @Test
     public final void testMoveUserNoSrcContextId() throws Throwable {
         final OXUserCopyInterface oxu = getUserMoveClient();
@@ -136,7 +136,7 @@ public class UserCopyTest extends AbstractTest {
             Assert.assertEquals("Client sent invalid source context data object", e.getMessage());
         }
     }
-    
+
     @Test
     public final void testMoveUserNoDestContext() throws Throwable {
         final OXUserCopyInterface oxu = getUserMoveClient();
@@ -151,7 +151,7 @@ public class UserCopyTest extends AbstractTest {
             Assert.assertEquals("Client sent invalid destination context data object", e.getMessage());
         }
     }
-    
+
     @Test
     public final void testMoveUserNoDestContextId() throws Throwable {
         final OXUserCopyInterface oxu = getUserMoveClient();
@@ -166,7 +166,7 @@ public class UserCopyTest extends AbstractTest {
             Assert.assertEquals("Client sent invalid destination context data object", e.getMessage());
         }
     }
-    
+
     private OXUserCopyInterface getUserMoveClient() throws MalformedURLException, RemoteException, NotBoundException {
         return (OXUserCopyInterface) Naming.lookup(getRMIHostUrl()+ OXUserCopyInterface.RMI_NAME);
     }

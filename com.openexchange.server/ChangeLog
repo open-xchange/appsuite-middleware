@@ -1,3 +1,18 @@
+* 2013-12-16 - marcus.klein@open-xchange.com
+
+ - Fix for bug 30318: Post installation scripts do not create any new files anymore and modify instead the existing ones. This keeps
+   permissions as the are.
+
+* 2013-12-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30302: Added missing "org.slf4j" package import to bundle "c.o.freebusy.json"
+
+* 2013-12-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30294: Properly detect availability of spam handler(s)
+ - Fix for bug 30305: Added null guard for values passed to MDC map
+ - Fix for bug 30306: Always include logging WebDAV handler in handler cycle to support dynamically changing log level
+
 * 2013-12-13 - marc.arens@open-xchange.com
 
  - Fix for bug 30128: Implement service to allow cascading cleanup per ID

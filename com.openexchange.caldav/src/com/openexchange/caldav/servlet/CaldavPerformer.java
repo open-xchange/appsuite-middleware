@@ -248,12 +248,8 @@ public class CaldavPerformer implements SessionHolder {
         lifeCycle.setBulkLoader(factory);
         final AbstractAction defaultHeader = new WebdavDefaultHeaderAction();
         defaultHeader.setBulkLoader(factory);
-        if (logAction.isEnabled()) {
-            lifeCycle.setNext(logAction);
-            logAction.setNext(defaultHeader);
-        } else {
-            lifeCycle.setNext(defaultHeader);
-        }
+        lifeCycle.setNext(logAction);
+        logAction.setNext(defaultHeader);
 
         AbstractAction a = defaultHeader;
 

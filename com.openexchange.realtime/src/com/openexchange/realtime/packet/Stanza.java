@@ -597,10 +597,10 @@ public abstract class Stanza implements Serializable {
         }
         final ID thisTo = to;
         if (thisTo == null) {
-            if (other.selector != null) {
+            if (other.to != null) {
                 return false;
             }
-        } else if (!thisTo.equals(other.selector)) {
+        } else if (!thisTo.equals(other.to)) {
             return false;
         }
         return true;

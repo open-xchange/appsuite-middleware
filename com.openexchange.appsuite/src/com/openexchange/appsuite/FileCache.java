@@ -61,7 +61,7 @@ import com.openexchange.java.Streams;
 /**
  * An in-memory file cache for small files (mostly UI files). Since all data is held in RAM, this class should only be used as a singleton.
  * This pretty much restricts it to only storing publicly accessible files (e.g. the UI).
- * 
+ *
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
 public class FileCache {
@@ -139,7 +139,7 @@ public class FileCache {
 
     /**
      * Returns the file contents as a byte array.
-     * 
+     *
      * @param path The file to return.
      * @param filter An optional Filter which processes loaded file data.
      * @return The file contents as a byte array, or null if the file does not exist or is not a normal file.
@@ -156,7 +156,7 @@ public class FileCache {
                 continue;
             }
             if (f.isFile()) {
-                CacheEntry entry = cache.get(f);
+                CacheEntry entry = cache.get(path);
                 if (entry == null) {
                     entry = new CacheEntry(f);
                     cache.put(path, entry);

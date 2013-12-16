@@ -18,5 +18,6 @@ Import-Package: com.openexchange.exception,
  com.openexchange.session,
  com.openexchange.tools.session,
  org.apache.commons.logging,
- org.osgi.framework;version="1.3.0"
+ org.osgi.framework,
+ org.slf4j
 Export-Package: com.openexchange.realtime.events

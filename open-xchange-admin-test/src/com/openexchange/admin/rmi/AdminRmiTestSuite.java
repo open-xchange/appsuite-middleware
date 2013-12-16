@@ -47,81 +47,35 @@
  *
  */
 
-package com.openexchange.admin.console.util;
+package com.openexchange.admin.rmi;
 
-import static org.junit.Assert.assertTrue;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
-import org.junit.Test;
-
-import com.openexchange.admin.console.AbstractTest;
-import com.openexchange.admin.console.BasicCommandlineOptions;
-import com.openexchange.admin.console.util.server.ListServer;
 
 /**
- * @author cutmasta
- *
+ * RMI tests for core admin rmi
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.4.2
  */
-public class ListServertest extends AbstractTest {
-    
-    @Test
-    public void testListServer() {
-        
-        resetBuffers();
-        
-        new ListServer(getMasterCredentialsOptionData()){
-            @Override
-            protected void sysexit(int exitCode) {
-                ListServertest.this.returnCode = exitCode;
-            }
-        };
-        
-        assertTrue("Expected 0 as return code!",0==this.returnCode);
+@RunWith(Suite.class)
+@SuiteClasses({
+    AdditionalRMITests.class,
+    AdminCoreTest.class,
+    Bug16865Test.class,
+    Bug19379Test.class,
+    Bug27065Test.class,
+    ContextTest.class,
+    GroupTest.class,
+    ResourceTest.class,
+    TaskMgmtTest.class,
+    UserTest.class,
+    UtilTest.class
+})
+public class AdminRmiTestSuite {
+
+    private AdminRmiTestSuite() {
     }
-    
-    @Test
-    public void testListServerCSV() {
-        
-        resetBuffers();
-        
-        new ListServer(getCSVMasterOptionData()){
-            @Override
-            protected void sysexit(int exitCode) {
-                ListServertest.this.returnCode = exitCode;
-            }
-        };
-        
-        assertTrue("Expected 0 as return code!",0==this.returnCode);
-    }
-    
-    @Test
-    public void testListServerInvalidCredentials() {
-        
-        resetBuffers();
-        
-        new ListServer(getWrongMasterCredentialsOptionData()){
-            @Override
-            protected void sysexit(int exitCode) {
-                ListServertest.this.returnCode = exitCode;
-            }
-        };
-        
-        assertTrue("Expected invalid credentials as return code!",BasicCommandlineOptions.SYSEXIT_INVALID_CREDENTIALS==this.returnCode);
-    }
-    
-    @Test
-    public void testListServerUnknownOption() {
-        
-        resetBuffers();
-        
-        new ListServer(getUnknownOptionData()){
-            @Override
-            protected void sysexit(int exitCode) {
-                ListServertest.this.returnCode = exitCode;
-            }
-        };
-        
-        assertTrue("Expected unknown options as return code!",BasicCommandlineOptions.SYSEXIT_UNKNOWN_OPTION==this.returnCode);
-    }
-    
-    
 }

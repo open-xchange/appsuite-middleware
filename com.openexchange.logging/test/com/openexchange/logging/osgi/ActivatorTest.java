@@ -49,6 +49,9 @@
 
 package com.openexchange.logging.osgi;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,6 +68,8 @@ import org.slf4j.LoggerFactory;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.jul.LevelChangePropagator;
+import ch.qos.logback.classic.spi.LoggerContextListener;
 import com.openexchange.test.mock.MockUtils;
 
 /**
@@ -127,10 +132,83 @@ public class ActivatorTest {
         Activator activatorSpy = Mockito.spy(activator);
         Mockito.doNothing().when(activatorSpy).overrideLoggerLevels();
         Mockito.doNothing().when(activatorSpy).configureJavaUtilLogging();
+        Mockito.doNothing().when(activatorSpy).installJulLevelChangePropagator();
         Mockito.doNothing().when(activatorSpy).registerLoggingConfigurationMBean(bundleContext);
 
         activatorSpy.start(bundleContext);
 
         Mockito.verify(activatorSpy, Mockito.times(1)).overrideLoggerLevels();
     }
+
+    @Test
+    public void testStartBundle_ensureInstallJulLevelChangePropagatorCalled_Successfull() throws Exception {
+        BundleContext bundleContext = PowerMockito.mock(BundleContext.class);
+        Bundle bundle = PowerMockito.mock(Bundle.class);
+        Mockito.when(bundleContext.getBundle()).thenReturn(bundle);
+
+        Activator activatorSpy = Mockito.spy(activator);
+        Mockito.doNothing().when(activatorSpy).overrideLoggerLevels();
+        Mockito.doNothing().when(activatorSpy).configureJavaUtilLogging();
+        Mockito.doNothing().when(activatorSpy).installJulLevelChangePropagator();
+        Mockito.doNothing().when(activatorSpy).registerLoggingConfigurationMBean(bundleContext);
+
+        activatorSpy.start(bundleContext);
+
+        Mockito.verify(activatorSpy, Mockito.times(1)).installJulLevelChangePropagator();
+    }
+
+    @Test
+    public void testInstallJulLevelChangePropagator_propagatorNotAvailable_AddPropagator() {
+        Activator activatorSpy = Mockito.spy(activator);
+        Mockito.doReturn(false).when(activatorSpy).hasInstanceOf(Matchers.anyCollection(), Matchers.any(Class.class));
+
+        activatorSpy.installJulLevelChangePropagator();
+
+        Mockito.verify(loggerContext, Mockito.atLeast(1)).addListener((LoggerContextListener) Matchers.any());
+    }
+
+    @Test
+    public void testInstallJulLevelChangePropagator_propagatorAvailable_DoNothing() {
+        Activator activatorSpy = Mockito.spy(activator);
+        Mockito.doReturn(true).when(activatorSpy).hasInstanceOf(Matchers.anyCollection(), Matchers.any(Class.class));
+
+        activatorSpy.installJulLevelChangePropagator();
+
+        Mockito.verify(loggerContext, Mockito.never()).addListener((LoggerContextListener) Matchers.any());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testInstallJulLevelChangePropagator_collectionNull_throwException() {
+        activator.hasInstanceOf(null, LevelChangePropagator.class);
+    }
+
+    @Test
+    public void testInstallJulLevelChangePropagator_classNullCollectionEmpty_returnFalse() {
+        boolean hasInstanceOf = activator.hasInstanceOf(new ArrayList<LoggerContextListener>(), null);
+
+        Assert.assertFalse(hasInstanceOf);
+    }
+
+    @Test
+    public void testInstallJulLevelChangePropagator_classNullCollectionIncludesLogger_returnFalse() {
+        LoggerContextListener listener = new LevelChangePropagator();
+        List<LoggerContextListener> collection = new ArrayList<LoggerContextListener>();
+        collection.add(listener);
+
+        boolean hasInstanceOf = activator.hasInstanceOf(collection, null);
+
+        Assert.assertFalse(hasInstanceOf);
+    }
+
+    @Test
+    public void testInstallJulLevelChangePropagator_everythingFine_returnTrue() {
+        LoggerContextListener listener = new LevelChangePropagator();
+        List<LoggerContextListener> collection = new ArrayList<LoggerContextListener>();
+        collection.add(listener);
+
+        boolean hasInstanceOf = activator.hasInstanceOf(collection, LevelChangePropagator.class);
+
+        Assert.assertTrue(hasInstanceOf);
+    }
+
 }

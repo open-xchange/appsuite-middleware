@@ -41,7 +41,6 @@
 package com.sun.mail.imap.protocol;
 
 import java.util.Date;
-import java.util.TimeZone;
 import java.util.Locale;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -84,7 +83,9 @@ public class INTERNALDATE implements Item {
 	if (s == null)
 	    throw new ParsingException("INTERNALDATE is NIL");
 	try {
-	    date = mailDateFormat.parse(s);
+	    synchronized (mailDateFormat) {
+            date = mailDateFormat.parse(s);
+        }
 	} catch (ParseException pex) {
 	    throw new ParsingException("INTERNALDATE parse error");
 	}

@@ -743,9 +743,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     public boolean isSpamEnabled() {
         if (null == spamHandlerFound) {
             try {
-                final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(
-                    MailAccountStorageService.class,
-                    true);
+                final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
                 // TODO: Use account ID later on!!! Currently default mail account is passed.
                 spamHandlerFound = Boolean.valueOf(SpamHandlerRegistry.hasSpamHandler(storage.getDefaultMailAccount(userId, cid)));
             } catch (final OXException e) {

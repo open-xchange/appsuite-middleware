@@ -80,6 +80,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public abstract class DeferredActivator implements BundleActivator, ServiceLookup {
 
+    /** The logger. */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeferredActivator.class);
 
     private static final DeferredActivatorServiceStateLookup STATE_LOOKUP = new DeferredActivatorServiceStateLookup();
