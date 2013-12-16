@@ -80,7 +80,7 @@ public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup {
             MultiTask<Void> cleanUpTask = new MultiTask<Void>(new CleanupDispatcher(id, cleanupScopes), clusterMembers);
             executorService.execute(cleanUpTask);
         } catch (Exception e) {
-            LOG.error("", e)
+            LOG.error("", e);
         }
     }
 
