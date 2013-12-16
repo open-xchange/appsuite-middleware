@@ -202,7 +202,7 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
         int digit;
 
         if (i < max) {
-            digit = digitFor(s.charAt(i++));
+            digit = digit(s.charAt(i++));
             if (digit < 0) {
                 return -1;
             }
@@ -212,7 +212,7 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
             /*
              * Accumulating negatively avoids surprises near MAX_VALUE
              */
-            digit = digitFor(s.charAt(i++));
+            digit = digit(s.charAt(i++));
             if (digit < 0) {
                 return -1;
             }
@@ -228,7 +228,7 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
         return -result;
     }
 
-    private static int digitFor(final char c) {
+    private static int digit(final char c) {
         switch (c) {
         case '0':
             return 0;
