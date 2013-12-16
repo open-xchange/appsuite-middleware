@@ -65,7 +65,6 @@ import org.slf4j.LoggerFactory;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.classic.spi.TurboFilterList;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
 import com.openexchange.log.LogProperties.Name;
@@ -75,24 +74,23 @@ import com.openexchange.management.MBeanMethodAnnotation;
  * {@link LogbackConfiguration}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class LogbackConfiguration extends StandardMBean implements LogbackConfigurationMBean {
 
     private static final Logger LOG = LoggerFactory.getLogger(LogbackConfiguration.class);
 
-    private final LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+    // -------------------------------------------------------------------------------------------- //
 
-    private final JoranConfigurator configurator = new JoranConfigurator();
-
-    private final Map<String, TurboFilter> turboFilterCache = new HashMap<String, TurboFilter>();
-
-    private final Map<String, Level> dynamicallyModifiedLoggers = new HashMap<String, Level>();
-
-    private final Map<String, String> methodDescriptions = new HashMap<String, String>();
-
-    private final Map<String, String[]> methodParameters = new HashMap<String, String[]>();
-
-    private final Map<String, String[]> methodParameterDescriptions = new HashMap<String, String[]>();
+    private final LoggerContext loggerContext;
+    private final JoranConfigurator configurator;
+    private final Map<String, Level> dynamicallyModifiedLoggers;
+    private final Map<String, String> methodDescriptions;
+    private final Map<String, String[]> methodParameters;
+    private final Map<String, String[]> methodParameterDescriptions;
+    private final TurboFilterCache turboFilterCache;
+    private final RankingAwareTurboFilterList rankingAwareTurboFilterList;
+    private final IncludeStackTraceServiceImpl traceServiceImpl;
 
     /**
      * Initializes a new {@link LogbackConfiguration}.
@@ -101,12 +99,23 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
      *
      * @throws NotCompliantMBeanException
      */
-    public LogbackConfiguration() throws NotCompliantMBeanException {
+    public LogbackConfiguration(final LoggerContext loggerContext, final RankingAwareTurboFilterList rankingAwareTurboFilterList, final IncludeStackTraceServiceImpl traceServiceImpl) throws NotCompliantMBeanException {
         super(LogbackConfigurationMBean.class);
+        this.loggerContext = loggerContext;
+        this.rankingAwareTurboFilterList = rankingAwareTurboFilterList;
+        this.traceServiceImpl = traceServiceImpl;
 
-        if (loggerContext.getTurboFilterList().size() > 0) {
-            loggerContext.getTurboFilterList().get(0).setName("DEFAULT");
-        }
+        // Initialize members
+        configurator = new JoranConfigurator();
+        dynamicallyModifiedLoggers = new HashMap<String, Level>();
+        methodDescriptions = new HashMap<String, String>();
+        methodParameters = new HashMap<String, String[]>();
+        methodParameterDescriptions = new HashMap<String, String[]>();
+
+        // Initialize & add turbo filter cache to list
+        final TurboFilterCache turboFilterCache = new TurboFilterCache();
+        this.turboFilterCache = turboFilterCache;
+        rankingAwareTurboFilterList.addTurboFilter(turboFilterCache);
 
         configurator.setContext(loggerContext);
 
@@ -126,33 +135,38 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         }
     }
 
+    /**
+     * Disposes this instance.
+     */
+    public void dispose() {
+        rankingAwareTurboFilterList.removeTurboFilter(turboFilterCache);
+        turboFilterCache.clear();
+    }
+
     @Override
     public void filterContext(int contextID) {
-        LOG.debug("New context filter created for context with ID \"{}\" and policy \"ACCEPT\"", contextID);
+        LOG.debug("New context filter created for context with ID \"{}\" and policy \"ACCEPT\"", Integer.valueOf(contextID));
 
         createExtendedMDCFilter(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID), FilterReply.ACCEPT);
     }
 
     @Override
     public void filterUser(int userID, int contextID) {
-        LOG.debug("New user filter created for user with ID \"{}\", context with ID \"{}\" and policy \"ACCEPT\"", userID, contextID);
+        LOG.debug("New user filter created for user with ID \"{}\", context with ID \"{}\" and policy \"ACCEPT\"", Integer.valueOf(userID), Integer.valueOf(contextID));
 
-        StringBuilder builder = new StringBuilder();
-        builder.append(createKey(Name.SESSION_USER_ID.getName(), Integer.toString(userID))).append(":").append(
-            createKey(Name.SESSION_CONTEXT_ID.getName(), (Integer.toString(contextID))));
+        StringBuilder builder = new StringBuilder(2048).append(createKey(Name.SESSION_USER_ID.getName(), Integer.toString(userID)));
+        builder.append(":").append(createKey(Name.SESSION_CONTEXT_ID.getName(), (Integer.toString(contextID))));
         String key = builder.toString();
+        builder = null;
 
-        if (!turboFilterCache.containsKey(key)) {
-            ExtendedMDCFilter filter = new ExtendedMDCFilter();
-            filter.addTuple(Name.SESSION_USER_ID.getName(), Integer.toString(userID));
-            filter.addTuple(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID));
-            filter.setOnMatch(FilterReply.ACCEPT);
-            filter.setName(key);
+        ExtendedMDCFilter filter = new ExtendedMDCFilter();
+        filter.addTuple(Name.SESSION_USER_ID.getName(), Integer.toString(userID));
+        filter.addTuple(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID));
+        filter.setOnMatch(FilterReply.ACCEPT);
+        filter.setName(key);
 
-            turboFilterCache.put(builder.toString(), filter);
-            loggerContext.addTurboFilter(filter);
-        } else {
-            LOG.debug("Duplicate user filter for user with ID \"{}\", context with ID \"{}\" and policy \"ACCEPT\"", userID, contextID);
+        if (!turboFilterCache.putIfAbsent(key, filter)) {
+            LOG.debug("Duplicate user filter for user with ID \"{}\", context with ID \"{}\" and policy \"ACCEPT\"", Integer.valueOf(userID), Integer.valueOf(contextID));
         }
     }
 
@@ -190,16 +204,15 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     @Override
     public void removeContextFilter(int contextID) {
         removeFilter(createKey(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID)));
-        LOG.debug("Removed context filter with context ID \"{}\"", contextID);
+        LOG.debug("Removed context filter with context ID \"{}\"", Integer.valueOf(contextID));
     }
 
     @Override
     public void removeUserFilter(int userID, int contextID) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(createKey(Name.SESSION_USER_ID.getName(), Integer.toString(userID))).append(":").append(
-            createKey(Name.SESSION_CONTEXT_ID.getName(), (Integer.toString(contextID))));
+        StringBuilder builder = new StringBuilder(2048).append(createKey(Name.SESSION_USER_ID.getName(), Integer.toString(userID)));
+        builder.append(":").append(createKey(Name.SESSION_CONTEXT_ID.getName(), (Integer.toString(contextID))));
         removeFilter(builder.toString());
-        LOG.debug("Removed user filter for user with ID \"{}\", context with ID \"{}\" and policy \"ACCEPT\"", userID, contextID);
+        LOG.debug("Removed user filter for user with ID \"{}\", context with ID \"{}\" and policy \"ACCEPT\"", Integer.valueOf(userID), Integer.valueOf(contextID));
     }
 
     @Override
@@ -219,8 +232,11 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     @Override
     public Set<String> listFilters() {
         Set<String> filters = new HashSet<String>();
-        for(TurboFilter tf  : loggerContext.getTurboFilterList()) {
-            filters.add(tf.getName());
+        for (TurboFilter tf : loggerContext.getTurboFilterList()) {
+            final String name = tf.getName();
+            if (null != name) {
+                filters.add(name);
+            }
         }
         return filters;
     }
@@ -228,13 +244,9 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
 
     @Override
     public synchronized void removeAllFilters() {
-        TurboFilterList list = loggerContext.getTurboFilterList();
-        StringBuilder builder = new StringBuilder();
-        for (String key : turboFilterCache.keySet()) {
-            list.remove(turboFilterCache.get(key));
-            LOG.debug("Removing filter {0}", key);
-        }
+        rankingAwareTurboFilterList.clear();
         turboFilterCache.clear();
+        LOG.debug("Removed all filters");
     }
 
     @Override
@@ -258,10 +270,14 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     }
 
     @Override
+    public void includeStackTraceForUser(final int userID, final int contextID, final boolean enable) {
+        traceServiceImpl.addTuple(userID, contextID, enable);
+    }
+
+    @Override
     protected final String getDescription(MBeanInfo info) {
         return DESCRIPTION;
     }
-
 
     @Override
     protected final String getDescription(MBeanOperationInfo info) {
@@ -297,43 +313,29 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
 
     /**
      * Create an MDCFilter based on the specified key/value/filter
-     * @param key
-     * @param value
-     * @param onMatch
-     * @return
      */
     private final void createExtendedMDCFilter(String key, String value, FilterReply onMatch) {
-        String k = createKey(key, value);
-        if (!turboFilterCache.containsKey(k)) {
-            ExtendedMDCFilter filter = new ExtendedMDCFilter();
-            filter.addTuple(key, value);
-            filter.setOnMatch(onMatch);
-            filter.setName(k);
+        String sKey = createKey(key, value);
 
-            turboFilterCache.put(createKey(key, value), filter);
-            loggerContext.addTurboFilter(filter);
-        } else {
+        ExtendedMDCFilter filter = new ExtendedMDCFilter();
+        filter.addTuple(key, value);
+        filter.setOnMatch(onMatch);
+        filter.setName(sKey);
+
+        if (!turboFilterCache.putIfAbsent(sKey, filter)) {
             LOG.debug("Duplicate filter for \"{}\" with ID \"{}\" and policy \"ACCEPT\"", key, value);
         }
     }
 
     /**
      * Remove the specified filter
-     * @param key
-     * @param value
      */
     private final void removeFilter(String key) {
-        TurboFilterList list = loggerContext.getTurboFilterList();
-        if (list.remove(turboFilterCache.get(key))) {
-            turboFilterCache.remove(key);
-        }
+        turboFilterCache.remove(key);
     }
 
     /**
-     * Create key
-     * @param key
-     * @param value
-     * @return
+     * Creates the appropriate key.
      */
     private String createKey(String key, String value) {
         StringBuilder builder = new StringBuilder();
@@ -352,4 +354,5 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
        builder.append("Logger: ").append(logger.getName()).append(", Level: ").append(logger.getLevel());
        return builder.toString();
     }
+
 }

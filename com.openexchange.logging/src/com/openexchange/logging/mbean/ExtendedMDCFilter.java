@@ -66,54 +66,60 @@ import ch.qos.logback.core.spi.FilterReply;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class ExtendedMDCFilter extends TurboFilter {
-    
-    private Set<Tuple> tuples = new HashSet<Tuple>();
-    
+
+    private final Set<Tuple> tuples;
     private FilterReply onMatch;
-    
-    /* (non-Javadoc)
-     * @see ch.qos.logback.classic.turbo.TurboFilter#decide(org.slf4j.Marker, ch.qos.logback.classic.Logger, ch.qos.logback.classic.Level, java.lang.String, java.lang.Object[], java.lang.Throwable)
+
+    /**
+     * Initializes a new {@link ExtendedMDCFilter}.
      */
+    public ExtendedMDCFilter() {
+        super();
+        tuples = new HashSet<Tuple>();
+    }
+
     @Override
     public FilterReply decide(Marker marker, Logger logger, Level level, String format, Object[] params, Throwable th) {
-        
+
         for(Tuple t : tuples) {
             String v = MDC.get(t.getKey());
-            if (v == null)
+            if (v == null) {
                 return FilterReply.NEUTRAL;
-            else if (!v.equals(t.getValue()))
+            } else if (!v.equals(t.getValue())) {
                 return FilterReply.NEUTRAL;
+            }
         }
-            
+
         return onMatch;
     }
-    
+
     /**
-     * Add a tuple for this filter
-     * @param k
-     * @param v
+     * Adds a tuple for this filter
+     *
+     * @param k The tuple's key to query MDC map
+     * @param v The tuple's expected value
      */
     public void addTuple(String k, String v) {
         tuples.add(new Tuple(k,v));
     }
-    
+
     /**
-     * Set on match rule
-     * @param fr
+     * Sets on match rule
+     *
+     * @param fr The filter reply
      */
     public final void setOnMatch(FilterReply fr) {
         onMatch = fr;
     }
-    
+
     /**
      * Nested {@link Tuple} class.
-     *
-     * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
      */
     private class Tuple {
-        private String key;
-        private String value;
-        
+
+        private final String key;
+        private final String value;
+
         /**
          * Initializes a new {@link Tuple}.
          * @param k
@@ -123,11 +129,7 @@ public class ExtendedMDCFilter extends TurboFilter {
             key = k;
             value = v;
         }
-        
-        
-        /* (non-Javadoc)
-         * @see java.lang.Object#hashCode()
-         */
+
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -138,34 +140,37 @@ public class ExtendedMDCFilter extends TurboFilter {
             return result;
         }
 
-
-        /* (non-Javadoc)
-         * @see java.lang.Object#equals(java.lang.Object)
-         */
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             Tuple other = (Tuple) obj;
-            if (!getOuterType().equals(other.getOuterType()))
+            if (!getOuterType().equals(other.getOuterType())) {
                 return false;
+            }
             if (key == null) {
-                if (other.key != null)
+                if (other.key != null) {
                     return false;
-            } else if (!key.equals(other.key))
+                }
+            } else if (!key.equals(other.key)) {
                 return false;
+            }
             if (value == null) {
-                if (other.value != null)
+                if (other.value != null) {
                     return false;
-            } else if (!value.equals(other.value))
+                }
+            } else if (!value.equals(other.value)) {
                 return false;
+            }
             return true;
         }
-
 
         /**
          * Gets the key
@@ -192,7 +197,7 @@ public class ExtendedMDCFilter extends TurboFilter {
         private ExtendedMDCFilter getOuterType() {
             return ExtendedMDCFilter.this;
         }
-        
+
     }
 
 }

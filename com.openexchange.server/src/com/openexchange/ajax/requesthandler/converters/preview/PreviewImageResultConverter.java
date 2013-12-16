@@ -276,7 +276,6 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
         "application/force-download",
         "application/binary",
         "application/x-download",
-        "application/octet-stream",
         "application/vnd",
         "application/vnd.ms-word.document.12n",
         "application/vnd.ms-word.document.12",

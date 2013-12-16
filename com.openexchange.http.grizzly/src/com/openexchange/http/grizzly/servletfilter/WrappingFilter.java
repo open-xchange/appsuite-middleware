@@ -53,6 +53,7 @@ import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapp
 import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper.HTTP_SCHEME;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -67,6 +68,7 @@ import com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper;
 import com.openexchange.http.grizzly.http.servlet.HttpServletResponseWrapper;
 import com.openexchange.http.grizzly.util.IPTools;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 
 /**
@@ -183,6 +185,12 @@ public class WrappingFilter implements Filter {
             if (null != action) {
                 LogProperties.put(LogProperties.Name.AJAX_ACTION, action);
             }
+
+            String trackingId = request.getParameter("trackingId");
+            if (trackingId == null) {
+                trackingId = UUIDs.getUnformattedString(UUID.randomUUID());
+            }
+            LogProperties.putProperty(LogProperties.Name.REQUEST_TRACKING_ID, trackingId);
         }
 
         chain.doFilter(httpServletRequestWrapper, httpServletResponseWrapper);

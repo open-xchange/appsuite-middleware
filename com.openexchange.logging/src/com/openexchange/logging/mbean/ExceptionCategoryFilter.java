@@ -51,29 +51,91 @@ package com.openexchange.logging.mbean;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Marker;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
+import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.Category.EnumType;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogProperties;
 
 /**
  * {@link ExceptionCategoryFilter}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ExceptionCategoryFilter extends TurboFilter {
+public class ExceptionCategoryFilter extends ExtendedTurboFilter {
 
-    private static Set<Category.EnumType> categories = new HashSet<Category.EnumType>();
+    /** Dummy object */
+    private static final Object PRESENT = new Object();
+
+    /** The map used to manage categories */
+    private static final ConcurrentMap<Category.EnumType, Object> CATEGORIES = new ConcurrentHashMap<Category.EnumType, Object>();
+
+    private static String generateName() {
+        final ConcurrentMap<EnumType, Object> categories = CATEGORIES;
+        if (categories.isEmpty()) {
+            return ExceptionCategoryFilter.class.getSimpleName();
+        }
+
+        final StringBuilder nameBuilder = new StringBuilder(1024).append(ExceptionCategoryFilter.class.getSimpleName());
+        boolean added = false;
+        for (final Category.EnumType category : categories.keySet()) {
+            if (null != category) {
+                if (!added) {
+                    nameBuilder.append(':');
+                    added = true;
+                }
+                nameBuilder.append(category.getName());
+            }
+        }
+        return nameBuilder.toString();
+    }
+
+    // ----------------------------------------------------------------------------- //
+
+    private final IncludeStackTraceService traceService;
+
+    /**
+     * Initializes a new {@link ExceptionCategoryFilter}.
+     */
+    public ExceptionCategoryFilter(final IncludeStackTraceService traceService) {
+        super();
+        this.traceService = traceService;
+    }
+
+    /**
+     * Adapts filter name to changed category set.
+     */
+    public void adaptName() {
+        setName(generateName());
+    }
+
+    @Override
+    public int getRanking() {
+        // Return default ranking
+        return DEFAULT_RANKING;
+    }
 
     @Override
     public FilterReply decide(Marker marker, Logger logger, Level level, String format, Object[] params, Throwable t) {
         if (OXException.class.isInstance(t)) {
             Category category = ((OXException) t).getCategory();
-            if (ExceptionCategoryFilter.categories.contains(category.getType())) {
-                t.setStackTrace(new StackTraceElement[] {});
+            if (ExceptionCategoryFilter.CATEGORIES.containsKey(category.getType())) {
+                try {
+                    final int contextId = getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
+                    final int userId = getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
+                    if (userId <= 0 || contextId <= 0 || !traceService.includeStackTraceOnError(userId, contextId)) {
+                        t.setStackTrace(new StackTraceElement[] {});
+                    }
+                } catch (final Exception e) {
+                    t.setStackTrace(new StackTraceElement[] {});
+                }
             }
         }
 
@@ -81,10 +143,10 @@ public class ExceptionCategoryFilter extends TurboFilter {
     }
 
     public static void setCategories(Set<String> categories) {
-        ExceptionCategoryFilter.categories.clear();
+        ExceptionCategoryFilter.CATEGORIES.clear();
         for (String category : categories) {
             try {
-            ExceptionCategoryFilter.categories.add(Category.EnumType.valueOf(Category.EnumType.class, category));
+            ExceptionCategoryFilter.CATEGORIES.put(Category.EnumType.valueOf(Category.EnumType.class, category), PRESENT);
             } catch (IllegalArgumentException e) {
                 //Skip this value
             }
@@ -93,18 +155,103 @@ public class ExceptionCategoryFilter extends TurboFilter {
 
     public static void setCategories(String categories) {
         Set<String> c = new HashSet<String>();
-        for (String category : categories.split(",")) {
+        for (String category : categories.split(" *, *")) {
             c.add(category.trim());
         }
         setCategories(c);
     }
-    
+
     public static String getCategories() {
         StringBuilder sb = new StringBuilder();
-        for (Category.EnumType c : categories) {
+        for (Category.EnumType c : CATEGORIES.keySet()) {
             sb.append(c.getName()).append(", ");
         }
         return sb.substring(0, sb.length()-2);
     }
 
+    /**
+     * The radix for base <code>10</code>.
+     */
+    private static final int RADIX = 10;
+
+    /**
+     * Parses a positive <code>int</code> value from passed {@link String} instance.
+     *
+     * @param s The string to parse
+     * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
+     */
+    private static final int getUnsignedInteger(final String s) {
+        if (s == null) {
+            return -1;
+        }
+
+        final int max = s.length();
+
+        if (max <= 0) {
+            return -1;
+        }
+        if (s.charAt(0) == '-') {
+            return -1;
+        }
+
+        int result = 0;
+        int i = 0;
+
+        final int limit = -Integer.MAX_VALUE;
+        final int multmin = limit / RADIX;
+        int digit;
+
+        if (i < max) {
+            digit = digitFor(s.charAt(i++));
+            if (digit < 0) {
+                return -1;
+            }
+            result = -digit;
+        }
+        while (i < max) {
+            /*
+             * Accumulating negatively avoids surprises near MAX_VALUE
+             */
+            digit = digitFor(s.charAt(i++));
+            if (digit < 0) {
+                return -1;
+            }
+            if (result < multmin) {
+                return -1;
+            }
+            result *= RADIX;
+            if (result < limit + digit) {
+                return -1;
+            }
+            result -= digit;
+        }
+        return -result;
+    }
+
+    private static int digitFor(final char c) {
+        switch (c) {
+        case '0':
+            return 0;
+        case '1':
+            return 1;
+        case '2':
+            return 2;
+        case '3':
+            return 3;
+        case '4':
+            return 4;
+        case '5':
+            return 5;
+        case '6':
+            return 6;
+        case '7':
+            return 7;
+        case '8':
+            return 8;
+        case '9':
+            return 9;
+        default:
+            return -1;
+        }
+    }
 }
