@@ -94,7 +94,7 @@ public class StatisticToolsTest extends AbstractTest {
             }
         };
         statisticTools.start(new String[] { "-x" }, "showruntimestats");
-        assertEquals("Expected 0 as return code!", 0, this.returnCode);
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeXchange);
     }
 
     @Test
@@ -108,7 +108,7 @@ public class StatisticToolsTest extends AbstractTest {
             }
         };
         statisticTools.start(new String[] { "-a" }, "showruntimestats");
-        assertEquals("Expected 0 as return code!", 0, this.returnCode);
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeAll);
     }
 
     @Test
@@ -122,7 +122,7 @@ public class StatisticToolsTest extends AbstractTest {
             }
         };
         statisticTools.start(new String[] { "-p" }, "showruntimestats");
-        assertEquals("Expected 0 as return code!", 0, this.returnCode);
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeThreadpool);
     }
 
     @Test
@@ -136,7 +136,7 @@ public class StatisticToolsTest extends AbstractTest {
             }
         };
         statisticTools.start(new String[] { "-r" }, "showruntimestats");
-        assertEquals("Expected 0 as return code!", 0, this.returnCode);
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeRuntime);
     }
 
     @Test
@@ -150,7 +150,7 @@ public class StatisticToolsTest extends AbstractTest {
             }
         };
         statisticTools.start(new String[] { "-o" }, "showruntimestats");
-        assertEquals("Expected 0 as return code!", 0, this.returnCode);
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeOs);
     }
 
     @Test
@@ -164,7 +164,7 @@ public class StatisticToolsTest extends AbstractTest {
             }
         };
         statisticTools.start(new String[] { "-t" }, "showruntimestats");
-        assertEquals("Expected 0 as return code!", 0, this.returnCode);
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeThreading);
     }
 
     @Test
@@ -178,7 +178,7 @@ public class StatisticToolsTest extends AbstractTest {
             }
         };
         statisticTools.start(new String[] { "-s" }, "showruntimestats");
-        assertEquals("Expected 0 as return code!", 0, this.returnCode);
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeShowOperations);
     }
 
     @Test
@@ -192,7 +192,7 @@ public class StatisticToolsTest extends AbstractTest {
             }
         };
         statisticTools.start(new String[] { "-d" }, "showruntimestats");
-        assertEquals("Expected 0 as return code!", 0, this.returnCode);
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeDooperation);
     }
 
     @Test
@@ -206,7 +206,7 @@ public class StatisticToolsTest extends AbstractTest {
             }
         };
         statisticTools.start(new String[] { "-m" }, "showruntimestats");
-        assertEquals("Expected 0 as return code!", 0, this.returnCode);
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeMemory);
     }
 
     @Test
@@ -220,7 +220,7 @@ public class StatisticToolsTest extends AbstractTest {
             }
         };
         statisticTools.start(new String[] { "-z" }, "showruntimestats");
-        assertEquals("Expected 0 as return code!", 0, this.returnCode);
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeGc);
     }
 
     @Test
@@ -234,7 +234,7 @@ public class StatisticToolsTest extends AbstractTest {
             }
         };
         statisticTools.start(new String[] { "-M" }, "showruntimestats");
-        assertEquals("Expected 0 as return code!", 0, this.returnCode);
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeMemoryFull);
     }
 
     @Test
@@ -248,7 +248,7 @@ public class StatisticToolsTest extends AbstractTest {
             }
         };
         statisticTools.start(new String[] { "-y" }, "showruntimestats");
-        assertEquals("Expected 0 as return code!", 0, this.returnCode);
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeDocumentconverter);
     }
 
     @Test
@@ -262,6 +262,6 @@ public class StatisticToolsTest extends AbstractTest {
             }
         };
         statisticTools.start(new String[] { "-f" }, "showruntimestats");
-        assertEquals("Expected 0 as return code!", 0, this.returnCode);
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeOffice);
     }
 }
