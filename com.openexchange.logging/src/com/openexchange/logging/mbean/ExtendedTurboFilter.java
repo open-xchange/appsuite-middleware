@@ -86,7 +86,7 @@ public abstract class ExtendedTurboFilter extends TurboFilter implements Compara
     public int compareTo(final ExtendedTurboFilter o) {
         final int thisVal = this.getRanking();
         final int anotherVal = o.getRanking();
-        return (thisVal < anotherVal ? 1 : (thisVal == anotherVal ? 0 : -1));
+        return (thisVal < anotherVal ? 1 : (thisVal == anotherVal ? 0 : -1)); // Highest first
     }
 
 }
