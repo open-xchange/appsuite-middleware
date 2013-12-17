@@ -879,6 +879,13 @@ EOF
 fi
 rm -f /opt/open-xchange/etc/log4j.xml
 
+# SoftwareChange_Request-1773
+ox_add_property com.openexchange.hazelcast.network.symmetricEncryption false /opt/open-xchange/etc/hazelcast.properties
+ox_add_property com.openexchange.hazelcast.network.symmetricEncryption.algorithm PBEWithMD5AndDES /opt/open-xchange/etc/hazelcast.properties
+ox_add_property com.openexchange.hazelcast.network.symmetricEncryption.salt 2mw67LqNDEb3 /opt/open-xchange/etc/hazelcast.properties
+ox_add_property com.openexchange.hazelcast.network.symmetricEncryption.password D2xhL8mPkjsF /opt/open-xchange/etc/hazelcast.properties
+ox_add_property com.openexchange.hazelcast.network.symmetricEncryption.iterationCount 19 /opt/open-xchange/etc/hazelcast.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
