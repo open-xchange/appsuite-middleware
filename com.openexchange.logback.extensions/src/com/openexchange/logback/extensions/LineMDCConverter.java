@@ -92,7 +92,7 @@ public class LineMDCConverter extends MDCConverter {
     public String convert(final ILoggingEvent event) {
         final Map<String, String> mdcPropertyMap = event.getMDCPropertyMap();
 
-        if (mdcPropertyMap == null) {
+        if (mdcPropertyMap == null || mdcPropertyMap.isEmpty()) {
             return defaultValue;
         }
 
@@ -105,17 +105,17 @@ public class LineMDCConverter extends MDCConverter {
     }
 
     /**
-     * if no key is specified, return all the values present in the MDC, in the format "k1=v1, k2=v2, ..."
+     * if no key is specified, return all the values present in the MDC, in the format "key0=value0\nkey1=value1..."
      */
     private String outputMDCForAllKeys(final Map<String, String> mdcPropertyMap) {
-        if (mdcPropertyMap.isEmpty()) {
-            return "";
-        }
         final String ls = System.getProperty("line.separator");
         final StringBuilder buf = new StringBuilder(1250);
         for (final Map.Entry<String, String> entry : new TreeMap<String, String>(mdcPropertyMap).entrySet()) {
             // format: key0=value0\nkey1=value1
-            buf.append(' ').append(entry.getKey()).append('=').append(entry.getValue()).append(ls);
+            final String name = entry.getKey();
+            if (!"__threadId".equals(name)) {
+                buf.append(' ').append(name).append('=').append(entry.getValue()).append(ls);
+            }
         }
         return buf.toString();
     }

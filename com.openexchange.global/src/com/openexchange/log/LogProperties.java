@@ -94,6 +94,10 @@ public final class LogProperties {
          */
         AJAX_MODULE("com.openexchange.ajax.module"),
         /**
+         * threadId
+         */
+        THREAD_ID("__threadId"),
+        /**
          * com.openexchange.ajpv13.requestURI
          */
         AJP_REQUEST_URI("com.openexchange.ajpv13.requestURI"),

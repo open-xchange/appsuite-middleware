@@ -722,7 +722,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             /*
              * Gather logging info
              */
-            LogProperties.putProperties(LogProperties.Name.AJP_THREAD_NAME, thread.getName(), LogProperties.Name.AJP_REMOTE_PORT, Integer.valueOf(socket.getPort()), LogProperties.Name.AJP_REMOTE_ADDRESS, socket.getInetAddress().getHostAddress());
+            LogProperties.putProperties(LogProperties.Name.THREAD_ID, Long.toString(thread.getId()), LogProperties.Name.AJP_THREAD_NAME, thread.getName(), LogProperties.Name.AJP_REMOTE_PORT, Integer.valueOf(socket.getPort()), LogProperties.Name.AJP_REMOTE_ADDRESS, socket.getInetAddress().getHostAddress());
 
             try {
                 stage = Stage.STAGE_AWAIT;

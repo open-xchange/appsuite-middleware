@@ -49,25 +49,49 @@
 
 package com.openexchange.logback.extensions;
 
-import ch.qos.logback.classic.PatternLayout;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-
+import java.util.Map;
+import ch.qos.logback.classic.pattern.ClassicConverter;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 
 /**
- * {@link ExtendedPatternLayoutEncoder} - Puts additional converters to <code>PatternLayout</code>'s default converter mapping.
+ * {@link ThreadIdConverter}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ExtendedPatternLayoutEncoder extends PatternLayoutEncoder {
+public class ThreadIdConverter extends ClassicConverter {
+
+    private final String defaultValue = "";
 
     /**
-     * Initializes a new {@link ExtendedPatternLayoutEncoder}.
+     * Initializes a new {@link ThreadIdConverter}.
      */
-    public ExtendedPatternLayoutEncoder() {
+    public ThreadIdConverter() {
         super();
-        PatternLayout.defaultConverterMap.put("lmdc", LineMDCConverter.class.getName());
-        PatternLayout.defaultConverterMap.put("ereplace", ExtendedReplacingCompositeConverter.class.getName());
-        PatternLayout.defaultConverterMap.put("tid", ThreadIdConverter.class.getName());
+    }
+
+    @Override
+    public String convert(final ILoggingEvent event) {
+        final Map<String, String> mdcPropertyMap = event.getMDCPropertyMap();
+
+        if (mdcPropertyMap == null || mdcPropertyMap.isEmpty()) {
+            return defaultValue;
+        }
+
+        final String threadId = mdcPropertyMap.get("__threadId");
+        return isEmpty(threadId) ? defaultValue : threadId;
+    }
+
+    /** Check for an empty string */
+    private boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }
