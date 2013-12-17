@@ -539,12 +539,13 @@ public final class HtmlServiceImpl implements HtmlService {
             final long st = DEBUG ? System.currentTimeMillis() : 0L;
             String html = htmlContent;
             // Perform one-shot sanitizing
+            html = replacePercentTags(html);
             html = replaceHexEntities(html);
             html = processDownlevelRevealedConditionalComments(html);
             html = dropDoubleAccents(html);
             html = dropSlashedTags(html);
             // CSS- and tag-wise sanitizing
-            {
+            try {
                 // Determine the definition to use
                 final String definition;
                 {
@@ -561,6 +562,8 @@ public final class HtmlServiceImpl implements HtmlService {
                     modified[0] |= handler.isImageURLFound();
                 }
                 html = handler.getHTML();
+            } catch (final ParsingDeniedException e) {
+                LOG.warn("HTML content will be returned un-white-listed. Reason: {}", e.getMessage(), e);
             }
             // Repetitive sanitizing until no further replacement/changes performed
             final boolean[] sanitized = new boolean[] { true };
@@ -574,7 +577,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 LOG.debug("\tHTMLServiceImpl.sanitize() took " + dur + "msec.");
             }
             return html;
-        } catch (final ParsingDeniedException e) {
+        } catch (final RuntimeException e) {
             LOG.warn("HTML content will be returned un-sanitized. Reason: "+e.getMessage(), e);
             return htmlContent;
         }
@@ -1608,6 +1611,21 @@ public final class HtmlServiceImpl implements HtmlService {
      */
     private static String validate(final String htmlContent) {
         return validateWithHtmlCleaner(replaceHexEntities(htmlContent));
+    }
+
+    private static final Pattern PAT_HEX_PERCENT_TAG = Pattern.compile("<%tag[^>]*>", Pattern.CASE_INSENSITIVE);
+
+    private static String replacePercentTags(final String htmlContent) {
+        final Matcher m = PAT_HEX_PERCENT_TAG.matcher(htmlContent);
+        if (!m.find()) {
+            return htmlContent;
+        }
+        final StringBuffer sb = new StringBuffer(htmlContent.length());
+        do {
+            m.appendReplacement(sb, "");
+        } while (m.find());
+        m.appendTail(sb);
+        return sb.toString();
     }
 
     private static final Pattern PAT_HEX_ENTITIES = Pattern.compile("&#x([0-9a-fA-F]+);", Pattern.CASE_INSENSITIVE);
