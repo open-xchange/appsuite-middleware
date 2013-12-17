@@ -345,6 +345,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.mail.MailProtocols.class,
             com.openexchange.groupware.settings.tree.modules.mail.ReplyAllCc.class,
             com.openexchange.groupware.settings.tree.modules.mail.SendAddress.class,
+            com.openexchange.groupware.settings.tree.modules.mail.Separators.class,
             com.openexchange.groupware.settings.tree.modules.mail.SpamButton.class,
             com.openexchange.groupware.settings.tree.modules.mail.VCard.class,
             com.openexchange.groupware.settings.tree.modules.mailaccount.Module.class,

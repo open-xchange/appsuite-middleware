@@ -170,12 +170,14 @@ public class WrappingFilter implements Filter {
             LogProperties.put(LogProperties.Name.GRIZZLY_PATH_INFO, httpServletRequest.getPathInfo());
 
             // Remote infos
-            LogProperties.put(LogProperties.Name.GRIZZLY_REMOTE_PORT, httpServletRequestWrapper.getRemotePort());
+            LogProperties.put(LogProperties.Name.GRIZZLY_REMOTE_PORT, Integer.toString(httpServletRequestWrapper.getRemotePort()));
             LogProperties.put(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS, httpServletRequestWrapper.getRemoteAddr());
             LogProperties.put(LogProperties.Name.GRIZZLY_REQUEST_IP, httpServletRequestWrapper.getRemoteAddr());
 
             // Names, addresses
-            LogProperties.put(LogProperties.Name.GRIZZLY_THREAD_NAME, Thread.currentThread().getName());
+            final Thread currentThread = Thread.currentThread();
+            LogProperties.put(LogProperties.Name.GRIZZLY_THREAD_NAME, currentThread.getName());
+            LogProperties.put(LogProperties.Name.THREAD_ID, Long.toString(currentThread.getId()));
             LogProperties.put(LogProperties.Name.GRIZZLY_SERVER_NAME, httpServletRequest.getServerName());
             final String userAgent = httpServletRequest.getHeader("User-Agent");
             LogProperties.put(LogProperties.Name.GRIZZLY_USER_AGENT, null == userAgent ? "<unknown>" : userAgent);
