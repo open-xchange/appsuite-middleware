@@ -1,3 +1,7 @@
+* 2013-12-17 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30355: Point to the correct configuration file when adjusting permissions during post-install
+
 * 2013-12-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 30339: Properly query a contact's current location from Facebook FQL API
