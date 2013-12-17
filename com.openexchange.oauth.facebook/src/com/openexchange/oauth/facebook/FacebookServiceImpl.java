@@ -285,7 +285,7 @@ public class FacebookServiceImpl implements FacebookService {
     }
 
     private static boolean isValid(final String toCheck) {
-        return null != toCheck && !Strings.isEmpty(toCheck) && !"nil".equals(toCheck);
+        return !Strings.isEmpty(toCheck) && !"nil".equals(toCheck);
     }
 
 }
