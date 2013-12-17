@@ -57,7 +57,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.osgi.HousekeepingActivator;
-
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link Activator}
@@ -73,7 +73,7 @@ public final class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[]{CapabilityService.class, ConfigViewFactory.class};
+        return new Class[] { CapabilityService.class, ConfigViewFactory.class, ThreadPoolService.class };
     }
 
     @Override

@@ -51,9 +51,12 @@ package com.openexchange.realtime.hazelcast.cleanup;
 
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
 import com.hazelcast.core.MultiTask;
+import com.openexchange.realtime.cleanup.CleanupScope;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.packet.ID;
@@ -65,18 +68,25 @@ import com.openexchange.realtime.packet.ID;
  */
 public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup {
 
+    private static final Logger LOG = LoggerFactory.getLogger(GlobalRealtimeCleanupImpl.class);
+
     @Override
-    public void cleanupForId(ID id) {
+    public void cleanForId(ID id, CleanupScope... cleanupScopes) {
         HazelcastInstance hazelcastInstance;
         try {
             hazelcastInstance = HazelcastAccess.getHazelcastInstance();
             ExecutorService executorService = hazelcastInstance.getExecutorService();
             Set<Member> clusterMembers = hazelcastInstance.getCluster().getMembers();
-            MultiTask<Void> cleanUpTask = new MultiTask<Void>(new CleanupDispatcher(id), clusterMembers);
+            MultiTask<Void> cleanUpTask = new MultiTask<Void>(new CleanupDispatcher(id, cleanupScopes), clusterMembers);
             executorService.execute(cleanUpTask);
         } catch (Exception e) {
-            org.slf4j.LoggerFactory.getLogger(GlobalRealtimeCleanupImpl.class).error("", e);
+            LOG.error("", e);
         }
+    }
+
+    @Override
+    public void cleanSequenceNumbersForId(ID id) {
+        cleanForId(id, CleanupScope.STANZASEQUENCE);
     }
 
 }

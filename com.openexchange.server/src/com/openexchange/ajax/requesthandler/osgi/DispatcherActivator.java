@@ -90,6 +90,8 @@ import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRendere
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.PreviewResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.StringResponseRenderer;
+import com.openexchange.ajax.response.IncludeStackTraceService;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.mail.mime.utils.ImageMatcher;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -224,6 +226,20 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
             @Override
             public void removed(final ServiceReference<ResponseRenderer> ref, final ResponseRenderer thing) {
                 DispatcherServlet.unregisterRenderer(thing);
+            }
+
+        });
+
+        track(IncludeStackTraceService.class, new SimpleRegistryListener<IncludeStackTraceService>() {
+
+            @Override
+            public void added(final ServiceReference<IncludeStackTraceService> ref, final IncludeStackTraceService thing) {
+                ResponseWriter.setIncludeStackTraceService(thing);
+            }
+
+            @Override
+            public void removed(final ServiceReference<IncludeStackTraceService> ref, final IncludeStackTraceService thing) {
+                ResponseWriter.setIncludeStackTraceService(null);
             }
 
         });

@@ -52,6 +52,7 @@ package com.openexchange.logging.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
@@ -68,11 +69,13 @@ public class ExceptionCategoryFilterRegisterer implements ServiceTrackerCustomiz
     private final BundleContext context;
     private volatile ExceptionCategoryFilter exceptionCategoryFilter = null;
     private final RankingAwareTurboFilterList rankingAwareTurboFilterList;
+    private final IncludeStackTraceService traceService;
 
-    public ExceptionCategoryFilterRegisterer(final BundleContext context, final RankingAwareTurboFilterList rankingAwareTurboFilterList) {
+    public ExceptionCategoryFilterRegisterer(final BundleContext context, final RankingAwareTurboFilterList rankingAwareTurboFilterList, final IncludeStackTraceService traceService) {
         super();
         this.context = context;
         this.rankingAwareTurboFilterList = rankingAwareTurboFilterList;
+        this.traceService = traceService;
     }
 
     @Override
@@ -86,7 +89,7 @@ public class ExceptionCategoryFilterRegisterer implements ServiceTrackerCustomiz
             synchronized (this) {
                 exceptionCategoryFilter = this.exceptionCategoryFilter;
                 if (exceptionCategoryFilter == null) {
-                    exceptionCategoryFilter = new ExceptionCategoryFilter();
+                    exceptionCategoryFilter = new ExceptionCategoryFilter(traceService);
                     rankingAwareTurboFilterList.addTurboFilter(exceptionCategoryFilter);
                     this.exceptionCategoryFilter = exceptionCategoryFilter;
                 }

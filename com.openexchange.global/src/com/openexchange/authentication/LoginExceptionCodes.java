@@ -57,6 +57,7 @@ import static com.openexchange.authentication.LoginExceptionMessages.INVALID_CRE
 import static com.openexchange.authentication.LoginExceptionMessages.NOT_SUPPORTED_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.PASSWORD_EXPIRED_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.REDIRECT_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.USER_NOT_ACTIVE_MSG;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE_RETRY;
 import com.openexchange.exception.Category;
@@ -104,6 +105,10 @@ public enum LoginExceptionCodes implements DisplayableOXExceptionCode {
      */
     PASSWORD_EXPIRED("Your password has expired. In order to change it, please log in to %1$s.", PASSWORD_EXPIRED_MSG, Category.CATEGORY_PERMISSION_DENIED, 11),
     /**
+     * User is not activated.
+     */
+    USER_NOT_ACTIVE("User is not activated.", USER_NOT_ACTIVE_MSG, Category.CATEGORY_PERMISSION_DENIED, 13),
+    /**
      * Client "%1$s" is not activated.
      */
     CLIENT_DENIED("Client \"%1$s\" is not activated.", CLIENT_DENIED_MSG, Category.CATEGORY_PERMISSION_DENIED, 14),
@@ -128,7 +133,9 @@ public enum LoginExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Value of User-Agent header must not be used as value for the client parameter. Please use a string identifying the client software.
      */
-    DONT_USER_AGENT("Value of User-Agent header must not be used as value for the client parameter. Please use a string identifying the client software.", MESSAGE, Category.CATEGORY_USER_INPUT, 21);
+    DONT_USER_AGENT("Value of User-Agent header must not be used as value for the client parameter. Please use a string identifying the client software.", MESSAGE, Category.CATEGORY_USER_INPUT, 21),
+
+    ;
 
     private final String message;
 

@@ -154,4 +154,21 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
         }
         return retval;
     }
+
+
+    @Override
+    public boolean isLogTransport() {
+        final boolean retval;
+        if (mailAccount.getId() == 0) {
+            final String tmp = properties.get("com.openexchange.smtp.logTransport");
+            if (null == tmp) {
+                return SMTPProperties.getInstance().isLogTransport();
+            }
+            retval = Boolean.parseBoolean(tmp);
+        } else {
+            retval = false;
+        }
+        return retval;
+    }
+
 }

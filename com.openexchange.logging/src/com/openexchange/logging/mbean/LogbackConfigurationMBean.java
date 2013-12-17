@@ -58,22 +58,22 @@ import com.openexchange.management.MBeanMethodAnnotation;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public interface LogbackConfigurationMBean {
-    
+
     public static final String DOMAIN = "com.openexchange.logging";
-    
+
     public static final String KEY = "name";
-    
+
     public static final String VALUE = "Logging Configuration";
-    
+
     static final String DESCRIPTION = "Management Bean for the Logback Configuration";
-    
+
     /**
      * Filter context
      * @param contextID
      */
     @MBeanMethodAnnotation (description="Create a filter for the specified contextID", parameters={"contextID"}, parameterDescriptions={"The contextID for which to apply the filter"})
     public void filterContext(int contextID);
-    
+
     /**
      * Filter user
      * @param userID
@@ -81,14 +81,14 @@ public interface LogbackConfigurationMBean {
      */
     @MBeanMethodAnnotation (description="Create a filter for the specified userID contextID combo", parameters={"userID", "contextID"}, parameterDescriptions={"The userID for which to apply the filter", "The contextID for which to apply the filter"})
     public void filterUser(int userID, int contextID);
-    
+
     /**
      * Filter session
      * @param sessionID
      */
     @MBeanMethodAnnotation (description="Create a filter for the specified sessionID", parameters={"sessionID"}, parameterDescriptions={"The sessionID for which to apply the filter"})
     public void filterSession(String sessionID);
-    
+
     /**
      * Set the specified level for the specified loggers
      * @param loggers
@@ -96,14 +96,14 @@ public interface LogbackConfigurationMBean {
      */
     @MBeanMethodAnnotation (description="Set the log level for the specified set of loggers", parameters={"level", "loggers"}, parameterDescriptions={"The desired log level for the specified loggers", "Loggers for which to apply the specified log level"})
     public void setLogLevel(String level, String[] loggers);
-    
+
     /**
      * Overrides Exception categories to be suppressed (comma separated).
      * @param categories
      */
     @MBeanMethodAnnotation (description="Overrides Exception categories to be suppressed (comma separated).", parameters={"categories"}, parameterDescriptions={"The categories to be suppressed when logging."})
     public void overrideExceptionCategories(String categories);
-    
+
     /**
      * Returns the Exception categories to be suppressed (comma separated).
      * @return
@@ -117,7 +117,7 @@ public interface LogbackConfigurationMBean {
      */
     @MBeanMethodAnnotation (description="Remove the context filter for the specified contextID", parameters={"contextID"}, parameterDescriptions={"The contextID for which to remove the logging filter"})
     public void removeContextFilter(int contextID);
-    
+
     /**
      * Remove the user filter
      * @param userID
@@ -125,52 +125,59 @@ public interface LogbackConfigurationMBean {
      */
     @MBeanMethodAnnotation (description="Remove the user filter for the specified userID, contextID combo", parameters={"userID", "contextID"}, parameterDescriptions={"The userID for which to remove the logging filter", "The contextID for which to remove the logging filter"})
     public void removeUserFilter(int userID, int contextID);
-    
+
     /**
      * Remove the session filter
      * @param sessionID
      */
     @MBeanMethodAnnotation (description="Remove the session filter for the specified sessionID", parameters={"sessionID"}, parameterDescriptions={"The sessionID for which to remove the logging filter"})
     public void removeSessionFilter(String sessionID);
-    
+
     /**
      * Returns a list with all loggers of the system along with their log level.
-     * 
+     *
      * @return
      */
     @MBeanMethodAnnotation (description="Return a list with all system's loggers along with their assigned log level", parameters={}, parameterDescriptions={})
     public Set<String> listAllLoggers();
-    
+
     /**
      * Return a list with all loggers that were dynamically modified along with their assigned log level
-     * 
+     *
      * @return
      */
     @MBeanMethodAnnotation (description="Return a list with all loggers that were dynamically modified along with their assigned log level", parameters={}, parameterDescriptions={})
     public Set<String> listDynamicallyModifiedLoggers();
-    
+
     /**
      * Return a list with only the specified loggers
-     * 
+     *
      * @param loggers
      * @return
      */
     @MBeanMethodAnnotation (description="Return a list with the specified system's loggers along with their assigned log level", parameters={"loggers"}, parameterDescriptions={"Specified loggers to return"})
     public Set<String> getLevelForLoggers(String[] loggers);
-    
+
     /**
      * Returns a list with all logging filters
-     * 
+     *
      * @return
      */
     @MBeanMethodAnnotation (description="Return a list with all logging filters", parameters={}, parameterDescriptions={})
     public Set<String> listFilters();
-    
+
     /**
      * Removes all filters
      */
     @MBeanMethodAnnotation (description="Remove all logging filters", parameters={}, parameterDescriptions={})
     public void removeAllFilters();
-    
-    
-}    
+
+    /**
+     * Filter user
+     * @param userID
+     * @param contextID
+     */
+    @MBeanMethodAnnotation (description="Sets whether to include stack traces in HTTP-API JSON responses for userID contextID combo", parameters={"userID", "contextID", "enable"}, parameterDescriptions={"The userID for which to apply the setting", "The contextID for which to apply the setting", "Whether to enable or disable to include stack traces in HTTP-API JSON responses"})
+    public void includeStackTraceForUser(int userID, int contextID, boolean enable);
+
+}

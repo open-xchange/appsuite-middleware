@@ -320,7 +320,7 @@ public class ReplicationMonitor {
         }
     }
 
-    private void increateCounterSeparateTransaction(AssignmentImpl assign, Connection con) {
+    private void increaseCounterSeparateTransaction(AssignmentImpl assign, Connection con) {
         try {
             con.setAutoCommit(false);
             increaseCounter(assign, con);
@@ -376,7 +376,7 @@ public class ReplicationMonitor {
             LOG.error("", e1);
             return;
         }
-        increateCounterSeparateTransaction(assign, con);
+        increaseCounterSeparateTransaction(assign, con);
     }
 
     public void increaseInCurrentTransaction(AssignmentImpl assign, Connection delegate, ConnectionState state) {

@@ -50,6 +50,7 @@
 package com.openexchange.ajax.writer;
 
 import static com.openexchange.ajax.fields.ResponseFields.*;
+import static com.openexchange.ajax.requesthandler.Utils.getUnsignedInteger;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Iterator;
@@ -58,17 +59,23 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.json.JSONWriter;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.fields.ResponseFields.ParsingFields;
 import com.openexchange.ajax.fields.ResponseFields.TruncatedFields;
+import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.PropertyEvent;
+import com.openexchange.config.PropertyEvent.Type;
+import com.openexchange.config.PropertyListener;
 import com.openexchange.exception.Categories;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -78,6 +85,7 @@ import com.openexchange.exception.OXException.Truncated;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -123,9 +131,38 @@ public final class ResponseWriter {
         super();
     }
 
-    private static volatile Boolean includeStackTraceOnError;
+    private static final AtomicReference<IncludeStackTraceService> INCL_STACKTRACE_REF = new AtomicReference<IncludeStackTraceService>();
 
+    /**
+     * Sets the specified instance.
+     *
+     * @param includeStackTraceService The instance to set
+     */
+    public static void setIncludeStackTraceService(final IncludeStackTraceService includeStackTraceService) {
+        INCL_STACKTRACE_REF.set(includeStackTraceService);
+    }
+
+    static volatile Boolean includeStackTraceOnError;
     private static boolean includeStackTraceOnError() {
+        // First consult IncludeStackTraceService
+        {
+            final IncludeStackTraceService traceService = INCL_STACKTRACE_REF.get();
+            if (null != traceService) {
+                try {
+                    final int contextId = getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
+                    if (contextId > 0) {
+                        final int userId = getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
+                        if (userId > 0) {
+                            return traceService.includeStackTraceOnError(userId, contextId);
+                        }
+                    }
+                } catch (final Exception e) {
+                    final Logger logger = org.slf4j.LoggerFactory.getLogger(ResponseWriter.class);
+                    logger.error("Could not check includeStackTraceOnError()", e);
+                }
+            }
+        }
+
         Boolean b = includeStackTraceOnError;
         if (null == b) {
             synchronized (ResponseWriter.class) {
@@ -135,7 +172,18 @@ public final class ResponseWriter {
                     if (null == service) {
                         return false;
                     }
-                    b = Boolean.valueOf(service.getBoolProperty("com.openexchange.ajax.response.includeStackTraceOnError", false));
+                    b = Boolean.valueOf(service.getBoolProperty("com.openexchange.ajax.response.includeStackTraceOnError", false, new PropertyListener() {
+
+                        @Override
+                        public void onPropertyChange(PropertyEvent event) {
+                            final Type type = event.getType();
+                            if (Type.DELETED == type) {
+                                includeStackTraceOnError = Boolean.FALSE;
+                            } else if (Type.CHANGED == type) {
+                                includeStackTraceOnError = Boolean.valueOf(event.getValue().trim());
+                            }
+                        }
+                    }));
                     includeStackTraceOnError = b;
                 }
             }

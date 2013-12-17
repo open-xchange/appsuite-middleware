@@ -67,6 +67,7 @@ public class ExtendedPatternLayoutEncoder extends PatternLayoutEncoder {
         super();
         PatternLayout.defaultConverterMap.put("lmdc", LineMDCConverter.class.getName());
         PatternLayout.defaultConverterMap.put("ereplace", ExtendedReplacingCompositeConverter.class.getName());
+        PatternLayout.defaultConverterMap.put("tid", ThreadIdConverter.class.getName());
     }
 
 }

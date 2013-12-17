@@ -20,7 +20,7 @@ set -e
 . /opt/open-xchange/lib/oxfunctions.sh
 
 setConfigFilePermissions() {
-    ox_update_permissions /opt/open-xchange/etc/aws.properties root:open-xchange 640
+    ox_update_permissions /opt/open-xchange/etc/awss3.properties root:open-xchange 640
 }
 
 case "$1" in

@@ -57,6 +57,7 @@ import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.management.ManagementService;
 import com.openexchange.realtime.Channel;
+import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.exception.RealtimeException;
@@ -95,7 +96,7 @@ public class RTJSONActivator extends AJAXModuleActivator {
         return new Class<?>[] {
             ConfigurationService.class, SessiondService.class, MessageDispatcher.class, SimpleConverter.class,
             ResourceDirectory.class, StanzaQueueService.class, PayloadTreeConverter.class, CapabilityService.class, TimerService.class,
-            ThreadPoolService.class, ManagementService.class};
+            ThreadPoolService.class, ManagementService.class, GlobalRealtimeCleanup.class};
     }
 
     @Override

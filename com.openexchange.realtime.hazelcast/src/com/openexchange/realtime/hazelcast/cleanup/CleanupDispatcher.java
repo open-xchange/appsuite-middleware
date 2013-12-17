@@ -51,6 +51,8 @@ package com.openexchange.realtime.hazelcast.cleanup;
 
 import java.io.Serializable;
 import java.util.concurrent.Callable;
+import org.apache.commons.lang.Validate;
+import com.openexchange.realtime.cleanup.CleanupScope;
 import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
 import com.openexchange.realtime.hazelcast.Services;
 import com.openexchange.realtime.packet.ID;
@@ -66,19 +68,25 @@ public class CleanupDispatcher implements Callable<Void>, Serializable {
 
     private final ID id;
 
+    private final CleanupScope[] cleanupScopes;
+
     /**
      * Initializes a new {@link CleanupDispatcher}.
      * 
-     * @param id the ID to clean up for.
+     * @param id The ID to clean up for.
+     * @param cleanupScopes The scopes to clean up on the remote machines. 
      */
-    public CleanupDispatcher(ID id) {
+    public CleanupDispatcher(ID id, CleanupScope... cleanupScopes) {
+        Validate.notNull(id, "Mandatory parameter id is missing.");
+        Validate.notNull(cleanupScopes, "Mandatory parameter cleanupScopes is missing.");
         this.id = id;
+        this.cleanupScopes = cleanupScopes;
     }
 
     @Override
     public Void call() throws Exception {
         LocalRealtimeCleanup localRealtimeCleanup = Services.getService(LocalRealtimeCleanup.class);
-        localRealtimeCleanup.cleanupForId(id);
+        localRealtimeCleanup.cleanForId(id, cleanupScopes);
         return null;
     }
 

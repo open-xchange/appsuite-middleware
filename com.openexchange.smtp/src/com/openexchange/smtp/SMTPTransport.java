@@ -843,10 +843,18 @@ public final class SMTPTransport extends MailTransport {
         }
     }
 
+    private void logMessageTransport(final MimeMessage smtpMessage, final SMTPConfig smtpConfig) throws OXException, MessagingException {
+        if (getTransportConfig0().getSMTPProperties().isLogTransport()) {
+            LogProperties.putSessionProperties(session);
+            LOG.info("Sent \"{}\" for login \"{}\" using SMTP server \"{}\" on port {}.", smtpMessage.getMessageID(), smtpConfig.getLogin(), smtpConfig.getServer(), Integer.valueOf(smtpConfig.getPort()));
+        }
+    }
+
     private void transport(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
         prepareAddresses(recipients);
         try {
             transport.sendMessage(smtpMessage, recipients);
+            logMessageTransport(smtpMessage, smtpConfig);
         } catch (final MessagingException e) {
             if (e.getNextException() instanceof javax.activation.UnsupportedDataTypeException) {
                 // Check for "no object DCH for MIME type xxxxx/yyyy"
@@ -875,6 +883,7 @@ public final class SMTPTransport extends MailTransport {
                 connectTransport(transport, smtpConfig);
             }
             transport.sendMessage(smtpMessage, recipients);
+            logMessageTransport(smtpMessage, smtpConfig);
             invokeLater(new Runnable() {
 
                 @Override
@@ -897,7 +906,7 @@ public final class SMTPTransport extends MailTransport {
             try {
                 tmpPass = new String(password.getBytes(Charsets.forName(getTransportConfig0().getSMTPProperties().getSmtpAuthEnc())), Charsets.ISO_8859_1);
             } catch (final UnsupportedCharsetException e) {
-                LOG.error("Unsupported encoding in a message detected and monitored: \"{}{}", e.getMessage(), '"', e);
+                LOG.error("Unsupported encoding in a message detected and monitored", e);
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             }
         }

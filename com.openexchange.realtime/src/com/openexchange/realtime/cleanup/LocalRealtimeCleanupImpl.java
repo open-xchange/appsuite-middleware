@@ -67,22 +67,36 @@ public class LocalRealtimeCleanupImpl extends ServiceTracker<RealtimeJanitor, Re
         super(bundleContext, RealtimeJanitor.class, null);
     }
 
-    @Override
-    public void cleanupForId(ID id) {
-        Collection<RealtimeJanitor> janitors = getJanitors();
-        for (RealtimeJanitor realtimeJanitor : janitors) {
-            realtimeJanitor.cleanupForId(id);
-        }
-    }
-
     /**
      * Get all currently tracked {@link RealtimeJanitor}s
      * 
      * @return all currently tracked {@link RealtimeJanitor}s
      */
-    private Collection<RealtimeJanitor> getJanitors() {
+    private Collection<RealtimeJanitor> getJanitors(CleanupScope... scopes) {
+        //TODO: Filter filter = bundleContext.createFilter(filterStr); to get only the needed Services
         SortedMap<ServiceReference<RealtimeJanitor>, RealtimeJanitor> trackedJanitors = getTracked();
         return trackedJanitors.values();
+    }
+
+    @Override
+    public void cleanForId(ID id, CleanupScope... scopes) {
+        for (CleanupScope cleanupScope : scopes) {
+            switch (cleanupScope) {
+            case STANZASEQUENCE:
+                cleanSequenceNumbersForId(id);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void cleanSequenceNumbersForId(ID id) {
+        Collection<RealtimeJanitor> janitors = getJanitors(CleanupScope.STANZASEQUENCE);
+        for (RealtimeJanitor realtimeJanitor : janitors) {
+            realtimeJanitor.cleanupForId(id, CleanupScope.STANZASEQUENCE);
+        }
     }
 
 }

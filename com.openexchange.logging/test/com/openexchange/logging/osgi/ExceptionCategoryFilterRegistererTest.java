@@ -57,6 +57,7 @@ import org.osgi.framework.ServiceReference;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.logging.mbean.ExceptionCategoryFilter;
+import com.openexchange.logging.mbean.IncludeStackTraceServiceImpl;
 import com.openexchange.logging.mbean.RankingAwareTurboFilterList;
 
 
@@ -77,7 +78,7 @@ public class ExceptionCategoryFilterRegistererTest {
 
         RankingAwareTurboFilterList turboFilterList = new RankingAwareTurboFilterList();
 
-        ExceptionCategoryFilterRegisterer ecfr = new ExceptionCategoryFilterRegisterer(bundleContext, turboFilterList);
+        ExceptionCategoryFilterRegisterer ecfr = new ExceptionCategoryFilterRegisterer(bundleContext, turboFilterList, new IncludeStackTraceServiceImpl());
         Assert.assertEquals(0, turboFilterList.size());
 
         ConfigurationService configMock = Mockito.mock(ConfigurationService.class);
