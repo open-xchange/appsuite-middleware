@@ -1,4 +1,8 @@
-* 2013-12-17 - jan.bauerdick@open-xchange.com
+* 2013-12-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30358: Modified HTTP-API call-back pattern to surround injected string with quotes while injected string gets quote-escaped before
+
+* 2013-12-17 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 30254: Added column names to SQL statement
 
