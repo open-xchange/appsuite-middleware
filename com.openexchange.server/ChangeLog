@@ -1,5 +1,9 @@
 * 2013-12-17 - tobias.friedrich@open-xchange.com
 
+ - Fix for bug 30343: Added new mapping file for Outlook 2007 (NL) to get a valid mapping
+
+* 2013-12-17 - tobias.friedrich@open-xchange.com
+
  - Fix for bug 30355: Point to the correct configuration file when adjusting permissions during post-install
  - Fix for bug 30336: Re-added LGI-0013
  - Fix for bug 30319: Changed error message when not having access to a folder
