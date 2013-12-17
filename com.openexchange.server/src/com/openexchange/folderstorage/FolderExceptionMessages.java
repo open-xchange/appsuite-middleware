@@ -89,7 +89,7 @@ public class FolderExceptionMessages implements LocalizableStrings {
     public static final String NO_CREATE_SUBFOLDERS_MSG_DISPLAY = "You do not have the appropriate permissions to create a subfolder below the folder \"%1$s\".";
 
     // It is not allowed to create a mail folder allowed below a public folder.
-    public static final String NO_PUBLIC_MAIL_FOLDER_MSG_DISPLAY = "It is not allowed to create a mail folder allowed below a public folder.";
+    public static final String NO_PUBLIC_MAIL_FOLDER_MSG_DISPLAY = "It is not allowed to create a mail folder below a public folder.";
 
     // The folder name "%1$s" is reserved. Please choose another name.
     public static final String RESERVED_NAME_MSG_DISPLAY = "The folder name \"%1$s\" is reserved. Please choose another name.";
