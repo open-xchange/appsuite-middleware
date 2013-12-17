@@ -65,17 +65,21 @@ public final class IncludeStackTraceServiceImpl implements IncludeStackTraceServ
     /** The map for tuples */
     private final ConcurrentMap<Key, Boolean> map;
 
+    /** The non-empty flag */
+    private volatile boolean nonEmpty;
+
     /**
      * Initializes a new {@link IncludeStackTraceServiceImpl}.
      */
     public IncludeStackTraceServiceImpl() {
         super();
         map = new ConcurrentHashMap<IncludeStackTraceServiceImpl.Key, Boolean>(32);
+        nonEmpty = false;
     }
 
     @Override
     public boolean includeStackTraceOnError(int userId, int contextId) throws OXException {
-        return map.containsKey(new Key(userId, contextId));
+        return nonEmpty && map.containsKey(new Key(userId, contextId));
     }
 
     /**
@@ -88,8 +92,10 @@ public final class IncludeStackTraceServiceImpl implements IncludeStackTraceServ
     public void addTuple(int userId, int contextId, boolean enable) {
         if (enable) {
             map.put(new Key(userId, contextId), Boolean.TRUE);
+            nonEmpty = true;
         } else {
             map.remove(new Key(userId, contextId));
+            nonEmpty = !map.isEmpty();
         }
     }
 
