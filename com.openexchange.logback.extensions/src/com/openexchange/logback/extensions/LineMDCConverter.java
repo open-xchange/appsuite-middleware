@@ -108,6 +108,9 @@ public class LineMDCConverter extends MDCConverter {
      * if no key is specified, return all the values present in the MDC, in the format "k1=v1, k2=v2, ..."
      */
     private String outputMDCForAllKeys(final Map<String, String> mdcPropertyMap) {
+        if (mdcPropertyMap.isEmpty()) {
+            return "";
+        }
         final String ls = System.getProperty("line.separator");
         final StringBuilder buf = new StringBuilder(1250);
         for (final Map.Entry<String, String> entry : new TreeMap<String, String>(mdcPropertyMap).entrySet()) {
