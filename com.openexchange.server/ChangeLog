@@ -2,6 +2,10 @@
 
  - Fix for bug 29639: Use configured default charset to url-decode incoming requests' URIs
 
+* 2013-12-17 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30359: Configure SAX builder to not resolve external entities
+
 * 2013-12-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 30190: Fixed parsing of CLI call
