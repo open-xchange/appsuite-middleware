@@ -147,7 +147,7 @@ public final class ResponseWriter {
         // First consult IncludeStackTraceService
         {
             final IncludeStackTraceService traceService = INCL_STACKTRACE_REF.get();
-            if (null != traceService) {
+            if (null != traceService && traceService.isEnabled()) {
                 try {
                     final int contextId = getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
                     if (contextId > 0) {

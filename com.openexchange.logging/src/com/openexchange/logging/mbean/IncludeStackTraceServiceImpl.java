@@ -82,6 +82,11 @@ public final class IncludeStackTraceServiceImpl implements IncludeStackTraceServ
         return nonEmpty && map.containsKey(new Key(userId, contextId));
     }
 
+    @Override
+    public boolean isEnabled() {
+        return nonEmpty;
+    }
+
     /**
      * Adds specified user / context identifier pair.
      *
@@ -91,8 +96,8 @@ public final class IncludeStackTraceServiceImpl implements IncludeStackTraceServ
      */
     public void addTuple(int userId, int contextId, boolean enable) {
         if (enable) {
-            map.put(new Key(userId, contextId), Boolean.TRUE);
             nonEmpty = true;
+            map.put(new Key(userId, contextId), Boolean.TRUE);
         } else {
             map.remove(new Key(userId, contextId));
             nonEmpty = !map.isEmpty();

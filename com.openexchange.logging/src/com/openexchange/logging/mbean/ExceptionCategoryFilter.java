@@ -127,13 +127,17 @@ public class ExceptionCategoryFilter extends ExtendedTurboFilter {
         if (OXException.class.isInstance(t)) {
             Category category = ((OXException) t).getCategory();
             if (ExceptionCategoryFilter.CATEGORIES.containsKey(category.getType())) {
-                try {
-                    final int contextId = getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
-                    final int userId = getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
-                    if (userId <= 0 || contextId <= 0 || !traceService.includeStackTraceOnError(userId, contextId)) {
+                if (traceService.isEnabled()) {
+                    try {
+                        final int contextId = getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
+                        final int userId = getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
+                        if (userId <= 0 || contextId <= 0 || !traceService.includeStackTraceOnError(userId, contextId)) {
+                            t.setStackTrace(new StackTraceElement[] {});
+                        }
+                    } catch (final Exception e) {
                         t.setStackTrace(new StackTraceElement[] {});
                     }
-                } catch (final Exception e) {
+                } else {
                     t.setStackTrace(new StackTraceElement[] {});
                 }
             }
