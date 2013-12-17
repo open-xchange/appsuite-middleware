@@ -1,3 +1,8 @@
+* 2013-12-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30358: Modified HTTP-API call-back pattern to surround injected string with quotes while injected string gets quote-escaped before
+ - Fix for bug 30217: Ensure context identifier is contained in login mappings
+
 * 2013-12-17 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 30343: Added new mapping file for Outlook 2007 (NL) to get a valid mapping
