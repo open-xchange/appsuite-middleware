@@ -1,3 +1,7 @@
+* 2013-12-17 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30359: Configure SAX builder to not resolve external entities
+
 * 2013-12-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 30114: Properly sanitize CSS selectors
