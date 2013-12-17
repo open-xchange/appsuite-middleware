@@ -1,3 +1,7 @@
+* 2013-12-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30144: Properly set login mappings (no "null" strings) in case autocontextid is active
+
 * 2013-09-16 - choeger@open-xchange.com
 
  - Fix for bug 28830: oxsysreport is collecting unneeded protected data
