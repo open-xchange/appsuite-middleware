@@ -61,7 +61,7 @@ import com.openexchange.java.Stringer;
 
 /**
  * Simple unit tests for {@link CSSMatcher}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4.1
  */
@@ -78,21 +78,21 @@ public class CSSMatcherTest {
         final String[] lines = saneCss.split("\r?\n");
 
         final String line0 = lines[0];
-        String expectedLine0 = "/* +++++++++++++++++++++ RESET +++++++++++++++++++++ */ @namespace \"http://www.w3.org/1999/xhtml\";   @namespace svg \"http://www.w3.org/2000/svg\";   body * { #test font-size: 1px; line-height: 1px;";
+        String expectedLine0 = "/* +++++++++++++++++++++ RESET +++++++++++++++++++++ */ @namespace \"http://www.w3.org/1999/xhtml\";   @namespace svg \"http://www.w3.org/2000/svg\";   #test  * { font-size: 1px; line-height: 1px; margin: 0; padding: 0; }";
         assertTrue(
             "Unexpected CSS in line0! Expected to start with: " + expectedLine0 + ", but was " + line0,
             line0.trim().startsWith(expectedLine0));
 
         final String line1 = lines[1];
-        String expectedLine1 = "#test a , #test img , #test a img , #test iframe , #test form , #test fieldset";
+        String expectedLine1 = "#test abbr , #test address , #test article , #test aside";
         assertTrue(
             "Unexpected CSS in line1! Expected to start with: " + expectedLine1 + ", but was " + line1,
             line1.trim().startsWith(expectedLine1));
 
         final String line10 = lines[10];
-        String expectedLine10 = "#test { -webkit-text-size-adjust: none; ";
+        String expectedLine10 = "/* +++++++++++++++++++++ BASICS +++++++++++++++++++++ */ #test html { direction: ltr;";
         assertTrue(
-            "Unexpected CSS in line10! Expected to start with: " + expectedLine10 + ", but was " + line10,
+            "Unexpected CSS in line10! Expected to start with: " + expectedLine10 + ", but was " + line10.trim(),
             line10.trim().startsWith(expectedLine10));
     }
 
@@ -113,13 +113,13 @@ public class CSSMatcherTest {
             line0.trim().startsWith(expectedLine0.trim()));
 
         final String line1 = lines[1];
-        String expectedLine1 = "a, img, a img, iframe, form, fieldset, abbr, acronym, object, applet, table {";
+        String expectedLine1 = "abbr, address, article, aside, audio, b, blockquote,";
         assertTrue(
-            "Unexpected CSS in line1! Expected to start with: " + expectedLine1 + ", but was " + line1,
+            "Unexpected CSS in line1! Expected to start with: " + expectedLine1 + ", but was " + line1.trim(),
             line1.trim().startsWith(expectedLine1.trim()));
 
         final String line10 = lines[10];
-        String expectedLine10 = "body { -webkit-text-size-adjust: none; margin: 0; padding: 0; ";
+        String expectedLine10 = "/* +++++++++++++++++++++ BASICS +++++++++++++++++++++ */ html {";
         assertTrue(
             "Unexpected CSS in line10! Expected to start with: " + expectedLine10 + ", but was " + line10,
             line10.trim().startsWith(expectedLine10.trim()));
