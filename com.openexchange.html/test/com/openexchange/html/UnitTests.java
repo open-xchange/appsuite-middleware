@@ -52,6 +52,9 @@ package com.openexchange.html;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.html.internal.Bug27708Test;
+import com.openexchange.html.internal.css.Bug30114Test;
+import com.openexchange.html.internal.css.CSSMatcherTest;
 
 /**
  * Test suite for all integrated unit tests of the HTMLService implementation.
@@ -59,7 +62,7 @@ import org.junit.runners.Suite.SuiteClasses;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 @RunWith(Suite.class)
-@SuiteClasses({ Bug26237Test.class, Bug26611Test.class, Bug27335Test.class })
+@SuiteClasses({ Bug26237Test.class, Bug26611Test.class, Bug27335Test.class, Bug27708Test.class, CSSMatcherTest.class, Bug30114Test.class })
 public class UnitTests {
 
     private UnitTests() {
