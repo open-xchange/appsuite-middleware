@@ -864,7 +864,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
             final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             final String view = paramContainer.getStringParam(PARAMETER_VIEW);
-            final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
+            final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
             /*
              * Deny saving for this request-specific settings
              */
@@ -962,7 +962,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
             final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             final String view = paramContainer.getStringParam(PARAMETER_VIEW);
-            final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
+            final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
             /*
              * Deny saving for this request-specific settings
              */
@@ -1404,7 +1404,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         }
                     }
                 } else {
-                    final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
+                    final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
                     /*
                      * Deny saving for this request-specific settings
                      */
@@ -2472,7 +2472,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 ids[i] = folderAndID.getString(PARAMETER_ID);
             }
             final String view = paramContainer.getStringParam(PARAMETER_VIEW);
-            final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
+            final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
             /*
              * Deny saving for this request-specific settings
              */

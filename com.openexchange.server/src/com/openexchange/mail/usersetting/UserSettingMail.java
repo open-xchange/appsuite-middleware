@@ -338,7 +338,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     @Override
-    public Object clone() {
+    public UserSettingMail clone() {
         try {
             final UserSettingMail clone = (UserSettingMail) super.clone();
             if (displayMsgHeaders != null) {

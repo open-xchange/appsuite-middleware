@@ -64,7 +64,6 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.Log;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -127,7 +126,7 @@ public final class ResendAction extends AbstractMailAction {
              * Read in parameters
              */
             final String view = req.getParameter(Mail.PARAMETER_VIEW);
-            final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
+            final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
             /*
              * Deny saving for this request-specific settings
              */
