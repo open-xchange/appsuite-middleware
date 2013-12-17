@@ -1268,7 +1268,7 @@ public final class MimeMessageUtility {
         return b.booleanValue();
     }
 
-    private static final Pattern PATTERN_REPLACE = Pattern.compile("([^\"]\\S+?)(\\s*)([;])(\\s*)");
+    private static final Pattern PATTERN_REPLACE = Pattern.compile("(\\.\\w+>?)(\\s*);(\\s*)");
 
     private static String replaceWithComma(final String addressList) {
         if (!checkReplaceWithComma()) {
@@ -1282,7 +1282,7 @@ public final class MimeMessageUtility {
         int lastMatch = 0;
         do {
             sb.append(addressList.substring(lastMatch, m.start()));
-            sb.append(m.group(1)).append(m.group(2)).append(',').append(m.group(4));
+            sb.append(m.group(1)).append(m.group(2)).append(',').append(m.group(3));
             lastMatch = m.end();
         } while (m.find());
         sb.append(addressList.substring(lastMatch));
