@@ -50,7 +50,6 @@ package com.openexchange.admin.rmi.impl;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashSet;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -145,14 +144,21 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
 
             createchecks(ret, admin_user, tool);
 
-            final String name = ret.getName();
-            final HashSet<String> loginMappings = ret.getLoginMappings();
-            if (null == loginMappings || loginMappings.isEmpty()) {
-                ret.addLoginMapping(ret.getIdAsString());
+            // Ensure context identifier is contained in login mappings
+            {
+                final String sContextId = ret.getIdAsString();
+                if (null !=sContextId) {
+                    ret.addLoginMapping(sContextId);
+                }
             }
-            if (null != name) {
-                // Add the name of the context to the login mappings and the id
-                ret.addLoginMapping(name);
+
+            // Ensure context name is contained in login mappings
+            {
+                final String name = ret.getName();
+                if (null != name) {
+                    // Add the name of the context to the login mappings and the id
+                    ret.addLoginMapping(name);
+                }
             }
 
             final Context retval = createmaincall(ret, admin_user, db, access,auth);
