@@ -195,11 +195,13 @@ public class APIResponseRenderer implements ResponseRenderer {
         + "<META http-equiv=\"Content-Type\" "
         + "content=\"text/html; charset=UTF-8\">"
         + "<script type=\"text/javascript\">"
-        + "(parent.callback_").toCharArray();
+        + "(parent[\"callback_").toCharArray();
 
-    private static final char[] JS_FRAGMENT_PART2 = " || window.opener && window.opener.callback_".toCharArray();
+    private static final char[] JS_FRAGMENT_PART2 = "\"] || window.opener && window.opener[\"callback_".toCharArray();
 
     private static final char[] JS_FRAGMENT_PART3 = ")</script></head></html>".toCharArray();
+
+    private static final Pattern PATTERN_QUOTE = Pattern.compile("(^|[^\\\\])\"");
 
     private static void writeResponse(final Response response, final String action, final HttpServletRequest req, final HttpServletResponse resp, final boolean plainJson) {
         try {
@@ -210,6 +212,10 @@ public class APIResponseRenderer implements ResponseRenderer {
                 String callback = req.getParameter(CALLBACK);
                 if (callback == null) {
                     callback = action;
+                } else {
+                    if (callback.indexOf('"') >= 0) {
+                        callback = PATTERN_QUOTE.matcher(callback).replaceAll("$1\\\\\"");
+                    }
                 }
                 // Write: PART1 + <action> + PART2 + <action> + ")(" + <json> + PART3
                 final PrintWriter writer = resp.getWriter();
@@ -217,7 +223,7 @@ public class APIResponseRenderer implements ResponseRenderer {
                 writer.write(callback);
                 writer.write(JS_FRAGMENT_PART2);
                 writer.write(callback);
-                writer.write(")(");
+                writer.write("\"])(");
                 ResponseWriter.write(response, new EscapingWriter(writer), localeFrom(req));
                 writer.write(JS_FRAGMENT_PART3);
                 /*-
