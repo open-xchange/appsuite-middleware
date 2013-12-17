@@ -105,6 +105,7 @@ import org.apache.james.mime4j.stream.RawField;
 import org.apache.james.mime4j.util.ByteArrayBuffer;
 import org.apache.james.mime4j.util.CharsetUtil;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -1247,22 +1248,45 @@ public final class MimeMessageUtility {
         return addrs;
     }
 
+    private static volatile Boolean checkReplaceWithComma;
+    private static boolean checkReplaceWithComma() {
+        Boolean b = checkReplaceWithComma;
+        if (null == b) {
+            synchronized (MimeMessageUtility.class) {
+                b = checkReplaceWithComma;
+                if (null == b) {
+                    final boolean fallback = false;
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        return fallback;
+                    }
+                    b = Boolean.valueOf(service.getBoolProperty("com.openexchange.mail.replaceWithComma", fallback));
+                    checkReplaceWithComma = b;
+                }
+            }
+        }
+        return b.booleanValue();
+    }
+
     private static final Pattern PATTERN_REPLACE = Pattern.compile("([^\"]\\S+?)(\\s*)([;])(\\s*)");
 
     private static String replaceWithComma(final String addressList) {
-        final Matcher m = PATTERN_REPLACE.matcher(addressList);
-        if (m.find()) {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(addressList.length());
-            int lastMatch = 0;
-            do {
-                sb.append(addressList.substring(lastMatch, m.start()));
-                sb.append(m.group(1)).append(m.group(2)).append(',').append(m.group(4));
-                lastMatch = m.end();
-            } while (m.find());
-            sb.append(addressList.substring(lastMatch));
-            return sb.toString();
+        if (!checkReplaceWithComma()) {
+            return addressList;
         }
-        return addressList;
+        final Matcher m = PATTERN_REPLACE.matcher(addressList);
+        if (!m.find()) {
+            return addressList;
+        }
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(addressList.length());
+        int lastMatch = 0;
+        do {
+            sb.append(addressList.substring(lastMatch, m.start()));
+            sb.append(m.group(1)).append(m.group(2)).append(',').append(m.group(4));
+            lastMatch = m.end();
+        } while (m.find());
+        sb.append(addressList.substring(lastMatch));
+        return sb.toString();
     }
 
     /**
