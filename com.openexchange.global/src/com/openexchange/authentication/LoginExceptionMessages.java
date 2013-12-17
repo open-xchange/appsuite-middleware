@@ -97,6 +97,9 @@ public final class LoginExceptionMessages implements LocalizableStrings {
     // %s is replaced with the implementations name.
     public static final String NOT_SUPPORTED_MSG = "Automatic login is not supported.";
 
+    // Indicates a deactivated user
+    public static final String USER_NOT_ACTIVE_MSG = "The user account is not activated.";
+
     private LoginExceptionMessages() {
         super();
     }

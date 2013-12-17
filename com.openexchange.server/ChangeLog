@@ -1,6 +1,7 @@
 * 2013-12-17 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 30355: Point to the correct configuration file when adjusting permissions during post-install
+ - Fix for bug 30336: Re-added LGI-0013
 
 * 2013-12-16 - thorben.betten@open-xchange.com
 
