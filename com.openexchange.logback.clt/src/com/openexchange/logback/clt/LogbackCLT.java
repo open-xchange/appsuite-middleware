@@ -104,7 +104,6 @@ public class LogbackCLT {
         options.addOption(createOption("ll", "list-loggers", false, true, "Get a list with all loggers of the system\nCan optionally have a list with loggers as arguments, i.e. -ll <logger1> <logger2> OR the keyword 'dynamic' that instructs the command line tool to fetch all dynamically modified loggers. Any other keyword is then ignored, and a full list will be retrieved.", false));
         options.addOption(createOption("lf", "list-filters", false, false, "Get a list with all logging filters of the system", false));
         options.addOption(createOption("le", "list-exception-category", false, false, "Get a list with all supressed exception categories", false));
-        options.addOption(createOption("is", "include-stacktraces", false, false, "Sets whether to include stack trace information in HTTP-API JSON responses", false));
         options.addOptionGroup(og);
     }
 
@@ -148,13 +147,8 @@ public class LogbackCLT {
                 contextID = getIntValue(cl.getOptionValue("c"));
                 if (cl.hasOption("u")) {
                     userID = getIntValue(cl.getOptionValue("u"));
-                    if (cl.hasOption("is")) {
-                        method = "includeStackTraceForUser";
-                        params = new Object[]{Integer.valueOf(userID), Integer.valueOf(contextID), cl.hasOption("a") ? Boolean.TRUE : Boolean.FALSE};
-                    } else {
-                        method = cl.hasOption("a") ? "filterUser" : "removeUserFilter";
-                        params = new Object[]{userID, contextID};
-                    }
+                    method = cl.hasOption("a") ? "filterUser" : "removeUserFilter";
+                    params = new Object[]{userID, contextID};
                 } else {
                     method = cl.hasOption("a") ? "filterContext" : "removeContextFilter";
                     params = new Object[]{contextID};

@@ -150,9 +150,11 @@ public final class ResponseWriter {
             if (null != traceService) {
                 try {
                     final int contextId = getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
-                    final int userId = getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
-                    if (contextId > 0 && userId > 0) {
-                        return traceService.includeStackTraceOnError(userId, contextId);
+                    if (contextId > 0) {
+                        final int userId = getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
+                        if (userId > 0) {
+                            return traceService.includeStackTraceOnError(userId, contextId);
+                        }
                     }
                 } catch (final Exception e) {
                     final Logger logger = org.slf4j.LoggerFactory.getLogger(ResponseWriter.class);
