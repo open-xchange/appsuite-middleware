@@ -51,7 +51,9 @@ package com.openexchange.logback.clt;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
@@ -83,9 +85,15 @@ import com.openexchange.logging.mbean.LogbackConfigurationMBean;
  */
 public class LogbackCLT {
 
-    private static final String serviceURL = "service:jmx:rmi:///jndi/rmi://localhost:9999/server";
+    private static final String serviceURL = "service:jmx:rmi:///jndi/rmi://localhost:";
 
     private static final String validLogLevels = "{OFF, ERROR, WARN, INFO, DEBUG, TRACE, ALL}";
+    
+    private static String jmxUser;
+    
+    private static String jmxPassword;
+    
+    private static String jmxPort = "9999"; //defaults to 9999
 
     private static final Options options = new Options();
     static {
@@ -104,6 +112,10 @@ public class LogbackCLT {
         options.addOption(createOption("ll", "list-loggers", false, true, "Get a list with all loggers of the system\nCan optionally have a list with loggers as arguments, i.e. -ll <logger1> <logger2> OR the keyword 'dynamic' that instructs the command line tool to fetch all dynamically modified loggers. Any other keyword is then ignored, and a full list will be retrieved.", false));
         options.addOption(createOption("lf", "list-filters", false, false, "Get a list with all logging filters of the system", false));
         options.addOption(createOption("le", "list-exception-category", false, false, "Get a list with all supressed exception categories", false));
+        options.addOption(createOption("U", "JMX-User", true, false, "JMX user", false));
+        options.addOption(createOption("P", "JMX-Password", true, false, "JMX password", false));
+        options.addOption(createOption("p", "JMX-Port", true, false, "JMX port (default:9999)", false));
+        
         options.addOptionGroup(og);
     }
 
@@ -138,6 +150,18 @@ public class LogbackCLT {
             String sessionID = null;
             int contextID = 0;
             int userID = 0;
+            
+            if (cl.hasOption("A")) {
+                jmxUser = cl.getOptionValue("A");
+            }
+            
+            if (cl.hasOption("P")) {
+                jmxPassword = cl.getOptionValue("P");
+            }
+            
+            if (cl.hasOption("p")) {
+                jmxPort = cl.getOptionValue("p");
+            }
 
             if (cl.hasOption("s")) {
                 sessionID = cl.getOptionValue("s");
@@ -225,8 +249,8 @@ public class LogbackCLT {
     private static final void invokeMBeanMethod(String methodName, Object[] params, String[] signature) {
         try {
             ObjectName logbackConfObjName = new ObjectName(LogbackConfigurationMBean.DOMAIN, LogbackConfigurationMBean.KEY, LogbackConfigurationMBean.VALUE);
-            JMXServiceURL jmxServiceURL = new JMXServiceURL(serviceURL);
-            JMXConnector jmxConnector = JMXConnectorFactory.connect(jmxServiceURL);
+            JMXServiceURL jmxServiceURL = new JMXServiceURL(serviceURL + jmxPort + "/server");
+            JMXConnector jmxConnector = JMXConnectorFactory.connect(jmxServiceURL, createEnvironment());
             MBeanServerConnection mbeanServerConnection = jmxConnector.getMBeanServerConnection();
 
             Object o = mbeanServerConnection.invoke(logbackConfObjName, methodName, params, signature);
@@ -288,6 +312,11 @@ public class LogbackCLT {
         return false;
     }
 
+    /**
+     * Verify whether the specified category is a valid OX Category
+     * @param category
+     * @return
+     */
     private static final boolean isValidCategory(String category) {
         if (category == null || category.equals("null")) {
             return false;
@@ -305,6 +334,10 @@ public class LogbackCLT {
         return false;
     }
 
+    /**
+     * Return all valid OX Categories 
+     * @return
+     */
     private static final String getValidCategories() {
         StringBuilder builder = new StringBuilder();
         builder.append("{");
@@ -375,5 +408,17 @@ public class LogbackCLT {
             e.printStackTrace();
         }
         return null;
+    }
+    
+    /**
+     * Create JMX Environment
+     * @return
+     */
+    private static Map<String, Object> createEnvironment() {
+        Map<String, Object> environment = new HashMap<String, Object>();
+        if (jmxUser != null && jmxPassword != null) {
+            environment.put(JMXConnector.CREDENTIALS, new String[]{jmxUser, jmxPassword});
+        }
+        return environment;
     }
 }
