@@ -302,7 +302,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             try {
                 cache.put(key, userConfig, false);
             } catch (RuntimeException e) {
-                LOG.warn("Failed to add user configuration for context {} and user {} to cache.", ctx.getContextId(), userId, e);
+                LOG.warn("Failed to add user configuration for context {} and user {} to cache.", Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId), e);
             }
             map.put(userId, userConfig.clone());
         }
