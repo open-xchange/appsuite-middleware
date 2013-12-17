@@ -61,8 +61,11 @@ public class FolderExceptionMessages implements LocalizableStrings {
     // You do not have a valid session. Please login again.
     public static final String MISSING_SESSION_MSG_DISPLAY = "You do not have a valid session. Please login again.";
 
-    // You do not have the necessary permissions for appointments in folder \"%1$s\".
-    public static final String FOLDER_NOT_VISIBLE_MSG_DISPLAY = "You do not have the necessary permissions for appointments in folder \"%1$s\".";
+    // You do not have appropriate permissions to view the folder \"%1$s\".
+    public static final String FOLDER_NOT_VISIBLE_MSG_DISPLAY = "You do not have appropriate permissions to view the folder \"%1$s\".";
+
+    public static final String FOLDER_NOT_VISIBLE_MSG = "Folder \"%1$s\" is not visible to user \"%2$s\" in context \"%3$s\"";
+
 
     // "The content type you provided is not allowed for the given folder \"%1$s\".";
     public static final String INVALID_CONTENT_TYPE_MSG_DISPLAY = "The content type you provided is not allowed for the given folder \"%1$s\".";
