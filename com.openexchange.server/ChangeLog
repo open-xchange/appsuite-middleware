@@ -1,3 +1,7 @@
+* 2013-12-17 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 30254: Added column names to SQL statement
+
 * 2013-12-17 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 30359: Configure SAX builder to not resolve external entities
