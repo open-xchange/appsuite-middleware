@@ -82,8 +82,8 @@ public class IncludeStackTraceCLT {
         OptionGroup og = new OptionGroup();
         og.addOption(enable).addOption(disbale);
 
-        options.addOption(createOption("u", "user", true, false, "The user id for which to enable logging", true));
-        options.addOption(createOption("c", "context", true, false, "The context id for which to enable logging", true));
+        options.addOption(createOption("u", "user", true, false, "The user identifier", true));
+        options.addOption(createOption("c", "context", true, false, "The context identifier", true));
         options.addOption(createOption("h", "help", false, false, "Print usage of the command line tool", false));
         options.addOptionGroup(og);
     }
