@@ -254,6 +254,11 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
         super.tearDown();
     }
 
+    @Override
+    public String getRMIHostUrl(String classname) {
+        return AbstractTest.getRMIHostUrl() + classname;
+    }
+
     private OXUserCopyInterface getUserMoveClient() throws MalformedURLException, RemoteException, NotBoundException {
         return (OXUserCopyInterface) Naming.lookup(getRMIHostUrl() + OXUserCopyInterface.RMI_NAME);
     }
