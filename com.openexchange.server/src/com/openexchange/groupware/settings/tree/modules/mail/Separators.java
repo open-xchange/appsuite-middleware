@@ -84,11 +84,15 @@ import com.openexchange.session.Session;
  */
 public class Separators implements PreferencesItemService {
 
+    /** The primary-only flag */
+    final boolean primaryOnly;
+
     /**
      * Default constructor.
      */
     public Separators() {
         super();
+        primaryOnly = true;
     }
 
     /**
@@ -117,7 +121,12 @@ public class Separators implements PreferencesItemService {
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 try {
                     final JSONObject retval = new JSONObject(4);
-                    if (userConfig.isMultipleMailAccounts()) {
+                    if (primaryOnly || !userConfig.isMultipleMailAccounts()) {
+                        final Character sep = getSeparator(MailAccount.DEFAULT_ID, session);
+                        if (null != sep) {
+                            retval.put(Integer.toString(MailAccount.DEFAULT_ID), sep.toString());
+                        }
+                    } else {
                         final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
                         if (null == mass) {
                             final Character sep = getSeparator(MailAccount.DEFAULT_ID, session);
@@ -134,11 +143,6 @@ public class Separators implements PreferencesItemService {
                                     }
                                 }
                             }
-                        }
-                    } else {
-                        final Character sep = getSeparator(MailAccount.DEFAULT_ID, session);
-                        if (null != sep) {
-                            retval.put(Integer.toString(MailAccount.DEFAULT_ID), sep.toString());
                         }
                     }
 
