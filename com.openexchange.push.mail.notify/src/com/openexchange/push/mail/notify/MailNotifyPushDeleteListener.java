@@ -61,17 +61,20 @@ import com.openexchange.groupware.delete.DeleteListener;
  */
 public final class MailNotifyPushDeleteListener implements DeleteListener {
 
+    private final MailNotifyPushListenerRegistry registry;
+
     /**
      * Initializes a new {@link MailNotifyPushDeleteListener}.
      */
-    public MailNotifyPushDeleteListener() {
+    public MailNotifyPushDeleteListener(final MailNotifyPushListenerRegistry registry) {
         super();
+        this.registry = registry;
     }
 
     @Override
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
         if (DeleteEvent.TYPE_USER == event.getType()) {
-            MailNotifyPushListenerRegistry.getInstance().purgeUserPushListener(event.getContext().getContextId(), event.getId());
+            registry.purgeUserPushListener(event.getContext().getContextId(), event.getId());
         }
     }
 
