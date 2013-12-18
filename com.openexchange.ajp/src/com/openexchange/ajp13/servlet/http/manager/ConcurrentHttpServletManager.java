@@ -193,8 +193,7 @@ public final class ConcurrentHttpServletManager extends AbstractHttpServletManag
                         }
                     }
                     if (null == implier) {
-                        final ServletQueue errServletQueue =
-                            new SingletonServletQueue(new HttpErrorServlet("No servlet bound to path/alias: " + AJPv13Utility.urlEncode(path)), path);
+                        final ServletQueue errServletQueue = new SingletonServletQueue(new HttpErrorServlet("No servlet bound to path/alias: " + AJPv13Utility.urlEncode(path, null)), path);
                         implierCache.put(path, errServletQueue);
                     } else {
                         pathStorage.append(implier.implier);

@@ -11,6 +11,10 @@
 
  - Fix for bug 30359: Configure SAX builder to not resolve external entities
 
+* 2013-12-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30190: Fixed parsing of CLI call
+
 * 2013-12-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 30114: Properly sanitize CSS selectors
@@ -18,6 +22,10 @@
 * 2013-11-04 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 29628: Make 'validate_contact_email' available in config tree, so it becomes visible for JSlob mapping
+
+* 2013-11-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29639: Use configured default charset encoding when decoding a Servlet path in AJP module
  
 * 2013-10-29 - tobias.friedrich@open-xchange.com
 
