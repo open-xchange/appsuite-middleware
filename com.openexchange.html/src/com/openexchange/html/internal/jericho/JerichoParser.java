@@ -142,7 +142,7 @@ public final class JerichoParser {
     private int maxLength() {
         Integer i = maxLength;
         if (null == maxLength) {
-            synchronized (JerichoParser.class) {
+            synchronized (this) {
                 i = maxLength;
                 if (null == maxLength) {
                     // Default is 1MB
