@@ -65,6 +65,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -75,6 +77,8 @@ import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.tools.caching.SerializedCachingLoader;
+import com.openexchange.tools.caching.StorageLoader;
 import com.openexchange.tools.update.Tools;
 import edu.emory.mathcs.backport.java.util.Collections;
 
@@ -86,12 +90,13 @@ import edu.emory.mathcs.backport.java.util.Collections;
  */
 public class SchemaStoreImpl extends SchemaStore {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SchemaStoreImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SchemaStoreImpl.class);
+    private static final String CACHE_REGION = "OXDBPoolCache";
     private static final String TABLE_NAME = "updateTask";
     private static final String LOCKED = "LOCKED";
     private static final String BACKGROUND = "BACKGROUND";
 
-    private final Lock cacheLock = new ReentrantLock();
+    final Lock cacheLock = new ReentrantLock();
 
     private Cache cache;
 
@@ -100,31 +105,17 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     @Override
-    protected SchemaUpdateState getSchema(int poolId, String schemaName, Connection con) throws OXException {
-        SchemaUpdateState retval;
-        if (null == cache) {
-            retval = loadSchema(con);
-        } else {
-            final CacheKey key = cache.newCacheKey(poolId, schemaName);
-            cacheLock.lock();
-            try {
-                retval = (SchemaUpdateState) cache.get(key);
-                if (null == retval) {
-                    retval = loadSchema(con);
-                    try {
-                        cache.putSafe(key, retval);
-                    } catch (final OXException e) {
-                        LOG.error("", e);
-                    }
-                }
-            } finally {
-                cacheLock.unlock();
+    protected SchemaUpdateState getSchema(int poolId, String schemaName, final Connection con) throws OXException {
+        final CacheKey key = cache.newCacheKey(poolId, schemaName);
+        return SerializedCachingLoader.fetch(cache, CACHE_REGION, null, cacheLock, key, new StorageLoader<SchemaUpdateState>() {
+            @Override
+            public SchemaUpdateState load() throws OXException {
+                return loadSchema(con);
             }
-        }
-        return retval;
+        });
     }
 
-    private static SchemaUpdateState loadSchema(Connection con) throws OXException {
+    static SchemaUpdateState loadSchema(Connection con) throws OXException {
         final SchemaUpdateState retval;
         try {
             con.setAutoCommit(false);
@@ -630,7 +621,7 @@ public class SchemaStoreImpl extends SchemaStore {
     @Override
     public void setCacheService(final CacheService cacheService) {
         try {
-            cache = cacheService.getCache("OXDBPoolCache");
+            cache = cacheService.getCache(CACHE_REGION);
         } catch (final OXException e) {
             LOG.error("", e);
         }
@@ -647,11 +638,11 @@ public class SchemaStoreImpl extends SchemaStore {
             cache = null;
         }
     }
-    
+
     private static boolean hasUUID(Connection con) throws SQLException {
         return Tools.columnExists(con, TABLE_NAME, "uuid");
     }
-    
+
     private static byte[] generateUUID() {
         UUID uuid = UUID.randomUUID();
         return UUIDs.toByteArray(uuid);
