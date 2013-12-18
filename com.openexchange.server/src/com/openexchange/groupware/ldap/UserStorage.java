@@ -61,6 +61,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 /**
  * This interface provides methods to read data from users in the directory
@@ -400,47 +401,51 @@ public abstract class UserStorage {
         return tmp;
     }
 
+    /*
+     * ==========================================================================================================
+     *
+     * FIXME: The whole service model is bypassed by the methods underneath.
+     * Calls to these methods can even be found in Comparators and the like!
+     * They should be removed and all of their (many) callers have to be refactored accordingly.
+     */
+
     /**
+     * Use {@link UserService} instead!
      * Reads the data from a user from the underlying persistent data storage.
      *
      * @param uid
      *            User identifier.
      * @param context
      *            Context.
-     * @return a user object or <code>null</code> on exception.
+     * @return a user object.
      */
-    public static User getStorageUser(final int uid, final Context context) {
-        try {
-            return getInstance().getUser(uid, context);
-        } catch (final OXException e) {
-            LOG.error("", e);
-            return null;
-        }
+    @Deprecated
+    public static User getStorageUser(final int uid, final Context context) throws OXException {
+        return getInstance().getUser(uid, context);
     }
 
     /**
+     * Use {@link UserService} instead!
      * Reads the data from a user from the underlying persistent data storage.
      *
      * @param uid User identifier.
      * @param contextId Context ID.
-     * @return a user object or <code>null</code> on exception.
+     * @return a user object.
      */
-    public static User getStorageUser(final int uid, final int contextId) {
-        try {
-            return getInstance().getUser(uid, ContextStorage.getStorageContext(contextId));
-        } catch (final OXException e) {
-            LOG.error("", e);
-            return null;
-        }
+    @Deprecated
+    public static User getStorageUser(final int uid, final int contextId) throws OXException {
+        return getInstance().getUser(uid, ContextStorage.getStorageContext(contextId));
     }
 
     /**
+     * Use {@link UserService} instead!
      * Reads the data from a user from the underlying persistent data storage.
      *
      * @param session The associated session
-     * @return A user or <code>null</code> on exception.
+     * @return A user.
      */
-    public static User getStorageUser(final Session session) {
+    @Deprecated
+    public static User getStorageUser(final Session session) throws OXException {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getUser();
         }

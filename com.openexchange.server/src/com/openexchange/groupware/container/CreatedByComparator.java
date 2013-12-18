@@ -54,6 +54,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import java.text.Collator;
 import java.util.Comparator;
 import java.util.Locale;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 
@@ -119,7 +120,11 @@ public class CreatedByComparator implements Comparator<DataObject> {
     private String getDisplayName(final int userId) {
         String displayName = cache.get(userId);
         if (null == displayName) {
-            displayName = UserStorage.getStorageUser(userId, context).getDisplayName();
+            try {
+                displayName = UserStorage.getStorageUser(userId, context).getDisplayName();
+            } catch (OXException e) {
+                return null;
+            }
             cache.put(userId, displayName);
         }
         return displayName;

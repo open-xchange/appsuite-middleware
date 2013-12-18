@@ -2676,22 +2676,6 @@ public final class OutlookFolderStorage implements FolderStorage {
         return null;
     }
 
-    /**
-     * Gets the locale for given session
-     *
-     * @param session The session
-     * @return The locale
-     */
-    private static Locale localeFrom(final Session session) {
-        if (null == session) {
-            return Locale.US;
-        }
-        if (session instanceof ServerSession) {
-            return ((ServerSession) session).getUser().getLocale();
-        }
-        return UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
-    }
-
     private static void doModifications(final OutlookFolder folder, final Session session, final boolean altNames) {
         final String id = folder.getID();
         if (FolderStorage.PUBLIC_ID.equals(id)) {

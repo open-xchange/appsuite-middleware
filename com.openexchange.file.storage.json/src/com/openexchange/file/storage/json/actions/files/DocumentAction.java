@@ -53,7 +53,6 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Locale;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -68,8 +67,6 @@ import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 
@@ -176,23 +173,6 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         if (eTag != null) {
             result.setHeader("ETag", eTag);
         }
-    }
-
-    /**
-     * Gets the locale for given server session
-     *
-     * @param session The server session
-     * @return The locale
-     */
-    private static Locale localeFrom(final ServerSession session) {
-        if (null == session) {
-            return Locale.US;
-        }
-        final User user = session.getUser();
-        if (null != user) {
-            return user.getLocale();
-        }
-        return UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
     }
 
     /** Check for an empty string */

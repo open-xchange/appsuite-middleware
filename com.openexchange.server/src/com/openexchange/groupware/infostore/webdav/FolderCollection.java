@@ -517,15 +517,15 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 			if(folder == null) {
 				folder = new FolderObject();
 			}
-			initDefaultAcl(folder);
-			initDefaultFields(folder);
 
-			final ServerSession session = getSession();
-			final Context ctx = session.getContext();
-
+			Context ctx = null;
 			Connection writeCon = null;
-
 			try {
+			    initDefaultAcl(folder);
+			    initDefaultFields(folder);
+
+			    final ServerSession session = getSession();
+                ctx = session.getContext();
 				writeCon = provider.getWriteConnection(ctx);
 				final OXFolderManager oxma = OXFolderManager.getInstance(getSession(), writeCon, writeCon);
 				folder = oxma.createFolder(folder, true, System.currentTimeMillis());
@@ -574,7 +574,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 
 	}
 
-	private void initDefaultAcl(final FolderObject folder) throws WebdavProtocolException {
+	private void initDefaultAcl(final FolderObject folder) throws OXException {
 
 		final List<OCLPermission> copyPerms;
 

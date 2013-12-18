@@ -712,7 +712,7 @@ public class OXFolderAccess {
         return bits;
     }
 
-    private User getUser(final Session session, final Context ctx, final int userId) {
+    private User getUser(final Session session, final Context ctx, final int userId) throws OXException {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getUser();
         }

@@ -145,14 +145,15 @@ public class Attachment extends PermissionServlet {
         }
 
         final ServerSession session;
+        final User user;
         try {
             session = ServerSessionAdapter.valueOf(getSessionObject(req));
+            user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
         } catch (final OXException e) {
             handle(res, e, action, getSessionObject(req));
             return;
         }
 
-        final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
         final Context ctx = session.getContext();
         final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
             session.getUserId(),
@@ -270,14 +271,15 @@ public class Attachment extends PermissionServlet {
         }
 
         final ServerSession session;
+        final User user;
         try {
             session = ServerSessionAdapter.valueOf(getSessionObject(req));
+            user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
         } catch (final OXException e) {
             handle(res, e, action, getSessionObject(req));
             return;
         }
 
-        final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
         final Context ctx = session.getContext();
         final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
             session.getUserId(),

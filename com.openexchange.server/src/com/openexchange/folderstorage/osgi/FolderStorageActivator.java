@@ -63,6 +63,7 @@ import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.ajax.customizer.folder.AdditionalFieldsUtils;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
@@ -158,7 +159,11 @@ public final class FolderStorageActivator implements BundleActivator {
             }
             final Context context = session.getContext();
             final String displayName = cache.get(Key.valueOf(createdBy, context.getContextId()));
-            return null == displayName ? UserStorage.getStorageUser(createdBy, context).getDisplayName() : displayName;
+            try {
+                return null == displayName ? UserStorage.getStorageUser(createdBy, context).getDisplayName() : displayName;
+            } catch (OXException e) {
+                return null;
+            }
         }
 
         @Override

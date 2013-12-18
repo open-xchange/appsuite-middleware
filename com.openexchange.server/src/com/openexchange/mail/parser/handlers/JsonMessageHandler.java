@@ -392,7 +392,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         return nestedMsgsArr;
     }
 
-    private TimeZone getTimeZone() {
+    private TimeZone getTimeZone() throws OXException {
         if (timeZone == null) {
             timeZone = TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
         }

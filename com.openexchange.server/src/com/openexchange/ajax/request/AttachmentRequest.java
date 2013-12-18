@@ -133,7 +133,7 @@ public class AttachmentRequest extends CommonRequest {
         return session.getUser().getLocale();
     }
 
-    private static Locale localeFrom(final Session session) {
+    private static Locale localeFrom(final Session session) throws OXException {
         if (null == session) {
             return Locale.US;
         }
@@ -573,6 +573,8 @@ public class AttachmentRequest extends CommonRequest {
             ResponseWriter.write(resp, w, localeFrom(session));
         } catch (final JSONException e) {
             LOG.debug("Cannot contact client", e);
+        } catch (OXException e) {
+            LOG.debug("", e);
         }
     }
 

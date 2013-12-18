@@ -1982,9 +1982,19 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                         final int owner1 = o1.getCreatedBy();
                         final int owner2 = o2.getCreatedBy();
                         if (owner1 > 0 && owner2 > 0) {
-                            return collator.compare(
-                                UserStorage.getStorageUser(owner1, context).getDisplayName(),
-                                UserStorage.getStorageUser(owner2, context).getDisplayName());
+                            String d1;
+                            try {
+                                d1 = UserStorage.getStorageUser(owner1, context).getDisplayName();
+                            } catch (OXException e) {
+                                d1 = null;
+                            }
+                            String d2;
+                            try {
+                                d2 = UserStorage.getStorageUser(owner2, context).getDisplayName();
+                            } catch (OXException e) {
+                                d2 = null;
+                            };
+                            return collator.compare(d1, d2);
                         }
                     }
                     return compareById(o1.getObjectID(), o2.getObjectID());
@@ -2030,9 +2040,19 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 final int owner1 = o1.getCreatedBy();
                 final int owner2 = o2.getCreatedBy();
                 if (owner1 > 0 && owner2 > 0) {
-                    return collator.compare(
-                        UserStorage.getStorageUser(owner1, context).getDisplayName(),
-                        UserStorage.getStorageUser(owner2, context).getDisplayName());
+                    String d1;
+                    try {
+                        d1 = UserStorage.getStorageUser(owner1, context).getDisplayName();
+                    } catch (OXException e) {
+                        d1 = null;
+                    }
+                    String d2;
+                    try {
+                        d2 = UserStorage.getStorageUser(owner2, context).getDisplayName();
+                    } catch (OXException e) {
+                        d2 = null;
+                    };
+                    return collator.compare(d1, d2);
                 }
             }
             return collator.compare(folderName1, folderName2);

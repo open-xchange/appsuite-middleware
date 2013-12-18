@@ -426,7 +426,12 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
             synchronized (this) {
                 tmp = user;
                 if (null == tmp) {
-                    user = tmp = UserStorage.getStorageUser(userId, ctx);
+                    try {
+                        user = tmp = UserStorage.getStorageUser(userId, ctx);
+                    } catch (OXException e) {
+                        LOG.warn("", e);
+                        return null;
+                    }
                 }
             }
         }

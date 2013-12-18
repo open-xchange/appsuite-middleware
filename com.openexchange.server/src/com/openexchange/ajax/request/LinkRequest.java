@@ -96,8 +96,9 @@ public class LinkRequest {
 	 * @param session The session
 	 * @param pw The (print) writer to write to
 	 * @param ctx The context
+	 * @throws OXException
 	 */
-	public LinkRequest(final Session session, final Writer pw, final Context ctx) {
+	public LinkRequest(final Session session, final Writer pw, final Context ctx) throws OXException {
 		this.session = session;
 		this.jsonWriter = new JSONWriter(pw);
 		this.ctx = ctx;

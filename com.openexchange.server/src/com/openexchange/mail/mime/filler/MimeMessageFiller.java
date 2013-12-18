@@ -310,7 +310,7 @@ public class MimeMessageFiller {
      * @param mimeMessage The MIME message
      * @throws MessagingException If headers cannot be set
      */
-    public void setCommonHeaders(final MimeMessage mimeMessage) throws MessagingException {
+    public void setCommonHeaders(final MimeMessage mimeMessage) throws MessagingException, OXException {
         /*
          * Set mailer
          */

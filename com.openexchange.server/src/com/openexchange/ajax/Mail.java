@@ -237,7 +237,12 @@ public class Mail extends PermissionServlet implements UploadListener {
     protected static final OXException getWrappingOXException(final Exception cause) {
         final String message = cause.getMessage();
         final String lineSeparator = System.getProperty("line.separator");
-        LOG.warn("An unexpected exception occurred, which is going to be wrapped for proper display.{}For safety reason its original content is displayed here.{}{}", lineSeparator, lineSeparator, (null == message ? "[Not available]" : message), cause);
+        LOG.warn(
+            "An unexpected exception occurred, which is going to be wrapped for proper display.{}For safety reason its original content is displayed here.{}{}",
+            lineSeparator,
+            lineSeparator,
+            (null == message ? "[Not available]" : message),
+            cause);
         return MailExceptionCode.UNEXPECTED_ERROR.create(cause, null == message ? "[Not available]" : message);
     }
 
@@ -770,7 +775,15 @@ public class Mail extends PermissionServlet implements UploadListener {
                         if (mail != null && !mail.isDeleted()) {
                             final JSONArray ja = new JSONArray();
                             for (final MailFieldWriter writer : writers) {
-                                writer.writeField(ja, mail, mail.getThreadLevel(), false, mailInterface.getAccountID(), userId, contextId, timeZone);
+                                writer.writeField(
+                                    ja,
+                                    mail,
+                                    mail.getThreadLevel(),
+                                    false,
+                                    mailInterface.getAccountID(),
+                                    userId,
+                                    contextId,
+                                    timeZone);
                             }
                             jsonWriter.value(ja);
                         }
@@ -1468,7 +1481,8 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
         } catch (final OXException e) {
             if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
-                LOG.warn("Requested mail could not be found. Most likely this is caused by concurrent access of multiple clients while one performed a delete on affected mail.",
+                LOG.warn(
+                    "Requested mail could not be found. Most likely this is caused by concurrent access of multiple clients while one performed a delete on affected mail.",
                     e);
             } else {
                 LOG.error("", e);
@@ -1546,7 +1560,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         return displayMode;
     }
 
-    private static void triggerContactCollector(final ServerSession session, final MailMessage mail) {
+    private static void triggerContactCollector(final ServerSession session, final MailMessage mail) throws OXException {
         final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (null != ccs) {
             final Set<InternetAddress> addrs = new HashSet<InternetAddress>();
@@ -1579,7 +1593,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         }
     }
 
-    private static void triggerContactCollector(final ServerSession session, final JSONObject mail) {
+    private static void triggerContactCollector(final ServerSession session, final JSONObject mail) throws OXException {
         final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (null != ccs) {
             final Set<InternetAddress> addrs = new HashSet<InternetAddress>();
@@ -2761,7 +2775,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 // Huh... No drafts folder in default account
                                 throw MailExceptionCode.FOLDER_NOT_FOUND.create("Drafts");
                             }
-                            LOG.warn("Mail account {} for user {} in context {} has no drafts folder. Saving draft to default account's draft folder.", accountId, session.getUserId(), session.getContextId());
+                            LOG.warn(
+                                "Mail account {} for user {} in context {} has no drafts folder. Saving draft to default account's draft folder.",
+                                accountId,
+                                session.getUserId(),
+                                session.getContextId());
                             // No drafts folder in detected mail account; auto-save to default account
                             accountId = MailAccount.DEFAULT_ID;
                             composedMail.setFolder(mailInterface.getDraftsFolder(accountId));
@@ -4948,7 +4966,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 // Huh... No drafts folder in default account
                                 throw MailExceptionCode.FOLDER_NOT_FOUND.create("Drafts");
                             }
-                            LOG.warn("Mail account {} for user {} in context {} has no drafts folder. Saving draft to default account's draft folder.", accountId, session.getUserId(), session.getContextId());
+                            LOG.warn(
+                                "Mail account {} for user {} in context {} has no drafts folder. Saving draft to default account's draft folder.",
+                                accountId,
+                                session.getUserId(),
+                                session.getContextId());
                             // No drafts folder in detected mail account; auto-save to default account
                             accountId = MailAccount.DEFAULT_ID;
                         }

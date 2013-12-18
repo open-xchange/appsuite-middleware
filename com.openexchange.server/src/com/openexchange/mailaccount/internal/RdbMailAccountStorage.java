@@ -497,7 +497,15 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         sb.append(mailAccount.getPrimaryAddress());
         final Set<String> s = new HashSet<String>(4);
         s.add(mailAccount.getPrimaryAddress());
-        for (final String alias : UserStorage.getStorageUser(user, cid).getAliases()) {
+        String[] aliases;
+        try {
+            aliases = UserStorage.getStorageUser(user, cid).getAliases();
+        } catch (OXException e) {
+            LOG.warn("", e);
+            return sb.toString();
+        }
+
+        for (final String alias : aliases) {
             if (s.add(alias)) {
                 sb.append(", ").append(alias);
             }

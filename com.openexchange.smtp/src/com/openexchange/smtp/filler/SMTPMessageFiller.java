@@ -160,7 +160,7 @@ public final class SMTPMessageFiller extends MimeMessageFiller {
     }
 
     @Override
-    public void setCommonHeaders(final MimeMessage mimeMessage) throws MessagingException {
+    public void setCommonHeaders(final MimeMessage mimeMessage) throws MessagingException, OXException {
         super.setCommonHeaders(mimeMessage);
         /*
          * ENVELOPE-FROM

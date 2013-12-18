@@ -217,7 +217,7 @@ public class OXContainerConverter {
         ctx = null;
     }
 
-    public OXContainerConverter(final Session session) throws ConverterException {
+    public OXContainerConverter(final Session session) throws ConverterException, OXException {
         super();
         try {
             ctx = ContextStorage.getStorageContext(session.getContextId());
@@ -227,7 +227,7 @@ public class OXContainerConverter {
         timezone = TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
     }
 
-    public OXContainerConverter(final Session session, final Context ctx) {
+    public OXContainerConverter(final Session session, final Context ctx) throws OXException {
         super();
         this.ctx = ctx;
         timezone = TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());

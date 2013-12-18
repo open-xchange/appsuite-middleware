@@ -225,8 +225,9 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      *
      * @param session The session
      * @param mail The mail
+     * @throws OXException
      */
-    public static void triggerContactCollector(final ServerSession session, final MailMessage mail) {
+    public static void triggerContactCollector(final ServerSession session, final MailMessage mail) throws OXException {
         final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (null != ccs) {
             final Set<InternetAddress> addrs = new HashSet<InternetAddress>();
@@ -264,8 +265,9 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      *
      * @param session The session
      * @param mail The JSON mail
+     * @throws OXException
      */
-    protected static void triggerContactCollector(final ServerSession session, final JSONObject mail) {
+    protected static void triggerContactCollector(final ServerSession session, final JSONObject mail) throws OXException {
         final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (null != ccs) {
             final Set<InternetAddress> addrs = new HashSet<InternetAddress>();

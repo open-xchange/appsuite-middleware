@@ -114,13 +114,13 @@ public class DefaultMailSenderService implements MailSenderService {
 
     private final HtmlService htmlService;
 
-	private final AttachmentBase attachments;
+    private final AttachmentBase attachments;
 
-	private final ContextService contexts;
+    private final ContextService contexts;
 
-	private final UserService users;
+    private final UserService users;
 
-	private final UserConfigurationStorage userConfigurations;
+    private final UserConfigurationStorage userConfigurations;
 
     public DefaultMailSenderService(final ITipEmitter iTipEmitter, final HtmlService htmlService, AttachmentBase attachments, ContextService contexts, UserService users, UserConfigurationStorage userConfigs, AttachmentMemory attachmentMemory) {
         this.iTipEmitter = iTipEmitter;
@@ -149,16 +149,15 @@ public class DefaultMailSenderService implements MailSenderService {
             final String sType = type != null ? type.toString() : null;
             message = new MailObject(session, appointmentId, folderId, Types.APPOINTMENT, sType);
         }
-        message.setInternalRecipient(!mail.getRecipient().isExternal() && !mail.getRecipient().isResource());
-
-        message.setFromAddr(getSenderAddress(mail.getSender(), session));
-        message.addToAddr(getAddress(mail.getRecipient()));
-        message.setSubject(mail.getSubject());
-        message.setUid(app.getUid());
-        if (app.containsRecurrenceDatePosition()) {
-        	message.setRecurrenceDatePosition(app.getRecurrenceDatePosition().getTime());
-        }
         try {
+            message.setInternalRecipient(!mail.getRecipient().isExternal() && !mail.getRecipient().isResource());
+            message.setFromAddr(getSenderAddress(mail.getSender(), session));
+            message.addToAddr(getAddress(mail.getRecipient()));
+            message.setSubject(mail.getSubject());
+            message.setUid(app.getUid());
+            if (app.containsRecurrenceDatePosition()) {
+                message.setRecurrenceDatePosition(app.getRecurrenceDatePosition().getTime());
+            }
             addBody(mail, message, session);
             message.send();
         } catch (OXException e) {
@@ -174,8 +173,9 @@ public class DefaultMailSenderService implements MailSenderService {
     /**
      * @param message
      * @param sender
+     * @throws OXException
      */
-    private String getSenderAddress(NotificationParticipant sender, Session session) {
+    private String getSenderAddress(NotificationParticipant sender, Session session) throws OXException {
         if (sender.getUser() == null || sender.getUser().getId() != session.getUserId()) {
             return getAddress(sender);
         }

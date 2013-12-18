@@ -72,7 +72,7 @@ public abstract class CommonRequest {
 		this.w = w;
 	}
 
-    private static Locale localeFrom(final Session session) {
+    private static Locale localeFrom(final Session session) throws OXException {
         if (null == session) {
             return Locale.US;
         }
@@ -111,8 +111,10 @@ public abstract class CommonRequest {
 		try {
 			ResponseWriter.write(res, w, localeFrom(session));
 		} catch (final JSONException e) {
-			LOG.error("",t);
-		}
+			LOG.error("", t);
+		} catch (OXException e) {
+		    LOG.error("", e);
+        }
 	}
 
 	protected void invalidParameter(final String parameter, final String value) {

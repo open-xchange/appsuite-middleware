@@ -1001,7 +1001,11 @@ public class UserPermissionBits implements Serializable, Cloneable {
     public int[] getGroups() {
         int[] thisGroups = groups;
         if (null == thisGroups) {
-            thisGroups = groups = UserStorage.getStorageUser(userId, contextId).getGroups();
+            try {
+                thisGroups = groups = UserStorage.getStorageUser(userId, contextId).getGroups();
+            } catch (OXException e) {
+                thisGroups = groups = new int[0];
+            }
         }
         return thisGroups;
     }

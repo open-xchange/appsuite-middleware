@@ -107,8 +107,9 @@ public abstract class AJAXServlet extends HttpServlet {
      *
      * @param session The session
      * @return The locale
+     * @throws OXException
      */
-    protected static Locale localeFrom(final Session session) {
+    protected static Locale localeFrom(final Session session) throws OXException {
         if (null == session) {
             return Locale.US;
         }
@@ -200,6 +201,9 @@ public abstract class AJAXServlet extends HttpServlet {
         } catch (final JSONException e) {
             LOG.error("Error while writing JSON.", e);
             sendError(resp);
+        } catch (OXException e) {
+            LOG.error("", e);
+            sendError(resp);
         }
     }
 
@@ -259,6 +263,9 @@ public abstract class AJAXServlet extends HttpServlet {
             ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
         } catch (final JSONException e) {
             LOG.error("Error while writing JSON.", e);
+            sendError(resp);
+        } catch (OXException e) {
+            LOG.error("", e);
             sendError(resp);
         }
     }

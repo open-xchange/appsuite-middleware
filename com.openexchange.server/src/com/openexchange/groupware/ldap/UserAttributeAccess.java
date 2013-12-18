@@ -131,8 +131,9 @@ public final class UserAttributeAccess {
      * @param contextId The identifier of user's context
      * @param defaultValue The default value to return if user has no attribute of specified name
      * @return The value of the <code>boolean</code> attribute
+     * @throws OXException
      */
-    public boolean getBooleanAttribute(final String name, final int userId, final int contextId, final boolean defaultValue) {
+    public boolean getBooleanAttribute(final String name, final int userId, final int contextId, final boolean defaultValue) throws OXException {
         return getBooleanAttribute(name, UserStorage.getStorageUser(userId, contextId), defaultValue);
     }
 

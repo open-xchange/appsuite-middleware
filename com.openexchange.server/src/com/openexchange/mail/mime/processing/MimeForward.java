@@ -510,7 +510,7 @@ public final class MimeForward {
         return forwardMail;
     }
 
-    private static User getUser(final Session session, final Context ctx) {
+    private static User getUser(final Session session, final Context ctx) throws OXException {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getUser();
         }
