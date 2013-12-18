@@ -54,7 +54,7 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.admin.rmi.AbstractRMITest;
 import com.openexchange.admin.rmi.dataobjects.Context;

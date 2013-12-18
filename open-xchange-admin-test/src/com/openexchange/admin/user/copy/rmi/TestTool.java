@@ -49,26 +49,55 @@
 
 package com.openexchange.admin.user.copy.rmi;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import java.rmi.RemoteException;
+import com.openexchange.admin.rmi.AbstractRMITest;
+import com.openexchange.admin.rmi.OXContextInterface;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.ContextExistsException;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 
 
 /**
- * RMI tests for admin user copy
+ * {@link TestTool}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4.2
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    RoundtripTest.class,
-    UserCopyTest.class,
-    UserExistsTest.class,
-    MailAttachmentFolderTest.class
-})
-public class AdminUserCopyRmiTestSuite {
+public class TestTool {
+//
+//    public static Context createContext(OXContextInterface ci, User admin, Credentials superAdminCredentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+//        Context ctx = null;
+//        int ctxId = Integer.MAX_VALUE;
+//        boolean created = false;
+//        while (!created) {
+//            try {
+//                ctx = ci.create(AbstractRMITest.newContext("UserMoveSourceCtx_" + ctxId, ctxId), admin, "all", superAdminCredentials);
+//                created = true;
+//            } catch (ContextExistsException e) {
+//                --ctxId;
+//            }
+//        }
+//
+//        return ctx;
+//    }
 
-    private AdminUserCopyRmiTestSuite() {
+    public static Context createContext(OXContextInterface ci, String prefix, User admin, String accessCombinationName, Credentials superAdminCredentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        Context ctx = null;
+        int ctxId = Integer.MAX_VALUE;
+        boolean created = false;
+        while (!created) {
+            try {
+                ctx = ci.create(AbstractRMITest.newContext(prefix + ctxId, ctxId), admin, accessCombinationName, superAdminCredentials);
+                created = true;
+            } catch (ContextExistsException e) {
+                --ctxId;
+            }
+        }
+
+        return ctx;
     }
+
 }

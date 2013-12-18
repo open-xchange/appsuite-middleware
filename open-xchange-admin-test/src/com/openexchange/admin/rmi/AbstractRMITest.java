@@ -48,9 +48,9 @@ public abstract class AbstractRMITest extends AbstractTest {
 
     @After
     public void tearDown() throws Exception {
-        
+
     }
-    
+
     public Integer getContextID() {
         return new Integer(1);
     }
@@ -62,7 +62,7 @@ public abstract class AbstractRMITest extends AbstractTest {
     public String getHostName() {
         return "localhost";
     }
-    
+
     public User getAdminData() throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException, MalformedURLException, NotBoundException{
         User admin = new User();
         admin.setId(Integer.valueOf(2));
@@ -85,12 +85,12 @@ public abstract class AbstractRMITest extends AbstractTest {
         for(int i = 0; i < arr1.length; i++){
             set2.add( arr2[i].getId() );
         }
-        
+
         assertEquals("Both arrays should return the same IDs", set1, set2 );
     }
-    
+
     /*** Asserts for mandatory fields ***/
-    
+
     public void assertUserEquals(User expected, User actual){
         assertEquals("Name should match", expected.getName(), actual.getName() );
         assertEquals("Display name should match", expected.getDisplay_name(), actual.getDisplay_name() );
@@ -99,7 +99,7 @@ public abstract class AbstractRMITest extends AbstractTest {
         assertEquals("Primary E-Mail should match", expected.getPrimaryEmail(), actual.getPrimaryEmail() );
         assertEquals("E-Mail #1 should match", expected.getEmail1(), actual.getEmail1() );
     }
-    
+
     public void assertGroupEquals(Group expected, Group actual){
         assertEquals("Display name should match", expected.getDisplayname(), actual.getDisplayname());
         assertEquals("Name should match", expected.getName(), actual.getName());
@@ -113,7 +113,7 @@ public abstract class AbstractRMITest extends AbstractTest {
 
 
     /*** Asserting proper creation by comparing data in the database with given one ***/
-    
+
     public void assertUserWasCreatedProperly(User expected, Context context, Credentials credentials) throws Exception{
         OXUserInterface userInterface = getUserInterface();
         User lookupUser = new User();
@@ -129,7 +129,7 @@ public abstract class AbstractRMITest extends AbstractTest {
         lookup = groupInterface.getData(context, lookup, credentials);
         assertGroupEquals(expected, lookup);
     }
-    
+
     public void assertResourceWasCreatedProperly(Resource expected, Context context, Credentials credentials) throws Exception{
         OXResourceInterface resInterface = getResourceInterface();
         Resource lookup = new Resource();
@@ -137,10 +137,10 @@ public abstract class AbstractRMITest extends AbstractTest {
         lookup = resInterface.getData(context, lookup, credentials);
         assertResourceEquals(expected, lookup);
     }
-    
+
     /*** pseudo constructors requiring mandatory fields ***/
-    
-    public User newUser(String name, String passwd, String displayName, String givenName, String surname, String email){
+
+    public static User newUser(String name, String passwd, String displayName, String givenName, String surname, String email){
         User user = new User();
         user.setName(name);
         user.setPassword(passwd);
@@ -151,23 +151,23 @@ public abstract class AbstractRMITest extends AbstractTest {
         user.setEmail1(email);
         return user;
     }
-    
-    public Group newGroup(String displayName, String name){
+
+    public static Group newGroup(String displayName, String name){
         Group group = new Group();
         group.setDisplayname(displayName);
         group.setName(name);
         return group;
     }
-    
-    public Resource newResource(String name, String displayName, String email){
+
+    public static Resource newResource(String name, String displayName, String email){
         Resource res = new Resource();
         res.setName(name);
         res.setDisplayname(displayName);
         res.setEmail(email);
         return res;
     }
-    
-    public Context newContext(String name, int id){
+
+    public static Context newContext(String name, int id){
         Context newContext = new Context();
         Filestore filestore = new Filestore();
         filestore.setSize(Long.valueOf(128l));
@@ -177,21 +177,21 @@ public abstract class AbstractRMITest extends AbstractTest {
         newContext.setId( Integer.valueOf(id) );
         return newContext;
     }
-    
+
     /*** Interfaces ***/
-    
+
     public OXGroupInterface getGroupInterface() throws MalformedURLException, RemoteException, NotBoundException{
          return (OXGroupInterface) Naming.lookup( getRMIHostUrl( OXGroupInterface.RMI_NAME ) );
     }
-    
+
     public OXUserInterface getUserInterface() throws MalformedURLException, RemoteException, NotBoundException{
          return (OXUserInterface) Naming.lookup( getRMIHostUrl( OXUserInterface.RMI_NAME ) );
     }
-    
+
     public OXContextInterface getContextInterface() throws MalformedURLException, RemoteException, NotBoundException{
         return (OXContextInterface) Naming.lookup( getRMIHostUrl( OXContextInterface.RMI_NAME ) );
     }
-    
+
     public OXResourceInterface getResourceInterface() throws MalformedURLException, RemoteException, NotBoundException{
         return (OXResourceInterface) Naming.lookup( getRMIHostUrl( OXResourceInterface.RMI_NAME ) );
     }
@@ -204,11 +204,11 @@ public abstract class AbstractRMITest extends AbstractTest {
      */
     public String getRMIHostUrl(String classname) {
         String host = getHostName();
-        
+
         if(System.getProperty("host")!=null){
             host = System.getProperty("host");
-        }        
-        
+        }
+
         if(!host.startsWith("rmi://")){
             host = "rmi://"+host;
         }
@@ -224,12 +224,12 @@ public abstract class AbstractRMITest extends AbstractTest {
     public AbstractRMITest() {
         super();
     }
-    
+
     /*** ANY & friends ***/
     protected interface Verifier<T,S>{
         public boolean verify(T obj1, S obj2);
     }
-    
+
     public <T,S> boolean any(Collection<T> collection, S searched, Verifier<T,S> verifier){
         for(T elem: collection){
             if(verifier.verify(elem, searched)) {
@@ -242,9 +242,9 @@ public abstract class AbstractRMITest extends AbstractTest {
     public <T,S> boolean any(T[] collection, S searched, Verifier<T,S> verifier){
         return any(Arrays.asList(collection), searched, verifier);
     }
-    
+
     /*** Creating test objects on the server ***/
-    
+
     public Resource getTestResource(){
         if(testResource != null && testResource.getId() != null) {
             return testResource;
@@ -256,16 +256,16 @@ public abstract class AbstractRMITest extends AbstractTest {
         return res;
     }
     /** Create a test resource on the server. Always remove this via #removeTestResource() afterwards!
-     * 
-     * @throws DatabaseUpdateException 
-     * @throws InvalidDataException 
-     * @throws NoSuchContextException 
-     * @throws InvalidCredentialsException 
-     * @throws StorageException 
-     * @throws RemoteException 
-     * @throws NotBoundException 
+     *
+     * @throws DatabaseUpdateException
+     * @throws InvalidDataException
+     * @throws NoSuchContextException
+     * @throws InvalidCredentialsException
+     * @throws StorageException
+     * @throws RemoteException
+     * @throws NotBoundException
      * @throws MalformedURLException
-     * */ 
+     * */
     public Resource createTestResource() throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, MalformedURLException, NotBoundException{
         OXResourceInterface resInterface = (OXResourceInterface) Naming.lookup( getRMIHostUrl( OXResourceInterface.RMI_NAME ) );
         testResource = resInterface.create(adminContext, getTestResource(), adminCredentials);

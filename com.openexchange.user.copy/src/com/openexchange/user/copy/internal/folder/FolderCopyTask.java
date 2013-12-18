@@ -56,7 +56,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -66,12 +65,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.mail.transport.config.TransportProperties;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.ObjectMapping;
@@ -137,16 +131,6 @@ public class FolderCopyTask implements CopyUserTaskService {
         "VALUES " +
             "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    private static final String SELECT_ATTACHMENT_FOLDER =
-        "SELECT "+
-            "fuid, parent, fname, module, type, creating_date, " +
-            "changing_date, changed_from, permission_flag, " +
-            "subfolder_flag, default_flag " +
-        "FROM " +
-            "oxfolder_tree " +
-        "WHERE " +
-            "cid = ? AND module = 8 AND type = 2 AND fname = ? AND parent = 15";
-
 
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#getAlreadyCopied()
@@ -171,8 +155,6 @@ public class FolderCopyTask implements CopyUserTaskService {
      */
     public ObjectMapping<FolderObject> copyUser(final Map<String, ObjectMapping<?>> copied) throws OXException {
         final CopyTools tools = new CopyTools(copied);
-        final Context srcCtx = tools.getSourceContext();
-        final Context dstCtx = tools.getDestinationContext();
         final Integer srcCtxId = tools.getSourceContextId();
         final Integer dstCtxId = tools.getDestinationContextId();
         final Integer srcUsrId = tools.getSourceUserId();
@@ -213,25 +195,10 @@ public class FolderCopyTask implements CopyUserTaskService {
         writeVirtualFoldersToDB(virtualFolders, idMapping, dstCon, i(dstCtxId), i(dstUsrId));
 
         /*
-         * Check if public infostore folder for mail attachments exists in source and destination context.
-         * Create if necessary.
-         */
-        String attachmentFolderName = TransportProperties.getInstance().getPublishingInfostoreFolder();
-        if ("i18n-defined".equals(attachmentFolderName)) {
-            attachmentFolderName = FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME;
-        }
-        checkAndCreateMailAttachmentFolder(srcCtx, dstCtx, dstUsrId, srcCon, dstCon, attachmentFolderName);
-        final FolderObject srcAttachmentFolder = loadAttachmentFolderFromDB(srcCon, srcCtxId, attachmentFolderName);
-        final FolderObject dstAttachmentFolder = loadAttachmentFolderFromDB(dstCon, dstCtxId, attachmentFolderName);
-
-        /*
          * Create mapping between origin and target folders.
          */
         final SortedMap<Integer, FolderEqualsWrapper> movedFolders = loadFoldersFromDB(dstCon, i(dstCtxId), i(dstUsrId));
         final FolderMapping folderMapping = new FolderMapping();
-        if (srcAttachmentFolder != null && dstAttachmentFolder != null) {
-            folderMapping.addMapping(srcAttachmentFolder.getObjectID(), srcAttachmentFolder, dstAttachmentFolder.getObjectID(), dstAttachmentFolder);
-        }
 
         for (final Integer fuid : originFolders.keySet()) {
             final FolderEqualsWrapper originWrapper = originFolders.get(fuid);
@@ -248,71 +215,6 @@ public class FolderCopyTask implements CopyUserTaskService {
         }
 
         return folderMapping;
-    }
-
-    private void checkAndCreateMailAttachmentFolder(final Context srcCtx, final Context dstCtx, final int userId, final Connection srcCon, final Connection dstCon, final String attachmentFolderName) throws OXException {
-        try {
-            final int sourcePersonalInfoStoreId = new OXFolderAccess(srcCon, srcCtx).getDefaultFolder(userId, FolderObject.INFOSTORE).getObjectID();
-            final int destPersonalInfoStoreId = new OXFolderAccess(dstCon, dstCtx).getDefaultFolder(userId, FolderObject.INFOSTORE).getObjectID();
-            final int sourceAttachmentFolderId = OXFolderSQL.lookUpFolder(sourcePersonalInfoStoreId, attachmentFolderName, FolderObject.INFOSTORE, srcCon, srcCtx);
-            int destAttachmentFolderId = OXFolderSQL.lookUpFolder(destPersonalInfoStoreId, attachmentFolderName, FolderObject.INFOSTORE, srcCon, dstCtx);
-            if (sourceAttachmentFolderId > 0 && destAttachmentFolderId < 0) {
-                destAttachmentFolderId = IDGenerator.getId(dstCtx.getContextId(), com.openexchange.groupware.Types.FOLDER, dstCon);
-                final Date date = new Date();
-                final FolderObject attachmentFolder = new FolderObject(destAttachmentFolderId);
-                attachmentFolder.setParentFolderID(destPersonalInfoStoreId);
-                attachmentFolder.setFolderName(attachmentFolderName);
-                attachmentFolder.setModule(FolderObject.INFOSTORE);
-                attachmentFolder.setType(FolderObject.PUBLIC);
-                attachmentFolder.setCreationDate(date);
-                attachmentFolder.setCreator(userId);
-                attachmentFolder.setLastModified(date);
-                attachmentFolder.setModifiedBy(userId);
-                attachmentFolder.setSubfolderFlag(false);
-                attachmentFolder.setDefaultFolder(false);
-
-                writeFoldersToDB(dstCon, Collections.singletonList(attachmentFolder), dstCtx.getContextId());
-
-                final FolderPermission userPermission = new FolderPermission();
-                userPermission.setUserId(userId);
-                userPermission.setFolderId(destAttachmentFolderId);
-                userPermission.setFp(128);
-                userPermission.setOrp(128);
-                userPermission.setOwp(128);
-                userPermission.setOdp(128);
-                userPermission.setAdminFlag(true);
-                userPermission.setGroupFlag(false);
-                userPermission.setSystem(false);
-
-                final List<FolderPermission> permissions = Collections.singletonList(userPermission);
-
-                writePermissionsToDB(permissions, dstCon, dstCtx.getContextId());
-            }
-        } catch (final SQLException e) {
-            throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
-        }
-    }
-
-    private FolderObject loadAttachmentFolderFromDB(final Connection con, final int cid, final String folderName) throws OXException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement(SELECT_ATTACHMENT_FOLDER);
-            stmt.setInt(1, cid);
-            stmt.setString(2, folderName);
-            rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                final FolderObject folder = buildFolderFromResultSet(rs);
-                return folder;
-            }
-
-            return null;
-        } catch (final SQLException e) {
-            throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-        }
     }
 
     private boolean ignoreFolder(final int id) {
@@ -400,7 +302,6 @@ public class FolderCopyTask implements CopyUserTaskService {
         if (parentFolderId != 0 && parent == null) {
             LOG.warn(String.format("A private folder (%1$s) without existing parent (%2$s) was found. The folder will be ignored!", folderId, folder.getParentFolderID()));
             return;
-//            throw UserCopyExceptionFactory.getInstance().create(UserCopyExceptionCodes.MISSING_PARENT_FOLDER, folderId, folder.getParentFolderID());
         }
 
         if (parentFolderId == 0) {

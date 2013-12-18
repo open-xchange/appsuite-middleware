@@ -51,7 +51,6 @@ package com.openexchange.admin.user.copy.rmi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -70,18 +69,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.Test;
-
 import com.openexchange.admin.rmi.AbstractRMITest;
 import com.openexchange.admin.rmi.AbstractTest;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.attach.actions.AllResponse;
@@ -187,27 +183,8 @@ public class RoundtripTest extends AbstractRMITest {
         }
 
         admin = newUser("oxadmin", "secret", "Admin User", "Admin", "User", "oxadmin@netline.de");
-
-        int ctxId = Integer.MAX_VALUE;
-        boolean created = false;
-        while (!created) {
-            try {
-                srcCtx = ci.create(newContext("UserMoveSourceCtx_" + ctxId, ctxId), admin, "all", superAdminCredentials);
-                created = true;
-            } catch (ContextExistsException e) {
-                --ctxId;
-            }
-        }
-
-        created = false;
-        while (!created) {
-            try {
-                dstCtx = ci.create(newContext("UserMoveDestinationCtx_" + ctxId, --ctxId), admin, "all", superAdminCredentials);
-                created = true;
-            } catch (ContextExistsException e) {
-                --ctxId;
-            }
-        }
+        srcCtx = TestTool.createContext(ci, "UserMoveSourceCtx_", admin, "all", superAdminCredentials);
+        dstCtx = TestTool.createContext(ci, "UserMoveDestinationCtx_", admin, "all", superAdminCredentials);
 
         ui = getUserInterface();
         final User test = newUser("user", "secret", "Test User", "Test", "User", "test.user@netline.de");
@@ -408,7 +385,17 @@ public class RoundtripTest extends AbstractRMITest {
     public void tearDown() throws Exception {
         try {
             ui.delete(srcCtx, srcUser, getCredentials());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
             ci.delete(srcCtx, superAdminCredentials);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
             ci.delete(dstCtx, superAdminCredentials);
         } catch (Exception e) {
             e.printStackTrace();
