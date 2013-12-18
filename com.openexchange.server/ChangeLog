@@ -9,6 +9,10 @@
 * 2013-11-04 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 29628: Make 'validate_contact_email' available in config tree, so it becomes visible for JSlob mapping
+
+* 2013-11-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29639: Use configured default charset encoding when decoding a Servlet path in AJP module
  
 * 2013-10-29 - tobias.friedrich@open-xchange.com
 
