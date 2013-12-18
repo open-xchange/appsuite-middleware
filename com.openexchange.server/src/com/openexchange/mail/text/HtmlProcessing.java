@@ -180,6 +180,7 @@ public final class HtmlProcessing {
                 retval = htmlService.dropScriptTagsInHeader(content);
                 if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
                     final boolean externalImagesAllowed = usm.isAllowHTMLImages();
+                    // Resolve <base> tags
                     retval = htmlService.checkBaseTag(retval, externalImagesAllowed);
                     final String cssPrefix = null == mailPath ? null : (embedded ? "ox-" + getHash(mailPath.toString(), 10) : null);
                     if (useSanitize()) {

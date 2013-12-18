@@ -1125,7 +1125,7 @@ public final class HtmlServiceImpl implements HtmlService {
                         epos = imgTag.indexOf('>', pos+4);
                         href = imgTag.substring(pos+4, epos);
                     }
-                    if (!href.startsWith("cid") && !href.startsWith("http")) {
+                    if (!href.startsWith("cid") && !href.startsWith("http") && !href.startsWith("mailto")) {
                         if (!href.startsWith("/")) {
                             href = '/' + href;
                         }
@@ -1161,7 +1161,7 @@ public final class HtmlServiceImpl implements HtmlService {
                         epos = hrefTag.indexOf('>', pos+11);
                         href = hrefTag.substring(pos+11, epos);
                     }
-                    if (!href.startsWith("cid") && !href.startsWith("http")) {
+                    if (!href.startsWith("cid") && !href.startsWith("http") && !href.startsWith("mailto")) {
                         if (!href.startsWith("/")) {
                             href = '/' + href;
                         }
@@ -1197,7 +1197,7 @@ public final class HtmlServiceImpl implements HtmlService {
                         epos = hrefTag.indexOf('>', pos+5);
                         href = hrefTag.substring(pos+5, epos);
                     }
-                    if (!href.startsWith("cid") && !href.startsWith("http")) {
+                    if (!href.startsWith("cid") && !href.startsWith("http") && !href.startsWith("mailto")) {
                         if (!href.startsWith("/")) {
                             href = '/' + href;
                         }
