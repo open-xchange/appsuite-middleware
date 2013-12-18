@@ -56,7 +56,6 @@ import java.util.concurrent.locks.Lock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.caching.Cache;
-import com.openexchange.caching.CacheKey;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.internal.SchemaStoreImpl;
 
@@ -81,12 +80,11 @@ public class SerializedCachingLoader {
      * @param regionName the region name within the cache.
      * @param groupName the name of the cache group or simply <code>null</code>.
      * @param lock the lock to use for throttling threads trying to access the cache or the storage layer.
-     * @param key the key of the data to fetch. Normally an instance of {@link CacheKey} or something similar.
      * @param loader the method to load the data from the storage layer if it is not available from the cache.
      * @return the data either fetched from the cache or loaded from the storage layer.
      * @throws OXException if the whole mechanism does not work as expected or some race conditions occurs.
      */
-    public static <T extends Serializable> T fetch(Cache cache, String regionName, String groupName, Lock lock, Serializable key, StorageLoader<T> loader) throws OXException {
+    public static <T extends Serializable> T fetch(Cache cache, String regionName, String groupName, Lock lock, StorageLoader<T> loader) throws OXException {
         if (null == cache) {
             return loader.load();
         }
@@ -103,6 +101,7 @@ public class SerializedCachingLoader {
             return loader.load();
         }
         // Lock acquired & replicated cache
+        final Serializable key = loader.getKey();
         Condition cond = null;
         try {
             final Object tmp = get(cache, groupName, key);
