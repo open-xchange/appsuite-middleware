@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -52,6 +52,8 @@ ox_update_permissions /opt/open-xchange/etc/awss3.properties root:open-xchange 6
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Wed Dec 18 2013 Markus Wagner <markus.wagner@open-xchange.com>
+prepare for 7.4.2
 * Thu Oct 10 2013 Markus Wagner <markus.wagner@open-xchange.com>
 First sprint increment for 7.4.0 release
 * Mon Oct 07 2013 Markus Wagner <markus.wagner@open-xchange.com>

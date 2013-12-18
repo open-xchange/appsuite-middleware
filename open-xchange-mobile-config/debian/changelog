@@ -1,3 +1,9 @@
+open-xchange-mobile-config (7.4.2-0) unstable; urgency=low
+
+  * prepare for 7.4.2
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Wed, 18 Dec 2013 17:34:21 +0100
+
 open-xchange-mobile-config (7.4.1-10) stable; urgency=low
 
   * Build for patch 2013-12-18
