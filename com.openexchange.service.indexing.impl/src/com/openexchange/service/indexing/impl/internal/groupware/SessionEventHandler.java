@@ -97,7 +97,7 @@ public class SessionEventHandler implements EventHandler {
     @Override
     public void handleEvent(Event event) {
         String topic = event.getTopic();
-        if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic)) {
+        if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic) || SessiondEventConstants.TOPIC_RESTORED_SESSION.equals(topic)) {
             ContextService contextService = Services.getService(ContextService.class);
             UserService userService = Services.getService(UserService.class);
             UserConfigurationService configurationService = Services.getService(UserConfigurationService.class);

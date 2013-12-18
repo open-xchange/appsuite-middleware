@@ -135,14 +135,14 @@ public final class MailNotifyPushListenerRegistry {
      * @throws OXException
      */
     public void fireEvent(final String mboxid) throws OXException {
-        final PushListener listener;
         LOG.debug("checking whether to fire event for {}", mboxid);
-        if (null != (listener = map.get(mboxid))) {
+        final PushListener listener = map.get(mboxid);
+        if (null != listener) {
             LOG.debug("fireEvent, mboxid={}", mboxid);
             listener.notifyNewMail();
         }
-
     }
+
     /**
      * Adds specified push listener.
      *
@@ -187,7 +187,7 @@ public final class MailNotifyPushListenerRegistry {
                     ret[i] = alias.toLowerCase();
                 } else {
                     final int idx = alias.indexOf('@');
-                    if( idx != -1) {
+                    if( idx > 0) {
                         ret[i] = alias.substring(0, idx).toLowerCase();
                     } else {
                         ret[i] = alias.toLowerCase();

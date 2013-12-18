@@ -49,7 +49,9 @@
 
 package com.openexchange.mail.smal.impl.index;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -96,6 +98,16 @@ public class SmalSessionEventHandler implements EventHandler {
 
     private static final long START_INTERVAL = 60000 * 60;
 
+    private final Set<String> handleAdded;
+
+    /**
+     * Initializes a new {@link SmalSessionEventHandler}.
+     */
+    public SmalSessionEventHandler() {
+        super();
+        handleAdded = new HashSet<String>(Arrays.asList(SessiondEventConstants.TOPIC_ADD_SESSION, SessiondEventConstants.TOPIC_REACTIVATE_SESSION, SessiondEventConstants.TOPIC_RESTORED_SESSION));
+    }
+
     @Override
     public void handleEvent(Event event) {
         try {
@@ -107,8 +119,7 @@ public class SmalSessionEventHandler implements EventHandler {
             }
 
             String topic = event.getTopic();
-            boolean isReactivation = SessiondEventConstants.TOPIC_REACTIVATE_SESSION.equals(topic);
-            if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic) || isReactivation) {
+            if (handleAdded.contains(topic)) {
                 Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
                 if (session.isTransient()) {
                     return;
@@ -134,7 +145,7 @@ public class SmalSessionEventHandler implements EventHandler {
                 Map<Integer, Set<MailFolder>> allFolders = IndexableFoldersCalculator.calculatePrivateMailFolders(
                     session,
                     storageService);
-                scheduleFolderJobs(session, allFolders, indexingService, isReactivation);
+                scheduleFolderJobs(session, allFolders, indexingService, SessiondEventConstants.TOPIC_REACTIVATE_SESSION.equals(topic));
             }
         } catch (Exception e) {
             LOG.warn("Error while triggering mail indexing jobs.", e);

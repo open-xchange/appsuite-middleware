@@ -918,7 +918,12 @@ public final class SessionHandler {
                     final Session storedSession = getSessionFrom(sessionId, storageService);
                     if (null != storedSession) {
                         final SessionControl sc = sessionData.addSession(new SessionImpl(storedSession), noLimit, true);
-                        return null == sc ? sessionToSessionControl(storedSession) : sc;
+                        final SessionControl retval = null == sc ? sessionToSessionControl(storedSession) : sc;
+                        if (null != retval) {
+                            // Post event for restored session
+                            postSessionRestauration(retval.getSession());
+                        }
+                        return retval;
                     }
                 } catch (final OXException e) {
                     if (!SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
@@ -1141,8 +1146,7 @@ public final class SessionHandler {
             final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             dic.put(SessiondEventConstants.PROP_SESSION, session);
             dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
-            final Event event = new Event(SessiondEventConstants.TOPIC_STORED_SESSION, dic);
-            eventAdmin.postEvent(event);
+            eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_STORED_SESSION, dic));
             LOG.debug("Posted event for added session");
         }
     }
@@ -1153,9 +1157,19 @@ public final class SessionHandler {
             final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             dic.put(SessiondEventConstants.PROP_SESSION, session);
             dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
-            final Event event = new Event(SessiondEventConstants.TOPIC_ADD_SESSION, dic);
-            eventAdmin.postEvent(event);
+            eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_ADD_SESSION, dic));
             LOG.debug("Posted event for added session");
+        }
+    }
+
+    private static void postSessionRestauration(final Session session) {
+        final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
+        if (eventAdmin != null) {
+            final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
+            dic.put(SessiondEventConstants.PROP_SESSION, session);
+            dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
+            eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_RESTORED_SESSION, dic));
+            LOG.debug("Posted event for restored session");
         }
     }
 
@@ -1186,9 +1200,8 @@ public final class SessionHandler {
             final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             dic.put(SessiondEventConstants.PROP_SESSION, session);
             dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
-            final Event event = new Event(SessiondEventConstants.TOPIC_REMOVE_SESSION, dic);
-            eventAdmin.postEvent(event);
-                LOG.debug("Posted event for removed session");
+            eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_REMOVE_SESSION, dic));
+            LOG.debug("Posted event for removed session");
             final SessionData sessionData = sessionDataRef.get();
             if (null != sessionData) {
                 if (sessionData.isUserActive(session.getUserId(), session.getContextId())) {
@@ -1203,9 +1216,8 @@ public final class SessionHandler {
             final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             dic.put(SessiondEventConstants.PROP_USER_ID, Integer.valueOf(userId));
             dic.put(SessiondEventConstants.PROP_CONTEXT_ID, Integer.valueOf(contextId));
-            final Event event = new Event(SessiondEventConstants.TOPIC_LAST_SESSION, dic);
-            eventAdmin.postEvent(event);
-                LOG.debug("Posted event for last removed session");
+            eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_LAST_SESSION, dic));
+            LOG.debug("Posted event for last removed session");
         }
     }
 
@@ -1253,9 +1265,8 @@ public final class SessionHandler {
             }
             dic.put(SessiondEventConstants.PROP_CONTAINER, eventMap);
             dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
-            final Event event = new Event(SessiondEventConstants.TOPIC_REMOVE_CONTAINER, dic);
-            eventAdmin.postEvent(event);
-                LOG.debug("Posted event for removed session container");
+            eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_REMOVE_CONTAINER, dic));
+            LOG.debug("Posted event for removed session container");
             final SessionData sessionData = sessionDataRef.get();
             if (null != sessionData) {
                 for (final UserKey userKey : users) {
@@ -1281,9 +1292,8 @@ public final class SessionHandler {
             }
             dic.put(SessiondEventConstants.PROP_CONTAINER, eventMap);
             dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
-            final Event event = new Event(SessiondEventConstants.TOPIC_REMOVE_DATA, dic);
-            eventAdmin.postEvent(event);
-                LOG.debug("Posted event for removing temporary session data.");
+            eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_REMOVE_DATA, dic));
+            LOG.debug("Posted event for removing temporary session data.");
             final SessionData sessionData = sessionDataRef.get();
             if (null != sessionData) {
                 for (final UserKey userKey : users) {
@@ -1301,9 +1311,8 @@ public final class SessionHandler {
             final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             dic.put(SessiondEventConstants.PROP_SESSION, session);
             dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
-            final Event event = new Event(SessiondEventConstants.TOPIC_REACTIVATE_SESSION, dic);
-            eventAdmin.postEvent(event);
-                LOG.debug("Posted event for reactivated session");
+            eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_REACTIVATE_SESSION, dic));
+            LOG.debug("Posted event for reactivated session");
         }
     }
 
@@ -1319,9 +1328,8 @@ public final class SessionHandler {
             final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             dic.put(SessiondEventConstants.PROP_SESSION, session);
             dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
-            final Event event = new Event(SessiondEventConstants.TOPIC_TOUCH_SESSION, dic);
-            eventAdmin.postEvent(event);
-                LOG.debug("Posted event for touched session");
+            eventAdmin.postEvent(new Event(SessiondEventConstants.TOPIC_TOUCH_SESSION, dic));
+            LOG.debug("Posted event for touched session");
         }
     }
 

@@ -80,13 +80,10 @@ public final class MailNotifyPushManagerService implements PushManagerService {
     @Override
     public PushListener startListener(final Session session) throws OXException {
         final MailNotifyPushListener pushListener = MailNotifyPushListener.newInstance(session);
-        MailNotifyPushListenerRegistry listener = MailNotifyPushListenerRegistry.getInstance();
-        listener.setUseEmailAddress(useEmailAddress);
-        listener.setUseOXLogin(useOXLogin);
-        if (listener.addPushListener(
-            session.getContextId(),
-            session.getUserId(),
-            pushListener)) {
+        MailNotifyPushListenerRegistry registry = MailNotifyPushListenerRegistry.getInstance();
+        registry.setUseEmailAddress(useEmailAddress);
+        registry.setUseOXLogin(useOXLogin);
+        if (registry.addPushListener(session.getContextId(), session.getUserId(), pushListener)) {
             pushListener.open();
             return pushListener;
         }
