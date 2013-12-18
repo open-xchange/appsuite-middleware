@@ -234,7 +234,7 @@ public final class ImapIdlePushListenerRegistry {
         final SimpleKey key = SimpleKey.valueOf(contextId, userId);
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ImapIdlePushListenerRegistry.class);
         if (null == session) {
-            logger.info("Found no other valid & active session for user {} in context {}. Therefore shutting down associated IMAP IDLE push listener.", userId, contextId, new Throwable());
+            logger.info("Found no other valid & active session for user {} in context {}. Therefore shutting down associated IMAP IDLE push listener.", userId, contextId, new Throwable("Shutting down IMAP IDLE push listener"));
             return removeListener(key);
         }
         /*
