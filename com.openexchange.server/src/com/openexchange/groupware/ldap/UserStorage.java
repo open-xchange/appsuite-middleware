@@ -95,6 +95,18 @@ public abstract class UserStorage {
 
     /**
      * Reads the data from a user from the underlying persistent data storage.
+     *
+     * @param userId User identifier.
+     * @param contextId The context identifier.
+     * @return a user object.
+     * @throws OXException if an error occurs while reading from the persistent storage or the user doesn't exist.
+     */
+    public User getUser(final int userId, final int contextId) throws OXException {
+        return getUser(userId, ContextStorage.getStorageContext(contextId));
+    }
+
+    /**
+     * Reads the data from a user from the underlying persistent data storage.
      * @param uid User identifier.
      * @param context The context.
      * @return a user object.
