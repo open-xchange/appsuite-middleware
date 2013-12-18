@@ -329,7 +329,7 @@
 
  - Fix for bug 25994: Expose basic realtime components via jmx
  - Fix for bug 29103: Use ComponentHandles singlethreaded
- 
+
 * 2013-10-31 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 29554: Introduced 'supported-calendar-component-sets' property for CalDAV collections

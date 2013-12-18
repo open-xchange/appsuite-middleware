@@ -10,8 +10,6 @@ Bundle-Activator: com.openexchange.version.osgi.VersionActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Import-Package: com.openexchange.log,
- org.apache.commons.logging,
- org.osgi.framework,
+Import-Package: org.osgi.framework,
  org.slf4j
 Export-Package: com.openexchange.version
