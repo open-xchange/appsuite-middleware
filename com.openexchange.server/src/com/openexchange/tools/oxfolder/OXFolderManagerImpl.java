@@ -559,19 +559,23 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
         final boolean performMove = fo.containsParentFolderID();
         if (fo.containsPermissions() || fo.containsModule() || fo.containsMeta()) {
-            if (performMove) {
-                move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), fo.getFolderName(), getFolderFromMaster(fo.getObjectID()), lastModified);
+            final FolderObject storageObject = getFolderFromMaster(fo.getObjectID());
+            final int newParentFolderID = fo.getParentFolderID();
+            if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
+                move(fo.getObjectID(), newParentFolderID, fo.getCreatedBy(), fo.getFolderName(), storageObject, lastModified);
             }
             if (isRenameOnly) {
-                rename(fo, getFolderFromMaster(fo.getObjectID()), lastModified);
+                rename(fo, storageObject, lastModified);
             } else {
-                update(fo, OPTION_NONE, getFolderFromMaster(fo.getObjectID()), lastModified, handDown);
+                update(fo, OPTION_NONE, storageObject, lastModified, handDown);
             }
         } else if (fo.containsFolderName()) {
-            if (performMove) {
-                move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), fo.getFolderName(), getFolderFromMaster(fo.getObjectID()), lastModified);
+            final FolderObject storageObject = getFolderFromMaster(fo.getObjectID());
+            final int newParentFolderID = fo.getParentFolderID();
+            if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
+                move(fo.getObjectID(), newParentFolderID, fo.getCreatedBy(), fo.getFolderName(), storageObject, lastModified);
             } else {
-                rename(fo, getFolderFromMaster(fo.getObjectID()), lastModified);
+                rename(fo, storageObject, lastModified);
             }
         } else if (performMove) {
             /*
