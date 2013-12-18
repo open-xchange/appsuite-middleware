@@ -78,8 +78,10 @@ import com.openexchange.java.Strings;
  */
 public final class JerichoParser {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JerichoParser.class);
-
+    /**
+     * {@link ParsingDeniedException} - Thrown if HTML content cannot be parsed by {@link JerichoParser#parse(String, JerichoHandler)}
+     * without wasting too many JVM resources.
+     */
     public static final class ParsingDeniedException extends RuntimeException {
 
         private static final long serialVersionUID = 150733382242549446L;
