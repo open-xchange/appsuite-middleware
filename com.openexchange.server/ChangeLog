@@ -1,6 +1,7 @@
 * 2013-12-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 30192: Properly detect a rename operation, rather than performing a move
+ - Fix for bug 29307: Immediate (remote) delivery (mail) folder-related changes
 
 * 2013-12-18 - martin.schneider@open-xchange.com
 
