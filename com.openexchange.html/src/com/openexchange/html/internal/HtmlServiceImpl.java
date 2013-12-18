@@ -520,7 +520,7 @@ public final class HtmlServiceImpl implements HtmlService {
             html = dropDoubleAccents(html);
             html = dropSlashedTags(html);
             // CSS- and tag-wise sanitizing
-            {
+            try {
                 // Determine the definition to use
                 final String definition;
                 {
