@@ -117,7 +117,7 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
         final Map<String, String> metaData = previewDocument.getMetaData();
         final List<String> sanitizedHtml = new ArrayList<String>();
         {
-            final UserSettingMail usm = (UserSettingMail) session.getUserSettingMail().clone();
+            final UserSettingMail usm = session.getUserSettingMail().clone();
             usm.setNoSave(true);
             final boolean edit = parseBool(requestData.getParameter(PARAMETER_EDIT));
             /*

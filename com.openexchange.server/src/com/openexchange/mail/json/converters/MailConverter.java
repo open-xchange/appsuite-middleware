@@ -529,7 +529,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             }
         }
         tmp = null;
-        final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
+        final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
         /*
          * Deny saving for this request-specific settings
          */
@@ -624,7 +624,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         String tmp = requestData.getParameter("embedded");
         final boolean embedded = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
         tmp = null;
-        final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
+        final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
         /*
          * Deny saving for this request-specific settings
          */

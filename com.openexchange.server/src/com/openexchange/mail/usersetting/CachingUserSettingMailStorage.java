@@ -180,7 +180,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                     if (null != cache.get(key)) {
                         cache.remove(key);
                     }
-                    cache.put(key, (Serializable) usm.clone(), false);
+                    cache.put(key, usm.clone(), false);
                 } catch (final OXException e) {
                     LOG.error("UserSettingMail could not be put into cache", e);
                 }
@@ -227,7 +227,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                     if (null != cache.get(key)) {
                         cache.remove(key);
                     }
-                    cache.put(key, (Serializable) usm.clone(), false);
+                    cache.put(key, usm.clone(), false);
                 } catch (final OXException e) {
                     LOG.error("UserSettingMail could not be put into cache", e);
                 }
@@ -313,7 +313,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
             final Cache cache = getCache();
             UserSettingMail usm = null == cache ? null : (UserSettingMail) cache.get(cache.newCacheKey(ctx.getContextId(), user));
             if (null != usm) {
-                return (UserSettingMail) usm.clone();
+                return usm.clone();
             }
             usm = new UserSettingMail(user, ctx.getContextId());
             Connection readCon = readConArg;
@@ -364,7 +364,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
             } finally {
                 closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             }
-            return (UserSettingMail) usm.clone();
+            return usm.clone();
         } catch (final SQLException e) {
             LOG.error("", e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());

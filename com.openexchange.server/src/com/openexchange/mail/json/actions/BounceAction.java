@@ -125,7 +125,7 @@ public final class BounceAction extends AbstractMailAction {
              * Read in parameters
              */
             final String view = req.getParameter(Mail.PARAMETER_VIEW);
-            final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
+            final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
             /*
              * Deny saving for this request-specific settings
              */

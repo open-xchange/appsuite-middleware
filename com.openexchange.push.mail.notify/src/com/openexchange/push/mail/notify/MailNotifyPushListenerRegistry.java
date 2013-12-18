@@ -50,16 +50,15 @@
 package com.openexchange.push.mail.notify;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.push.PushListener;
-import com.openexchange.push.mail.notify.services.PushServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.iterator.ReadOnlyIterator;
 
@@ -71,61 +70,20 @@ public final class MailNotifyPushListenerRegistry {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailNotifyPushListenerRegistry.class);
 
+    private final ConcurrentMap<String, MailNotifyPushListener> listenerMap;
 
-    /**
-     * @return the useOXLogin
-     */
-    public final boolean isUseOXLogin() {
-        return useOXLogin;
-    }
+    private final boolean useOXLogin;
 
-
-    /**
-     * @param useOXLogin the useOXLogin to set
-     */
-    public final void setUseOXLogin(final boolean useOXLogin) {
-        this.useOXLogin = useOXLogin;
-    }
-
-
-    /**
-     * @return the useEmailAddress
-     */
-    public final boolean isUseEmailAddress() {
-        return useEmailAddress;
-    }
-
-
-    /**
-     * @param useEmailAddress the useEmailAddress to set
-     */
-    public final void setUseEmailAddress(final boolean useEmailAddress) {
-        this.useEmailAddress = useEmailAddress;
-    }
-
-    private static final MailNotifyPushListenerRegistry instance = new MailNotifyPushListenerRegistry();
-
-    private final ConcurrentMap<String, MailNotifyPushListener> map;
-
-    private boolean useOXLogin;
-
-    private boolean useEmailAddress;
+    private final boolean useEmailAddress;
 
     /**
      * Initializes a new {@link MailNotifyPushListenerRegistry}.
      */
-    private MailNotifyPushListenerRegistry() {
+    public MailNotifyPushListenerRegistry(final boolean useOXLogin, final boolean useEmailAddress) {
         super();
-        map = new ConcurrentHashMap<String, MailNotifyPushListener>();
-    }
-
-    /**
-     * Gets the registry instance.
-     *
-     * @return The registry instance
-     */
-    public static MailNotifyPushListenerRegistry getInstance() {
-        return instance;
+        listenerMap = new ConcurrentHashMap<String, MailNotifyPushListener>();
+        this.useOXLogin = useOXLogin;
+        this.useEmailAddress = useEmailAddress;
     }
 
     /**
@@ -135,14 +93,14 @@ public final class MailNotifyPushListenerRegistry {
      * @throws OXException
      */
     public void fireEvent(final String mboxid) throws OXException {
-        final PushListener listener;
         LOG.debug("checking whether to fire event for {}", mboxid);
-        if (null != (listener = map.get(mboxid))) {
+        final PushListener listener = listenerMap.get(mboxid);
+        if (null != listener) {
             LOG.debug("fireEvent, mboxid={}", mboxid);
             listener.notifyNewMail();
         }
-
     }
+
     /**
      * Adds specified push listener.
      *
@@ -153,11 +111,14 @@ public final class MailNotifyPushListenerRegistry {
      */
     public boolean addPushListener(final int contextId, final int userId, final MailNotifyPushListener pushListener) throws OXException {
         boolean notYetPushed = true;
-        for(final String id : getMboxIds(contextId, userId)) {
-            LOG.debug("adding alias {} to map", id);
-            final boolean pushFailed = (null == map.putIfAbsent(id, pushListener) ? false : true);
-            if( notYetPushed && pushFailed ) {
-                notYetPushed = false;
+        for (final String id : getMboxIds(contextId, userId)) {
+            if (null == listenerMap.putIfAbsent(id, pushListener)) {
+                LOG.debug("added mboxid {} to map for user {} in context {}", id, Integer.valueOf(userId), Integer.valueOf(contextId));
+            } else {
+                // Listener wasn't put into map
+                if (notYetPushed) {
+                    notYetPushed = false;
+                }
             }
         }
         return notYetPushed;
@@ -168,56 +129,50 @@ public final class MailNotifyPushListenerRegistry {
      *
      * @param contextId
      * @param userId
-     * @return String Array
+     * @return List of mbox identifiers
      * @throws OXException
      */
-    private final String[] getMboxIds(final int contextId, final int userId) throws OXException {
-        Context storageContext;
-        {
-            storageContext = ContextStorage.getStorageContext(contextId);
-            final User user = UserStorage.getInstance().getUser(userId, storageContext);
-            int alength = user.getAliases().length;
-            if( useOXLogin ) {
-                alength++;
-            }
-            final String[] ret = new String[alength];
-            int i=0;
-            for(final String alias : user.getAliases()) {
-                if( useEmailAddress ) {
-                    ret[i] = alias.toLowerCase();
+    private final List<String> getMboxIds(final int contextId, final int userId) throws OXException {
+        final User user = UserStorage.getInstance().getUser(userId, contextId);
+
+        final String[] aliases = user.getAliases();
+        final int alength = aliases.length;
+        final List<String> ret = new ArrayList<String>(alength + 1);
+        for (int i = 0; i < alength; i++) {
+            final String alias = aliases[i];
+            if( useEmailAddress ) {
+                ret.add(alias.toLowerCase());
+            } else {
+                final int idx = alias.indexOf('@');
+                if( idx > 0) {
+                    ret.add(alias.substring(0, idx).toLowerCase());
                 } else {
-                    final int idx = alias.indexOf('@');
-                    if( idx != -1) {
-                        ret[i] = alias.substring(0, idx).toLowerCase();
-                    } else {
-                        ret[i] = alias.toLowerCase();
-                    }
+                    ret.add(alias.toLowerCase());
                 }
-                i++;
             }
-            if( useOXLogin ) {
-                ret[i] = user.getLoginInfo().toLowerCase();
-            }
-            return ret;
         }
+        if( useOXLogin ) {
+            ret.add(user.getLoginInfo().toLowerCase());
+        }
+        return ret;
     }
     /**
      * Clears this registry. <br>
      * <b>Note</b>: {@link MailNotifyPushListener#close()} is called for each instance.
      */
     public void clear() {
-        for (final Iterator<MailNotifyPushListener> i = map.values().iterator(); i.hasNext();) {
+        for (final Iterator<MailNotifyPushListener> i = listenerMap.values().iterator(); i.hasNext();) {
             i.next().close();
             i.remove();
         }
-        map.clear();
+        listenerMap.clear();
     }
 
     /**
      * Closes all listeners contained in this registry.
      */
     public void closeAll() {
-        for (final Iterator<MailNotifyPushListener> i = map.values().iterator(); i.hasNext();) {
+        for (final Iterator<MailNotifyPushListener> i = listenerMap.values().iterator(); i.hasNext();) {
             i.next().close();
         }
     }
@@ -230,14 +185,14 @@ public final class MailNotifyPushListenerRegistry {
      * @return A read-only {@link Iterator iterator} over the push listeners in this registry.
      */
     public Iterator<MailNotifyPushListener> getPushListeners() {
-        return new ReadOnlyIterator<MailNotifyPushListener>(map.values().iterator());
+        return new ReadOnlyIterator<MailNotifyPushListener>(listenerMap.values().iterator());
     }
 
     /**
      * Opens all listeners contained in this registry.
      */
     public void openAll() {
-        for (final Iterator<MailNotifyPushListener> i = map.values().iterator(); i.hasNext();) {
+        for (final Iterator<MailNotifyPushListener> i = listenerMap.values().iterator(); i.hasNext();) {
             final MailNotifyPushListener l = i.next();
             try {
                 l.open();
@@ -272,17 +227,17 @@ public final class MailNotifyPushListenerRegistry {
      * @throws OXException
      */
     public boolean removePushListener(final int contextId, final int userId) throws OXException {
-        final SessiondService sessiondService = PushServiceRegistry.getServiceRegistry().getService(SessiondService.class);
+        final SessiondService sessiondService = Services.optService(SessiondService.class);
         if (null == sessiondService || null == sessiondService.getAnyActiveSessionForUser(userId, contextId)) {
             return removeListener(getMboxIds(contextId, userId));
         }
         return false;
     }
 
-    private boolean removeListener(final String[] mboxIds) {
+    private boolean removeListener(final List<String> mboxIds) {
         for(final String id : mboxIds) {
-            LOG.debug("removing alias{} from map", id);
-            final MailNotifyPushListener listener = map.remove(id);
+            LOG.debug("removing alias {} from map", id);
+            final MailNotifyPushListener listener = listenerMap.remove(id);
             if (null != listener) {
                 listener.close();
             }

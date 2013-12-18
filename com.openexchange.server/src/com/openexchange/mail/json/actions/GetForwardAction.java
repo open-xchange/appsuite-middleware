@@ -110,7 +110,7 @@ public final class GetForwardAction extends AbstractMailAction {
             final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
             final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
             final String view = req.getParameter(Mail.PARAMETER_VIEW);
-            final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
+            final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
             /*
              * Deny saving for this request-specific settings
              */
@@ -154,7 +154,7 @@ public final class GetForwardAction extends AbstractMailAction {
                 ids[i] = folderAndID.getString(AJAXServlet.PARAMETER_ID);
             }
             final String view = req.getParameter(Mail.PARAMETER_VIEW);
-            final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
+            final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
             /*
              * Deny saving for this request-specific settings
              */

@@ -100,7 +100,7 @@ AbstractOAuthTokenAction {
              */
             final String serviceId = request.getParameter(AccountField.SERVICE_ID.getName());
             if (serviceId == null) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create( AccountField.SERVICE_ID.getName());
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(AccountField.SERVICE_ID.getName());
             }
             /*
              * Get service meta data
@@ -115,8 +115,7 @@ AbstractOAuthTokenAction {
             /*
              * By now it doesn't matter which interaction type is passed
              */
-            final OAuthAccount newAccount =
-                oAuthService.createAccount(serviceId, OAuthInteractionType.CALLBACK, arguments, session.getUserId(), session.getContextId());
+            final OAuthAccount newAccount = oAuthService.createAccount(serviceId, OAuthInteractionType.CALLBACK, arguments, session.getUserId(), session.getContextId());
             /*
              * Write as JSON
              */

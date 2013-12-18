@@ -73,7 +73,11 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
 
     private final String imapLoginDelimiter;
 
-    public MailNotifyPushUdpSocketListener(final String udpListenHost, final int udpListenPort, final String imapLoginDelimiter, final boolean multicast) throws OXException, IOException {
+    private final MailNotifyPushListenerRegistry registry;
+
+    public MailNotifyPushUdpSocketListener(MailNotifyPushListenerRegistry registry, final String udpListenHost, final int udpListenPort, final String imapLoginDelimiter, final boolean multicast) throws OXException, IOException {
+        super();
+        this.registry = registry;
         final InetAddress senderAddress = InetAddress.getByName(udpListenHost);
 
         this.imapLoginDelimiter = imapLoginDelimiter;
@@ -98,7 +102,7 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
                 if (datagramPacket.getLength() > 0) {
                     // Packet received
                     final String mailboxName = getMailboxName(datagramPacket);
-                    MailNotifyPushListenerRegistry.getInstance().fireEvent(mailboxName);
+                    registry.fireEvent(mailboxName);
                 } else {
                     LOG.warn("recieved empty udp package: {}", datagramSocket);
                 }

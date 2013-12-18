@@ -49,9 +49,12 @@
 
 package com.openexchange.chat.db.osgi;
 
+import java.util.Arrays;
 import java.util.Dictionary;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Set;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
@@ -177,6 +180,7 @@ public final class DBChatActivator extends HousekeepingActivator {
         {
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            final Set<String> handleAdded = new HashSet<String>(Arrays.asList(SessiondEventConstants.TOPIC_ADD_SESSION, SessiondEventConstants.TOPIC_REACTIVATE_SESSION, SessiondEventConstants.TOPIC_RESTORED_SESSION));
             registerService(EventHandler.class, new EventHandler() {
 
                 @Override
@@ -197,15 +201,9 @@ public final class DBChatActivator extends HousekeepingActivator {
                         for (final Session session : container.values()) {
                             handleRemovedSession(session);
                         }
-                    } else if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic)) {
+                    } else if (handleAdded.contains(topic)) {
                         final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
                         handleAddedSession(session);
-                    } else if (SessiondEventConstants.TOPIC_REACTIVATE_SESSION.equals(topic)) {
-                        @SuppressWarnings("unchecked") final Map<String, Session> container =
-                            (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-                        for (final Session session : container.values()) {
-                            handleAddedSession(session);
-                        }
                     }
                 }
 

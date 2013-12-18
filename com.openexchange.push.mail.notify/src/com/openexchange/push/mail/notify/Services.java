@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,32 +47,71 @@
  *
  */
 
-package com.openexchange.push.mail.notify.services;
+package com.openexchange.push.mail.notify;
 
-import com.openexchange.osgi.ServiceRegistry;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link PushServiceRegistry} - A registry for services needed by push bundle
+ * {@link Services}
  *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PushServiceRegistry {
-
-    private static final ServiceRegistry REGISTRY = new ServiceRegistry();
+public final class Services {
 
     /**
-     * Gets the service registry
-     *
-     * @return The service registry
+     * Initializes a new {@link Services}.
      */
-    public static ServiceRegistry getServiceRegistry() {
-        return REGISTRY;
+    private Services() {
+        super();
+    }
+
+    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Gets the service look-up
+     *
+     * @return The service look-up or <code>null</code>
+     */
+    public static ServiceLookup get() {
+        return ref.get();
     }
 
     /**
-     * Initializes a new {@link PushServiceRegistry}
+     * Sets the service look-up
+     *
+     * @param serviceLookup The service look-up or <code>null</code>
      */
-    private PushServiceRegistry() {
-        super();
+    public static void set(final ServiceLookup serviceLookup) {
+        ref.set(serviceLookup);
+    }
+
+    /**
+     * Gets the service.
+     *
+     * @param c The service type
+     * @return The service or <code>null</code>
+     */
+    public static <S extends Object> S optService(final Class<? extends S> c) {
+        final ServiceLookup serviceLookup = ref.get();
+        return null == serviceLookup ? null : serviceLookup.getOptionalService(c);
+    }
+
+    /**
+     * Gets the service.
+     *
+     * @param c The service type
+     * @return The service
+     * @throws OXException If service is absent
+     */
+    public static <S extends Object> S getService(final Class<? extends S> c, final boolean throwOnAbsence) throws OXException {
+        final S service = optService(c);
+        if (null == service && throwOnAbsence) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
+        }
+        return service;
     }
 
 }

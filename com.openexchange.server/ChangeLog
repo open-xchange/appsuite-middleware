@@ -1,8 +1,24 @@
+* 2013-12-18 - marcus.klein@open-xchange.com
+
+ - Optimization out of bug 30255: Using now a more specialized locking to throttle only threads trying to load the information from the same
+   schema.
+
+* 2013-12-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30358: Modified HTTP-API call-back pattern to surround injected string with quotes while injected string gets quote-escaped before
+ - Fix for bug 30217: Ensure context identifier is contained in login mappings
+ - Fix for bug 30357: Remove harmful "<%tag>" tags from HTML content id displayed inline
+
+* 2013-12-17 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30343: Added new mapping file for Outlook 2007 (NL) to get a valid mapping
+
 * 2013-12-17 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 30355: Point to the correct configuration file when adjusting permissions during post-install
  - Fix for bug 30336: Re-added LGI-0013
  - Fix for bug 30319: Changed error message when not having access to a folder
+ - Fix for bug 30359: Configure SAX builder to not resolve external entities
 
 * 2013-12-16 - thorben.betten@open-xchange.com
 

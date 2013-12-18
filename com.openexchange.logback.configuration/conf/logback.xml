@@ -36,7 +36,7 @@
             <maxFileSize>2MB</maxFileSize>
         </triggeringPolicy>
         <encoder class="com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder">
-            <pattern>%d{"MMM dd, yyyy H:m:s a"} %class %method%n%level: %message%lmdc%exception{full}%n</pattern>
+            <pattern>%d{"MMM dd, yyyy H:m:s a"} %class %method%n%level: %message%n%lmdc%exception{full}%n</pattern>
         </encoder>
     </appender>
 

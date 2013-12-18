@@ -88,12 +88,9 @@ public final class WebDAVSessionEventHandler implements EventHandler {
                         LOG.debug("WebDAV session removed for user {} in context {}", session.getUserId(), session.getContextId());
                     }
                 }
-            } else if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic)) {
-                // final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                // Nothing to do for an added session
             }
         } catch (final Exception e) {
-            LOG.error("Error while handling SessionD event \"{}\": {}", topic, e.getMessage(), e);
+            LOG.error("Error while handling SessionD event \"{}\"", topic, e);
         }
     }
 }

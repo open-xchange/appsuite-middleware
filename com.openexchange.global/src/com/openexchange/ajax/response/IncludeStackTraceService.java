@@ -69,4 +69,11 @@ public interface IncludeStackTraceService {
      */
     boolean includeStackTraceOnError(int userId, int contextId) throws OXException;
 
+    /**
+     * Checks if including stack trace information is currently enabled for any user.
+     *
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     */
+    boolean isEnabled();
+
 }
