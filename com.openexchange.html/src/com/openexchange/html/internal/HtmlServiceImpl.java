@@ -538,7 +538,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 }
                 html = handler.getHTML();
             } catch (final ParsingDeniedException e) {
-                LOG.warn("HTML content will be returned un-white-listed. Reason: {}", e.getMessage(), e);
+                LOG.warn("HTML content will be returned un-white-listed. Reason: " + e.getMessage(), e);
             }
             // Repetitive sanitizing until no further replacement/changes performed
             final boolean[] sanitized = new boolean[] { true };
