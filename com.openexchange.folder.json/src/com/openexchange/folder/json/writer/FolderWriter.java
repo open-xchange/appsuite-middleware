@@ -89,7 +89,6 @@ import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
@@ -472,7 +471,6 @@ public final class FolderWriter {
 
             @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
-                LogProperties.putProperty(LogProperties.Name.SESSION_SESSION, folder.getSession());
                 final int obj = folder.getTotal();
                 jsonPutter.put(FolderField.TOTAL.getName(), -1 == obj ? JSONObject.NULL : Integer.valueOf(obj));
             }

@@ -142,6 +142,10 @@ public final class LogProperties {
          */
         AJP_USER_AGENT("com.openexchange.ajp13.userAgent"),
         /**
+         * com.openexchange.session.authId
+         */
+        SESSION_AUTH_ID("com.openexchange.session.authId"),
+        /**
          * com.openexchange.session.sessionId
          */
         SESSION_SESSION_ID("com.openexchange.session.sessionId"),
@@ -418,12 +422,13 @@ public final class LogProperties {
             return;
         }
         MDC.put(LogProperties.Name.SESSION_SESSION_ID.getName(), session.getSessionID());
+        MDC.put(LogProperties.Name.SESSION_AUTH_ID.getName(), session.getAuthId());
         MDC.put(LogProperties.Name.SESSION_USER_ID.getName(), Integer.toString(session.getUserId()));
         MDC.put(LogProperties.Name.SESSION_USER_NAME.getName(), session.getLogin());
         MDC.put(LogProperties.Name.SESSION_CONTEXT_ID.getName(), Integer.toString(session.getContextId()));
         final String client  = session.getClient();
         MDC.put(LogProperties.Name.SESSION_CLIENT_ID.getName(), client == null ? "unknown" : client);
-        MDC.put(LogProperties.Name.SESSION_SESSION.getName(), session.toString());
+        // MDC.put(LogProperties.Name.SESSION_SESSION.getName(), session.toString());
     }
 
     /**
@@ -431,11 +436,12 @@ public final class LogProperties {
      */
     public static void removeSessionProperties() {
         MDC.remove(LogProperties.Name.SESSION_SESSION_ID.getName());
+        MDC.remove(LogProperties.Name.SESSION_AUTH_ID.getName());
         MDC.remove(LogProperties.Name.SESSION_USER_ID.getName());
         MDC.remove(LogProperties.Name.SESSION_USER_NAME.getName());
         MDC.remove(LogProperties.Name.SESSION_CONTEXT_ID.getName());
         MDC.remove(LogProperties.Name.SESSION_CLIENT_ID.getName());
-        MDC.remove(LogProperties.Name.SESSION_SESSION.getName());
+        // MDC.remove(LogProperties.Name.SESSION_SESSION.getName());
     }
 
     /**

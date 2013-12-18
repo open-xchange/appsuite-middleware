@@ -151,6 +151,7 @@ public class LoginServlet extends AJAXServlet {
         set.add(LogProperties.Name.LOGIN_LOGIN);
         set.add(LogProperties.Name.LOGIN_USER_AGENT);
         set.add(LogProperties.Name.LOGIN_VERSION);
+        set.add(LogProperties.Name.SESSION_AUTH_ID);
         set.add(LogProperties.Name.SESSION_SESSION_ID);
         set.add(LogProperties.Name.SESSION_USER_ID);
         set.add(LogProperties.Name.SESSION_USER_NAME);

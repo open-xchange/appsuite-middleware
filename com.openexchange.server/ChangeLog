@@ -4,6 +4,7 @@
  - Fix for bug 29307: Immediate (remote) delivery (mail) folder-related changes
  - Fix for bug 30350: Set a non-empty message in dummy Throwable
  - Fix for bug 29892: Ignore "mailto" links in href attribute when resolving <base> tags
+ - Fix for bug 30348: Dropped "com.openexchange.session.session" logging property and added "com.openexchange.session.authId" as a separate one
 
 * 2013-12-18 - martin.schneider@open-xchange.com
 
