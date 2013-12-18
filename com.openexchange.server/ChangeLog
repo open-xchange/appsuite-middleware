@@ -2,6 +2,10 @@
 
  - Fix for bug 30192: Properly detect a rename operation, rather than performing a move
 
+* 2013-12-18 - martin.schneider@open-xchange.com
+
+ - Fix for bug 23492: Removed crawler update and associated CLT
+
 * 2013-12-18 - martin.herfurth@open-xchange.com
 
  - Fix for bug 30118: Delete single occurrence for appointments lasting longer than one day.
@@ -17,7 +21,7 @@
  - Fix for bug 30217: Ensure context identifier is contained in login mappings
  - Fix for bug 30357: Remove harmful "<%tag>" tags from HTML content id displayed inline
 
-* 2013-12-17 - tobias.friedrich@open-xchange.com
+* 2013-12-17 - martin.schneider@open-xchange.com
 
  - Fix for bug 30343: Added new mapping file for Outlook 2007 (NL) to get a valid mapping
 
