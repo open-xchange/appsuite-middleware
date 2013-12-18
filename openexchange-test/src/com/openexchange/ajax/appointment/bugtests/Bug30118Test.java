@@ -47,18 +47,61 @@
  *
  */
 
-package com.openexchange.subscribe.crawler.commandline;
+package com.openexchange.ajax.appointment.bugtests;
+
+import static com.openexchange.groupware.calendar.TimeTools.D;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.test.CalendarTestManager;
 
 /**
- * {@link CrawlerUpdateMBean}
- *
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * {@link Bug30118Test}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public interface CrawlerUpdateMBean {
+public class Bug30118Test extends AbstractAJAXSession {
 
-    public static final String DOMAIN_NAME = "com.openexchange.subscribe.crawler.commandline";
+    private CalendarTestManager ctm;
 
-    public abstract void updateCrawlersAccordingToConfiguration();
+    private Appointment appointment;
 
+    /**
+     * Initializes a new {@link Bug30118Test}.
+     * 
+     * @param name
+     */
+    public Bug30118Test(String name) {
+        super(name);
+    }
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+
+        ctm = new CalendarTestManager(client);
+        appointment = new Appointment();
+        appointment.setTitle("Bug 30118 Test");
+        appointment.setStartDate(D("17.12.2013 08:00"));
+        appointment.setEndDate(D("18.12.2013 09:00"));
+        appointment.setRecurrenceType(Appointment.DAILY);
+        appointment.setInterval(1);
+        appointment.setOccurrence(5);
+        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appointment.setIgnoreConflicts(true);
+        
+        ctm.insert(appointment);
+    }
+
+    public void testBug30118() throws Exception {
+        ctm.createDeleteException(appointment.getParentFolderID(), appointment.getObjectID(), 3);
+        Appointment loaded = ctm.get(appointment);
+        assertTrue("Expected one delete Exception.", loaded.getDeleteException() != null && loaded.getDeleteException().length == 1);
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        ctm.cleanUp();
+        super.tearDown();
+    }
 
 }

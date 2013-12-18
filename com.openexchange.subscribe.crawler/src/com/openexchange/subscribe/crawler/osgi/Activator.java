@@ -60,17 +60,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.ho.yaml.Yaml;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.data.conversion.ical.ICalParser;
-import com.openexchange.management.ManagementService;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.crawler.CrawlerDescription;
 import com.openexchange.subscribe.crawler.internal.GenericSubscribeService;
-import com.openexchange.timer.TimerService;
 
 /**
  * {@link Activator}
@@ -84,12 +80,6 @@ public class Activator implements BundleActivator {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
     public static final String DIR_NAME_PROPERTY = "com.openexchange.subscribe.crawler.path";
-
-    public static final String UPDATE_INTERVAL = "com.openexchange.subscribe.crawler.updateinterval";
-
-    public static final String ENABLE_AUTO_UPDATE = "com.openexchange.subscribe.crawler.enableautoupdate";
-
-    public static final String ONLY_UPDATE_INSTALLED = "com.openexchange.subscribe.crawler.onlyupdatealreadyinstalled";
 
     private BundleContext bundleContext;
 
@@ -110,15 +100,9 @@ public class Activator implements BundleActivator {
         bundleContext = context;
         services = new ArrayList<ServiceRegistration<?>>();
 
-        // react dynamically to the appearance/disappearance of ConfigurationService, TimerService, ManagementService and iCalParserService
         trackers.push(new ServiceTracker<ConfigurationService,ConfigurationService>(context, ConfigurationService.class, new CrawlerRegisterer(context, this)));
-        final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + TimerService.class.getName() + "))");
-        final ServiceTracker<Object,Object> configAndTimerTracker = new ServiceTracker<Object,Object>(context, filter, new CrawlerAutoUpdater(context, this));
-        trackers.push(configAndTimerTracker);
-        final Filter filter2 = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + ManagementService.class.getName() + "))");
-        final ServiceTracker<Object,Object> configAndManagementTracker = new ServiceTracker<Object,Object>(context, filter2, new CrawlerMBeanRegisterer(context, this));
-        trackers.push(configAndManagementTracker);
-        trackers.push(new ServiceTracker<ICalParser,ICalParser>(context, ICalParser.class, new ICalParserRegisterer(context, this)));
+        trackers.push(new ServiceTracker<ICalParser, ICalParser>(context, ICalParser.class, new ICalParserRegisterer(context, this)));
+
         for (final ServiceTracker<?,?> tracker : trackers) {
             tracker.open();
         }
@@ -264,19 +248,5 @@ public class Activator implements BundleActivator {
     public ICalParser getICalParser() {
         return iCalParserRef.get();
     }
-
-    // THESE METHODS SHOULD ONLY BE USED FOR TESTING
-    public ArrayList<ServiceRegistration<?>> getServices() {
-        return services;
-    }
-
-    public void setServices(final ArrayList<ServiceRegistration<?>> services) {
-        this.services = services;
-    }
-
-    public void setBundleContext(final BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
-    }
-    // THESE METHODS SHOULD ONLY BE USED FOR TESTING
 
 }

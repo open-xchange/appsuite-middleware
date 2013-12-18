@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -98,16 +99,19 @@ public class SchemaStoreImpl extends SchemaStore {
 
     final Lock cacheLock = new ReentrantLock();
 
-    private Cache cache;
+    Cache cache;
 
     public SchemaStoreImpl() {
         super();
     }
 
     @Override
-    protected SchemaUpdateState getSchema(int poolId, String schemaName, final Connection con) throws OXException {
-        final CacheKey key = cache.newCacheKey(poolId, schemaName);
-        return SerializedCachingLoader.fetch(cache, CACHE_REGION, null, cacheLock, key, new StorageLoader<SchemaUpdateState>() {
+    protected SchemaUpdateState getSchema(final int poolId, final String schemaName, final Connection con) throws OXException {
+        return SerializedCachingLoader.fetch(cache, CACHE_REGION, null, cacheLock, new StorageLoader<SchemaUpdateState>() {
+            @Override
+            public Serializable getKey() {
+                return cache.newCacheKey(poolId, schemaName);
+            }
             @Override
             public SchemaUpdateState load() throws OXException {
                 return loadSchema(con);

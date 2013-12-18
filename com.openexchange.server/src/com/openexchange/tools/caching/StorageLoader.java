@@ -49,6 +49,8 @@
 
 package com.openexchange.tools.caching;
 
+import java.io.Serializable;
+import com.openexchange.caching.CacheKey;
 import com.openexchange.exception.OXException;
 
 /**
@@ -58,6 +60,11 @@ import com.openexchange.exception.OXException;
  * @param <T>
  */
 public interface StorageLoader<T> {
+
+    /**
+     * @return the key for the value. Normally an instance of {@link CacheKey}.
+     */
+    Serializable getKey();
 
     /**
      * This method is called if the data is not available in the cache and needs to be loaded from the storage layer.

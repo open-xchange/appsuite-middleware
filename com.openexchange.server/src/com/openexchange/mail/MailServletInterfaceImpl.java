@@ -2474,7 +2474,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         fullName = mailAccess.getFolderStorage().moveFolder(fullName, newFullname.toString());
                         movePerformed = true;
                         postEvent4Subfolders(accountId, subfolders);
-                        postEvent(accountId, newParent, false);
+                        postEvent(accountId, newParent, false, true);
                     }
                 } else {
                     // Move to another account
@@ -2505,7 +2505,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             p.getSeparator(),
                             session.getUserId(),
                             otherAccess.getMailConfig().getCapabilities().hasPermissions());
-                        postEvent(parentAccountID, newParent, false);
+                        postEvent(parentAccountID, newParent, false, true);
                         // Delete source
                         final Map<String, Map<?, ?>> subfolders = subfolders(fullName);
                         mailAccess.getFolderStorage().deleteFolder(fullName, true);
@@ -2527,7 +2527,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 final String newName = mailFolder.getName();
                 if (!newName.equals(oldName)) { // rename
                     fullName = mailAccess.getFolderStorage().renameFolder(fullName, newName);
-                    postEvent(accountId, fullName, false);
+                    postEvent(accountId, fullName, false, true);
                 }
             }
             /*

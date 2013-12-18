@@ -143,6 +143,15 @@ public class AppointmentParser extends CalendarParser {
         if (jsonobject.has(CalendarFields.RECURRENCE_START)) {
             appointmentobject.setRecurringStart(parseDate(jsonobject, CalendarFields.RECURRENCE_START).getTime());
         }
+        
+        if (parseAll) {
+            if (jsonobject.has(CalendarFields.CHANGE_EXCEPTIONS)) {
+                appointmentobject.setChangeExceptions(parseJSONDateArray(jsonobject, CalendarFields.CHANGE_EXCEPTIONS));
+            }
+            if (jsonobject.has(CalendarFields.DELETE_EXCEPTIONS)) {
+                appointmentobject.setDeleteExceptions(parseJSONDateArray(jsonobject, CalendarFields.DELETE_EXCEPTIONS));
+            }
+        }
 
         parseElementCalendar(appointmentobject, jsonobject);
     }
