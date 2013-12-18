@@ -1,3 +1,7 @@
+* 2013-12-18 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 30118: Delete single occurrence for appointments lasting longer than one day.
+
 * 2013-12-18 - marcus.klein@open-xchange.com
 
  - Optimization out of bug 30255: Using now a more specialized locking to throttle only threads trying to load the information from the same

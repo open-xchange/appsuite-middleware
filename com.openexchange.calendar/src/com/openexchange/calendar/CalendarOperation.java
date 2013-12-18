@@ -1011,7 +1011,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
     private static final Date calculateRealRecurringEndDate(final CalendarDataObject cdao, CalendarDataObject edao) {
         Date until = cdao.getRecurrenceType() == CalendarDataObject.NO_RECURRENCE ? edao.getUntil() : cdao.getUntil();
-        return calculateRealRecurringEndDate(null == until ? recColl.getMaxUntilDate(cdao) : until, cdao.getEndDate(), cdao.getFullTime());
+        return calculateRealRecurringEndDate(null == until ? recColl.getMaxUntilDate(cdao) : until, cdao.getEndDate(), cdao.getFullTime(), cdao.getRecurrenceCalculator());
     }
 
     /**
@@ -1032,21 +1032,27 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         return null;
     }
 
-    private static final Date calculateRealRecurringEndDate(final Date untilDate, final Date endDate, final boolean isFulltime) {
+    private static final Date calculateRealRecurringEndDate(final Date untilDate, final Date endDate, final boolean isFulltime, int recCal) {
         long until = untilDate.getTime();
         // Extract time out of until date
         long mod = until % Constants.MILLI_DAY;
         if (mod > 0) {
             until = until - mod;
         }
+        
         // Extract time out of end date
         mod = (endDate.getTime()) % Constants.MILLI_DAY;
         if (isFulltime) {
             /*
              * Add one day for general handling of full-time appointments: from 00:00h day 1 to 00:00h day 2
              */
-            return new Date(until + Constants.MILLI_DAY);
+            until += Constants.MILLI_DAY;
         }
+
+        if (recCal > 0) {
+            until += Constants.MILLI_DAY * recCal;
+        }
+        
         return new Date(until + mod);
     }
 
@@ -1804,7 +1810,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         // Get corresponding until date
         final Date untilDate = new Date(recColl.normalizeLong(occurrenceDate.getTime()));
         // Set proper end time
-        cdao.setEndDate(calculateRealRecurringEndDate(untilDate, edao.getEndDate(), edao.getFullTime()));
+        cdao.setEndDate(calculateRealRecurringEndDate(untilDate, edao.getEndDate(), edao.getFullTime(), edao.getRecurrenceCalculator()));
     }
 
     /**
@@ -1878,7 +1884,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             // Get corresponding until date
             final Date untilDate = new Date(recColl.normalizeLong(occurrenceDate.getTime()));
             // Set proper end time
-            cdao.setEndDate(calculateRealRecurringEndDate(untilDate, edao.getEndDate(), edao.getFullTime()));
+            cdao.setEndDate(calculateRealRecurringEndDate(untilDate, edao.getEndDate(), edao.getFullTime(), edao.getRecurrenceCalculator()));
             pattern_change = true;
         }
         if (cdao.containsEndDate() && !cdao.getEndDate().equals(edao.getEndDate())) {
