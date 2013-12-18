@@ -53,6 +53,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -161,6 +162,10 @@ public class Separators implements PreferencesItemService {
                         ma.connect(false);
                         sep = Character.valueOf(ma.getFolderStorage().getFolder("INBOX").getSeparator());
                         sessionCache.putParameter(accountId, MailSessionParameterNames.getParamSeparator(), sep);
+                    } catch (final Exception x) {
+                        // Ignore
+                        final Logger logger = org.slf4j.LoggerFactory.getLogger(Separators.class);
+                        logger.debug("Failed determining separator character for mail account {} of user {} in context {}", accountId, session.getUserId(), session.getContextId(), x);
                     } finally {
                         if (null != ma) {
                             ma.close(true);
