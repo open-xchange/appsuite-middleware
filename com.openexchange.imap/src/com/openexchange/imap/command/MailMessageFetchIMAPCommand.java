@@ -305,7 +305,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         try {
             return handleMessage(imapFolder.getMessage(seqNum));
         } catch (final Exception e) {
-            LOG.warn("Message #{} discarded: {}", seqNum, e.getMessage(), e);
+            LOG.warn("Message #{} discarded", seqNum, e);
             return null;
         }
     }
@@ -314,7 +314,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         try {
             return handleMessage(imapFolder.getMessageByUID(uid));
         } catch (final Exception e) {
-            LOG.warn("Message uid={} discarded: {}", uid, e.getMessage(), e);
+            LOG.warn("Message uid={} discarded", uid, e);
             return null;
         }
     }
@@ -330,7 +330,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             }
             return mail;
         } catch (final Exception e) {
-            LOG.warn("Message #{} discarded: {}", message.getMessageNumber(), e.getMessage(), e);
+            LOG.warn("Message #{} discarded", message.getMessageNumber(), e);
             return null;
         }
     }
@@ -371,7 +371,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
              */
             {
                 final OXException imapExc = MimeMailException.handleMessagingException(e);
-                LOG.warn("Message #{} discarded: {}", seqNum, imapExc.getMessage(), imapExc);
+                LOG.warn("Message #{} discarded", seqNum, imapExc);
             }
             error = true;
             mail = null;
@@ -379,7 +379,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             /*
              * Discard corrupt message
              */
-            LOG.warn("Message #{} discarded: {}", seqNum, e.getMessage(), e);
+            LOG.warn("Message #{} discarded", seqNum, e);
             error = true;
             mail = null;
         }

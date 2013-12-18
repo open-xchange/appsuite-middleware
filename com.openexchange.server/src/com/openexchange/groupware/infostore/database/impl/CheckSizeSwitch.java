@@ -129,7 +129,7 @@ public class CheckSizeSwitch {
             LOG.error("", e);
             return 0;
         } catch (final OXException e) {
-            LOG.error(e.getMessage(),  e);
+            LOG.error("",  e);
             return 0;
         } finally {
             provider.releaseWriteConnectionAfterReading(ctx, con);

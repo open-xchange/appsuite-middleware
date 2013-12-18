@@ -64,7 +64,7 @@ public class ProxyActivator extends HousekeepingActivator {
         try {
             log.info("starting bundle: com.openexchange.proxy");
         } catch (final Exception e) {
-            log.error("Failed start-up of bundle com.openexchange.proxy: {}", e.getMessage(), e);
+            log.error("Failed start-up of bundle com.openexchange.proxy", e);
             throw e;
         }
 	}
@@ -75,7 +75,7 @@ public class ProxyActivator extends HousekeepingActivator {
         try {
             log.info("stopping bundle: com.openexchange.proxy");
         } catch (final Exception e) {
-            log.error("Failed shut-down of bundle com.openexchange.proxy: {}", e.getMessage(), e);
+            log.error("Failed shut-down of bundle com.openexchange.proxy", e);
             throw e;
         }
 	}

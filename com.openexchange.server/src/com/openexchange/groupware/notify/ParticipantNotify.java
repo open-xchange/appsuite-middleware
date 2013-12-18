@@ -541,7 +541,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                         final StringBuilder builder = new StringBuilder(256).append(
                             "Could not set correct recurrence information in notification for appointment").append(title).append(" (").append(
                                 newObj.getObjectID()).append("). Cause:\n");
-                        LOG.error("{}{}", builder, e.getMessage(), e);
+                        LOG.error("{}", builder, e);
                     }
                 }
             }

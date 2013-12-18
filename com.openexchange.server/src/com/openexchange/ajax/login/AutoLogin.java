@@ -186,7 +186,7 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                             } catch (final ExecutionException e) {
                                 // Cannot occur
                                 final Throwable cause = e.getCause();
-                                LOG.warn("Modules could not be added to login JSON response: {}", cause.getMessage(), cause);
+                                LOG.warn("Modules could not be added to login JSON response", cause);
                             }
                         }
 

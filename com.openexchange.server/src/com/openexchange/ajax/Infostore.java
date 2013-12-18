@@ -224,7 +224,7 @@ public class Infostore extends PermissionServlet {
             }
             LOG.error("", e);
         } catch (final OXException e) {
-            LOG.error("Not possible, obviously: {}", e.getMessage(), e);
+            LOG.error("Not possible, obviously", e);
         } finally {
             ThreadLocalSessionHolder.getInstance().clear();
         }
@@ -262,7 +262,7 @@ public class Infostore extends PermissionServlet {
             }
             LOG.error("", e);
         } catch (final OXException e) {
-            LOG.error("Not possible, obviously: {}", e.getMessage(), e);
+            LOG.error("Not possible, obviously", e);
         } catch (final Throwable t) {
             LOG.error("", t);
         } finally {

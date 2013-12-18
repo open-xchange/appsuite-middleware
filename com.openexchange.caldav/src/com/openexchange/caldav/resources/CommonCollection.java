@@ -92,7 +92,7 @@ public abstract class CommonCollection extends AbstractCollection {
     }
 
     protected WebdavProtocolException protocolException(Throwable t, int statusCode) {
-        LOG.error("{}: {}", this.getUrl(), t.getMessage(), t);
+        LOG.error("{}", this.getUrl(), t);
         return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), statusCode, t);
     }
 

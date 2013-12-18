@@ -136,7 +136,7 @@ public class WebdavLogAction extends AbstractAction {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(b.toString(), x);
             } else if (x.getStatus() == HttpServletResponse.SC_INTERNAL_SERVER_ERROR) {
-                LOG.error("The request: {} caused an internal server error: {}", b, x.getMessage(), x);
+                LOG.error("The request: {} caused an internal server error", b, x);
             }
             throw x;
         } catch (final RuntimeException x) {

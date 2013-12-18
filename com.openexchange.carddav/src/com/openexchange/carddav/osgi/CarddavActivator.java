@@ -86,7 +86,7 @@ public class CarddavActivator extends HousekeepingActivator {
 
             openTrackers();
         } catch (Throwable t) {
-            org.slf4j.LoggerFactory.getLogger(CarddavActivator.class).error(t.getMessage(), t);
+            org.slf4j.LoggerFactory.getLogger(CarddavActivator.class).error("", t);
         }
     }
 

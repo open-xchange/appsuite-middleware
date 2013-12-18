@@ -793,7 +793,7 @@ public final class SieveTextFilter {
     }
 
     private void printErrorForUser(final OXException mailfilterException) {
-        LOG.error("Error in mailfilter rules of user {}: {}", this.username, mailfilterException.getMessage(), mailfilterException);
+        LOG.error("Error in mailfilter rules of user {}", this.username, mailfilterException);
     }
 
     /**

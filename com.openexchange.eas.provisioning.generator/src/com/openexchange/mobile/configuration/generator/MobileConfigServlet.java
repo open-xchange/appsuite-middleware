@@ -261,11 +261,11 @@ public class MobileConfigServlet extends HttpServlet {
             try {
                 generateConfig(req, resp, login, device);
             } catch (final OXException e) {
-                LOG.error("A template exception occurred, which should not happen: {}", e.getMessage(), e);
+                LOG.error("A template exception occurred, which should not happen", e);
                 printError(req, resp, ErrorMessage.MSG_INTERNAL_ERROR);
                 return;
             } catch (final IOException e) {
-                LOG.error("A template exception occurred, which should not happen: {}", e.getMessage(), e);
+                LOG.error("A template exception occurred, which should not happen", e);
                 printError(req, resp, ErrorMessage.MSG_INTERNAL_ERROR);
                 return;
             }
@@ -315,7 +315,7 @@ public class MobileConfigServlet extends HttpServlet {
         try {
             writer = getWriterFromOutputStream(resp.getOutputStream());
         } catch (final IOException e) {
-            LOG.error("Unable to get output stream to write error message: {}", e.getMessage(), e);
+            LOG.error("Unable to get output stream to write error message", e);
             return;
         }
         if (ErrorMessage.MSG_PARAMETER_LOGIN_IS_MISSING.equals(msg)) {

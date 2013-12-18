@@ -55,7 +55,6 @@ import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -327,7 +326,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                         FacebookMessagingExceptionCodes.FQL_QUERY_RESULT_MISMATCH.create(
                             Integer.valueOf(size),
                             Integer.valueOf(messageIds.length));
-                    org.slf4j.LoggerFactory.getLogger(FacebookMessagingMessageAccess.class).debug(warning.getMessage(), warning);
+                    org.slf4j.LoggerFactory.getLogger(FacebookMessagingMessageAccess.class).debug("", warning);
                 }
                 final Iterator<JSONObject> iterator = results.iterator();
                 final Map<String, FacebookMessagingMessage> orderMap = new HashMap<String, FacebookMessagingMessage>(size);

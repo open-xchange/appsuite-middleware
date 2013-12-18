@@ -184,7 +184,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
              */
             openTrackers();
         } catch (final Exception e) {
-            LOG.error("Failed start-up of bundle com.openexchange.threadpool: {}", e.getMessage(), e);
+            LOG.error("Failed start-up of bundle com.openexchange.threadpool", e);
             throw e;
         }
     }
@@ -213,7 +213,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
                 }
             }
         } catch (final Exception e) {
-            LOG.error("Failed shut-down of bundle com.openexchange.threadpool: {}", e.getMessage(), e);
+            LOG.error("Failed shut-down of bundle com.openexchange.threadpool", e);
             throw e;
         }
     }

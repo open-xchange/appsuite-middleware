@@ -49,7 +49,6 @@
 
 package com.openexchange.ms.osgi;
 
-import java.text.MessageFormat;
 import java.util.Map;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
@@ -99,7 +98,7 @@ public final class MsEventHandlerImpl implements EventHandler {
         } catch (final Exception e) {
             // Ignore
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MsActivator.class);
-            logger.warn("Could not handle event with topic ''{}'': \"{}\"", event.getTopic(), e.getMessage(), e);
+            logger.warn("Could not handle event with topic ''{}''", event.getTopic(), e);
         }
     }
 

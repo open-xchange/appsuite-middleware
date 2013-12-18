@@ -94,7 +94,7 @@ public abstract class CommonRequest {
 			response.put("error_params",arr);
 			w.value(response);*/
 		} catch (final JSONException e) {
-			LOG.debug(e.getMessage(),e);
+			LOG.debug("",e);
 		}
 	}
 

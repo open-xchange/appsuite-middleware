@@ -210,7 +210,7 @@ public class SpamAssassin {
 
         private static final String NAME = "TrainMessageThread";
 
-        private static final String ERR_PREFIX = "Invocation of " + CMD_SA_LEARN + " failed: ";
+        private static final String ERR_PREFIX = "Invocation of " + CMD_SA_LEARN + " failed ";
 
         private final InputStream msgSrc;
 
@@ -249,11 +249,11 @@ public class SpamAssassin {
                 final String res = cmdExec.getOutputString();
                 LOG.info("{}{}{}", STR_SPAMASSASSIN, isSpam ? STR_SPAM : STR_HAM, res);
             } catch (final IOException e) {
-                LOG.error("{}{}", ERR_PREFIX, e.getMessage(), e);
+                LOG.error(ERR_PREFIX, e);
             } catch (final InterruptedException e) {
                 // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
                 Thread.currentThread().interrupt();
-                LOG.error("{}{}", ERR_PREFIX, e.getMessage(), e);
+                LOG.error(ERR_PREFIX, e);
             }
         }
 

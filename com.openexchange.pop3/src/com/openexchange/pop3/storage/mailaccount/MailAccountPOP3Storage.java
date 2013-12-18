@@ -141,7 +141,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
             if (null == tmp) {
                 final OXException e = POP3ExceptionCode.MISSING_PATH.create(Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
-                LOG.debug("Path is null. Error: {}", e.getMessage(), e);
+                LOG.debug("Path is null.", e);
                 // Try to compose path
                 tmp = composeUniquePath(pop3Access.getAccountId(), session.getUserId(), session.getContextId());
                 // Add to properties
@@ -474,12 +474,12 @@ public class MailAccountPOP3Storage implements POP3Storage {
         try {
             getFolderStorage().releaseResources();
         } catch (final OXException e) {
-            LOG.debug("Error while closing POP3 folder storage: {}", e.getMessage(), e);
+            LOG.debug("Error while closing POP3 folder storage", e);
         }
         try {
             getMessageStorage().releaseResources();
         } catch (final OXException e) {
-            LOG.debug("Error while closing POP3 message storage: {}", e.getMessage(), e);
+            LOG.debug("Error while closing POP3 message storage", e);
         }
         /*-
          * TODO:
@@ -664,17 +664,17 @@ public class MailAccountPOP3Storage implements POP3Storage {
         } catch (final MessagingException e) {
             final Exception nested = e.getNextException();
             if (nested instanceof IOException) {
-                LOG.warn("Connect to POP3 account failed: {}", nested.getMessage(), nested);
+                LOG.warn("Connect to POP3 account failed", nested);
                 warnings.add(MailExceptionCode.IO_ERROR.create(nested, nested.getMessage()));
             } else {
-                LOG.warn("Connect to POP3 account failed: {}", e.getMessage(), e);
+                LOG.warn("Connect to POP3 account failed", e);
                 warnings.add(MimeMailException.handleMessagingException(e, pop3Access.getPOP3Config(), session));
             }
         } catch (final OXException e) {
             if (MimeMailExceptionCode.LOGIN_FAILED.equals(e) || MimeMailExceptionCode.INVALID_CREDENTIALS.equals(e)) {
                 throw e;
             }
-            LOG.warn("Connect to POP3 account failed: {}", e.getMessage(), e);
+            LOG.warn("Connect to POP3 account failed", e);
             warnings.add(e);
         } finally {
             try {
@@ -813,7 +813,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         try {
             pop3MessageStorage.appendPOP3Messages(toAppend.toArray(new MailMessage[toAppend.size()]));
         } catch (final OXException e) {
-            LOG.debug("Batch append operation to POP3 storage failed: {}", e.getMessage(), e);
+            LOG.debug("Batch append operation to POP3 storage failed", e);
             final Throwable cause = e.getCause();
             if ((cause instanceof MessagingException) && toLowerCase(cause.getMessage()).indexOf("quota") >= 0) {
                 /*
@@ -830,7 +830,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                     arr[0] = mailMessage;
                     pop3MessageStorage.appendPOP3Messages(arr);
                 } catch (final OXException inner) {
-                    LOG.warn("POP3 message could not be appended to POP3 storage: {}", inner.getMessage(), inner);
+                    LOG.warn("POP3 message could not be appended to POP3 storage", inner);
                 }
             }
         }

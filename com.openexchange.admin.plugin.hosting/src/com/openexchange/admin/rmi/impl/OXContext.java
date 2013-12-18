@@ -287,7 +287,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             if(ctx.getFilestoreId()!=null) {
                 if(!tool.existsStore(ctx.getFilestoreId().intValue())){
                     final InvalidDataException inde = new InvalidDataException("No such filestore with id "+ctx.getFilestoreId());
-                    log.error(inde.getMessage(),inde);
+                    log.error("",inde);
                     throw inde;
                 }
             }
@@ -1067,7 +1067,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             try {
                 ret = (Context)callPluginMethod("postCreate", ret, admin_user, createaccess, auth);
             } catch(final StorageException e) {
-                log.error(e.getMessage(),e);
+                log.error("",e);
                 // callPluginMethod delete may fail here for what ever reason.
                 // this must not prevent us from cleaning up the rest
                 try {

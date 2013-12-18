@@ -362,7 +362,7 @@ public class LoginServlet extends AJAXServlet {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (final OXException e) {
-                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}{}{}", session.getContextId(), '/', session.getUserId());
+                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}", session.getContextId(), session.getUserId());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -518,7 +518,7 @@ public class LoginServlet extends AJAXServlet {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (final OXException e) {
-                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}{}{}", session.getContextId(), '/', session.getUserId());
+                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}", session.getContextId(), session.getUserId());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -803,12 +803,8 @@ public class LoginServlet extends AJAXServlet {
                 final Setting setting = ConfigTree.getInstance().getSettingByPath(modules);
                 SettingStorage.getInstance(session).readValues(setting);
                 json.put(modules, convert2JS(setting));
-            } catch (final OXException e) {
-                LOG.warn("Modules could not be added to login JSON response: {}", e.getMessage(), e);
-            } catch (final JSONException e) {
-                LOG.warn("Modules could not be added to login JSON response: {}", e.getMessage(), e);
             } catch (final Exception e) {
-                LOG.warn("Modules could not be added to login JSON response: {}", e.getMessage(), e);
+                LOG.warn("Modules could not be added to login JSON response", e);
             }
         }
     }

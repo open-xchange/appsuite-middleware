@@ -128,7 +128,7 @@ public class KerberosAuthentication implements AuthenticationService {
             try {
                 principal = kerberosService.authenticate(uid, loginInfo.getPassword());
             } catch (OXException e) {
-                LOG.error(e.getMessage(), e.getCause());
+                LOG.error("", e.getCause());
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
             }
         }

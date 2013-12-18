@@ -148,7 +148,7 @@ public final class JobQueue {
             // What?!
             final Throwable t = e.getCause();
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JobQueue.class);
-            log.error(t.getMessage(), t);
+            log.error("", t);
         }
     }
 

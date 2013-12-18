@@ -893,7 +893,7 @@ public final class MimeMessageUtility {
                     /*
                      * Invalid quoted-printable
                      */
-                    LOG.warn("Cannot decode quoted-printable: {}", e.getMessage(), e);
+                    LOG.warn("Cannot decode quoted-printable", e);
                     return asciiText;
                 }
             } else if ("B".equalsIgnoreCase(transferEncoding)) {
@@ -1401,7 +1401,7 @@ public final class MimeMessageUtility {
             return new com.openexchange.java.StringAllocator(len + 2).append('"').append(
                 encode ? MimeUtility.encodeWord(replaced) : replaced).append('"').toString();
         } catch (final UnsupportedEncodingException e) {
-            LOG.error("Unsupported encoding in a message detected and monitored: \"{}{}", e.getMessage(), '"', e);
+            LOG.error("Unsupported encoding in a message detected and monitored", e);
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             return phrase;
         }

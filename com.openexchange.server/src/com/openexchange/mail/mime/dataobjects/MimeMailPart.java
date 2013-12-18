@@ -327,7 +327,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 return obj;
             }
         } catch (final UnsupportedEncodingException e) {
-            LOG.error("Unsupported encoding in a message detected and monitored: \"{}{}", e.getMessage(), '"', e);
+            LOG.error("Unsupported encoding in a message detected and monitored", e);
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
@@ -542,7 +542,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             }
             part.writeTo(out);
         } catch (final UnsupportedEncodingException e) {
-            LOG.error("Unsupported encoding in a message detected and monitored: \"{}{}", e.getMessage(), '"', e);
+            LOG.error("Unsupported encoding in a message detected and monitored", e);
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
@@ -629,7 +629,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (final UnsupportedEncodingException e) {
-            LOG.error("Unsupported encoding in a message detected and monitored: \"{}{}", e.getMessage(), '"', e);
+            LOG.error("Unsupported encoding in a message detected and monitored", e);
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
@@ -1053,7 +1053,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                     } catch (final MessagingException e) {
                         throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
                     } catch (final UnsupportedEncodingException e) {
-                        LOG.error("Unsupported encoding in a message detected and monitored: \"{}{}", e.getMessage(), '"', e);
+                        LOG.error("Unsupported encoding in a message detected and monitored", e);
                         mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
                         throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
                     } catch (final IOException e) {

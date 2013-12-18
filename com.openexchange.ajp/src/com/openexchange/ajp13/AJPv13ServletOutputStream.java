@@ -299,7 +299,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
             if (e.getMessage().indexOf(ERR_BROKEN_PIPE) == -1) {
                 LOG.error("", e);
             } else {
-                LOG.warn("Underlying (TCP) protocol communication aborted: {}", e.getMessage(), e);
+                LOG.warn("Underlying (TCP) protocol communication aborted", e);
             }
             // Treat a socket exception as fatal; meaning to close this servlet output stream since socket connection is broken
             isClosed = true;
@@ -343,7 +343,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
             if (e.getMessage().indexOf(ERR_BROKEN_PIPE) == -1) {
                 LOG.error("", e);
             } else {
-                LOG.warn("Underlying (TCP) protocol communication aborted: {}", e.getMessage(), e);
+                LOG.warn("Underlying (TCP) protocol communication aborted", e);
             }
             // Treat a socket exception as fatal; meaning to close this servlet output stream since socket connection is broken
             isClosed = true;

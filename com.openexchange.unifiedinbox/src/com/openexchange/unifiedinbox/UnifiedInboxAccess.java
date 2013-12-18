@@ -217,7 +217,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
             try {
                 folderStorage.releaseResources();
             } catch (final OXException e) {
-                LOG.error("Error while closing Unified Mail folder storage: {}", e.getMessage(), e);
+                LOG.error("Error while closing Unified Mail folder storage", e);
             } finally {
                 folderStorage = null;
             }
@@ -226,7 +226,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
             try {
                 messageStorage.releaseResources();
             } catch (final OXException e) {
-                LOG.error("Error while closing Unified Mail message storage: {}", e.getMessage(), e);
+                LOG.error("Error while closing Unified Mail message storage", e);
             } finally {
                 messageStorage = null;
 

@@ -54,7 +54,6 @@ import java.util.Hashtable;
 import javax.servlet.ServletException;
 import org.apache.cxf.Bus;
 import org.apache.cxf.BusFactory;
-import org.apache.cxf.common.logging.LogUtils;
 import org.apache.cxf.staxutils.StaxUtils;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
 import org.osgi.framework.BundleContext;
@@ -65,7 +64,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.soap.cxf.interceptor.TransformGenericElementsInterceptor;
-import com.openexchange.soap.cxf.logger.Slf4jLogger;
 
 /**
  * {@link CXFActivator} - The activator for CXF bundle.
@@ -191,9 +189,9 @@ public class CXFActivator extends HousekeepingActivator {
                              */
                             return httpService;
                         } catch (final ServletException e) {
-                            log.error("Couldn't register CXF Servlet: {}", e.getMessage(), e);
+                            log.error("Couldn't register CXF Servlet", e);
                         } catch (final NamespaceException e) {
-                            log.error("Couldn't register CXF Servlet: {}", e.getMessage(), e);
+                            log.error("Couldn't register CXF Servlet", e);
                         } catch (final RuntimeException e) {
                             if (servletRegistered) {
                                 try {
@@ -214,7 +212,7 @@ public class CXFActivator extends HousekeepingActivator {
                                     this.collector = null;
                                 }
                             }
-                            log.error("Couldn't register CXF Servlet: {}", e.getMessage(), e);
+                            log.error("Couldn't register CXF Servlet", e);
                         }
                         context.ungetService(reference);
                         return null;

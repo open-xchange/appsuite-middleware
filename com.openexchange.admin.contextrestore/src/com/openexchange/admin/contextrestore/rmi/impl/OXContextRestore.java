@@ -769,7 +769,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                     contextInterface.delete(ctx, auth);
                 } catch (final NoSuchContextException e) {
                     // As we check for the existence beforehand this exception should never occur. Nevertheless we will log this
-                    LOG.error("FATAL:{}", e.getMessage(), e);
+                    LOG.error("FATAL", e);
                 }
             }
             return instance.restorectx(ctx, result, getConfigDbName(optConfigDbName));

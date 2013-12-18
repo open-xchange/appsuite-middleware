@@ -318,14 +318,14 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
              */
             {
                 final OXException imapExc = MimeMailException.handleMessagingException(e);
-                LOG.warn("Message #{} discarded: {}", mail.getSeqnum(), imapExc.getMessage(), imapExc);
+                LOG.warn("Message #{} discarded", mail.getSeqnum(), imapExc);
             }
             error = true;
         } catch (final OXException e) {
             /*
              * Discard corrupt message
              */
-            LOG.warn("Message #{} discarded: {}", mail.getSeqnum(), e.getMessage(), e);
+            LOG.warn("Message #{} discarded", mail.getSeqnum(), e);
             error = true;
         }
         if (!error) {

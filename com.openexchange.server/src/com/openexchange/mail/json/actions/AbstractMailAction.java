@@ -51,7 +51,6 @@ package com.openexchange.mail.json.actions;
 
 import static com.openexchange.mail.json.parser.MessageParser.parseAddressKey;
 import java.io.Closeable;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -250,7 +249,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                 }
                 addrs.removeAll(validAddrs);
             } catch (final AddressException e) {
-                LOG.warn("Collected contacts could not be stripped by user's email aliases: {}", e.getMessage(), e);
+                LOG.warn("Collected contacts could not be stripped by user's email aliases", e);
 
             }
             if (!addrs.isEmpty()) {
@@ -290,9 +289,9 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                 }
                 addrs.removeAll(validAddrs);
             } catch (final AddressException e) {
-                LOG.warn("Contact collector could not be triggered: {}", e.getMessage(), e);
+                LOG.warn("Contact collector could not be triggered", e);
             } catch (final JSONException e) {
-                LOG.warn("Contact collector could not be triggered: {}", e.getMessage(), e);
+                LOG.warn("Contact collector could not be triggered", e);
             }
             if (!addrs.isEmpty()) {
                 // Add addresses

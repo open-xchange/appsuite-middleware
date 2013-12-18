@@ -97,7 +97,7 @@ public class SerializedCachingLoader {
         } catch (final InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return loader.load();
         }
         // Lock acquired & replicated cache

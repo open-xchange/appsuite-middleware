@@ -107,9 +107,9 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
                     LOG.warn("recieved empty udp package: {}", datagramSocket);
                 }
             } catch (final IOException e) {
-                LOG.error("Receiving of UDP packet failed: {}", e.getMessage(), e);
+                LOG.error("Receiving of UDP packet failed", e);
             } catch (final OXException e) {
-                LOG.error("Failed to create push event: {}", e.getMessage(), e);
+                LOG.error("Failed to create push event", e);
             }
         }
     }

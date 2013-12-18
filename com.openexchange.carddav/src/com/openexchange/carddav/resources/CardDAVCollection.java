@@ -56,10 +56,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.servlet.http.HttpServletResponse;
-
-
 import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.Tools;
@@ -115,7 +112,7 @@ public abstract class CardDAVCollection extends AbstractCollection {
     }
 
     protected WebdavProtocolException protocolException(Throwable t, int statusCode) {
-        LOG.error("{}: {}", this.getUrl(), t.getMessage(), t);
+        LOG.error("{}", this.getUrl(), t);
         return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), statusCode, t);
     }
 

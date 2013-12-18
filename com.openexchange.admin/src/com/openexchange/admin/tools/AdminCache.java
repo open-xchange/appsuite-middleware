@@ -64,7 +64,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -75,7 +74,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
 import com.damienmiller.BCrypt;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.properties.AdminProperties;
@@ -626,7 +624,7 @@ public class AdminCache {
         }
         if (masterCredentials == null) {
             final OXGenericException genericException = new OXGenericException("No master credentials defined!");
-            log.warn(genericException.getMessage());
+            log.warn("", genericException);
         }
     }
 

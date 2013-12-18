@@ -106,7 +106,7 @@ public final class PushActivator extends HousekeepingActivator {
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
             registerService(EventHandler.class, new PushEventHandler(), serviceProperties);
         } catch (final Exception e) {
-            log.error("Failed start-up of bundle com.openexchange.push: {}", e.getMessage(), e);
+            log.error("Failed start-up of bundle com.openexchange.push", e);
             throw e;
         }
     }
@@ -126,7 +126,7 @@ public final class PushActivator extends HousekeepingActivator {
             closeTrackers();
             PushManagerRegistry.shutdown();
         } catch (final Exception e) {
-            log.error("Failed shut-down of bundle com.openexchange.push: {}", e.getMessage(), e);
+            log.error("Failed shut-down of bundle com.openexchange.push", e);
             throw e;
         }
     }

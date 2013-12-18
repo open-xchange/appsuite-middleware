@@ -206,7 +206,7 @@ public final class URIParser {
             if (URIDefaults.NULL.equals(defaults)) {
                 throw new URISyntaxException(input, e.getMessage());
             }
-            LOG.warn("Couldn't parse port: {}", e.getMessage(), e);
+            LOG.warn("Couldn't parse port", e);
             return defaults.getPort();
         }
     }

@@ -1383,7 +1383,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                                      *
                                      * Perform some debug logs for traceability...
                                      */
-                                    LOG.debug("Generic messaging error occurred for mail \"{}\" in folder \"{}\" with login \"{}\" on server \"{}\" (user={}, context={}): {}", msgUID, fullName, imapConfig.getLogin(), imapConfig.getServer(), session.getUserId(), session.getContextId(), e.getMessage(), e);
+                                    LOG.debug("Generic messaging error occurred for mail \"{}\" in folder \"{}\" with login \"{}\" on server \"{}\" (user={}, context={})", msgUID, fullName, imapConfig.getLogin(), imapConfig.getServer(), session.getUserId(), session.getContextId(), e);
                                 }
                                 throw e;
                             } catch (final java.lang.IndexOutOfBoundsException e) {

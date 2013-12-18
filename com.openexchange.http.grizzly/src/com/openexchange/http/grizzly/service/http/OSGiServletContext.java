@@ -91,7 +91,6 @@
 
 package com.openexchange.http.grizzly.service.http;
 
-import static java.text.MessageFormat.format;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -156,14 +155,14 @@ public class OSGiServletContext extends WebappContext {
 
         URL resource = httpContext.getResource(path);
         if(resource == null) {
-            LOG.warn(format("Error getting resource ''{0}''. Message: {1}", path, "Can't locate resource."));
+            LOG.warn("Error getting resource ''{}''. Message: {}", path, "Can't locate resource.");
             return null;
         }
 
         try {
             return httpContext.getResource(path).openStream();
         } catch (IOException e) {
-            LOG.warn(format("Error getting resource ''{0}''. Message: {1}", path, e.getMessage()));
+            LOG.warn("Error getting resource ''{}''. Message: {}", path, e.getMessage());
         }
         return null;
     }

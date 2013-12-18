@@ -217,7 +217,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
                 bos.write(iChar);
             }
         } catch (final IOException ioe) {
-            org.slf4j.LoggerFactory.getLogger(UUEncodedPart.class).error(ioe.getMessage(), ioe);
+            org.slf4j.LoggerFactory.getLogger(UUEncodedPart.class).error("", ioe);
             throw ioe;
         } finally {
             Streams.close(bos);

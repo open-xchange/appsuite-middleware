@@ -217,7 +217,7 @@ public class ParallelsOXAuthentication implements AuthenticationService {
                 OXException e = LoginExceptionCodes.INVALID_CREDENTIALS.create();
                 LOG.error("Invalid credentials");
                 // FIXME: exception below is never logged for some reason :-(
-                LOG.error(e.getMessage(),e);
+                LOG.error("",e);
                 throw e;
             }
 

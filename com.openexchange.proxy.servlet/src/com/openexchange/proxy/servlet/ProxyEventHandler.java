@@ -49,7 +49,6 @@
 
 package com.openexchange.proxy.servlet;
 
-import java.text.MessageFormat;
 import java.util.Map;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
@@ -92,7 +91,7 @@ public final class ProxyEventHandler implements EventHandler {
                 }
             }
         } catch (final Exception e) {
-            LOG.error("Error while handling SessionD event \"{}\": {}", topic, e.getMessage(), e);
+            LOG.error("Error while handling SessionD event \"{}\"", topic, e);
         }
     }
 }

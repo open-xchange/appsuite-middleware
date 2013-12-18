@@ -78,7 +78,7 @@ public final class XingOAuthActivator extends HousekeepingActivator {
             registerService(OAuthServiceMetaData.class, new XingOAuthServiceMetaData(config));
         } catch (final IllegalStateException e) {
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(XingOAuthActivator.class);
-            log.warn("Could not start-up XING OAuth service: {}", e.getMessage(), e);
+            log.warn("Could not start-up XING OAuth service", e);
         }
     }
 

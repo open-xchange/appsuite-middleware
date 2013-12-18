@@ -153,7 +153,7 @@ public class CometListener extends DefaultLongPollingListener {
                 try {
                     cometHandler.getCometContext().notify(event, Type.NOTIFY, cometHandler);
                 } catch (IOException e) {
-                    LOG.warn(e.getMessage(), e);
+                    LOG.warn("", e);
                 }
                 cometHandler = null;
             } else {

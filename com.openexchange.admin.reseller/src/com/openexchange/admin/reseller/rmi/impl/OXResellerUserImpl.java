@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.reseller.rmi.impl;
 
-import org.slf4j.Logger;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
@@ -115,7 +114,7 @@ public class OXResellerUserImpl implements OXUserPluginInterface {
             //long tend = System.currentTimeMillis();
             //System.out.println("Time: " + (tend - tstart) + " ms");
         } catch (StorageException e) {
-            log.error(e.getMessage(),e);
+            log.error("",e);
             throw new PluginException(e);
         }
     }

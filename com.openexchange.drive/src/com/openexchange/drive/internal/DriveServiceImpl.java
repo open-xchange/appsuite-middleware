@@ -180,7 +180,7 @@ public class DriveServiceImpl implements DriveService {
                     continue;
                 }
                 driveSession.trace("Got exception during execution of server actions (" + e.getMessage() + ")");
-                LOG.warn("Got exception during execution of server actions ({})\nPrevious sync result:\n{}", e.getMessage(), syncResult, e);
+                LOG.warn("Got exception during execution of server actions\nPrevious sync result:\n{}", syncResult, e);
                 throw e;
             }
             /*
@@ -303,9 +303,7 @@ public class DriveServiceImpl implements DriveService {
         try {
             createdFile = new UploadHelper(driveSession).perform(path, originalVersion, newVersion, uploadStream, contentType, offset, totalLength, created, modified);
         } catch (OXException e) {
-            LOG.warn("Got exception during upload (" + e.getMessage() + ")\n" + "Session: " + driveSession + ", path: " + path +
-                ", original version: " + originalVersion + ", new version: " + newVersion + ", offset: " + offset + ", total length: " +
-                totalLength);
+            LOG.warn("Got exception during upload ({})\nSession: {}, path: {}, original version: {}, new version: {}, offset: {}, total length: {}",e.getMessage(),driveSession,path,originalVersion,newVersion,offset,totalLength);
             if ("FLS-0024".equals(e.getErrorCode())) {
                 /*
                  * quota reached

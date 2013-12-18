@@ -1607,7 +1607,7 @@ public final class MimeMessageConverter {
                         /*
                          * Cannot occur
                          */
-                        LOG1.error(e1.getMessage(), e1);
+                        LOG1.error("", e1);
                         return;
                     }
                 }
@@ -1997,7 +1997,7 @@ public final class MimeMessageConverter {
                                     throw e;
                                 }
                                 // A messaging error occurred
-                                LOG.debug("Parsing message's multipart/* content to check for file attachments caused a messaging error: {}.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.", e.getMessage(), e);
+                                LOG.debug("Parsing message's multipart/* content to check for file attachments caused a messaging error.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.", e);
                                 mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                             } catch (final ClassCastException e) {
                                 // Cast to javax.mail.Multipart failed
@@ -2857,7 +2857,7 @@ public final class MimeMessageConverter {
             }
             return addressList.toArray(new InternetAddress[addressList.size()]);
         } catch (final AddressException e) {
-            LOG.debug("Internet addresses could not be properly parsed: \"{}\". Using plain addresses' string representation instead.", e.getMessage(), e);
+            LOG.debug("Internet addresses could not be properly parsed. Using plain addresses' string representation instead.", e);
             return getAddressesOnParseError(addressArray);
         }
     }
@@ -2872,7 +2872,7 @@ public final class MimeMessageConverter {
         try {
             return QuotedInternetAddress.parseHeader(addresses, true);
         } catch (final AddressException e) {
-            LOG.debug("Internet addresses could not be properly parsed: \"{}\". Using plain addresses' string representation instead.", e.getMessage(), e);
+            LOG.debug("Internet addresses could not be properly parsed. Using plain addresses' string representation instead.", e);
             return new InternetAddress[] { new PlainTextAddress(addresses) };
         }
     }

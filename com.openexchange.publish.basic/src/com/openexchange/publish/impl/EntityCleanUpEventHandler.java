@@ -90,14 +90,14 @@ public abstract class EntityCleanUpEventHandler<T> implements EventHandler {
         try {
             context = contexts.getContext(commonEvent.getContextId());
         } catch (OXException e) {
-            LOG.error("Could not delete all dependent publications: {}", e.getMessage(), e);
+            LOG.error("Could not delete all dependent publications", e);
             return;
         }
 
         try {
             entityCleanUp.cleanUp(context, module, entityId);
         } catch (OXException e) {
-            LOG.error("Could not delete all dependent publications: {}", e.getMessage(), e);
+            LOG.error("Could not delete all dependent publications", e);
         }
     }
 

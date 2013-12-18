@@ -121,7 +121,7 @@ public final class FiFoServletQueue extends FIFOQueue<HttpServlet> implements Se
                 servletKey));
             return servletInstance;
         } catch (final Throwable t) {
-            LoggerFactory.getLogger(FiFoServletQueue.class).error(t.getMessage(), t);
+            LoggerFactory.getLogger(FiFoServletQueue.class).error("", t);
         }
         return null;
     }

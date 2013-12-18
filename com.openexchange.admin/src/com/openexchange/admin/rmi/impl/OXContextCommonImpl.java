@@ -137,7 +137,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                 try {
                     ret = (Context)callPluginMethod("preCreate", ret, admin_user, auth);
                 } catch(final StorageException e) {
-                    log.error(e.getMessage(),e);
+                    log.error("",e);
                     throw e;
                 }
             }
@@ -176,7 +176,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
 
             return retval;
         } catch (final ContextExistsException e) {
-            log.error(e.getMessage(),e);
+            log.error("",e);
             throw e;
         } catch (final InvalidDataException e) {
             log.error("", e);

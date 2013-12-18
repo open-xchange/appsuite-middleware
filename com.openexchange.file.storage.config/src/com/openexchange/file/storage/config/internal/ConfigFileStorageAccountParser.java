@@ -182,7 +182,7 @@ public final class ConfigFileStorageAccountParser {
                 }
                 map.put(account.getId(), account);
             } catch (final OXException e) {
-                logger.warn("Configuration for file storage account \"{}\" is invalid: {}", id, e.getMessage(), e);
+                logger.warn("Configuration for file storage account \"{}\" is invalid", id, e);
             }
         }
         this.map = m;

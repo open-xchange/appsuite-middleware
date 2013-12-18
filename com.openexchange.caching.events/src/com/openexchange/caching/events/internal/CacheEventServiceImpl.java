@@ -167,7 +167,7 @@ public final class CacheEventServiceImpl implements CacheEventService {
                     listener.onEvent(sender, event);
                 } catch (Throwable t) {
                     ExceptionUtils.handleThrowable(t);
-                    LOG.error("Error while excuting event listener: {}", t.getMessage(), t);
+                    LOG.error("Error while excuting event listener.", t);
                 }
             }
         };

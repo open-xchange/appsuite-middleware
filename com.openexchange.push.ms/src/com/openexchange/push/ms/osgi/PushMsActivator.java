@@ -133,7 +133,7 @@ public class PushMsActivator extends HousekeepingActivator {
             openTrackers();
             activated = true;
         } catch (final Exception e) {
-            LOG.error("Starting bundle com.openexchange.push.ms failed: {}", e.getMessage(), e);
+            LOG.error("Starting bundle com.openexchange.push.ms failed", e);
             throw e;
         }
     }
@@ -155,7 +155,7 @@ public class PushMsActivator extends HousekeepingActivator {
             super.stopBundle();
             Services.setServiceLookup(null);
         } catch (final Exception e) {
-            LOG.error("Stopping bundle com.openexchange.push.ms failed: {}", e.getMessage(), e);
+            LOG.error("Stopping bundle com.openexchange.push.ms failed", e);
             throw e;
         }
     }

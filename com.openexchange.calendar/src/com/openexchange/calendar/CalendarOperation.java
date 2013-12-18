@@ -528,7 +528,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             } else {
                 final String text = "Object " + oid + " in context " + cdao.getContextID();
                 final OXException e = OXException.notFound(text);
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw e;
             }
         } finally {
@@ -1039,7 +1039,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         if (mod > 0) {
             until = until - mod;
         }
-        
+
         // Extract time out of end date
         mod = (endDate.getTime()) % Constants.MILLI_DAY;
         if (isFulltime) {
@@ -1052,7 +1052,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         if (recCal > 0) {
             until += Constants.MILLI_DAY * recCal;
         }
-        
+
         return new Date(until + mod);
     }
 

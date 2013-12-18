@@ -266,7 +266,7 @@ public final class EventPool implements Runnable {
                 } while ((pooledEvent = queue.poll()) != null);
             }
         } catch (final Throwable t) {
-            org.slf4j.LoggerFactory.getLogger(EventPool.class).error(t.getMessage(), t);
+            org.slf4j.LoggerFactory.getLogger(EventPool.class).error("", t);
         } finally {
             blocker.unblock();
         }

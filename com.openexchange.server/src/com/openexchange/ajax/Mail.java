@@ -1583,7 +1583,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
                 addrs.removeAll(validAddrs);
             } catch (final AddressException e) {
-                LOG.warn("Collected contacts could not be stripped by user's email aliases: {}", e.getMessage(), e);
+                LOG.warn("Collected contacts could not be stripped by user's email aliases", e);
 
             }
             if (!addrs.isEmpty()) {
@@ -1616,9 +1616,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
                 addrs.removeAll(validAddrs);
             } catch (final AddressException e) {
-                LOG.warn("Contact collector could not be triggered: {}", e.getMessage(), e);
+                LOG.warn("Contact collector could not be triggered", e);
             } catch (final JSONException e) {
-                LOG.warn("Contact collector could not be triggered: {}", e.getMessage(), e);
+                LOG.warn("Contact collector could not be triggered", e);
             }
             if (!addrs.isEmpty()) {
                 // Add addresses

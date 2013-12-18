@@ -55,7 +55,6 @@ import java.net.URL;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.text.MessageFormat;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -197,7 +196,7 @@ public abstract class OXSOAPRMIMapper {
                         try {
                             Thread.sleep(delay);
                         } catch (final InterruptedException e1) {
-                            log.error(e1.getMessage(),e1);
+                            log.error("",e1);
                         }
                         count--;
                         if( count == 0 ) {

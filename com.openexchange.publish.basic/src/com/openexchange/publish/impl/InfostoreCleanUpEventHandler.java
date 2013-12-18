@@ -86,7 +86,7 @@ public class InfostoreCleanUpEventHandler implements EventHandler {
             try {
                 context = contextService.getContext(FileStorageEventHelper.extractSession(event).getContextId());
             } catch (OXException e) {
-                LOG.error("Could not delete all dependent publications: {}", e.getMessage(), e);
+                LOG.error("Could not delete all dependent publications", e);
                 return;
             }
 
@@ -94,7 +94,7 @@ public class InfostoreCleanUpEventHandler implements EventHandler {
                 FileID fileID = new FileID(FileStorageEventHelper.extractObjectId(event));
                 entityCleanUp.cleanUp(context, "infostore/object", fileID.getFileId());
             } catch (OXException e) {
-                LOG.error("Could not delete all dependent publications: {}", e.getMessage(), e);
+                LOG.error("Could not delete all dependent publications", e);
             }
         }
     }

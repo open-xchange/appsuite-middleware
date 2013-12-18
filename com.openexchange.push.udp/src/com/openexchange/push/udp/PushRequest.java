@@ -191,7 +191,7 @@ public class PushRequest {
         } catch (final OXException e) {
             LOG.error("PushRequest: {}", e, e);
         } catch (final UnknownHostException e) {
-            LOG.error("PushRequest: Remote host registration failed: {}", e.getMessage(), e);
+            LOG.error("PushRequest: Remote host registration failed", e);
         } catch (final Exception e) {
             LOG.error("PushRequest: {}", e, e);
         }

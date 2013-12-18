@@ -83,7 +83,7 @@ public final class TwitterActivator extends HousekeepingActivator {
              */
             registerService(TwitterService.class, new TwitterServiceImpl());
         } catch (final Exception e) {
-            log.error("Failed start-up of bundle com.openexchange.twitter: {}", e.getMessage(), e);
+            log.error("Failed start-up of bundle com.openexchange.twitter", e);
             throw e;
         }
     }
@@ -102,7 +102,7 @@ public final class TwitterActivator extends HousekeepingActivator {
              */
             closeTrackers();
         } catch (final Exception e) {
-            log.error("Failed shut-down of bundle com.openexchange.twitter: {}", e.getMessage(), e);
+            log.error("Failed shut-down of bundle com.openexchange.twitter", e);
             throw e;
         }
     }

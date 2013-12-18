@@ -134,11 +134,11 @@ public class RedeemToken implements LoginRequestHandler {
                 return;
             }
         } catch (final java.lang.RuntimeException e) {
-            LOG.info("Unexpected error occurred during login: {}", e.getMessage(), e);
+            LOG.info("Unexpected error occurred during login", e);
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         } catch (final OXException e) {
-            LOG.info("Couldn't resolve context/user by identifier: {}{}{}", session.getContextId(), '/', session.getUserId(), e);
+            LOG.info("Couldn't resolve context/user by identifier: {}/{}", session.getContextId(), session.getUserId(), e);
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }

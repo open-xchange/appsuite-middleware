@@ -194,7 +194,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
             consistencyTimer = new Timer(true);
             consistencyTimer.schedule(new ConsistencyTask(this, locallyAcquiredTriggers, locallyExecutingTriggers), new Date(System.currentTimeMillis() + 60000L * 5), 60000L * 5);
         } catch (IllegalStateException e) {
-            LOG.warn("Could not schedule consistency task: {}", e.getMessage(), e);
+            LOG.warn("Could not schedule consistency task", e);
         }
     }
 
@@ -220,7 +220,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
             consistencyTimer = new Timer(true);
             consistencyTimer.schedule(new ConsistencyTask(this, locallyAcquiredTriggers, locallyExecutingTriggers), new Date(System.currentTimeMillis() + 60000L * 5), 60000L * 5);
         } catch (IllegalStateException e) {
-            LOG.warn("Could not schedule consistency task: {}", e.getMessage(), e);
+            LOG.warn("Could not schedule consistency task", e);
         }
     }
 

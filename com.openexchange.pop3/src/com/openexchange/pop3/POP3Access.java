@@ -218,7 +218,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             if (null == providerName) {
                 final OXException e =
                     POP3ExceptionCode.MISSING_POP3_STORAGE_NAME.create(Integer.valueOf(user), Integer.valueOf(cid));
-                LOG.debug("Using fallback storage \"mailaccount\".\n{}", e.getMessage(), e);
+                LOG.debug("Using fallback storage \"mailaccount\".", e);
                 providerName = MailAccountPOP3StorageProvider.NAME;
                 /*
                  * Add to properties if marker is absent
@@ -300,7 +300,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             try {
                 folderStorage.releaseResources();
             } catch (final OXException e) {
-                LOG.error("Error while closing POP3 folder storage: {}", e.getMessage(), e);
+                LOG.error("Error while closing POP3 folder storage", e);
             } finally {
                 folderStorage = null;
             }
@@ -309,7 +309,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
             try {
                 messageStorage.releaseResources();
             } catch (final OXException e) {
-                LOG.error("Error while closing POP3 message storage: {}", e.getMessage(), e);
+                LOG.error("Error while closing POP3 message storage", e);
             } finally {
                 messageStorage = null;
 

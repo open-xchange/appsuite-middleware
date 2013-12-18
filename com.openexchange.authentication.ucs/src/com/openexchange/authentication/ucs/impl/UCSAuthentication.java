@@ -327,13 +327,13 @@ public class UCSAuthentication implements AuthenticationService {
                     props = new Properties();
                     props.load(fis);
                 } catch (final IOException e) {
-                    LOG.error(e.getMessage(),e);
+                    LOG.error("",e);
                     throw LoginExceptionCodes.UNKNOWN.create(file.getAbsolutePath());
                 } finally {
                     try {
                         fis.close();
                     } catch (final IOException e) {
-                        LOG.error(e.getMessage(),e);
+                        LOG.error("",e);
                         throw LoginExceptionCodes.UNKNOWN.create("Error closing stream for file:"+file.getAbsolutePath());
                     }
                 }

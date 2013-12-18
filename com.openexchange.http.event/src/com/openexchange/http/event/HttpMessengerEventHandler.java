@@ -50,7 +50,6 @@
 package com.openexchange.http.event;
 
 import java.net.InetSocketAddress;
-import java.text.MessageFormat;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
@@ -130,7 +129,7 @@ public final class HttpMessengerEventHandler implements EventHandler {
 
             }
         } catch (final Exception e) {
-            LOG.warn("Could not handle event {}. Reason: {}", event.getTopic(), e.getMessage(), e);
+            LOG.warn("Could not handle event {}.", event.getTopic(), e);
         }
     }
 

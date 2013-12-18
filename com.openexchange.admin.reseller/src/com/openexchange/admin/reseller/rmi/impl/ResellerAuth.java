@@ -51,7 +51,6 @@ package com.openexchange.admin.reseller.rmi.impl;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import org.slf4j.Logger;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface;
@@ -93,16 +92,16 @@ public class ResellerAuth extends OXCommonImpl implements BasicAuthenticatorPlug
                 throw new InvalidCredentialsException("authentication failed");
             }
         } catch (StorageException e) {
-            log.error(e.getMessage(),e);
+            log.error("",e);
             throw new InvalidCredentialsException("authentication failed");
         } catch (InvalidCredentialsException e) {
-            log.error(e.getMessage(),e);
+            log.error("",e);
             throw e;
         } catch (NoSuchAlgorithmException e) {
-            log.error(e.getMessage(),e);
+            log.error("",e);
             throw new InvalidCredentialsException("authentication failed");
         } catch (UnsupportedEncodingException e) {
-            log.error(e.getMessage(),e);
+            log.error("",e);
             throw new InvalidCredentialsException("authentication failed");
         }
     }

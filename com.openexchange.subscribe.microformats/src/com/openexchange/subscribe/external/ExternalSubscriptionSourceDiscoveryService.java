@@ -52,7 +52,6 @@ package com.openexchange.subscribe.external;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.MalformedURLException;
-import java.text.MessageFormat;
 import java.util.List;
 import org.apache.commons.httpclient.HttpException;
 import com.openexchange.exception.OXException;
@@ -188,10 +187,10 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
 
             return subscribeService;
         } catch (final HttpException e) {
-            LOG.error("Could not grab external service: {} Got Error: {}", externalAddress, e.getMessage(), e);
+            LOG.error("Could not grab external service: {} Got Error", externalAddress, e);
             throw OXMFSubscriptionErrorMessage.HttpException.create(e.getMessage(), externalAddress, e);
         } catch (final IOException e) {
-            LOG.error("Could not grab external service: {} Got Error: {}", externalAddress, e.getMessage(), e);
+            LOG.error("Could not grab external service: {} Got Error", externalAddress, e);
             throw OXMFSubscriptionErrorMessage.IOException.create(e.getMessage(), externalAddress, e);
         }
     }

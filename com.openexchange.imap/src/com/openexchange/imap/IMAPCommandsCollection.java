@@ -2091,7 +2091,7 @@ public final class IMAPCommandsCollection {
                         throw ((FolderClosedException) cause);
                     }
                 }
-                LOG.warn("UID EXPUNGE failed: {0}.\nPerforming fallback actions.", e.getMessage(), e);
+                LOG.warn("UID EXPUNGE failed.\nPerforming fallback actions.", e);
                 performFallback = true;
             }
         }

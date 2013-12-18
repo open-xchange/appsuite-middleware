@@ -190,7 +190,7 @@ public final class Utility {
             throw new IllegalStateException(e);
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
-            org.slf4j.LoggerFactory.getLogger(Utility.class).error(cause.getMessage(), cause);
+            org.slf4j.LoggerFactory.getLogger(Utility.class).error("", cause);
             return DEFAULT_MAIL_DATE_FORMAT;
         }
     }

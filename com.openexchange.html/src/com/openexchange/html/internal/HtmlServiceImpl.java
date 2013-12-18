@@ -1044,17 +1044,17 @@ public final class HtmlServiceImpl implements HtmlService {
             return writer.toString();
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
-            LOG.error("Unsupported encoding: {}", e.getMessage(), e);
+            LOG.error("Unsupported encoding", e);
             return htmlContent;
         } catch (final IOException e) {
             // Cannot occur
-            LOG.error("I/O error: {}", e.getMessage(), e);
+            LOG.error("I/O error", e);
             return htmlContent;
         } catch (final RuntimeException rte) {
             /*
              * HtmlCleaner failed horribly...
              */
-            LOG.warn("HtmlCleaner library failed to pretty-print HTML content with: {}", rte.getMessage(), rte);
+            LOG.warn("HtmlCleaner library failed to pretty-print HTML content", rte);
             return htmlContent;
         }
     }
@@ -1810,17 +1810,17 @@ public final class HtmlServiceImpl implements HtmlService {
             return P_HTMLE_REG.matcher(P_HTMLE_COPY.matcher(buffer.toString()).replaceAll("\u00a9")).replaceAll("\u00ae");
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
-            LOG.error("HtmlCleaner library failed to pretty-print HTML content with an unsupported encoding: {}", e.getMessage(), e);
+            LOG.error("HtmlCleaner library failed to pretty-print HTML content with an unsupported encoding", e);
             return htmlContent;
         } catch (final IOException e) {
             // Cannot occur
-            LOG.error("HtmlCleaner library failed to pretty-print HTML content with I/O error: {}", e.getMessage(), e);
+            LOG.error("HtmlCleaner library failed to pretty-print HTML content with I/O error", e);
             return htmlContent;
         } catch (final RuntimeException rte) {
             /*
              * HtmlCleaner failed horribly...
              */
-            LOG.warn("HtmlCleaner library failed to pretty-print HTML content with: {}", rte.getMessage(), rte);
+            LOG.warn("HtmlCleaner library failed to pretty-print HTML content", rte);
             return htmlContent;
         }
     }

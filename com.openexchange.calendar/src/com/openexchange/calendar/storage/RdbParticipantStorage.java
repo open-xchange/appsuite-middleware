@@ -117,8 +117,8 @@ public class RdbParticipantStorage extends ParticipantStorage {
                      * Duplicate address
                      */
                     final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RdbParticipantStorage.class);
-                    final OXException e = OXCalendarExceptionCodes.DUPLICATE_EXTERNAL_PARTICIPANT.create(emailAddress);
-                    logger.warn(e.getMessage());
+                    // final OXException e = OXCalendarExceptionCodes.DUPLICATE_EXTERNAL_PARTICIPANT.create(emailAddress);
+                    logger.warn("An external participant with the E-Mail address {} is already included. Please remove participant duplicate and retry.", emailAddress);
                 }
             }
             stmt.executeBatch();

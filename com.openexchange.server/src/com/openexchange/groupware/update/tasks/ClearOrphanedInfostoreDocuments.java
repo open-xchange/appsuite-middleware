@@ -137,7 +137,7 @@ public class ClearOrphanedInfostoreDocuments implements UpdateTask {
             } catch (SQLException e1) {
                 // IGNORE
             }
-            LOG.error(e.getMessage(),e);
+            LOG.error("",e);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, select);

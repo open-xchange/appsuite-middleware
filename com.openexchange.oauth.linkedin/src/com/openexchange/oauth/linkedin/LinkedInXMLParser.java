@@ -359,7 +359,7 @@ public class LinkedInXMLParser {
                 contacts.add(parse(persons.optJSONObject(i)));
             } catch (final RuntimeException e) {
                 // Ignore
-                LOG.warn("Runtime error occurred: {}", e.getMessage(), e);
+                LOG.warn("Runtime error occurred", e);
             }
         }
         return contacts;

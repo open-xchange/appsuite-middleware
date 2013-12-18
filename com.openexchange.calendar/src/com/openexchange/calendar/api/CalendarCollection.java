@@ -615,7 +615,7 @@ public final class CalendarCollection implements CalendarCollectionService {
             convertDSString(cdao);
             return true;
         } catch (final OXException e) {
-            LOG.error("fillDAO:convertDSString error: {}", e.getMessage(), e);
+            LOG.error("fillDAO:convertDSString error.", e);
         }
         return false;
     }
@@ -1712,7 +1712,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
                 }
             }
         } catch (final OXException e) {
-            LOG.warn("ERROR getting read permissions: {}", e.getMessage(), e);
+            LOG.warn("ERROR getting read permissions.", e);
             return false;
         } catch (final RuntimeException e) {
             LOG.error("ERROR getting read permissions", e);

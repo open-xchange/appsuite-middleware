@@ -529,7 +529,7 @@ public class ReminderHandler implements ReminderService {
                 retval.add(reminder);
             } catch (final SQLException e) {
                 // Nothing to do here. Missed one reminder.
-                LOG.error(ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage()).toString());
+                LOG.error("", e);
             }
         }
         return retval.toArray(new ReminderObject[retval.size()]);

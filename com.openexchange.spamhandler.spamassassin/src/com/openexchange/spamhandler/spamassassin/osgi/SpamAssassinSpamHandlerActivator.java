@@ -164,7 +164,7 @@ public final class SpamAssassinSpamHandlerActivator extends HousekeepingActivato
             thisBundle.stop();
             thisBundle = null;
         } catch (BundleException e) {
-            LOG.error("Can't stop bundle SpamHandler Spamassassin: {}", e.getMessage(), e);
+            LOG.error("Can't stop bundle SpamHandler Spamassassin", e);
         }
     }
 }
