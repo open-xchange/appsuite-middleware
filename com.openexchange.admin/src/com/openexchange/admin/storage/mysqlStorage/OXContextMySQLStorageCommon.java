@@ -586,18 +586,20 @@ public class OXContextMySQLStorageCommon {
             checkAvailable = configdb_write_con.prepareStatement("SELECT 1 FROM login2context WHERE login_info = ?");
             stmt = configdb_write_con.prepareStatement("INSERT INTO login2context (cid,login_info) VALUES (?,?)");
             for (final String mapping : loginMappings) {
-                checkAvailable.setString(1, mapping);
-                found = checkAvailable.executeQuery();
-                final boolean mappingTaken = found.next();
-                found.close();
+                if (null != mapping) {
+                    checkAvailable.setString(1, mapping);
+                    found = checkAvailable.executeQuery();
+                    final boolean mappingTaken = found.next();
+                    found.close();
 
-                if(mappingTaken) {
-                    throw new StorageException("Cannot map '"+mapping+"' to the newly created context. This mapping is already in use.");
+                    if(mappingTaken) {
+                        throw new StorageException("Cannot map '"+mapping+"' to the newly created context. This mapping is already in use.");
+                    }
+
+                    stmt.setInt(1, ctxid.intValue());
+                    stmt.setString(2, mapping);
+                    stmt.executeUpdate();
                 }
-
-                stmt.setInt(1, ctxid);
-                stmt.setString(2, mapping);
-                stmt.executeUpdate();
             }
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
@@ -611,24 +613,23 @@ public class OXContextMySQLStorageCommon {
     }
 
     private void closeResultSet(final ResultSet rs) {
-        try {
-            if (rs != null) {
-                rs.close();
+        if (rs != null) {
+            try {
+                    rs.close();
+            } catch (final SQLException e) {
+                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
             }
-        } catch (final SQLException e) {
-            log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
         }
     }
 
     private void closePreparedStatement(final PreparedStatement stmt) {
-        try {
-            if (stmt != null) {
-                stmt.close();
+        if (stmt != null) {
+            try {
+                    stmt.close();
+            } catch (final SQLException e) {
+                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
             }
-        } catch (final SQLException e) {
-            log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
         }
     }
-
 
 }

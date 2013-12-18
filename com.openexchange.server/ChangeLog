@@ -1,3 +1,7 @@
+* 2013-12-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30190: Fixed parsing of CLI call
+
 * 2013-12-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 30114: Properly sanitize CSS selectors
