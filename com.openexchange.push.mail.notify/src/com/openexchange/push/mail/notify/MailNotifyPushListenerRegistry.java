@@ -58,6 +58,7 @@ import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.push.PushListener;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.iterator.ReadOnlyIterator;
@@ -141,13 +142,13 @@ public final class MailNotifyPushListenerRegistry {
         for (int i = 0; i < alength; i++) {
             final String alias = aliases[i];
             if( useEmailAddress ) {
-                ret.add(alias.toLowerCase());
+                ret.add(Strings.toLowerCase(alias));
             } else {
                 final int idx = alias.indexOf('@');
                 if( idx > 0) {
-                    ret.add(alias.substring(0, idx).toLowerCase());
+                    ret.add(Strings.toLowerCase(alias.substring(0, idx)));
                 } else {
-                    ret.add(alias.toLowerCase());
+                    ret.add(Strings.toLowerCase(alias));
                 }
             }
         }
