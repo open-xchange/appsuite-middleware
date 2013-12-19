@@ -56,5 +56,6 @@ package com.openexchange.realtime.cleanup;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public enum CleanupScope {
-    STANZASEQUENCE
+    STANZASEQUENCE,
+    ALL;
 }

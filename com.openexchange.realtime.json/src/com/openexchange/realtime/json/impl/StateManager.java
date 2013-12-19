@@ -50,8 +50,12 @@
 package com.openexchange.realtime.json.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.realtime.cleanup.CleanupScope;
+import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.json.protocol.RTClientState;
 import com.openexchange.realtime.json.protocol.StanzaTransmitter;
 import com.openexchange.realtime.packet.ID;
@@ -62,7 +66,7 @@ import com.openexchange.realtime.packet.IDEventHandler;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class StateManager {
+public class StateManager implements RealtimeJanitor {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StateManager.class);
 
@@ -130,6 +134,15 @@ public class StateManager {
         for (RTClientState state : new ArrayList<RTClientState>(states.values())) {
             if (state.isTimedOut(timestamp)) {
                 LOG.debug("State for id {} is timed out. Last seen: {}", state.getId(), state.getLastSeen());
+                /*
+                 * Client could have been rerouted
+                 * if(rerouted) {
+                 *     the state should have been removed by the global cleanup already!
+                 * } else {
+                 *     remove from hazelcastdirectory
+                 *     globalcleanup
+                 * }
+                 */
                 state.getId().dispose(this, null);
             } else {
                 state.getId().trigger(ID.Events.REFRESH, this);
@@ -145,6 +158,13 @@ public class StateManager {
      */
     public boolean isConnected(ID id) {
         return states.containsKey(id);
+    }
+
+    @Override
+    public void cleanupForId(ID id) {
+        LOG.debug("Cleanup for ID: {}", id);
+        states.remove(id);
+        transmitters.remove(id);
     }
 
 }

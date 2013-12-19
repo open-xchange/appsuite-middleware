@@ -70,6 +70,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
@@ -90,7 +91,7 @@ import com.openexchange.threadpool.ThreadPools;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class GlobalMessageDispatcherImpl implements MessageDispatcher {
+public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJanitor {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GlobalMessageDispatcherImpl.class);
 
@@ -256,6 +257,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
             if (peerMap == null) {
                 peerMap = new ConcurrentHashMap<String, AtomicLong>();
                 ConcurrentHashMap<String, AtomicLong> otherPeerMap = peerMapPerID.putIfAbsent(stanza.getSequencePrincipal(), peerMap);
+                removal of synthetic IDs GDs
                 if (otherPeerMap == null) {
                     stanza.getSequencePrincipal().on(ID.Events.DISPOSE, new IDEventHandler() {
 
@@ -269,11 +271,10 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
 
                     });
                 } else {
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("Found other peerMap for SequencePrincipal: {} with value {}", stanza.getSequencePrincipal(), otherPeerMap);
-                    }
+                    LOG.debug("Found other peerMap for SequencePrincipal: {} with value {}", stanza.getSequencePrincipal(), otherPeerMap);
                     peerMap = otherPeerMap;
                 }
+                //---
             }
             AtomicLong nextNumber = peerMap.get(receiver.getUuid());
             if (nextNumber == null) {
@@ -300,5 +301,11 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
                 LOG.debug("peerMapsPerID after ensuring Sequence: {}", peerMapPerID);
             }
         }
+    }
+
+    @Override
+    public void cleanupForId(ID id) {
+        LOG.debug("Removing SequencePrincipal {} from peerMapPerID lookup table.", id);
+        peerMapPerID.remove(id);
     }
 }

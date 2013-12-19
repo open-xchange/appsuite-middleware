@@ -49,7 +49,6 @@
 
 package com.openexchange.realtime.cleanup;
 
-import java.util.Collection;
 import com.openexchange.realtime.packet.ID;
 
 /**
@@ -67,13 +66,6 @@ public interface RealtimeJanitor {
      * 
      * @param id
      */
-    void cleanupForId(ID id, CleanupScope... scopes);
+    void cleanupForId(ID id);
 
-    /**
-     * Get the scopes this Janitor is able to clean up. This can be used to register the RealtimeJanitor service for different scopes in the
-     * OSGI service registry.
-     * 
-     * @return the scopes this RealtimeJanitor is able to clean up.
-     */
-    Collection<CleanupScope> getScopes();
 }

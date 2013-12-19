@@ -328,9 +328,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
 
 
     public void freeResourcesFor(ID sequencePrincipal) {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Freeing Ressources for SequencePrincipal: " + sequencePrincipal);
-        }
+        LOG.debug("Freeing Ressources for SequencePrincipal: " + sequencePrincipal);
         sequenceNumbers.remove(sequencePrincipal);
         inboxes.remove(sequencePrincipal);
         notifyManagementSequenceNumbers();
@@ -364,13 +362,8 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
     }
 
     @Override
-    public Collection<CleanupScope> getScopes() {
-        return Collections.singletonList(CleanupScope.STANZASEQUENCE);
-    }
-
-    @Override
-    public void cleanupForId(ID id, CleanupScope... scopes) {
-        //We don't care about the scope, yet. We only have sequence numbers related stuff to clean.
+    public void cleanupForId(ID id) {
+        LOG.debug("Cleanup for ID: {}", id);
         freeResourcesFor(id);
     }
 

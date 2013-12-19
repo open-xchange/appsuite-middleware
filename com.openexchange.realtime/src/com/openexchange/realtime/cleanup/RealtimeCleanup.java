@@ -63,15 +63,7 @@ public interface RealtimeCleanup {
      * Clean up states that were kept for the given id.
      * 
      * @param id The id
-     * @param scopes The scopes that have to be cleaned for the id
      */
-    public void cleanForId(ID id, CleanupScope... scopes);
-
-    /**
-     * Clean up sequence number related states that were kept for the given id.
-     * 
-     * @param id The Id
-     */
-    public void cleanSequenceNumbersForId(ID id);
+    public void cleanForId(ID id);
 
 }

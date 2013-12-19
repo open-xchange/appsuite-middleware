@@ -86,7 +86,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class GroupDispatcher implements ComponentHandle {
+public class GroupDispatcher implements ComponentHandle, Evictable {
 
     /** The logger constant. */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupDispatcher.class);
@@ -132,6 +132,7 @@ public class GroupDispatcher implements ComponentHandle {
         final AtomicReference<Set<ID>> idsRef = this.idsRef;
         id.on(ID.Events.DISPOSE, new IDEventHandler() {
 
+            Move this to implementation of evictable interface
             @Override
             public void handle(String event, ID id, Object source, Map<String, Object> properties) {
                 try {
@@ -311,6 +312,7 @@ public class GroupDispatcher implements ComponentHandle {
         if (added) {
             onJoin(id);
         }
+        //TODO: add to global ID -> Groupchat directory
     }
 
     /**
@@ -320,9 +322,9 @@ public class GroupDispatcher implements ComponentHandle {
     public void leave(ID id) throws OXException {
         beforeLeave(id);
 
-        LOG.debug("leaving:{}", id);
+        LOG.debug("leaving: {}", id);
 
-        id.off("dispose", LEAVE);
+        id.off(ID.Events.DISPOSE, LEAVE);
 
         // Perform a compare-and-set to atomically remove
         boolean removed = false;
@@ -343,7 +345,9 @@ public class GroupDispatcher implements ComponentHandle {
             onLeave(id);
         }
 
+        //TODO: remove client from global ID -> Groupchat directory
         if (empty) {
+            //TODO: remove dispatcher from global ID -> Groupchat directory
             Map<String, Object> properties = new HashMap<String, Object>();
             properties.put("id", id);
             onDispose(id);
@@ -355,7 +359,7 @@ public class GroupDispatcher implements ComponentHandle {
              */
             if(disposed) {
                 GlobalRealtimeCleanup globalRealtimeCleanup = SERVICE_REF.get().getService(GlobalRealtimeCleanup.class);
-                globalRealtimeCleanup.cleanSequenceNumbersForId(this.id);
+                globalRealtimeCleanup.cleanForId(this.id);
             }
         }
     }

@@ -153,7 +153,7 @@ public class RTJSONHandler implements StanzaSender {
                 stateManager.timeOutStaleStates(System.currentTimeMillis());
             }
 
-        }, 1, 15, TimeUnit.MINUTES);
+        }, 1, 1, TimeUnit.MINUTES);
     }
 
     /**

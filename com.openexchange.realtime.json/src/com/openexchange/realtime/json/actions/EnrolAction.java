@@ -117,14 +117,17 @@ public class EnrolAction extends RTAction {
         /*
          * The user might have been migrated from another node where he was active and created states on multiple nodes e.g.
          * StanzaSequenceGate of LocalMessageDispatchers during remote delivery of Stanzas. We have to clean those states or otherwise
-         * StanzaSequenceGates will drop Stanzas due to the NextSequence Stanza that will be returned by this Action.
+         * StanzaSequenceGates will drop Stanzas due to the NextSequence Stanza that will be returned by this Action. 
          */
         IDMap<Resource> idMap = resourceDirectory.get(constructedId);
         if (!idMap.isEmpty()) {
             GlobalRealtimeCleanup globalRealtimeCleanup = JSONServiceRegistry.getInstance().getService(GlobalRealtimeCleanup.class);
-            globalRealtimeCleanup.cleanSequenceNumbersForId(constructedId);
+            globalRealtimeCleanup.cleanForId(constructedId);
         }
 
+        /*
+         * We cleaned all states if the user was migrated, now update the ResourceDirectory with resource infos of this node.
+         */
         try {
             resourceDirectory.set(constructedId, new DefaultResource());
         } catch (OXException e) {

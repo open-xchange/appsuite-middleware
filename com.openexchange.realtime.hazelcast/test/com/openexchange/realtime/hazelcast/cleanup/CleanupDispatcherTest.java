@@ -51,7 +51,10 @@ package com.openexchange.realtime.hazelcast.cleanup;
 
 import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
-import com.openexchange.realtime.cleanup.CleanupScope;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.realtime.exception.RealtimeException;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
 
 
@@ -61,22 +64,17 @@ import com.openexchange.realtime.packet.ID;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class CleanupDispatcherTest {
+    private static final Logger LOG = LoggerFactory.getLogger(CleanupDispatcherTest.class);
 
     @Test(expected=IllegalArgumentException.class)
     public void testCleanupDispatcherNullId() {
-        CleanupDispatcher cleanupDispatcher = new CleanupDispatcher(null, null);
+        CleanupDispatcher cleanupDispatcher = new CleanupDispatcher(null);
     }
 
-    @Test(expected=IllegalArgumentException.class)
-    public void testCleanupDispatcherNullScope() {
-        ID marens = new ID("ox", "marc.arens", "premium", "uniqueResource");
-        CleanupDispatcher cleanupDispatcher = new CleanupDispatcher(marens, null);
-    }
-    
-    @Test(expected=IllegalArgumentException.class)
+    @Test
     public void testCleanupDispatcher() {
         ID marens = new ID("ox", "marc.arens", "premium", "uniqueResource");
-        CleanupDispatcher cleanupDispatcher = new CleanupDispatcher(marens, CleanupScope.STANZASEQUENCE);
+        CleanupDispatcher cleanupDispatcher = new CleanupDispatcher(marens);
         assertNotNull(cleanupDispatcher);
     }
 
