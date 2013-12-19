@@ -49,7 +49,6 @@
 
 package com.openexchange.push.mail.notify;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -198,9 +197,7 @@ public final class MailNotifyPushListenerRegistry {
             try {
                 l.open();
             } catch (final OXException e) {
-                org.slf4j.LoggerFactory.getLogger(MailNotifyPushListenerRegistry.class).error(
-                    MessageFormat.format("Opening mail push UDP listener failed. Removing listener from registry: {0}", l.toString()),
-                    e);
+                org.slf4j.LoggerFactory.getLogger(MailNotifyPushListenerRegistry.class).error("Opening mail push UDP listener failed. Removing listener from registry: {}", l.toString(), e);
                 i.remove();
             }
         }
