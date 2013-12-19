@@ -47,82 +47,35 @@
  *
  */
 
-package com.openexchange.webdav.acl;
+package com.openexchange.webdav.acl.mixins;
 
-import com.openexchange.contact.ContactService;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.session.SessionHolder;
-import com.openexchange.user.UserService;
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
-import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.webdav.acl.PrincipalProtocol;
+import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
 /**
- * {@link PrincipalWebdavFactory}
+ * {@link FirstName}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class PrincipalWebdavFactory extends AbstractWebdavFactory {
+public class FirstName extends SingleXMLPropertyMixin {
 
-    private static final Protocol PROTOCOL = new PrincipalProtocol();
+    private final User user;
 
-    private final UserService userService;
-    private final ContactService contactService;
-    private final SessionHolder sessionHolder;
-
-
-    public PrincipalWebdavFactory(final UserService userService, ContactService contactService, final SessionHolder sessionHolder) {
-        super();
-        this.contactService = contactService;
-        this.userService = userService;
-        this.sessionHolder = sessionHolder;
+    /**
+     * Initializes a new {@link FirstName}.
+     *
+     * @param user The user
+     */
+    public FirstName(User user) {
+        super(PrincipalProtocol.CALENDARSERVER_NS.getURI(), "first-name");
+        this.user = user;
     }
 
     @Override
-    public Protocol getProtocol() {
-        return PROTOCOL;
+    protected String getValue() {
+        return user.getGivenName();
     }
-
-    @Override
-    public WebdavCollection resolveCollection(final WebdavPath url) throws WebdavProtocolException {
-        if (url.size() != 0) {
-            throw WebdavProtocolException.generalError(url, 404);
-        }
-        return mixin(new RootPrincipal(this));
-    }
-
-    @Override
-    public WebdavResource resolveResource(final WebdavPath url) throws WebdavProtocolException {
-        if (url.size() == 0) {
-            return mixin(new RootPrincipal(this));
-        }
-
-        return mixin(new RootPrincipal(this).resolveUser(url));
-    }
-
-    public UserService getUserService() {
-        return userService;
-    }
-
-    public ContactService getContactService() {
-        return contactService;
-    }
-
-    public Context getContext() {
-        return sessionHolder.getContext();
-    }
-
-    public String getLoginName() {
-        return sessionHolder.getSessionObject().getUserlogin();
-    }
-
-    public SessionHolder getSessionHolder() {
-        return sessionHolder;
-    }
-
 
 }

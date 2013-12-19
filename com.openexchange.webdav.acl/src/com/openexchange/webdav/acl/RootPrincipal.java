@@ -83,7 +83,7 @@ public class RootPrincipal extends AbstractCollection {
         this.factory = factory;
         this.url = new WebdavPath();
 
-        includeProperties(new PrincipalURL(factory.getSessionHolder()));
+        includeProperties(new PrincipalURL(factory.getSessionHolder().getUser()));
     }
 
     @Override

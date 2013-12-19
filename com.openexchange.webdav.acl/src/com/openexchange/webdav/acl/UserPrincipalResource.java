@@ -56,8 +56,16 @@ import java.util.List;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.webdav.acl.mixins.AddressbookHomeSet;
 import com.openexchange.webdav.acl.mixins.CalendarHomeSet;
+import com.openexchange.webdav.acl.mixins.CalendarUserAddressSet;
+import com.openexchange.webdav.acl.mixins.CalendarUserType;
 import com.openexchange.webdav.acl.mixins.CurrentUserPrincipal;
+import com.openexchange.webdav.acl.mixins.DisplayName;
+import com.openexchange.webdav.acl.mixins.EmailAddressSet;
+import com.openexchange.webdav.acl.mixins.FirstName;
+import com.openexchange.webdav.acl.mixins.LastName;
+import com.openexchange.webdav.acl.mixins.PrincipalCollectionSet;
 import com.openexchange.webdav.acl.mixins.PrincipalURL;
+import com.openexchange.webdav.acl.mixins.RecordType;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
@@ -82,8 +90,10 @@ public class UserPrincipalResource extends AbstractResource {
         this.factory = factory;
         this.user = u;
         this.url = url;
-        includeProperties(new PrincipalURL(factory.getSessionHolder()), new CurrentUserPrincipal(factory.getSessionHolder()));
-        includeProperties(new AddressbookHomeSet(), new CalendarHomeSet());
+        includeProperties(new PrincipalURL(user), new CurrentUserPrincipal(factory.getSessionHolder()), new AddressbookHomeSet(),
+            new CalendarHomeSet(), new EmailAddressSet(user), new PrincipalCollectionSet(), new CalendarUserAddressSet(user),
+            new DisplayName(user), new FirstName(user), new LastName(user),
+            new CalendarUserType(CalendarUserType.USER_TYPE_INDIVIDUAL), new RecordType(RecordType.RECORD_TYPE_USER));
     }
 
     @Override

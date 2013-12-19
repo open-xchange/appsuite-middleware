@@ -53,6 +53,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -150,7 +151,7 @@ public class WebdavPrincipalPerformer implements SessionHolder{
         WebdavAction report;
 
 
-        this.factory = new PrincipalWebdavFactory(services.getService(UserService.class),this);
+        this.factory = new PrincipalWebdavFactory(services.getService(UserService.class), services.getService(ContactService.class), this);
 
         unlock = prepare(new WebdavUnlockAction(), true, true, new WebdavIfAction(0, false, false));
         propPatch = prepare(new WebdavProppatchAction(protocol), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false));

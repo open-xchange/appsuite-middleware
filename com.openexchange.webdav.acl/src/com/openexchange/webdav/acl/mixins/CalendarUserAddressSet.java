@@ -47,57 +47,38 @@
  *
  */
 
-package com.openexchange.webdav.acl.osgi;
+package com.openexchange.webdav.acl.mixins;
 
-import org.osgi.service.http.HttpService;
-import com.openexchange.contact.ContactService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
-import com.openexchange.webdav.acl.servlets.WebdavPrincipalPerformer;
-import com.openexchange.webdav.acl.servlets.WebdavPrincipalServlet;
-import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.StringAllocator;
+import com.openexchange.webdav.acl.PrincipalProtocol;
+import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
- * {@link WebdavACLActivator}
+ * {@link CalendarUserAddressSet}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class WebdavACLActivator extends HousekeepingActivator {
+public class CalendarUserAddressSet extends SingleXMLPropertyMixin {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavACLActivator.class);
+    private final User user;
 
-    private volatile OSGiPropertyMixin mixin;
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, HttpService.class, ContactService.class };
+    /**
+     * Initializes a new {@link CalendarUserAddressSet}.
+     *
+     * @param user The user
+     */
+    public CalendarUserAddressSet(User user) {
+        super(PrincipalProtocol.CAL_NS.getURI(), "calendar-user-address-set");
+        this.user = user;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        try {
-            WebdavPrincipalPerformer.setServices(this);
-
-            getService(HttpService.class).registerServlet("/servlet/dav/principals/users", new WebdavPrincipalServlet(), null, null);
-
-            final WebdavPrincipalPerformer performer = WebdavPrincipalPerformer.getInstance();
-            final OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
-            performer.setGlobalMixins(mixin);
-            this.mixin = mixin;
-            openTrackers();
-        } catch (final Throwable t) {
-            LOG.error("", t);
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        final OSGiPropertyMixin mixin = this.mixin;
-        if (null != mixin) {
-            mixin.close();
-            this.mixin = null;
-        }
-        super.stopBundle();
+    protected String getValue() {
+        StringAllocator stringAllocator = new StringAllocator();
+        stringAllocator.append("<D:href>mailto:").append(user.getMail()).append("</D:href>");
+        stringAllocator.append("<D:href>/principals/users/" + user.getLoginInfo() + "/</D:href>");
+        return stringAllocator.toString();
     }
 
 }

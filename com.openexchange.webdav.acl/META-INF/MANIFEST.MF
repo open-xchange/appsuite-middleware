@@ -6,12 +6,14 @@ Bundle-Version: 7.4.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.authentication,
+ com.openexchange.contact,
  com.openexchange.exception,
  com.openexchange.folderstorage,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.ldap,
+ com.openexchange.java,
  com.openexchange.log,
  com.openexchange.login,
  com.openexchange.login.internal,

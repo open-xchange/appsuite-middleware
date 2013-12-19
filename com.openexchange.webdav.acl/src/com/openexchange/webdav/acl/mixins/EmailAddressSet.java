@@ -50,33 +50,33 @@
 package com.openexchange.webdav.acl.mixins;
 
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.acl.PrincipalProtocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
-
 /**
- * {@link PrincipalURL}
+ * {@link EmailAddressSet}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {http://calendarserver.org/ns/}email-address-set
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class PrincipalURL extends SingleXMLPropertyMixin {
+public class EmailAddressSet extends SingleXMLPropertyMixin {
 
-    private static final String PROPERTY_NAME = "principal-URL";
     private final User user;
 
     /**
-     * Initializes a new {@link PrincipalURL}.
+     * Initializes a new {@link EmailAddressSet}.
      *
      * @param user The user
      */
-    public PrincipalURL(User user) {
-        super(Protocol.DAV_NS.getURI(), PROPERTY_NAME);
+    public EmailAddressSet(User user) {
+        super(PrincipalProtocol.CALENDARSERVER_NS.getURI(), "email-address-set");
         this.user = user;
     }
 
     @Override
     protected String getValue() {
-        return "<D:href>/principals/users/" + user.getLoginInfo() + "/</D:href>";
+        return "<D:email-address>" + user.getMail() +"</D:email-address>";
     }
 
 }
