@@ -1,3 +1,9 @@
+open-xchange-spamhandler-spamassassin (7.4.0-24) stable; urgency=low
+
+  * Build for patch 2013-12-23
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 19 Dec 2013 09:08:03 +0100
+
 open-xchange-spamhandler-spamassassin (7.4.0-23) stable; urgency=low
 
   * Build for patch 2013-12-19
