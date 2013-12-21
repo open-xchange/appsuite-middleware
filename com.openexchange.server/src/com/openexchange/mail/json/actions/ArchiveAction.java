@@ -61,6 +61,7 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.FullnameArgument;
@@ -136,12 +137,13 @@ public final class ArchiveAction extends AbstractMailAction {
                 archiveName = mailAccount.getArchive();
                 boolean updateAccount = false;
                 if (isEmpty(archiveName)) {
+                    final User user = session.getUser();
                     if (!AJAXRequestDataTools.parseBoolParameter(req.getParameter("useDefaultName"))) {
-                        final String i18nArchive = StringHelper.valueOf(session.getUser().getLocale()).getString(MailStrings.ARCHIVE);
+                        final String i18nArchive = StringHelper.valueOf(user.getLocale()).getString(MailStrings.ARCHIVE);
                         throw MailExceptionCode.MISSING_DEFAULT_FOLDER_NAME.create(Category.CATEGORY_USER_INPUT, i18nArchive);
                     }
                     // Select default name for archive folder
-                    archiveName = StringHelper.valueOf(session.getUser().getLocale()).getString(MailStrings.DEFAULT_ARCHIVE);
+                    archiveName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.DEFAULT_ARCHIVE);
                     updateAccount = true;
                 }
                 final String prefix = mailAccess.getFolderStorage().getDefaultFolderPrefix();

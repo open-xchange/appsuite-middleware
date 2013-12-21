@@ -64,6 +64,7 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -110,11 +111,12 @@ public final class GetMessageAction extends AbstractChatConversationAction {
             /*
              * Get message
              */
-            final Message message = chat.getMessage(messageId, session.getUser().getId());
+            final User user = session.getUser();
+            final Message message = chat.getMessage(messageId, user.getId());
             /*
              * Create JSON
              */
-            final JSONObject json = JSONConversationWriter.writeMessage(message, session.getUser().getTimeZone());
+            final JSONObject json = JSONConversationWriter.writeMessage(message, user.getTimeZone());
             /*
              * Return appropriate result
              */

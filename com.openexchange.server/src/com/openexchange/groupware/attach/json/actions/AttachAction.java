@@ -121,6 +121,8 @@ public final class AttachAction extends AbstractAttachmentAction {
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
+            final User user = session.getUser();
+            final UserConfiguration userConfiguration = session.getUserConfiguration();
             if (requestData.hasUploads()) {
                 final UploadEvent upload = requestData.getUploadEvent();
                 final List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
@@ -158,7 +160,7 @@ public final class AttachAction extends AbstractAttachmentAction {
                     checkSize(sum, requestData);
                 }
 
-                return attach(attachments, uploadFiles, session, session.getContext(), session.getUser(), session.getUserConfiguration());
+                return attach(attachments, uploadFiles, session, session.getContext(), user, userConfiguration);
             }
             final JSONObject object = (JSONObject) requestData.getData();
             if (object == null) {
@@ -252,8 +254,8 @@ public final class AttachAction extends AbstractAttachmentAction {
                         is,
                         session,
                         session.getContext(),
-                        session.getUser(),
-                        session.getUserConfiguration());
+                        user,
+                        userConfiguration);
                 ATTACHMENT_BASE.commit();
             } catch (final OXException x) {
                 ATTACHMENT_BASE.rollback();

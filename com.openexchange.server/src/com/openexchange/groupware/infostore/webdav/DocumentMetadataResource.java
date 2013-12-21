@@ -1007,8 +1007,7 @@ public class DocumentMetadataResource extends AbstractResource implements
 	}
 
 	private ServerSession getSession() {
-		return ServerSessionAdapter.valueOf(sessionHolder.getSessionObject(),
-				sessionHolder.getContext());
+		return ServerSessionAdapter.valueOf(sessionHolder.getSessionObject(), sessionHolder.getContext());
 	}
 
 	@Override

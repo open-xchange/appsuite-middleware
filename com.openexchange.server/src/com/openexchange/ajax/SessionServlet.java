@@ -310,8 +310,8 @@ public abstract class SessionServlet extends AJAXServlet {
         final Context ctx = session.getContext();
         if (!ctx.isEnabled()) {
             sessiondService.removeSession(sessionId);
-            LOG.info("The context {} associated with session is locked.", ctx.getContextId());
-            throw SessionExceptionCodes.CONTEXT_LOCKED.create(ctx.getContextId(), ctx.getName());
+            LOG.info("The context {} associated with session is locked.", Integer.toString(ctx.getContextId()));
+            throw SessionExceptionCodes.CONTEXT_LOCKED.create(Integer.toString(ctx.getContextId()), ctx.getName());
         }
         checkIP(session, req.getRemoteAddr());
     }
@@ -636,13 +636,12 @@ public abstract class SessionServlet extends AJAXServlet {
             optChecker.checkSecret(session, req, source.name());
         }
         try {
-            final Context context = ContextStorage.getInstance().getContext(session.getContextId());
-            final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
+            final User user = UserStorage.getInstance().getUser(session.getUserId(), ContextStorage.getInstance().getContext(session.getContextId()));
             if (!user.isMailEnabled()) {
-                LOG.info("User {} in context {} is not activated.", user.getId(), context.getContextId());
+                LOG.info("User {} in context {} is not activated.", Integer.toString(user.getId()), Integer.toString(session.getContextId()));
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
             }
-            return ServerSessionAdapter.valueOf(session, context, user);
+            return ServerSessionAdapter.valueOf(session);
         } catch (final OXException e) {
             if (ContextExceptionCodes.NOT_FOUND.equals(e)) {
                 // An outdated session; context absent

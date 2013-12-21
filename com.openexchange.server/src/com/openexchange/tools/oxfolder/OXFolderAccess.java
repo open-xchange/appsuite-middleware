@@ -583,11 +583,8 @@ public class OXFolderAccess {
             } else if (module == FolderObject.PROJECT) {
                 return false;
             } else if (module == FolderObject.INFOSTORE) {
-                final InfostoreFacade db =
-                    new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
-                return db.hasFolderForeignObjects(
-                    folder.getObjectID(),
-                    ServerSessionAdapter.valueOf(session, ctx));
+                final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
+                return db.hasFolderForeignObjects(folder.getObjectID(), ServerSessionAdapter.valueOf(session, ctx));
             } else {
                 throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(module), Integer.valueOf(ctx.getContextId()));
             }
@@ -685,7 +682,6 @@ public class OXFolderAccess {
             case FolderObject.INFOSTORE:
                 try {
                     final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
-                    final User user = getUser(session, ctx, userId);
                     return db.countDocuments(folder.getObjectID(), ServerSessionAdapter.valueOf(session, ctx));
                 } catch (final OXException e) {
                     if (InfostoreExceptionCodes.NO_READ_PERMISSION.equals(e)) {

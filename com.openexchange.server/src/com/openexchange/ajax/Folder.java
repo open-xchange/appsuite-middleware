@@ -1139,6 +1139,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 }
             } else {
                 final MessagingFolderIdentifier mfi = MessagingFolderIdentifier.parseFQN(folderIdentifier);
+                final Locale locale = session.getUser().getLocale();
                 if (null == mfi) {
                     MailServletInterface mailInterface = null;
                     SearchIterator<MailFolder> it = null;
@@ -1206,7 +1207,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         }
                         folderWriter.writeOXFolderFieldsAsArray(columns, privateFolder, FolderObject.getFolderString(
                             FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-                            session.getUser().getLocale()), -1);
+                            locale), -1);
                     } finally {
                         if (it != null) {
                             it.close();
@@ -1277,7 +1278,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         }
                         folderWriter.writeOXFolderFieldsAsArray(columns, privateFolder, FolderObject.getFolderString(
                             FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-                            session.getUser().getLocale()), -1);
+                            locale), -1);
                     } finally {
                         accountAccess.close();
                     }
@@ -1372,10 +1373,11 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             boolean checkVirtualListFolders = false;
             int size = q.size();
             Iterator<FolderObject> iter = q.iterator();
+            final User user = session.getUser();
             {
                 final UserPermissionBits userPerm = session.getUserPermissionBits();
                 final UserStorage us = UserStorage.getInstance();
-                final StringHelper strHelper = StringHelper.valueOf(session.getUser().getLocale());
+                final StringHelper strHelper = StringHelper.valueOf(user.getLocale());
                 final boolean sharedFolderAccess = userPerm.hasFullSharedFolderAccess();
                 for (int i = 0; i < size; i++) {
                     final FolderObject fo = iter.next();
@@ -1459,7 +1461,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
              */
             if (addSystemSharedFolder) {
                 final FolderObject sharedFolder = access.getFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID);
-                sharedFolder.setFolderName(FolderObject.getFolderString(FolderObject.SYSTEM_SHARED_FOLDER_ID, session.getUser().getLocale()));
+                sharedFolder.setFolderName(FolderObject.getFolderString(FolderObject.SYSTEM_SHARED_FOLDER_ID, user.getLocale()));
                 updatedQueue.add(sharedFolder);
                 if (!displayNames.isEmpty()) {
                     for (final Entry<String, Integer> entry : displayNames.entrySet()) {
@@ -1524,7 +1526,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                     final List<MailAccount> tmp = new ArrayList<MailAccount>(accountsArr.length);
                     tmp.addAll(Arrays.asList(accountsArr));
                     // Sort them
-                    Collections.sort(tmp, new MailAccountComparator(session.getUser().getLocale()));
+                    Collections.sort(tmp, new MailAccountComparator(user.getLocale()));
                     accounts = tmp;
                 } else {
                     accounts = new ArrayList<MailAccount>(1);
@@ -1700,7 +1702,8 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         /*
          * Some variables
          */
-        final Response response = new Response(session.getUser().getLocale());
+        final Locale locale = session.getUser().getLocale();
+        final Response response = new Response(locale);
         OXJSONWriter jsonWriter = null;
         Date lastModifiedDate = null;
         /*
@@ -1721,7 +1724,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 new FolderWriter(jsonWriter, session, ctx, timeZoneId, FIELDS).writeOXFolderFieldsAsObject(
                     columns,
                     fo,
-                    session.getUser().getLocale());
+                    locale);
             } else if (folderIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
                 int userId = -1;
                 try {
