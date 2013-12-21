@@ -52,11 +52,11 @@ package com.openexchange.printing.tasks;
 
 import java.util.Map;
 import java.util.TimeZone;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.templating.TemplateHelperFactory;
 import com.openexchange.tools.session.ServerSession;
@@ -64,24 +64,24 @@ import com.openexchange.tools.session.ServerSession;
 public class TaskTemplateHelperFactory implements TemplateHelperFactory {
 
 	private final ServiceLookup services;
-	
+
     public TaskTemplateHelperFactory(ServiceLookup services) {
         this.services = services;
     }
-    
+
 	@Override
 	public String getName() {
 		return "tasks";
 	}
 
 	@Override
-	public Object create(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter, Map<String, Object> rootObject) throws OXException {			
-
-		TimeZone tz = TimeZone.getTimeZone( requestData.isSet("timezone") ? requestData.getParameter("timezone") : session.getUser().getTimeZone() );
+	public Object create(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter, Map<String, Object> rootObject) throws OXException {
+		User user = session.getUser();
+        TimeZone tz = TimeZone.getTimeZone( requestData.isSet("timezone") ? requestData.getParameter("timezone") : user.getTimeZone() );
 		if (result.getResultObject() instanceof Map) {
-			return new TaskHelper((Map<String, Object>) result.getResultObject(), session.getUser().getLocale(), tz, session.getContext(), services);
+			return new TaskHelper((Map<String, Object>) result.getResultObject(), user.getLocale(), tz, session.getContext(), services);
 		} else {
-			return new TaskHelper(null, session.getUser().getLocale(), tz, session.getContext(), services);
+			return new TaskHelper(null, user.getLocale(), tz, session.getContext(), services);
 		}
 	}
 }

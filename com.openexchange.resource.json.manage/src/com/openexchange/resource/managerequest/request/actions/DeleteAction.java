@@ -59,6 +59,8 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.managerequest.request.ResourceAJAXRequest;
 import com.openexchange.server.ServiceExceptionCode;
@@ -91,6 +93,9 @@ public final class DeleteAction extends AbstractResourceAction {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ResourceService.class.getName());
         }
         final Date clientLastModified = req.getDate(AJAXServlet.PARAMETER_TIMESTAMP);
+        final ServerSession session = req.getSession();
+        final Context context = session.getContext();
+        final User user = session.getUser();
         if (req.getData() instanceof JSONObject) {
             /*
              * Check for "data"
@@ -101,8 +106,7 @@ public final class DeleteAction extends AbstractResourceAction {
             /*
              * Delete resource
              */
-            final ServerSession session = req.getSession();
-            resourceService.delete(session.getUser(), session.getContext(), resource, clientLastModified);
+            resourceService.delete(user, context, resource, clientLastModified);
         } else {
             JSONArray jsonArray = req.getData();
             for (int i = 0; i < jsonArray.length(); i++) {
@@ -115,8 +119,7 @@ public final class DeleteAction extends AbstractResourceAction {
                 /*
                  * Delete resource
                  */
-                final ServerSession session = req.getSession();
-                resourceService.delete(session.getUser(), session.getContext(), resource, clientLastModified);
+                resourceService.delete(user, context, resource, clientLastModified);
             }
         }
         /*

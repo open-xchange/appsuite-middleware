@@ -213,7 +213,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             }
             final Session session = result.getSession();
             // Store associated session
-            SessionServlet.rememberSession(req, new ServerSessionAdapter(session, result.getContext(), result.getUser()));
+            SessionServlet.rememberSession(req, new ServerSessionAdapter(session));
             LoginServlet.writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
             // Login response is unfortunately not conform to default responses.
             if (req.getParameter("callback") != null && LoginServlet.ACTION_LOGIN.equals(req.getParameter("action"))) {

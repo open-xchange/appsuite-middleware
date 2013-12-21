@@ -103,9 +103,10 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
         }
 
         // Continue with non-empty secret
-        final Set<String> token = session.getUser().getAttributes().get(PROPERTY);
+        final User user = session.getUser();
+        final Set<String> token = user.getAttributes().get(PROPERTY);
         if (token == null || token.isEmpty()) {
-            saveNewToken(session.getUser(), secret, session.getContext());
+            saveNewToken(user, secret, session.getContext());
             return null;
         }
 
@@ -116,7 +117,7 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
         if (detector.hasEncryptedItems(session)) {
             return "Could not decrypt token";
         }
-        saveNewToken(session.getUser(), secret, session.getContext());
+        saveNewToken(user, secret, session.getContext());
         return null;
     }
 

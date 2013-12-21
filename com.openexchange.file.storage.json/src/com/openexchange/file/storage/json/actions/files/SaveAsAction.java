@@ -67,6 +67,8 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.util.GetSwitch;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -101,14 +103,17 @@ public class SaveAsAction extends AbstractWriteAction {
 
         final ServerSession session = request.getSession();
 
+        final User user = session.getUser();
+        final UserConfiguration userConfiguration = session.getUserConfiguration();
+
         final AttachmentMetadata att = attachments.getAttachment(
             session, folderId,
             attachedId,
             moduleId,
             attachment,
             session.getContext(),
-            session.getUser(),
-            session.getUserConfiguration());
+            user,
+            userConfiguration);
 
         final FileFieldSet fileSet = new FileFieldSet();
         final GetSwitch attGet = new GetSwitch(att);
@@ -144,8 +149,8 @@ public class SaveAsAction extends AbstractWriteAction {
             moduleId,
             attachment,
             session.getContext(),
-            session.getUser(),
-            session.getUserConfiguration());
+            user,
+            userConfiguration);
 
         fileAccess.saveDocument(file, fileData, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
 

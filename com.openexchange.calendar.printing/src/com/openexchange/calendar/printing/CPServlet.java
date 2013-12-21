@@ -81,6 +81,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Strings;
@@ -169,7 +170,8 @@ public class CPServlet extends PermissionServlet {
 
         final ServerSession session = getSessionObject(req);
         try {
-            final TimeZone zone = TimeZone.getTimeZone(session.getUser().getTimeZone());
+            final User user = session.getUser();
+            final TimeZone zone = TimeZone.getTimeZone(user.getTimeZone());
             final CPParameters params = new CPParameters(req, zone);
             if (params.hasUnparseableFields()) {
                 throw new ServletException("Could not parse the value of the following parameters: " + Strings.join(
@@ -207,7 +209,7 @@ public class CPServlet extends PermissionServlet {
             }
             final List<Appointment> idList = SearchIteratorAdapter.toList(iterator);
 
-            final Locale locale = session.getUser().getLocale();
+            final Locale locale = user.getLocale();
             final CPCalendar cal = CPCalendar.getCalendar(zone, locale);
             modifyCalendar(cal, params);
 
@@ -243,7 +245,7 @@ public class CPServlet extends PermissionServlet {
             variables.put(DAYS, perDayList);
             variables.put(I18N, new I18n(I18nServices.getInstance().getService(locale)));
             variables.put(DOCUMENT_TITLE, getDocumentTitle(session));
-            variables.put(DATE_FORMATTER, new DateFormatter(session.getUser().getLocale(), TimeZone.getTimeZone(session.getUser().getTimeZone())));
+            variables.put(DATE_FORMATTER, new DateFormatter(user.getLocale(), TimeZone.getTimeZone(user.getTimeZone())));
 
             for (final CPAppointment app : partitions.getAppointments()) {
                 debuggingItems.add(app.getTitle());

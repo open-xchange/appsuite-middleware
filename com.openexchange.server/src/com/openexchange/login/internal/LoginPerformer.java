@@ -92,8 +92,6 @@ import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link LoginPerformer} - Performs a login for specified credentials.
@@ -235,13 +233,6 @@ public final class LoginPerformer {
                 ((SessionEnhancement) authed).enhanceSession(session);
             }
             retval.setSession(session);
-
-            // init session
-            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-            serverSession.getUser();
-            serverSession.getUserSettingMail();
-            serverSession.getUserPermissionBits();
-            //serverSession.getUserConfiguration();
 
             // Trigger registered login handlers
             triggerLoginHandlers(retval);

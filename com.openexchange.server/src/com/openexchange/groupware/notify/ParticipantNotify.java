@@ -141,6 +141,7 @@ import com.openexchange.i18n.tools.replacement.TaskStatusReplacement;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -219,6 +220,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
         final String type = (msg.overrideType != null) ? msg.overrideType.toString() : state.getType().toString();
         final MailObject mail = new MailObject(session, obj.getObjectID(), fuid, state.getModule(), type);
+        final User sender = session.getUser();
 
         String fromAddr;
         final String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
@@ -227,19 +229,23 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 fromAddr = getUserSettingMail(session.getUserId(), session.getContext()).getSendAddr();
             } catch (final OXException e) {
                 LOG.error("", e);
-                session.getUser().getMail();
-                fromAddr = session.getUser().getMail();
+                fromAddr = sender.getMail();
             }
         } else {
-            fromAddr = session.getUser().getMail();
+            fromAddr = sender.getMail();
         }
 
-        final User sender = session.getUser();
-
-        if (sender != null) {
-            mail.setFromAddr("\"" + sender.getDisplayName() + "\"" + " <" + fromAddr + ">");
-        } else {
+        if (sender == null) {
             mail.setFromAddr(fromAddr);
+        } else {
+            final QuotedInternetAddress addr = new QuotedInternetAddress();
+            addr.setAddress(fromAddr);
+            try {
+                addr.setPersonal(sender.getDisplayName(), "UTF-8");
+            } catch (final UnsupportedEncodingException e) {
+                // Cannot occur
+            }
+            mail.setFromAddr(addr.toString());
         }
 
         mail.setToAddrs(msg.addresses.toArray(new String[msg.addresses.size()]));

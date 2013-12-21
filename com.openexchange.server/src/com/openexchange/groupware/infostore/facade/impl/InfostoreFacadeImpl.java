@@ -215,18 +215,18 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     @Override
     public DocumentMetadata getDocumentMetadata(final int id, final int version, ServerSession session) throws OXException {
-        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(
-            id, session.getContext(), session.getUser(), session.getUserPermissionBits());
+        final User user = session.getUser();
+        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, session.getContext(), user, session.getUserPermissionBits());
 
         if (!infoPerm.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
 
-        final List<Lock> locks = lockManager.findLocks(id, session.getContext(), session.getUser());
+        final List<Lock> locks = lockManager.findLocks(id, session.getContext(), user);
         final Map<Integer, List<Lock>> allLocks = new HashMap<Integer, List<Lock>>();
         allLocks.put(Integer.valueOf(id), locks);
 
-        return addNumberOfVersions(addLocked(load(id, version, session.getContext()), allLocks, session.getContext(), session.getUser()), session.getContext());
+        return addNumberOfVersions(addLocked(load(id, version, session.getContext()), allLocks, session.getContext(), user), session.getContext());
     }
 
     DocumentMetadata load(final int id, final int version, final Context ctx) throws OXException {
@@ -1431,7 +1431,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     public TimedResult<DocumentMetadata> getDocuments(final long folderId, Metadata[] columns, final Metadata sort, final int order, ServerSession session) throws OXException {
         Metadata[] cols = addLastModifiedIfNeeded(columns);
         boolean onlyOwn = false;
-        final EffectivePermission isperm = security.getFolderPermission(folderId, session.getContext(), session.getUser(), session.getUserPermissionBits());
+        User user = session.getUser();
+        final EffectivePermission isperm = security.getFolderPermission(folderId, session.getContext(), user, session.getUserPermissionBits());
         if (isperm.getReadPermission() == OCLPermission.NO_PERMISSIONS) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         } else if (isperm.getReadPermission() == OCLPermission.READ_OWN_OBJECTS) {
@@ -1452,13 +1453,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
         InfostoreIterator iter = null;
         if (onlyOwn) {
-            iter = InfostoreIterator.documentsByCreator(folderId, session.getUser().getId(), cols, sort, order, getProvider(), session.getContext());
+            iter = InfostoreIterator.documentsByCreator(folderId, user.getId(), cols, sort, order, getProvider(), session.getContext());
         } else {
             iter = InfostoreIterator.documents(folderId, cols, sort, order, getProvider(), session.getContext());
         }
         TimedResult<DocumentMetadata> tr = new InfostoreTimedResult(iter);
         if (addLocked) {
-            tr = addLocked(tr, session.getContext(), session.getUser());
+            tr = addLocked(tr, session.getContext(), user);
         }
         if (addNumberOfVersions) {
             tr = addNumberOfVersions(tr, session.getContext());
@@ -1478,7 +1479,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     @Override
     public TimedResult<DocumentMetadata> getVersions(final int id, Metadata[] columns, final Metadata sort, final int order, ServerSession session) throws OXException {
-        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, session.getContext(), session.getUser(), session.getUserPermissionBits());
+        final User user = session.getUser();
+        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, session.getContext(), user, session.getUserPermissionBits());
         if (!infoPerm.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
@@ -1494,7 +1496,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         final TimedResult<DocumentMetadata> tr = new InfostoreTimedResult(iter);
 
         if (addLocked) {
-            return addLocked(tr, session.getContext(), session.getUser());
+            return addLocked(tr, session.getContext(), user);
         }
         return tr;
 
@@ -1502,9 +1504,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     @Override
     public TimedResult<DocumentMetadata> getDocuments(final int[] ids, Metadata[] columns, ServerSession session) throws OXException {
-
+        final User user = session.getUser();
         try {
-            security.injectInfostorePermissions(ids, session.getContext(), session.getUser(), session.getUserPermissionBits(), null, new Injector<Object, EffectiveInfostorePermission>() {
+            security.injectInfostorePermissions(ids, session.getContext(), user, session.getUserPermissionBits(), null, new Injector<Object, EffectiveInfostorePermission>() {
 
                 @Override
                 public Object inject(final Object list, final EffectiveInfostorePermission element) {
@@ -1524,7 +1526,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
         for (final Metadata m : cols) {
             if (m == Metadata.LOCKED_UNTIL_LITERAL) {
-                tr = addLocked(tr, session.getContext(), session.getUser());
+                tr = addLocked(tr, session.getContext(), user);
             }
             if (m == Metadata.NUMBER_OF_VERSIONS_LITERAL) {
                 tr = addNumberOfVersions(tr, session.getContext());
@@ -1542,7 +1544,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     @Override
     public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, Metadata[] columns, final Metadata sort, final int order, final boolean ignoreDeleted, ServerSession session) throws OXException {
         boolean onlyOwn = false;
-        final EffectivePermission isperm = security.getFolderPermission(folderId, session.getContext(), session.getUser(), session.getUserPermissionBits());
+        User user = session.getUser();
+        final EffectivePermission isperm = security.getFolderPermission(folderId, session.getContext(), user, session.getUserPermissionBits());
         if (isperm.getReadPermission() == OCLPermission.NO_PERMISSIONS) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         } else if (isperm.getReadPermission() == OCLPermission.READ_OWN_OBJECTS) {
@@ -1561,7 +1564,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             }
         }
 
-        final Map<Integer, List<Lock>> locks = loadLocksInFolderAndExpireOldLocks(folderId, session.getContext(), session.getUser());
+        final Map<Integer, List<Lock>> locks = loadLocksInFolderAndExpireOldLocks(folderId, session.getContext(), user);
 
         final DBProvider reuse = new ReuseReadConProvider(getProvider());
 
@@ -1572,10 +1575,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         Metadata[] cols = addLastModifiedIfNeeded(columns);
 
         if (onlyOwn) {
-            newIter = InfostoreIterator.newDocumentsByCreator(folderId, session.getUser().getId(), cols, sort, order, updateSince, reuse, session.getContext());
-            modIter = InfostoreIterator.modifiedDocumentsByCreator(folderId, session.getUser().getId(), cols, sort, order, updateSince, reuse, session.getContext());
+            newIter = InfostoreIterator.newDocumentsByCreator(folderId, user.getId(), cols, sort, order, updateSince, reuse, session.getContext());
+            modIter = InfostoreIterator.modifiedDocumentsByCreator(folderId, user.getId(), cols, sort, order, updateSince, reuse, session.getContext());
             if (!ignoreDeleted) {
-                delIter = InfostoreIterator.deletedDocumentsByCreator(folderId, session.getUser().getId(), sort, order, updateSince, reuse, session.getContext());
+                delIter = InfostoreIterator.deletedDocumentsByCreator(folderId, user.getId(), sort, order, updateSince, reuse, session.getContext());
             }
         } else {
             newIter = InfostoreIterator.newDocuments(folderId, cols, sort, order, updateSince, reuse, session.getContext());
@@ -1594,7 +1597,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         Delta<DocumentMetadata> delta = new DeltaImpl<DocumentMetadata>(newIter, modIter, it, System.currentTimeMillis());
 
         if (addLocked) {
-            delta = addLocked(delta, locks, session.getContext(), session.getUser());
+            delta = addLocked(delta, locks, session.getContext(), user);
         }
         if (addNumberOfVersions) {
             delta = addNumberOfVersions(delta, session.getContext());
@@ -1664,13 +1667,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     @Override
     public int countDocuments(final long folderId, ServerSession session) throws OXException {
         boolean onlyOwn = false;
-        final EffectivePermission isperm = security.getFolderPermission(folderId, session.getContext(), session.getUser(), session.getUserPermissionBits());
+        User user = session.getUser();
+        final EffectivePermission isperm = security.getFolderPermission(folderId, session.getContext(), user, session.getUserPermissionBits());
         if (!(isperm.canReadAllObjects()) && !(isperm.canReadOwnObjects())) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         } else if (isperm.canReadOwnObjects()) {
             onlyOwn = true;
         }
-        return db.countDocuments(folderId, onlyOwn, session.getContext(), session.getUser());
+        return db.countDocuments(folderId, onlyOwn, session.getContext(), user);
     }
 
     @Override

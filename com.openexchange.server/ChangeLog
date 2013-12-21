@@ -1,3 +1,7 @@
+* 2013-12-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30387: Do not cache user data in SessionServletAdapter, but fetch from JCS cache to ensure dealing with most up-to-date instance(s)
+
 * 2013-12-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 30192: Properly detect a rename operation, rather than performing a move
