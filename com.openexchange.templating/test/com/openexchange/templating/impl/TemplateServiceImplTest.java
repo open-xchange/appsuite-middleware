@@ -64,6 +64,8 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -72,6 +74,7 @@ import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.OXTemplateImpl;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
@@ -81,6 +84,7 @@ import com.openexchange.tools.session.ServerSession;
  * @since 7.4.1
  */
 @RunWith(PowerMockRunner.class)
+@PrepareForTest({ ServerSessionAdapter.class })
 public class TemplateServiceImplTest {
 
     /**
@@ -104,6 +108,9 @@ public class TemplateServiceImplTest {
      */
     @Mock
     private ConfigurationService configService;
+
+    @Mock
+    private ServerSession serverSession;
 
     /**
      * Mock of the {@link OXFolderHelper}
@@ -135,10 +142,12 @@ public class TemplateServiceImplTest {
     protected TemporaryFolder folder = new TemporaryFolder();
 
     @Before
-    public void setUp() {
+    public void setUp() throws OXException {
         MockitoAnnotations.initMocks(this);
+        PowerMockito.mockStatic(ServerSessionAdapter.class);
 
         Mockito.when(this.configService.getProperty(TemplateServiceImpl.PATH_PROPERTY)).thenReturn("thePath");
+        PowerMockito.when(ServerSessionAdapter.valueOf((Session) Matchers.anyObject())).thenReturn(serverSession);
     }
 
     @Test
