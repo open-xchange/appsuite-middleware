@@ -131,7 +131,7 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
                 /*
                  * The JCS cache manager already tracks initialized caches though the same region name always points to the same cache
                  */
-                cache = new JCSCache(JCS.getInstance(name));
+                cache = new JCSCache(JCS.getInstance(name), name);
                 /*
                  * Wrap with notifying cache if configured
                  */
