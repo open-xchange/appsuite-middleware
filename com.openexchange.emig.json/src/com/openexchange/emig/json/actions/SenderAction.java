@@ -50,19 +50,25 @@
 package com.openexchange.emig.json.actions;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.emig.EmigService;
 import com.openexchange.emig.json.EmigRequest;
 import com.openexchange.exception.OXException;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SenderAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.4.1
+ * @since 7.4.2
  */
-public final class SenderAction extends EmigAction {
+public final class SenderAction extends AbstractEmigAction {
 
     /**
      * Initializes a new {@link SenderAction}.
@@ -74,13 +80,38 @@ public final class SenderAction extends EmigAction {
     }
 
     @Override
-    protected boolean checkCapability() {
-        return false;
-    }
-
-    @Override
     protected AJAXRequestResult perform(final EmigRequest req) throws OXException, JSONException {
-        return new AJAXRequestResult(Boolean.valueOf(getService(EmigService.class).isEMIG_Session(req.getSession().getLoginName())), "boolean");
+        // Acquire services
+        final EmigService emigService = getService(EmigService.class);
+        if (null == emigService) {
+            throw ServiceExceptionCode.absentService(EmigService.class);
+        }
+        final MailAccountStorageService mass = getService(MailAccountStorageService.class);
+        if (null == mass) {
+            throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
+        }
+
+        // Get JSON body
+        final JSONObject jBody = (JSONObject) req.getRequest().getData();
+        if (null == jBody) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
+        final int accountId = jBody.optInt("account", -1);
+        if (accountId < 0) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("account");
+        }
+
+        final String sender = jBody.optString("sender", null);
+        if (null == sender) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("sender");
+        }
+
+        final ServerSession session = req.getSession();
+        final MailAccount mailAccount = mass.getMailAccount(accountId, session.getUserId(), session.getContextId());
+
+        final boolean emig = emigService.isEMIG_MSA(mailAccount.getTransportServer(), sender, mailAccount.getTransportLogin());
+
+        return new AJAXRequestResult(Boolean.valueOf(emig), "boolean");
     }
 
 }

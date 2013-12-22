@@ -47,75 +47,80 @@
  *
  */
 
-package com.openexchange.emig.json.osgi;
+package com.openexchange.emig.json.actions;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.capabilities.CapabilityChecker;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.emig.EmigService;
-import com.openexchange.emig.json.EmigActionFactory;
-import com.openexchange.emig.json.Enabled;
+import com.openexchange.emig.json.EmigRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.session.Session;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * {@link EmigJsonActivator}
+ * {@link AbstractEmigAction} - The abstract EMiG action.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class EmigJsonActivator extends AJAXModuleActivator {
+public abstract class AbstractEmigAction implements AJAXActionService {
+
+    private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link EmigJsonActivator}.
+     * Initializes a new {@link AbstractTaskAction}.
      */
-    public EmigJsonActivator() {
+    protected AbstractEmigAction(final ServiceLookup services) {
         super();
+        this.services = services;
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> is absent
+     */
+    protected <S> S getService(final Class<? extends S> clazz) {
+        return services.getService(clazz);
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CapabilityService.class, EmigService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        // Register AJAX module
-        registerModule(new EmigActionFactory(this), "emig");
-
-        // Register CapabilityChecker
-        final String sCapability = "emig";
-        {
-            final Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
-            registerService(CapabilityChecker.class, new CapabilityChecker() {
-                @Override
-                public boolean isEnabled(String capability, Session ses) throws OXException {
-                    if (sCapability.equals(capability)) {
-                        final ServerSession session = ServerSessionAdapter.valueOf(ses);
-                        if (session.isAnonymous()) {
-                            return false;
-                        }
-                        return getService(EmigService.class).isEMIG_Session(ses.getLoginName());
-                    }
-                    return true;
-                }
-            }, properties);
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        if (checkCapability() && !hasEmigCapability(session)) {
+            throw OXException.noPermissionForModule("emig");
         }
-
-        // Declare capability
-        getService(CapabilityService.class).declareCapability(sCapability);
-
-        // Modules preference item service
-        registerService(PreferencesItemService.class, new Enabled(this));
-
-        trackService(MailAccountStorageService.class);
-        openTrackers();
+        try {
+            return perform(new EmigRequest(requestData, session));
+        } catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
     }
+
+    private boolean hasEmigCapability(final ServerSession session) throws OXException {
+        final CapabilityService capabilityService = getService(CapabilityService.class);
+        return (null != capabilityService && capabilityService.getCapabilities(session).contains("emig"));
+    }
+
+    /**
+     * Checks if capability should be checked prior to serving action.
+     *
+     * @return <code>true</code> to check; otherwise <code>false</code>
+     */
+    protected boolean checkCapability() {
+        return true;
+    }
+
+    /**
+     * Performs specified EMiG request.
+     *
+     * @param req The EMiG request
+     * @return The result
+     * @throws OXException If an error occurs
+     * @throws JSONException If a JSON error occurs
+     */
+    protected abstract AJAXRequestResult perform(EmigRequest req) throws OXException, JSONException;
 
 }

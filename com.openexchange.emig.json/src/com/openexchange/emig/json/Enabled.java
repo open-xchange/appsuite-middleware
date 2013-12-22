@@ -47,75 +47,55 @@
  *
  */
 
-package com.openexchange.emig.json.osgi;
+package com.openexchange.emig.json;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.capabilities.CapabilityChecker;
-import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.emig.EmigService;
-import com.openexchange.emig.json.EmigActionFactory;
-import com.openexchange.emig.json.Enabled;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * {@link EmigJsonActivator}
+ * {@link Enabled}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class EmigJsonActivator extends AJAXModuleActivator {
+public class Enabled implements PreferencesItemService {
+
+    final ServiceLookup services;
 
     /**
-     * Initializes a new {@link EmigJsonActivator}.
+     * Initializes a new {@link Enabled}.
      */
-    public EmigJsonActivator() {
-        super();
+    public Enabled(final ServiceLookup services) {
+        this.services = services;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CapabilityService.class, EmigService.class };
+    public String[] getPath() {
+        return new String[] { "modules", "com.openexchange.emig", "module" };
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        // Register AJAX module
-        registerModule(new EmigActionFactory(this), "emig");
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
 
-        // Register CapabilityChecker
-        final String sCapability = "emig";
-        {
-            final Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
-            registerService(CapabilityChecker.class, new CapabilityChecker() {
-                @Override
-                public boolean isEnabled(String capability, Session ses) throws OXException {
-                    if (sCapability.equals(capability)) {
-                        final ServerSession session = ServerSessionAdapter.valueOf(ses);
-                        if (session.isAnonymous()) {
-                            return false;
-                        }
-                        return getService(EmigService.class).isEMIG_Session(ses.getLoginName());
-                    }
-                    return true;
-                }
-            }, properties);
-        }
+            @Override
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
+                setting.setSingleValue(Boolean.valueOf(services.getService(EmigService.class).isEMIG_Session(session.getLoginName())));
+            }
 
-        // Declare capability
-        getService(CapabilityService.class).declareCapability(sCapability);
+            @Override
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return true;
+            }
+        };
 
-        // Modules preference item service
-        registerService(PreferencesItemService.class, new Enabled(this));
-
-        trackService(MailAccountStorageService.class);
-        openTrackers();
     }
-
 }

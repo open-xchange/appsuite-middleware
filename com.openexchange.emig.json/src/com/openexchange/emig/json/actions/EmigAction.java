@@ -49,78 +49,62 @@
 
 package com.openexchange.emig.json.actions;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.emig.EmigService;
 import com.openexchange.emig.json.EmigRequest;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link EmigAction} - The abstract EMiG action.
+ * {@link EmigAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.2
  */
-public abstract class EmigAction implements AJAXActionService {
-
-    private final ServiceLookup services;
+public final class EmigAction extends AbstractEmigAction {
 
     /**
-     * Initializes a new {@link AbstractTaskAction}.
-     */
-    protected EmigAction(final ServiceLookup services) {
-        super();
-        this.services = services;
-    }
-
-    /**
-     * Gets the service of specified type
+     * Initializes a new {@link EmigAction}.
      *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> is absent
+     * @param services The service look-up
      */
-    protected <S> S getService(final Class<? extends S> clazz) {
-        return services.getService(clazz);
+    public EmigAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
-        if (checkCapability() && !hasEmigCapability(session)) {
-            throw OXException.noPermissionForModule("emig");
+    protected AJAXRequestResult perform(final EmigRequest req) throws OXException, JSONException {
+        // Acquire service
+        final EmigService emigService = getService(EmigService.class);
+        if (null == emigService) {
+            throw ServiceExceptionCode.absentService(EmigService.class);
         }
-        try {
-            return perform(new EmigRequest(requestData, session));
-        } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+
+        // Get JSON body
+        final JSONArray jBody = (JSONArray) req.getRequest().getData();
+        if (null == jBody) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
-    }
 
-    private boolean hasEmigCapability(final ServerSession session) throws OXException {
-        final CapabilityService capabilityService = getService(CapabilityService.class);
-        return (null != capabilityService && capabilityService.getCapabilities(session).contains("emig"));
-    }
+        final int length = jBody.length();
+        final List<String> addrs = new ArrayList<String>(length);
+        for (int i = 0; i < length; i++) {
+            addrs.add(jBody.getString(i));
+        }
 
-    /**
-     * Checks if capability should be checked prior to serving action.
-     *
-     * @return <code>true</code> to check; otherwise <code>false</code>
-     */
-    protected boolean checkCapability() {
-        return true;
-    }
+        final int[] colors = emigService.isEMIG_Recipient(addrs.toArray(new String[addrs.size()]));
+        final JSONArray retval = new JSONArray(colors.length);
+        for (int i = 0; i < colors.length; i++) {
+            retval.put(colors[i]);
+        }
 
-    /**
-     * Performs specified EMiG request.
-     *
-     * @param req The EMiG request
-     * @return The result
-     * @throws OXException If an error occurs
-     * @throws JSONException If a JSON error occurs
-     */
-    protected abstract AJAXRequestResult perform(EmigRequest req) throws OXException, JSONException;
+        return new AJAXRequestResult(retval);
+    }
 
 }

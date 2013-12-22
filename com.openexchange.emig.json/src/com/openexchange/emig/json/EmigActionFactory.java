@@ -55,7 +55,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
-import com.openexchange.emig.json.actions.EmigAction;
+import com.openexchange.emig.json.actions.AbstractEmigAction;
 import com.openexchange.emig.json.actions.SenderAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -69,14 +69,14 @@ import com.openexchange.server.ServiceLookup;
 @Module(name = "emig", description = "Provides access to EmiG module.")
 public class EmigActionFactory implements AJAXActionServiceFactory {
 
-    private final Map<String, EmigAction> actions;
+    private final Map<String, AbstractEmigAction> actions;
 
     /**
      * Initializes a new {@link EmigActionFactory}.
      */
     public EmigActionFactory(final ServiceLookup serviceLookup) {
         super();
-        actions = new ConcurrentHashMap<String, EmigAction>(4);
+        actions = new ConcurrentHashMap<String, AbstractEmigAction>(4);
         actions.put("sender", new SenderAction(serviceLookup));
     }
 
