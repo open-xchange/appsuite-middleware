@@ -49,7 +49,7 @@
 
 package com.openexchange.emig.json;
 
-import com.openexchange.emig.EmigService;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -88,7 +88,7 @@ public class Enabled implements PreferencesItemService {
 
             @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
-                setting.setSingleValue(Boolean.valueOf(services.getService(EmigService.class).isEMIG_Session(session.getLoginName())));
+                setting.setSingleValue(Boolean.valueOf(services.getService(CapabilityService.class).getCapabilities(session).contains("emig")));
             }
 
             @Override
