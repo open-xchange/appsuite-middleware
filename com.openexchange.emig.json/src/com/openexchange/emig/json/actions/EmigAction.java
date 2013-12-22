@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.emig.EmigExceptionCodes;
 import com.openexchange.emig.EmigService;
@@ -72,8 +71,6 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @since 7.4.2
  */
 public final class EmigAction extends AbstractEmigAction {
-
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(EmigAction.class);
 
     /**
      * Initializes a new {@link EmigAction}.
