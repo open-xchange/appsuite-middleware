@@ -75,7 +75,7 @@ public final class SenderAction extends AbstractEmigAction {
      *
      * @param services The service look-up
      */
-    public SenderAction(ServiceLookup services) {
+    public SenderAction(final ServiceLookup services) {
         super(services);
     }
 

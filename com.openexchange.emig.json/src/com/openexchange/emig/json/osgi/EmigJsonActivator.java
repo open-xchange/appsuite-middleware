@@ -95,7 +95,7 @@ public class EmigJsonActivator extends AJAXModuleActivator {
             properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
             registerService(CapabilityChecker.class, new CapabilityChecker() {
                 @Override
-                public boolean isEnabled(String capability, Session ses) throws OXException {
+                public boolean isEnabled(final String capability, final Session ses) throws OXException {
                     if (sCapability.equals(capability)) {
                         final ServerSession session = ServerSessionAdapter.valueOf(ses);
                         if (session.isAnonymous()) {

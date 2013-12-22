@@ -74,7 +74,7 @@ public final class EmigAction extends AbstractEmigAction {
      *
      * @param services The service look-up
      */
-    public EmigAction(ServiceLookup services) {
+    public EmigAction(final ServiceLookup services) {
         super(services);
     }
 
