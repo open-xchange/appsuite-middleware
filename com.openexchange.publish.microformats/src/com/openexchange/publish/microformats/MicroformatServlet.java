@@ -208,7 +208,8 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             if (admin == null || admin.equals("")) {
                 admin = userService.getUser(ctx.getMailadmin(), ctx).getMail();
             }
-            final String privacyText = formatPrivacyText(getPrivacyText(user), admin, user, new Date());
+            // TODO for bug 30250: set name for "Open-Xchange"
+            final String privacyText = formatPrivacyText(getPrivacyText(user), "Open-Xchange", admin, user, new Date(publication.getCreated()));
             variables.put("privacy", privacyText); // TODO Use lastmodified once someone implements this.
             variables.put("userContact", userContact);
             variables.put("htmlService", new HTMLUtils(htmlService));
@@ -246,9 +247,9 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         return contacts.getUser(publicationSession, publicationSession.getUserId());
     }
 
-    private String formatPrivacyText(final String privacyText, final String adminAddress, final User user, final Date creationDate) {
+    private String formatPrivacyText(final String privacyText, final String company, final String adminAddress, final User user, final Date creationDate) {
         final String date = new SimpleDateFormat("yyyy-MM-dd").format(creationDate);
-        final String retVal = String.format(privacyText, adminAddress, user.getMail(), date);
+        final String retVal = String.format(privacyText, company, adminAddress, user.getMail(), date);
         return "<p>" + retVal.replaceAll("\n", "</p><p>") + "</p>";
     }
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.session;
 
+import org.apache.commons.lang.Validate;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -304,21 +305,13 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
      */
     public ServerSessionAdapter(final Session session, final Context ctx, final User user, final UserConfiguration userConfiguration, final UserPermissionBits permissionBits) {
         super();
-        if (null == session) {
-            throw new IllegalArgumentException("Session is null.");
-        }
-        if (null == user) {
-            throw new IllegalArgumentException("User is null.");
-        }
-        if (null == ctx) {
-            throw new IllegalArgumentException("Context is null.");
-        }
-        if (null == userConfiguration) {
-            throw new IllegalArgumentException("UserConfiguration is null.");
-        }
-        if (null == permissionBits) {
-            throw new IllegalArgumentException("UserPermissionBits is null.");
-        }
+
+        Validate.notNull(session, "Session is null.");
+        Validate.notNull(ctx, "Context is null.");
+        Validate.notNull(user, "User is null.");
+        Validate.notNull(userConfiguration, "UserConfiguration is null.");
+        Validate.notNull(permissionBits, "UserPermissionBits is null.");
+
         context = ctx;
         overwriteUser = user;
         overwriteUserConfiguration = userConfiguration;

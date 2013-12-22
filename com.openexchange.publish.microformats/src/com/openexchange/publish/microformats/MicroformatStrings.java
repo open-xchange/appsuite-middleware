@@ -60,7 +60,7 @@ public final class MicroformatStrings implements LocalizableStrings {
 
     public static final String DISCLAIMER_PRIVACY = "Privacy:\n"
     +   "The data and any references contained in this webpage are shared with you under the assumption "
-    +   "that the owner of the data was entitled to make them available to you. Neither Open-Xchange, "
+    +   "that the owner of the data was entitled to make them available to you. Neither %s, "
     +   "nor any of its subsidiaries or affiliates shall be liable for its publication or "
     +   "re-publication.\n"
     +   "Any unauthorized use or dissemination of this data is prohibited. If you intend to store, "
