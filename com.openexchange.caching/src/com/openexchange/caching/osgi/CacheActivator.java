@@ -64,10 +64,10 @@ import com.openexchange.caching.CacheKeyService;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.DefaultCacheKeyService;
 import com.openexchange.caching.events.CacheEventService;
+import com.openexchange.caching.internal.AbstractCache;
 import com.openexchange.caching.internal.JCSCacheInformation;
 import com.openexchange.caching.internal.JCSCacheService;
 import com.openexchange.caching.internal.JCSCacheServiceInit;
-import com.openexchange.caching.internal.NotifyingCache;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
@@ -192,12 +192,12 @@ public final class CacheActivator extends HousekeepingActivator {
 
             @Override
             public void added(final ServiceReference<EventAdmin> ref, final EventAdmin service) {
-                NotifyingCache.setEventAdmin(service);
+                AbstractCache.setEventAdmin(service);
             }
 
             @Override
             public void removed(final ServiceReference<EventAdmin> ref, final EventAdmin service) {
-                NotifyingCache.setEventAdmin(null);
+                AbstractCache.setEventAdmin(null);
             }
         });
         openTrackers();

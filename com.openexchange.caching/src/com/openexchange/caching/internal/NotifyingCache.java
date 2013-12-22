@@ -54,12 +54,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheElement;
+import com.openexchange.caching.CacheEventConstant;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheStatistics;
 import com.openexchange.caching.ElementAttributes;
@@ -76,20 +76,9 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class NotifyingCache implements Cache, CacheListener {
+public class NotifyingCache extends AbstractCache implements Cache, CacheListener {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(NotifyingCache.class);
-
-    private static final AtomicReference<EventAdmin> EVENT_ADMIN_REF = new AtomicReference<EventAdmin>();
-
-    /**
-     * Sets the event admin.
-     *
-     * @param eventAdmin The event admin or <code>null</code>
-     */
-    public static void setEventAdmin(final EventAdmin eventAdmin) {
-        EVENT_ADMIN_REF.set(eventAdmin);
-    }
 
     private final Cache delegate;
     private final String region;
@@ -340,15 +329,22 @@ public class NotifyingCache implements Cache, CacheListener {
         }
     }
 
+    private static final String TOPIC_REMOTE_INVALIDATE = CacheEventConstant.TOPIC_REMOTE_INVALIDATE;
+
+    private static final String PROP_REGION = CacheEventConstant.PROP_REGION;
+    private static final String PROP_KEY = CacheEventConstant.PROP_KEY;
+    private static final String PROP_GROUP = CacheEventConstant.PROP_GROUP;
+    private static final String PROP_OPERATION = CacheEventConstant.PROP_OPERATION;
+
     private void locallyPostInvalidateEvent(final CacheEvent cacheEvent) {
         final EventAdmin eventAdmin = EVENT_ADMIN_REF.get();
         if (null != eventAdmin && null != cacheEvent) {
             final Map<String, Object> properties = new HashMap<String, Object>(4);
-            properties.put("region", cacheEvent.getRegion());
-            properties.put("operation", cacheEvent.getOperation().toString());
-            properties.put("group", cacheEvent.getGroupName());
-            properties.put("key", cacheEvent.getKey());
-            eventAdmin.postEvent(new Event("com/openexchange/cache/remote/invalidate", properties));
+            properties.put(PROP_REGION, cacheEvent.getRegion());
+            properties.put(PROP_OPERATION, cacheEvent.getOperation().toString());
+            properties.put(PROP_GROUP, cacheEvent.getGroupName());
+            properties.put(PROP_KEY, cacheEvent.getKey());
+            eventAdmin.postEvent(new Event(TOPIC_REMOTE_INVALIDATE, properties));
         }
     }
 
