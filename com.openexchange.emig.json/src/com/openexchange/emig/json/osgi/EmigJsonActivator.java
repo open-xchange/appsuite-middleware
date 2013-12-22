@@ -51,7 +51,6 @@ package com.openexchange.emig.json.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityChecker;
@@ -106,8 +105,7 @@ public class EmigJsonActivator extends AJAXModuleActivator {
             }
         }, properties);
 
-        ServiceReference<CapabilityService> capabilityRef = context.getServiceReference(CapabilityService.class);
-        context.getService(capabilityRef).declareCapability(sCapability);
+        getService(CapabilityService.class).declareCapability(sCapability);
     }
 
 }
