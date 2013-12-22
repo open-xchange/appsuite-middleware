@@ -4,10 +4,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.CreateAttachmentAction;
 import com.openexchange.groupware.attach.impl.DeleteAttachmentAction;
+import com.openexchange.groupware.userconfiguration.MutableUserConfiguration;
 import com.openexchange.tx.UndoableAction;
 
 public class RemoveAttachmentsActionTest extends AbstractAttachmentActionTest {
@@ -57,7 +59,7 @@ public class RemoveAttachmentsActionTest extends AbstractAttachmentActionTest {
     @Override
     protected void verifyUndone() throws Exception {
         for(final AttachmentMetadata attachment : getAttachments()) {
-            final AttachmentMetadata loaded = getAttachmentBase().getAttachment(getSession(), attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(),  attachment.getId(), getContext(), getUser(), null);
+            final AttachmentMetadata loaded = getAttachmentBase().getAttachment(getSession(), attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(),  attachment.getId(), getContext(), getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
             assertEquals(attachment, loaded);
         }
         checkRemovedFromDel();
@@ -66,7 +68,7 @@ public class RemoveAttachmentsActionTest extends AbstractAttachmentActionTest {
     private void checkRemovedFromNormalTable() throws Exception {
         for(final AttachmentMetadata attachment : getAttachments()) {
             try {
-                getAttachmentBase().getAttachment(getSession(), attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(),  attachment.getId(), getContext(), getUser(), null);
+                getAttachmentBase().getAttachment(getSession(), attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(),  attachment.getId(), getContext(), getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
                 fail("Found attachment");
             } catch (final OXException x) {
                 assertTrue(true);
@@ -113,6 +115,4 @@ public class RemoveAttachmentsActionTest extends AbstractAttachmentActionTest {
     private void checkRemovedFromDel() throws OXException, SQLException {
         assertEquals(delCountStart, countDel());
     }
-
-
 }

@@ -1,10 +1,12 @@
 package com.openexchange.groupware.attach.actions;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.attach.impl.CreateAttachmentAction;
 import com.openexchange.groupware.attach.impl.UpdateAttachmentAction;
+import com.openexchange.groupware.userconfiguration.MutableUserConfiguration;
 import com.openexchange.tx.UndoableAction;
 
 public class UpdateAttachmentsActionTest  extends AbstractAttachmentActionTest{
@@ -49,14 +51,13 @@ public class UpdateAttachmentsActionTest  extends AbstractAttachmentActionTest{
 
 	@Override
 	protected void verifyPerformed() throws Exception {
-		final AttachmentMetadata loaded = getAttachmentBase().getAttachment(getSession(), update.getFolderId(), update.getAttachedId(), update.getModuleId(), update.getId(), getContext(), getUser(), null);
+		final AttachmentMetadata loaded = getAttachmentBase().getAttachment(getSession(), update.getFolderId(), update.getAttachedId(), update.getModuleId(), update.getId(), getContext(), getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
 		assertEquals(update,loaded);
 	}
 
 	@Override
 	protected void verifyUndone() throws Exception {
-		final AttachmentMetadata loaded = getAttachmentBase().getAttachment(getSession(), update.getFolderId(), update.getAttachedId(), update.getModuleId(), update.getId(), getContext(), getUser(), null);
+		final AttachmentMetadata loaded = getAttachmentBase().getAttachment(getSession(), update.getFolderId(), update.getAttachedId(), update.getModuleId(), update.getId(), getContext(), getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
 		assertEquals(original,loaded);
 	}
-
 }
