@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 
 
 /**
- * {@link EmigService}
+ * {@link EmigService} - The EMiG service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.2
