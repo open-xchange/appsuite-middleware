@@ -56,5 +56,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.2,open-xchange-themes-default"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.2,open-xchange-gui-help-plugin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.2,open-xchange-meta"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.2,open-xchange-emig"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.2,open-xchange-emig-mock"/>
 </provider>
 </psf>
