@@ -134,7 +134,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
         checkMayAttach(ServerSessionAdapter.valueOf(session, ctx, user, userConfig),
             attachment.getModuleId(), attachment.getFolderId(), attachment.getAttachedId());
-//        checkMayAttach(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), ctx, user, userConfig);
 
         checkCharacters(attachment);
 
@@ -171,7 +170,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     @Override
     public long detachFromObject(final int folderId, final int objectId, final int moduleId, final int[] ids, final Session session, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         checkMayDetach(ServerSessionAdapter.valueOf(session, ctx, user, userConfig), moduleId, folderId, objectId);
-//        checkMayDetach(folderId, objectId, moduleId, ctx, user, userConfig);
 
         if (ids.length == 0) {
             return System.currentTimeMillis();
@@ -191,7 +189,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     @Override
     public AttachmentMetadata getAttachment(final Session session, final int folderId, final int objectId, final int moduleId, final int id, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         checkMayReadAttachments(ServerSessionAdapter.valueOf(session, ctx, user, userConfig), moduleId, folderId, objectId);
-//        checkMayReadAttachments(folderId, objectId, moduleId, ctx, user, userConfig);
 
         contextHolder.set(ctx);
 
@@ -201,7 +198,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     @Override
     public InputStream getAttachedFile(final Session session, final int folderId, final int objectId, final int moduleId, final int id, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         checkMayReadAttachments(ServerSessionAdapter.valueOf(session, ctx, user, userConfig), moduleId, folderId, objectId);
-//        checkMayReadAttachments(folderId, objectId, moduleId, ctx, user, userConfig);
         contextHolder.set(ctx);
 
         return getFile(id, ctx);
@@ -240,7 +236,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     @Override
     public TimedResult<AttachmentMetadata> getAttachments(final Session session, final int folderId, final int attachedId, final int moduleId, final AttachmentField[] columns, final AttachmentField sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         checkMayReadAttachments(ServerSessionAdapter.valueOf(session, ctx, user, userConfig), moduleId, folderId, attachedId);
-//        checkMayReadAttachments(folderId, attachedId, moduleId, ctx, user, userConfig);
 
         contextHolder.set(ctx);
         final AttachmentField[] cols = addCreationDateAsNeeded(columns);
@@ -273,7 +268,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     @Override
     public TimedResult<AttachmentMetadata> getAttachments(final Session session, final int folderId, final int attachedId, final int moduleId, final int[] idsToFetch, final AttachmentField[] columns, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         checkMayReadAttachments(ServerSessionAdapter.valueOf(session, ctx, user, userConfig), moduleId, folderId, attachedId);
-//        checkMayReadAttachments(folderId, attachedId, moduleId, ctx, user, userConfig);
 
         contextHolder.set(ctx);
 
@@ -299,13 +293,12 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     @Override
     public Delta<AttachmentMetadata> getDelta(final Session session, final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-        return getDelta(session, folderId, attachedId, moduleId, ts, ignoreDeleted, QUERIES.getFields(), null, ASC, ctx, user, null);
+        return getDelta(session, folderId, attachedId, moduleId, ts, ignoreDeleted, QUERIES.getFields(), null, ASC, ctx, user, userConfig);
     }
 
     @Override
     public Delta<AttachmentMetadata> getDelta(final Session session, final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final AttachmentField[] columns, final AttachmentField sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         checkMayReadAttachments(ServerSessionAdapter.valueOf(session, ctx, user, userConfig), moduleId, folderId, attachedId);
-//        checkMayReadAttachments(folderId, attachedId, moduleId, ctx, user, userConfig);
 
         contextHolder.set(ctx);
 
@@ -499,24 +492,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         }
     }
 
-//    private void checkMayAttach(final int folderId, final int attachedId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-//        for (final AttachmentAuthorization authz : getAuthorizors(moduleId)) {
-//            authz.checkMayAttach(folderId, attachedId, user, userConfig, ctx);
-//        }
-//    }
-//
-//    private void checkMayReadAttachments(final int folderId, final int objectId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-//        for (final AttachmentAuthorization authz : getAuthorizors(moduleId)) {
-//            authz.checkMayReadAttachments(folderId, objectId, user, userConfig, ctx);
-//        }
-//    }
-//
-//    private void checkMayDetach(final int folderId, final int objectId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-//        for (final AttachmentAuthorization authz : getAuthorizors(moduleId)) {
-//            authz.checkMayDetach(folderId, objectId, user, userConfig, ctx);
-//        }
-//    }
-//
     private List<AttachmentListener> getListeners(final int moduleId) {
         List<AttachmentListener> listener = moduleListeners.get(moduleId);
         if (listener == null) {

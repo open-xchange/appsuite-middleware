@@ -184,9 +184,9 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
      */
     public ServerSessionAdapter(final Session session) throws OXException {
         super();
-        if (null == session) {
-            throw new OXException(new IllegalArgumentException("Session is null."));
-        }
+
+        Validate.notNull(session, "Session is null.");
+
         context = ContextStorage.getStorageContext(session.getContextId());
         overwriteUser = null;
         overwriteUserConfiguration = null;
@@ -209,12 +209,10 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
      */
     public ServerSessionAdapter(final Session session, final Context ctx) {
         super();
-        if (null == session) {
-            throw new IllegalArgumentException("Session is null.");
-        }
-        if (null == ctx) {
-            throw new IllegalArgumentException("Context is null.");
-        }
+
+        Validate.notNull(session, "Session is null.");
+        Validate.notNull(ctx, "Context is null.");
+
         context = ctx;
         overwriteUser = null;
         overwriteUserConfiguration = null;
@@ -238,15 +236,11 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
      */
     public ServerSessionAdapter(final Session session, final Context ctx, final User user) {
         super();
-        if (null == session) {
-            throw new IllegalArgumentException("Session is null.");
-        }
-        if (null == user) {
-            throw new IllegalArgumentException("User is null.");
-        }
-        if (null == ctx) {
-            throw new IllegalArgumentException("Context is null.");
-        }
+
+        Validate.notNull(session, "Session is null.");
+        Validate.notNull(ctx, "Context is null.");
+        Validate.notNull(user, "User is null.");
+
         context = ctx;
         overwriteUser = user;
         overwriteUserConfiguration = null;
@@ -270,18 +264,12 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
      */
     public ServerSessionAdapter(final Session session, final Context ctx, final User user, final UserConfiguration userConfiguration) {
         super();
-        if (null == session) {
-            throw new IllegalArgumentException("Session is null.");
-        }
-        if (null == user) {
-            throw new IllegalArgumentException("User is null.");
-        }
-        if (null == ctx) {
-            throw new IllegalArgumentException("Context is null.");
-        }
-        if (null == userConfiguration) {
-            throw new IllegalArgumentException("UserConfiguration is null.");
-        }
+
+        Validate.notNull(session, "Session is null.");
+        Validate.notNull(ctx, "Context is null.");
+        Validate.notNull(user, "User is null.");
+        Validate.notNull(userConfiguration, "UserConfiguration is null.");
+
         context = ctx;
         overwriteUser = user;
         overwriteUserConfiguration = userConfiguration;
