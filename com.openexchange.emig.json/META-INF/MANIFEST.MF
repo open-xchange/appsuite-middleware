@@ -46,3 +46,4 @@ Import-Package: com.openexchange.ajax,
  org.osgi.service.event,
  org.osgi.util.tracker,
  org.slf4j
+Bundle-Activator: com.openexchange.emig.json.osgi.EmigJsonActivator
