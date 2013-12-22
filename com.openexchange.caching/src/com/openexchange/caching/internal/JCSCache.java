@@ -49,6 +49,8 @@
 
 package com.openexchange.caching.internal;
 
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -61,11 +63,17 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.CacheAccess;
+import org.apache.jcs.access.exception.CacheException;
 import org.apache.jcs.access.exception.ObjectExistsException;
 import org.apache.jcs.auxiliary.AuxiliaryCache;
 import org.apache.jcs.engine.behavior.ICache;
 import org.apache.jcs.engine.behavior.ICacheElement;
+import org.apache.jcs.engine.behavior.IElementAttributes;
 import org.apache.jcs.engine.control.CompositeCache;
+import org.apache.jcs.engine.control.event.ElementEvent;
+import org.apache.jcs.engine.control.event.behavior.IElementEvent;
+import org.apache.jcs.engine.control.event.behavior.IElementEventConstants;
+import org.apache.jcs.engine.control.event.behavior.IElementEventHandler;
 import org.apache.jcs.engine.control.group.GroupAttrName;
 import org.apache.jcs.engine.control.group.GroupId;
 import org.apache.jcs.engine.memory.MemoryCache;
@@ -115,21 +123,23 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
         return field;
     }
 
+    private static final boolean enableCacheEvents = false;
+
     // -------------------------------------------------------------------------------------------------------- //
 
     private final JCS cache;
     private final CompositeCache cacheControl;
     private volatile Boolean localOnly;
     private final MemoryCache memCache;
-    private final String name;
+    private final String region;
 
     /**
      * Initializes a new {@link JCSCache}
      */
-    public JCSCache(final JCS cache, final String name) {
+    public JCSCache(final JCS cache, final String region) throws CacheException {
         super();
         this.cache = cache;
-        this.name = name;
+        this.region = region;
         // Init CompositeCache reference
         CompositeCache tmp;
         try {
@@ -139,6 +149,38 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
         }
         cacheControl = tmp;
         memCache = null == tmp ? null : tmp.getMemoryCache();
+
+        if (enableCacheEvents) {
+            final TIntSet removeEvents = new TIntHashSet(4);
+            removeEvents.add(IElementEventConstants.ELEMENT_EVENT_EXCEEDED_IDLETIME_BACKGROUND);
+            removeEvents.add(IElementEventConstants.ELEMENT_EVENT_EXCEEDED_IDLETIME_ONREQUEST);
+            removeEvents.add(IElementEventConstants.ELEMENT_EVENT_EXCEEDED_MAXLIFE_BACKGROUND);
+            removeEvents.add(IElementEventConstants.ELEMENT_EVENT_EXCEEDED_MAXLIFE_ONREQUEST);
+            final IElementAttributes defaultElementAttributes = cache.getDefaultElementAttributes();
+            defaultElementAttributes.addElementEventHandler(new IElementEventHandler() {
+
+                @Override
+                public void handleElementEvent(final IElementEvent event) {
+                    final int type = event.getElementEvent();
+                    if (removeEvents.contains(type)) {
+                        final ElementEvent elementEvent = (ElementEvent) event;
+                        final Object source = elementEvent.getSource();
+                        if (source instanceof ICacheElement) {
+                            final ICacheElement cacheElement = (ICacheElement) source;
+                            Serializable key = cacheElement.getKey();
+                            if (key instanceof GroupAttrName) {
+                                final GroupAttrName groupAttrName = (GroupAttrName) key;
+                                postRemove((Serializable) groupAttrName.attrName, groupAttrName.groupId.groupName, true);
+                            } else {
+                                postRemove(key, null, true);
+                            }
+                        }
+                    }
+
+                }
+            });
+            cache.setDefaultElementAttributes(defaultElementAttributes);
+        }
     }
 
     @Override
@@ -260,7 +302,7 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
     @Override
     public void invalidateGroup(final String group) {
         cache.invalidateGroup(group);
-        postRemove(null, group);
+        postRemove(null, group, false);
     }
 
     @Override
@@ -346,7 +388,7 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
     public void remove(final Serializable key) throws OXException {
         try {
             cache.remove(key);
-            postRemove(key, null);
+            postRemove(key, null, false);
         } catch (final org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_REMOVE.create(e, e.getMessage());
         }
@@ -356,7 +398,7 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
     public void localRemove(final Serializable key) throws OXException {
         try {
             cacheControl.localRemove(key);
-            postRemove(key, null);
+            postRemove(key, null, false);
         } catch (final Exception e) {
             throw CacheExceptionCode.FAILED_REMOVE.create(e, e.getMessage());
         }
@@ -376,14 +418,14 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
     @Override
     public void removeFromGroup(final Serializable key, final String group) {
         cache.remove(key, group);
-        postRemove(key, group);
+        postRemove(key, group, false);
     }
 
     @Override
     public void localRemoveFromGroup(final Serializable key, final String group) {
         final GroupAttrName groupAttrName = getGroupAttrName(group, key);
         this.cacheControl.localRemove(groupAttrName);
-        postRemove(key, group);
+        postRemove(key, group, false);
     }
 
     private GroupAttrName getGroupAttrName(final String group, final Object name) {
@@ -496,27 +538,35 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
     private static final String PROP_REGION = CacheEventConstant.PROP_REGION;
     private static final String PROP_KEY = CacheEventConstant.PROP_KEY;
     private static final String PROP_GROUP = CacheEventConstant.PROP_GROUP;
+    private static final String PROP_EXCEEDED = CacheEventConstant.PROP_EXCEEDED;
 
-    private void postRemove(final Serializable optKey, final String optGroup) {
+    void postRemove(final Serializable optKey, final String optGroup, final boolean exceeded) {
+        if (!enableCacheEvents) {
+            return;
+        }
         final EventAdmin eventAdmin = EVENT_ADMIN_REF.get();
         if (null != eventAdmin) {
             final Map<String, Object> properties = new HashMap<String, Object>(6);
-            properties.put(PROP_REGION, name);
+            properties.put(PROP_REGION, region);
             if (null != optGroup) {
                 properties.put(PROP_GROUP, optGroup);
             }
             if (null != optKey) {
                 properties.put(PROP_KEY, optKey);
             }
+            properties.put(PROP_EXCEEDED, Boolean.valueOf(exceeded));
             eventAdmin.postEvent(new Event(TOPIC_REMOVE, properties));
         }
     }
 
-    private void postClear() {
+    void postClear() {
+        if (!enableCacheEvents) {
+            return;
+        }
         final EventAdmin eventAdmin = EVENT_ADMIN_REF.get();
         if (null != eventAdmin) {
             final Map<String, Object> properties = new HashMap<String, Object>(2);
-            properties.put(PROP_REGION, name);
+            properties.put(PROP_REGION, region);
             eventAdmin.postEvent(new Event(TOPIC_CLEAR, properties));
         }
     }

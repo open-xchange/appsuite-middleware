@@ -77,6 +77,9 @@ public final class CacheEventConstant {
     /** The property name for cache operation (value is of type <code>java.lang.String</code>) */
     public static final String PROP_OPERATION = "operation";
 
+    /** The property name for exceeded cache element event (value is of type <code>java.lang.Boolean</code>) */
+    public static final String PROP_EXCEEDED = "exceeded";
+
     /** The topic for cache element removal */
     public static final String TOPIC_REMOVE = "com/openexchange/cache/remove";
 

@@ -89,18 +89,18 @@ public abstract class EmigAction implements AJAXActionService {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
-        final CapabilityService capabilityService = getService(CapabilityService.class);
-        if (null == capabilityService || !capabilityService.getCapabilities(session).contains("emig")) {
-            throw OXException.noPermissionForModule("emig");
-        }
-
-        if (!session.getUserPermissionBits().hasTask()) {
-            throw OXException.noPermissionForModule("task");
-        }
+        extracted(session);
         try {
             return perform(new EmigRequest(requestData, session));
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private void extracted(final ServerSession session) throws OXException {
+        final CapabilityService capabilityService = getService(CapabilityService.class);
+        if (null == capabilityService || !capabilityService.getCapabilities(session).contains("emig")) {
+            throw OXException.noPermissionForModule("emig");
         }
     }
 
