@@ -47,40 +47,41 @@
  *
  */
 
-package com.openexchange.emig.json.actions;
+package com.openexchange.emig;
 
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.emig.EmigService;
-import com.openexchange.emig.json.EmigRequest;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link SenderAction}
+ * {@link EmigService}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.4.1
+ * @since 7.4.2
  */
-public final class SenderAction extends EmigAction {
+public interface EmigService {
 
     /**
-     * Initializes a new {@link SenderAction}.
+     * Checks if EMiG is enabled for denoted user.
      *
-     * @param services The service look-up
+     * @param userIdentifier The EMiG user identifier
+     * @return <code>true</code> if EMiG is enabled for denoted user; otherwise <code>false</code>
      */
-    public SenderAction(ServiceLookup services) {
-        super(services);
-    }
+    boolean isEMIG_Session(String userIdentifier);
 
-    @Override
-    protected boolean checkCapability() {
-        return false;
-    }
+    /**
+     * Checks if transport server has EMiG capability.
+     *
+     * @param serverName The name of the transport server
+     * @param mailFrom The from address
+     * @param debugLoginname The login name for debugging purpose
+     * @return <code>true</code> if transport server has EMiG capability; otherwise <code>false</code>
+     */
+    boolean isEMIG_MSA(String serverName, String mailFrom, String debugLoginname);
 
-    @Override
-    protected AJAXRequestResult perform(final EmigRequest req) throws OXException, JSONException {
-        return new AJAXRequestResult(Boolean.valueOf(getService(EmigService.class).isEMIG_Session(req.getSession().getLoginName())), "boolean");
-    }
+    /**
+     * Checks EMiG capabilities for given addresses
+     *
+     * @param mailAddresses The mail addresses
+     * @return The colors' bit values
+     */
+    int[] isEMIG_Recipient(String[] mailAddresses);
 
 }

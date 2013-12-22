@@ -47,80 +47,67 @@
  *
  */
 
-package com.openexchange.emig.json.actions;
+package com.openexchange.emig.json.osgi;
 
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.emig.json.EmigRequest;
+import com.openexchange.emig.EmigService;
+import com.openexchange.emig.json.EmigActionFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * {@link EmigAction} - The abstract EMiG action.
+ * {@link EmigJsonActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class EmigAction implements AJAXActionService {
+public class EmigJsonActivator extends AJAXModuleActivator {
 
-    private final ServiceLookup services;
+    private volatile ServiceRegistration<CapabilityChecker> capabilityChecker;
 
     /**
-     * Initializes a new {@link AbstractTaskAction}.
+     * Initializes a new {@link EmigJsonActivator}.
      */
-    protected EmigAction(final ServiceLookup services) {
+    public EmigJsonActivator() {
         super();
-        this.services = services;
-    }
-
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> is absent
-     */
-    protected <S> S getService(final Class<? extends S> clazz) {
-        return services.getService(clazz);
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
-        if (checkCapability() && !hasEmigCapability(session)) {
-            throw OXException.noPermissionForModule("emig");
-        }
-        try {
-            return perform(new EmigRequest(requestData, session));
-        } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        }
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { CapabilityService.class, EmigService.class };
     }
 
-    private boolean hasEmigCapability(final ServerSession session) throws OXException {
-        final CapabilityService capabilityService = getService(CapabilityService.class);
-        return (null != capabilityService && capabilityService.getCapabilities(session).contains("emig"));
-    }
+    @Override
+    protected void startBundle() throws Exception {
+        registerModule(new EmigActionFactory(this), "emig");
 
-    /**
-     * Checks if capability should be checked prior to serving action.
-     *
-     * @return <code>true</code> to check; otherwise <code>false</code>
-     */
-    protected boolean checkCapability() {
-        return true;
-    }
+        final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+        final String sCapability = "emig";
+        properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
+        capabilityChecker = context.registerService(CapabilityChecker.class, new CapabilityChecker() {
+            @Override
+            public boolean isEnabled(String capability, Session ses) throws OXException {
+                if (sCapability.equals(capability)) {
+                    final ServerSession session = ServerSessionAdapter.valueOf(ses);
+                    if (session.isAnonymous()) {
+                        return false;
+                    }
 
-    /**
-     * Performs specified EMiG request.
-     *
-     * @param req The EMiG request
-     * @return The result
-     * @throws OXException If an error occurs
-     * @throws JSONException If a JSON error occurs
-     */
-    protected abstract AJAXRequestResult perform(EmigRequest req) throws OXException, JSONException;
+                    return getService(EmigService.class).isEMIG_Session(ses.getLoginName());
+                }
+                return true;
+            }
+        }, properties);
+
+        ServiceReference<CapabilityService> capabilityRef = context.getServiceReference(CapabilityService.class);
+        context.getService(capabilityRef).declareCapability(sCapability);
+    }
 
 }
