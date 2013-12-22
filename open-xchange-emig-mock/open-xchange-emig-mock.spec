@@ -43,7 +43,6 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
-%dir /opt/open-xchange/etc/
 
 %changelog
 * Wed Dec 22 2013 Thorben Betten <thorben.betten@open-xchange.com>
