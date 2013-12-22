@@ -49,6 +49,8 @@
 
 package com.openexchange.emig;
 
+import com.openexchange.exception.OXException;
+
 
 /**
  * {@link EmigService}
@@ -63,8 +65,9 @@ public interface EmigService {
      *
      * @param userIdentifier The EMiG user identifier
      * @return <code>true</code> if EMiG is enabled for denoted user; otherwise <code>false</code>
+     * @throws OXException If operation fails for any reason
      */
-    boolean isEMIG_Session(String userIdentifier);
+    boolean isEMIG_Session(String userIdentifier) throws OXException;
 
     /**
      * Checks if transport server has EMiG capability.
@@ -73,15 +76,17 @@ public interface EmigService {
      * @param mailFrom The from address
      * @param debugLoginname The login name for debugging purpose
      * @return <code>true</code> if transport server has EMiG capability; otherwise <code>false</code>
+     * @throws OXException If operation fails for any reason
      */
-    boolean isEMIG_MSA(String serverName, String mailFrom, String debugLoginname);
+    boolean isEMIG_MSA(String serverName, String mailFrom, String debugLoginname) throws OXException;
 
     /**
      * Checks EMiG capabilities for given addresses
      *
      * @param mailAddresses The mail addresses
      * @return The colors' bit values
+     * @throws OXException If operation fails for any reason
      */
-    int[] isEMIG_Recipient(String[] mailAddresses);
+    int[] isEMIG_Recipient(String[] mailAddresses) throws OXException;
 
 }
