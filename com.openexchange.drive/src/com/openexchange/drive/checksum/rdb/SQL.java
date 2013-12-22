@@ -55,7 +55,6 @@ import java.net.URLEncoder;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.FileID;
@@ -322,7 +321,8 @@ public class SQL {
 
     public static String escape(String value) throws OXException {
         if (null == value) {
-            System.out.println(value);
+            //System.out.println(value);
+            return null;
         }
         try {
             return URLEncoder.encode(value, "US-ASCII");

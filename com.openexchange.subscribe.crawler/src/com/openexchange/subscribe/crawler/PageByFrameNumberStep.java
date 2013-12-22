@@ -62,13 +62,10 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class PageByFrameNumberStep extends AbstractStep<HtmlPage, HtmlPage> {
-    private Exception exception;
-
-    protected boolean executedSuccessfully;
-
-    private int frameNumber;
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PageByFrameNumberStep.class);
+
+    private int frameNumber;
 
     public PageByFrameNumberStep() {
         super();

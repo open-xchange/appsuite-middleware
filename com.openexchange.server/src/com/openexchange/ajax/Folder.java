@@ -126,6 +126,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.json.writer.FolderWriter.MailFolderFieldWriter;
 import com.openexchange.mail.messaging.MailMessagingService;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -747,7 +748,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                                         /*
                                                          * TODO: Does UI already accept warnings?
                                                          */
-                                                        warning = (OXException) t;
+                                                        warning = MimeMailException.handleMessagingException((MessagingException) t);
                                                         warning.setCategory(Category.CATEGORY_WARNING);
                                                     }
                                                 } else {
@@ -1632,7 +1633,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                         /*
                                          * TODO: Does UI already accept warnings?
                                          */
-                                        warning = (OXException) t;
+                                        warning = MimeMailException.handleMessagingException((MessagingException) t);
                                         warning.setCategory(Category.CATEGORY_WARNING);
                                     }
                                 } else {

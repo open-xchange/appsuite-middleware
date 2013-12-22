@@ -206,6 +206,9 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
 
     @Override
     public boolean exists(final int userId, final int contextId, final Connection con) throws OXException {
+        if (null == con) {
+            return exists(userId, contextId);
+        }
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {

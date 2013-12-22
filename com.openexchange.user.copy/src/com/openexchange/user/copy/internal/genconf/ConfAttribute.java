@@ -99,7 +99,7 @@ public class ConfAttribute {
         int result = 1;
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + type;
-        if (!name.equals("account")) {
+        if (!"account".equals(name)) {
             result = prime * result + ((value == null) ? 0 : value.hashCode());
         }
 

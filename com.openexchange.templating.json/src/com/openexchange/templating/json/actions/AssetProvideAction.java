@@ -76,20 +76,20 @@ public class AssetProvideAction implements AJAXActionService {
     public AssetProvideAction(ServiceLookup services) {
         this.services = services;
     }
-    
+
     @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         String templateDirectory = services.getService(ConfigurationService.class).getProperty("com.openexchange.templating.assets.path");
-        
+
         String requestedAsset = request.getParameter("name");
-        
+
         File asset = new File(new File(templateDirectory), requestedAsset);
-        
+
         // Check for directory traversal
-        if (!asset.getParent().equals(new File(templateDirectory))){
+        if (!asset.getParent().equals(templateDirectory)){
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("name", requestedAsset);
         }
-        
+
         if (!asset.exists()) {
             throw TemplateErrorMessage.TemplateNotFound.create();
         }

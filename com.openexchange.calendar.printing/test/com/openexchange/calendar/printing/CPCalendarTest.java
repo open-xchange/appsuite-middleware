@@ -49,6 +49,7 @@
 
 package com.openexchange.calendar.printing;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import junit.framework.TestCase;
 import org.junit.Test;
@@ -92,7 +93,7 @@ public class CPCalendarTest extends TestCase {
         for(int workDay: workDays){
             assertTrue("Should be a work day: "+workDay, calendar.getWorkWeekDays().contains(Integer.valueOf(workDay)));
         }
-        assertEquals("Should contain only the given days, not more: "+workDays, workDays.length , calendar.getWorkWeekDurationInDays());
+        assertEquals("Should contain only the given days, not more: "+Arrays.toString(workDays), workDays.length , calendar.getWorkWeekDurationInDays());
     }
 
     @Test
