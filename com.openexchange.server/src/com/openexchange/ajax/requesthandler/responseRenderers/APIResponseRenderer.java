@@ -215,7 +215,7 @@ public class APIResponseRenderer implements ResponseRenderer {
                         callback = PATTERN_QUOTE.matcher(callback).replaceAll("$1\\\\\"");
                     }
                 }
-                // Write: PART1 + <action> + PART2 + <action> + ")(" + <json> + PART3
+                // Write: PART1 + <action> + PART2 + <action> + ``"])(лл + <json> + PART3
                 final PrintWriter writer = resp.getWriter();
                 writer.write(JS_FRAGMENT_PART1);
                 writer.write(callback);

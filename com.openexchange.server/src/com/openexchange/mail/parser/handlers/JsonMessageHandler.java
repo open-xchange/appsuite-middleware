@@ -680,7 +680,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             for (int i = len; b && i-- > 0;) {
                                 final JSONObject jAttachment = attachments.getJSONObject(i);
                                 // Is HTML and in same multipart
-                                if (jAttachment.optString(CONTENT_TYPE, "").startsWith("text/htm") && mpInfo.equals(jAttachment.optString(MULTIPART_ID, null))) {
+                                if (jAttachment.optString(CONTENT_TYPE, "").startsWith("text/htm") && mpInfo.mpId.equals(jAttachment.optString(MULTIPART_ID, null))) {
                                     String content = jAttachment.optString(CONTENT, "null");
                                     if (!"null".equals(content)) {
                                         // Append to first one

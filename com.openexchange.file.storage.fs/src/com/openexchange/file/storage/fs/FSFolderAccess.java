@@ -209,7 +209,7 @@ public class FSFolderAccess extends  AbstractFileStorageFolderAccess{
 
         dir.renameTo(new File(dest, null != newName ? newName : dir.getName()));
 
-        return newParentId + "/" + null != newName ? newName : dir.getName();
+        return newParentId + "/" + (null != newName ? newName : dir.getName());
     }
 
     @Override

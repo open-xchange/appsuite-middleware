@@ -369,24 +369,33 @@ public abstract class UserStorage {
      * @throws OXException if initialization of contexts fails.
      */
     public static void start() throws OXException {
-        if (null != instance) {
-            LOG.error("Duplicate initialization of UserStorage.");
-            return;
+        UserStorage tmp = instance;
+        if (null == tmp) {
+            synchronized (UserStorage.class) {
+                tmp = instance;
+                if (null == tmp) {
+                    tmp = new CachingUserStorage(new RdbUserStorage());
+                    tmp.startInternal();
+                    instance = tmp;
+                }
+            }
         }
-        instance = new CachingUserStorage(new RdbUserStorage());
-        instance.startInternal();
     }
 
     /**
      * Shutdown.
      */
     public static void stop() throws OXException {
-        if (null == instance) {
-            LOG.error("Duplicate shutdown of UserStorage.");
-            return;
+        UserStorage tmp = instance;
+        if (null != tmp) {
+            synchronized (UserStorage.class) {
+                tmp = instance;
+                if (null != tmp) {
+                    tmp.stopInternal();
+                    instance = null;
+                }
+            }
         }
-        instance.stopInternal();
-        instance = null;
     }
 
     /**

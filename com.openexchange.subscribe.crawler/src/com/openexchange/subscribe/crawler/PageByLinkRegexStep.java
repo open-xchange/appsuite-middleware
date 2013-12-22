@@ -66,13 +66,9 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
  */
 public class PageByLinkRegexStep extends AbstractStep<HtmlPage, HtmlPage>{
 
-    protected String linkRegex;
-
-    private Exception exception;
-
-    protected boolean executedSuccessfully;
-
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PageByLinkRegexStep.class);
+
+    protected String linkRegex;
 
     public PageByLinkRegexStep() {
         super();
