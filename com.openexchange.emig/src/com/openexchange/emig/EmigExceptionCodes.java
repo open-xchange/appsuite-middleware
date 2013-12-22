@@ -78,7 +78,11 @@ public enum EmigExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * A JSON error occurred: %1$s
      */
-    JSON_ERROR("A JSON error occurred: %1$s", Category.CATEGORY_ERROR, 14),
+    JSON_ERROR("A JSON error occurred: %1$s", Category.CATEGORY_ERROR, 4),
+    /**
+     * Internet E-Mail address could not be parsed: "%1$s".
+     */
+    EMAIL_PARSE_ERROR("Internet E-Mail address could not be parsed: \"%1$s\".", Category.CATEGORY_ERROR, 5, EmigExceptionMessages.EMAIL_PARSE_ERROR_MSG),
     ;
 
     /**
