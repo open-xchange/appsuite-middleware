@@ -1,3 +1,16 @@
+* 2013-12-17 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 30254: Added column names to SQL statement
+
+* 2013-12-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30358: Modified HTTP-API call-back pattern to surround injected string with quotes while injected string gets quote-escaped before
+ - Fix for bug 30357: Remove harmful "<%tag>" tags from HTML content id displayed inline
+
+* 2013-12-17 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30359: Configure SAX builder to not resolve external entities
+
 * 2013-12-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 27640: Properly decode "Subject" header in JSON MIME representation
@@ -42,16 +55,15 @@
  - Fix for bug 29853: Check for duplicate folder name during insert/update
  - Fix for bug 30049: Added missing import to javax.management
   
+* 2013-11-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29914: Cleansed all duplicate log4j occurrences from runtime system
+ - Fix for bug 29816: Added "TLSv1" to enabled protocols accepted by Open-Xchange as a client
+
 * 2013-11-26 - marcus.klein@open-xchange.com
 
  - Fix for bug 29734: Marked paths.perfMap not as configuration file anymore.
  - Fix for bug 29981: Be resilient against concurrent reads and modifications.
-
- - Fix for bug 29816: Added "TLSv1" to enabled protocols accepted by Open-Xchange as a client
-
-* 2013-12-02 - thorben.betten@open-xchange.com
-
- - Fix for bug 30119: Avoid superfluous database updates on JSlob write-back requests
 
 * 2013-11-19 - marc.arens@open-xchange.com
 

@@ -1,3 +1,15 @@
+open-xchange-admin-reseller (7.4.1-11) stable; urgency=low
+
+  * Build for patch 2013-12-23
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Thu, 19 Dec 2013 09:06:57 +0100
+
+open-xchange-admin-reseller (7.4.1-10) stable; urgency=low
+
+  * Build for patch 2013-12-18
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Tue, 17 Dec 2013 10:15:19 +0100
+
 open-xchange-admin-reseller (7.4.1-9) stable; urgency=low
 
   * Build for patch 2013-12-12
