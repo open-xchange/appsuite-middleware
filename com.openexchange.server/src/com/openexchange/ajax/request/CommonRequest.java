@@ -79,7 +79,7 @@ public abstract class CommonRequest {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getUser().getLocale();
         }
-        return UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
+        return UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getLocale();
     }
 
 	protected void sendErrorAsJS(final String error, final String...errorParams) {

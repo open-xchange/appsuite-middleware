@@ -478,7 +478,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         }
 
         try {
-            return UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
+            return UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getLocale();
         } catch (OXException e) {
             LOG.warn("Could not load user to get his locale.", e);
             return Locale.US;
@@ -500,7 +500,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         }
 
         try {
-            return UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
+            return UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getLocale();
         } catch (OXException e) {
             LOG.warn("Could not load user to get his locale.", e);
             return Locale.US;

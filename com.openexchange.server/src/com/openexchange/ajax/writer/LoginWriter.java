@@ -132,7 +132,7 @@ public final class LoginWriter {
             locale = ((ServerSession) session).getUser().getLocale();
         } else {
             try {
-                locale = UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
+                locale = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getLocale();
             } catch (final Exception e) {
                 // Ignore
             }
@@ -159,7 +159,7 @@ public final class LoginWriter {
         } else {
             isRandomTokenEnabled = configurationService.getBoolProperty(ConfigurationProperty.RANDOM_TOKEN.getPropertyName(), false);
         }
-        
+
         json.put(PARAMETER_SESSION, session.getSessionID());
         if(isRandomTokenEnabled) {
             json.put(RANDOM_PARAM, session.getRandomToken());
@@ -185,7 +185,7 @@ public final class LoginWriter {
             return ((ServerSession) session).getUser().getLocale();
         }
         try {
-            return UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
+            return UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getLocale();
         } catch (final Exception e) {
             return defaultLocale;
         }

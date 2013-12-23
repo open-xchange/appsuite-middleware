@@ -765,7 +765,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 throw OXMailfilterExceptionCode.PROPERTY_ERROR.create(e, MailFilterProperties.Values.SIEVE_PORT.property);
             }
         } else if (MailFilterProperties.LoginTypes.USER.name.equals(logintype)) {
-            storageUser = UserStorage.getStorageUser(creds.getUserid(), creds.getContextid());
+            storageUser = UserStorage.getInstance().getUser(creds.getUserid(), creds.getContextid());
             if (null != storageUser) {
                 final String mailServerURL = storageUser.getImapServer();
                 final URI uri;
@@ -810,7 +810,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             if (null != storageUser) {
                 authname = storageUser.getImapLogin();
             } else {
-                storageUser = UserStorage.getStorageUser(creds.getUserid(), creds.getContextid());
+                storageUser = UserStorage.getInstance().getUser(creds.getUserid(), creds.getContextid());
                 if (null != storageUser) {
                     authname = storageUser.getImapLogin();
                 } else {
@@ -831,7 +831,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 if (null != storageUser) {
                     authname = storageUser.getMail();
                 } else {
-                    storageUser = UserStorage.getStorageUser(creds.getUserid(), creds.getContextid());
+                    storageUser = UserStorage.getInstance().getUser(creds.getUserid(), creds.getContextid());
                     if (null != storageUser) {
                         authname = storageUser.getMail();
                     } else {

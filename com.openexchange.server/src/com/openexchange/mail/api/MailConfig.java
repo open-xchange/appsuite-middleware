@@ -284,7 +284,7 @@ public abstract class MailConfig {
         mailConfig.accountId = accountId;
         mailConfig.session = session;
         mailConfig.applyStandardNames(mailAccount);
-        fillLoginAndPassword(mailConfig, session, UserStorage.getStorageUser(userId, contextId).getLoginInfo(), mailAccount);
+        fillLoginAndPassword(mailConfig, session, UserStorage.getInstance().getUser(userId, contextId).getLoginInfo(), mailAccount);
         String serverURL = MailConfig.getMailServerURL(mailAccount);
         if (serverURL == null) {
             if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
