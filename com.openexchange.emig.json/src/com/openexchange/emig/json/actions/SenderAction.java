@@ -52,9 +52,11 @@ package com.openexchange.emig.json.actions;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.emig.EmigExceptionCodes;
 import com.openexchange.emig.EmigService;
 import com.openexchange.emig.json.EmigRequest;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceExceptionCode;
@@ -75,7 +77,7 @@ public final class SenderAction extends AbstractEmigAction {
      *
      * @param services The service look-up
      */
-    public SenderAction(ServiceLookup services) {
+    public SenderAction(final ServiceLookup services) {
         super(services);
     }
 
@@ -101,9 +103,14 @@ public final class SenderAction extends AbstractEmigAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("account");
         }
 
-        final String sender = jBody.optString("sender", null);
+        String sender = jBody.optString("sender", null);
         if (null == sender) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("sender");
+        }
+        try {
+            sender = new QuotedInternetAddress(sender, false).getIDNAddress();
+        } catch (final Exception e) {
+            throw EmigExceptionCodes.EMAIL_PARSE_ERROR.create(e, sender);
         }
 
         final ServerSession session = req.getSession();

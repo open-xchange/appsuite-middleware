@@ -50,43 +50,24 @@
 package com.openexchange.emig;
 
 import com.openexchange.exception.OXException;
-
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link EmigService} - The EMiG service.
+ * {@link EmigExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.2
  */
-public interface EmigService {
+public final class EmigExceptionMessages implements LocalizableStrings {
 
     /**
-     * Checks if EMiG is enabled for denoted user.
-     *
-     * @param userIdentifier The EMiG user identifier
-     * @return <code>true</code> if EMiG is enabled for denoted user; otherwise <code>false</code>
-     * @throws OXException If operation fails for any reason
+     * Initializes a new {@link OXExceptionMessages}.
      */
-    boolean isEMIG_Session(String userIdentifier) throws OXException;
+    private EmigExceptionMessages() {
+        super();
+    }
 
-    /**
-     * Checks if transport server has EMiG capability.
-     *
-     * @param serverName The name of the transport server
-     * @param mailFrom The from address
-     * @param debugLoginname The login name for debugging purpose
-     * @return <code>true</code> if transport server has EMiG capability; otherwise <code>false</code>
-     * @throws OXException If operation fails for any reason
-     */
-    boolean isEMIG_MSA(String serverName, String mailFrom, String debugLoginname) throws OXException;
-
-    /**
-     * Checks EMiG capabilities for given addresses
-     *
-     * @param mailAddresses The mail addresses
-     * @return The colors' bit values
-     * @throws OXException If operation fails for any reason
-     */
-    int[] isEMIG_Recipient(String[] mailAddresses) throws OXException;
+    // The E-Mail address is invalid %1$s
+    public static final String EMAIL_PARSE_ERROR_MSG = "The E-Mail address is invalid: \"%1$s\".";
 
 }

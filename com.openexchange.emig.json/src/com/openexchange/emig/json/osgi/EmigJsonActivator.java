@@ -54,6 +54,9 @@ import java.util.Hashtable;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.emig.EmigService;
 import com.openexchange.emig.json.EmigActionFactory;
 import com.openexchange.emig.json.Enabled;
@@ -80,7 +83,7 @@ public class EmigJsonActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CapabilityService.class, EmigService.class };
+        return new Class<?>[] { ConfigViewFactory.class, CapabilityService.class, EmigService.class };
     }
 
     @Override
@@ -95,13 +98,19 @@ public class EmigJsonActivator extends AJAXModuleActivator {
             properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
             registerService(CapabilityChecker.class, new CapabilityChecker() {
                 @Override
-                public boolean isEnabled(String capability, Session ses) throws OXException {
+                public boolean isEnabled(final String capability, final Session ses) throws OXException {
                     if (sCapability.equals(capability)) {
                         final ServerSession session = ServerSessionAdapter.valueOf(ses);
                         if (session.isAnonymous()) {
                             return false;
                         }
-                        return getService(EmigService.class).isEMIG_Session(ses.getLoginName());
+                        final ConfigViewFactory factory = getService(ConfigViewFactory.class);
+                        final ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+                        final ComposedConfigProperty<Boolean> property = view.property("com.openexchange.emig.enabled", boolean.class);
+                        if (property.isDefined() && property.get().booleanValue()) {
+                            return getService(EmigService.class).isEMIG_Session(ses.getLoginName());
+                        }
+                        return false;
                     }
                     return true;
                 }

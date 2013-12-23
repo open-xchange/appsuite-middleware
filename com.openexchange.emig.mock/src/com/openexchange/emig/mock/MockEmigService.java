@@ -47,46 +47,50 @@
  *
  */
 
-package com.openexchange.emig;
+package com.openexchange.emig.mock;
 
+import java.util.Arrays;
+import com.openexchange.emig.EmigService;
 import com.openexchange.exception.OXException;
 
 
 /**
- * {@link EmigService} - The EMiG service.
+ * {@link MockEmigService} - EMig fully enabled...
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.2
  */
-public interface EmigService {
+public final class MockEmigService implements EmigService {
 
     /**
-     * Checks if EMiG is enabled for denoted user.
-     *
-     * @param userIdentifier The EMiG user identifier
-     * @return <code>true</code> if EMiG is enabled for denoted user; otherwise <code>false</code>
-     * @throws OXException If operation fails for any reason
+     * Initializes a new {@link MockEmigService}.
      */
-    boolean isEMIG_Session(String userIdentifier) throws OXException;
+    public MockEmigService() {
+        super();
+    }
 
-    /**
-     * Checks if transport server has EMiG capability.
-     *
-     * @param serverName The name of the transport server
-     * @param mailFrom The from address
-     * @param debugLoginname The login name for debugging purpose
-     * @return <code>true</code> if transport server has EMiG capability; otherwise <code>false</code>
-     * @throws OXException If operation fails for any reason
-     */
-    boolean isEMIG_MSA(String serverName, String mailFrom, String debugLoginname) throws OXException;
+    @Override
+    public boolean isEMIG_Session(String userIdentifier) throws OXException {
+        return true;
+    }
 
-    /**
-     * Checks EMiG capabilities for given addresses
-     *
-     * @param mailAddresses The mail addresses
-     * @return The colors' bit values
-     * @throws OXException If operation fails for any reason
-     */
-    int[] isEMIG_Recipient(String[] mailAddresses) throws OXException;
+    @Override
+    public boolean isEMIG_MSA(String serverName, String mailFrom, String debugLoginname) throws OXException {
+        return true;
+    }
+
+    @Override
+    public int[] isEMIG_Recipient(String[] mailAddresses) throws OXException {
+        if (null == mailAddresses) {
+            return new int[0];
+        }
+        final int length = mailAddresses.length;
+        if (0 == length) {
+            return new int[0];
+        }
+        final int[] retval = new int[length];
+        Arrays.fill(retval, 2);
+        return retval;
+    }
 
 }

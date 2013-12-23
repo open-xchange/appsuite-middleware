@@ -54,9 +54,12 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.emig.EmigExceptionCodes;
 import com.openexchange.emig.EmigService;
 import com.openexchange.emig.json.EmigRequest;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -74,7 +77,7 @@ public final class EmigAction extends AbstractEmigAction {
      *
      * @param services The service look-up
      */
-    public EmigAction(ServiceLookup services) {
+    public EmigAction(final ServiceLookup services) {
         super(services);
     }
 
@@ -95,7 +98,14 @@ public final class EmigAction extends AbstractEmigAction {
         final int length = jBody.length();
         final List<String> addrs = new ArrayList<String>(length);
         for (int i = 0; i < length; i++) {
-            addrs.add(jBody.getString(i));
+            final String sAddress = jBody.getString(i);
+            if (!Strings.isEmpty(sAddress)) {
+                try {
+                    addrs.add(new QuotedInternetAddress(sAddress, false).getIDNAddress());
+                } catch (final Exception e) {
+                    throw EmigExceptionCodes.EMAIL_PARSE_ERROR.create(e, sAddress);
+                }
+            }
         }
 
         final int[] colors = emigService.isEMIG_Recipient(addrs.toArray(new String[addrs.size()]));

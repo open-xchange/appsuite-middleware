@@ -47,46 +47,44 @@
  *
  */
 
-package com.openexchange.emig;
+package com.openexchange.emig.mock.osgi;
 
-import com.openexchange.exception.OXException;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.emig.EmigService;
+import com.openexchange.emig.mock.MockEmigService;
 
 
 /**
- * {@link EmigService} - The EMiG service.
+ * {@link MockEmigActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.2
  */
-public interface EmigService {
+public final class MockEmigActivator implements BundleActivator {
+
+    private volatile ServiceRegistration<EmigService> emigRegistration;
 
     /**
-     * Checks if EMiG is enabled for denoted user.
-     *
-     * @param userIdentifier The EMiG user identifier
-     * @return <code>true</code> if EMiG is enabled for denoted user; otherwise <code>false</code>
-     * @throws OXException If operation fails for any reason
+     * Initializes a new {@link MockEmigActivator}.
      */
-    boolean isEMIG_Session(String userIdentifier) throws OXException;
+    public MockEmigActivator() {
+        super();
+    }
 
-    /**
-     * Checks if transport server has EMiG capability.
-     *
-     * @param serverName The name of the transport server
-     * @param mailFrom The from address
-     * @param debugLoginname The login name for debugging purpose
-     * @return <code>true</code> if transport server has EMiG capability; otherwise <code>false</code>
-     * @throws OXException If operation fails for any reason
-     */
-    boolean isEMIG_MSA(String serverName, String mailFrom, String debugLoginname) throws OXException;
+    @Override
+    public void start(final BundleContext context) throws Exception {
+        emigRegistration = context.registerService(EmigService.class, new MockEmigService(), null);
+    }
 
-    /**
-     * Checks EMiG capabilities for given addresses
-     *
-     * @param mailAddresses The mail addresses
-     * @return The colors' bit values
-     * @throws OXException If operation fails for any reason
-     */
-    int[] isEMIG_Recipient(String[] mailAddresses) throws OXException;
+    @Override
+    public void stop(final BundleContext context) throws Exception {
+        final ServiceRegistration<EmigService> emigRegistration = this.emigRegistration;
+        if (null != emigRegistration) {
+            emigRegistration.unregister();
+            this.emigRegistration = null;
+        }
+    }
 
 }
