@@ -51,12 +51,15 @@ package com.openexchange.ajax.requesthandler.converters.preview.cache.console;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.Map;
 import javax.management.MBeanServerConnection;
 import javax.management.MBeanServerInvocationHandler;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXServiceURL;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -65,6 +68,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.ResourceCacheMBean;
+import com.openexchange.management.console.JMXAuthenticatorImpl;
 
 /**
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -76,7 +80,12 @@ public final class PreviewCacheTool2 {
         sOptions = new Options();
         sOptions.addOption("h", "help", false, "Prints a help text");
         sOptions.addOption("c", "context", true, "Required. The context identifier");
+        sOptions.addOption("a", "all", false, "Required. The flag to signal that contexts shall be processed. Hence option -c/--context is then obsolete.");
         sOptions.addOption("i", "invalids", true, "An optional comma-separated list of those MIME types that should be considered as broken/corrupt. Default is \"application/force-download, application/x-download, application/$suffix\"");
+
+        sOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
+        sOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
+        sOptions.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
     }
 
     /**
@@ -102,17 +111,21 @@ public final class PreviewCacheTool2 {
                 return;
             }
 
-            if (!cmd.hasOption('c')) {
-                System.out.println("Parameter 'context' is required.");
-                printHelp();
-                System.exit(1);
-                return;
+            final String contextOptionVal;
+            if (cmd.hasOption('a')) {
+                contextOptionVal = null;
+            } else {
+                if (!cmd.hasOption('c')) {
+                    System.out.println("Either parameter 'context' or parameter 'all' is required.");
+                    printHelp();
+                    System.exit(1);
+                    return;
+                }
+                contextOptionVal = cmd.getOptionValue('c');
             }
 
-            final String contextOptionVal = cmd.getOptionValue('c');
-
             String invalids = null;
-            if (!cmd.hasOption('i')) {
+            if (cmd.hasOption('i')) {
                 invalids = cmd.getOptionValue('i');
                 invalids = invalids.trim();
                 if (invalids.startsWith("\"") && invalids.endsWith("\"")) {
@@ -121,15 +134,53 @@ public final class PreviewCacheTool2 {
                 }
             }
 
+            int port = 9999;
+            if (cmd.hasOption('p')) {
+                final String val = cmd.getOptionValue('p');
+                if (null != val) {
+                    try {
+                        port = Integer.parseInt(val.trim());
+                    } catch (final NumberFormatException e) {
+                        System.err.println(new StringBuilder("Port parameter is not a number: ").append(val).toString());
+                        printHelp();
+                        System.exit(1);
+                    }
+                    if (port < 1 || port > 65535) {
+                        System.err.println(new StringBuilder("Port parameter is out of range: ").append(val).append(
+                            ". Valid range is from 1 to 65535.").toString());
+                        printHelp();
+                        System.exit(1);
+                    }
+                }
+            }
+
+            String jmxLogin = null;
+            if (cmd.hasOption('l')) {
+                jmxLogin = cmd.getOptionValue('l');
+            }
+            String jmxPassword = null;
+            if (cmd.hasOption('s')) {
+                jmxPassword = cmd.getOptionValue('s');
+            }
+
+            // Environment
+            final Map<String, Object> environment;
+            if (jmxLogin == null || jmxPassword == null) {
+                environment = null;
+            } else {
+                environment = new HashMap<String, Object>(1);
+                environment.put(JMXConnectorServer.AUTHENTICATOR, new JMXAuthenticatorImpl(jmxLogin, jmxPassword));
+            }
+
             // Invoke MBean
-            JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:9999/server");
-            JMXConnector jmxConnector = JMXConnectorFactory.connect(url, null);
+            JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:"+port+"/server");
+            JMXConnector jmxConnector = JMXConnectorFactory.connect(url, environment);
             try {
                 MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
 
                 try {
                     ResourceCacheMBean previceCacheProxy = previewCacheMBean(mbsc);
-                    String resultDesc = previceCacheProxy.sanitizeMimeTypesInDatabaseFor(Integer.parseInt(contextOptionVal.trim()), invalids);
+                    String resultDesc = previceCacheProxy.sanitizeMimeTypesInDatabaseFor(null == contextOptionVal ? -1 : Integer.parseInt(contextOptionVal.trim()), invalids);
                     System.out.println(resultDesc);
                 } catch (Exception e) {
                     String errMsg = e.getMessage();
@@ -159,7 +210,7 @@ public final class PreviewCacheTool2 {
 
     private static void printHelp() {
         HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp("sanitizefilemimetypes", sOptions);
+        helpFormatter.printHelp(HelpFormatter.DEFAULT_WIDTH, "sanitizefilemimetypes", null, sOptions, "The options -c/--context and -a/--all are mutually exclusive.", false);
     }
 
     private static ResourceCacheMBean previewCacheMBean(MBeanServerConnection mbsc) throws MalformedObjectNameException {

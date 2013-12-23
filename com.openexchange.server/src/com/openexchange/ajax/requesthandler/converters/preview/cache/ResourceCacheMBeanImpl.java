@@ -49,12 +49,30 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview.cache;
 
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.requesthandler.cache.ResourceCache;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.mime.MimeTypes;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 
 /**
@@ -78,16 +96,222 @@ public final class ResourceCacheMBeanImpl extends StandardMBean implements Resou
 
     @Override
     public void clearFor(final int contextId) throws MBeanException {
-        final ResourceCache previewCache = CACHE_REF.get();
-        if (null != previewCache) {
+        final ResourceCache resourceCache = CACHE_REF.get();
+        if (null != resourceCache) {
             try {
-                previewCache.clearFor(contextId);
+                resourceCache.clearFor(contextId);
             } catch (final Exception e) {
-                final Log log = com.openexchange.log.Log.loggerFor(ResourceCacheMBeanImpl.class);
-                log.error(e.getMessage(), e);
-                throw new MBeanException(new Exception(e.getMessage()));
+                com.openexchange.log.Log.loggerFor(ResourceCacheMBeanImpl.class).error("", e);
+                final String message = e.getMessage();
+                throw new MBeanException(new Exception(message), message);
             }
         }
+    }
+
+    @Override
+    public String sanitizeMimeTypesInDatabaseFor(int contextId, String invalids) throws MBeanException {
+        final Log logger = com.openexchange.log.Log.loggerFor(ResourceCacheMBeanImpl.class);
+        try {
+            final DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+            if (null == databaseService) {
+                final String message = "Missing service: " + DatabaseService.class.getName();
+                throw new MBeanException(new Exception(message), message);
+            }
+
+            final Set<String> invalidsSet = new HashSet<String>(Arrays.asList("application/force-download", "application/x-download", "application/$suffix"));
+            if (!isEmpty(invalids)) {
+                for (final String invalid : invalids.split(" *, *")) {
+                    invalidsSet.add(toLowerCase(invalid.trim()));
+                }
+            }
+
+            if (contextId >= 0) {
+                return processContext(contextId, invalidsSet, databaseService);
+            }
+
+            // Process all available contexts
+            final TIntSet contextIds;
+            {
+                Connection configDbCon = null;
+                PreparedStatement stmt = null;
+                ResultSet rs = null;
+                try {
+                    configDbCon = databaseService.getReadOnly();
+                    stmt = configDbCon.prepareStatement("SELECT cid FROM context");
+                    rs = stmt.executeQuery();
+
+                    contextIds = new TIntHashSet();
+
+                    while (rs.next()) {
+                        contextIds.add(rs.getInt(1));
+                    }
+                } finally {
+                    Databases.closeSQLStuff(rs, stmt);
+                    rs = null;
+                    stmt = null;
+                    if (null != configDbCon) {
+                        databaseService.backReadOnly(configDbCon);
+                        configDbCon = null;
+                    }
+                }
+            }
+
+            if (contextIds.isEmpty()) {
+                return "No contexts found";
+            }
+
+            final String sep = System.getProperty("line.separator");
+            final StringBuilder responseBuilder = new StringBuilder(65536);
+            final AtomicReference<Exception> errorRef = new AtomicReference<Exception>();
+            contextIds.forEach(new TIntProcedure() {
+
+                @Override
+                public boolean execute(final int cid) {
+                    if (responseBuilder.length() > 0) {
+                        responseBuilder.append(sep);
+                    }
+                    try {
+                        responseBuilder.append(processContext(cid, invalidsSet, databaseService));
+                    } catch (final Exception e) {
+                        logger.error("Context "+cid+" could not be processed", e);
+                        responseBuilder.append("Context ").append(cid).append(" could not be processed: >>>").append(e.getMessage()).append("<<<");
+                    }
+                    return true;
+                }
+            });
+
+            final Exception exc = errorRef.get();
+            if (null != exc) {
+                throw exc;
+            }
+
+            return responseBuilder.toString();
+        } catch (final Exception e) {
+            logger.error("", e);
+            final String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
+    }
+
+    String processContext(final int contextId, final Set<String> invalidsSet, final DatabaseService databaseService) throws OXException, SQLException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        boolean afterReading = true;
+
+        try {
+            con = databaseService.getForUpdateTask(contextId);
+            stmt = con.prepareStatement("SELECT infostore_id, version_number, file_mimetype, filename FROM infostore_document WHERE cid=?");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+
+            if (!rs.next()) {
+                // No documents in specified context;
+                return "Context " + contextId + " does not hold any documents.";
+            }
+
+            class Tuple {
+
+                int id;
+                int version;
+                String mimeType;
+
+                Tuple(String mimeType, ResultSet rs) throws SQLException {
+                    super();
+                    id = rs.getInt(1);
+                    version = rs.getInt(2);
+                    this.mimeType = mimeType;
+                }
+            }
+
+            final String defaultMimeType = MimeTypes.MIME_APPL_OCTET;
+            final List<Tuple> tuples = new LinkedList<Tuple>();
+            do {
+                String fileName = rs.getString(4);
+                if (!isEmpty(fileName)) {
+                    String mimeType = rs.getString(3);
+                    if (!isEmpty(mimeType)) {
+                        final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
+                        if (invalidsSet.contains(toLowerCase(mimeType)) || (!defaultMimeType.equals(contentTypeByFileName) && !equalPrimaryTypes(mimeType, contentTypeByFileName))) {
+                            tuples.add(new Tuple(contentTypeByFileName, rs));
+                        }
+                    }
+                }
+            } while (rs.next());
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            if (tuples.isEmpty()) {
+                return "No document with a broken/corrupt MIME type found in context " + contextId;
+            }
+
+            stmt = con.prepareStatement("UPDATE infostore_document SET file_mimetype=? WHERE cid=? AND infostore_id=? AND version_number=?");
+            stmt.setInt(2, contextId);
+
+            for (final Tuple tuple : tuples) {
+                stmt.setString(1, tuple.mimeType);
+                stmt.setInt(3, tuple.id);
+                stmt.setInt(4, tuple.version);
+                stmt.addBatch();
+            }
+
+            final int[] result = stmt.executeBatch();
+            afterReading = false;
+
+            return "Fixed " + Integer.toString(result.length) + (result.length == 1 ? " document" : " documents") + " with a broken/corrupt MIME type in context " + contextId;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            if (null != con) {
+                if (afterReading) {
+                    databaseService.backForUpdateTaskAfterReading(contextId, con);
+                } else {
+                    databaseService.backForUpdateTask(contextId, con);
+                }
+            }
+        }
+    }
+
+    /** Check for an empty string */
+    private boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    /** ASCII-wise to lower-case */
+    private String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
+    }
+
+    private String getPrimaryType(final String contentType) {
+        if (isEmpty(contentType)) {
+            return contentType;
+        }
+        final int pos = contentType.indexOf('/');
+        return pos > 0 ? contentType.substring(0, pos) : contentType;
+    }
+
+    private boolean equalPrimaryTypes(final String contentType1, final String contentType2) {
+        if (null == contentType1 || null == contentType2) {
+            return false;
+        }
+        return toLowerCase(getPrimaryType(contentType1)).startsWith(toLowerCase(getPrimaryType(contentType2)));
     }
 
 }
