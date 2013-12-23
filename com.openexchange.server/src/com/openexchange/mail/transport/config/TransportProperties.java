@@ -185,7 +185,7 @@ public final class TransportProperties implements ITransportProperties {
         {
             final String tmp = configuration.getProperty(
                 "com.openexchange.mail.transport.publishingPublicInfostoreFolder",
-                "Email attachments").trim();
+                "i18n-defined").trim();
             publishingInfostoreFolder = tmp;
             logBuilder.append("\tPublishing Infostore Folder Name: \"").append(publishingInfostoreFolder).append('"').append('\n');
         }
