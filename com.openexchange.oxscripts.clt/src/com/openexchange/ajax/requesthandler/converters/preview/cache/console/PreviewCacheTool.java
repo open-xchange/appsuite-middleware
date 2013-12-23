@@ -157,7 +157,7 @@ public final class PreviewCacheTool {
             }
 
             // Invoke MBean
-            JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:9999/server");
+            JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + port + "/server");
             JMXConnector jmxConnector = JMXConnectorFactory.connect(url, environment);
             try {
                 MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
