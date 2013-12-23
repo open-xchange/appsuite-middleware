@@ -127,7 +127,7 @@ public class CreatedByComparator implements Comparator<File> {
         String displayName = cache.get(userId);
         if (null == displayName) {
             try {
-                displayName = UserStorage.getStorageUser(userId, context).getDisplayName();
+                displayName = UserStorage.getInstance().getUser(userId, context).getDisplayName();
             } catch (OXException e) {
                 return null;
             }

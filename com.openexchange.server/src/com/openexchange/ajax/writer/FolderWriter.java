@@ -348,7 +348,7 @@ public final class FolderWriter extends DataWriter {
      */
     public FolderWriter(final JSONWriter jw, final Session session, final Context ctx, final String timeZone, final AdditionalFolderFieldList fields) throws OXException {
         super(null == timeZone ? getTimeZoneBySession(session, ctx) : getTimeZone(timeZone), jw);
-        this.user = UserStorage.getStorageUser(session.getUserId(), ctx);
+        this.user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
         this.userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
         this.ctx = ctx;
         this.fields = fields;
@@ -359,7 +359,7 @@ public final class FolderWriter extends DataWriter {
         if (session instanceof ServerSession) {
             return getTimeZone(((ServerSession) session).getUser().getTimeZone());
         }
-        return getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
+        return getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
     }
 
     /**

@@ -169,7 +169,7 @@ public final class SMTPMessageFiller extends MimeMessageFiller {
             /*
              * Set ENVELOPE-FROM in SMTP message to user's primary email address
              */
-            ((SMTPMessage) mimeMessage).setEnvelopeFrom(IDNA.toACE(UserStorage.getStorageUser(session.getUserId(), ctx).getMail()));
+            ((SMTPMessage) mimeMessage).setEnvelopeFrom(IDNA.toACE(UserStorage.getInstance().getUser(session.getUserId(), ctx).getMail()));
         }
     }
 

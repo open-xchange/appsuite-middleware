@@ -1069,7 +1069,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             boolean isShared = false;
             if (isShared = (searchobject.getFolder() > 0 && folderAccess.isFolderShared(searchobject.getFolder(), session.getUserId()))) {
                 userId = folderAccess.getFolderOwner(searchobject.getFolder());
-                groups = UserStorage.getStorageUser(userId, ctx).getGroups();
+                groups = UserStorage.getInstance().getUser(userId, ctx).getGroups();
                 uc = UserConfigurationStorage.getInstance().getUserConfiguration(userId, groups, ctx);
             } else {
                 userId = session.getUserId();

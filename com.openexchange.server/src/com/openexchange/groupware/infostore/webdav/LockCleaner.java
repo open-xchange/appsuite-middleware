@@ -77,7 +77,7 @@ public class LockCleaner implements FolderEventInterface, EventHandler {
     public void folderDeleted(final FolderObject folderObj, final Session session) {
 		try {
             final ServerSession sessionObj = ServerSessionAdapter.valueOf(session);
-            folderLockManager.removeAll(folderObj.getObjectID(), sessionObj.getContext(), UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext()));
+            folderLockManager.removeAll(folderObj.getObjectID(), sessionObj.getContext(), UserStorage.getInstance().getUser(sessionObj.getUserId(), sessionObj.getContext()));
 		} catch (final OXException e) {
 			LOG.error("Couldn't remove folder locks from folder {} in context {}. Run the consistency tool.", folderObj.getObjectID(), session.getContextId());
 		}
@@ -99,7 +99,7 @@ public class LockCleaner implements FolderEventInterface, EventHandler {
             try {
                 int id = Integer.parseInt(FileStorageEventHelper.extractObjectId(event));
                 ServerSession session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
-                infoLockManager.removeAll(id, session.getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()));
+                infoLockManager.removeAll(id, session.getContext(), UserStorage.getInstance().getUser(session.getUserId(), session.getContext()));
             } catch (OXException e) {
                 LOG.error("Couldn't remove locks from infoitem. Run the consistency tool.", e);
             } catch (NumberFormatException e) {

@@ -512,7 +512,7 @@ public final class SMTPTransport extends MailTransport {
                 throw SMTPExceptionCode.MISSING_NOTIFICATION_HEADER.create(MessageHeaders.HDR_DISP_TO, Long.valueOf(srcMail.getMailId()));
             }
             final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession());
-            final String userMail = UserStorage.getStorageUser(session.getUserId(), ctx).getMail();
+            final String userMail = UserStorage.getInstance().getUser(session.getUserId(), ctx).getMail();
             /*
              * Set from
              */
@@ -541,7 +541,7 @@ public final class SMTPTransport extends MailTransport {
             /*
              * Subject
              */
-            final Locale locale = UserStorage.getStorageUser(session.getUserId(), ctx).getLocale();
+            final Locale locale = UserStorage.getInstance().getUser(session.getUserId(), ctx).getLocale();
             final StringHelper strHelper = StringHelper.valueOf(locale);
             smtpMessage.setSubject(strHelper.getString(MailStrings.ACK_SUBJECT));
             /*

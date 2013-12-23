@@ -417,7 +417,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 			dumpToDB();
             if(propertyHelper.mustWrite()) {
                 final ServerSession session = getSession();
-                final EffectivePermission perm = security.getFolderPermission(getId(),session.getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()),
+                final EffectivePermission perm = security.getFolderPermission(getId(),session.getContext(), UserStorage.getInstance().getUser(session.getUserId(), session.getContext()),
 					UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), session.getContext()));
                 if(!perm.isFolderAdmin()) {
                     throw WebdavProtocolException.Code.NO_WRITE_PERMISSION.create(getUrl(), HttpServletResponse.SC_FORBIDDEN);
@@ -593,7 +593,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 
 		final ArrayList<OCLPermission> newPerms = new ArrayList<OCLPermission>();
 
-		final User owner = UserStorage.getStorageUser(getSession().getUserId(), getSession().getContext());
+		final User owner = UserStorage.getInstance().getUser(getSession().getUserId(), getSession().getContext());
 
 		for(final OCLPermission perm : copyPerms) {
 			if(perm.getEntity() != owner.getId()){
@@ -634,7 +634,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 				loadFolder();
 			}
 			final ServerSession session = getSession();
-			final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
+			final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContext());
 			final UserPermissionBits userPermissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), session.getContext());
 			final Context ctx = session.getContext();
 

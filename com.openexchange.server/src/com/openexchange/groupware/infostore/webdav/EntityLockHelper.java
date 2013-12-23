@@ -105,7 +105,7 @@ public class EntityLockHelper extends LockHelper {
 						LockManager.Type.WRITE,
 						lock.getOwner(),
 						session.getContext(),
-						UserStorage.getStorageUser(session.getUserId(), session.getContext()));
+						UserStorage.getInstance().getUser(session.getUserId(), session.getContext()));
 	}
 
 	@Override
@@ -119,7 +119,7 @@ public class EntityLockHelper extends LockHelper {
 						LockManager.Type.WRITE,
 						lock.getOwner(),
 						session.getContext(),
-						UserStorage.getStorageUser(session.getUserId(), session.getContext())
+						UserStorage.getInstance().getUser(session.getUserId(), session.getContext())
 		);
 	}
 

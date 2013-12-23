@@ -514,7 +514,7 @@ public final class MimeForward {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getUser();
         }
-        return UserStorage.getStorageUser(session.getUserId(), ctx);
+        return UserStorage.getInstance().getUser(session.getUserId(), ctx);
     }
 
     private static MailMessage asAttachmentForward(final MailMessage[] originalMsgs, final MimeMessage forwardMsg) throws MessagingException, OXException {
@@ -899,7 +899,7 @@ public final class MimeForward {
                 return ((ServerSession) session).getUser();
             }
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-            return UserStorage.getStorageUser(session.getUserId(), ctx);
+            return UserStorage.getInstance().getUser(session.getUserId(), ctx);
         } catch (final Exception e) {
             // Ignore
             return null;

@@ -64,7 +64,6 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -146,7 +145,7 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
     public FileStorageFolder getPersonalFolder() throws OXException {
         final FolderService service = Services.getService(FolderService.class);
         return FolderWriter.writeFolder(service.getDefaultFolder(
-            UserStorage.getStorageUser(session.getUserId(), session.getContext()),
+            session.getUser(),
             REAL_TREE_ID,
             FolderParser.getContentType(),
             session,

@@ -243,7 +243,7 @@ public class ICalImporter extends AbstractImporter {
 		final ICalParser parser = ImportExportServices.getIcalParser();
 		final Context ctx = session.getContext();
 		final TimeZone defaultTz = TimeZoneUtils.getTimeZone(UserStorage
-				.getStorageUser(session.getUserId(), ctx).getTimeZone());
+				.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
 
 		final List<ImportResult> list = new ArrayList<ImportResult>();
 		final List<ConversionError> errors = new ArrayList<ConversionError>();

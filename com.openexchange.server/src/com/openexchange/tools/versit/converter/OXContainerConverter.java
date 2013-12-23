@@ -224,13 +224,13 @@ public class OXContainerConverter {
         } catch (final OXException e) {
             throw new ConverterException(e);
         }
-        timezone = TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
+        timezone = TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
     }
 
     public OXContainerConverter(final Session session, final Context ctx) throws OXException {
         super();
         this.ctx = ctx;
-        timezone = TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
+        timezone = TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
     }
 
     public OXContainerConverter(final Context ctx, final TimeZone tz) {

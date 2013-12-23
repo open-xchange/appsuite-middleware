@@ -163,7 +163,7 @@ public final class ICalJSONDataHandler implements DataHandler {
         {
             final String timeZoneId = dataArguments.get("com.openexchange.groupware.calendar.timezone");
             timeZone =
-                TimeZoneUtils.getTimeZone(null == timeZoneId ? UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone() : timeZoneId);
+                TimeZoneUtils.getTimeZone(null == timeZoneId ? UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone() : timeZoneId);
         }
         try {
             /*

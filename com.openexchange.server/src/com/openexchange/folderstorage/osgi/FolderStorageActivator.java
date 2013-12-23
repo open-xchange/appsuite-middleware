@@ -160,7 +160,7 @@ public final class FolderStorageActivator implements BundleActivator {
             final Context context = session.getContext();
             final String displayName = cache.get(Key.valueOf(createdBy, context.getContextId()));
             try {
-                return null == displayName ? UserStorage.getStorageUser(createdBy, context).getDisplayName() : displayName;
+                return null == displayName ? UserStorage.getInstance().getUser(createdBy, context).getDisplayName() : displayName;
             } catch (OXException e) {
                 return null;
             }

@@ -134,7 +134,7 @@ public final class JSONObjectConverter {
 
     private TimeZone getTimeZone() throws OXException {
         if (timeZone == null) {
-            timeZone = TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
+            timeZone = TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
         }
         return timeZone;
     }

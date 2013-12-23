@@ -211,7 +211,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
     @Override
     protected void startWriter(final Session sessionObj, final Context ctx, final int objectId, final int folderId,
             final OutputStream os) throws Exception {
-        final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+        final User userObj = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
         final AppointmentWriter appointmentwriter = new AppointmentWriter(userObj, ctx, sessionObj);
         appointmentwriter.startWriter(objectId, folderId, os);
     }
@@ -227,7 +227,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
     protected void startWriter(final Session sessionObj, final Context ctx, final int folderId,
             final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync,
             final OutputStream os) throws Exception {
-        final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+        final User userObj = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
         final AppointmentWriter appointmentwriter = new AppointmentWriter(userObj, ctx, sessionObj);
         appointmentwriter.startWriter(bModified, bDelete, bList, folderId, lastsync, os);
     }

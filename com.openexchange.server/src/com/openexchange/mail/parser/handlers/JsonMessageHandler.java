@@ -394,7 +394,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     private TimeZone getTimeZone() throws OXException {
         if (timeZone == null) {
-            timeZone = TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
+            timeZone = TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
         }
         return timeZone;
     }
@@ -1053,7 +1053,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             String contentType = MimeTypes.MIME_APPL_OCTET;
             final String filename = part.getFileName();
             try {
-                final Locale locale = UserStorage.getStorageUser(session.getUserId(), ctx).getLocale();
+                final Locale locale = UserStorage.getInstance().getUser(session.getUserId(), ctx).getLocale();
                 contentType = MimeType2ExtMap.getContentType(new File(filename.toLowerCase(locale)).getName()).toLowerCase(locale);
             } catch (final Exception e) {
                 final Throwable t =

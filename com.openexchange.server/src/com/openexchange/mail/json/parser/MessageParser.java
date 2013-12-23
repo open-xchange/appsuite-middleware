@@ -345,7 +345,7 @@ public final class MessageParser {
         parse(
             jsonObj,
             transportMail,
-            TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone()),
+            TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone()),
             provider,
             session,
             accountId,
@@ -367,7 +367,7 @@ public final class MessageParser {
         parse(
             jsonObj,
             mail,
-            TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(
+            TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(
                 session.getUserId(),
                 ContextStorage.getStorageContext(session.getContextId())).getTimeZone()),
             session,
