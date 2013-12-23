@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview.cache;
 
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -62,10 +65,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.cache.ResourceCache;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -98,19 +103,98 @@ public final class ResourceCacheMBeanImpl extends StandardMBean implements Resou
                 resourceCache.clearFor(contextId);
             } catch (final Exception e) {
                 LoggerFactory.getLogger(ResourceCacheMBeanImpl.class).error("", e);
-                throw new MBeanException(new Exception(e.getMessage()));
+                final String message = e.getMessage();
+                throw new MBeanException(new Exception(message), message);
             }
         }
     }
 
     @Override
     public String sanitizeMimeTypesInDatabaseFor(int contextId, String invalids) throws MBeanException {
-        final DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        if (null == databaseService) {
-            final String message = "Missing service: " + DatabaseService.class.getName();
+        final Logger logger = LoggerFactory.getLogger(ResourceCacheMBeanImpl.class);
+        try {
+            final DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+            if (null == databaseService) {
+                final String message = "Missing service: " + DatabaseService.class.getName();
+                throw new MBeanException(new Exception(message), message);
+            }
+
+            final Set<String> invalidsSet = new HashSet<String>(Arrays.asList("application/force-download", "application/x-download", "application/$suffix"));
+            if (!isEmpty(invalids)) {
+                for (final String invalid : invalids.split(" *, *")) {
+                    invalidsSet.add(toLowerCase(invalid.trim()));
+                }
+            }
+
+            if (contextId >= 0) {
+                return processContext(contextId, invalidsSet, databaseService);
+            }
+
+            // Process all available contexts
+            final TIntSet contextIds;
+            {
+                Connection configDbCon = null;
+                PreparedStatement stmt = null;
+                ResultSet rs = null;
+                try {
+                    configDbCon = databaseService.getReadOnly();
+                    stmt = configDbCon.prepareStatement("SELECT cid FROM context");
+                    rs = stmt.executeQuery();
+
+                    contextIds = new TIntHashSet();
+
+                    while (rs.next()) {
+                        contextIds.add(rs.getInt(1));
+                    }
+                } finally {
+                    Databases.closeSQLStuff(rs, stmt);
+                    rs = null;
+                    stmt = null;
+                    if (null != configDbCon) {
+                        databaseService.backReadOnly(configDbCon);
+                        configDbCon = null;
+                    }
+                }
+            }
+
+            if (contextIds.isEmpty()) {
+                return "No contexts found";
+            }
+
+            final String sep = System.getProperty("line.separator");
+            final StringBuilder responseBuilder = new StringBuilder(65536);
+            final AtomicReference<Exception> errorRef = new AtomicReference<Exception>();
+            contextIds.forEach(new TIntProcedure() {
+
+                @Override
+                public boolean execute(final int cid) {
+                    if (responseBuilder.length() > 0) {
+                        responseBuilder.append(sep);
+                    }
+                    try {
+                        responseBuilder.append(processContext(cid, invalidsSet, databaseService));
+                    } catch (final Exception e) {
+                        logger.error("Context {} could not be processed", Integer.valueOf(cid), e);
+                        responseBuilder.append("Context ").append(cid).append(" could not be processed: >>>").append(e.getMessage()).append("<<<");
+                    }
+                    return true;
+                }
+            });
+
+            final Exception exc = errorRef.get();
+            if (null != exc) {
+                throw exc;
+            }
+
+            return responseBuilder.toString();
+        } catch (final Exception e) {
+            logger.error("", e);
+            final String message = e.getMessage();
             throw new MBeanException(new Exception(message), message);
         }
+    }
 
+    String processContext(final int contextId, final Set<String> invalidsSet, final DatabaseService databaseService) throws OXException, SQLException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -138,14 +222,6 @@ public final class ResourceCacheMBeanImpl extends StandardMBean implements Resou
                     id = rs.getInt(1);
                     version = rs.getInt(2);
                     this.mimeType = mimeType;
-                }
-            }
-            ;
-
-            final Set<String> invalidsSet = new HashSet<String>(Arrays.asList("application/force-download", "application/x-download", "application/$suffix"));
-            if (!isEmpty(invalids)) {
-                for (final String invalid : invalids.split(" *, *")) {
-                    invalidsSet.add(toLowerCase(invalid.trim()));
                 }
             }
 
@@ -185,9 +261,6 @@ public final class ResourceCacheMBeanImpl extends StandardMBean implements Resou
             afterReading = false;
 
             return "Fixed " + Integer.toString(result.length) + (result.length == 1 ? " document" : " documents") + " with a broken/corrupt MIME type in context " + contextId;
-        } catch (final Exception e) {
-            LoggerFactory.getLogger(ResourceCacheMBeanImpl.class).error("", e);
-            throw new MBeanException(new Exception(e.getMessage()));
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             if (null != con) {

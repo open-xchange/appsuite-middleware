@@ -101,7 +101,10 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     private static final String CONTEXTID = "ctx";
 
-    private static final String USE_WHITELISTING_PROPERTY_NAME = "com.openexchange.publish.microformats.usesWhitelisting";
+    /**
+     * Property to get the configured name of the hoster to be displayed in disclaimer of the default template
+     */
+    private static final String PROPERTY_LEGAL_HOSTER_NAME = "com.openexchange.publish.legalHosterName";
 
     private static PublicationDataLoaderService dataLoader = null;
 
@@ -208,8 +211,13 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             if (admin == null || admin.equals("")) {
                 admin = userService.getUser(ctx.getMailadmin(), ctx).getMail();
             }
-            // TODO for bug 30250: set name for "Open-Xchange"
-            final String privacyText = formatPrivacyText(getPrivacyText(user), "Open-Xchange", admin, user, new Date(publication.getCreated()));
+
+            String legalHosterName = configService.getProperty(MicroformatServlet.PROPERTY_LEGAL_HOSTER_NAME);
+            if (legalHosterName == null || legalHosterName.equals("")) {
+                legalHosterName = MicroformatStrings.DISCLAIMER_ALTERNATIV_HOSTER_NAME_WORDING;
+            }
+
+            final String privacyText = formatPrivacyText(getPrivacyText(user), legalHosterName, admin, user, new Date(publication.getCreated()));
             variables.put("privacy", privacyText); // TODO Use lastmodified once someone implements this.
             variables.put("userContact", userContact);
             variables.put("htmlService", new HTMLUtils(htmlService));

@@ -76,6 +76,7 @@ public final class PreviewCacheTool2 {
         sOptions = new Options();
         sOptions.addOption("h", "help", false, "Prints a help text");
         sOptions.addOption("c", "context", true, "Required. The context identifier");
+        sOptions.addOption("a", "all", false, "Required. The flag to signal that contexts shall be processed. Hence option -c/--context is then obsolete.");
         sOptions.addOption("i", "invalids", true, "An optional comma-separated list of those MIME types that should be considered as broken/corrupt. Default is \"application/force-download, application/x-download, application/$suffix\"");
     }
 
@@ -102,17 +103,21 @@ public final class PreviewCacheTool2 {
                 return;
             }
 
-            if (!cmd.hasOption('c')) {
-                System.out.println("Parameter 'context' is required.");
-                printHelp();
-                System.exit(1);
-                return;
+            final String contextOptionVal;
+            if (cmd.hasOption('a')) {
+                contextOptionVal = null;
+            } else {
+                if (!cmd.hasOption('c')) {
+                    System.out.println("Either parameter 'context' or parameter 'all' is required.");
+                    printHelp();
+                    System.exit(1);
+                    return;
+                }
+                contextOptionVal = cmd.getOptionValue('c');
             }
 
-            final String contextOptionVal = cmd.getOptionValue('c');
-
             String invalids = null;
-            if (!cmd.hasOption('i')) {
+            if (cmd.hasOption('i')) {
                 invalids = cmd.getOptionValue('i');
                 invalids = invalids.trim();
                 if (invalids.startsWith("\"") && invalids.endsWith("\"")) {
@@ -129,7 +134,7 @@ public final class PreviewCacheTool2 {
 
                 try {
                     ResourceCacheMBean previceCacheProxy = previewCacheMBean(mbsc);
-                    String resultDesc = previceCacheProxy.sanitizeMimeTypesInDatabaseFor(Integer.parseInt(contextOptionVal.trim()), invalids);
+                    String resultDesc = previceCacheProxy.sanitizeMimeTypesInDatabaseFor(null == contextOptionVal ? -1 : Integer.parseInt(contextOptionVal.trim()), invalids);
                     System.out.println(resultDesc);
                 } catch (Exception e) {
                     String errMsg = e.getMessage();
@@ -159,7 +164,7 @@ public final class PreviewCacheTool2 {
 
     private static void printHelp() {
         HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp("sanitizefilemimetypes", sOptions);
+        helpFormatter.printHelp(HelpFormatter.DEFAULT_WIDTH, "sanitizefilemimetypes", null, sOptions, "The options -c/--context and -a/--all are mutually exclusive.", false);
     }
 
     private static ResourceCacheMBean previewCacheMBean(MBeanServerConnection mbsc) throws MalformedObjectNameException {
