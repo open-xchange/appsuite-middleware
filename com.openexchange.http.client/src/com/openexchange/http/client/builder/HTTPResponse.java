@@ -58,4 +58,6 @@ public interface HTTPResponse {
 	
 	public Map<String, String> getHeaders();
 	public Map<String, String> getCookies();
+
+    public int getStatus();
 }

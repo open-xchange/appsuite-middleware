@@ -97,7 +97,7 @@ public class ApacheHTTPRequest implements HTTPRequest {
 				reqBuilder.url(location);
 				return reqBuilder.build().execute();
 			}
-			return new ApacheHTTPResponse(method, client, coreBuilder);
+			return new ApacheHTTPResponse(method, client, coreBuilder, status);
 		} catch (HttpException e) {
 			throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
 		} catch (IOException e) {

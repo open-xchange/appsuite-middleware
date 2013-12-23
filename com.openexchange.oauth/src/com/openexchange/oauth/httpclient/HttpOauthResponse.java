@@ -79,5 +79,10 @@ public class HttpOauthResponse implements HTTPResponse {
 	public Map<String, String> getHeaders() {
 		return delegate.getHeaders();
 	}
+	
+	@Override
+	public int getStatus() {
+	    return delegate.getCode();
+	}
 
 }

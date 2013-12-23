@@ -56,7 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.emig.json.actions.AbstractEmigAction;
-import com.openexchange.emig.json.actions.EmigAction;
+import com.openexchange.emig.json.actions.RecipientsAction;
 import com.openexchange.emig.json.actions.SenderAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -79,7 +79,7 @@ public class EmigActionFactory implements AJAXActionServiceFactory {
         super();
         actions = new ConcurrentHashMap<String, AbstractEmigAction>(4);
         actions.put("sender", new SenderAction(serviceLookup));
-        actions.put("emig", new EmigAction(serviceLookup));
+        actions.put("recipients", new RecipientsAction(serviceLookup));
     }
 
     @Override

@@ -66,13 +66,19 @@ public class ApacheHTTPResponse implements HTTPResponse {
 	private HttpClient client;
 	private ApacheClientRequestBuilder coreBuilder;
 	private Object payload;
+    private int status;
 
 	public ApacheHTTPResponse(HttpMethodBase method, HttpClient client,
-			ApacheClientRequestBuilder coreBuilder) {
+			ApacheClientRequestBuilder coreBuilder, int status) {
 		this.method = method;
 		this.client = client;
 		this.coreBuilder = coreBuilder;
+		this.status = status;
 	}
+	
+    public int getStatus() {
+        return status;
+    }
 
 	public <R> R getPayload(Class<R> type) throws OXException {
 		if (payload != null && type.isInstance(payload)) {

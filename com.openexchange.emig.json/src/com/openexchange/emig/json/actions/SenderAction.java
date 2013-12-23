@@ -93,27 +93,29 @@ public final class SenderAction extends AbstractEmigAction {
             throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
         }
 
+        final ServerSession session = req.getSession();
         // Get JSON body
         final JSONObject jBody = (JSONObject) req.getRequest().getData();
         if (null == jBody) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
-        final int accountId = jBody.optInt("account", -1);
-        if (accountId < 0) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("account");
-        }
-
-        String sender = jBody.optString("sender", null);
+        int accountId = jBody.optInt("account", -1);
+        String sender = jBody.optString("address", null);
         if (null == sender) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("sender");
         }
+
+        
         try {
             sender = new QuotedInternetAddress(sender, false).getIDNAddress();
         } catch (final Exception e) {
             throw EmigExceptionCodes.EMAIL_PARSE_ERROR.create(e, sender);
         }
 
-        final ServerSession session = req.getSession();
+        if (accountId < 0) {
+            accountId =  mass.getByPrimaryAddress(sender, session.getUserId(), session.getContextId());
+        }
+
         final MailAccount mailAccount = mass.getMailAccount(accountId, session.getUserId(), session.getContextId());
 
         final boolean emig = emigService.isEMIG_MSA(mailAccount.getTransportServer(), sender, mailAccount.getTransportLogin());
