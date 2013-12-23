@@ -1,3 +1,9 @@
+open-xchange-datamining (7.4.2-1) stable; urgency=low
+
+  * First release candidate for 7.4.2
+
+ -- Karsten Will <karsten.will@open-xchange.com>  Mon, 23 Dec 2013 12:48:04 +0100
+
 open-xchange-datamining (7.4.2-0) unstable; urgency=low
 
   * prepare for 7.4.2

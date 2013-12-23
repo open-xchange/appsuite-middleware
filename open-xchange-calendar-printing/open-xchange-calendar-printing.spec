@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -49,6 +49,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 
 %changelog
+* Mon Dec 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.4.2
 * Wed Dec 18 2013 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.4.2
 * Tue Dec 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
