@@ -1,20 +1,20 @@
 
-Name:           open-xchange-emig-mock
-BuildArch:      noarch
-#!BuildIgnore:  post-build-checks
+Name:          open-xchange-emig-mock
+BuildArch:     noarch
+#!BuildIgnore: post-build-checks
 BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: open-xchange-emig
 BuildRequires: java-devel >= 1.6.0
-Version:    @OXVERSION@
-%define     ox_release 0
-Release:    %{ox_release}_<CI_CNT>.<B_CNT>
-Group:          Applications/Productivity
-License:        GPL-2.0
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
+Version:       @OXVERSION@
+%define        ox_release 0
+Release:       %{ox_release}_<CI_CNT>.<B_CNT>
+Group:         Applications/Productivity
+License:       GPL-2.0
+BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
-Source:         %{name}_%{version}.orig.tar.bz2
-Summary:        The Open-Xchange EMiG Mock Bundle
+Source:        %{name}_%{version}.orig.tar.bz2
+Summary:       The Open-Xchange EMiG Mock Bundle
 Autoreqprov:   no
 Requires:      open-xchange-emig >= @OXVERSION@
 
