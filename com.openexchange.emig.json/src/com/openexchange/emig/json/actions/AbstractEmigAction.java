@@ -70,7 +70,7 @@ public abstract class AbstractEmigAction implements AJAXActionService {
     private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link AbstractTaskAction}.
+     * Initializes a new {@link AbstractEmigAction}.
      */
     protected AbstractEmigAction(final ServiceLookup services) {
         super();
