@@ -193,7 +193,8 @@ public class LoginServlet extends AJAXServlet {
         SESSION, SECRET;
     }
 
-    private static final AtomicReference<LoginConfiguration> confReference = new AtomicReference<LoginConfiguration>();
+    /** The login configuration reference */
+    static final AtomicReference<LoginConfiguration> confReference = new AtomicReference<LoginConfiguration>();
 
     /**
      * Gets the login configuration.
@@ -325,7 +326,7 @@ public class LoginServlet extends AJAXServlet {
                             if (null == oldIP || SessionServlet.isWhitelistedFromIPCheck(oldIP, conf.getRanges())) {
                                 final String newIP = req.getRemoteAddr();
                                 if (!newIP.equals(oldIP)) {
-                                    LOG.info("Changing IP of session {} with authID: {} from {} to {}{}", session.getSessionID(), session.getAuthId(), oldIP, newIP, '.');
+                                    LOG.info("Changing IP of session {} with authID: {} from {} to {}.", session.getSessionID(), session.getAuthId(), oldIP, newIP);
                                     session.setLocalIp(newIP);
                                 }
                             }
@@ -345,6 +346,8 @@ public class LoginServlet extends AJAXServlet {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
+                // Add session log properties
+                LogProperties.putSessionProperties(session);
                 // Remove old cookies to prevent usage of the old autologin cookie
                 if (conf.isInsecure()) {
                     SessionServlet.removeOXCookies(session.getHash(), req, resp);
@@ -407,8 +410,11 @@ public class LoginServlet extends AJAXServlet {
                     }
                     final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
                     session = sessiondService.getSession(sessionId);
-                    final LoginConfiguration conf = confReference.get();
                     if (session != null) {
+                        // Add session log properties
+                        LogProperties.putSessionProperties(session);
+                        // Check
+                        final LoginConfiguration conf = confReference.get();
                         SessionServlet.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
                         final String secret = SessionServlet.extractSecret(
                             conf.getHashSource(),
@@ -481,7 +487,7 @@ public class LoginServlet extends AJAXServlet {
                             if (null == oldIP || SessionServlet.isWhitelistedFromIPCheck(oldIP, conf.getRanges())) {
                                 final String newIP = req.getRemoteAddr();
                                 if (!newIP.equals(oldIP)) {
-                                    LOG.info("Changing IP of session {} with authID: {} from {} to {}{}", session.getSessionID(), session.getAuthId(), oldIP, newIP, '.');
+                                    LOG.info("Changing IP of session {} with authID: {} from {} to {}.", session.getSessionID(), session.getAuthId(), oldIP, newIP);
                                     session.setLocalIp(newIP);
                                 }
                             }
@@ -501,6 +507,8 @@ public class LoginServlet extends AJAXServlet {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
+                // Add session log properties
+                LogProperties.putSessionProperties(session);
                 // Remove old cookies to prevent usage of the old autologin cookie
                 if (conf.isInsecure()) {
                     SessionServlet.removeOXCookies(session.getHash(), req, resp);
