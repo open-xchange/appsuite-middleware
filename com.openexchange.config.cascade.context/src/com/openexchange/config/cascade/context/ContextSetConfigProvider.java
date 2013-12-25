@@ -112,9 +112,9 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
     }
 
     protected Set<String> getSpecification(final Context context, final UserPermissionBits perms) throws OXException {
-        Set<String> typeValues = context.getAttributes().get(TAXONOMY_TYPES);
+        List<String> typeValues = context.getAttributes().get(TAXONOMY_TYPES);
         if (typeValues == null) {
-            typeValues = Collections.emptySet();
+            typeValues = Collections.emptyList();
         }
         // Gather available tags
         final Set<String> tags = new HashSet<String>(64);

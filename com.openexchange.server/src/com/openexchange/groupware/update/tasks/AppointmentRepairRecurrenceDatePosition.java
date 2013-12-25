@@ -55,8 +55,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -291,7 +291,7 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
         }
 
         @Override
-        public Map<String, Set<String>> getAttributes() {
+        public Map<String, List<String>> getAttributes() {
             throw new UnsupportedOperationException("getAttributes");
         }
     }

@@ -49,11 +49,10 @@
 
 package com.openexchange.groupware.contexts;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 
 /**
@@ -65,7 +64,7 @@ import java.util.Set;
 public class SimContext implements Context {
 
     private final int id;
-    private final Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
+    private final Map<String, List<String>> attributes = new HashMap<String, List<String>>();
 
     public SimContext(int id) {
         super();
@@ -128,11 +127,11 @@ public class SimContext implements Context {
     }
 
     @Override
-    public Map<String, Set<String>> getAttributes() {
+    public Map<String, List<String>> getAttributes() {
         return attributes;
     }
 
     public void setAttribute(String key, String value) {
-        attributes.put(key, new HashSet<String>(Arrays.asList(value)));
+        attributes.put(key, Collections.singletonList(value));
     }
 }

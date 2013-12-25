@@ -82,13 +82,13 @@ public class ContextConfigProvider extends AbstractContextBasedConfigProvider {
 
             @Override
             public String get() {
-                final Map<String, Set<String>> attributes = ctx.getAttributes();
+                final Map<String, List<String>> attributes = ctx.getAttributes();
 
-                final Set<String> set = attributes.get(new StringAllocator(DYNAMIC_ATTR_PREFIX).append(property).toString());
-                if (set == null || set.isEmpty()) {
+                final List<String> values = attributes.get(new StringAllocator(DYNAMIC_ATTR_PREFIX).append(property).toString());
+                if (values == null || values.isEmpty()) {
                     return null;
                 }
-                return set.iterator().next();
+                return values.get(0);
             }
 
             @Override
@@ -122,7 +122,7 @@ public class ContextConfigProvider extends AbstractContextBasedConfigProvider {
 
     @Override
     public Collection<String> getAllPropertyNames(final Context ctx) {
-        final Map<String, Set<String>> attributes = ctx.getAttributes();
+        final Map<String, List<String>> attributes = ctx.getAttributes();
         final Set<String> allNames = new HashSet<String>();
         final int snip = DYNAMIC_ATTR_PREFIX.length();
         for (final String name : attributes.keySet()) {

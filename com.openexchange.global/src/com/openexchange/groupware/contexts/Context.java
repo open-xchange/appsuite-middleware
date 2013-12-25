@@ -50,8 +50,8 @@
 package com.openexchange.groupware.contexts;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * The context stores all attributes that are necessary for components dealing with context specific data. This are especially which
@@ -132,12 +132,12 @@ public interface Context extends Serializable {
     String getFilestoreName();
 
     /**
-     * Gets the user attributes as an unmodifiable map.
+     * Gets the context attributes as an unmodifiable map.
      * <p>
      * Each attribute may point to multiple values.
      *
-     * @return user attributes
+     * @return The context attributes
      */
-    Map<String, Set<String>> getAttributes();
+    Map<String, List<String>> getAttributes();
 
 }
