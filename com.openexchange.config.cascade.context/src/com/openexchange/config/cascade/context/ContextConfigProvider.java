@@ -60,6 +60,7 @@ import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.StringAllocator;
 
 /**
  * {@link ContextConfigProvider}
@@ -83,7 +84,7 @@ public class ContextConfigProvider extends AbstractContextBasedConfigProvider {
             public String get() {
                 final Map<String, Set<String>> attributes = ctx.getAttributes();
 
-                final Set<String> set = attributes.get(DYNAMIC_ATTR_PREFIX + property);
+                final Set<String> set = attributes.get(new StringAllocator(DYNAMIC_ATTR_PREFIX).append(property).toString());
                 if (set == null || set.isEmpty()) {
                     return null;
                 }
