@@ -52,7 +52,11 @@ package com.openexchange.groupware.contexts.impl;
 import com.openexchange.groupware.contexts.Context;
 
 /**
- * ContextExtended - an extended version of <code>Context</code> interface
+ * ContextExtended - an extended version of <code>Context</code> interface providing additional methods
+ * <ul>
+ * <li>{@link #setUpdating(boolean)}</li>
+ * <li>{@link #setReadOnly(boolean)}</li>
+ * </ul>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
