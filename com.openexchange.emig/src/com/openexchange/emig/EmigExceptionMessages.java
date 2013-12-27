@@ -70,4 +70,7 @@ public final class EmigExceptionMessages implements LocalizableStrings {
     // The E-Mail address is invalid %1$s
     public static final String EMAIL_PARSE_ERROR_MSG = "The E-Mail address is invalid: \"%1$s\".";
 
+    // The user identifier is invalid: "%1$s".
+    public static final String INVALID_USER_IDENTIFER_MSG = "The user identifier is invalid: \"%1$s\".";
+
 }

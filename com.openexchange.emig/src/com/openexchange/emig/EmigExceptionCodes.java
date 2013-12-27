@@ -83,6 +83,10 @@ public enum EmigExceptionCodes implements DisplayableOXExceptionCode {
      * Internet E-Mail address could not be parsed: "%1$s".
      */
     EMAIL_PARSE_ERROR("Internet E-Mail address could not be parsed: \"%1$s\".", Category.CATEGORY_ERROR, 5, EmigExceptionMessages.EMAIL_PARSE_ERROR_MSG),
+    /**
+     * The user identifier is invalid: "%1$s".
+     */
+    INVALID_USER_IDENTIFER("The user identifier is invalid: \"%1$s\".", Category.CATEGORY_ERROR, 5, EmigExceptionMessages.INVALID_USER_IDENTIFER_MSG),
     ;
 
     /**
