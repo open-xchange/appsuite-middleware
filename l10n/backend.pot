@@ -1341,6 +1341,11 @@ msgstr ""
 msgid "The E-Mail address is invalid: \"%1$s\"."
 msgstr ""
 
+#. The user identifier is invalid: "%1$s".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.emig/src/com/openexchange/emig/EmigExceptionMessages.java:74
+msgid "The user identifier is invalid: \"%1$s\"."
+msgstr ""
+
 #. An error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eventsystem/src/com/openexchange/eventsystem/EventSystemExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:63
