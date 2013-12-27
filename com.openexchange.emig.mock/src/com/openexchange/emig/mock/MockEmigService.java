@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.Logger;
 import com.openexchange.context.ContextService;
 import com.openexchange.emig.EmigExceptionCodes;
 import com.openexchange.emig.EmigService;
@@ -76,6 +77,8 @@ import com.openexchange.user.UserService;
  */
 public final class MockEmigService implements EmigService {
 
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MockEmigService.class);
+
     private final AtomicReference<Set<String>> nonEmigDomainsRef;
     private final ServiceLookup services;
 
@@ -96,6 +99,7 @@ public final class MockEmigService implements EmigService {
     public void applyNonEmigDomains(final String sNonEmigDomains) {
         if (Strings.isEmpty(sNonEmigDomains)) {
             nonEmigDomainsRef.set(Collections.<String> emptySet());
+            LOGGER.info("{} now works with no domain restrictions. Everyone is considered as EMiG capable...", MockEmigService.class.getSimpleName());
             return;
         }
 
@@ -109,20 +113,21 @@ public final class MockEmigService implements EmigService {
         for (final String domain : domains) {
             set.add(Strings.toLowerCase(domain));
         }
+        LOGGER.info("{} now works with following domain restrictions: {}", MockEmigService.class.getSimpleName(), set.toString());
     }
 
     @Override
-    public boolean isEMIG_Session(String userIdentifier) throws OXException {
+    public boolean isEMIG_Session(final String userIdentifier) throws OXException {
         return checkMailAddress(userIdentifier, true);
     }
 
     @Override
-    public boolean isEMIG_MSA(String serverName, String mailFrom, String debugLoginname) throws OXException {
+    public boolean isEMIG_MSA(final String serverName, final String mailFrom, final String debugLoginname) throws OXException {
         return checkMailAddress(mailFrom, false);
     }
 
     @Override
-    public int[] isEMIG_Recipient(String[] mailAddresses) throws OXException {
+    public int[] isEMIG_Recipient(final String[] mailAddresses) throws OXException {
         if (null == mailAddresses) {
             return new int[0];
         }
@@ -137,48 +142,65 @@ public final class MockEmigService implements EmigService {
         return retval;
     }
 
-    private boolean checkMailAddress(String address, boolean isUserId) throws OXException {
+    private boolean checkMailAddress(final String address, final boolean isUserId) throws OXException {
         if (Strings.isEmpty(address)) {
             return false;
         }
 
+        LOGGER.info("{} checks {}: {}", MockEmigService.class.getSimpleName(), isUserId ? "user identifier" : "address", address);
+
         final Set<String> set = nonEmigDomainsRef.get();
         if (null == set || set.isEmpty()) {
+            LOGGER.info("{} rates {} \"{}\" as EMiG-capable.", MockEmigService.class.getSimpleName(), isUserId ? "user identifier" : "address", address);
             return true;
         }
 
-        final ContextService contextService = services.getOptionalService(ContextService.class);
-        if (null == contextService) {
-            throw ServiceExceptionCode.absentService(ContextService.class);
+        if (isUserId) {
+            // Check user identifier
+            final ContextService contextService = services.getOptionalService(ContextService.class);
+            if (null == contextService) {
+                throw ServiceExceptionCode.absentService(ContextService.class);
+            }
+
+            final UserService userService = services.getOptionalService(UserService.class);
+            if (null == userService) {
+                throw ServiceExceptionCode.absentService(UserService.class);
+            }
+
+            final String[] splitted = split(address);
+            final int ctxId = contextService.getContextId(splitted[0]);
+            if (ContextStorage.NOT_FOUND == ctxId) {
+                throw EmigExceptionCodes.INVALID_USER_IDENTIFER.create(address);
+            }
+            final Context ctx = contextService.getContext(ctxId);
+            final int userId;
+            try {
+                userId = userService.getUserId(splitted[1], ctx);
+            } catch (final OXException e) {
+                if (UserExceptionCode.PROPERTY_MISSING.getPrefix().equals(e.getPrefix()) && LdapExceptionCode.USER_NOT_FOUND.getNumber() == e.getCode()) {
+                    throw EmigExceptionCodes.INVALID_USER_IDENTIFER.create(address);
+                }
+                throw e;
+            }
+            final User user = userService.getUser(userId, ctx);
+            for (final String alias : user.getAliases()) {
+                final int pos = alias.indexOf('@');
+                if (set.contains(Strings.toLowerCase(pos > 0 ? alias.substring(pos + 1) : alias))) {
+                    LOGGER.info("{} rates {} \"{}\" as non-EMiG-capable.", MockEmigService.class.getSimpleName(), "address", alias);
+                    return false;
+                }
+            }
+            LOGGER.info("{} rates user identifier \"{}\" as EMiG-capable.", MockEmigService.class.getSimpleName(), address);
+            return true;
         }
 
-        final UserService userService = services.getOptionalService(UserService.class);
-        if (null == userService) {
-            throw ServiceExceptionCode.absentService(UserService.class);
+        // Check address
+        final int pos = address.indexOf('@');
+        if (set.contains(Strings.toLowerCase(pos > 0 ? address.substring(pos + 1) : address))) {
+            LOGGER.info("{} rates address \"{}\" as non-EMiG-capable.", MockEmigService.class.getSimpleName(), address);
+            return false;
         }
-
-        final String[] splitted = split(address);
-        final int ctxId = contextService.getContextId(splitted[0]);
-        if (ContextStorage.NOT_FOUND == ctxId) {
-            throw isUserId ? EmigExceptionCodes.INVALID_USER_IDENTIFER.create(address) : EmigExceptionCodes.EMAIL_PARSE_ERROR.create(address);
-        }
-        final Context ctx = contextService.getContext(ctxId);
-        final int userId;
-        try {
-            userId = userService.getUserId(splitted[1], ctx);
-        } catch (final OXException e) {
-            if (UserExceptionCode.PROPERTY_MISSING.getPrefix().equals(e.getPrefix()) && LdapExceptionCode.USER_NOT_FOUND.getNumber() == e.getCode()) {
-                throw isUserId ? EmigExceptionCodes.INVALID_USER_IDENTIFER.create(address) : EmigExceptionCodes.EMAIL_PARSE_ERROR.create(address);
-            }
-            throw e;
-        }
-        final User user = userService.getUser(userId, ctx);
-        for (final String alias : user.getAliases()) {
-            final int pos = alias.indexOf('@');
-            if (set.contains(Strings.toLowerCase(pos > 0 ? alias.substring(pos + 1) : alias))) {
-                return false;
-            }
-        }
+        LOGGER.info("{} rates address \"{}\" as EMiG-capable.", MockEmigService.class.getSimpleName(), address);
         return true;
     }
 
