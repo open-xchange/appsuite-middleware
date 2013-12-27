@@ -51,6 +51,8 @@ package com.openexchange.ajax.requesthandler.converters.preview.cache.console;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.management.MBeanServerConnection;
@@ -67,11 +69,20 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import com.openexchange.admin.rmi.OXLoginInterface;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.ResourceCacheMBean;
 import com.openexchange.management.console.JMXAuthenticatorImpl;
 
 /**
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public final class PreviewCacheTool2 {
 
@@ -86,6 +97,10 @@ public final class PreviewCacheTool2 {
         sOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
         sOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
         sOptions.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
+        
+        sOptions.addOption("A", "adminuser", true, "Admin username");
+        sOptions.addOption("P", "adminpass", true, "Admin password");
+        sOptions.addOption("r", "rmi-port", true, "The optional RMI port (default:1099)");
     }
 
     /**
@@ -103,6 +118,9 @@ public final class PreviewCacheTool2 {
     public static void main(String[] args) {
         CommandLineParser parser = new PosixParser();
         boolean error = true;
+        Credentials credentials = null;
+        Context ctx = null;
+        int rmiPort = 1099;
         try {
             final CommandLine cmd = parser.parse(sOptions, args);
             if (cmd.hasOption('h')) {
@@ -110,7 +128,7 @@ public final class PreviewCacheTool2 {
                 System.exit(0);
                 return;
             }
-
+            
             final String contextOptionVal;
             if (cmd.hasOption('a')) {
                 contextOptionVal = null;
@@ -122,25 +140,15 @@ public final class PreviewCacheTool2 {
                     return;
                 }
                 contextOptionVal = cmd.getOptionValue('c');
+                ctx = new Context();
+                ctx.setId(Integer.valueOf(contextOptionVal));
             }
 
             int port = 9999;
             if (cmd.hasOption('p')) {
                 final String val = cmd.getOptionValue('p');
                 if (null != val) {
-                    try {
-                        port = Integer.parseInt(val.trim());
-                    } catch (final NumberFormatException e) {
-                        System.err.println(new StringBuilder("Port parameter is not a number: ").append(val).toString());
-                        printHelp();
-                        System.exit(1);
-                    }
-                    if (port < 1 || port > 65535) {
-                        System.err.println(new StringBuilder("Port parameter is out of range: ").append(val).append(
-                            ". Valid range is from 1 to 65535.").toString());
-                        printHelp();
-                        System.exit(1);
-                    }
+                    port = parsePort(val);
                 }
             }
 
@@ -170,6 +178,57 @@ public final class PreviewCacheTool2 {
             } else {
                 environment = new HashMap<String, Object>(1);
                 environment.put(JMXConnectorServer.AUTHENTICATOR, new JMXAuthenticatorImpl(jmxLogin, jmxPassword));
+            }
+            
+            if (cmd.hasOption('r')) {
+                rmiPort = parsePort(cmd.getOptionValue('r'));
+            }
+            
+            // Authentication
+            if (cmd.hasOption('A') && cmd.hasOption('P')) {
+                String user = cmd.getOptionValue('A');
+                String password = cmd.getOptionValue('P');
+                credentials = new Credentials(user, password);
+                try {
+                    OXLoginInterface oxlogin = (OXLoginInterface) Naming.lookup("rmi://localhost:" + rmiPort + "/" + OXLoginInterface.RMI_NAME);
+                    if (ctx == null)
+                        oxlogin.login(credentials);
+                    else
+                        oxlogin.login(ctx, credentials);
+                } catch (NotBoundException e) {
+                    String msg = e.getMessage();
+                    System.out.println(msg);
+                    System.exit(-1);
+                    return;
+                } catch (InvalidCredentialsException e) {
+                    System.out.println("Invalid credentials. Access denied.");
+                    System.exit(-1);
+                    return;
+                } catch (StorageException e) {
+                    String msg = e.getMessage();
+                    System.out.println("Storage not available. " + msg);
+                    System.exit(-1);
+                    return;
+                } catch (InvalidDataException e) {
+                    String msg = e.getMessage();
+                    System.out.println(msg);
+                    System.exit(-1);
+                    return;
+                } catch (NoSuchContextException e) {
+                    System.out.println("The specified context '" + ctx.getId() + "' does not exist.");
+                    System.exit(-1);
+                    return;
+                } catch (DatabaseUpdateException e) {
+                    String msg = e.getMessage();
+                    System.out.println(msg);
+                    System.exit(-1);
+                    return;
+                }
+            } else {
+                System.out.println("You must provide administrative credentials to proceed.");
+                printHelp();
+                System.exit(-1);
+                return;
             }
 
             // Invoke MBean
@@ -228,6 +287,28 @@ public final class PreviewCacheTool2 {
     private static ObjectName getObjectName(final String className, final String domain) throws MalformedObjectNameException {
         final int pos = className.lastIndexOf('.');
         return new ObjectName(domain, "name", pos == -1 ? className : className.substring(pos + 1));
+    }
+    
+    /**
+     * Parse and validate port number
+     * @param val port as string
+     * @return
+     */
+    private static int parsePort(String val) {
+        int port = 0;
+        try {
+            port = Integer.parseInt(val.trim());
+        } catch (final NumberFormatException e) {
+            System.err.println(new StringBuilder("Port parameter is not a number: ").append(val).toString());
+            printHelp();
+            System.exit(1);
+        }
+        if (port < 1 || port > 65535) {
+            System.err.println(new StringBuilder("Port parameter is out of range: ").append(val).append(". Valid range is from 1 to 65535.").toString());
+            printHelp();
+            System.exit(1);
+        }
+        return port;
     }
 
 }
