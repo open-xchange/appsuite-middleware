@@ -52,6 +52,7 @@ package com.openexchange.ajax.appointment;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import com.openexchange.ajax.appointment.bugtests.AppointmentBugTestSuite;
+import com.openexchange.ajax.appointment.bugtests.FolderIdTestAjax;
 import com.openexchange.ajax.appointment.recurrence.RecurrenceTestSuite;
 
 public class AppointmentAJAXSuite extends TestSuite{
@@ -97,6 +98,7 @@ public class AppointmentAJAXSuite extends TestSuite{
         tests.addTest(AppointmentBugTestSuite.suite());
         tests.addTest(NewAppointmentHttpApiTestSuite.suite());
         tests.addTestSuite(PrivateTests.class);
+        tests.addTestSuite(FolderIdTestAjax.class);
         return tests;
     }
 }
