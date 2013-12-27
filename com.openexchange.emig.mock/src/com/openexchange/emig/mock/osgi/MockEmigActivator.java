@@ -49,11 +49,15 @@
 
 package com.openexchange.emig.mock.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.PropertyEvent;
+import com.openexchange.config.PropertyEvent.Type;
+import com.openexchange.config.PropertyListener;
+import com.openexchange.context.ContextService;
 import com.openexchange.emig.EmigService;
 import com.openexchange.emig.mock.MockEmigService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.user.UserService;
 
 
 /**
@@ -62,9 +66,7 @@ import com.openexchange.emig.mock.MockEmigService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.2
  */
-public final class MockEmigActivator implements BundleActivator {
-
-    private volatile ServiceRegistration<EmigService> emigRegistration;
+public final class MockEmigActivator extends HousekeepingActivator {
 
     /**
      * Initializes a new {@link MockEmigActivator}.
@@ -74,17 +76,30 @@ public final class MockEmigActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-        emigRegistration = context.registerService(EmigService.class, new MockEmigService(), null);
+    protected void startBundle() throws Exception {
+        final MockEmigService mockEmigService = new MockEmigService(this);
+
+        final ConfigurationService service = getService(ConfigurationService.class);
+        final String nonEmigDomains = service.getProperty("com.openexchange.emig.mock.nonEmigDomains", "", new PropertyListener() {
+
+            @Override
+            public void onPropertyChange(final PropertyEvent event) {
+                final Type type = event.getType();
+                if (Type.DELETED == type) {
+                    mockEmigService.applyNonEmigDomains("");
+                } else if (Type.CHANGED == type) {
+                    mockEmigService.applyNonEmigDomains(event.getValue());
+                }
+            }
+        });
+        mockEmigService.applyNonEmigDomains(nonEmigDomains);
+
+        registerService(EmigService.class, mockEmigService, null);
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        final ServiceRegistration<EmigService> emigRegistration = this.emigRegistration;
-        if (null != emigRegistration) {
-            emigRegistration.unregister();
-            this.emigRegistration = null;
-        }
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class, UserService.class, ContextService.class };
     }
 
 }
