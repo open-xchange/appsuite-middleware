@@ -54,7 +54,6 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 import java.util.List;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.cache.impl.FolderCacheManager;
@@ -226,7 +225,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
             final ToDoPermission toDoPermission = iterator.value();
             final int[] users = toDoPermission.getUsers();
             for (final int user : users) {
-                LOG.debug("Auto-Delete system-folder-read permission for user {} from folder {}", UserStorage.getStorageUser(user, ctx).getDisplayName(), fid);
+                LOG.debug("Auto-Delete system-folder-read permission for user {} from folder {}", UserStorage.getInstance().getUser(user, ctx).getDisplayName(), fid);
                 deleteSystemFolderReadPermission(fid, user);
             }
             final int[] groups = toDoPermission.getGroups();

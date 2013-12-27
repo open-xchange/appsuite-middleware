@@ -377,7 +377,7 @@ public class OXFolderAccess {
      * @throws OXException If operation fails
      */
     public final boolean isVisibleFor(final int folderId, final int userId, final UserPermissionBits permissions) throws OXException {
-        return isVisibleFor(folderId, userId, UserStorage.getStorageUser(userId, ctx).getGroups(), permissions);
+        return isVisibleFor(folderId, userId, UserStorage.getInstance().getUser(userId, ctx).getGroups(), permissions);
     }
 
     /**
@@ -416,7 +416,7 @@ public class OXFolderAccess {
      * @throws OXException If operation fails
      */
     public final boolean isReadFolder(final int folderId, final int userId, final UserPermissionBits permissions) throws OXException {
-        return isReadFolder(folderId, userId, UserStorage.getStorageUser(userId, ctx).getGroups(), permissions);
+        return isReadFolder(folderId, userId, UserStorage.getInstance().getUser(userId, ctx).getGroups(), permissions);
     }
 
     /**
@@ -469,7 +469,7 @@ public class OXFolderAccess {
                 final Connection wc = DBPool.pickupWriteable(ctx);
                 try {
                     wc.setAutoCommit(false);
-                    final String displayName = UserStorage.getStorageUser(userId, ctx).getDisplayName();
+                    final String displayName = UserStorage.getInstance().getUser(userId, ctx).getDisplayName();
                     final int fuid = new OXFolderAdminHelper().addUserToInfoStore(userId, displayName, ctx.getContextId(), wc);
                     wc.commit();
                     return getFolderObject(fuid);
@@ -712,7 +712,7 @@ public class OXFolderAccess {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getUser();
         }
-        return UserStorage.getStorageUser(userId, ctx);
+        return UserStorage.getInstance().getUser(userId, ctx);
     }
 
 }

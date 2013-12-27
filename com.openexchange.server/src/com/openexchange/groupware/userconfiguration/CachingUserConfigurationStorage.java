@@ -193,7 +193,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 
     @Override
     public UserConfiguration getUserConfiguration(int userId, int[] groups, Context ctx) throws OXException {
-        final int[] grps = null != groups && 0 != groups.length ? groups : UserStorage.getStorageUser(userId, ctx).getGroups();
+        final int[] grps = null != groups && 0 != groups.length ? groups : UserStorage.getInstance().getUser(userId, ctx).getGroups();
         final Cache cache = this.cache;
         if (cache == null) {
             return getFallback().getUserConfiguration(userId, grps, ctx);

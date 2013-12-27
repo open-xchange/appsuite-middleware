@@ -54,7 +54,6 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
@@ -126,7 +125,7 @@ public final class CheckPermissionOnInsert extends CheckPermission {
                     final ToDoPermission toDoPermission = it.value();
                     final int[] users = toDoPermission.getUsers();
                     for (int j = 0; j < users.length; j++) {
-                        LOG.debug("Auto-Insert system-folder-read permission for user {} to folder {}", UserStorage.getStorageUser(users[j], ctx).getDisplayName(), folderId);
+                        LOG.debug("Auto-Insert system-folder-read permission for user {} to folder {}", UserStorage.getInstance().getUser(users[j], ctx).getDisplayName(), folderId);
                         addSystemFolderReadPermission(folderId, users[j], false);
                     }
                     final int[] groups = toDoPermission.getGroups();

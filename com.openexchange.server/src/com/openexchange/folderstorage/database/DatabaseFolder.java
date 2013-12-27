@@ -248,7 +248,7 @@ public class DatabaseFolder extends AbstractFolder {
                 }
                 final Context ctx = ContextStorage.getStorageContext(session.getContextId());
                 final int userId = session.getUserId();
-                final User user = UserStorage.getStorageUser(userId, ctx);
+                final User user = UserStorage.getInstance().getUser(userId, ctx);
                 final UserPermissionBits userPerm = UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, ctx);
                 userPerm.setGroups(user.getGroups());
                 final EffectivePermission permission = folderObject.getEffectiveUserPermission(userId, userPerm);

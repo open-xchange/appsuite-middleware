@@ -102,7 +102,7 @@ public class LinkRequest {
 		this.session = session;
 		this.jsonWriter = new JSONWriter(pw);
 		this.ctx = ctx;
-		user = UserStorage.getStorageUser(session.getUserId(), ctx);
+		user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
 	}
 
 	/**

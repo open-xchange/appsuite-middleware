@@ -127,7 +127,7 @@ public class ContactReader {
     private Contact patch(Contact contact) throws OXException {
         if (null != contact && 0 < contact.getInternalUserId() && contact.containsEmail1()) {
             String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
-            
+
             if (senderSource.equalsIgnoreCase("defaultSenderAddress")) {
                 UserSettingMail userSettingMail = UserSettingMailStorage.getInstance().getUserSettingMail(contact.getInternalUserId(), getContext(), connection);
                 String defaultSendAddress = userSettingMail.getSendAddr();
@@ -135,7 +135,7 @@ public class ContactReader {
                     contact.setEmail1(defaultSendAddress);
                 }
             } else {
-                String primaryMail = UserStorage.getStorageUser(contact.getInternalUserId(), contextID).getMail();
+                String primaryMail = UserStorage.getInstance().getUser(contact.getInternalUserId(), contextID).getMail();
                 contact.setEmail1(primaryMail);
             }
         }

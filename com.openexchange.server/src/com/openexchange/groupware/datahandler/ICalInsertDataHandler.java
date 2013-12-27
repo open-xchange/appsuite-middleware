@@ -146,7 +146,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
             /*
              * Get user time zone
              */
-            final TimeZone defaultZone = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx)
+            final TimeZone defaultZone = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx)
                     .getTimeZone());
             /*
              * Errors and warnings

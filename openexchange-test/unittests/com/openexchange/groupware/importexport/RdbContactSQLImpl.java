@@ -104,7 +104,7 @@ public class RdbContactSQLImpl {
         super();
         this.ctx = ContextStorage.getStorageContext(session);
         this.userId = session.getUserId();
-        this.memberInGroups = UserStorage.getStorageUser(session.getUserId(), ctx).getGroups();
+        this.memberInGroups = UserStorage.getInstance().getUser(session.getUserId(), ctx).getGroups();
         this.session = session;
         userConfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
     }

@@ -97,7 +97,7 @@ public class FolderLockHelper extends LockHelper {
                     lock.getDepth(),
                     lock.getOwner(),
                     session.getContext(),
-                    UserStorage.getStorageUser(session.getUserId(), session.getContext()));
+                    UserStorage.getInstance().getUser(session.getUserId(), session.getContext()));
         } catch (final OXException x) {
             throw x;
         }

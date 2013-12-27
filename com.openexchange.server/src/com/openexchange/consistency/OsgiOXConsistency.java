@@ -154,7 +154,7 @@ public class OsgiOXConsistency extends Consistency {
 
     @Override
     protected User getAdmin(final Context ctx) throws OXException {
-        return UserStorage.getStorageUser(ctx.getMailadmin(),ctx);
+        return UserStorage.getInstance().getUser(ctx.getMailadmin(),ctx);
     }
 
 

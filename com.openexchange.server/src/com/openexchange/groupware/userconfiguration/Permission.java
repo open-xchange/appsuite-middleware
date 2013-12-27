@@ -54,6 +54,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -171,6 +172,9 @@ public enum Permission {
      * @return The associated permissions
      */
     public static List<Permission> byBits(final int bits) {
+        if (0 == bits) {
+            return Collections.emptyList();
+        }
         final Permission[] pa = values();
         final List<Permission> permissions = new ArrayList<Permission>(pa.length);
         for (final Permission p : pa) {

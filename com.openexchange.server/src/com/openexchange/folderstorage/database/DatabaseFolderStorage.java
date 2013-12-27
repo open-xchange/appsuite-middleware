@@ -1568,7 +1568,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 final int owner = Integer.parseInt(id.substring(FolderObject.SHARED_PREFIX.length()));
                 throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(
                     OXFolderUtility.getUserName(session.getUserId(), context),
-                    UserStorage.getStorageUser(owner, context).getDisplayName(),
+                    UserStorage.getInstance().getUser(owner, context).getDisplayName(),
                     Integer.valueOf(context.getContextId()));
             }
 
@@ -1984,13 +1984,13 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                         if (owner1 > 0 && owner2 > 0) {
                             String d1;
                             try {
-                                d1 = UserStorage.getStorageUser(owner1, context).getDisplayName();
+                                d1 = UserStorage.getInstance().getUser(owner1, context).getDisplayName();
                             } catch (OXException e) {
                                 d1 = null;
                             }
                             String d2;
                             try {
-                                d2 = UserStorage.getStorageUser(owner2, context).getDisplayName();
+                                d2 = UserStorage.getInstance().getUser(owner2, context).getDisplayName();
                             } catch (OXException e) {
                                 d2 = null;
                             };
@@ -2042,13 +2042,13 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 if (owner1 > 0 && owner2 > 0) {
                     String d1;
                     try {
-                        d1 = UserStorage.getStorageUser(owner1, context).getDisplayName();
+                        d1 = UserStorage.getInstance().getUser(owner1, context).getDisplayName();
                     } catch (OXException e) {
                         d1 = null;
                     }
                     String d2;
                     try {
-                        d2 = UserStorage.getStorageUser(owner2, context).getDisplayName();
+                        d2 = UserStorage.getInstance().getUser(owner2, context).getDisplayName();
                     } catch (OXException e) {
                         d2 = null;
                     };

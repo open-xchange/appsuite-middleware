@@ -178,7 +178,7 @@ public final class attachments extends OXServlet {
                 is,
                 sessionObj,
                 ctx,
-                UserStorage.getStorageUser(sessionObj.getUserId(), ctx),
+                UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx),
                 UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx));
             ATTACHMENT_BASE.commit();
 
@@ -311,7 +311,7 @@ public final class attachments extends OXServlet {
 
             ATTACHMENT_BASE.startTransaction();
             final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
-            final User u = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+            final User u = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
             final AttachmentMetadata attachmentMeta = ATTACHMENT_BASE.getAttachment(
                 sessionObj, folder_id,
                 target_id,
@@ -372,7 +372,7 @@ public final class attachments extends OXServlet {
             final int folderId = req.getIntHeader(TARGET_FOLDER_ID);
 
             ATTACHMENT_BASE.startTransaction();
-            ATTACHMENT_BASE.detachFromObject(folderId, targetId, module, new int[] { objectId }, sessionObj, ctx, UserStorage.getStorageUser(
+            ATTACHMENT_BASE.detachFromObject(folderId, targetId, module, new int[] { objectId }, sessionObj, ctx, UserStorage.getInstance().getUser(
                 sessionObj.getUserId(),
                 ctx), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx));
             ATTACHMENT_BASE.commit();

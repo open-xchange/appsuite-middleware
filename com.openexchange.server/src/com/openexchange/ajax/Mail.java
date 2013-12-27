@@ -1575,7 +1575,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
                     validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
                 }
-                final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
+                final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
                 validAddrs.add(new QuotedInternetAddress(user.getMail()));
                 final String[] aliases = user.getAliases();
                 for (final String alias : aliases) {
@@ -1608,7 +1608,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
                     validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
                 }
-                final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
+                final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
                 validAddrs.add(new QuotedInternetAddress(user.getMail()));
                 final String[] aliases = user.getAliases();
                 for (final String alias : aliases) {

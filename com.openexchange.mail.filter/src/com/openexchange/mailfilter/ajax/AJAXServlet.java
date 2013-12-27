@@ -116,7 +116,7 @@ public abstract class AJAXServlet extends HttpServlet {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getUser().getLocale();
         }
-        return UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
+        return UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getLocale();
     }
 
     @Override

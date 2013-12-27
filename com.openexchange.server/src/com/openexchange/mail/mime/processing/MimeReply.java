@@ -352,7 +352,7 @@ public final class MimeReply {
                 /*
                  * Add user's aliases to filter
                  */
-                final String[] userAddrs = UserStorage.getStorageUser(session.getUserId(), ctx).getAliases();
+                final String[] userAddrs = UserStorage.getInstance().getUser(session.getUserId(), ctx).getAliases();
                 if (userAddrs != null && userAddrs.length > 0) {
                     final com.openexchange.java.StringAllocator addrBuilder = new com.openexchange.java.StringAllocator();
                     addrBuilder.append(userAddrs[0]);
@@ -496,7 +496,7 @@ public final class MimeReply {
             {
                 final List<String> list = new LinkedList<String>();
                 {
-                    final User user = UserStorage.getStorageUser(session.getUserId(), ctx);
+                    final User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
                     final Locale locale = user.getLocale();
                     final LocaleAndTimeZone ltz = new LocaleAndTimeZone(locale, user.getTimeZone());
                     generateReplyText(origMsg, retvalContentType, StringHelper.valueOf(locale), ltz, usm, mailSession, session, accountId, list);

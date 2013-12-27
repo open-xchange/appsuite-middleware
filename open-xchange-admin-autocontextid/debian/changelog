@@ -1,3 +1,9 @@
+open-xchange-admin-autocontextid (7.4.2-1) stable; urgency=low
+
+  * First release candidate for 7.4.2
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Mon, 23 Dec 2013 12:47:28 +0100
+
 open-xchange-admin-autocontextid (7.4.2-0) unstable; urgency=low
 
   * prepare for 7.4.2

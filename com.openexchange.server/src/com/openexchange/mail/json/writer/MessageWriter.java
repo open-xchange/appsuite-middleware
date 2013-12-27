@@ -517,7 +517,7 @@ public final class MessageWriter {
                 try {
                     TimeZone timeZone = optTimeZone;
                     if (null == timeZone) {
-                        timeZone = TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(user, cid).getTimeZone());
+                        timeZone = TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(user, cid).getTimeZone());
                     }
                     if (withKey) {
                         if (mail.containsSentDate() && mail.getSentDate() != null) {
@@ -544,7 +544,7 @@ public final class MessageWriter {
                 try {
                     TimeZone timeZone = optTimeZone;
                     if (null == timeZone) {
-                        timeZone = TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(user, cid).getTimeZone());
+                        timeZone = TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(user, cid).getTimeZone());
                     }
                     if (withKey) {
                         if (mail.containsReceivedDate() && mail.getReceivedDate() != null) {

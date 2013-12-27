@@ -779,7 +779,7 @@ public class MimeMessageFiller {
              * Set default subject if none set
              */
             if (null == mimeMessage.getSubject()) {
-                mimeMessage.setSubject(StringHelper.valueOf(UserStorage.getStorageUser(session.getUserId(), ctx).getLocale()).getString(MailStrings.DEFAULT_SUBJECT));
+                mimeMessage.setSubject(StringHelper.valueOf(UserStorage.getInstance().getUser(session.getUserId(), ctx).getLocale()).getString(MailStrings.DEFAULT_SUBJECT));
             }
         } catch (final AddressException e) {
             throw MimeMailException.handleMessagingException(e);
@@ -1018,7 +1018,7 @@ public class MimeMessageFiller {
                     if (session instanceof ServerSession) {
                         displayName = ((ServerSession) session).getUser().getDisplayName();
                     } else {
-                        displayName = UserStorage.getStorageUser(session.getUserId(), ctx).getDisplayName();
+                        displayName = UserStorage.getInstance().getUser(session.getUserId(), ctx).getDisplayName();
                     }
                     final String saneDisplayName = Strings.replaceWhitespacesWith(displayName, "");
                     fileName = MimeUtility.encodeText(new StringAllocator(saneDisplayName).append(".vcf").toString(), charset, "Q");

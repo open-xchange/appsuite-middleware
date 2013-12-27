@@ -461,7 +461,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             return ((ServerSession) session).getUser().getLocale();
         }
         final Context context = ContextStorage.getStorageContext(session.getContextId());
-        return UserStorage.getStorageUser(session.getUserId(), context).getLocale();
+        return UserStorage.getInstance().getUser(session.getUserId(), context).getLocale();
     }
 
     private ComposedMailMessage copyOf(final ComposedMailMessage source, final Context ctx) throws OXException {

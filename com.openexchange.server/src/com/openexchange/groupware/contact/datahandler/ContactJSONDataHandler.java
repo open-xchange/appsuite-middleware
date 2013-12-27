@@ -130,7 +130,7 @@ public final class ContactJSONDataHandler implements DataHandler {
             }
             final JSONArray jsonArray = new JSONArray();
 			final ContactWriter writer = new ContactWriter(TimeZone
-					.getTimeZone(UserStorage.getStorageUser(
+					.getTimeZone(UserStorage.getInstance().getUser(
 							session.getUserId(), ctx).getTimeZone()));
             for (final VCardFileToken chunk : chunks) {
                 final VersitDefinition def = chunk.getVersitDefinition();

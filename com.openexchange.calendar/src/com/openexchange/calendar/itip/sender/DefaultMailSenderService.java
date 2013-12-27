@@ -195,10 +195,10 @@ public class DefaultMailSenderService implements MailSenderService {
                 fromAddr = getUserSettingMail(session.getUserId(), serverSession.getContext()).getSendAddr();
             } catch (final OXException e) {
                 LOG.error("", e);
-                fromAddr = UserStorage.getStorageUser(session.getUserId(), serverSession.getContext()).getMail();
+                fromAddr = UserStorage.getInstance().getUser(session.getUserId(), serverSession.getContext()).getMail();
             }
         } else {
-            fromAddr = UserStorage.getStorageUser(session.getUserId(), serverSession.getContext()).getMail();
+            fromAddr = UserStorage.getInstance().getUser(session.getUserId(), serverSession.getContext()).getMail();
         }
 
         sender.setEmail(fromAddr);

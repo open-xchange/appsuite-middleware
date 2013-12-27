@@ -134,7 +134,7 @@ public final class UserAttributeAccess {
      * @throws OXException
      */
     public boolean getBooleanAttribute(final String name, final int userId, final int contextId, final boolean defaultValue) throws OXException {
-        return getBooleanAttribute(name, UserStorage.getStorageUser(userId, contextId), defaultValue);
+        return getBooleanAttribute(name, UserStorage.getInstance().getUser(userId, contextId), defaultValue);
     }
 
     /**

@@ -1,3 +1,9 @@
+open-xchange-indexing (7.4.2-1) stable; urgency=low
+
+  * First release candidate for 7.4.2
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Mon, 23 Dec 2013 12:48:38 +0100
+
 open-xchange-indexing (7.4.2-0) unstable; urgency=low
 
   * prepare for 7.4.2

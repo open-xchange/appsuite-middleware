@@ -215,7 +215,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         } else {
             ctx = ContextStorage.getStorageContext(session.getContextId());
             userPerms = UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), ctx);
-            user = UserStorage.getStorageUser(session.getUserId(), ctx);
+            user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
         }
         this.readCon = readCon;
         this.writeCon = writeCon;

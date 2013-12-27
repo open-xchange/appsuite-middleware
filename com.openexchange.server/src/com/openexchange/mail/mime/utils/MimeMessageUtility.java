@@ -248,7 +248,7 @@ public final class MimeMessageUtility {
         if (session instanceof ServerSession) {
             user = ((ServerSession) session).getUser();
         } else {
-            user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
+            user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
         }
         return getMailDateFormat(user.getTimeZone());
     }

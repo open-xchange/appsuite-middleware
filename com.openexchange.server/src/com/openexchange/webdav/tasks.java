@@ -168,7 +168,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
 
     @Override
     protected void startWriter(final Session sessionObj, final Context ctx, final int objectId, final int folderId, final OutputStream os) throws Exception {
-        final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+        final User userObj = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
         final TaskWriter taskwriter = new TaskWriter(userObj, ctx, sessionObj);
         taskwriter.startWriter(objectId, folderId, os);
     }
@@ -180,7 +180,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
 
     @Override
     protected void startWriter(final Session sessionObj, final Context ctx, final int folderId, final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
-        final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+        final User userObj = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
         final TaskWriter taskwriter = new TaskWriter(userObj, ctx, sessionObj);
         taskwriter.startWriter(bModified, bDelete, bList, folderId, lastsync, os);
     }

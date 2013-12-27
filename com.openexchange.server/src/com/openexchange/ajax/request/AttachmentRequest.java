@@ -140,7 +140,7 @@ public class AttachmentRequest extends CommonRequest {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getUser().getLocale();
         }
-        return UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
+        return UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getLocale();
     }
 
     public static boolean hasPermission(final UserConfiguration userConfig) {

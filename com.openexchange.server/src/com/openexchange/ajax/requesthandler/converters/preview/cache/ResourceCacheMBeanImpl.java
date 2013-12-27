@@ -163,7 +163,6 @@ public final class ResourceCacheMBeanImpl extends StandardMBean implements Resou
 
             final String sep = System.getProperty("line.separator");
             final StringBuilder responseBuilder = new StringBuilder(65536);
-            final AtomicReference<Exception> errorRef = new AtomicReference<Exception>();
             contextIds.forEach(new TIntProcedure() {
 
                 @Override
@@ -180,11 +179,6 @@ public final class ResourceCacheMBeanImpl extends StandardMBean implements Resou
                     return true;
                 }
             });
-
-            final Exception exc = errorRef.get();
-            if (null != exc) {
-                throw exc;
-            }
 
             return responseBuilder.toString();
         } catch (final Exception e) {

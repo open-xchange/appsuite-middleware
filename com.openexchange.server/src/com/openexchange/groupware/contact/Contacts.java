@@ -1371,7 +1371,7 @@ public final class Contacts {
 
     public static Contact getContactById(final int objectId, final Session session) throws OXException {
         final Context ctx = ContextStorage.getStorageContext(session);
-        final int[] groups = UserStorage.getStorageUser(session.getUserId(), ctx).getGroups();
+        final int[] groups = UserStorage.getInstance().getUser(session.getUserId(), ctx).getGroups();
         final Connection readCon = DBPool.pickup(ctx);
         final Contact co;
         try {

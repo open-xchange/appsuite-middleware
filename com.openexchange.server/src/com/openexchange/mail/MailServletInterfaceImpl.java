@@ -264,7 +264,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     private User getUser() throws OXException {
         if (null == user) {
-            user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
+            user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
         }
         return user;
     }
