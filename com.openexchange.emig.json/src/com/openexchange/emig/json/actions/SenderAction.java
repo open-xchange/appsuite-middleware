@@ -102,10 +102,9 @@ public final class SenderAction extends AbstractEmigAction {
         int accountId = jBody.optInt("account", -1);
         String sender = jBody.optString("address", null);
         if (null == sender) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("sender");
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("address");
         }
 
-        
         try {
             sender = new QuotedInternetAddress(sender, false).getIDNAddress();
         } catch (final Exception e) {
