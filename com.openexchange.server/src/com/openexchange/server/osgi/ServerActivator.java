@@ -56,6 +56,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import javax.activation.MailcapCommandMap;
+import javax.management.ObjectName;
 import javax.servlet.ServletException;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
@@ -79,6 +80,9 @@ import com.openexchange.ajax.customizer.folder.osgi.FolderFieldCollector;
 import com.openexchange.ajax.meta.MetaContributorRegistry;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.ajax.requesthandler.Dispatcher;
+import com.openexchange.auth.Authenticator;
+import com.openexchange.auth.mbean.AuthenticatorMBean;
+import com.openexchange.auth.mbean.impl.AuthenticatorMBeanImpl;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
@@ -170,12 +174,14 @@ import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.CreateMailAccountTables;
 import com.openexchange.mailaccount.internal.DeleteListenerServiceTracker;
 import com.openexchange.management.ManagementService;
+import com.openexchange.management.Managements;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
 import com.openexchange.osgi.BundleServiceTracker;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
@@ -246,7 +252,8 @@ public final class ServerActivator extends HousekeepingActivator {
         }
     }
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServerActivator.class);
+    /** The logger */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServerActivator.class);
 
     /**
      * Constant for string: "identifier"
@@ -436,6 +443,30 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // CapabilityService
         track(CapabilityService.class, new CapabilityRegistrationListener());
+
+        // Authenticator
+        track(Authenticator.class, new RegistryCustomizer<Authenticator>(context, Authenticator.class));
+        track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
+
+            @Override
+            public void added(final ServiceReference<ManagementService> ref, final ManagementService management) {
+                try {
+                    final ObjectName objectName = Managements.getObjectName(AuthenticatorMBean.class.getName(), AuthenticatorMBean.DOMAIN);
+                    management.registerMBean(objectName, new AuthenticatorMBeanImpl());
+                } catch (final Exception e) {
+                    LOG.warn("Could not register MBean {}", AuthenticatorMBean.class.getName());
+                }
+            }
+
+            @Override
+            public void removed(final ServiceReference<ManagementService> ref, final ManagementService management) {
+                try {
+                    management.unregisterMBean(Managements.getObjectName(AuthenticatorMBean.class.getName(), AuthenticatorMBean.DOMAIN));
+                } catch (final Exception e) {
+                    LOG.warn("Could not un-register MBean {}", AuthenticatorMBean.class.getName());
+                }
+            }
+        });
 
         // MetaContributors
         {
