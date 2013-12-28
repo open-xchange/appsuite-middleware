@@ -88,8 +88,8 @@ public final class PreviewCacheTool2 {
         sOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
         sOptions.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
 
-        sOptions.addOption("A", "adminuser", true, "Admin username");
-        sOptions.addOption("P", "adminpass", true, "Admin password");
+        sOptions.addOption("A", "adminuser", true, "Admin username. In case -a/--all is provided master administrator's user name is required; else the one context administrator");
+        sOptions.addOption("P", "adminpass", true, "Admin password. In case -a/--all is provided master administrator's password is required; else the one context administrator");
         sOptions.addOption("r", "rmi-port", true, "The optional RMI port (default:1099)");
     }
 
