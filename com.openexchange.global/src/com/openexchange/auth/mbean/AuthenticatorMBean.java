@@ -52,7 +52,7 @@ package com.openexchange.auth.mbean;
 import javax.management.MBeanException;
 
 /**
- * {@link AuthenticatorMBean} - The authenticator MBean.
+ * {@link AuthenticatorMBean} - The MBean for administrative authentication
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.2

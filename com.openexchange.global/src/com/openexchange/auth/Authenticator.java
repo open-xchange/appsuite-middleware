@@ -52,7 +52,7 @@ package com.openexchange.auth;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link Authenticator}
+ * {@link Authenticator} - For administrative authentication.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.2

@@ -52,7 +52,7 @@ package com.openexchange.auth;
 import java.io.Serializable;
 
 /**
- * {@link Credentials} - Credentials providing log and password.
+ * {@link Credentials} - Credentials providing login and password for administrative authentication.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.2
