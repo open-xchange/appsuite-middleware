@@ -218,10 +218,10 @@ public final class PreviewCacheTool2 {
             JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + port + "/server");
             JMXConnector jmxConnector = JMXConnectorFactory.connect(url, environment);
             try {
-                MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
+                final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
                 try {
-                    AuthenticatorMBean authenticator = authenticatorMBean(mbsc);
-                    ResourceCacheMBean previceCacheProxy = previewCacheMBean(mbsc);
+                    final AuthenticatorMBean authenticator = authenticatorMBean(mbsc);
+                    final ResourceCacheMBean previceCacheProxy = previewCacheMBean(mbsc);
 
                     final String resultDesc;
                     if (null == contextOptionVal) {
@@ -234,8 +234,8 @@ public final class PreviewCacheTool2 {
                     }
 
                     System.out.println(resultDesc);
-                } catch (Exception e) {
-                    String errMsg = e.getMessage();
+                } catch (final Exception e) {
+                    final String errMsg = e.getMessage();
                     System.out.println(errMsg == null ? "An error occurred." : errMsg);
                 }
             } finally {
