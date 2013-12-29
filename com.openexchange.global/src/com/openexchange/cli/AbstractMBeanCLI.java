@@ -276,6 +276,16 @@ public abstract class AbstractMBeanCLI<R> {
 
     /**
      * Adds this command-line tool's options.
+     * <p>
+     * Note following options are reserved:
+     * <ul>
+     * <li>-h / --help
+     * <li>-p / --port
+     * <li>-l / --login
+     * <li>-s / --password
+     * <li>-A / --adminuser
+     * <li>-P / --adminpass
+     * </ul>
      *
      * @param options The options
      */
