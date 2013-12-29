@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.MBeanServerInvocationHandler;
 import javax.management.MalformedObjectNameException;
@@ -257,8 +258,9 @@ public abstract class AbstractMBeanCLI<R> {
      * @param password The administrator password
      * @param cmd The command line providing options
      * @param authenticator The authenticator MBean
+     * @throws MBeanException If authentication fails
      */
-    protected abstract void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator);
+    protected abstract void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException;
 
     /**
      * Gets the banner to display at the end of the help
