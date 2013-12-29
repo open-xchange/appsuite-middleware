@@ -72,6 +72,8 @@ import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.management.console.JMXAuthenticatorImpl;
 
 /**
+ * {@link PreviewCacheTool} - Serves <code>clearpreviewcache</code> command-line tool.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PreviewCacheTool {
