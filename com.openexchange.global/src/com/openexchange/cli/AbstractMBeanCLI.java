@@ -107,13 +107,23 @@ public abstract class AbstractMBeanCLI<R> {
             // Check if administrative permission is required
             final boolean requiresAdministrativePermission = requiresAdministrativePermission();
             if (requiresAdministrativePermission) {
-                options.addOption("A", "adminuser", true, "Admin username. In case -a/--all is provided master administrator's user name is required; else the one for context administrator");
-                options.addOption("P", "adminpass", true, "Admin password. In case -a/--all is provided master administrator's password is required; else the one for context administrator");
+                options.addOption("A", "adminuser", true, "Admin username");
+                options.addOption("P", "adminpass", true, "Admin password");
             }
+
+            // Add other options
+            addOptions(options);
 
             // Initialize command-line parser & parse arguments
             final CommandLineParser parser = new PosixParser();
             final CommandLine cmd = parser.parse(options, args);
+
+            // Check if help output is requested
+            if (cmd.hasOption('h')) {
+                printHelp(options);
+                System.exit(0);
+                return null;
+            }
 
             // Check for JMX port
             int port = 9999;
@@ -146,19 +156,7 @@ public abstract class AbstractMBeanCLI<R> {
                 jmxPassword = cmd.getOptionValue('s');
             }
 
-            // Check other mandatory options
-            checkOptions(cmd);
-
-            // Build JMX environment
-            final Map<String, Object> environment;
-            if (jmxLogin == null || jmxPassword == null) {
-                environment = null;
-            } else {
-                environment = new HashMap<String, Object>(1);
-                environment.put(JMXConnectorServer.AUTHENTICATOR, new JMXAuthenticatorImpl(jmxLogin, jmxPassword));
-            }
-
-            // Authentication
+            // Options for administrative authentication
             if (requiresAdministrativePermission && !cmd.hasOption('A')) {
                 System.out.println("You must provide administrative credentials to proceed.");
                 printHelp(options);
@@ -171,8 +169,20 @@ public abstract class AbstractMBeanCLI<R> {
                 System.exit(-1);
                 return null;
             }
-            final String login = cmd.getOptionValue('A');
-            final String password = cmd.getOptionValue('P');
+            final String adminLogin = cmd.getOptionValue('A');
+            final String adminPassword = cmd.getOptionValue('P');
+
+            // Check other mandatory options
+            checkOptions(cmd);
+
+            // Build JMX environment
+            final Map<String, Object> environment;
+            if (jmxLogin == null || jmxPassword == null) {
+                environment = null;
+            } else {
+                environment = new HashMap<String, Object>(1);
+                environment.put(JMXConnectorServer.AUTHENTICATOR, new JMXAuthenticatorImpl(jmxLogin, jmxPassword));
+            }
 
             // Invoke MBean
             final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + port + "/server");
@@ -184,12 +194,13 @@ public abstract class AbstractMBeanCLI<R> {
                 try {
                     if (requiresAdministrativePermission) {
                         final AuthenticatorMBean authenticator = authenticatorMBean(mbsc);
-                        administrativeAuth(login, password, cmd, authenticator);
+                        administrativeAuth(adminLogin, adminPassword, cmd, authenticator);
                     }
-                    retval = invoke(cmd, mbsc);
+                    retval = invoke(options, cmd, mbsc);
                 } catch (final Exception e) {
-                    final String errMsg = e.getMessage();
-                    System.out.println(errMsg == null ? "An error occurred." : errMsg);
+                    final Throwable t = e.getCause();
+                    final String message = null == t ? e.getMessage() : t.getMessage();
+                    System.err.println(null == message ? "An error occurred." : message);
                 }
             } finally {
                 try {
@@ -208,6 +219,8 @@ public abstract class AbstractMBeanCLI<R> {
             System.err.println("URL to connect to server is invalid: " + e.getMessage());
         } catch (final IOException e) {
             System.err.println("Unable to communicate with the server: " + e.getMessage());
+        } catch (final RuntimeException e) {
+            System.err.println("Problem in runtime: " + e.getMessage());
         } finally {
             if (error) {
                 System.exit(1);
@@ -296,11 +309,13 @@ public abstract class AbstractMBeanCLI<R> {
     /**
      * Invokes the MBean's method.
      *
+     * @param option The options
      * @param cmd The command line providing parameters/options
      * @param mbsc The MBean server connection
      * @return The return value
+     * @throws Exception If invocation fails
      */
-    protected abstract R invoke(CommandLine cmd, MBeanServerConnection mbsc);
+    protected abstract R invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception;
 
     /**
      * Gets the MBean instance.

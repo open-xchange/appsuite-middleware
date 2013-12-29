@@ -50,6 +50,7 @@
 package com.openexchange.cli;
 
 import javax.management.MBeanException;
+import javax.management.MBeanServerConnection;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
@@ -73,6 +74,33 @@ public abstract class AbstractContextMBeanCLI<R> extends AbstractMBeanCLI<R> {
     @Override
     protected void addOptions(Options options) {
         options.addOption("c", "context", true, "A valid context identifier");
+        addMoreOptions(options);
+    }
+
+    @Override
+    protected R invoke(Options options, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
+        // Parse context identifier
+        if (!cmd.hasOption('c')) {
+            System.err.println("Missing context identifier.");
+            printHelp(options);
+            System.exit(1);
+            return null;
+        }
+        final int contextId;
+        {
+            final String optionValue = cmd.getOptionValue('c');
+            try {
+                contextId = Integer.parseInt(optionValue.trim());
+            } catch (final NumberFormatException e) {
+                System.err.println("Context identifier parameter is not a number: " + optionValue);
+                printHelp(options);
+                System.exit(1);
+                return null;
+            }
+        }
+
+        // Invoke MBean method
+        return invoke(contextId, options, cmd, mbsc);
     }
 
     @Override
@@ -108,5 +136,17 @@ public abstract class AbstractContextMBeanCLI<R> extends AbstractMBeanCLI<R> {
      * @param options The options
      */
     protected abstract void addMoreOptions(Options options);
+
+    /**
+     * Invokes the MBean's method.
+     *
+     * @param contextId The context identifier
+     * @param option The options
+     * @param cmd The command line providing parameters/options
+     * @param mbsc The MBean server connection
+     * @return The return value
+     * @throws Exception If invocation fails
+     */
+    protected abstract R invoke(int contextId, Options options, CommandLine cmd, MBeanServerConnection mbsc) throws Exception;
 
 }
