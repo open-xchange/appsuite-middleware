@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.converters.preview.cache.console;
+package com.openexchange.cli;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -67,69 +67,54 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
-import com.openexchange.ajax.requesthandler.converters.preview.cache.ResourceCacheMBean;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
-import com.openexchange.management.console.JMXAuthenticatorImpl;
+
 
 /**
- * {@link PreviewCacheTool2} - Serves <code>sanitizefilemimetypes</code> command-line tool.
+ * {@link AbstractMBeanCLI} - The abstract helper class for MBean-based command-line tools.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.2
  */
-public final class PreviewCacheTool2 {
-
-    private static final Options sOptions;
-    static {
-        sOptions = new Options();
-        sOptions.addOption("h", "help", false, "Prints a help text");
-        sOptions.addOption("c", "context", true, "Required. The context identifier");
-        sOptions.addOption("a", "all", false, "Required. The flag to signal that contexts shall be processed. Hence option -c/--context is then obsolete.");
-        sOptions.addOption("i", "invalids", true, "An optional comma-separated list of those MIME types that should be considered as broken/corrupt. Default is \"application/force-download, application/x-download, application/$suffix\"");
-
-        sOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
-        sOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
-        sOptions.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
-
-        sOptions.addOption("A", "adminuser", true, "Admin username. In case -a/--all is provided master administrator's user name is required; else the one for context administrator");
-        sOptions.addOption("P", "adminpass", true, "Admin password. In case -a/--all is provided master administrator's password is required; else the one for context administrator");
-    }
+public abstract class AbstractMBeanCLI<R> {
 
     /**
-     * Prevent instantiation.
+     * Initializes a new {@link AbstractMBeanCLI}.
      */
-    private PreviewCacheTool2() {
+    protected AbstractMBeanCLI() {
         super();
     }
 
     /**
-     * Main method for starting from console.
+     * Executes the command-line tool.
      *
-     * @param args program arguments
+     * @param args The arguments
+     * @return The return value
      */
-    public static void main(String[] args) {
-        CommandLineParser parser = new PosixParser();
+    public R execute(final String[] args) {
+        final Options options = new Options();
         boolean error = true;
         try {
-            final CommandLine cmd = parser.parse(sOptions, args);
-            if (cmd.hasOption('h')) {
-                printHelp();
-                System.exit(0);
-                return;
+            // Option for help
+            options.addOption("h", "help", false, "Prints a help text");
+
+            // Option for JMX connect & authentication
+            options.addOption("p", "port", true, "The optional JMX port (default:9999)");
+            options.addOption("l", "login", true, "The optional JMX login (if JMX authentication is enabled)");
+            options.addOption("s", "password", true, "The optional JMX password (if JMX authentication is enabled)");
+
+            // Check if administrative permission is required
+            final boolean requiresAdministrativePermission = requiresAdministrativePermission();
+            if (requiresAdministrativePermission) {
+                options.addOption("A", "adminuser", true, "Admin username. In case -a/--all is provided master administrator's user name is required; else the one for context administrator");
+                options.addOption("P", "adminpass", true, "Admin password. In case -a/--all is provided master administrator's password is required; else the one for context administrator");
             }
 
-            final String contextOptionVal;
-            if (cmd.hasOption('a')) {
-                contextOptionVal = null;
-            } else {
-                if (!cmd.hasOption('c')) {
-                    System.out.println("Either parameter 'context' or parameter 'all' is required.");
-                    printHelp();
-                    System.exit(1);
-                    return;
-                }
-                contextOptionVal = cmd.getOptionValue('c');
-            }
+            // Initialize command-line parser & parse arguments
+            final CommandLineParser parser = new PosixParser();
+            final CommandLine cmd = parser.parse(options, args);
 
+            // Check for JMX port
             int port = 9999;
             if (cmd.hasOption('p')) {
                 final String val = cmd.getOptionValue('p');
@@ -138,28 +123,19 @@ public final class PreviewCacheTool2 {
                         port = Integer.parseInt(val.trim());
                     } catch (final NumberFormatException e) {
                         System.err.println(new StringBuilder("Port parameter is not a number: ").append(val).toString());
-                        printHelp();
+                        printHelp(options);
                         System.exit(1);
                     }
                     if (port < 1 || port > 65535) {
                         System.err.println(new StringBuilder("Port parameter is out of range: ").append(val).append(
                             ". Valid range is from 1 to 65535.").toString());
-                        printHelp();
+                        printHelp(options);
                         System.exit(1);
                     }
                 }
             }
 
-            String invalids = null;
-            if (cmd.hasOption('i')) {
-                invalids = cmd.getOptionValue('i');
-                invalids = invalids.trim();
-                if (invalids.startsWith("\"") && invalids.endsWith("\"")) {
-                    invalids = invalids.substring(1, invalids.length() - 1);
-                    invalids = invalids.trim();
-                }
-            }
-
+            // Check for JMX login/password
             String jmxLogin = null;
             if (cmd.hasOption('l')) {
                 jmxLogin = cmd.getOptionValue('l');
@@ -169,7 +145,10 @@ public final class PreviewCacheTool2 {
                 jmxPassword = cmd.getOptionValue('s');
             }
 
-            // Environment
+            // Check other mandatory options
+            checkOptions(cmd);
+
+            // Build JMX environment
             final Map<String, Object> environment;
             if (jmxLogin == null || jmxPassword == null) {
                 environment = null;
@@ -179,41 +158,34 @@ public final class PreviewCacheTool2 {
             }
 
             // Authentication
-            if (!cmd.hasOption('A')) {
+            if (requiresAdministrativePermission && !cmd.hasOption('A')) {
                 System.out.println("You must provide administrative credentials to proceed.");
-                printHelp();
+                printHelp(options);
                 System.exit(-1);
-                return;
+                return null;
             }
-            if (!cmd.hasOption('P')) {
+            if (requiresAdministrativePermission && !cmd.hasOption('P')) {
                 System.out.println("You must provide administrative credentials to proceed.");
-                printHelp();
+                printHelp(options);
                 System.exit(-1);
-                return;
+                return null;
             }
             final String login = cmd.getOptionValue('A');
             final String password = cmd.getOptionValue('P');
 
             // Invoke MBean
-            JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + port + "/server");
-            JMXConnector jmxConnector = JMXConnectorFactory.connect(url, environment);
+            final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + port + "/server");
+            final JMXConnector jmxConnector = JMXConnectorFactory.connect(url, environment);
+
+            R retval = null;
             try {
                 final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
                 try {
-                    final AuthenticatorMBean authenticator = authenticatorMBean(mbsc);
-                    final ResourceCacheMBean previceCacheProxy = previewCacheMBean(mbsc);
-
-                    final String resultDesc;
-                    if (null == contextOptionVal) {
-                        authenticator.doAuthentication(login, password);
-                        resultDesc = previceCacheProxy.sanitizeMimeTypesInDatabaseFor(-1, invalids);
-                    } else {
-                        final int contextId = Integer.parseInt(contextOptionVal.trim());
-                        authenticator.doAuthentication(login, password, contextId);
-                        resultDesc = previceCacheProxy.sanitizeMimeTypesInDatabaseFor(contextId, invalids);
+                    if (requiresAdministrativePermission) {
+                        final AuthenticatorMBean authenticator = authenticatorMBean(mbsc);
+                        administrativeAuth(login, password, cmd, authenticator);
                     }
-
-                    System.out.println(resultDesc);
+                    retval = invoke(cmd, mbsc);
                 } catch (final Exception e) {
                     final String errMsg = e.getMessage();
                     System.out.println(errMsg == null ? "An error occurred." : errMsg);
@@ -221,36 +193,114 @@ public final class PreviewCacheTool2 {
             } finally {
                 try {
                     jmxConnector.close();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     // Ignore
                 }
             }
+
             error = false;
-        } catch (ParseException e) {
+            return retval;
+        } catch (final ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());
-            printHelp();
-        } catch (MalformedURLException e) {
+            printHelp(options);
+        } catch (final MalformedURLException e) {
             System.err.println("URL to connect to server is invalid: " + e.getMessage());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             System.err.println("Unable to communicate with the server: " + e.getMessage());
         } finally {
             if (error) {
                 System.exit(1);
             }
         }
+        return null;
     }
 
-    private static void printHelp() {
-        HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp(HelpFormatter.DEFAULT_WIDTH, "sanitizefilemimetypes", null, sOptions, "The options -c/--context and -a/--all are mutually exclusive.", false);
+    /**
+     * Prints the <code>--help</code> text.
+     *
+     * @param options The help output
+     */
+    protected void printHelp(final Options options) {
+        final HelpFormatter helpFormatter = new HelpFormatter();
+        helpFormatter.printHelp(HelpFormatter.DEFAULT_WIDTH, getName(), null, options, getFooter(), false);
     }
 
-    private static ResourceCacheMBean previewCacheMBean(MBeanServerConnection mbsc) throws MalformedObjectNameException {
-        return MBeanServerInvocationHandler.newProxyInstance(mbsc, getObjectName(ResourceCacheMBean.class.getName(), "com.openexchange.preview.cache"), ResourceCacheMBean.class, false);
+    /**
+     * Gets the {@link AuthenticatorMBean} instance.
+     *
+     * @param mbsc The MBean server connection
+     * @return The {@link AuthenticatorMBean} instance
+     * @throws MalformedObjectNameException If generating object name fails
+     */
+    protected AuthenticatorMBean authenticatorMBean(final MBeanServerConnection mbsc) throws MalformedObjectNameException {
+        return getMBean(mbsc, AuthenticatorMBean.class);
     }
 
-    private static AuthenticatorMBean authenticatorMBean(MBeanServerConnection mbsc) throws MalformedObjectNameException {
-        return MBeanServerInvocationHandler.newProxyInstance(mbsc, getObjectName(AuthenticatorMBean.class.getName(), AuthenticatorMBean.DOMAIN), AuthenticatorMBean.class, false);
+    /**
+     * Checks other mandatory options.
+     *
+     * @param cmd The command line
+     */
+    protected abstract void checkOptions(CommandLine cmd);
+
+    /**
+     * Signals if this command-line tool requires administrative permission.
+     *
+     * @return <code>true</code> for administrative permission; otherwise <code>false</code>
+     */
+    protected abstract boolean requiresAdministrativePermission();
+
+    /**
+     * Performs appropriate administrative authentication.
+     *
+     * @param login The administrator login
+     * @param password The administrator password
+     * @param cmd The command line providing options
+     * @param authenticator The authenticator MBean
+     */
+    protected abstract void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator);
+
+    /**
+     * Gets the banner to display at the end of the help
+     *
+     * @return The banner to display at the end of the help
+     */
+    protected abstract String getFooter();
+
+    /**
+     * Gets the syntax for this application.
+     *
+     * @return The syntax for this application
+     */
+    protected abstract String getName();
+
+    /**
+     * Adds this command-line tool's options.
+     *
+     * @param options The options
+     */
+    protected abstract void addOptions(Options options);
+
+    /**
+     * Invokes the MBean's method.
+     *
+     * @param cmd The command line providing parameters/options
+     * @param mbsc The MBean server connection
+     * @return The return value
+     */
+    protected abstract R invoke(CommandLine cmd, MBeanServerConnection mbsc);
+
+    /**
+     * Gets the MBean instance.
+     *
+     * @param mbsc The MBean server connection
+     * @param clazz The MBean class
+     * @return The MBean instance
+     * @throws MalformedObjectNameException If generating object name fails
+     * @see #getObjectName(String, String)
+     */
+    protected static <MBean> MBean getMBean(final MBeanServerConnection mbsc, final Class<? extends MBean> clazz) throws MalformedObjectNameException {
+        return MBeanServerInvocationHandler.newProxyInstance(mbsc, getObjectName(clazz.getName(), AuthenticatorMBean.DOMAIN), clazz, false);
     }
 
     /**
@@ -261,9 +311,8 @@ public final class PreviewCacheTool2 {
      * @return An appropriate instance of {@link ObjectName}
      * @throws MalformedObjectNameException If instantiation of {@link ObjectName} fails
      */
-    private static ObjectName getObjectName(final String className, final String domain) throws MalformedObjectNameException {
+    protected static ObjectName getObjectName(final String className, final String domain) throws MalformedObjectNameException {
         final int pos = className.lastIndexOf('.');
         return new ObjectName(domain, "name", pos == -1 ? className : className.substring(pos + 1));
     }
-
 }

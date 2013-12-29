@@ -90,7 +90,6 @@ public final class PreviewCacheTool {
 
         sOptions.addOption("A", "adminuser", true, "Admin username. In case -a/--all is provided master administrator's user name is required; else the one for context administrator");
         sOptions.addOption("P", "adminpass", true, "Admin password. In case -a/--all is provided master administrator's password is required; else the one for context administrator");
-        sOptions.addOption("r", "rmi-port", true, "The optional RMI port (default:1099)");
     }
 
     /**
@@ -141,27 +140,6 @@ public final class PreviewCacheTool {
                             ". Valid range is from 1 to 65535.").toString());
                         printHelp();
                         System.exit(1);
-                    }
-                }
-            }
-
-            int rmiPort = 1099;
-            if (cmd.hasOption('r')) {
-                final String val = cmd.getOptionValue('r');
-                if (null != val) {
-                    try {
-                        rmiPort = Integer.parseInt(val.trim());
-                    } catch (final NumberFormatException e) {
-                        System.err.println(new StringBuilder("RMI port parameter is not a number: ").append(val).toString());
-                        printHelp();
-                        System.exit(1);
-                    }
-                    if (rmiPort < 1 || rmiPort > 65535) {
-                        System.err.println(new StringBuilder("RMI port parameter is out of range: ").append(val).append(
-                            ". Valid range is from 1 to 65535.").toString());
-                        printHelp();
-                        System.exit(1);
-                        return;
                     }
                 }
             }
