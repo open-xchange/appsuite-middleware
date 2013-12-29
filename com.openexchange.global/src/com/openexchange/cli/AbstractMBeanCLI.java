@@ -71,7 +71,7 @@ import com.openexchange.auth.mbean.AuthenticatorMBean;
 
 
 /**
- * {@link AbstractMBeanCLI} - The abstract helper class for MBean-based command-line tools.
+ * {@link AbstractMBeanCLI} - The abstract helper class for MBean-connecting command-line tools.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.2
