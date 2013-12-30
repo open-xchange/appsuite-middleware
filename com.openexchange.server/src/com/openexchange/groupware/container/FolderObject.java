@@ -676,12 +676,14 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      * @param permissions The permissions to set
      */
     public void setPermissions(final List<OCLPermission> permissions) {
-        final int size = permissions.size();
-        this.permissions = new ArrayList<OCLPermission>(size);
-        for (final OCLPermission permission : permissions) {
-            this.permissions.add(permission.deepClone());
+        if (null != permissions) {
+            final int size = permissions.size();
+            this.permissions = new ArrayList<OCLPermission>(size);
+            for (final OCLPermission permission : permissions) {
+                this.permissions.add(permission.deepClone());
+            }
+            b_permissions = true;
         }
-        b_permissions = true;
     }
 
     /**
@@ -692,6 +694,9 @@ public class FolderObject extends FolderChildObject implements Cloneable {
      * @param permissions The permissions to set
      */
     public void setPermissionsAsArray(final OCLPermission[] permissions) {
+        if (null == permissions) {
+            return;
+        }
         if (this.permissions == null) {
             this.permissions = new ArrayList<OCLPermission>();
         } else {
