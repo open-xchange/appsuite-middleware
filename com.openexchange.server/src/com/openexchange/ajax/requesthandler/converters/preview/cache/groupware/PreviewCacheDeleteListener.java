@@ -52,6 +52,9 @@ package com.openexchange.ajax.requesthandler.converters.preview.cache.groupware;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import org.slf4j.Logger;
+import com.openexchange.ajax.requesthandler.cache.ResourceCache;
+import com.openexchange.ajax.requesthandler.converters.preview.cache.ResourceCacheMBeanImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
@@ -65,6 +68,13 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class PreviewCacheDeleteListener implements DeleteListener {
 
+    /**
+     * Initializes a new {@link PreviewCacheDeleteListener} instance.
+     */
+    public PreviewCacheDeleteListener() {
+        super();
+    }
+
     @Override
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
         if (event.getType() == DeleteEvent.TYPE_USER) {
@@ -76,6 +86,19 @@ public class PreviewCacheDeleteListener implements DeleteListener {
 
     private void deleteContextEntriesFromDB(final DeleteEvent event, final Connection writeCon) throws OXException {
         final int contextId = event.getContext().getContextId();
+
+        // Cleanse by instance
+        final ResourceCache resourceCache = ResourceCacheMBeanImpl.CACHE_REF.get();
+        if (null != resourceCache) {
+            try {
+                resourceCache.clearFor(contextId);
+            } catch (final Exception e) {
+                final Logger logger = org.slf4j.LoggerFactory.getLogger(PreviewCacheDeleteListener.class);
+                logger.warn("Failed to clean resource for deleted context {}", Integer.valueOf(contextId), e);
+            }
+        }
+
+        // DB cleansing
         PreparedStatement stmt = null;
         try {
             stmt = writeCon.prepareStatement("DELETE FROM preview WHERE cid = ?");
@@ -92,12 +115,26 @@ public class PreviewCacheDeleteListener implements DeleteListener {
 
     private void deleteUserEntriesFromDB(final DeleteEvent event, final Connection writeCon) throws OXException {
         final int contextId = event.getContext().getContextId();
+        final int userId = event.getId();
+
+        // Cleanse by instance
+        final ResourceCache resourceCache = ResourceCacheMBeanImpl.CACHE_REF.get();
+        if (null != resourceCache) {
+            try {
+                resourceCache.remove(userId, contextId);
+            } catch (final Exception e) {
+                final Logger logger = org.slf4j.LoggerFactory.getLogger(PreviewCacheDeleteListener.class);
+                logger.warn("Failed to clean resource for deleted user {} in context {}", Integer.valueOf(userId), Integer.valueOf(contextId), e);
+            }
+        }
+
+        // DB cleansing
         PreparedStatement stmt = null;
         try {
             stmt = writeCon.prepareStatement("DELETE FROM preview WHERE cid = ? AND user = ?");
             int pos = 1;
             stmt.setInt(pos++, contextId);
-            stmt.setInt(pos, event.getId());
+            stmt.setInt(pos, userId);
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
