@@ -56,7 +56,7 @@ import com.openexchange.cli.AbstractContextMBeanCLI;
 import com.openexchange.sessiond.SessiondMBean;
 
 /**
- * {@link CloseSessionsCLT} - Command-Line access to reset version via update task toolkit.
+ * {@link CloseSessionsCLT} - Command-Line access clear all sessions belonging to a given context.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
