@@ -102,13 +102,19 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
         } finally {
             databaseService.backReadOnly(ctx, con);
         }
+
         con = databaseService.getWritable(ctx);
+        boolean modifiedData = false;
         try {
-            create(login.getSession(), login.getContext(), folderName, con);
+            modifiedData = create(login.getSession(), login.getContext(), folderName, con);
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            databaseService.backWritable(ctx, con);
+            if (modifiedData) {
+                databaseService.backWritable(ctx, con);
+            } else {
+                databaseService.backWritableAfterReading(ctx, con);
+            }
         }
     }
 
@@ -133,10 +139,10 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
         return false;
     }
 
-    public static void create(final Session session, final Context ctx, final String folderName, final Connection con) throws OXException, SQLException {
+    public static boolean create(final Session session, final Context ctx, final String folderName, final Connection con) throws OXException, SQLException {
         // Check again on the master if maybe another parallel request already created the folder.
         if (exists(session, ctx, con)) {
-            return;
+            return false;
         }
         final int cid = session.getContextId();
         final int userId = session.getUserId();
@@ -165,6 +171,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
         serverUserSetting.setContactCollectOnMailAccess(cid, userId, serverUserSetting.isContactCollectOnMailAccess(cid, userId).booleanValue());
         serverUserSetting.setContactCollectOnMailTransport(cid, userId, serverUserSetting.isContactCollectOnMailTransport(cid, userId).booleanValue());
         LOG.info("Contact collector folder (id={}) successfully created for user {} in context {}", collectFolderID, userId, cid);
+        return true;
     }
 
     private static boolean isConfigured(final ServerUserSetting setting, final int cid, final int userId) throws OXException {
