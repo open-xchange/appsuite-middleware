@@ -69,7 +69,7 @@ public class AJAXSession {
     /**
      * User Agent displayed to server - needs to be consistent during a test run for security purposes
      */
-    public static final String USER_AGENT = "OX6 HTTP API Testing Agent";
+    public static final String USER_AGENT = "HTTP API Testing Agent";
 
     private final WebConversation conversation;
 

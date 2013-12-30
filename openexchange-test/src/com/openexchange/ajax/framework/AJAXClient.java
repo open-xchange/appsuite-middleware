@@ -67,7 +67,7 @@ import com.openexchange.exception.OXException;
  */
 public class AJAXClient {
 
-    public static final String VERSION = "6.19.0";
+    public static final String VERSION = "7.4.2";
 
     private final AJAXSession session;
 

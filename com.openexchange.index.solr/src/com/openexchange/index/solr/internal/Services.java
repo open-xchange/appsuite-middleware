@@ -126,7 +126,7 @@ public final class Services {
      * (Optionally) Gets the service of specified type
      *
      * @param clazz The service's class
-     * @return The service or <code>null</code> is absent
+     * @return The service or <code>null</code> if absent
      */
     public static <S extends Object> S optService(final Class<? extends S> clazz) {
         try {

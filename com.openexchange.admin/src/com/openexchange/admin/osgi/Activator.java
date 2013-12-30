@@ -70,6 +70,7 @@ import com.openexchange.admin.mysql.CreateVirtualFolderTables;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.auth.Authenticator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
@@ -165,6 +166,9 @@ public class Activator extends HousekeepingActivator {
         registerService(CreateTableService.class, new CreateAttachmentTables());
         registerService(CreateTableService.class, new CreateMiscTables());
         registerService(CreateTableService.class, new CreateIcalVcardTables());
+
+        // Register authenticator
+        registerService(Authenticator.class, new AuthenticatorImpl());
     }
 
     /**

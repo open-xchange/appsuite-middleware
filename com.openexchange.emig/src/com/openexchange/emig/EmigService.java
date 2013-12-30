@@ -59,6 +59,11 @@ import com.openexchange.exception.OXException;
  * @since 7.4.2
  */
 public interface EmigService {
+    
+    public static final int NONE    =   0;
+    public static final int MEMBER  =   1; // grey
+    public static final int SECURE  =   2; // green
+    
 
     /**
      * Checks if EMiG is enabled for denoted user.
@@ -84,7 +89,7 @@ public interface EmigService {
      * Checks EMiG capabilities for given addresses
      *
      * @param mailAddresses The mail addresses
-     * @return The colors' bit values
+     * @return At the appropriate index either NONE, MEMBER or SECURE
      * @throws OXException If operation fails for any reason
      */
     int[] isEMIG_Recipient(String[] mailAddresses) throws OXException;

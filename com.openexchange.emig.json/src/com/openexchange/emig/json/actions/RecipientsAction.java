@@ -65,19 +65,19 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link EmigAction}
+ * {@link RecipientsAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.2
  */
-public final class EmigAction extends AbstractEmigAction {
+public final class RecipientsAction extends AbstractEmigAction {
 
     /**
-     * Initializes a new {@link EmigAction}.
+     * Initializes a new {@link RecipientsAction}.
      *
      * @param services The service look-up
      */
-    public EmigAction(final ServiceLookup services) {
+    public RecipientsAction(final ServiceLookup services) {
         super(services);
     }
 

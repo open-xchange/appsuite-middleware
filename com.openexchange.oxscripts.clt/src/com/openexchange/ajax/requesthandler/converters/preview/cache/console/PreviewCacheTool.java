@@ -68,9 +68,12 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.ResourceCacheMBean;
+import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.management.console.JMXAuthenticatorImpl;
 
 /**
+ * {@link PreviewCacheTool} - Serves <code>clearpreviewcache</code> command-line tool.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PreviewCacheTool {
@@ -84,6 +87,9 @@ public final class PreviewCacheTool {
         sOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
         sOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
         sOptions.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
+
+        sOptions.addOption("A", "adminuser", true, "Admin username. In case -a/--all is provided master administrator's user name is required; else the one for context administrator");
+        sOptions.addOption("P", "adminpass", true, "Admin password. In case -a/--all is provided master administrator's password is required; else the one for context administrator");
     }
 
     /**
@@ -138,6 +144,21 @@ public final class PreviewCacheTool {
                 }
             }
 
+            if (!cmd.hasOption('A')) {
+                System.out.println("You must provide administrative credentials to proceed.");
+                printHelp();
+                System.exit(-1);
+                return;
+            }
+            if (!cmd.hasOption('P')) {
+                System.out.println("You must provide administrative credentials to proceed.");
+                printHelp();
+                System.exit(-1);
+                return;
+            }
+            final String login = cmd.getOptionValue('A');
+            final String password = cmd.getOptionValue('P');
+
             String jmxLogin = null;
             if (cmd.hasOption('l')) {
                 jmxLogin = cmd.getOptionValue('l');
@@ -160,14 +181,19 @@ public final class PreviewCacheTool {
             JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + port + "/server");
             JMXConnector jmxConnector = JMXConnectorFactory.connect(url, environment);
             try {
-                MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
-
+                final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
                 try {
-                    ResourceCacheMBean previceCacheProxy = previewCacheMBean(mbsc);
-                    previceCacheProxy.clearFor(Integer.parseInt(contextOptionVal.trim()));
+                    final AuthenticatorMBean authenticator = authenticatorMBean(mbsc);
+                    final ResourceCacheMBean previceCacheProxy = previewCacheMBean(mbsc);
+
+                    final int contextId = Integer.parseInt(contextOptionVal.trim());
+
+                    authenticator.doAuthentication(login, password, contextId);
+                    previceCacheProxy.clearFor(contextId);
+
                     System.out.println("All cache entries cleared for context " + contextOptionVal);
-                } catch (Exception e) {
-                    String errMsg = e.getMessage();
+                } catch (final Exception e) {
+                    final String errMsg = e.getMessage();
                     System.out.println(errMsg == null ? "An error occurred." : errMsg);
                 }
             } finally {
@@ -199,6 +225,10 @@ public final class PreviewCacheTool {
 
     private static ResourceCacheMBean previewCacheMBean(MBeanServerConnection mbsc) throws MalformedObjectNameException {
         return MBeanServerInvocationHandler.newProxyInstance(mbsc, getObjectName(ResourceCacheMBean.class.getName(), "com.openexchange.preview.cache"), ResourceCacheMBean.class, false);
+    }
+
+    private static AuthenticatorMBean authenticatorMBean(MBeanServerConnection mbsc) throws MalformedObjectNameException {
+        return MBeanServerInvocationHandler.newProxyInstance(mbsc, getObjectName(AuthenticatorMBean.class.getName(), AuthenticatorMBean.DOMAIN), AuthenticatorMBean.class, false);
     }
 
     /**
