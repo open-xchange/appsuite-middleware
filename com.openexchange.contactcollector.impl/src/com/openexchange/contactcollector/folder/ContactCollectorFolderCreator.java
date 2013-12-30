@@ -125,11 +125,13 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
         final ServerUserSetting serverUserSetting = ServerUserSetting.getInstance(con);
 
         final Integer folderId = serverUserSetting.getContactCollectionFolder(cid, userId);
-        final OXFolderAccess folderAccess = new OXFolderAccess(con, ctx);
-        if (folderId != null && folderAccess.exists(folderId.intValue())) {
-            // Folder already exists
-            session.setParameter("__ccf#", folderId);
-            return true;
+        if (folderId != null) {
+            final OXFolderAccess folderAccess = new OXFolderAccess(con, ctx);
+            if (folderAccess.exists(folderId.intValue())) {
+                // Folder already exists
+                session.setParameter("__ccf#", folderId);
+                return true;
+            }
         }
         if (!serverUserSetting.isContactCollectionEnabled(cid, userId).booleanValue() && isConfigured(serverUserSetting, cid, userId)) {
             // Both - collect-on-mail-access and collect-on-mail-transport - disabled
