@@ -70,7 +70,6 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 
-
 /**
  * {@link AbstractMBeanCLI} - The abstract helper class for MBean-connecting command-line tools.
  *
@@ -126,25 +125,7 @@ public abstract class AbstractMBeanCLI<R> {
             }
 
             // Check for JMX port
-            int port = 9999;
-            if (cmd.hasOption('p')) {
-                final String val = cmd.getOptionValue('p');
-                if (null != val) {
-                    try {
-                        port = Integer.parseInt(val.trim());
-                    } catch (final NumberFormatException e) {
-                        System.err.println(new StringBuilder("Port parameter is not a number: ").append(val).toString());
-                        printHelp(options);
-                        System.exit(1);
-                    }
-                    if (port < 1 || port > 65535) {
-                        System.err.println(new StringBuilder("Port parameter is out of range: ").append(val).append(
-                            ". Valid range is from 1 to 65535.").toString());
-                        printHelp(options);
-                        System.exit(1);
-                    }
-                }
-            }
+            final int port = parsePort('p', 9999, cmd, options);
 
             // Check for JMX login/password
             String jmxLogin = null;
@@ -227,6 +208,38 @@ public abstract class AbstractMBeanCLI<R> {
             }
         }
         return null;
+    }
+
+    /**
+     * Parses & validates the port value for given option.
+     * <p>
+     * Exits gracefully if port value is invalid.
+     *
+     * @param opt The option name
+     * @param defaultValue The default value
+     * @param cmd The command line
+     * @param options The options
+     * @return The port value
+     */
+    protected int parsePort(final char opt, final int defaultValue, final CommandLine cmd, final Options options) {
+        int port = defaultValue;
+        // Check option & parse if present
+        final String sPort = cmd.getOptionValue(opt);
+        if (null != sPort) {
+            try {
+                port = Integer.parseInt(sPort.trim());
+            } catch (final NumberFormatException e) {
+                System.err.println("Port parameter is not a number: " + sPort);
+                printHelp(options);
+                System.exit(1);
+            }
+        }
+        if (port < 1 || port > 65535) {
+            System.err.println("Port parameter is out of range: " + sPort + ". Valid range is from 1 to 65535.");
+            printHelp(options);
+            System.exit(1);
+        }
+        return port;
     }
 
     /**

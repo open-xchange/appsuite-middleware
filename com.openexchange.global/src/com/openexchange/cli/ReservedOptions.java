@@ -64,7 +64,7 @@ public class ReservedOptions extends Options {
     private static final long serialVersionUID = -5606926837108336821L;
 
     /**
-     * Initializes a new {@link ReservedOptions}.
+     * Initializes a new {@link ReservedOptions} instance.
      */
     public ReservedOptions() {
         super();
