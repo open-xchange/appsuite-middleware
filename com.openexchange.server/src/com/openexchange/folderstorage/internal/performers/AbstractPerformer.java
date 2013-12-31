@@ -115,8 +115,9 @@ public abstract class AbstractPerformer {
      * Initializes a new {@link AbstractPerformer} from given session.
      *
      * @param session The session
+     * @throws OXException If passed session is invalid
      */
-    protected AbstractPerformer(final ServerSession session) {
+    protected AbstractPerformer(final ServerSession session) throws OXException {
         this(session, FolderStorageRegistry.getInstance());
     }
 
@@ -125,18 +126,31 @@ public abstract class AbstractPerformer {
      *
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
+     * @throws OXException If passed session is invalid
      */
-    protected AbstractPerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    protected AbstractPerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super();
         this.folderStorageDiscoverer = folderStorageDiscoverer;
         this.session = session;
+        if (null == session) {
+            throw FolderExceptionErrorMessage.INVALID_SESSION.create("Session is null.");
+        }
+        if (session.getUserId() <= 0 || (session.getContextId() <= 0)) {
+            throw FolderExceptionErrorMessage.INVALID_SESSION.create("Either user and/or context identifier is invalid.");
+        }
         // Pre-Initialize session
         final UserPermissionBits userPermissionBits = session.getUserPermissionBits();
         if (null != userPermissionBits) {
             userPermissionBits.isMultipleMailAccounts();
         }
-        user = session.getUser();
         context = session.getContext();
+        if (null == context) {
+            throw FolderExceptionErrorMessage.INVALID_SESSION.create("Context is null.");
+        }
+        user = session.getUser();
+        if (null == user) {
+            throw FolderExceptionErrorMessage.INVALID_SESSION.create("User is null.");
+        }
         storageParameters = new StorageParametersImpl(session, user, context);
         warnings = new ConcurrentHashMap<OXException, Object>(2);
         check4Duplicates = true;

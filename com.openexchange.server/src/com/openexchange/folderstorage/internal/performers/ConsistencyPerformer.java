@@ -64,14 +64,13 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class ConsistencyPerformer extends AbstractPerformer {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConsistencyPerformer.class);
-
     /**
      * Initializes a new {@link ConsistencyPerformer}.
      *
      * @param session The session
+     * @throws OXException If passed session is invalid
      */
-    public ConsistencyPerformer(final ServerSession session) {
+    public ConsistencyPerformer(final ServerSession session) throws OXException {
         super(session);
     }
 
@@ -90,8 +89,9 @@ public final class ConsistencyPerformer extends AbstractPerformer {
      *
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
+     * @throws OXException If passed session is invalid
      */
-    public ConsistencyPerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public ConsistencyPerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(session, folderStorageDiscoverer);
     }
 
