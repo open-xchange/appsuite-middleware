@@ -162,11 +162,42 @@ public class ConvertJUL2LogbackCLT {
         Element configuration = document.createElement("configuration");
         document.appendChild(configuration);
         for (String name : properties.stringPropertyNames()) {
+            if (name.equals(".level")) {
+                continue;
+            }
             Element logger = document.createElement("logger");
             configuration.appendChild(logger);
             logger.setAttribute("name", name.substring(0, name.length() - ".level".length()));
-            logger.setAttribute("level", properties.getProperty(name));
+            logger.setAttribute("level", convertLevel(properties.getProperty(name)));
         }
+        if (properties.containsKey(".level")) {
+            Element root = document.createElement("root");
+            configuration.appendChild(root);
+            root.setAttribute("level", convertLevel(properties.getProperty(".level")));
+            Element appender_ref = document.createElement("appender-ref");
+            root.appendChild(appender_ref);
+            appender_ref.setAttribute("ref", "ASYNC");
+        }
+    }
+
+    private static String convertLevel(String julLevel) {
+        String retval = julLevel;
+        // OFF
+        if ("SEVERE".equals(julLevel)) {
+            retval = "ERROR";
+        }
+        if ("WARNING".equals(julLevel)) {
+            retval = "WARN";
+        }
+        // INFO
+        if ("CONFIG".equals(julLevel) || "FINE".equals(julLevel)) {
+            retval = "DEBUG";
+        }
+        if ("FINER".equals(julLevel) || "FINEST".equals(julLevel)) {
+            retval = "TRACE";
+        }
+        // ALL
+        return retval;
     }
 
     static Properties parseInput(boolean stdin, String filename) {

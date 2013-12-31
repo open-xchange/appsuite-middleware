@@ -1,3 +1,7 @@
+* 2013-12-31 - marcus.klein@open-xchange.com
+
+ - Fix for bug 30408: Migrating the level configuration of the root logger, too.
+
 * 2013-12-30 - marcus.klein@open-xchange.com
 
  - Fix for bug 30015: Dropping attribute 'date completed' when creating the next occurrence of a task.

@@ -26,7 +26,7 @@
         <level value="WARN"/> 
     </logger>
     <root>
-        <level value="INFO"/>
+        <level value="WARN"/>
         <appender-ref ref="SERVER_LOG"/>
     </root>
     <logger name="com.openexchange.html.internal.parser.HtmlParser">
