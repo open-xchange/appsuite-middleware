@@ -84,8 +84,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class CreatePerformer extends AbstractUserizedFolderPerformer {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CreatePerformer.class);
-
     private static final String CONTENT_TYPE_MAIL = MailContentType.getInstance().toString();
 
     private static final String CONTENT_TYPE_INFOSTORE = InfostoreContentType.getInstance().toString();
@@ -94,8 +92,9 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
      * Initializes a new {@link CreatePerformer}.
      *
      * @param session The session
+     * @throws OXException If passed session is invalid
      */
-    public CreatePerformer(final ServerSession session, final FolderServiceDecorator decorator) {
+    public CreatePerformer(final ServerSession session, final FolderServiceDecorator decorator) throws OXException {
         super(session, decorator);
     }
 
@@ -114,8 +113,9 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
      *
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
+     * @throws OXException If passed session is invalid
      */
-    public CreatePerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public CreatePerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(session, decorator, folderStorageDiscoverer);
     }
 

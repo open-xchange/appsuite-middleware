@@ -83,8 +83,9 @@ public final class SubscribePerformer extends AbstractPerformer {
      * Initializes a new {@link SubscribePerformer}.
      *
      * @param session
+     * @throws OXException If passed session is invalid
      */
-    public SubscribePerformer(final ServerSession session) {
+    public SubscribePerformer(final ServerSession session) throws OXException {
         super(session);
     }
 
@@ -103,8 +104,9 @@ public final class SubscribePerformer extends AbstractPerformer {
      *
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
+     * @throws OXException If passed session is invalid
      */
-    public SubscribePerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public SubscribePerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(session, folderStorageDiscoverer);
     }
 

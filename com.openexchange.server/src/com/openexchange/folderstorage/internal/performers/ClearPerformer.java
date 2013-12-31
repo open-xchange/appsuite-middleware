@@ -65,14 +65,13 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class ClearPerformer extends AbstractPerformer {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ClearPerformer.class);
-
     /**
      * Initializes a new {@link ClearPerformer}.
      *
      * @param session The session
+     * @throws OXException If passed session is invalid
      */
-    public ClearPerformer(final ServerSession session) {
+    public ClearPerformer(final ServerSession session) throws OXException {
         super(session);
     }
 
@@ -91,8 +90,9 @@ public final class ClearPerformer extends AbstractPerformer {
      *
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
+     * @throws OXException If passed session is invalid
      */
-    public ClearPerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public ClearPerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(session, folderStorageDiscoverer);
     }
 

@@ -72,14 +72,13 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class DeletePerformer extends AbstractPerformer {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeletePerformer.class);
-
     /**
      * Initializes a new {@link DeletePerformer}.
      *
      * @param session The session
+     * @throws OXException If passed session is invalid
      */
-    public DeletePerformer(final ServerSession session) {
+    public DeletePerformer(final ServerSession session) throws OXException {
         super(session);
     }
 
@@ -98,8 +97,9 @@ public final class DeletePerformer extends AbstractPerformer {
      *
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
+     * @throws OXException If passed session is invalid
      */
-    public DeletePerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public DeletePerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(session, folderStorageDiscoverer);
     }
 
