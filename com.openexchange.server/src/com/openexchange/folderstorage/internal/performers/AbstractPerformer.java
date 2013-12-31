@@ -137,7 +137,7 @@ public abstract class AbstractPerformer {
         }
         user = session.getUser();
         context = session.getContext();
-        storageParameters = new StorageParametersImpl(session);
+        storageParameters = new StorageParametersImpl(session, user, context);
         warnings = new ConcurrentHashMap<OXException, Object>(2);
         check4Duplicates = true;
     }
@@ -338,7 +338,7 @@ public abstract class AbstractPerformer {
         if (null == session) {
             return new StorageParametersImpl(user, context);
         }
-        return new StorageParametersImpl(session);
+        return new StorageParametersImpl(session, user, context);
     }
 
     /**

@@ -1789,7 +1789,7 @@ public final class CacheFolderStorage implements FolderStorage {
         if (null == session) {
             return new StorageParametersImpl(source.getUser(), source.getContext());
         }
-        return new StorageParametersImpl((ServerSession) session);
+        return new StorageParametersImpl((ServerSession) session, source.getUser(), source.getContext());
     }
 
     private static volatile Integer maxWaitMillis;

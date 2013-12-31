@@ -135,7 +135,6 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.log.LogProperties;
@@ -2269,7 +2268,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         if (null == session) {
             return new StorageParametersImpl(source.getUser(), source.getContext());
         }
-        return new StorageParametersImpl((ServerSession) session);
+        return new StorageParametersImpl((ServerSession) session, source.getUser(), source.getContext());
     }
 
     @Override

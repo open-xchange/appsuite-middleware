@@ -94,7 +94,7 @@ public final class SessionStorageParametersProvider implements StorageParameters
         if (null == session) {
             return new StorageParametersImpl(user, ctx);
         }
-        return new StorageParametersImpl(session);
+        return new StorageParametersImpl(session, user, ctx);
     }
 
 }
