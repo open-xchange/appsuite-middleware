@@ -184,23 +184,9 @@ public class UpdaterXMLTest extends AbstractAJAXSession {
             List<Element> children = products.getChildren("Product");
 
             Map<String, String> filesToGet = new HashMap<String, String>();
-            boolean foundAppsuiteLinkProduct = false;
             for (Element child : children) {
-                if ("{92406A45-8205-4EF4-B7BF-8CA57D56B822}".equals(child.getChildText("UpgradeCode"))) {
-                    /*
-                     * Ignore the artificial product that is used to create a link to appsuite on a users desktop.
-                     * Nevertheless we have to ensure that it was part of the response.
-                     */
-                    foundAppsuiteLinkProduct = true;
-                    continue;
-                }
-
                 filesToGet.put(child.getChildText("URL"), child.getChildText("MD5"));
             }
-
-            /* Deactivated artificial App Suite product
-             * assertTrue("Product {92406A45-8205-4EF4-B7BF-8CA57D56B822} (Appsuite URL for Hotlink) was missing.", foundAppsuiteLinkProduct);
-             */
 
             for (String url : filesToGet.keySet()) {
                 FileRequest fileRequest = new FileRequest(extractFileName(url));
