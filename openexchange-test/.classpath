@@ -5,7 +5,7 @@
 	<classpathentry kind="src" path="unittests"/>
 	<classpathentry kind="lib" path="lib/httpmime-4.1.jar"/>
 	<classpathentry kind="lib" path="lib/httpunit-1.7.jar" sourcepath="lib/source/httpunit-1.7-sources.zip"/>
-	<classpathentry kind="lib" path="lib/jchronic-0.2.3.jar"/>
+	<classpathentry kind="lib" path="lib/jchronic-0.2.6.jar"/>
 	<classpathentry kind="lib" path="lib/junit-4.11.jar" sourcepath="lib/source/junit-4.11-sources.jar"/>
 	<classpathentry kind="lib" path="lib/junit-addons-1.4.jar" sourcepath="lib/source/junit-addons-1.4-src.jar"/>
 	<classpathentry kind="lib" path="lib/junitperf-1.9.1.jar"/>

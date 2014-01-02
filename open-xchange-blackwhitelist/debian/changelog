@@ -10,6 +10,12 @@ open-xchange-blackwhitelist (7.4.2-0) unstable; urgency=low
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 18 Dec 2013 17:33:46 +0100
 
+open-xchange-blackwhitelist (7.4.1-11) stable; urgency=low
+
+  * Build for patch 2013-12-23
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 19 Dec 2013 09:07:23 +0100
+
 open-xchange-blackwhitelist (7.4.1-10) stable; urgency=low
 
   * Build for patch 2013-12-18
