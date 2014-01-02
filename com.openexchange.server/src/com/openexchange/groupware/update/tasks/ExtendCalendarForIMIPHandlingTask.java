@@ -74,7 +74,7 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExtendCalendarForIMIPHandlingTask.class);
 
     private final String[] TABLES = { "prg_dates", "del_dates" };
-    private final Column[] COLUMNS = { new Column("uid", "VARCHAR(255)"), new Column("organizer", "VARCHAR(255)"), new Column("sequence", "INT4 UNSIGNED") };
+    private final Column[] COLUMNS = { new Column("uid", "VARCHAR(1024)"), new Column("organizer", "VARCHAR(255)"), new Column("sequence", "INT4 UNSIGNED") };
 
     private static final String DATES_EXTERNAL_CREATE =
         "CREATE TABLE dateExternal (" +

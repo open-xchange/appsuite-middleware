@@ -52,11 +52,14 @@ package com.openexchange.groupware.update.tasks;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
@@ -64,19 +67,20 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link POP3DropFKTask} - Drops rather needless foreign keys from pop3 tables.
+ * {@link DropFKTaskv2} - Drops rather needless foreign keys.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class POP3DropFKTask extends UpdateTaskAdapter {
+public final class DropFKTaskv2 extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link POP3DropFKTask}.
+     * Initializes a new {@link DropFKTaskv2}.
      */
-    public POP3DropFKTask() {
+    public DropFKTaskv2() {
         super();
     }
 
@@ -89,9 +93,13 @@ public final class POP3DropFKTask extends UpdateTaskAdapter {
     public void perform(final PerformParameters params) throws OXException {
         final int cid = params.getContextId();
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        final Connection con = dbService.getForUpdateTask(cid);
+
+        Connection con = null;
+        boolean rollback = false;
         try {
+            con = dbService.getForUpdateTask(cid);
             con.setAutoCommit(false);
+            rollback = true;
             final List<String> tables = Arrays.asList(
                 "pop3_storage_deleted",
                 "pop3_storage_ids",
@@ -104,15 +112,97 @@ public final class POP3DropFKTask extends UpdateTaskAdapter {
                 handleTable(table, con);
             }
             con.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                rollback(con);
+            }
             autocommit(con);
             Database.backNoTimeout(cid, true, con);
+        }
+
+        // Check for >>CONSTRAINT `pop3_storage_deleted_ibfk_1` FOREIGN KEY (`cid`, `user`) REFERENCES `user` (`cid`, `id`)<<
+        con = dbService.getForUpdateTask(cid);
+        try {
+            dropForeignKeySafe("pop3_storage_deleted_ibfk_1", "pop3_storage_deleted", con);
+        } finally {
+            Database.backNoTimeout(cid, true, con);
+        }
+
+        // Check for >>CONSTRAINT `pop3_storage_deleted_ibfk_2` FOREIGN KEY (`cid`, `user`, `id`) REFERENCES `user_mail_account` (`cid`, `user`, `id`)<<
+        con = dbService.getForUpdateTask(cid);
+        try {
+            dropForeignKeySafe("pop3_storage_deleted_ibfk_2", "pop3_storage_deleted", con);
+        } finally {
+            Database.backNoTimeout(cid, true, con);
+        }
+
+        // Check for >>CONSTRAINT `pop3_storage_ids_ibfk_1` FOREIGN KEY (`cid`, `user`) REFERENCES `user` (`cid`, `id`)<<
+        con = dbService.getForUpdateTask(cid);
+        try {
+            dropForeignKeySafe("pop3_storage_ids_ibfk_1", "pop3_storage_ids", con);
+        } finally {
+            Database.backNoTimeout(cid, true, con);
+        }
+
+        // Check for >>CONSTRAINT `pop3_storage_ids_ibfk_2` FOREIGN KEY (`cid`, `user`, `id`) REFERENCES `user_mail_account` (`cid`, `user`, `id`)<<
+        con = dbService.getForUpdateTask(cid);
+        try {
+            dropForeignKeySafe("pop3_storage_ids_ibfk_2", "pop3_storage_ids", con);
+        } finally {
+            Database.backNoTimeout(cid, true, con);
+        }
+
+        // Check "uid" column in prg_dates
+        con = dbService.getForUpdateTask(cid);
+        try {
+            enlargeVarcharColumn("uid", 1024, "prg_dates", con);
+        } finally {
+            Database.backNoTimeout(cid, true, con);
+        }
+
+        // Check "uid" column in del_dates
+        con = dbService.getForUpdateTask(cid);
+        try {
+            enlargeVarcharColumn("uid", 1024, "del_dates", con);
+        } finally {
+            Database.backNoTimeout(cid, true, con);
+        }
+
+    }
+
+    private void enlargeVarcharColumn(final String colName, final int newSize, final String tableName, final Connection con) throws OXException {
+        ResultSet rsColumns = null;
+        boolean doAlterTable = false;
+        try {
+            DatabaseMetaData meta = con.getMetaData();
+            rsColumns = meta.getColumns(null, null, tableName, null);
+            while (rsColumns.next()) {
+                final String columnName = rsColumns.getString("COLUMN_NAME");
+                if (colName.equals(columnName)) {
+                    final int size = rsColumns.getInt("COLUMN_SIZE");
+                    if (size < newSize) {
+                        doAlterTable = true;
+                    }
+                    break;
+                }
+            }
+            Databases.closeSQLStuff(rsColumns);
+            rsColumns = null;
+
+            if (doAlterTable) {
+                com.openexchange.tools.update.Tools.modifyColumns(con, tableName, new Column(colName, "VARCHAR("+newSize+")"));
+            }
+        } catch (final SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rsColumns);
         }
     }
 
@@ -126,6 +216,20 @@ public final class POP3DropFKTask extends UpdateTaskAdapter {
             } finally {
                 DBUtils.closeSQLStuff(null, stmt);
             }
+        }
+    }
+
+    private void dropForeignKeySafe(final String foreignKeyName, final String table, final Connection con) {
+        try {
+            Statement stmt = null;
+            try {
+                stmt = con.createStatement();
+                stmt.execute("ALTER TABLE " + table + " DROP FOREIGN KEY " + foreignKeyName);
+            } finally {
+                DBUtils.closeSQLStuff(null, stmt);
+            }
+        } catch (final Exception e) {
+            // Ignore
         }
     }
 }
