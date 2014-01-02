@@ -57,6 +57,7 @@
 * 2013-12-17 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 30355: Point to the correct configuration file when adjusting permissions during post-install
+ - Fix for bug 30359: Configure SAX builder to not resolve external entities
  - Fix for bug 30336: Re-added LGI-0013
  - Fix for bug 30319: Changed error message when not having access to a folder
  - Fix for bug 30359: Configure SAX builder to not resolve external entities
