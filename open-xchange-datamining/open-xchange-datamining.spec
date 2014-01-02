@@ -55,6 +55,8 @@ GLOBIGNORE='*'
 First release candidate for 7.4.2
 * Thu Dec 19 2013 Karsten Will <karsten.will@open-xchange.com>
 Build for patch 2013-12-23
+* Thu Dec 19 2013 Karsten Will <karsten.will@open-xchange.com>
+Build for patch 2013-12-23
 * Wed Dec 18 2013 Karsten Will <karsten.will@open-xchange.com>
 prepare for 7.4.2
 * Tue Dec 17 2013 Karsten Will <karsten.will@open-xchange.com>
