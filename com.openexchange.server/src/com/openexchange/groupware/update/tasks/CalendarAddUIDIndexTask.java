@@ -142,8 +142,7 @@ public final class CalendarAddUIDIndexTask extends UpdateTaskAdapter {
                     }
                 }
             } catch (final SQLException e) {
-                log.error("Problem adding index {} on table {}{}", name, table, '.',
-                    e);
+                log.error("Problem adding index {} on table {}.", name, table, e);
             }
         }
     }

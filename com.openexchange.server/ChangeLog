@@ -1,3 +1,7 @@
+* 2014-01-02 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 29754: Better handling for GlobalAddressbookDisable option for RMI and CLI.
+
 * 2014-01-02 - marcus.klein@open-xchange.com
 
  - Fix for bug 29476: Disabled debug output for Kerberos authentication component.
