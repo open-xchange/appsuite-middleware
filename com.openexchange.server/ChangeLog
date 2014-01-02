@@ -1,3 +1,7 @@
+* 2014-01-02 - marcus.klein@open-xchange.com
+
+ - Fix for bug 29476: Disabled debug output for Kerberos authentication component.
+
 * 2013-12-31 - thorben.betten@open-xchange.com
 
  - Change for bug 30425: Add several guards to folder storage API to check for possibly invalid session;

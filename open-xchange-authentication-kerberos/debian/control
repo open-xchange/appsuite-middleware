@@ -9,7 +9,7 @@ Homepage: http://www.open-xchange.com
 Package: open-xchange-authentication-kerberos
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
-Depends: ${misc:Depends}
+Depends: ${misc:Depends}, sed
 Conflicts: open-xchange-authentication-database, open-xchange-authentication-ldap, open-xchange-authentication-imap
 Provides: open-xchange-authentication
 Description: Module for authenticating users in a Kerberos domain
