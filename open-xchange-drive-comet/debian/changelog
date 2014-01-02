@@ -76,6 +76,12 @@ open-xchange-drive-comet (7.4.1-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 20 Sep 2013 11:43:58 +0200
 
+open-xchange-drive-comet (7.4.0-16) stable; urgency=low
+
+  * Build for patch 2013-12-23
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 19 Dec 2013 09:06:52 +0100
+
 open-xchange-drive-comet (7.4.0-15) stable; urgency=low
 
   * Build for patch 2013-12-19
