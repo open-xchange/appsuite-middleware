@@ -66,6 +66,10 @@
  - Fix for bug 30319: Changed error message when not having access to a folder
  - Fix for bug 30359: Configure SAX builder to not resolve external entities
 
+* 2013-12-17 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 30254: Added column names to SQL statement
+
 * 2013-12-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 30339: Properly query a contact's current location from Facebook FQL API
