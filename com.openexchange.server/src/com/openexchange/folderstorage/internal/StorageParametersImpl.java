@@ -117,9 +117,9 @@ public final class StorageParametersImpl implements StorageParameters {
         super();
         this.session = session;
         this.user = null == user ? session.getUser() : user;
-        userId = null == user ? -1 : user.getId();
+        userId = null == this.user ? -1 : this.user.getId();
         this.context = null == context ? session.getContext() : context;
-        contextId = null == context ? -1 : context.getContextId();
+        contextId = null == this.context ? -1 : this.context.getContextId();
         parameters = new ConcurrentHashMap<FolderType, ConcurrentMap<String, Object>>();
         warnings = new ConcurrentHashMap<OXException, Object>(2);
     }
