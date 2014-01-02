@@ -1,3 +1,7 @@
+* 2014-01-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30225: Fixed possible ArrayIndexOutOfBoundsException
+
 * 2014-01-02 - martin.herfurth@open-xchange.com
 
  - Fix for bug 29754: Better handling for GlobalAddressbookDisable option for RMI and CLI.
