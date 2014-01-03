@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,69 +47,46 @@
  *
  */
 
-package com.openexchange.caldav;
+package com.openexchange.caldav.mixins;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.java.Streams;
-import com.openexchange.webdav.action.AbstractAction;
-import com.openexchange.webdav.action.WebdavRequest;
-import com.openexchange.webdav.action.WebdavResponse;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
-import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
- * {@link WebdavPostAction}
+ * {@link AllowedSharingModes}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class WebdavPostAction extends AbstractAction {
+public class AllowedSharingModes extends SingleXMLPropertyMixin {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavPostAction.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AllowedSharingModes.class);
+    private final Session session;
 
-    protected final GroupwareCaldavFactory factory;
+    /**
+     * Initializes a new {@link AllowedSharingModes}.
+     *
+     * @param session The session
+     */
+    public AllowedSharingModes(Session session) {
+        super(CaldavProtocol.CALENDARSERVER_NS.getURI(), "allowed-sharing-modes");
+        this.session = session;
+    }
 
-    public WebdavPostAction(GroupwareCaldavFactory factory) {
-	    this.factory = factory;
-	}
-
-	@Override
-	public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
-		WebdavResource resource = request.getResource();
-		if (null != request.getHeader("content-length")) {
-			resource.setLength(new Long(request.getHeader("content-length")));
-		}
-		/*
-		 * put request body
-		 */
-		try {
-			resource.putBodyAndGuessLength(request.getBody());
-		} catch (IOException e) {
-			LOG.debug("Client Gone?", e);
-		}
-		/*
-		 * write back response
-		 */
-		response.setContentType(resource.getContentType());
-		byte[] buffer = new byte[1024];
-		OutputStream outputStream = null;
-		InputStream inputStream = null;
-		try {
-			inputStream = resource.getBody();
-			outputStream = response.getOutputStream();
-			int length;
-			while ((length = inputStream.read(buffer)) > 0) {
-				outputStream.write(buffer, 0, length);
-			}
-			response.setStatus(HttpServletResponse.SC_OK);
-		} catch (IOException e) {
-			LOG.debug("Client gone?", e);
-		} finally {
-			Streams.close(inputStream);
-			Streams.close(outputStream);
-		}
-	}
+    @Override
+    protected String getValue() {
+        try {
+            UserPermissionBits permissionBits = ServerSessionAdapter.valueOf(session).getUserPermissionBits();
+            if (permissionBits.hasFullSharedFolderAccess()) {
+                return "<CS:can-be-shared/><CS:can-be-published/>";
+            }
+        } catch (OXException e) {
+            LOG.warn("Error checking user permission bits", e);
+        }
+        return ""; // sharing not allowed
+    }
 
 }

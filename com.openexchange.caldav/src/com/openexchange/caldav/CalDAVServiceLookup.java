@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,67 +49,63 @@
 
 package com.openexchange.caldav;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.java.Streams;
-import com.openexchange.webdav.action.AbstractAction;
-import com.openexchange.webdav.action.WebdavRequest;
-import com.openexchange.webdav.action.WebdavResponse;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
-import com.openexchange.webdav.protocol.WebdavResource;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link WebdavPostAction}
+ * {@link CalDAVServiceLookup}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class WebdavPostAction extends AbstractAction {
+public final class CalDAVServiceLookup {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavPostAction.class);
+    /**
+     * Initializes a new {@link CalDAVServiceLookup}.
+     */
+    private CalDAVServiceLookup() {
+        super();
+    }
 
-    protected final GroupwareCaldavFactory factory;
+    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
 
-    public WebdavPostAction(GroupwareCaldavFactory factory) {
-	    this.factory = factory;
-	}
+    /**
+     * Gets the service look-up
+     *
+     * @return The service look-up or <code>null</code>
+     */
+    public static ServiceLookup get() {
+        return ref.get();
+    }
 
-	@Override
-	public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
-		WebdavResource resource = request.getResource();
-		if (null != request.getHeader("content-length")) {
-			resource.setLength(new Long(request.getHeader("content-length")));
-		}
-		/*
-		 * put request body
-		 */
-		try {
-			resource.putBodyAndGuessLength(request.getBody());
-		} catch (IOException e) {
-			LOG.debug("Client Gone?", e);
-		}
-		/*
-		 * write back response
-		 */
-		response.setContentType(resource.getContentType());
-		byte[] buffer = new byte[1024];
-		OutputStream outputStream = null;
-		InputStream inputStream = null;
-		try {
-			inputStream = resource.getBody();
-			outputStream = response.getOutputStream();
-			int length;
-			while ((length = inputStream.read(buffer)) > 0) {
-				outputStream.write(buffer, 0, length);
-			}
-			response.setStatus(HttpServletResponse.SC_OK);
-		} catch (IOException e) {
-			LOG.debug("Client gone?", e);
-		} finally {
-			Streams.close(inputStream);
-			Streams.close(outputStream);
-		}
-	}
+    /**
+     * Sets the service look-up
+     *
+     * @param serviceLookup The service look-up or <code>null</code>
+     */
+    public static void set(ServiceLookup serviceLookup) {
+        ref.set(serviceLookup);
+    }
+
+    public static <S extends Object> S getService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getService(c);
+        return service;
+    }
+
+    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
+        S service = getService(c);
+        if (null == service && throwOnAbsence) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
+        }
+        return service;
+    }
+
+    public static <S extends Object> S getOptionalService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getOptionalService(c);
+        return service;
+    }
 
 }
