@@ -73,13 +73,15 @@ import com.openexchange.management.console.JMXAuthenticatorImpl;
 /**
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PreviewCacheTool {
+public final class PreviewCacheTool2 {
 
     private static final Options sOptions;
     static {
         sOptions = new Options();
         sOptions.addOption("h", "help", false, "Prints a help text");
         sOptions.addOption("c", "context", true, "Required. The context identifier");
+        sOptions.addOption("a", "all", false, "Required. The flag to signal that contexts shall be processed. Hence option -c/--context is then obsolete.");
+        sOptions.addOption("i", "invalids", true, "An optional comma-separated list of those MIME types that should be considered as broken/corrupt. Default is \"application/force-download, application/x-download, application/$suffix\"");
 
         sOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
         sOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
@@ -89,7 +91,7 @@ public final class PreviewCacheTool {
     /**
      * Prevent instantiation.
      */
-    private PreviewCacheTool() {
+    private PreviewCacheTool2() {
         super();
     }
 
@@ -109,14 +111,28 @@ public final class PreviewCacheTool {
                 return;
             }
 
-            if (!cmd.hasOption('c')) {
-                System.out.println("Parameter 'context' is required.");
-                printHelp();
-                System.exit(1);
-                return;
+            final String contextOptionVal;
+            if (cmd.hasOption('a')) {
+                contextOptionVal = null;
+            } else {
+                if (!cmd.hasOption('c')) {
+                    System.out.println("Either parameter 'context' or parameter 'all' is required.");
+                    printHelp();
+                    System.exit(1);
+                    return;
+                }
+                contextOptionVal = cmd.getOptionValue('c');
             }
 
-            final String contextOptionVal = cmd.getOptionValue('c');
+            String invalids = null;
+            if (cmd.hasOption('i')) {
+                invalids = cmd.getOptionValue('i');
+                invalids = invalids.trim();
+                if (invalids.startsWith("\"") && invalids.endsWith("\"")) {
+                    invalids = invalids.substring(1, invalids.length() - 1);
+                    invalids = invalids.trim();
+                }
+            }
 
             int port = 9999;
             if (cmd.hasOption('p')) {
@@ -164,8 +180,8 @@ public final class PreviewCacheTool {
 
                 try {
                     ResourceCacheMBean previceCacheProxy = previewCacheMBean(mbsc);
-                    previceCacheProxy.clearFor(Integer.parseInt(contextOptionVal.trim()));
-                    System.out.println("All cache entries cleared for context " + contextOptionVal);
+                    String resultDesc = previceCacheProxy.sanitizeMimeTypesInDatabaseFor(null == contextOptionVal ? -1 : Integer.parseInt(contextOptionVal.trim()), invalids);
+                    System.out.println(resultDesc);
                 } catch (Exception e) {
                     String errMsg = e.getMessage();
                     System.out.println(errMsg == null ? "An error occurred." : errMsg);
@@ -194,7 +210,7 @@ public final class PreviewCacheTool {
 
     private static void printHelp() {
         HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp("clearpreviewcache", sOptions);
+        helpFormatter.printHelp(HelpFormatter.DEFAULT_WIDTH, "sanitizefilemimetypes", null, sOptions, "The options -c/--context and -a/--all are mutually exclusive.", false);
     }
 
     private static ResourceCacheMBean previewCacheMBean(MBeanServerConnection mbsc) throws MalformedObjectNameException {
