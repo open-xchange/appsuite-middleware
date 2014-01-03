@@ -49,7 +49,6 @@
 
 package com.openexchange.carddav;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -58,6 +57,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.carddav.resources.RootCollection;
@@ -89,6 +89,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.tools.versit.converter.OXContainerConverter;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -116,6 +117,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 	private final ConfigViewFactory configs;
 	private final UserService userService;
 	private final ContactService contactService;
+	private final OXContainerConverter converter;
 
 	public GroupwareCarddavFactory(FolderService folders, SessionHolder sessionHolder, ConfigViewFactory configs,
 			UserService users, ContactService contactService) {
@@ -125,6 +127,8 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		this.configs = configs;
 		this.userService = users;
 		this.contactService = contactService;
+		this.converter = new OXContainerConverter((TimeZone)null, (String)null);
+		this.converter.setSkipOxCTypeAttribute(true);
 	}
 
 	@Override
@@ -179,6 +183,10 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 
 	public FolderService getFolderService() {
 		return folderService;
+	}
+
+	public OXContainerConverter getConverter() {
+	    return converter;
 	}
 
 	public Context getContext() {
