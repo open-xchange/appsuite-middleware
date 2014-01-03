@@ -4125,6 +4125,11 @@ msgid ""
 "same name."
 msgstr ""
 
+#. Failed to delete following folder/s: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:102
+msgid "Failed to delete following folder/s: %1$s"
+msgstr ""
+
 #. No group given.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:69
 msgid "No group given."
