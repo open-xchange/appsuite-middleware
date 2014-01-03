@@ -244,14 +244,4 @@ public class StatisticToolsTest extends AbstractTest {
         statisticTools.start(new String[] { "-f", "-H", getRMIHost() }, "showruntimestats");
         assertEquals("Expected 0 as return code!", 0, this.returnCodeOffice);
     }
-
-    protected static String getRMIHost() {
-        String host = "localhost";
-
-        if (System.getProperty("rmi_test_host") != null) {
-            host = System.getProperty("rmi_test_host");
-        }
-
-        return host;
-    }
 }
