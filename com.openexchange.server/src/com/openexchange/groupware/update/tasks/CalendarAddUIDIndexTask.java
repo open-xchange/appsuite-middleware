@@ -115,34 +115,17 @@ public final class CalendarAddUIDIndexTask extends UpdateTaskAdapter {
     private void createCalendarIndex(final Connection con, final String[] tables) {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CalendarAddUIDIndexTask.class);
         final String name = "uidIndex";
-        final StringBuilder sb = new StringBuilder(64);
         for (final String table : tables) {
             try {
                 final String indexName = existsIndex(con, table, new String[] { "cid", "uid" });
                 if (null == indexName) {
-                    if (log.isInfoEnabled()) {
-                        sb.setLength(0);
-                        sb.append("Creating new index named \"");
-                        sb.append(name);
-                        sb.append("\" with columns (cid,uid) on table ");
-                        sb.append(table);
-                        sb.append('.');
-                        log.info(sb.toString());
-                    }
+                    log.info("Creating new index named \"{}\" with columns (cid,uid) on table {}.", name, table);
                     createIndex(con, table, name, new String[] { "cid", "uid(255)" }, false);
                 } else {
-                    if (log.isInfoEnabled()) {
-                        sb.setLength(0);
-                        sb.append("New index named \"");
-                        sb.append(indexName);
-                        sb.append("\" with columns (cid,uid) already exists on table ");
-                        sb.append(table);
-                        sb.append('.');
-                        log.info(sb.toString());
-                    }
+                    log.info("New index named \"{}\" with columns (cid,uid) already exists on table {}.", indexName, table);
                 }
             } catch (final SQLException e) {
-                log.error("Problem adding index {} on table {}.", name, table, e);
+                log.error("Problem adding index \"{}\" on table {}.", name, table, e);
             }
         }
     }
