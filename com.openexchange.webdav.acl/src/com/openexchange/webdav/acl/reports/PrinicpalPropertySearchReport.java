@@ -50,7 +50,6 @@
 package com.openexchange.webdav.acl.reports;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -60,10 +59,19 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
+import com.openexchange.contact.ContactFieldOperand;
+import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
-import com.openexchange.user.UserService;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SingleSearchTerm;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.ConstantOperand;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.webdav.acl.PrincipalProtocol;
 import com.openexchange.webdav.acl.PrincipalWebdavFactory;
 import com.openexchange.webdav.acl.UserPrincipalResource;
@@ -81,6 +89,8 @@ import com.openexchange.webdav.xml.resources.ResourceMarshaller;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class PrinicpalPropertySearchReport extends WebdavPropfindAction {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PrinicpalPropertySearchReport.class);
 
     public static final String NAMESPACE = DAV_NS.getURI();
     public static final String NAME = "principal-property-search";
@@ -122,45 +132,72 @@ public class PrinicpalPropertySearchReport extends WebdavPropfindAction {
          * search matching users
          */
         PrincipalWebdavFactory factory = (PrincipalWebdavFactory)req.getFactory();
-        //TODO search via contact service
-        UserService userService = factory.getUserService();
         Set<User> users = new HashSet<User>();
+        /*
+         * prepare composite search term
+         */
+        CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
         List<Element> propertySearches = requestBody.getRootElement().getChildren("property-search", DAV_NS);
         for (Element propertySearch : propertySearches) {
             Element matchElement = propertySearch.getChild("match", DAV_NS);
             if (null == matchElement || Strings.isEmpty(matchElement.getText())) {
                 continue;
             }
-            String match = matchElement.getText() + "*"; // TODO: evaluate starts-with attributes
+            String match = matchElement.getText() + "*"; // always assume starts-with nature
             Element prop = propertySearch.getChild("prop", DAV_NS);
-            boolean searchedByDisplayName = false;
             for (Element element : prop.getChildren()) {
-                if ("displayname".equals(element.getName()) && DAV_NS.equals(element.getNamespace()) ||
-                    "first-name".equals(element.getName()) && PrincipalProtocol.CALENDARSERVER_NS.equals(element.getNamespace()) ||
-                    "last-name".equals(element.getName()) && PrincipalProtocol.CALENDARSERVER_NS.equals(element.getNamespace())) {
-                    if (false == searchedByDisplayName) {
-                        try {
-                            User[] foundUsers = userService.searchUserByName(match, factory.getContext(), UserService.SEARCH_DISPLAY_NAME);
-                            if (null != foundUsers && 0 < foundUsers.length) {
-                                users.addAll(Arrays.asList(foundUsers));
-                            }
-                        } catch (OXException e) {
-                            // ignore
-                        }
-                        searchedByDisplayName = true;
-                    }
+                /*
+                 * create a corresponding search term for each supported property
+                 */
+                if ("displayname".equals(element.getName()) && DAV_NS.equals(element.getNamespace())) {
+                    SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+                    term.addOperand(new ContactFieldOperand(ContactField.DISPLAY_NAME));
+                    term.addOperand(new ConstantOperand<String>(match));
+                    orTerm.addSearchTerm(term);
+                } else if ("first-name".equals(element.getName()) && PrincipalProtocol.CALENDARSERVER_NS.equals(element.getNamespace())) {
+                    SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+                    term.addOperand(new ContactFieldOperand(ContactField.GIVEN_NAME));
+                    term.addOperand(new ConstantOperand<String>(match));
+                    orTerm.addSearchTerm(term);
+                } else if ("last-name".equals(element.getName()) && PrincipalProtocol.CALENDARSERVER_NS.equals(element.getNamespace())) {
+                    SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+                    term.addOperand(new ContactFieldOperand(ContactField.SUR_NAME));
+                    term.addOperand(new ConstantOperand<String>(match));
+                    orTerm.addSearchTerm(term);
                 } else if ("email-address-set".equals(element.getName()) && PrincipalProtocol.CALENDARSERVER_NS.equals(element.getNamespace())) {
-                    try {
-                        User[] foundUsers = userService.searchUserByName(match, factory.getContext(), UserService.SEARCH_LOGIN_NAME);
-                        if (null != foundUsers && 0 < foundUsers.length) {
-                            users.addAll(Arrays.asList(foundUsers));
-                        }
-                    } catch (OXException e) {
-                        // ignore
+                    CompositeSearchTerm emailTerm = new CompositeSearchTerm(CompositeOperation.OR);
+                    for (ContactField emailField : new ContactField[] { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 }) {
+                        SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+                        term.addOperand(new ContactFieldOperand(emailField));
+                        term.addOperand(new ConstantOperand<String>(match));
+                        emailTerm.addSearchTerm(term);
                     }
+                    orTerm.addSearchTerm(emailTerm);
+                }
+            }
+        }
+        /*
+         * perform search
+         */
+        if (null != orTerm.getOperands() && 0 < orTerm.getOperands().length) {
+            SearchIterator<Contact> searchIterator = null;
+            try {
+                searchIterator = factory.getContactService().searchUsers(factory.getSessionHolder().getSessionObject(), orTerm,
+                    new ContactField[] { ContactField.INTERNAL_USERID, ContactField.CONTEXTID }, SortOptions.EMPTY);
+                while (searchIterator.hasNext()) {
                     try {
-                        User user = userService.searchUser(match, factory.getContext());
-                        users.add(user);
+                        Contact contact = searchIterator.next();
+                        users.add(factory.getUserService().getUser(contact.getInternalUserId(), contact.getContextId()));
+                    } catch (OXException e) {
+                        LOG.warn("error resolving user", e);
+                    }
+                }
+            } catch (OXException e) {
+                LOG.warn("error searching users", e);
+            } finally {
+                if (null != searchIterator) {
+                    try {
+                        searchIterator.close();
                     } catch (OXException e) {
                         // ignore
                     }

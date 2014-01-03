@@ -168,4 +168,8 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
      * The mailbox on mail server %1$s is already in use. Please try again later.
      */
     public static final String IN_USE_ERROR_EXT_MSG_DISPLAY = "The mailbox on mail server %1$s is already in use. Please try again later.";
+
+    // Wrong or missing login data to access mail transport server %1$s. Please check associated account's settings/credentials.
+    public static final String TRANSPORT_INVALID_CREDENTIALS_MSG_DISPLAY = "Wrong or missing login data to access mail transport server %1$s. Please check associated account's settings/credentials.";
+
 }

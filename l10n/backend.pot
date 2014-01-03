@@ -6770,6 +6770,13 @@ msgid ""
 "The mailbox on mail server %1$s is already in use. Please try again later."
 msgstr ""
 
+#. Wrong or missing login data to access mail transport server %1$s. Please check associated account's settings/credentials.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:173
+msgid ""
+"Wrong or missing login data to access mail transport server %1$s. Please "
+"check associated account's settings/credentials."
+msgstr ""
+
 #. Cannot find mail account for user "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62
 msgid "Cannot find mail account for user \"%2$s\"."

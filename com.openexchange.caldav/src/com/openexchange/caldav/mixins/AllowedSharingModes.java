@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,25 +47,46 @@
  *
  */
 
-package com.openexchange.subscribe.xing;
+package com.openexchange.caldav.mixins;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
- * {@link UnitTests}
+ * {@link AllowedSharingModes}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class UnitTests {
+public class AllowedSharingModes extends SingleXMLPropertyMixin {
 
-    public UnitTests() {
-        super();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AllowedSharingModes.class);
+    private final Session session;
+
+    /**
+     * Initializes a new {@link AllowedSharingModes}.
+     *
+     * @param session The session
+     */
+    public AllowedSharingModes(Session session) {
+        super(CaldavProtocol.CALENDARSERVER_NS.getURI(), "allowed-sharing-modes");
+        this.session = session;
     }
 
-    public static final Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(ContactSanitationTest.class);
-        return tests;
+    @Override
+    protected String getValue() {
+        try {
+            UserPermissionBits permissionBits = ServerSessionAdapter.valueOf(session).getUserPermissionBits();
+            if (permissionBits.hasFullSharedFolderAccess()) {
+                return "<CS:can-be-shared/><CS:can-be-published/>";
+            }
+        } catch (OXException e) {
+            LOG.warn("Error checking user permission bits", e);
+        }
+        return ""; // sharing not allowed
     }
+
 }

@@ -50,6 +50,7 @@
 package com.openexchange.caldav.osgi;
 
 import org.osgi.service.http.HttpService;
+import com.openexchange.caldav.CalDAVServiceLookup;
 import com.openexchange.caldav.mixins.CalendarUserAddressSet;
 import com.openexchange.caldav.mixins.DefaultAlarmVeventDate;
 import com.openexchange.caldav.mixins.DefaultAlarmVeventDatetime;
@@ -63,6 +64,7 @@ import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.freebusy.service.FreeBusyService;
+import com.openexchange.group.GroupService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.contexts.Context;
@@ -82,6 +84,7 @@ import com.openexchange.webdav.directory.PathRegistration;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 import com.openexchange.webdav.protocol.helpers.PropertyMixinFactory;
 import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
+import com.openexchange.xml.jdom.JDOMParser;
 
 
 /**
@@ -97,20 +100,19 @@ public class CaldavActivator extends HousekeepingActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CaldavActivator.class);
 
-	private volatile OSGiPropertyMixin mixin;
+    private volatile OSGiPropertyMixin mixin;
 
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] {
             ICalEmitter.class, ICalParser.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, FolderService.class,
-            UserService.class, ConfigViewFactory.class, HttpService.class, FreeBusyService.class };
+            UserService.class, ConfigViewFactory.class, HttpService.class, FreeBusyService.class, JDOMParser.class, GroupService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
-            CalDAV.setServiceLookup(this);
-            CaldavPerformer.setServices(this);
+            CalDAVServiceLookup.set(this);
 
             final HttpService httpService = getService(HttpService.class);
             httpService.registerServlet(SERVLET_PATH, new CalDAV(), null, null);
@@ -138,28 +140,28 @@ public class CaldavActivator extends HousekeepingActivator {
 
             registerService(PreferencesItemService.class, new PreferencesItemService() {
 
-				@Override
-				public IValueHandler getSharedValue() {
-					return new ReadOnlyValue() {
+                @Override
+                public IValueHandler getSharedValue() {
+                    return new ReadOnlyValue() {
 
-						@Override
-						public boolean isAvailable(UserConfiguration userConfig) {
-							return true;
-						}
+                        @Override
+                        public boolean isAvailable(UserConfiguration userConfig) {
+                            return true;
+                        }
 
-						@Override
-						public void getValue(Session session, Context ctx, User user,
-								UserConfiguration userConfig, Setting setting) throws OXException {
-							setting.setSingleValue(Boolean.FALSE);
-						}
-					};
-				}
+                        @Override
+                        public void getValue(Session session, Context ctx, User user,
+                                UserConfiguration userConfig, Setting setting) throws OXException {
+                            setting.setSingleValue(Boolean.FALSE);
+                        }
+                    };
+                }
 
-				@Override
-				public String[] getPath() {
-					return new String[]{"modules", "caldav", "module"};
-				}
-			});
+                @Override
+                public String[] getPath() {
+                    return new String[]{"modules", "caldav", "module"};
+                }
+            });
 
             /*-
              * # CalDAV
@@ -219,6 +221,7 @@ public class CaldavActivator extends HousekeepingActivator {
             mixin.close();
             this.mixin = null;
         }
+        CalDAVServiceLookup.set(null);
         super.stopBundle();
     }
 

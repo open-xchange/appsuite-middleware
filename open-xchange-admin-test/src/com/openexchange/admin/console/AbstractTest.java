@@ -184,4 +184,20 @@ public abstract class AbstractTest {
     public void setReturnCode(int returnCode) {
         this.returnCode = returnCode;
     }
+
+    protected static String getRMIHost() {
+        String host = "localhost";
+
+        if (System.getProperty("rmi_test_host") != null) {
+            host = System.getProperty("rmi_test_host");
+        }
+
+        if (!host.startsWith("rmi://")) {
+            host = "rmi://" + host;
+        }
+        if (!host.endsWith("/")) {
+            host = host + "/";
+        }
+        return host;
+    }
 }

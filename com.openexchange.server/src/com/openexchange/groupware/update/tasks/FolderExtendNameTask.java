@@ -52,10 +52,12 @@ package com.openexchange.groupware.update.tasks;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.update.Tools.checkAndModifyColumns;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.slf4j.Logger;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
@@ -97,24 +99,60 @@ public final class FolderExtendNameTask extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Logger log = org.slf4j.LoggerFactory.getLogger(FolderExtendNameTask.class);
-        log.info("Performing update task {}", FolderExtendNameTask.class.getSimpleName());
+        String simpleName = FolderExtendNameTask.class.getSimpleName();
+        log.info("Performing update task {}", simpleName);
         Connection connnection = Database.getNoTimeout(params.getContextId(), true);
+        boolean rollback = false;
         try {
             connnection.setAutoCommit(false);
-            checkAndModifyColumns(connnection, "oxfolder_tree", new Column("fname", "varchar(767)"));
-            checkAndModifyColumns(connnection, "virtualTree", new Column("name", "varchar(767)"));
+            rollback = true;
+            enlargeVarcharColumn("fname", 767, "oxfolder_tree", connnection);
+            enlargeVarcharColumn("name", 767, "virtualTree", connnection);
             connnection.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(connnection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (Exception e) {
-            rollback(connnection);
+        } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                rollback(connnection);
+            }
             autocommit(connnection);
             Database.backNoTimeout(params.getContextId(), true, connnection);
         }
-        log.info(FolderExtendNameTask.class.getSimpleName() + " successfully performed.");
+        log.info("{} successfully performed.", simpleName);
+    }
+
+    private void enlargeVarcharColumn(final String colName, final int newSize, final String tableName, final Connection con) throws OXException {
+        ResultSet rsColumns = null;
+        boolean doAlterTable = false;
+        try {
+            DatabaseMetaData meta = con.getMetaData();
+            rsColumns = meta.getColumns(null, null, tableName, null);
+            while (rsColumns.next()) {
+                final String columnName = rsColumns.getString("COLUMN_NAME");
+                if (colName.equals(columnName)) {
+                    final int size = rsColumns.getInt("COLUMN_SIZE");
+                    if (size < newSize) {
+                        doAlterTable = true;
+                    }
+                    break;
+                }
+            }
+            Databases.closeSQLStuff(rsColumns);
+            rsColumns = null;
+
+            if (doAlterTable) {
+                com.openexchange.tools.update.Tools.modifyColumns(con, tableName, new Column(colName, "VARCHAR("+newSize+")"));
+            }
+        } catch (final SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rsColumns);
+        }
     }
 
 }

@@ -95,7 +95,7 @@ public class LockCleaner implements FolderEventInterface, EventHandler {
 
     @Override
     public void handleEvent(final Event event) {
-        if (FileStorageEventHelper.isInfostoreEvent(event) && FileStorageEventHelper.isUpdateEvent(event)) {
+        if (FileStorageEventHelper.isInfostoreEvent(event) && FileStorageEventHelper.isDeleteEvent(event)) {
             try {
                 int id = Integer.parseInt(FileStorageEventHelper.extractObjectId(event));
                 ServerSession session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
@@ -107,7 +107,7 @@ public class LockCleaner implements FolderEventInterface, EventHandler {
                 LOG.debug("", e);
             }
 
-            LOG.debug("{}", new Object() { @Override public String toString() { return FileStorageEventHelper.createDebugMessage("UpdateEvent", event);}});
+            LOG.debug("{}", new Object() { @Override public String toString() { return FileStorageEventHelper.createDebugMessage("DeleteEvent", event);}});
         }
     }
 }

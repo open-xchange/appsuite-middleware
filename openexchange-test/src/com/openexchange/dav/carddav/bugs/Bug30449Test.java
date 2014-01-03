@@ -49,29 +49,57 @@
 
 package com.openexchange.dav.carddav.bugs;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.List;
+import java.util.Map;
+import net.sourceforge.cardme.vcard.types.ExtendedType;
+import com.openexchange.dav.SyncToken;
+import com.openexchange.dav.carddav.CardDAVTest;
+import com.openexchange.dav.carddav.VCardResource;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 
 /**
- * {@link CardDAVBugSuite}
+ * {@link Bug30449Test}
+ *
+ * OS X 10.6 Clients only: 'X-OPEN-XCHANGE-CTYPE: contact' visible in Notes section of Contacts App
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class CardDAVBugSuite {
+public class Bug30449Test extends CardDAVTest {
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite();
-        suite.addTestSuite(Bug20665Test.class);
-        suite.addTestSuite(Bug21079Test.class);
-        suite.addTestSuite(Bug21177Test.class);
-        suite.addTestSuite(Bug21235Test.class);
-        suite.addTestSuite(Bug21240Test.class);
-        suite.addTestSuite(Bug21354Test.class);
-        suite.addTestSuite(Bug21374Test.class);
-        suite.addTestSuite(Bug23046Test.class);
-        suite.addTestSuite(Bug23078Test.class);
-        suite.addTestSuite(Bug28672Test.class);
-        suite.addTestSuite(Bug30449Test.class);
-        return suite;
-    }
+	public Bug30449Test(String name) {
+		super(name);
+	}
+
+	public void testDontIncludeX_OPEN_XCHANGE_CTYPE() throws Exception {
+	    /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(super.fetchSyncToken());
+        /*
+         * create subfolder and contacts on server
+         */
+        String folderName = "testfolder_" + randomUID();
+        FolderObject subFolder = super.createFolder(folderName);
+        super.rememberForCleanUp(subFolder);
+        String uid = randomUID();
+        String firstName = "gerd";
+        String lastName = "gurke";
+        Contact contact = new Contact();
+        contact.setSurName(lastName);
+        contact.setGivenName(firstName);
+        contact.setDisplayName(firstName + " " + lastName);
+        contact.setUid(uid);
+        super.rememberForCleanUp(super.create(contact, subFolder.getObjectID()));
+        /*
+         * verify contact and folder on client
+         */
+        Map<String, String> eTags = super.syncCollection(syncToken).getETagsStatusOK();
+        assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
+        List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
+        VCardResource contactCard = assertContains(uid, addressData);
+        List<ExtendedType> extendedTypes = contactCard.getExtendedTypes("X-OPEN-XCHANGE-CTYPE");
+        assertTrue("X-OPEN-XCHANGE-CTYPE found", null == extendedTypes || 0 == extendedTypes.size());
+	}
+
 }

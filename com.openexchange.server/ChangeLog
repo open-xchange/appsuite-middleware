@@ -1,3 +1,22 @@
+* 2014-01-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30429: Return a meaningful error message in case SMTP authentication fails
+
+* 2014-01-03 - martin.schneider@open-xchange.com
+
+ - Fix for bug 30404: Correct handling of month of birth for contact subscriptions. 
+
+* 2014-01-03 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25160: Added basic support for caldav-sharing, don't include "owner" property, skip implicit folder owner participant
+ - Fix for bug 30449: Exclude X-OPEN-XCHANGE-CTYPE attribute for CardDAV synchronization
+ - Fix for bug 29776: Corrected access to referenced change types
+ - Fix for bug 30435: Don't remove locks upon infostore update events, but on delete events 
+
+* 2014-01-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30225: Fixed possible ArrayIndexOutOfBoundsException
+
 * 2014-01-02 - martin.herfurth@open-xchange.com
 
  - Fix for bug 29754: Better handling for GlobalAddressbookDisable option for RMI and CLI.

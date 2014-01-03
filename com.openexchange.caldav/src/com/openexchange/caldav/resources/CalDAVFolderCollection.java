@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,25 +49,40 @@
 
 package com.openexchange.caldav.resources;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import com.openexchange.caldav.CalDAVPermission;
+import com.openexchange.caldav.CalDAVServiceLookup;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
+import com.openexchange.caldav.mixins.AllowedSharingModes;
 import com.openexchange.caldav.mixins.CalendarOrder;
+import com.openexchange.caldav.mixins.CalendarOwner;
+import com.openexchange.caldav.mixins.Invite;
 import com.openexchange.caldav.mixins.MaxDateTime;
 import com.openexchange.caldav.mixins.MinDateTime;
+import com.openexchange.caldav.mixins.Organizer;
 import com.openexchange.caldav.mixins.SupportedReportSet;
 import com.openexchange.caldav.query.Filter;
 import com.openexchange.caldav.query.FilterAnalyzer;
 import com.openexchange.caldav.query.FilterAnalyzerBuilder;
 import com.openexchange.caldav.reports.FilteringResource;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -75,10 +90,14 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.xml.jdom.JDOMParser;
 
 /**
  * {@link CalDAVFolderCollection}
@@ -100,7 +119,8 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
     public CalDAVFolderCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder, int order) throws OXException {
         super(factory, url, folder);
         this.factory = factory;
-        includeProperties(new SupportedReportSet(), new MinDateTime(this), new MaxDateTime(this));
+        includeProperties(new SupportedReportSet(), new MinDateTime(this), new MaxDateTime(this), new Invite(factory, this),
+            new AllowedSharingModes(factory.getSession()), new CalendarOwner(this), new Organizer(this));
         if (NO_ORDER != order) {
             includeProperties(new CalendarOrder(order));
         }
@@ -133,6 +153,172 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
             }
         }
         return null;
+    }
+
+    @Override
+    public void putBody(final InputStream data, final boolean guessSize) throws WebdavProtocolException {
+        try {
+            Document document = CalDAVServiceLookup.getService(JDOMParser.class).parse(data);
+            if (null == document.getRootElement() || false == "share".equals(document.getRootElement().getName()) ||
+                false == CaldavProtocol.CALENDARSERVER_NS.equals(document.getRootElement().getNamespace())) {
+                throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+            }
+            if (false == getFolder().getOwnPermission().isAdmin()) {
+                throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_FORBIDDEN);
+            }
+            List<Permission> permissionsToSet = extractPermissionsToSet(document);
+            Set<Integer> permissionsEntitiesToRemove = extractPermissionsToRemove(document);
+            boolean hasChanged = false;
+            List<Permission> updatedPermissions = new ArrayList<Permission>();
+            Permission[] permissions = getFolder().getPermissions();
+            // remove / update
+            for (Permission permission : permissions) {
+                if (permission.isAdmin()) {
+                    updatedPermissions.add(permission);
+                    continue;
+                }
+                if (permissionsEntitiesToRemove.contains(Integer.valueOf(permission.getEntity()))) {
+                    // don't add
+                    hasChanged = true;
+                    continue;
+                }
+                Iterator<Permission> iterator = permissionsToSet.iterator();
+                while (iterator.hasNext()) {
+                    Permission permissionToSet = iterator.next();
+                    if (permission.getEntity() == permissionToSet.getEntity()) {
+                        // update
+                        permission = permissionToSet;
+                        iterator.remove();
+                        hasChanged = true;
+                        break;
+                    }
+                }
+                updatedPermissions.add(permission);
+            }
+            // add remaining
+            if (0 < permissionsToSet.size()) {
+                updatedPermissions.addAll(permissionsToSet);
+                hasChanged = true;
+            }
+            if (hasChanged) {
+                UserizedFolder folder = getFolder();
+                folder.setPermissions(updatedPermissions.toArray(new Permission[updatedPermissions.size()]));
+                factory.getFolderService().updateFolder(folder, folder.getLastModifiedUTC(), factory.getSession(), null);
+            }
+        } catch (JDOMException e) {
+            throw WebdavProtocolException.generalError(e, getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+        } catch (IOException e) {
+            throw WebdavProtocolException.generalError(e, getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+        } catch (OXException e) {
+            if (e.getCategory().equals(Category.CATEGORY_PERMISSION_DENIED)) {
+                throw WebdavProtocolException.generalError(e, getUrl(), HttpServletResponse.SC_FORBIDDEN);
+            } else {
+                throw WebdavProtocolException.generalError(e, getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+            }
+        }
+    }
+
+    /**
+     * Gets a list of permission entities that are requested to remove in the supplied "share" document.
+     *
+     * @param document The document body of the request
+     * @return A set of permission entities to remove, or an empty set if there are none
+     */
+    private Set<Integer> extractPermissionsToRemove(Document document) {
+        Set<Integer> permissionsEntitiesToRemove = new HashSet<Integer>();
+        for (Element element : document.getRootElement().getChildren("remove", CaldavProtocol.CALENDARSERVER_NS)) {
+            try {
+                Element hrefElement = element.getChild("href", CaldavProtocol.DAV_NS);
+                int entity = discoverUserID(hrefElement);
+                if (-1 == entity) {
+                    entity = discoverGroupID(hrefElement);
+                    if (-1 == entity) {
+                        continue;
+                    }
+                }
+                permissionsEntitiesToRemove.add(entity);
+            } catch (OXException e) {
+                LOG.warn("Error resolving share entitites", e);
+            }
+        }
+        return permissionsEntitiesToRemove;
+    }
+
+    /**
+     * Gets a list of permissions that are requested to set in the supplied "share" document.
+     *
+     * @param document The document body of the request
+     * @return The list of permissions to set, or an empty list if there are none
+     */
+    private List<Permission> extractPermissionsToSet(Document document) {
+        List<Permission> permissionsToSet = new ArrayList<Permission>();
+        for (Element element : document.getRootElement().getChildren("set", CaldavProtocol.CALENDARSERVER_NS)) {
+            try {
+                Element hrefElement = element.getChild("href", CaldavProtocol.DAV_NS);
+                boolean group = false;
+                int entity = discoverUserID(hrefElement);
+                if (-1 == entity) {
+                    entity = discoverGroupID(hrefElement);
+                    if (-1 == entity) {
+                        continue;
+                    }
+                    group = true;
+                }
+                if (null != element.getChild("read", CaldavProtocol.CALENDARSERVER_NS)) {
+                    permissionsToSet.add(CalDAVPermission.createReadOnlyForEntity(entity, group));
+                } else if (null != element.getChild("read-write", CaldavProtocol.CALENDARSERVER_NS)) {
+                    permissionsToSet.add(CalDAVPermission.createReadWriteForEntity(entity, group));
+                }
+            } catch (OXException e) {
+                LOG.warn("Error resolving share entitites", e);
+            }
+        }
+        return permissionsToSet;
+    }
+
+    private int discoverGroupID(Element hrefElement) throws OXException {
+        if (null != hrefElement.getText() && null != hrefElement.getText()) {
+            String text = hrefElement.getText();
+            if (text.startsWith("/principals/groups/")) {
+                String groupId = text.substring(19);
+                if ('/' == groupId.charAt(groupId.length() - 1)) {
+                    groupId = groupId.substring(0, groupId.length() - 1);
+                }
+                try {
+                    return Integer.valueOf(groupId);
+                } catch (NumberFormatException e) {
+                    LOG.debug("Error parsing group identifier '{}'", groupId, e);
+                }
+            }
+        }
+        return -1;
+    }
+
+    private int discoverUserID(Element hrefElement) throws OXException {
+        if (null != hrefElement.getText() && null != hrefElement.getText()) {
+            String text = hrefElement.getText();
+            if (text.startsWith("mailto:")) {
+                String mail = text.substring(7);
+                return CalDAVServiceLookup.getService(UserService.class).searchUser(mail, factory.getContext()).getId();
+            } else if (text.startsWith("/principals/users/")) {
+                String loginName = text.substring(18);
+                if ('/' == loginName.charAt(loginName.length() - 1)) {
+                    loginName = loginName.substring(0, loginName.length() - 1);
+                }
+                return CalDAVServiceLookup.getService(UserService.class).getUserId(loginName, factory.getContext());
+            }
+        }
+        return -1;
+    }
+
+    @Override
+    public InputStream getBody() throws WebdavProtocolException {
+        return Streams.newByteArrayInputStream(new byte[0]);
+    }
+
+    @Override
+    public void setLength(final Long l) throws WebdavProtocolException {
+
     }
 
     protected static <T extends CalendarObject>boolean isInInterval(T object, Date intervalStart, Date intervalEnd) {
@@ -192,7 +378,18 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
 
     @Override
     public String getResourceType() throws WebdavProtocolException {
-        return super.getResourceType() + CaldavProtocol.CALENDAR;
+        StringAllocator stringAllocator = new StringAllocator(super.getResourceType());
+        stringAllocator.append('<').append(CaldavProtocol.CAL_NS.getPrefix()).append(":calendar/>");
+        if (null != this.folder) {
+            if (SharedType.getInstance().equals(folder.getType())) {
+                // used to indicate that the calendar is owned by another user and is being shared to the current user.
+                stringAllocator.append('<').append(CaldavProtocol.CALENDARSERVER_NS.getPrefix()).append(":shared/>");
+            } else if (PrivateType.getInstance().equals(folder.getType())) {
+                // used to indicate that the calendar is owned by the current user and is being shared by them.
+                stringAllocator.append('<').append(CaldavProtocol.CALENDARSERVER_NS.getPrefix()).append(":shared-owner/>");
+            }
+        }
+        return stringAllocator.toString();
     }
 
     @Override

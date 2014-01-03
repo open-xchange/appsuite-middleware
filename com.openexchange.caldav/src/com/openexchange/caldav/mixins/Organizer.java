@@ -47,69 +47,47 @@
  *
  */
 
-package com.openexchange.caldav;
+package com.openexchange.caldav.mixins;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.java.Streams;
-import com.openexchange.webdav.action.AbstractAction;
-import com.openexchange.webdav.action.WebdavRequest;
-import com.openexchange.webdav.action.WebdavResponse;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
-import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.caldav.resources.CommonFolderCollection;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
- * {@link WebdavPostAction}
+ * The {@link Organizer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class WebdavPostAction extends AbstractAction {
+public class Organizer extends SingleXMLPropertyMixin {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavPostAction.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Organizer.class);
 
-    protected final GroupwareCaldavFactory factory;
+    private final CommonFolderCollection<?> collection;
 
-    public WebdavPostAction(GroupwareCaldavFactory factory) {
-	    this.factory = factory;
-	}
+    /**
+     * Initializes a new {@link Organizer}.
+     *
+     * @param collection The collection to get the owner from.
+     * @throws OXException
+     */
+    public Organizer(CommonFolderCollection<?> collection) throws OXException {
+        super(CaldavProtocol.CALENDARSERVER_NS.getURI(), "organizer");
+        this.collection = collection;
+    }
 
-	@Override
-	public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
-		WebdavResource resource = request.getResource();
-		if (null != request.getHeader("content-length")) {
-			resource.setLength(new Long(request.getHeader("content-length")));
-		}
-		/*
-		 * put request body
-		 */
-		try {
-			resource.putBodyAndGuessLength(request.getBody());
-		} catch (IOException e) {
-			LOG.debug("Client Gone?", e);
-		}
-		/*
-		 * write back response
-		 */
-		response.setContentType(resource.getContentType());
-		byte[] buffer = new byte[1024];
-		OutputStream outputStream = null;
-		InputStream inputStream = null;
-		try {
-			inputStream = resource.getBody();
-			outputStream = response.getOutputStream();
-			int length;
-			while ((length = inputStream.read(buffer)) > 0) {
-				outputStream.write(buffer, 0, length);
-			}
-			response.setStatus(HttpServletResponse.SC_OK);
-		} catch (IOException e) {
-			LOG.debug("Client gone?", e);
-		} finally {
-			Streams.close(inputStream);
-			Streams.close(outputStream);
-		}
-	}
+    @Override
+    protected String getValue() {
+        User user = null;
+        if (null != collection) {
+            try {
+                user = collection.getOwner();
+            } catch (OXException e) {
+                LOG.warn("error determining owner from folder collection '{}'", collection.getFolder(), e);
+            }
+        }
+        return null != user ? "<D:href>/principals/users/" + user.getLoginInfo() + "/</D:href>" : null;
+    }
 
 }

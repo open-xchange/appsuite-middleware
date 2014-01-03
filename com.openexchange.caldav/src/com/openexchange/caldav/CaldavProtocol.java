@@ -71,7 +71,10 @@ public class CaldavProtocol extends Protocol {
     /** http://apple.com/ns/ical/ */
     public static final Namespace APPLE_NS = Namespace.getNamespace("APPLE", "http://apple.com/ns/ical/");
 
-    private static final List<Namespace> ADDITIONAL_NAMESPACES = Arrays.asList(CAL_NS, APPLE_NS);
+    /** http://calendarserver.org/ns/ */
+    public static final Namespace CALENDARSERVER_NS = Namespace.getNamespace("CS", "http://calendarserver.org/ns/");
+
+    private static final List<Namespace> ADDITIONAL_NAMESPACES = Arrays.asList(CAL_NS, APPLE_NS, CALENDARSERVER_NS);
 
 //    public static final String CAL_NAMESPACE = "CAL:";
 

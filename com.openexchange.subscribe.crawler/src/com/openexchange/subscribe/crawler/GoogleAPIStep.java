@@ -197,22 +197,9 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
                     }
 
                     if (entry.getBirthday() != null) {
-                        final String birthday = entry.getBirthday().getValue();
-                        final String regex = "([0-9]{4})\\-([0-9]{2})\\-([0-9]{2})";
-                        if (birthday.matches(regex)) {
-                            final Pattern pattern = Pattern.compile(regex);
-                            final Matcher matcher = pattern.matcher(birthday);
-                            if (matcher.matches() && matcher.groupCount() == 3) {
-                                final int year = Integer.parseInt(matcher.group(1));
-                                final int month = Integer.parseInt(matcher.group(2));
-                                final int day = Integer.parseInt(matcher.group(3));
-                                final Calendar cal = Calendar.getInstance();
-                                cal.clear();
-                                cal.set(year, month, day);
-                                contact.setBirthday(cal.getTime());
-                            }
-                        }
+                        setBirthday(contact, entry.getBirthday().getValue());
                     }
+
                     if (entry.hasStructuredPostalAddresses()) {
                         for (final StructuredPostalAddress pa : entry.getStructuredPostalAddresses()) {
                             if (pa.getRel() != null) {
@@ -351,6 +338,34 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
             LOG.error("", e);
             LOG.error("User with id={} and context={} failed to subscribe source={} with display_name={}", workflow.getSubscription().getUserId(), workflow.getSubscription().getContext(), workflow.getSubscription().getSource().getDisplayName(), workflow.getSubscription().getDisplayName());
             throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
+        }
+    }
+
+    /**
+     * Sets the birthday for the contact based on the google information
+     * 
+     * @param contact - the {@link Contact} to set the birthday for
+     * @param birthday - the string the birthday is included in
+     */
+    protected void setBirthday(Contact contact, String birthday) {
+        if (birthday != null) {
+
+            final String regex = "([0-9]{4})\\-([0-9]{2})\\-([0-9]{2})";
+            if (birthday.matches(regex)) {
+                final Pattern pattern = Pattern.compile(regex);
+                final Matcher matcher = pattern.matcher(birthday);
+                if (matcher.matches() && matcher.groupCount() == 3) {
+                    final int year = Integer.parseInt(matcher.group(1));
+                    final int month = Integer.parseInt(matcher.group(2));
+                    final int day = Integer.parseInt(matcher.group(3));
+                    final Calendar cal = Calendar.getInstance();
+                    cal.clear();
+                    cal.set(Calendar.DAY_OF_MONTH, day);
+                    cal.set(Calendar.MONTH, month - 1);
+                    cal.set(Calendar.YEAR, year);
+                    contact.setBirthday(cal.getTime());
+                }
+            }
         }
     }
 

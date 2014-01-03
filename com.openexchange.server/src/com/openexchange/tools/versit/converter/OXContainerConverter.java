@@ -210,6 +210,8 @@ public class OXContainerConverter {
 
     private boolean addDisplayName4DList;
 
+    private boolean skipOxCTypeAttribute;
+
     public OXContainerConverter(final TimeZone timezone, final String organizerMailAddress) {
         super();
         this.timezone = timezone;
@@ -267,6 +269,26 @@ public class OXContainerConverter {
      */
     public void setAddDisplayName4DList(final boolean addDisplayName4DList) {
         this.addDisplayName4DList = addDisplayName4DList;
+    }
+
+    /**
+     * Gets a value whether the <code>X-OPEN-XCHANGE-CTYPE</code> attribute is set in vCards to distinguish between distribution lists
+     * and contacts.
+     *
+     * @return <code>true</code> if the <code>X-OPEN-XCHANGE-CTYPE</code> attribute is skipped, <code>false</code>, otherwise
+     */
+    public boolean isSkipOxCTypeAttribute() {
+        return skipOxCTypeAttribute;
+    }
+
+    /**
+     * Configures if the <code>X-OPEN-XCHANGE-CTYPE</code> attribute will be set in vCards to distinguish between distribution lists
+     * and contacts.
+     *
+     * @param <code>true</code> to skip the <code>X-OPEN-XCHANGE-CTYPE</code> attribute, <code>false</code>, otherwise
+     */
+    public void setSkipOxCTypeAttribute(final boolean skipOxCTypeAttribute) {
+        this.skipOxCTypeAttribute = skipOxCTypeAttribute;
     }
 
     public boolean isSendUTC() {
@@ -1799,7 +1821,9 @@ public class OXContainerConverter {
         addProperty(object, "NICKNAME", getList(contact.getNickname(), ','));
         // Distribution list?
         if (!contact.containsMarkAsDistributionlist() || !contact.getMarkAsDistribtuionlist()) {
-            addProperty(object, P_OPEN_XCHANGE_CTYPE, CTYPE_CONTACT);
+            if (false == skipOxCTypeAttribute) {
+                addProperty(object, P_OPEN_XCHANGE_CTYPE, CTYPE_CONTACT);
+            }
             // PHOTO
             if (contact.getImage1() != null) {
                 byte[] imageData = contact.getImage1();
@@ -1933,7 +1957,9 @@ public class OXContainerConverter {
                 addProperty(object, "ORG", list);
             }
         } else {
-            addProperty(object, P_OPEN_XCHANGE_CTYPE, CTYPE_DISTRIBUTION_LIST);
+            if (false == skipOxCTypeAttribute) {
+                addProperty(object, P_OPEN_XCHANGE_CTYPE, CTYPE_DISTRIBUTION_LIST);
+            }
             final DistributionListEntryObject[] distributionList = contact.getDistributionList();
             if (null != distributionList && 0 < distributionList.length) {
                 for (final DistributionListEntryObject distributionListEntry : distributionList) {

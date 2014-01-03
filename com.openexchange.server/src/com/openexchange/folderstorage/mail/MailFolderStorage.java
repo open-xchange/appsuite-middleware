@@ -396,7 +396,7 @@ public final class MailFolderStorage implements FolderStorage {
                 } else {
                     final MailFolder parent = mailAccess.getFolderStorage().getFolder(parentFullName);
                     final MailPermission[] parentPermissions = parent.getPermissions();
-                    final MailPermission[] mailPermissions = new MailPermission[1];
+                    final List<MailPermission> mailPermissions = new ArrayList<MailPermission>();
                     final MailProvider provider = MailProviderRegistry.getMailProviderBySession(session, accountId);
                     for (int i = 0; i < parentPermissions.length; i++) {
                         final MailPermission parentPerm = parentPermissions[i];
@@ -409,7 +409,7 @@ public final class MailFolderStorage implements FolderStorage {
                             parentPerm.getDeletePermission());
                         mailPerm.setFolderAdmin(parentPerm.isFolderAdmin());
                         mailPerm.setGroupPermission(parentPerm.isGroupPermission());
-                        mailPermissions[i] = mailPerm;
+                        mailPermissions.add(mailPerm);
                     }
                     mfd.addPermissions(mailPermissions);
                 }

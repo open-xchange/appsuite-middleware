@@ -71,9 +71,10 @@ import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link DropFKTaskv2} - Drops rather needless foreign keys.
+ * {@link DropFKTaskv2} - Performs several adjustments to DB schema to get aligned to clean v7.4.1 installation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.4.2
  */
 public final class DropFKTaskv2 extends UpdateTaskAdapter {
 
