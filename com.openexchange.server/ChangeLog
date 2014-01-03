@@ -2,6 +2,10 @@
 
  - Fix for bug 30429: Return a meaningful error message in case SMTP authentication fails
 
+* 2014-01-03 - martin.schneider@open-xchange.com
+
+ - Fix for bug 30404: Correct handling of month of birth for contact subscriptions. 
+
 * 2014-01-03 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 25160: Added basic support for caldav-sharing, don't include "owner" property, skip implicit folder owner participant

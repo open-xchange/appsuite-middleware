@@ -49,14 +49,18 @@
 
 package com.openexchange.oauth.facebook;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.GregorianCalendar;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import org.apache.commons.lang.time.DateUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -187,12 +191,6 @@ public class FacebookServiceImpl implements FacebookService {
             if (null != connection) {
                 final Contact contact = new Contact();
                 {
-                    final String email = connection.optString("email", null);
-                    if (isValid(email)) {
-                        contact.setEmail1(email);
-                    }
-                }
-                {
                     final String profileUrl = connection.optString("profile_url", null);
                     if (isValid(profileUrl)) {
                         contact.setURL(profileUrl);
@@ -209,6 +207,10 @@ public class FacebookServiceImpl implements FacebookService {
                     if (isValid(surName)) {
                         contact.setSurName(surName);
                     }
+                }
+                {
+                    final String email = connection.optString("email", null);
+                    setEmail(contact, email);
                 }
                 {
                     final String imageUrl = connection.optString("pic_big", null);
@@ -229,22 +231,8 @@ public class FacebookServiceImpl implements FacebookService {
                     }
                 }
                 {
-                    final String dateString = connection.optString("birthday_date", null);
-                    if (isValid(dateString)) {
-                        final int month = Integer.parseInt(dateString.substring(0, 2)) - 1;
-                        final int day = Integer.parseInt(dateString.substring(3, 5));
-                        int year = 0;
-                        // year is available
-                        if (dateString.length() == 10) {
-                            year = Integer.parseInt(dateString.substring(6, 10)) - 1900;
-                        }
-                        // only set the birthday if there is a year given as well (Bug 23009 - Facebook birthday stored as "0000-00-00" in
-                        // the
-                        // database)
-                        if (year != 0) {
-                            contact.setBirthday(new GregorianCalendar(year + 1900, month, day).getTime());
-                        }
-                    }
+                    final String birthdayString = connection.optString("birthday_date", null);
+                    setBirthday(contact, birthdayString);
                 }
                 final JSONObject currentLocation = connection.optJSONObject("current_location");
                 if (null != currentLocation) {
@@ -288,4 +276,55 @@ public class FacebookServiceImpl implements FacebookService {
         return !Strings.isEmpty(toCheck) && !"nil".equals(toCheck);
     }
 
+    /**
+     * Sets the birthday for the contact based on the facebook information
+     * 
+     * @param contact - the {@link Contact} to set the birthday for
+     * @param birthday - the string the birthday is included in
+     */
+    protected void setBirthday(Contact contact, String birthdayString) {
+        if (isValid(birthdayString) && !"00/00/0000".equals(birthdayString)) {
+
+            Date birthday = null;
+            try {
+                birthday = DateUtils.parseDate(birthdayString, new String[] { "MM/dd/yyyy" });
+            } catch (ParseException parseException) {
+                LOG.info(
+                    "Unable to parse birthday string for facebook user '{} {}'! Tried to parse {}.",
+                    contact.getGivenName(),
+                    contact.getSurName(),
+                    birthdayString,
+                    parseException);
+            }
+
+            // only set the birthday if there is a year given as well (Bug 23009 - Facebook birthday stored as "0000-00-00" in
+            // the database)
+            // because of the defined format 'MM/dd/yyyy' dates without a year are not accepted and 'birthday' will be null
+            if (birthday != null) {
+                contact.setBirthday(birthday);
+            }
+        }
+    }
+
+    /**
+     * Sets the email address for the contact based on the facebook information
+     * 
+     * @param contact - the {@link Contact} to set the birthday for
+     * @param email - the string the email is included in
+     */
+    protected void setEmail(Contact contact, String email) {
+        try {
+            InternetAddress emailAddr = new InternetAddress(email);
+            emailAddr.validate();
+
+            contact.setEmail1(email);
+        } catch (AddressException addressException) {
+            LOG.info(
+                "Email address for facebook user '{} {}' is not valid and cannot be imported! Tried to import {}.",
+                contact.getGivenName(),
+                contact.getSurName(),
+                email,
+                addressException);
+        }
+    }
 }
