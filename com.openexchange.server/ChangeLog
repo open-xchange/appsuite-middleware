@@ -6,6 +6,7 @@
 
  - Fix for bug 25160: Added basic support for caldav-sharing, don't include "owner" property, skip implicit folder owner participant
  - Fix for bug 30449: Exclude X-OPEN-XCHANGE-CTYPE attribute for CardDAV synchronization
+ - Fix for bug 29776: Corrected access to referenced change types
 
 * 2014-01-02 - thorben.betten@open-xchange.com
 
