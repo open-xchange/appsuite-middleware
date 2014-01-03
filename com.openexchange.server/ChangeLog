@@ -1,6 +1,7 @@
 * 2014-01-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 30429: Return a meaningful error message in case SMTP authentication fails
+ - Change for bug 27294: Added separate error code to indicate a failed folder deletion attempt
 
 * 2014-01-03 - martin.schneider@open-xchange.com
 
