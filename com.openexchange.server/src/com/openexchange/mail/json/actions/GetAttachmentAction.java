@@ -55,6 +55,7 @@ import java.io.PushbackInputStream;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -384,6 +385,13 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                         mimeType = contentTypeByFileName;
                     }
                 }
+                /*
+                 * Check file name for possible invalid characters
+                 */
+                fileName = fileName.replaceAll(Pattern.quote("/"), "_");
+                /*
+                 * Apply to file
+                 */
                 if (!set.contains(Field.FILENAME) || isEmpty(file.getFileName())) {
                     file.setFileName(fileName);
                 }
