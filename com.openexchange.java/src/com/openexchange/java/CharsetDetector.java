@@ -53,12 +53,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import javax.mail.MessagingException;
-import javax.mail.Part;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
 import org.mozilla.universalchardet.UniversalDetector;
-import org.slf4j.Logger;
 
 /**
  * {@link CharsetDetector} - A charset detector based on <a href="https://code.google.com/p/juniversalchardet/">juniversalchardet</a>
@@ -173,36 +168,6 @@ public final class CharsetDetector {
             legal = false;
         }
         return legal;
-    }
-
-    /**
-     * Detects the charset of specified part.
-     *
-     * @param p The part whose charset shall be detected
-     * @return The detected part's charset
-     * @throws MessagingException If an error occurs in part's getter methods
-     */
-    public static String detectPartCharset(final Part p) throws MessagingException {
-        try {
-            return detectCharset(p.getInputStream());
-        } catch (final IOException e) {
-            /*
-             * Try to get data from raw input stream
-             */
-            final InputStream rawIn;
-            if (p instanceof MimeBodyPart) {
-                rawIn = ((MimeBodyPart) p).getRawInputStream();
-            } else if (p instanceof MimeMessage) {
-                rawIn = ((MimeMessage) p).getRawInputStream();
-            } else {
-                /*
-                 * Neither a MimeBodyPart nor a MimeMessage
-                 */
-                LOG.error("", e);
-                return FALLBACK;
-            }
-            return detectCharset(rawIn);
-        }
     }
 
     /**
