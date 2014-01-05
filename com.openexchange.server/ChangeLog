@@ -37,7 +37,7 @@
 * 2013-12-31 - thorben.betten@open-xchange.com
 
  - Change for bug 30425: Add several guards to folder storage API to check for possibly invalid session;
-                         e.g. context-is equal to or less than zero
+                         e.g. context-id is equal to or less than zero
 
 * 2013-12-31 - marcus.klein@open-xchange.com
 
