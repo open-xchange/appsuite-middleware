@@ -1,3 +1,7 @@
+* 2014-01-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29696: Obtain MIME message's Multipart content in a safe manner
+
 * 2014-01-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 30469: Sanitize file name prior to saving to drive
