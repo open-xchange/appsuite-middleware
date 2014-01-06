@@ -88,11 +88,11 @@ public class LogbackCLT {
     private static final String serviceURL = "service:jmx:rmi:///jndi/rmi://localhost:";
 
     private static final String validLogLevels = "{OFF, ERROR, WARN, INFO, DEBUG, TRACE, ALL}";
-    
+
     private static String jmxUser;
-    
+
     private static String jmxPassword;
-    
+
     private static String jmxPort = "9999"; //defaults to 9999
 
     private static final Options options = new Options();
@@ -115,7 +115,7 @@ public class LogbackCLT {
         options.addOption(createOption("U", "JMX-User", true, false, "JMX user", false));
         options.addOption(createOption("P", "JMX-Password", true, false, "JMX password", false));
         options.addOption(createOption("p", "JMX-Port", true, false, "JMX port (default:9999)", false));
-        
+
         options.addOptionGroup(og);
     }
 
@@ -150,15 +150,15 @@ public class LogbackCLT {
             String sessionID = null;
             int contextID = 0;
             int userID = 0;
-            
+
             if (cl.hasOption("A")) {
                 jmxUser = cl.getOptionValue("A");
             }
-            
+
             if (cl.hasOption("P")) {
                 jmxPassword = cl.getOptionValue("P");
             }
-            
+
             if (cl.hasOption("p")) {
                 jmxPort = cl.getOptionValue("p");
             }
@@ -247,6 +247,7 @@ public class LogbackCLT {
      */
     @SuppressWarnings("unchecked")
     private static final void invokeMBeanMethod(String methodName, Object[] params, String[] signature) {
+        boolean error = true;
         try {
             ObjectName logbackConfObjName = new ObjectName(LogbackConfigurationMBean.DOMAIN, LogbackConfigurationMBean.KEY, LogbackConfigurationMBean.VALUE);
             JMXServiceURL jmxServiceURL = new JMXServiceURL(serviceURL + jmxPort + "/server");
@@ -276,8 +277,9 @@ public class LogbackCLT {
                 builder.setCharAt(builder.length() - 2, '}'); //replace last comma "," with a curly bracket "}"
                 builder.append("succeeded.\n");
                 System.out.println(builder.toString());
-                return;
             }
+
+            error = false;
         } catch (InstanceNotFoundException e) {
             e.printStackTrace();
         } catch (MBeanException e) {
@@ -290,8 +292,11 @@ public class LogbackCLT {
             e.printStackTrace();
         } catch (NullPointerException e) {
             e.printStackTrace();
+        } finally {
+            if (error) {
+                System.exit(-1);
+            }
         }
-        System.exit(-1);
     }
 
     /**
@@ -335,7 +340,7 @@ public class LogbackCLT {
     }
 
     /**
-     * Return all valid OX Categories 
+     * Return all valid OX Categories
      * @return
      */
     private static final String getValidCategories() {
@@ -409,7 +414,7 @@ public class LogbackCLT {
         }
         return null;
     }
-    
+
     /**
      * Create JMX Environment
      * @return
