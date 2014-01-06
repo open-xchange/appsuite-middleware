@@ -231,7 +231,7 @@ public class LogbackCLT {
             }
 
             invokeMBeanMethod(method, params, getSignatureOf(method));
-            System.exit(1);
+            System.exit(0);
 
         } catch (ParseException e) {
             System.out.println(e.getMessage());

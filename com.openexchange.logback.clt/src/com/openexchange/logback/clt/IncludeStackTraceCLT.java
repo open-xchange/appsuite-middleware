@@ -149,7 +149,7 @@ public class IncludeStackTraceCLT {
                 }
             }
 
-            System.exit(1);
+            System.exit(0);
             return;
 
         } catch (final ParseException e) {
