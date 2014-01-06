@@ -1042,12 +1042,6 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
         // Extract time out of end date
         mod = (endDate.getTime()) % Constants.MILLI_DAY;
-        if (isFulltime) {
-            /*
-             * Add one day for general handling of full-time appointments: from 00:00h day 1 to 00:00h day 2
-             */
-            until += Constants.MILLI_DAY;
-        }
 
         if (recCal > 0) {
             until += Constants.MILLI_DAY * recCal;
