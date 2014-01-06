@@ -104,7 +104,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     private static final String REGION_NAME_CONTEXT = "CapabilitiesContext";
     private static final String REGION_NAME_USER = "CapabilitiesUser";
-    private static final String REGION_NAME = "Capabilities";
+    private static final String REGION_NAME = "CapabilitiesSession";
 
     private static final String PERMISSION_PROPERTY = "permissions".intern();
 

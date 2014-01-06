@@ -100,7 +100,7 @@ public class CapabilityCheckerRegistry extends ServiceTracker<CapabilityChecker,
             return null;
         }
         try {
-            return service.getCache("Capabilities");
+            return service.getCache("CapabilitiesSession");
         } catch (final OXException e) {
             org.slf4j.LoggerFactory.getLogger(CapabilityCheckerRegistry.class).error("", e);
             return null;

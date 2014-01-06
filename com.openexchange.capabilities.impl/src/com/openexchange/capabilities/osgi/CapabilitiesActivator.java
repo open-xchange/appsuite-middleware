@@ -161,7 +161,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
             getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
         }
         {
-            final String regionName = "Capabilities";
+            final String regionName = "CapabilitiesSession";
             final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
                 "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
                 "jcs.region."+regionName+".cacheattributes.MaxObjects=1000000\n" +
@@ -189,7 +189,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
         if (null != cacheService) {
             cacheService.freeCache("CapabilitiesContext");
             cacheService.freeCache("CapabilitiesUser");
-            cacheService.freeCache("Capabilities");
+            cacheService.freeCache("CapabilitiesSession");
         }
         super.stopBundle();
     }
