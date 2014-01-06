@@ -88,7 +88,8 @@ public class Enabled implements PreferencesItemService {
 
             @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
-                setting.setSingleValue(Boolean.valueOf(services.getService(CapabilityService.class).getCapabilities(session).contains("emig")));
+                boolean enabled = services.getService(CapabilityService.class).getCapabilities(session).contains("emig");
+                setting.setSingleValue(Boolean.valueOf(enabled));
             }
 
             @Override
