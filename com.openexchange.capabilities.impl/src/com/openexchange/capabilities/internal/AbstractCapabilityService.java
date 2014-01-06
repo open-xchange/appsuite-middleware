@@ -103,8 +103,8 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     private static final Object PRESENT = new Object();
 
     private static final String REGION_NAME_CONTEXT = "CapabilitiesContext";
-
     private static final String REGION_NAME_USER = "CapabilitiesUser";
+    private static final String REGION_NAME = "Capabilities";
 
     private static final String PERMISSION_PROPERTY = "permissions".intern();
 
@@ -245,6 +245,28 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         }
     }
 
+    private Cache optCache() {
+        final CacheService service = services.getOptionalService(CacheService.class);
+        if (null == service) {
+            return null;
+        }
+        try {
+            return service.getCache(REGION_NAME);
+        } catch (final OXException e) {
+            LOG.error("", e);
+            return null;
+        }
+    }
+
+    private CapabilitySet optCachedCapabilitySet(final int userId, final int contextId) {
+        final Cache cache = optCache();
+        if (null == cache) {
+            return null;
+        }
+        final Object object = cache.getFromGroup(Integer.valueOf(userId), Integer.toString(contextId));
+        return (object instanceof CapabilitySet) ? (CapabilitySet) object : null;
+    }
+
     private boolean autologin() {
         Boolean tmp = autologin;
         if (null == tmp) {
@@ -268,8 +290,10 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     @Override
     public CapabilitySet getCapabilities(final int userId, final int contextId, final boolean computeCapabilityFilters) throws OXException {
+        // Initialize server session
         ServerSession serverSession = ServerSessionAdapter.valueOf(userId, contextId);
 
+        // Create capability set
         CapabilitySet capabilities = new CapabilitySet(64);
 
         // What about autologin?
@@ -279,10 +303,21 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
         // ------------- Combined capabilities/permissions ------------ //
         if (!serverSession.isAnonymous()) {
+            // Check cache
+            final CapabilitySet cachedCapabilitySet = optCachedCapabilitySet(userId, contextId);
+            if (null != cachedCapabilitySet) {
+                capabilities = cachedCapabilitySet;
+                if (computeCapabilityFilters) {
+                    applyUIFilter(capabilities);
+                }
+                return capabilities;
+            }
             // Obtain user permissions
-            final UserPermissionBits userPermissionBits = services.getService(UserPermissionService.class).getUserPermissionBits(serverSession.getUserId(), serverSession.getContext());
+            final UserPermissionBits userPermissionBits = services.getService(UserPermissionService.class).getUserPermissionBits(
+                serverSession.getUserId(),
+                serverSession.getContext());
             // Capabilities by user permission bits
-            for (final Permission p: Permission.byBits(userPermissionBits.getPermissionBits())) {
+            for (final Permission p : Permission.byBits(userPermissionBits.getPermissionBits())) {
                 capabilities.add(getCapability(p));
             }
             // Apply capabilities for non-transient sessions
@@ -450,6 +485,14 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             }
         }
 
+        // Put in cache
+        if (!serverSession.isAnonymous() && !serverSession.isTransient()) {
+            final Cache cache = optCache();
+            if (null != cache) {
+                cache.putInGroup(Integer.valueOf(userId), Integer.toString(contextId), capabilities.clone(), false);
+            }
+        }
+
         if (computeCapabilityFilters) {
             applyUIFilter(capabilities);
         }
@@ -546,7 +589,20 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     @Override
     public boolean declareCapability(String capability) {
-        return (null == declaredCapabilities.putIfAbsent(capability, PRESENT));
+        final boolean added = null == declaredCapabilities.putIfAbsent(capability, PRESENT);
+
+        if (added) {
+            final Cache optCache = optCache();
+            if (null != optCache) {
+                try {
+                    optCache.clear();
+                } catch (final Exception e) {
+                    // ignore
+                }
+            }
+        }
+
+        return added;
     }
 
     /**

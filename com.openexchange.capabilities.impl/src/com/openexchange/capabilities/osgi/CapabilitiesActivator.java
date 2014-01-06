@@ -91,7 +91,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
         PermissionAvailabilityServiceRegistry tracker = new PermissionAvailabilityServiceRegistry(context);
         track(PermissionAvailabilityService.class, tracker);
 
-        final CapabilityCheckerRegistry capCheckers = new CapabilityCheckerRegistry(context);
+        final CapabilityCheckerRegistry capCheckers = new CapabilityCheckerRegistry(context, this);
         rememberTracker(capCheckers);
 
         /*
@@ -144,6 +144,24 @@ public class CapabilitiesActivator extends HousekeepingActivator {
         }
         {
             final String regionName = "CapabilitiesUser";
+            final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
+                "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                "jcs.region."+regionName+".cacheattributes.MaxObjects=1000000\n" +
+                "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
+                "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=300\n" +
+                "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=60\n" +
+                "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
+                "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=-1\n" +
+                "jcs.region."+regionName+".elementattributes.IdleTime=300\n" +
+                "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
+                "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
+                "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+            getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
+        }
+        {
+            final String regionName = "Capabilities";
             final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
                 "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
                 "jcs.region."+regionName+".cacheattributes.MaxObjects=1000000\n" +

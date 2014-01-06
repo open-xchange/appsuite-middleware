@@ -4,6 +4,7 @@
  - Fix for bug 30468: Indicate '0' status code on success
  - Fix for bug 30464: Fixed description of 'clearpreviewcache' options
  - Fix for bug 30480: Do not close DB connection too early
+ - Fix for bug 30487: Introduced a generic cache for capabilities to avoid vast computations/checks for a user's capabilities
 
 * 2014-01-05 - thorben.betten@open-xchange.com
 
