@@ -112,7 +112,5 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.file.storage"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.contactcollector.impl"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jcl-over-slf4j-1.7.5.jar" sourcepath="/com.openexchange.bundles/source/jcl-over-slf4j-1.7.5-sources.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.amazonaws"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.aws.s3"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
