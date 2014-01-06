@@ -145,7 +145,7 @@ public class LocalFileStorage extends DefaultFileStorage {
      *
      * @param depth depth of sub directories for storing files.
      * @param entries number of entries per sub directory.
-     * @throws OXException if a problem occurs while creating the file storage.
+     * @throws IllegalArgumentException if a problem occurs while creating the file storage.
      */
     public LocalFileStorage(final URI uri) {
         this(new File(uri));

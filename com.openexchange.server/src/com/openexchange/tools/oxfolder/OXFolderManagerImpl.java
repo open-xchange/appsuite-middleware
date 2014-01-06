@@ -559,10 +559,12 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
         final boolean performMove = fo.containsParentFolderID();
         if (fo.containsPermissions() || fo.containsModule() || fo.containsMeta()) {
-            final FolderObject storageObject = getFolderFromMaster(fo.getObjectID());
+            FolderObject storageObject = getFolderFromMaster(fo.getObjectID());
             final int newParentFolderID = fo.getParentFolderID();
             if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
                 move(fo.getObjectID(), newParentFolderID, fo.getCreatedBy(), fo.getFolderName(), storageObject, lastModified);
+                // Reload storage's folder
+                storageObject = getFolderFromMaster(fo.getObjectID());
             }
             if (isRenameOnly) {
                 rename(fo, storageObject, lastModified);
@@ -904,24 +906,18 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     }
 
     private FolderObject getFolderFromMaster(final int folderId, final boolean withSubfolders) throws OXException {
-        try {
-            /*
-             * Use writable connection to ensure to fetch from master database
-             */
-            Connection wc = writeCon;
-            if (wc == null) {
-                try {
-                    wc = DBPool.pickupWriteable(ctx);
-                    return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
-                } finally {
-                    if (wc != null) {
-                        DBPool.closeWriterAfterReading(ctx, wc);
-                    }
-                }
-            }
+        // Use writable connection to ensure to fetch from master database
+        Connection wc = writeCon;
+        if (wc != null) {
             return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
-        } catch (final OXException e) {
-            throw e;
+        }
+
+        // Fetch new writable connection
+        wc = DBPool.pickupWriteable(ctx);
+        try {
+            return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
+        } finally {
+            DBPool.closeWriterAfterReading(ctx, wc);
         }
     }
 

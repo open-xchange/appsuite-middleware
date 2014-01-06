@@ -578,7 +578,8 @@ public final class MessageParser {
                 /*
                  * Boolean value "true"
                  */
-                mail.setDispositionNotification(mail.getFrom().length > 0 ? mail.getFrom()[0] : null);
+                final InternetAddress[] from = mail.getFrom();
+                mail.setDispositionNotification(from.length > 0 ? from[0] : null);
             } else {
                 final InternetAddress ia = getEmailAddress(dispVal);
                 if (ia == null) {
@@ -1006,11 +1007,11 @@ public final class MessageParser {
     }
 
     private static InternetAddress getEmailAddress(final String addrStr) {
-        if (addrStr == null || addrStr.length() == 0) {
+        if (isEmpty(addrStr)) {
             return null;
         }
         try {
-            return QuotedInternetAddress.parse(addrStr, true)[0];
+            return new QuotedInternetAddress(addrStr, false);
         } catch (final AddressException e) {
             return null;
         }

@@ -108,7 +108,7 @@ public class EmigJsonActivator extends AJAXModuleActivator {
                         final ConfigView view = factory.getView(session.getUserId(), session.getContextId());
                         final ComposedConfigProperty<Boolean> property = view.property("com.openexchange.emig.enabled", boolean.class);
                         if (property.isDefined() && property.get().booleanValue()) {
-                            return getService(EmigService.class).isEMIG_Session(ses.getLogin());
+                            return getService(EmigService.class).isEMIG_Session(session.getUser().getMail());
                         }
                         return false;
                     }

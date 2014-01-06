@@ -1,3 +1,9 @@
+* 2014-01-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30467: Terminate "logconf" with status code 1 on success
+ - Fix for bug 30468: Indicate '0' status code on success
+ - Fix for bug 30464: Fixed description of 'clearpreviewcache' options
+
 * 2014-01-05 - thorben.betten@open-xchange.com
 
  - Fix for bug 29696: Obtain MIME message's Multipart content in a safe manner

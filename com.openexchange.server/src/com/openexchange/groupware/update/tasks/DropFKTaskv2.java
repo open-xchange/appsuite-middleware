@@ -53,14 +53,13 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -95,6 +94,7 @@ public final class DropFKTaskv2 extends UpdateTaskAdapter {
         final int cid = params.getContextId();
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
 
+        boolean modified = false;
         Connection con = null;
         boolean rollback = false;
         try {
@@ -110,7 +110,7 @@ public final class DropFKTaskv2 extends UpdateTaskAdapter {
                 "user_transport_account"
             );
             for (final String table : tables) {
-                handleTable(table, con);
+                modified |= handleTable(table, con);
             }
             con.commit();
             rollback = false;
@@ -123,60 +123,94 @@ public final class DropFKTaskv2 extends UpdateTaskAdapter {
                 rollback(con);
             }
             autocommit(con);
-            Database.backNoTimeout(cid, true, con);
+            if (modified) {
+                dbService.backForUpdateTask(cid, con);
+            } else {
+                dbService.backForUpdateTaskAfterReading(cid, con);
+            }
         }
 
         // Check for >>CONSTRAINT `pop3_storage_deleted_ibfk_1` FOREIGN KEY (`cid`, `user`) REFERENCES `user` (`cid`, `id`)<<
         con = dbService.getForUpdateTask(cid);
+        modified = false;
         try {
-            dropForeignKeySafe("pop3_storage_deleted_ibfk_1", "pop3_storage_deleted", con);
+            modified = dropForeignKeySafe("pop3_storage_deleted_ibfk_1", "pop3_storage_deleted", con);
         } finally {
-            Database.backNoTimeout(cid, true, con);
+            if (modified) {
+                dbService.backForUpdateTask(cid, con);
+            } else {
+                dbService.backForUpdateTaskAfterReading(cid, con);
+            }
         }
 
         // Check for >>CONSTRAINT `pop3_storage_deleted_ibfk_2` FOREIGN KEY (`cid`, `user`, `id`) REFERENCES `user_mail_account` (`cid`, `user`, `id`)<<
         con = dbService.getForUpdateTask(cid);
+        modified = false;
         try {
-            dropForeignKeySafe("pop3_storage_deleted_ibfk_2", "pop3_storage_deleted", con);
+            modified = dropForeignKeySafe("pop3_storage_deleted_ibfk_2", "pop3_storage_deleted", con);
         } finally {
-            Database.backNoTimeout(cid, true, con);
+            if (modified) {
+                dbService.backForUpdateTask(cid, con);
+            } else {
+                dbService.backForUpdateTaskAfterReading(cid, con);
+            }
         }
 
         // Check for >>CONSTRAINT `pop3_storage_ids_ibfk_1` FOREIGN KEY (`cid`, `user`) REFERENCES `user` (`cid`, `id`)<<
         con = dbService.getForUpdateTask(cid);
+        modified = false;
         try {
-            dropForeignKeySafe("pop3_storage_ids_ibfk_1", "pop3_storage_ids", con);
+            modified = dropForeignKeySafe("pop3_storage_ids_ibfk_1", "pop3_storage_ids", con);
         } finally {
-            Database.backNoTimeout(cid, true, con);
+            if (modified) {
+                dbService.backForUpdateTask(cid, con);
+            } else {
+                dbService.backForUpdateTaskAfterReading(cid, con);
+            }
         }
 
         // Check for >>CONSTRAINT `pop3_storage_ids_ibfk_2` FOREIGN KEY (`cid`, `user`, `id`) REFERENCES `user_mail_account` (`cid`, `user`, `id`)<<
         con = dbService.getForUpdateTask(cid);
+        modified = false;
         try {
-            dropForeignKeySafe("pop3_storage_ids_ibfk_2", "pop3_storage_ids", con);
+            modified = dropForeignKeySafe("pop3_storage_ids_ibfk_2", "pop3_storage_ids", con);
         } finally {
-            Database.backNoTimeout(cid, true, con);
+            if (modified) {
+                dbService.backForUpdateTask(cid, con);
+            } else {
+                dbService.backForUpdateTaskAfterReading(cid, con);
+            }
         }
 
         // Check "uid" column in prg_dates
         con = dbService.getForUpdateTask(cid);
+        modified = false;
         try {
-            enlargeVarcharColumn("uid", 1024, "prg_dates", con);
+            modified = enlargeVarcharColumn("uid", 1024, "prg_dates", con);
         } finally {
-            Database.backNoTimeout(cid, true, con);
+            if (modified) {
+                dbService.backForUpdateTask(cid, con);
+            } else {
+                dbService.backForUpdateTaskAfterReading(cid, con);
+            }
         }
 
         // Check "uid" column in del_dates
         con = dbService.getForUpdateTask(cid);
+        modified = false;
         try {
-            enlargeVarcharColumn("uid", 1024, "del_dates", con);
+            modified = enlargeVarcharColumn("uid", 1024, "del_dates", con);
         } finally {
-            Database.backNoTimeout(cid, true, con);
+            if (modified) {
+                dbService.backForUpdateTask(cid, con);
+            } else {
+                dbService.backForUpdateTaskAfterReading(cid, con);
+            }
         }
 
     }
 
-    private void enlargeVarcharColumn(final String colName, final int newSize, final String tableName, final Connection con) throws OXException {
+    private boolean enlargeVarcharColumn(final String colName, final int newSize, final String tableName, final Connection con) throws OXException {
         ResultSet rsColumns = null;
         boolean doAlterTable = false;
         try {
@@ -197,6 +231,7 @@ public final class DropFKTaskv2 extends UpdateTaskAdapter {
 
             if (doAlterTable) {
                 com.openexchange.tools.update.Tools.modifyColumns(con, tableName, new Column(colName, "VARCHAR("+newSize+")"));
+                return true;
             }
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
@@ -205,32 +240,37 @@ public final class DropFKTaskv2 extends UpdateTaskAdapter {
         } finally {
             Databases.closeSQLStuff(rsColumns);
         }
+        return false;
     }
 
-    private void handleTable(final String table, final Connection con) throws SQLException {
+    private boolean handleTable(final String table, final Connection con) throws SQLException {
         final List<String> keyNames = Tools.allForeignKey(con, table);
-        Statement stmt = null;
+        PreparedStatement stmt = null;
+        boolean modified = false;
         for (final String keyName : keyNames) {
             try {
-                stmt = con.createStatement();
-                stmt.execute("ALTER TABLE " + table + " DROP FOREIGN KEY " + keyName);
+                stmt = con.prepareStatement("ALTER TABLE " + table + " DROP FOREIGN KEY " + keyName);
+                modified |= (stmt.executeUpdate() > 0);
             } finally {
                 DBUtils.closeSQLStuff(null, stmt);
             }
         }
+        return modified;
     }
 
-    private void dropForeignKeySafe(final String foreignKeyName, final String table, final Connection con) {
+    private boolean dropForeignKeySafe(final String foreignKeyName, final String table, final Connection con) {
+        boolean modified = false;
         try {
-            Statement stmt = null;
+            PreparedStatement stmt = null;
             try {
-                stmt = con.createStatement();
-                stmt.execute("ALTER TABLE " + table + " DROP FOREIGN KEY " + foreignKeyName);
+                stmt = con.prepareStatement("ALTER TABLE " + table + " DROP FOREIGN KEY " + foreignKeyName);
+                modified = stmt.executeUpdate() > 0;
             } finally {
                 DBUtils.closeSQLStuff(null, stmt);
             }
         } catch (final Exception e) {
             // Ignore
         }
+        return modified;
     }
 }
