@@ -97,6 +97,7 @@ import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 import com.openexchange.tools.oxfolder.memory.Condition;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMap;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * This class provides SQL related methods to fill instances of <code>com.openexchange.tools.iterator.FolderObjectIterator</code>
@@ -1376,11 +1377,6 @@ public final class OXFolderIteratorSQL {
     }
 
     private static SearchIterator<FolderObject> getVisibleFoldersNotSeenInTreeViewNew(final Integer module, final int userId, final int[] groups, final UserPermissionBits permissionBits, final Context ctx, final Connection readCon) throws OXException {
-        final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.type = ").append(PUBLIC);
-        if (null != module) {
-            condBuilder.append(") AND (ot.module = ").append(module.intValue());
-        }
-        condBuilder.append(')');
         Connection rc = readCon;
         boolean closeReadCon = false;
         PreparedStatement stmt = null;
@@ -1394,11 +1390,18 @@ public final class OXFolderIteratorSQL {
             /*
              * Statement to select all user-visible public folders
              */
-            stmt = rc.prepareStatement(getSQLUserVisibleFolders("ot.fuid, ot.parent", // fuid, parent, ...
-                permissionIds(userId, groups, ctx),
-                StringCollection.getSqlInString(permissionBits.getAccessibleModules()),
-                condBuilder.toString(),
-                getSubfolderOrderBy(STR_OT)));
+            {
+                final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.type = ").append(PUBLIC);
+                if (null != module) {
+                    condBuilder.append(") AND (ot.module = ").append(module.intValue());
+                }
+                condBuilder.append(')');
+                stmt = rc.prepareStatement(getSQLUserVisibleFolders("ot.fuid, ot.parent", // fuid, parent, ...
+                    permissionIds(userId, groups, ctx),
+                    StringCollection.getSqlInString(permissionBits.getAccessibleModules()),
+                    condBuilder.toString(),
+                    getSubfolderOrderBy(STR_OT)));
+            }
             int pos = 1;
             // stmt.setInt(pos++, contextId);
             // stmt.setInt(pos++, userId);
@@ -1420,7 +1423,9 @@ public final class OXFolderIteratorSQL {
                 fuid2parent.put(fuid, rs.getInt(2));
                 fuids.add(fuid);
             } while (rs.next());
-            closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
+            DBUtils.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
             /*
              * Remove those fuids with a parent contained as a key
              */
@@ -1438,10 +1443,12 @@ public final class OXFolderIteratorSQL {
                 closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
                 return FolderObjectIterator.EMPTY_FOLDER_ITERATOR;
             }
-            stmt =
-                rc.prepareStatement("SELECT " + FolderObjectIterator.getFieldsForSQL(STR_OT) + " FROM oxfolder_tree AS ot WHERE ot.cid = ? AND ot.fuid IN " + StringCollection.getSqlInString(fuid2parent.keys()) + ' ' + getSubfolderOrderBy(STR_OT));
+            stmt = rc.prepareStatement("SELECT " + FolderObjectIterator.getFieldsForSQL(STR_OT) + " FROM oxfolder_tree AS ot WHERE ot.cid = ? AND ot.fuid IN " + StringCollection.getSqlInString(fuid2parent.keys()) + ' ' + getSubfolderOrderBy(STR_OT));
             stmt.setInt(1, contextId);
             rs = executeQuery(stmt);
+        } catch (final OXException e) {
+            closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
+            throw e;
         } catch (final SQLException e) {
             closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
