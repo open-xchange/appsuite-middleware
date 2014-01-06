@@ -72,8 +72,6 @@ public class StatisticToolsTest extends AbstractTest {
 
     private int returnCodeShowOperations;
 
-    private int returnCodeDooperation;
-
     private int returnCodeMemory;
 
     private int returnCodeGc;

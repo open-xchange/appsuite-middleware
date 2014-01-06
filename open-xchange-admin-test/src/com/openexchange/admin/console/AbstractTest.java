@@ -192,12 +192,6 @@ public abstract class AbstractTest {
             host = System.getProperty("rmi_test_host");
         }
 
-        if (!host.startsWith("rmi://")) {
-            host = "rmi://" + host;
-        }
-        if (!host.endsWith("/")) {
-            host = host + "/";
-        }
         return host;
     }
 }
