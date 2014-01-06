@@ -215,9 +215,16 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
      * Specified session is invalid: %1$s
      */
     INVALID_SESSION(FolderExceptionErrorMessage.INVALID_SESSION_MSG, Category.CATEGORY_ERROR, 1036),
+    /**
+     * Failed to delete following folder/s: %1$s
+     */
+    FOLDER_DELETION_FAILED(FolderExceptionErrorMessage.FOLDER_DELETION_FAILED_MSG, Category.CATEGORY_ERROR, 1037, FolderExceptionMessages.FOLDER_DELETION_FAILED_MSG_DISPLAY),
     ;
 
     private static final String PREFIX = "FLD";
+
+    // Failed to delete following folder/s: %1$s
+    private static final String FOLDER_DELETION_FAILED_MSG = "Failed to delete following folder/s: %1$s";
 
     // Unexpected error: %1$s
     private static final String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s";

@@ -54,7 +54,6 @@ import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -140,7 +139,7 @@ public final class DeleteAction extends AbstractFolderAction {
                     folderService.deleteFolder(treeId, folderId, timestamp, session);
                 } catch (final OXException e) {
                     e.setCategory(Category.CATEGORY_ERROR);
-                    log.error("", e);
+                    log.error("Failed to delete folder {} in tree {}.", folderId, treeId, e);
                     errorOccurred = true;
                     foldersWithError.add(folderId);
                 }
@@ -152,7 +151,7 @@ public final class DeleteAction extends AbstractFolderAction {
                 for (int i = 1; i < size; i++) {
                     sb.append(", ").append(foldersWithError.get(i));
                 }
-                throw FolderExceptionErrorMessage.FOLDER_NOT_DELETEABLE.create(sb.toString(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                throw FolderExceptionErrorMessage.FOLDER_DELETION_FAILED.create(sb.toString());
             }
             result = new AJAXRequestResult(new JSONArray(0));
         } else {
@@ -164,7 +163,7 @@ public final class DeleteAction extends AbstractFolderAction {
                     folderService.deleteFolder(treeId, folderId, timestamp, session);
                 } catch (final OXException e) {
                     final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DeleteAction.class);
-                    log.error("", e);
+                    log.error("Failed to delete folder {} in tree {}.", folderId, treeId, e);
                     e.setCategory(Category.CATEGORY_WARNING);
                     warnings.add(e);
                     responseArray.put(folderId);

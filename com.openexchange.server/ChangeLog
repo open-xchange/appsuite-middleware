@@ -1,6 +1,15 @@
+* 2014-01-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29696: Obtain MIME message's Multipart content in a safe manner
+
+* 2014-01-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30469: Sanitize file name prior to saving to drive
+
 * 2014-01-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 30429: Return a meaningful error message in case SMTP authentication fails
+ - Change for bug 27294: Added separate error code to indicate a failed folder deletion attempt
 
 * 2014-01-03 - martin.schneider@open-xchange.com
 
@@ -28,7 +37,7 @@
 * 2013-12-31 - thorben.betten@open-xchange.com
 
  - Change for bug 30425: Add several guards to folder storage API to check for possibly invalid session;
-                         e.g. context-is equal to or less than zero
+                         e.g. context-id is equal to or less than zero
 
 * 2013-12-31 - marcus.klein@open-xchange.com
 
