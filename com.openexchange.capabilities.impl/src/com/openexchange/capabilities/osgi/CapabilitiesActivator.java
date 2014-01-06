@@ -189,6 +189,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
         if (null != cacheService) {
             cacheService.freeCache("CapabilitiesContext");
             cacheService.freeCache("CapabilitiesUser");
+            cacheService.freeCache("Capabilities");
         }
         super.stopBundle();
     }
