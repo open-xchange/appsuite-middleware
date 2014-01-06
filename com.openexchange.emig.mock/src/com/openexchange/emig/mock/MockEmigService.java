@@ -187,7 +187,7 @@ public final class MockEmigService implements EmigService {
             for (final String alias : user.getAliases()) {
                 final int pos = alias.indexOf('@');
                 if (set.contains(Strings.toLowerCase(pos > 0 ? alias.substring(pos + 1) : alias))) {
-                    LOGGER.info("{} rates {} \"{}\" as non-EMiG-capable.", MockEmigService.class.getSimpleName(), "address", alias);
+                    LOGGER.info("{} rates user alias  \"{}\" as non-EMiG-capable.", MockEmigService.class.getSimpleName(), alias);
                     return false;
                 }
             }
