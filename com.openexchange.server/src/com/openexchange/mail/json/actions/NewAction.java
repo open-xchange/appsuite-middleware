@@ -92,6 +92,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.preferences.ServerUserSetting;
@@ -216,13 +217,22 @@ public final class NewAction extends AbstractMailAction {
                     }
                 }
                 /*
+                 * User settings
+                 */
+                final UserSettingMail usm = session.getUserSettingMail();
+                usm.setNoSave(true);
+                if (jMail.hasAndNotNull("copy2Sent")) {
+                    final boolean copy2Sent = jMail.optBoolean("copy2Sent", !usm.isNoCopyIntoStandardSentFolder());
+                    usm.setNoCopyIntoStandardSentFolder(!copy2Sent);
+                }
+                /*
                  * Check
                  */
-                msgIdentifier = mailInterface.sendMessage(composedMails[0], sendType, accountId);
+                msgIdentifier = mailInterface.sendMessage(composedMails[0], sendType, accountId, usm);
                 for (int i = 1; i < composedMails.length; i++) {
                     final ComposedMailMessage cm = composedMails[i];
                     if (null != cm) {
-                        mailInterface.sendMessage(cm, sendType, accountId);
+                        mailInterface.sendMessage(cm, sendType, accountId, usm);
                     }
                 }
                 warnings.addAll(mailInterface.getWarnings());

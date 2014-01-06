@@ -58,10 +58,14 @@ import java.util.concurrent.ConcurrentMap;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.ConcurrentList;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link CapabilityCheckerRegistry} - A registry for CapabilityChecker.
@@ -77,15 +81,30 @@ public class CapabilityCheckerRegistry extends ServiceTracker<CapabilityChecker,
     private static final List<String> ALL = Collections.singletonList("*");
 
     private final ConcurrentMap<String, List<CapabilityChecker>> map;
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link CapabilityCheckerRegistry}.
      *
      * @param context The bundle context
      */
-    public CapabilityCheckerRegistry(final BundleContext context) {
+    public CapabilityCheckerRegistry(final BundleContext context, final ServiceLookup services) {
         super(context, CapabilityChecker.class, null);
+        this.services = services;
         map = new ConcurrentHashMap<String, List<CapabilityChecker>>(256);
+    }
+
+    private Cache optCache() {
+        final CacheService service = services.getOptionalService(CacheService.class);
+        if (null == service) {
+            return null;
+        }
+        try {
+            return service.getCache("Capabilities");
+        } catch (final OXException e) {
+            org.slf4j.LoggerFactory.getLogger(CapabilityCheckerRegistry.class).error("", e);
+            return null;
+        }
     }
 
     @Override
@@ -124,6 +143,15 @@ public class CapabilityCheckerRegistry extends ServiceTracker<CapabilityChecker,
             list.add(checker);
         }
 
+        final Cache optCache = optCache();
+        if (null != optCache) {
+            try {
+                optCache.clear();
+            } catch (final Exception e) {
+                // ignore
+            }
+        }
+
         return checker;
     }
 
@@ -156,6 +184,15 @@ public class CapabilityCheckerRegistry extends ServiceTracker<CapabilityChecker,
             final List<CapabilityChecker> list = map.get(cap);
             if (null != list) {
                 list.remove(checker);
+            }
+        }
+
+        final Cache optCache = optCache();
+        if (null != optCache) {
+            try {
+                optCache.clear();
+            } catch (final Exception e) {
+                // ignore
             }
         }
 

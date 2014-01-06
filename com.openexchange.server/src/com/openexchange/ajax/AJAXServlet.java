@@ -438,8 +438,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	public static final String JS_FRAGMENT = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\"><html><head>"
 			+ "<META http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">"
 			+ "<script type=\"text/javascript\">"
-			+ "(parent.callback_**action** || window.opener && "
-			+ "window.opener.callback_**action**)(**json**)"
+			+ "(parent[\"callback_**action**\"] || window.opener && "
+			+ "window.opener[\"callback_**action**\"])(**json**)"
 			+ "</script></head></html>";
 
     public static final String SAVE_AS_TYPE = "application/octet-stream";

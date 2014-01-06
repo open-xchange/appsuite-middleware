@@ -183,10 +183,18 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context, CacheService.class);
         if (null != cacheService) {
             try {
-                Cache jcs = cacheService.getCache("CapabilitiesUser");
-                jcs.removeFromGroup(user.getId(), ctx.getId().toString());
-            } catch (final OXException e) {
-                log.error("", e);
+                try {
+                    final Cache jcs = cacheService.getCache("CapabilitiesUser");
+                    jcs.removeFromGroup(user.getId(), ctx.getId().toString());
+                } catch (final OXException e) {
+                    log.error("", e);
+                }
+                try {
+                    final Cache jcs = cacheService.getCache("Capabilities");
+                    jcs.removeFromGroup(user.getId(), ctx.getId().toString());
+                } catch (final OXException e) {
+                    log.error("", e);
+                }
             } finally {
                 AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
             }
@@ -1528,7 +1536,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     /**
      * Checks for valid Module Accesses.
      * @param addAccess
-     * @throws InvalidDataException 
+     * @throws InvalidDataException
      */
     private void checkForGABRestriction(UserModuleAccess access) throws InvalidDataException {
         if (access.isGlobalAddressBookDisabled()) {

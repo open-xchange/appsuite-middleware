@@ -229,11 +229,19 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context, CacheService.class);
         if (null != cacheService) {
             try {
-                Cache jcs = cacheService.getCache("CapabilitiesContext");
-                final Serializable key = Integer.valueOf(ctx.getId().intValue());
-                jcs.remove(key);
-            } catch (final OXException e) {
-                log.error("", e);
+                try {
+                    final Cache jcs = cacheService.getCache("CapabilitiesContext");
+                    final Serializable key = Integer.valueOf(ctx.getId().intValue());
+                    jcs.remove(key);
+                } catch (final OXException e) {
+                    log.error("", e);
+                }
+                try {
+                    final Cache jcs = cacheService.getCache("Capabilities");
+                    jcs.invalidateGroup(ctx.getId().toString());
+                } catch (final OXException e) {
+                    log.error("", e);
+                }
             } finally {
                 AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
             }

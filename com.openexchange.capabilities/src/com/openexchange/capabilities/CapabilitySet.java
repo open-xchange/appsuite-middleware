@@ -49,9 +49,10 @@
 
 package com.openexchange.capabilities;
 
-import java.util.HashMap;
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -60,10 +61,12 @@ import java.util.Set;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CapabilitySet implements Iterable<Capability> {
+public final class CapabilitySet implements Iterable<Capability>, Serializable, Cloneable {
+
+    private static final long serialVersionUID = -7226304751781497934L;
 
     /** The capability map */
-    private final Map<String, Capability> capabilities;
+    private Map<String, Capability> capabilities;
 
     /**
      * Initializes a new {@link CapabilitySet}.
@@ -72,7 +75,19 @@ public final class CapabilitySet implements Iterable<Capability> {
      */
     public CapabilitySet(final int capacity) {
         super();
-        capabilities = new HashMap<String, Capability>(capacity);
+        capabilities = new LinkedHashMap<String, Capability>(capacity);
+    }
+
+    @Override
+    public CapabilitySet clone() {
+        try {
+            final CapabilitySet clone = (CapabilitySet) super.clone();
+            final Map<String, Capability> m = this.capabilities;
+            clone.capabilities = null == m ? null : new LinkedHashMap<String, Capability>(m);
+            return clone;
+        } catch (final CloneNotSupportedException e) {
+            throw new InternalError("Clone not supported although Cloneable is implemented");
+        }
     }
 
     /**

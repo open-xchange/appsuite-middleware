@@ -2697,6 +2697,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     @Override
     public String sendMessage(final ComposedMailMessage composedMail, final ComposeType type, final int accountId) throws OXException {
+        return sendMessage(composedMail, type, accountId, UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx));
+    }
+
+    @Override
+    public String sendMessage(final ComposedMailMessage composedMail, final ComposeType type, final int accountId, final UserSettingMail optUserSetting) throws OXException {
         /*
          * Initialize
          */
@@ -2776,7 +2781,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             } catch (final OXException e) {
                 mailAccess.addWarnings(Collections.singletonList(MailExceptionCode.FLAG_FAIL.create(e, new Object[0])));
             }
-            if (UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isNoCopyIntoStandardSentFolder()) {
+            final UserSettingMail usm = null == optUserSetting ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx) : optUserSetting;
+            if (usm.isNoCopyIntoStandardSentFolder()) {
                 /*
                  * No copy in sent folder
                  */

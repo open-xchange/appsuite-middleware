@@ -114,6 +114,7 @@ public final class MockEmigService implements EmigService {
             set.add(Strings.toLowerCase(domain));
         }
         LOGGER.info("{} now works with following domain restrictions: {}", MockEmigService.class.getSimpleName(), set.toString());
+        nonEmigDomainsRef.set(set);
     }
 
     @Override

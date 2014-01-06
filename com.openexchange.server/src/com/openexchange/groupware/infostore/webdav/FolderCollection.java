@@ -531,6 +531,8 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 				folder = oxma.createFolder(folder, true, System.currentTimeMillis());
 				//oxfa.createFolder(folder, session, true, writeCon, writeCon, true);
 				setId(folder.getObjectID());
+            } catch (WebdavProtocolException x) {
+                throw x; // re-throw
 			} catch (final OXException x) {
 				if(isPermissionException(x)) {
 				    throw WebdavProtocolException.generalError(x, url, HttpServletResponse.SC_FORBIDDEN);
