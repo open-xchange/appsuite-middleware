@@ -208,6 +208,10 @@ public final class JCSCacheServiceInit {
     }
 
     private void configure(final Properties properties) throws OXException {
+        configure(properties, false);
+    }
+
+    private void configure(final Properties properties, final boolean overwrite) throws OXException {
         synchronized (ccmInstance) {
             if (null == props) {
                 /*
@@ -243,11 +247,19 @@ public final class JCSCacheServiceInit {
                      */
                     addAuxProps |= checkAdditionalAuxiliary(key, value);
                     if (isDefault(key)) {
-                        LOG.warn("Ignoring default cache configuration property: {}{}{}", key, '=', value);
+                        LOG.warn("Ignoring default cache configuration property: {}={}", key, value);
                     } else if (overwritesExisting(key)) {
-                        LOG.warn("Ignoring overwriting existing cache configuration property: {}{}{}", key, '=', value);
+                        if (overwrite) {
+                            additionalProps.put(key, value);
+                        } else {
+                            LOG.warn("Ignoring overwriting existing cache configuration property: {}={}", key, value);
+                        }
                     } else if (props.containsKey(key)) {
-                        LOG.warn("Ignoring overwriting existing cache configuration property: {}{}{}", key, '=', value);
+                        if (overwrite) {
+                            additionalProps.put(key, value);
+                        } else {
+                            LOG.warn("Ignoring overwriting existing cache configuration property: {}={}", key, value);
+                        }
                     } else {
                         additionalProps.put(key, value);
                     }
@@ -321,9 +333,9 @@ public final class JCSCacheServiceInit {
      * @param inputStream The input stream
      * @throws OXException If configuration of JCS caching system fails
      */
-    public void loadConfiguration(final InputStream inputStream) throws OXException {
+    public void loadConfiguration(final InputStream inputStream, final boolean overwrite) throws OXException {
         initializeCompositeCacheManager(true);
-        configure(loadProperties(inputStream));
+        configure(loadProperties(inputStream), overwrite);
         LOG.info("JCS caching system successfully configured with properties from input stream.");
     }
 

@@ -237,7 +237,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                     log.error("", e);
                 }
                 try {
-                    final Cache jcs = cacheService.getCache("CapabilitiesSession");
+                    final Cache jcs = cacheService.getCache("Capabilities");
                     jcs.invalidateGroup(ctx.getId().toString());
                 } catch (final OXException e) {
                     log.error("", e);

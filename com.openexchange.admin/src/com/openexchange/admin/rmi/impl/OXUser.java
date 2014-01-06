@@ -190,7 +190,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     log.error("", e);
                 }
                 try {
-                    final Cache jcs = cacheService.getCache("CapabilitiesSession");
+                    final Cache jcs = cacheService.getCache("Capabilities");
                     jcs.removeFromGroup(user.getId(), ctx.getId().toString());
                 } catch (final OXException e) {
                     log.error("", e);
