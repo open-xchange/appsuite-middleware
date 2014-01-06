@@ -50,13 +50,13 @@
 package com.openexchange.webdav.action;
 
 import java.io.ByteArrayInputStream;
-
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public abstract class StructureTest extends ActionTestCase {
@@ -211,7 +211,9 @@ public abstract class StructureTest extends ActionTestCase {
             action.perform(req, res);
             fail("Expected 409 CONFLICT, 412 PRECONDITION FAILED or 207 MULTISTATUS");
         } catch (final WebdavProtocolException x) {
-            assertTrue(""+x.getStatus(), HttpServletResponse.SC_CONFLICT == x.getStatus()
+            StringWriter sw = new StringWriter();
+            x.printStackTrace(new PrintWriter(sw));
+            assertTrue(x.getStatus() + " - " + x.getMessage() + "\n" + sw.toString(), HttpServletResponse.SC_CONFLICT == x.getStatus()
                     || Protocol.SC_MULTISTATUS == x.getStatus()
                     || HttpServletResponse.SC_PRECONDITION_FAILED == x.getStatus()
             );
