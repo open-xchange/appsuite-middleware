@@ -51,7 +51,7 @@ package com.openexchange.contactcollector.folder;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Collections;
 import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -102,13 +102,19 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
         } finally {
             databaseService.backReadOnly(ctx, con);
         }
+
         con = databaseService.getWritable(ctx);
+        boolean modifiedData = false;
         try {
-            create(login.getSession(), login.getContext(), folderName, con);
+            modifiedData = create(login.getSession(), login.getContext(), folderName, con);
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            databaseService.backWritable(ctx, con);
+            if (modifiedData) {
+                databaseService.backWritable(ctx, con);
+            } else {
+                databaseService.backWritableAfterReading(ctx, con);
+            }
         }
     }
 
@@ -119,11 +125,13 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
         final ServerUserSetting serverUserSetting = ServerUserSetting.getInstance(con);
 
         final Integer folderId = serverUserSetting.getContactCollectionFolder(cid, userId);
-        final OXFolderAccess folderAccess = new OXFolderAccess(con, ctx);
-        if (folderId != null && folderAccess.exists(folderId.intValue())) {
-            // Folder already exists
-            session.setParameter("__ccf#", folderId);
-            return true;
+        if (folderId != null) {
+            final OXFolderAccess folderAccess = new OXFolderAccess(con, ctx);
+            if (folderAccess.exists(folderId.intValue())) {
+                // Folder already exists
+                session.setParameter("__ccf#", folderId);
+                return true;
+            }
         }
         if (!serverUserSetting.isContactCollectionEnabled(cid, userId).booleanValue() && isConfigured(serverUserSetting, cid, userId)) {
             // Both - collect-on-mail-access and collect-on-mail-transport - disabled
@@ -133,26 +141,26 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
         return false;
     }
 
-    public static void create(final Session session, final Context ctx, final String folderName, final Connection con) throws OXException, SQLException {
+    public static boolean create(final Session session, final Context ctx, final String folderName, final Connection con) throws OXException, SQLException {
         // Check again on the master if maybe another parallel request already created the folder.
         if (exists(session, ctx, con)) {
-            return;
+            return false;
         }
         final int cid = session.getContextId();
         final int userId = session.getUserId();
         final OXFolderAccess folderAccess = new OXFolderAccess(con, ctx);
         int collectFolderID = 0;
-        final int parent = folderAccess.getDefaultFolder(userId, FolderObject.CONTACT).getObjectID();
-        try {
-            collectFolderID =
-                OXFolderManager.getInstance(session, folderAccess, con, con).createFolder(
-                    createNewContactFolder(userId, folderName, parent),
-                    true,
-                    System.currentTimeMillis()).getObjectID();
-        } catch (final OXException folderException) {
-            if (folderException.isPrefix("FLD") && folderException.getCode() == OXFolderExceptionCode.NO_DUPLICATE_FOLDER.getNumber()) {
-                LOG.info("Found Folder with name of contact collect folder. Guess this is the dedicated folder.");
-                collectFolderID = OXFolderSQL.lookUpFolder(parent, folderName, FolderObject.CONTACT, con, ctx);
+        {
+            final int parent = folderAccess.getDefaultFolder(userId, FolderObject.CONTACT).getObjectID();
+            try {
+                final FolderObject folder = createNewContactFolder(userId, folderName, parent);
+                final OXFolderManager folderManager = OXFolderManager.getInstance(session, folderAccess, con, con);
+                collectFolderID = folderManager.createFolder(folder, true, System.currentTimeMillis()).getObjectID();
+            } catch (final OXException oxe) {
+                if (oxe.isPrefix("FLD") && oxe.getCode() == OXFolderExceptionCode.NO_DUPLICATE_FOLDER.getNumber()) {
+                    LOG.info("Found Folder with name of contact collect folder. Guess this is the dedicated folder.");
+                    collectFolderID = OXFolderSQL.lookUpFolder(parent, folderName, FolderObject.CONTACT, con, ctx);
+                }
             }
         }
         /*
@@ -164,7 +172,8 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
         session.setParameter("__ccf#", folder);
         serverUserSetting.setContactCollectOnMailAccess(cid, userId, serverUserSetting.isContactCollectOnMailAccess(cid, userId).booleanValue());
         serverUserSetting.setContactCollectOnMailTransport(cid, userId, serverUserSetting.isContactCollectOnMailTransport(cid, userId).booleanValue());
-        LOG.info("Contact collector folder (id={}) successfully created for user {} in context {}", collectFolderID, userId, cid);
+        LOG.info("Contact collector folder (id={}) successfully created for user {} in context {}", folder, Integer.valueOf(userId), Integer.valueOf(cid));
+        return true;
     }
 
     private static boolean isConfigured(final ServerUserSetting setting, final int cid, final int userId) throws OXException {
@@ -178,7 +187,6 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
         newFolder.setType(FolderObject.PRIVATE);
         newFolder.setModule(FolderObject.CONTACT);
 
-        final ArrayList<OCLPermission> perms = new ArrayList<OCLPermission>();
         // User is Admin and can read, write or delete everything
         final OCLPermission perm = new OCLPermission();
         perm.setEntity(userId);
@@ -188,8 +196,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
         perm.setWriteObjectPermission(OCLPermission.ADMIN_PERMISSION);
         perm.setDeleteObjectPermission(OCLPermission.ADMIN_PERMISSION);
         perm.setGroupPermission(false);
-        perms.add(perm);
-        newFolder.setPermissions(perms);
+        newFolder.setPermissions(Collections.singletonList(perm));
 
         return newFolder;
     }

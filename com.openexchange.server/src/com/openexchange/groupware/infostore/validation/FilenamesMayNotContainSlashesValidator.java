@@ -62,7 +62,7 @@ import com.openexchange.groupware.infostore.utils.Metadata;
  */
 public class FilenamesMayNotContainSlashesValidator implements InfostoreValidator {
 
-    private static final String NAME = "FilenamesMayNotContainSlahsesValidator";
+    private static final String NAME = FilenamesMayNotContainSlashesValidator.class.getSimpleName();
 
     @Override
     public String getName() {

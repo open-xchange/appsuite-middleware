@@ -80,7 +80,7 @@ public class InvalidCharactersValidator implements InfostoreValidator{
 
 	@Override
     public String getName() {
-		return "InvalidCharactersValidator";
+		return InvalidCharactersValidator.class.getSimpleName();
 	}
 
 }

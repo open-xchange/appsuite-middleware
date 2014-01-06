@@ -72,15 +72,14 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class PathPerformer extends AbstractUserizedFolderPerformer {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PathPerformer.class);
-
     /**
      * Initializes a new {@link PathPerformer} from given session.
      *
      * @param session The session
      * @param decorator The optional folder service decorator
+     * @throws OXException If passed session is invalid
      */
-    public PathPerformer(final ServerSession session, final FolderServiceDecorator decorator) {
+    public PathPerformer(final ServerSession session, final FolderServiceDecorator decorator) throws OXException {
         super(session, decorator);
     }
 
@@ -101,8 +100,9 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
      * @param session The session
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
+     * @throws OXException If passed session is invalid
      */
-    public PathPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public PathPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(session, decorator, folderStorageDiscoverer);
     }
 

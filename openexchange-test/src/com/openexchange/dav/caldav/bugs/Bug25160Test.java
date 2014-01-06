@@ -50,6 +50,7 @@
 package com.openexchange.dav.caldav.bugs;
 
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
@@ -151,12 +152,7 @@ public class Bug25160Test extends CalDAVTest {
         propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/caldav/" + subfolder.getObjectID(),
                 DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         response = assertSingleResponse(super.getWebDAVClient().doPropFind(propFind));
-        String owner = super.extractHref(PropertyNames.OWNER, response);
-        assertNotNull(owner);
-        if (owner.endsWith("/")) {
-            owner = owner.substring(0, owner.length() - 1);
-        }
-        assertEquals("owner mismatch", currentUserPrincipal, owner);
+        assertTrue("owner found", response.getPropertyNames(HttpServletResponse.SC_NOT_FOUND).contains(PropertyNames.OWNER));
     }
 
 }

@@ -71,15 +71,14 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class AllVisibleFoldersPerformer extends AbstractUserizedFolderPerformer {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AllVisibleFoldersPerformer.class);
-
     /**
      * Initializes a new {@link AllVisibleFoldersPerformer}.
      *
      * @param session The session
      * @param decorator The optional folder service decorator
+     * @throws OXException If passed session is invalid
      */
-    public AllVisibleFoldersPerformer(final ServerSession session, final FolderServiceDecorator decorator) {
+    public AllVisibleFoldersPerformer(final ServerSession session, final FolderServiceDecorator decorator) throws OXException {
         super(session, decorator);
     }
 
@@ -100,8 +99,9 @@ public final class AllVisibleFoldersPerformer extends AbstractUserizedFolderPerf
      * @param session The session
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
+     * @throws OXException If passed session is invalid
      */
-    public AllVisibleFoldersPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public AllVisibleFoldersPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(session, decorator, folderStorageDiscoverer);
     }
 

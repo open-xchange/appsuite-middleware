@@ -98,23 +98,34 @@ public final class StorageParametersImpl implements StorageParameters {
     private final Map<OXException, Object> warnings;
 
     /**
-     * Initializes a new {@link List} from given session.
+     * Initializes a new {@link StorageParametersImpl} from given session.
      *
      * @param session The session
      */
     public StorageParametersImpl(final ServerSession session) {
+        this(session, null, null);
+    }
+
+    /**
+     * Initializes a new {@link StorageParametersImpl} from given session.
+     *
+     * @param session The session
+     * @param user The session user
+     * @param context The session context
+     */
+    public StorageParametersImpl(final ServerSession session, final User user, final Context context) {
         super();
         this.session = session;
-        user = session.getUser();
-        userId = null == user ? -1 : user.getId();
-        context = session.getContext();
-        contextId = null == context ? -1 : context.getContextId();
+        this.user = null == user ? session.getUser() : user;
+        userId = null == this.user ? -1 : this.user.getId();
+        this.context = null == context ? session.getContext() : context;
+        contextId = null == this.context ? -1 : this.context.getContextId();
         parameters = new ConcurrentHashMap<FolderType, ConcurrentMap<String, Object>>();
         warnings = new ConcurrentHashMap<OXException, Object>(2);
     }
 
     /**
-     * Initializes a new {@link List} from given user-context-pair.
+     * Initializes a new {@link StorageParametersImpl} from given user-context-pair.
      *
      * @param user The user
      * @param context The context

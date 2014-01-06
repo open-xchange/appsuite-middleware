@@ -709,9 +709,12 @@ public final class InternalList {
 
         // Extende folder tables by "meta" JSON BLOB
         list.add(new com.openexchange.groupware.update.tasks.AddMetaForOXFolderTable());
-        
+
         // Add primary key to snippetAttachment table, fix for bug 30293
         list.add(new AddSnippetAttachmentPrimaryKeyUpdateTask());
+
+        // Performs several adjustments to DB schema to get aligned to clean v7.4.1 installation
+        list.add(new com.openexchange.groupware.update.tasks.DropFKTaskv2());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

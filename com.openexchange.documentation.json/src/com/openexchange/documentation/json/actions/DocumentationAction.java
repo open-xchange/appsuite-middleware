@@ -113,7 +113,7 @@ public abstract class DocumentationAction implements AJAXActionService {
      * Gets the service of specified type
      *
      * @param clazz The service's class
-     * @return The service or <code>null</code> is absent
+     * @return The service or <code>null</code> if absent
      */
     protected <S> S getService(final Class<? extends S> clazz) {
         return services.getService(clazz);

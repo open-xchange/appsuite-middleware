@@ -49,54 +49,24 @@
 
 package com.openexchange.sessiond.impl.clt;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.HashMap;
-import java.util.Map;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import javax.management.ReflectionException;
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
-import javax.management.remote.JMXConnectorServer;
-import javax.management.remote.JMXServiceURL;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
-import com.openexchange.exception.OXException;
-import com.openexchange.management.console.JMXAuthenticatorImpl;
+import com.openexchange.cli.AbstractContextMBeanCLI;
 import com.openexchange.sessiond.SessiondMBean;
 
 /**
- * {@link CloseSessionsCLT} - Command-Line access to reset version via update task toolkit.
+ * {@link CloseSessionsCLT} - Command-Line access clear all sessions belonging to a given context.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CloseSessionsCLT {
+public final class CloseSessionsCLT extends AbstractContextMBeanCLI<Void> {
 
-    private static final Options toolkitOptions;
-
-    static {
-        toolkitOptions = new Options();
-        toolkitOptions.addOption("h", "help", false, "Prints a help text");
-
-        toolkitOptions.addOption("c", "context", true, "A valid context identifier");
-
-        toolkitOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
-        toolkitOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
-        toolkitOptions.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
+    public static void main(String[] args) {
+        new CloseSessionsCLT().execute(args);
     }
 
-    private static void printHelp() {
-        final HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp("closesessions", toolkitOptions);
-    }
+    // ------------------------------------------------------------------------------------ //
 
     /**
      * Initializes a new {@link CloseSessionsCLT}.
@@ -105,133 +75,33 @@ public final class CloseSessionsCLT {
         super();
     }
 
-    public static void main(final String[] args) {
-        final CommandLineParser parser = new PosixParser();
-        int contextId = -1;
-        boolean error = true;
-        try {
-            final CommandLine cmd = parser.parse(toolkitOptions, args);
-            if (cmd.hasOption('h')) {
-                printHelp();
-                System.exit(0);
-            }
-            int port = 9999;
-            if (cmd.hasOption('p')) {
-                final String val = cmd.getOptionValue('p');
-                if (null != val) {
-                    try {
-                        port = Integer.parseInt(val.trim());
-                    } catch (final NumberFormatException e) {
-                        System.err.println(new StringBuilder("Port parameter is not a number: ").append(val).toString());
-                        printHelp();
-                        System.exit(1);
-                    }
-                    if (port < 1 || port > 65535) {
-                        System.err.println(new StringBuilder("Port parameter is out of range: ").append(val).append(
-                            ". Valid range is from 1 to 65535.").toString());
-                        printHelp();
-                        System.exit(1);
-                    }
-                }
-            }
-
-            if (cmd.hasOption('c')) {
-                final String optionValue = cmd.getOptionValue('c');
-                try {
-                    contextId = Integer.parseInt(optionValue.trim());
-                } catch (final NumberFormatException e) {
-                    System.err.println("Context identifier parameter is not a number: " + optionValue);
-                    printHelp();
-                    System.exit(1);
-                }
-            } else {
-                System.err.println("Missing context identifier.");
-                printHelp();
-                System.exit(1);
-            }
-
-            String jmxLogin = null;
-            if (cmd.hasOption('l')) {
-                jmxLogin = cmd.getOptionValue('l');
-            }
-            String jmxPassword = null;
-            if (cmd.hasOption('s')) {
-                jmxPassword = cmd.getOptionValue('s');
-            }
-
-            final Map<String, Object> environment;
-            if (jmxLogin == null || jmxPassword == null) {
-                environment = null;
-            } else {
-                environment = new HashMap<String, Object>(1);
-                environment.put(JMXConnectorServer.AUTHENTICATOR, new JMXAuthenticatorImpl(jmxLogin, jmxPassword));
-            }
-
-            final JMXServiceURL url = new JMXServiceURL(new StringBuilder("service:jmx:rmi:///jndi/rmi://localhost:").append(port).append("/server").toString());
-            final JMXConnector jmxConnector = JMXConnectorFactory.connect(url, environment);
-            try {
-                final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
-
-                final String[] signature = new String[] { int.class.getName() };
-                final Object[] params = new Object[] { Integer.valueOf(contextId) };
-                mbsc.invoke(getObjectName("SessionD Toolkit", SessiondMBean.SESSIOND_DOMAIN), "clearContextSessions", params, signature);
-            } finally {
-                jmxConnector.close();
-            }
-            error = false;
-        } catch (final MalformedObjectNameException e) {
-            // Cannot occur
-            System.err.println("Invalid MBean name: " + e.getMessage());
-        } catch (final ParseException e) {
-            System.err.println("Unable to parse command line: " + e.getMessage());
-            printHelp();
-        } catch (final MalformedURLException e) {
-            System.err.println("URL to connect to server is invalid: " + e.getMessage());
-        } catch (final IOException e) {
-            System.err.println("Unable to communicate with the server: " + e.getMessage());
-        } catch (final InstanceNotFoundException e) {
-            System.err.println("Instance is not available: " + e.getMessage());
-        } catch (final MBeanException e) {
-            final Throwable t = e.getCause();
-            final String message;
-            if (null == t) {
-                message = e.getMessage();
-            } else {
-                if ((t instanceof OXException)) {
-                    final OXException oxe = (OXException) t;
-                    if ("CTX".equals(oxe.getPrefix())) {
-                        message = "Cannot find context " + contextId;
-                    } else {
-                        message = t.getMessage();
-                    }
-                } else {
-                    message = t.getMessage();
-                }
-            }
-            System.err.println(null == message ? "Unexpected error." : "Unexpected error: " + message);
-        } catch (final ReflectionException e) {
-            System.err.println("Problem with reflective type handling: " + e.getMessage());
-        } catch (final RuntimeException e) {
-            System.err.println("Problem in runtime: " + e.getMessage());
-            printHelp();
-        } finally {
-            if (error) {
-                System.exit(1);
-            }
-        }
+    @Override
+    protected void addMoreOptions(Options options) {
+        // No more options to add
     }
 
-    /**
-     * Creates an appropriate instance of {@link ObjectName} from specified class name and domain name.
-     *
-     * @param className The class name to use as object name
-     * @param domain The domain name
-     * @return An appropriate instance of {@link ObjectName}
-     * @throws MalformedObjectNameException If instantiation of {@link ObjectName} fails
-     */
-    private static ObjectName getObjectName(final String className, final String domain) throws MalformedObjectNameException {
-        final int pos = className.lastIndexOf('.');
-        return new ObjectName(domain, "name", pos == -1 ? className : className.substring(pos + 1));
+    @Override
+    protected Void invoke(int contextId, Options options, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
+        final String[] signature = new String[] { int.class.getName() };
+        final Object[] params = new Object[] { Integer.valueOf(contextId) };
+        mbsc.invoke(getObjectName("SessionD Toolkit", SessiondMBean.SESSIOND_DOMAIN), "clearContextSessions", params, signature);
+        System.out.println("Cleared sessions for context " + contextId);
+        return null;
+    }
+
+    @Override
+    protected void checkOptions(CommandLine cmd) {
+        // No more options to check
+    }
+
+    @Override
+    protected String getFooter() {
+        return null;
+    }
+
+    @Override
+    protected String getName() {
+        return "closesessions";
     }
 
 }

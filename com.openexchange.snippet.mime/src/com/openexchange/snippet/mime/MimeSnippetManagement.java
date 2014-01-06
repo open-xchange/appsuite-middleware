@@ -327,6 +327,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             }
             final QuotaFileStorage fileStorage = getFileStorage(getContext(session));
             final MimeMessage mimeMessage = new MimeMessage(getDefaultSession(), fileStorage.getFile(file));
+            com.openexchange.mail.mime.converters.MimeMessageConverter.saveChanges(mimeMessage);
             final DefaultSnippet snippet = new DefaultSnippet().setId(identifier).setCreatedBy(creator);
             final String lcct;
             {
@@ -338,7 +339,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 }
             }
             if (lcct.startsWith("multipart/", 0)) {
-                final Multipart multipart = (Multipart) mimeMessage.getContent();
+                final Multipart multipart = MimeMessageUtility.getMultipartContentFrom(mimeMessage);
                 parseSnippet(mimeMessage, (MimePart) multipart.getBodyPart(0), snippet);
                 final int count = multipart.getCount();
                 if (count > 1) {
@@ -399,7 +400,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
     }
 
     private static final Set<String> IGNORABLES = new HashSet<String>(Arrays.asList(Snippet.PROP_MISC));
-    
+
     private static String encode(String value) {
         try {
             return MimeUtility.encodeText(value, "UTF-8", "Q");
@@ -407,7 +408,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             return value;
         }
     }
-    
+
     @Override
     public String createSnippet(final Snippet snippet) throws OXException {
         final DatabaseService databaseService = getDatabaseService();

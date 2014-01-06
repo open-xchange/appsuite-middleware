@@ -1480,8 +1480,16 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             log.error("", invalidDataException);
             throw invalidDataException;
         }
+        try {
+            checkForGABRestriction(addAccess);
+            checkForGABRestriction(removeAccess);
+        } catch (final InvalidDataException e1) {
+            final InvalidDataException invalidDataException = new InvalidDataException("\"GlobalAddressBookDisabled\" can not be changed with this method.");
+            log.error("", invalidDataException);
+            throw invalidDataException;
+        }
 
-            log.debug("{} - {} - {} - {}", filter, addAccess, removeAccess, auth);
+        log.debug("{} - {} - {} - {}", filter, addAccess, removeAccess, auth);
 
         try {
             basicauth.doAuthentication(auth);
@@ -1515,6 +1523,17 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
 
         // TODO: How to notify via EventSystemService ?
+    }
+
+    /**
+     * Checks for valid Module Accesses.
+     * @param addAccess
+     * @throws InvalidDataException 
+     */
+    private void checkForGABRestriction(UserModuleAccess access) throws InvalidDataException {
+        if (access.isGlobalAddressBookDisabled()) {
+            throw new InvalidDataException("Can not change the value for \"access-global-address-book-disabled\".");
+        }
     }
 
     @Override

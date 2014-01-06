@@ -210,9 +210,21 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
     /**
      * An unexpected error occurred: %1$s. Please try again.
      */
-    TRY_AGAIN(FolderExceptionErrorMessage.TRY_AGAIN_MSG, Category.CATEGORY_TRY_AGAIN, 1035);
+    TRY_AGAIN(FolderExceptionErrorMessage.TRY_AGAIN_MSG, Category.CATEGORY_TRY_AGAIN, 1035),
+    /**
+     * Specified session is invalid: %1$s
+     */
+    INVALID_SESSION(FolderExceptionErrorMessage.INVALID_SESSION_MSG, Category.CATEGORY_ERROR, 1036),
+    /**
+     * Failed to delete following folder/s: %1$s
+     */
+    FOLDER_DELETION_FAILED(FolderExceptionErrorMessage.FOLDER_DELETION_FAILED_MSG, Category.CATEGORY_ERROR, 1037, FolderExceptionMessages.FOLDER_DELETION_FAILED_MSG_DISPLAY),
+    ;
 
     private static final String PREFIX = "FLD";
+
+    // Failed to delete following folder/s: %1$s
+    private static final String FOLDER_DELETION_FAILED_MSG = "Failed to delete following folder/s: %1$s";
 
     // Unexpected error: %1$s
     private static final String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s";
@@ -320,6 +332,9 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
     // No mail folder allowed below a public folder.
     private static final String NO_PUBLIC_MAIL_FOLDER_MSG = "No mail folder allowed below a public folder.";
 
+    // Specified session is invalid: %1$s
+    private static final String INVALID_SESSION_MSG = "Specified session is invalid: %1$s";
+
     /**
      * The prefix for this error codes.
      */
@@ -340,7 +355,7 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
 
     /**
      * Initializes a new {@link FolderExceptionErrorMessage}.
-     * 
+     *
      * @param message
      * @param category
      * @param detailNumber
@@ -351,7 +366,7 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
 
     /**
      * Initializes a new {@link FolderExceptionErrorMessage}.
-     * 
+     *
      * @param message
      * @param category
      * @param detailNumber

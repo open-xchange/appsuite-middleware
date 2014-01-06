@@ -61,118 +61,129 @@ import com.openexchange.admin.console.util.filestore.RegisterFilestore;
  *
  */
 public class ChangeFilestoreTest extends AbstractTest {
-    
+
+    protected int returnCodeEditFilestore;
+    protected int returnCodeEditFilestoreWithInvalidCredentials;
+    protected int returnCodeEditFilestoreWithunknownOption;
+    protected int returnCodeEditFilestoreWithMissingOption;
+
     @Test
     public void testEditFilestore() {
-        
+
         resetBuffers();
         String store = "file:/tmp/"+System.currentTimeMillis();
         new RegisterFilestore(RegisterFilestoreTest.getAllOptionData(store)){
             @Override
             protected void sysexit(int exitCode) {
-                ChangeFilestoreTest.this.returnCode = exitCode;
+                ChangeFilestoreTest.this.returnCodeEditFilestore = exitCode;
             }
         };
-        
-        assertTrue("Expected 0 as return code!",0==this.returnCode);
-        
-        
-        //edit fstore via store id        
+
+        assertTrue("Expected 0 as return code, but was " + this.returnCodeEditFilestore + "!", 0 == this.returnCodeEditFilestore);
+
+
+        //edit fstore via store id
         int store_id = Integer.parseInt(outBytes.toString().trim());
         new ChangeFilestore(getAllChangeOptionData(store,store_id)){
             @Override
             protected void sysexit(int exitCode) {
-                ChangeFilestoreTest.this.returnCode = exitCode;
+                ChangeFilestoreTest.this.returnCodeEditFilestore = exitCode;
             }
         };
-        
-        assertTrue("Expected 0 as return code!",0==this.returnCode);
-        
+
+        assertTrue("Expected 0 as return code, but was " + returnCodeEditFilestore + "!", 0 == this.returnCodeEditFilestore);
+
     }
-    
+
     @Test
     public void testEditFilestoreWithInvalidCredentials() {
-        
+
         resetBuffers();
         String store = "file:/tmp/"+System.currentTimeMillis();
-        new RegisterFilestore(RegisterFilestoreTest.getAllOptionData(store)){
+        new RegisterFilestore(RegisterFilestoreTest.getAllOptionDataWithInvalidCredentials(store)) {
             @Override
             protected void sysexit(int exitCode) {
-                ChangeFilestoreTest.this.returnCode = exitCode;
+                ChangeFilestoreTest.this.returnCodeEditFilestoreWithInvalidCredentials = exitCode;
             }
         };
-        
-        assertTrue("Expected 0 as return code!",0==this.returnCode);
-        
-        
-        //edit fstore via store id        
+
+        assertTrue("Expected 0 as return code, but was " +returnCodeEditFilestoreWithInvalidCredentials +"!" ,0==this.returnCodeEditFilestoreWithInvalidCredentials);
+
+
+        //edit fstore via store id
         int store_id = Integer.parseInt(outBytes.toString().trim());
         new ChangeFilestore(getAllChangeOptionDataWithInvalidCredentials(store,store_id)){
             @Override
             protected void sysexit(int exitCode) {
-                ChangeFilestoreTest.this.returnCode = exitCode;
+                ChangeFilestoreTest.this.returnCodeEditFilestoreWithInvalidCredentials = exitCode;
             }
         };
-        
-        assertTrue("Expected invalid credentials as return code!",BasicCommandlineOptions.SYSEXIT_INVALID_CREDENTIALS==this.returnCode);
-        
+
+        assertTrue(
+            "Expected invalid credentials as return code, but was " + returnCodeEditFilestoreWithInvalidCredentials + "!",
+            BasicCommandlineOptions.SYSEXIT_INVALID_CREDENTIALS == this.returnCodeEditFilestoreWithInvalidCredentials);
+
     }
-    
+
     @Test
     public void testEditFilestoreWithunknownOption() {
-        
+
         resetBuffers();
-      
-        
+
+
         new ChangeFilestore(getUnknownOptionData()){
             @Override
             protected void sysexit(int exitCode) {
-                ChangeFilestoreTest.this.returnCode = exitCode;
+                ChangeFilestoreTest.this.returnCodeEditFilestoreWithunknownOption = exitCode;
             }
         };
-        
-        assertTrue("Expected unknown option as return code!",BasicCommandlineOptions.SYSEXIT_UNKNOWN_OPTION==this.returnCode);
-        
+
+        assertTrue(
+            "Expected unknown option as return code, but was " + returnCodeEditFilestoreWithunknownOption + "!",
+            BasicCommandlineOptions.SYSEXIT_UNKNOWN_OPTION == this.returnCodeEditFilestoreWithunknownOption);
+
     }
-    
+
     @Test
     public void testEditFilestoreWithMissingOption() {
-        
+
         resetBuffers();
-      
-        
+
+
         new ChangeFilestore(getMissingOptionData()){
             @Override
             protected void sysexit(int exitCode) {
-                ChangeFilestoreTest.this.returnCode = exitCode;
+                ChangeFilestoreTest.this.returnCodeEditFilestoreWithMissingOption = exitCode;
             }
         };
-        
-        assertTrue("Expected missing option as return code!",BasicCommandlineOptions.SYSEXIT_MISSING_OPTION==this.returnCode);
-        
+
+        assertTrue(
+            "Expected missing option as return code, but was " + returnCodeEditFilestoreWithMissingOption + "!",
+            BasicCommandlineOptions.SYSEXIT_MISSING_OPTION == this.returnCodeEditFilestoreWithMissingOption);
+
     }
-    
-    
+
+
     public static String[] getAllChangeOptionData(String store,int id){
-        String[] tmp = {OPTION_SUPER_ADMIN_USER, 
-                OPTION_SUPER_ADMIN_PWD,
-                "--storepath="+store+"_"+CHANGE_SUFFIX,
-                "--storesize=13337",
-                "--maxcontexts=13336",
-                "--id="+id
-                };
+        String[] tmp = {OPTION_SUPER_ADMIN_USER,
+            OPTION_SUPER_ADMIN_PWD,
+            "--storepath="+store+"_"+CHANGE_SUFFIX,
+            "--storesize=13337",
+            "--maxcontexts=13336",
+            "--id="+id
+        };
         return tmp;
     }
-    
+
     public static String[] getAllChangeOptionDataWithInvalidCredentials(String store,int id){
-        String[] tmp = {OPTION_SUPER_ADMIN_USER+"_xyzfoobar", 
-                OPTION_SUPER_ADMIN_PWD+"xyzfoobar",
-                "--storepath="+store+"_"+CHANGE_SUFFIX,
-                "--storesize=13337",
-                "--maxcontexts=13336",
-                "--id="+id
-                };
+        String[] tmp = {OPTION_SUPER_ADMIN_USER+"_xyzfoobar",
+            OPTION_SUPER_ADMIN_PWD+"xyzfoobar",
+            "--storepath="+store+"_"+CHANGE_SUFFIX,
+            "--storesize=13337",
+            "--maxcontexts=13336",
+            "--id="+id
+        };
         return tmp;
     }
-    
+
 }

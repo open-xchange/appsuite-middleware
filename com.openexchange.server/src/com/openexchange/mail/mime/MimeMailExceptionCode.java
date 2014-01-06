@@ -273,7 +273,7 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Wrong or missing login data to access mail transport server %1$s. Error message from mail transport server: %2$s
      */
-    TRANSPORT_INVALID_CREDENTIALS(MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS_MSG, CATEGORY_PERMISSION_DENIED, 1030),
+    TRANSPORT_INVALID_CREDENTIALS(MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS_MSG, CATEGORY_PERMISSION_DENIED, 1030, MimeMailExceptionMessage.TRANSPORT_INVALID_CREDENTIALS_MSG_DISPLAY),
     /**
      * Wrong or missing login data to access mail transport server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from mail
      * transport server: %5$s
@@ -655,7 +655,7 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {

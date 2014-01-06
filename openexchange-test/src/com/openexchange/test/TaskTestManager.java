@@ -291,6 +291,7 @@ public class TaskTestManager implements TestManager{
         case Task.END_DATE:
         case Task.RECURRENCE_DATE_POSITION:
         case Task.UNTIL:
+        case Task.DATE_COMPLETED:
             retval = new Date(((Long) value).longValue());
             break;
         case Task.ACTUAL_DURATION:

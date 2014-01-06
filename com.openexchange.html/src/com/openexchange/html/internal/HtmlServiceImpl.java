@@ -75,9 +75,9 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
-import org.apache.commons.io.IOUtils;
 import org.apache.tika.Tika;
 import org.apache.tika.exception.TikaException;
+import org.apache.tika.io.IOUtils;
 import org.apache.tika.metadata.Metadata;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
@@ -561,7 +561,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 }
                 html = handler.getHTML();
             } catch (final ParsingDeniedException e) {
-                LOG.warn("HTML content will be returned un-white-listed.", e);
+                LOG.warn("HTML content will be returned un-white-listed. Reason: " + e.getMessage(), e);
             }
             // Repetitive sanitizing until no further replacement/changes performed
             final boolean[] sanitized = new boolean[] { true };
@@ -572,7 +572,7 @@ public final class HtmlServiceImpl implements HtmlService {
             }
             return html;
         } catch (final RuntimeException e) {
-            LOG.warn("HTML content will be returned un-sanitized.", e);
+            LOG.warn("HTML content will be returned un-sanitized. Reason: "+e.getMessage(), e);
             return htmlContent;
         }
     }

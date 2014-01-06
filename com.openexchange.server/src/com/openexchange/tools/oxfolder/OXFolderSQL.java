@@ -775,6 +775,9 @@ public final class OXFolderSQL {
         return 0;
     }
 
+    private static final String SQL_INSERT_NEW_FOLDER = "INSERT INTO oxfolder_tree (fuid, cid, parent, fname, module, type, creating_date,"
+        + " created_from, changing_date, changed_from, permission_flag, subfolder_flag, default_flag) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
     private static final String SQL_INSERT_NEW_PERMISSIONS = "INSERT INTO oxfolder_permissions " + "(cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag) " + "VALUES (?,?,?,?,?,?,?,?,?)";
 
     private static final String SQL_UPDATE_PARENT_SUBFOLDER_FLAG = "UPDATE oxfolder_tree " + "SET subfolder_flag = 1, changing_date = ? WHERE cid = ? AND fuid = ?";

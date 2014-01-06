@@ -106,8 +106,9 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      *
      * @param session The session
      * @param decorator The optional folder service decorator
+     * @throws OXException If passed session is invalid
      */
-    public AbstractUserizedFolderPerformer(final ServerSession session, final FolderServiceDecorator decorator) {
+    public AbstractUserizedFolderPerformer(final ServerSession session, final FolderServiceDecorator decorator) throws OXException {
         super(session);
         this.decorator = decorator;
         storageParameters.setDecorator(decorator);
@@ -132,8 +133,9 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param session The session
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
+     * @throws OXException If passed session is invalid
      */
-    public AbstractUserizedFolderPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public AbstractUserizedFolderPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(session, folderStorageDiscoverer);
         this.decorator = decorator;
         storageParameters.setDecorator(decorator);

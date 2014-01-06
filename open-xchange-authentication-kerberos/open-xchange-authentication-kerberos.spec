@@ -7,20 +7,21 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define		ox_release 1
-Release:	%{ox_release}_<CI_CNT>.<B_CNT>
-Group:          Applications/Productivity
-License:        GPL-2.0
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-URL:            http://www.open-xchange.com/
-Source:         %{name}_%{version}.orig.tar.bz2
-Summary:        Module for authenticating users in a Kerberos domain
+%define        ox_release 1
+Release:       %{ox_release}_<CI_CNT>.<B_CNT>
+Group:         Applications/Productivity
+License:       GPL-2.0
+BuildRoot:     %{_tmppath}/%{name}-%{version}-build
+URL:           http://www.open-xchange.com/
+Source:        %{name}_%{version}.orig.tar.bz2
+Summary:       Module for authenticating users in a Kerberos domain
 Autoreqprov:   no
-Requires:       open-xchange-core >= @OXVERSION@
-Provides:	open-xchange-authentication
-Conflicts:	open-xchange-authentication-database
-Conflicts:	open-xchange-authentication-imap
-Conflicts:	open-xchange-authentication-ldap
+Requires:      open-xchange-core >= @OXVERSION@
+Requires:      sed
+Provides:      open-xchange-authentication
+Conflicts:     open-xchange-authentication-database
+Conflicts:     open-xchange-authentication-imap
+Conflicts:     open-xchange-authentication-ldap
 
 %description
 This package installs the OSGi bundle implementing the OSGi AuthenticationService for the backend. The implementation uses the Kerberos
@@ -49,6 +50,9 @@ for FILE in $CONFFILES; do
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc ${FILE}
 done
 
+ox_set_property sun.security.krb5.debug false /opt/open-xchange/etc/kerberos.properties
+sed -i 's/debug=true/debug=false/g' /opt/open-xchange/etc/kerberosLogin.conf
+
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -64,6 +68,10 @@ done
 %changelog
 * Mon Dec 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 7.4.2
+* Thu Dec 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-23
+* Thu Dec 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-23
 * Wed Dec 18 2013 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.4.2
 * Tue Dec 17 2013 Marcus Klein <marcus.klein@open-xchange.com>

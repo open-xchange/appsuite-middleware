@@ -66,8 +66,12 @@ public final class JsonCacheCreateTableService extends AbstractCreateTableImpl {
         "  user INT4 unsigned NOT NULL,\n" +
         "  id VARCHAR(128) CHARACTER SET latin1 NOT NULL,\n" +
         "  json TEXT CHARACTER SET latin1 NOT NULL,\n" +
+        "  inProgressSince bigint(64) DEFAULT NULL,\n" +
+        "  lastUpdate bigint(64) DEFAULT NULL,\n" +
+        "  took bigint(64) DEFAULT 0,\n" +
+        "  size bigint(64) DEFAULT 0,\n" +
         "  PRIMARY KEY (cid,user,id)\n" +
-        ") ENGINE=InnoDB";
+        ") ENGINE=InnoDB DEFAULT CHARSET=latin1";
 
     /**
      * Gets the table names.

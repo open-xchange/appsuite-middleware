@@ -115,6 +115,7 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
         ci = getContextInterface();
         ui = getUserInterface();
 
+        superAdminCredentials = AbstractTest.DummyMasterCredentials();
         Context[] contexts = ci.list("UserMove*", superAdminCredentials);
         for (Context ctx : contexts) {
             System.out.println("Deleting context " + ctx.getName() + " in schema " + ctx.getReadDatabase().getScheme());
@@ -125,7 +126,6 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
             }
         }
 
-        superAdminCredentials = AbstractTest.DummyMasterCredentials();
         admin = newUser("oxadmin", "secret", "Admin User", "Admin", "User", "oxadmin@example.com");
         srcCtx = TestTool.createContext(ci, "UserMoveSourceCtx_", admin, "all", superAdminCredentials);
         dstCtx = TestTool.createContext(ci, "UserMoveDestinationCtx_", admin, "all", superAdminCredentials);

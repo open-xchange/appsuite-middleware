@@ -98,6 +98,9 @@ public class FolderExceptionMessages implements LocalizableStrings {
     // folders with the same name.
     public static final String DUPLICATE_NAME_MSG_DISPLAY = "Found two folders named \"%1$s\" located below the parent folder \"%2$s\". Please rename one of the folders. There should be no two folders with the same name.";
 
+    // Failed to delete following folder/s: %1$s
+    public static final String FOLDER_DELETION_FAILED_MSG_DISPLAY = "Failed to delete following folder/s: %1$s";
+
     /**
      * Initializes a new {@link FolderExceptionMessages}
      */

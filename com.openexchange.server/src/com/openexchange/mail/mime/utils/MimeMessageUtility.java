@@ -90,6 +90,8 @@ import javax.mail.Part;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
 import javax.mail.internet.MimeUtility;
@@ -2194,6 +2196,36 @@ public final class MimeMessageUtility {
             return new MimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(((String) content).getBytes(Charsets.ISO_8859_1)), contentType));
         }
         return null;
+    }
+
+    /**
+     * Detects the charset of specified part.
+     *
+     * @param p The part whose charset shall be detected
+     * @return The detected part's charset
+     * @throws MessagingException If an error occurs in part's getter methods
+     */
+    public static String detectPartCharset(final Part p) throws MessagingException {
+        try {
+            return CharsetDetector.detectCharset(p.getInputStream());
+        } catch (final IOException e) {
+            /*
+             * Try to get data from raw input stream
+             */
+            final InputStream rawIn;
+            if (p instanceof MimeBodyPart) {
+                rawIn = ((MimeBodyPart) p).getRawInputStream();
+            } else if (p instanceof MimeMessage) {
+                rawIn = ((MimeMessage) p).getRawInputStream();
+            } else {
+                /*
+                 * Neither a MimeBodyPart nor a MimeMessage
+                 */
+                LOG.error("", e);
+                return CharsetDetector.getFallback();
+            }
+            return CharsetDetector.detectCharset(rawIn);
+        }
     }
 
 }

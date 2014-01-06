@@ -767,10 +767,10 @@ public class DocumentMetadataResource extends AbstractResource implements
 								.create(url, HttpServletResponse.SC_FORBIDDEN);
 					}
 					throw WebdavProtocolException.Code.GENERAL_ERROR.create(
-							url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+							url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, x, new Object[0]);
 				} catch (final Exception x) {
 					throw WebdavProtocolException.Code.GENERAL_ERROR.create(
-							url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+							url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, x, new Object[0]);
 				}
 			} else {
 				// UPDATE

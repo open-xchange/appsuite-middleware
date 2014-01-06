@@ -52,7 +52,6 @@ package com.openexchange.carddav.resources;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Date;
-import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.Tools;
@@ -66,7 +65,6 @@ import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
@@ -79,7 +77,6 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 public class ContactResource extends CardDAVResource {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactResource.class);
-	private static final OXContainerConverter CONVERTER = new OXContainerConverter((TimeZone) null, (String) null);
 	private static final int MAX_RETRIES = 3;
 
     private boolean exists = false;
@@ -283,7 +280,7 @@ public class ContactResource extends CardDAVResource {
 	}
 
 	private Contact deserializeAsContact(VersitObject versitObject) throws OXException, ConverterException {
-		return CONVERTER.convertContact(versitObject);
+		return factory.getConverter().convertContact(versitObject);
 	}
 
     private Contact deserializeAsTemporaryGroup(VersitObject versitObject) throws OXException {
@@ -305,7 +302,7 @@ public class ContactResource extends CardDAVResource {
         VersitDefinition.Writer versitWriter = null;
         try {
             versitWriter = contactDef.getWriter(outputStream, "UTF-8");
-            VersitObject versitObject = CONVERTER.convertContact(contact, "3.0");
+            VersitObject versitObject = factory.getConverter().convertContact(contact, "3.0");
             contactDef.write(versitWriter, versitObject);
             versitWriter.flush();
             return new String(outputStream.toByteArray(), "UTF-8");

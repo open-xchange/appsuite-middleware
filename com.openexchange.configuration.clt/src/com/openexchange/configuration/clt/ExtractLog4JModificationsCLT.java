@@ -63,6 +63,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import org.apache.commons.cli.CommandLine;
@@ -131,24 +132,8 @@ public class ExtractLog4JModificationsCLT {
             }
             Document document = parseInput(!cmd.hasOption('i'), cmd.getOptionValue('i'));
             // Find differences
-            Set<Logger> origLogger = parseLogger(original);
-            Set<Logger> configuredLogger = parseLogger(document);
-            Set<Logger> added = new HashSet<Logger>(configuredLogger);
-            Set<Logger> changed = new HashSet<Logger>(configuredLogger);
-            added.removeAll(origLogger);
-            changed.retainAll(origLogger);
-            Properties properties = new Properties();
-            for (Logger logger : added) {
-                properties.put(logger.getName() + ".level", logger.getLevel());
-            }
-            loop: for (Logger change : changed) {
-                for (Logger orig : origLogger) {
-                    if (orig.equals(change) && !change.getLevel().equals(orig.getLevel())) {
-                        properties.put(change.getName() + ".level", change.getLevel());
-                        continue loop;
-                    }
-                }
-            }
+            Properties properties = extractDifferences(original, document);
+            properties.putAll(extractRootLevel(original, document));
             // Write output
             final OutputStream os = determineOutput(!cmd.hasOption('o'), cmd.getOptionValue('o'));
             try {
@@ -172,6 +157,42 @@ public class ExtractLog4JModificationsCLT {
         return 0;
     }
 
+    private static Properties extractRootLevel(Document original, Document current) throws XPathExpressionException {
+        Properties retval = new Properties();
+        XPath path = xf.newXPath();
+        XPathExpression expression = path.compile("/configuration/root/level/@value");
+        Node currentNode = (Node) expression.evaluate(current, XPathConstants.NODE);
+        String currentValue = currentNode.getNodeValue();
+        Node origNode = (Node) expression.evaluate(original, XPathConstants.NODE);
+        String origValue = origNode.getNodeValue();
+        if (!origValue.equals(currentValue)) {
+            retval.put(".level", convertLevel(currentValue));
+        }
+        return retval;
+    }
+
+    private static Properties extractDifferences(Document original, Document current) throws XPathExpressionException {
+        Properties retval = new Properties();
+        Set<Logger> origLogger = parseLogger(original);
+        Set<Logger> configuredLogger = parseLogger(current);
+        Set<Logger> added = new HashSet<Logger>(configuredLogger);
+        Set<Logger> changed = new HashSet<Logger>(configuredLogger);
+        added.removeAll(origLogger);
+        changed.retainAll(origLogger);
+        for (Logger logger : added) {
+            retval.put(logger.getName() + ".level", convertLevel(logger.getLevel()));
+        }
+        loop: for (Logger change : changed) {
+            for (Logger orig : origLogger) {
+                if (orig.equals(change) && !change.getLevel().equals(orig.getLevel())) {
+                    retval.put(change.getName() + ".level", convertLevel(change.getLevel()));
+                    continue loop;
+                }
+            }
+        }
+        return retval;
+    }
+
     private static Set<Logger> parseLogger(Document original) throws XPathExpressionException {
         XPath path = xf.newXPath();
         NodeList list = (NodeList) path.compile("/configuration/logger/@name").evaluate(original, XPathConstants.NODESET);
@@ -183,6 +204,26 @@ public class ExtractLog4JModificationsCLT {
             final String value = valueAttribute.getNodeValue();
             retval.add(new Logger(name, value));
         }
+        return retval;
+    }
+
+    private static String convertLevel(String log4JLevel) {
+        String retval = log4JLevel;
+        // OFF
+        if ("ERROR".equals(log4JLevel) || "FATAL".equals(log4JLevel)) {
+            retval = "SEVERE";
+        }
+        if ("WARN".equals(log4JLevel)) {
+            retval = "WARNING";
+        }
+        // INFO
+        if ("DEBUG".equals(log4JLevel)) {
+            retval = "FINE";
+        }
+        if ("TRACE".equals(log4JLevel)) {
+            retval = "FINE";
+        }
+        // ALL
         return retval;
     }
 }

@@ -75,14 +75,13 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdatePerformer.class);
-
     /**
      * Initializes a new {@link UpdatePerformer} from given session.
      *
      * @param session The session
+     * @throws OXException If passed session is invalid
      */
-    public UpdatePerformer(final ServerSession session, final FolderServiceDecorator decorator) {
+    public UpdatePerformer(final ServerSession session, final FolderServiceDecorator decorator) throws OXException {
         super(session, decorator);
     }
 
@@ -101,8 +100,9 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
      *
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
+     * @throws OXException If passed session is invalid
      */
-    public UpdatePerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public UpdatePerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(session, decorator, folderStorageDiscoverer);
     }
 
@@ -415,7 +415,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         }
     }
 
-    private MovePerformer newMovePerformer() {
+    private MovePerformer newMovePerformer() throws OXException {
         if (null == session) {
             return new MovePerformer(user, context, folderStorageDiscoverer);
         }
