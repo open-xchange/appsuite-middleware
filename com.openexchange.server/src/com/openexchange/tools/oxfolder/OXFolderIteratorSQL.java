@@ -609,6 +609,7 @@ public final class OXFolderIteratorSQL {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         final int contextId = ctx.getContextId();
+        boolean closeResources = true;
         try {
             readCon = DBPool.pickup(ctx);
             stmt = readCon.prepareStatement(sqlSelectStr);
@@ -622,12 +623,15 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
 
             rs = executeQuery(stmt);
+            closeResources = false;
         } catch (final SQLException e) {
-            closeResources(rs, stmt, readCon, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException t) {
-            closeResources(rs, stmt, readCon, true, ctx);
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(contextId));
+        } finally {
+            if (closeResources) {
+                closeResources(rs, stmt, readCon, true, ctx);
+            }
         }
         try {
             return new FolderObjectIterator(rs, stmt, true, ctx, readCon, true);
@@ -943,6 +947,9 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
 
             rs = executeQuery(stmt);
+        } catch (final OXException e) {
+            closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
+            throw e;
         } catch (final SQLException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -1196,7 +1203,7 @@ public final class OXFolderIteratorSQL {
         final SQLStuff stuff = getVisibleSharedFolders0(userId, memberInGroups, accessibleModules, owner, ctx, since, con);
         try {
             return new FolderObjectIterator(stuff.rs, stuff.stmt, false, ctx, stuff.readCon, stuff.closeCon);
-        } catch (final SearchIteratorException e) {
+        } catch (final OXException e) {
             closeResources(stuff.rs, stuff.stmt, stuff.closeCon ? stuff.readCon : null, true, ctx);
             throw e;
         } catch (final Exception e) {
@@ -1242,6 +1249,9 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
 
             rs = executeQuery(stmt);
+        } catch (final OXException e) {
+            closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
+            throw e;
         } catch (final SQLException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -1382,6 +1392,7 @@ public final class OXFolderIteratorSQL {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         final int contextId = ctx.getContextId();
+        boolean closeResources = true;
         try {
             if (readCon == null) {
                 rc = DBPool.pickup(ctx);
@@ -1413,7 +1424,6 @@ public final class OXFolderIteratorSQL {
 
             rs = executeQuery(stmt);
             if (!rs.next()) {
-                closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
                 return FolderObjectIterator.EMPTY_FOLDER_ITERATOR;
             }
             final TIntIntMap fuid2parent = new TIntIntHashMap(128);
@@ -1440,21 +1450,20 @@ public final class OXFolderIteratorSQL {
              * Remaining entries have a non-visible parent
              */
             if (fuid2parent.isEmpty()) {
-                closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
                 return FolderObjectIterator.EMPTY_FOLDER_ITERATOR;
             }
             stmt = rc.prepareStatement("SELECT " + FolderObjectIterator.getFieldsForSQL(STR_OT) + " FROM oxfolder_tree AS ot WHERE ot.cid = ? AND ot.fuid IN " + StringCollection.getSqlInString(fuid2parent.keys()) + ' ' + getSubfolderOrderBy(STR_OT));
             stmt.setInt(1, contextId);
             rs = executeQuery(stmt);
-        } catch (final OXException e) {
-            closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
-            throw e;
+            closeResources = false;
         } catch (final SQLException e) {
-            closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException t) {
-            closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(contextId));
+        } finally {
+            if (closeResources) {
+                closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
+            }
         }
         try {
             return new FolderObjectIterator(rs, stmt, false, ctx, readCon, closeReadCon);
@@ -1719,8 +1728,6 @@ public final class OXFolderIteratorSQL {
             }
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw e;
         } catch (final RuntimeException t) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(contextId));
         }
@@ -1926,6 +1933,9 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
 
             rs = executeQuery(stmt);
+        } catch (final OXException e) {
+            closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
+            throw e;
         } catch (final SQLException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
