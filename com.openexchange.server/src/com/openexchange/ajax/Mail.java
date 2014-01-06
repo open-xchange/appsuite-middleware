@@ -4576,7 +4576,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 if (!set.contains(Field.FILENAME)) {
                     file.setFileName(mailPart.getFileName());
                 }
-                file.setFileMIMEType(mailPart.getContentType().toString());
+                file.setFileMIMEType(mailPart.getContentType().getBaseType());
                 /*
                  * Since file's size given from IMAP server is just an estimation and therefore does not exactly match the file's size a
                  * future file access via webdav can fail because of the size mismatch. Thus set the file size to 0 to make the infostore

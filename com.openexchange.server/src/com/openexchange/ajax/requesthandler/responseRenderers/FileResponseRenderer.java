@@ -858,11 +858,15 @@ public class FileResponseRenderer implements ResponseRenderer {
             final String fileName = file.getName();
             final String contentType = file.getContentType();
             final AbstractTask<Void> task = new AbstractTask<Void>() {
-
                 @Override
-                public Void call() throws OXException {
-                    final CachedResource preview = new CachedResource(bytes, fileName, contentType, bytes.length);
-                    resourceCache.save(cacheKey, preview, 0, session.getContextId());
+                public Void call() {
+                    try {
+                        final CachedResource preview = new CachedResource(bytes, fileName, contentType, bytes.length);
+                        resourceCache.save(cacheKey, preview, 0, session.getContextId());
+                    } catch (OXException e) {
+                        LOG.warn("Could not cache preview.", e);
+                    }
+
                     return null;
                 }
             };
