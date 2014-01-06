@@ -70,7 +70,7 @@ import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
  */
 public class CompositeFileStorageFactory implements FileStorageFactory, ServiceTrackerCustomizer<FileStorageFactoryCandidate, FileStorageFactoryCandidate> {
 
-    private static final List<FileStorageFactoryCandidate> facs = new CopyOnWriteArrayList<FileStorageFactoryCandidate>();
+    protected static final List<FileStorageFactoryCandidate> facs = new CopyOnWriteArrayList<FileStorageFactoryCandidate>();
 
     /**
      * Initializes a new {@link CompositeFileStorageFactory}.

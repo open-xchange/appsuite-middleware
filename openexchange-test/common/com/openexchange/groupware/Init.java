@@ -61,12 +61,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.servlet.ServletConfigLoader;
 import com.openexchange.ajp13.servlet.http.HttpManagersInit;
+import com.openexchange.aws.s3.internal.AWSS3FileStorageFactory;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.internal.CacheEventServiceImpl;
@@ -190,8 +190,8 @@ import com.openexchange.timer.internal.CustomThreadPoolExecutorTimerService;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
-import com.openexchange.tools.file.external.FileStorageFactory;
-import com.openexchange.tools.file.internal.CompositeFileStorageFactory;
+import com.openexchange.tools.file.TestCompositeFileStorageFactory;
+import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
 import com.openexchange.tools.file.internal.DBQuotaFileStorageFactory;
 import com.openexchange.user.UserService;
 import com.openexchange.user.internal.UserServiceImpl;
@@ -714,10 +714,14 @@ public final class Init {
         /*
          * May be invoked multiple times
          */
-        final FileStorageFactory fileStorageStarter = new CompositeFileStorageFactory();
-        FileStorage.setFileStorageStarter(fileStorageStarter);
+        TestCompositeFileStorageFactory fileStorageFactory = new TestCompositeFileStorageFactory();
+        AWSS3FileStorageFactory s3Factory = new AWSS3FileStorageFactory((ConfigurationService) services.get(ConfigurationService.class));
+        services.put(FileStorageFactoryCandidate.class, s3Factory);
+        TestServiceRegistry.getInstance().addService(FileStorageFactoryCandidate.class, s3Factory);
+        fileStorageFactory.add(s3Factory);
+        FileStorage.setFileStorageStarter(fileStorageFactory);
         final DatabaseService dbService = (DatabaseService) services.get(DatabaseService.class);
-        QuotaFileStorage.setQuotaFileStorageStarter(new DBQuotaFileStorageFactory(dbService, fileStorageStarter));
+        QuotaFileStorage.setQuotaFileStorageStarter(new DBQuotaFileStorageFactory(dbService, fileStorageFactory));
     }
 
     public static void startAndInjectDatabaseUpdate() throws OXException {
