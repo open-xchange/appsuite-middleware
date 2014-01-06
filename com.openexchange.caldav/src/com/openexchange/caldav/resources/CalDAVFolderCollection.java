@@ -87,6 +87,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
+import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.ldap.User;
@@ -387,6 +388,10 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
             } else if (PrivateType.getInstance().equals(folder.getType())) {
                 // used to indicate that the calendar is owned by the current user and is being shared by them.
                 stringAllocator.append('<').append(CaldavProtocol.CALENDARSERVER_NS.getPrefix()).append(":shared-owner/>");
+            } else if (PublicType.getInstance().equals(folder.getType())) {
+                // evaluate own permission if folder shares can be edited or not
+                stringAllocator.append('<').append(CaldavProtocol.CALENDARSERVER_NS.getPrefix())
+                    .append(folder.getOwnPermission().isAdmin() ? ":shared-owner/>" : ":shared/>");
             }
         }
         return stringAllocator.toString();
