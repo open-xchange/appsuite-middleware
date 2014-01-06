@@ -563,6 +563,10 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             final int newParentFolderID = fo.getParentFolderID();
             if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
                 move(fo.getObjectID(), newParentFolderID, fo.getCreatedBy(), fo.getFolderName(), storageObject, lastModified);
+                /*
+                 * apply new parent folder ID for subsequent calls (instead of performing a reload)
+                 */
+                storageObject.setParentFolderID(newParentFolderID);
             }
             if (isRenameOnly) {
                 rename(fo, storageObject, lastModified);
