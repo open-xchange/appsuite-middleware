@@ -210,15 +210,29 @@ public class Activator implements BundleActivator {
     }
 
     /**
-     * Overrides the log level for LoginPerformer and SessionHandler in case that the administrator removed or changed the logging level.
+     * Overrides the log level for LoginPerformer and SessionHandler in case that the administrator removed or changed the logging level to
+     * coarser settings. If the settings are finer (TRACE, DEBUG, ALL) this level will not be overridden.
      */
     protected void overrideLoggerLevels(final LoggerContext loggerContext) {
+        String disableOverrideLogLevels = loggerContext.getProperty("com.openexchange.logging.disableOverrideLogLevels");
+        if ("true".equalsIgnoreCase(disableOverrideLogLevels)) {
+            return;
+        }
+
         for (final String className : new String[] { LOGIN_PERFORMER, SESSION_HANDLER }) {
             ch.qos.logback.classic.Logger lLogger = loggerContext.getLogger(className);
+
             if (lLogger != null) {
-                lLogger.setLevel(Level.INFO);
+                Level level = lLogger.getLevel();
+                if (level.isGreaterOrEqual(Level.WARN)) {
+                    lLogger.setLevel(Level.INFO);
+                    LOGGER.info(
+                        "Configured log level {} for class {} is too coarse. It is changed to INFO!",
+                        level,
+                        className);
+                }
             } else {
-                LOGGER.warn("Not able to override the log level to INFO for class: {}", className);
+                LOGGER.warn("Not able to check (and set) the log level to INFO for class: {}", className);
             }
         }
     }
