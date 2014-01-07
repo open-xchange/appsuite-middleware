@@ -264,7 +264,7 @@ public class AJAXRequestDataTools {
      * @param name The parameter's name
      * @param requestData The request data to parse from
      * @param defaultValue The default value to return if parameter is absent
-     * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
+     * @return The parsed <tt>boolean</tt> value (<code>defaultValue</code> on absence)
      */
     public static boolean parseBoolParameter(final String name, final AJAXRequestData requestData, final boolean defaultValue) {
         final String value = requestData.getParameter(name);
