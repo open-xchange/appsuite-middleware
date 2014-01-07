@@ -89,9 +89,28 @@ public class DirectLinkGenerator {
             .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
             .replaceAll("\\[hostname\\]", session.getHostData().getHost())
             .replaceAll("\\[uiwebpath\\]", getWebpath())
+            .replaceAll("\\[dispatcherPrefix\\]", getDispatcherPrefix())
             .replaceAll("\\[contextid\\]", String.valueOf(session.getServerSession().getContextId()))
             .replaceAll("\\[userid\\]", String.valueOf(session.getServerSession().getUserId()))
             .replaceAll("\\[login\\]", String.valueOf(session.getServerSession().getLogin()))
+        ;
+    }
+
+    /**
+     * Gets the ready-to-use help link.
+     *
+     * @return The help link
+     */
+    public String getHelpLink() {
+        return DriveConfig.getInstance().getDirectLinkHelp()
+            .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
+            .replaceAll("\\[hostname\\]", session.getHostData().getHost())
+            .replaceAll("\\[uiwebpath\\]", getWebpath())
+            .replaceAll("\\[dispatcherPrefix\\]", getDispatcherPrefix())
+            .replaceAll("\\[contextid\\]", String.valueOf(session.getServerSession().getContextId()))
+            .replaceAll("\\[userid\\]", String.valueOf(session.getServerSession().getUserId()))
+            .replaceAll("\\[login\\]", String.valueOf(session.getServerSession().getLogin()))
+            .replaceAll("\\[locale\\]", String.valueOf(session.getDriveSession().getLocale()))
         ;
     }
 

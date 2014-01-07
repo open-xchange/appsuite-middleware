@@ -158,5 +158,13 @@ public interface DriveService {
      */
     DirectoryMetadata getDirectoryMetadata(DriveSession session, String path) throws OXException;
 
+    /**
+     * Gets the configured drive settings based on the supplied session.
+     *
+     * @return The drive settings
+     * @throws OXException
+     */
+    DriveSettings getSettings(DriveSession session) throws OXException;
+
 }
 

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,49 +47,49 @@
  *
  */
 
-package com.openexchange.drive.json.action;
+package com.openexchange.drive.internal;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
+import java.util.Arrays;
+import com.openexchange.drive.DriveQuota;
+import com.openexchange.file.storage.Quota;
 
 /**
- * {@link DriveActionFactory}
+ * {@link DriveQuotaImpl}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DriveActionFactory implements AJAXActionServiceFactory {
+public class DriveQuotaImpl implements DriveQuota {
 
-    private final Map<String, AJAXActionService> actions;
+    private final Quota[] quota;
+    private final String manageLink;
 
-    public DriveActionFactory() {
+    /**
+     * Initializes a new {@link DriveQuotaImpl}.
+     *
+     * @param quota The quota
+     * @param manageLink The quota manage link
+     */
+    public DriveQuotaImpl(Quota[] quota, String manageLink) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(12);
-        actions.put("syncfolders", new SyncFoldersAction());
-        actions.put("syncfiles", new SyncFilesAction());
-        actions.put("upload", new UploadAction());
-        actions.put("download", new DownloadAction());
-        actions.put("listen", new ListenAction());
-        actions.put("quota", new QuotaAction());
-        actions.put("settings", new SettingsAction());
-        actions.put("subscribe", new SubscribeAction());
-        actions.put("unsubscribe", new UnsubscribeAction());
-        actions.put("updateToken", new UpdateTokenAction());
-        actions.put("fileMetadata", new FileMetadataAction());
-        actions.put("directoryMetadata", new DirectoryMetadataAction());
+        this.manageLink = manageLink;
+        this.quota = quota;
+    }
+
+
+    @Override
+    public String getManageLink() {
+        return manageLink;
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
+    public Quota[] getQuota() {
+        return quota;
     }
 
+
     @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    public String toString() {
+        return "DriveQuota [quota=" + Arrays.toString(quota) + "]";
     }
 
 }

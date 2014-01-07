@@ -93,6 +93,7 @@ public class DriveConfig implements Initialization {
     private int maxBandwidthPerClient;
     private int maxConcurrentSyncOperations;
     private String directLinkQuota;
+    private String directLinkHelp;
     private Pattern excludedFilenamesPattern;
     private String shortProductName;
     private int minApiVersion;
@@ -202,6 +203,15 @@ public class DriveConfig implements Initialization {
      */
     public String getDirectLinkQuota() {
         return directLinkQuota;
+    }
+
+    /**
+     * Gets the directLinkHelp
+     *
+     * @return The directLinkHelp
+     */
+    public String getDirectLinkHelp() {
+        return directLinkHelp;
     }
 
     /**
@@ -403,6 +413,8 @@ public class DriveConfig implements Initialization {
          * direct link templates
          */
         directLinkQuota = configService.getProperty("com.openexchange.drive.directLinkQuota", "[protocol]://[hostname]");
+        directLinkHelp = configService.getProperty("com.openexchange.drive.directLinkHelp",
+            "[protocol]://[hostname]/[dispatcherPrefix]/help/[locale]/index.html");
         directLinkFragmentsFile = configService.getProperty("com.openexchange.drive.directLinkFragmentsFile",
             "m=infostore&f=[folder]&i=[object]");
         directLinkFile = configService.getProperty("com.openexchange.drive.directLinkFile",

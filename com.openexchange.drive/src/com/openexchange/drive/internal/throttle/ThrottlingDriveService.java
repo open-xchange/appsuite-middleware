@@ -62,6 +62,7 @@ import com.openexchange.drive.DriveFileMetadata;
 import com.openexchange.drive.DriveQuota;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSession;
+import com.openexchange.drive.DriveSettings;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.SyncResult;
 import com.openexchange.drive.management.DriveConfig;
@@ -132,6 +133,11 @@ public class ThrottlingDriveService implements DriveService {
         } finally {
             leaveSyncOperation();
         }
+    }
+
+    @Override
+    public DriveSettings getSettings(DriveSession session) throws OXException {
+        return delegate.getSettings(session);
     }
 
     @Override
