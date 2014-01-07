@@ -50,74 +50,92 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import java.util.Calendar;
+import java.util.List;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.ajax.appointment.action.ConflictObject;
+import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
 
 /**
- * {@link Bug30118Test}
+ * {@link Bug30414Test}
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class Bug30118Test extends AbstractAJAXSession {
+public class Bug30414Test extends AbstractAJAXSession {
 
     private CalendarTestManager ctm;
+    private Appointment series;
+    private Appointment single;
+    private int nextYear;
 
-    private Appointment appointment;
-
-    /**
-     * Initializes a new {@link Bug30118Test}.
-     * 
-     * @param name
-     */
-    public Bug30118Test(String name) {
+    public Bug30414Test(String name) {
         super(name);
     }
 
     @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
-
         ctm = new CalendarTestManager(client);
-        appointment = new Appointment();
-        appointment.setTitle("Bug 30118 Test");
-        appointment.setStartDate(D("17.12.2013 08:00"));
-        appointment.setEndDate(D("18.12.2013 09:00"));
-        appointment.setRecurrenceType(Appointment.DAILY);
-        appointment.setInterval(1);
-        appointment.setOccurrence(5);
-        appointment.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        appointment.setIgnoreConflicts(true);
+        nextYear = Calendar.getInstance().get(Calendar.YEAR) + 1;
+        
+        single = new Appointment();
+        single.setTitle("Bug 30414 single appointment.");
+        single.setStartDate(D("03.02." + nextYear + " 08:00"));
+        single.setEndDate(D("03.02." + nextYear + " 09:00"));
+        single.setIgnoreConflicts(true);
+        single.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        ctm.insert(single);
+        
+        series = new Appointment();
+        series.setTitle("Bug 30414 series appointment.");
+        series.setStartDate(D("01.02." + nextYear + " 08:00"));
+        series.setEndDate(D("01.02." + nextYear + " 09:00"));
+        series.setRecurrenceType(Appointment.DAILY);
+        series.setInterval(2);
+        series.setOccurrence(3);
+        series.setIgnoreConflicts(true);
+        series.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        ctm.insert(series);
     }
-
-    public void testBug30118() throws Exception {
-        ctm.insert(appointment);
-        ctm.createDeleteException(appointment.getParentFolderID(), appointment.getObjectID(), 3);
-        Appointment loaded = ctm.get(appointment);
-        assertTrue("Expected one delete Exception.", loaded.getDeleteException() != null && loaded.getDeleteException().length == 1);
-    }
-
-    public void testBug30118Fulltime() throws Exception {
-        appointment.setStartDate(D("17.12.2013 00:00"));
-        appointment.setEndDate(D("18.12.2013 00:00"));
-        appointment.setFullTime(true);
-        ctm.insert(appointment);
-        ctm.createDeleteException(appointment.getParentFolderID(), appointment.getObjectID(), 3);
-        Appointment loaded = ctm.get(appointment);
-        assertTrue("Expected one delete Exception.", loaded.getDeleteException() != null && loaded.getDeleteException().length == 1);
-    }
-
-    public void testBug30118Fulltime2days() throws Exception {
-        appointment.setStartDate(D("17.12.2013 00:00"));
-        appointment.setEndDate(D("19.12.2013 00:00"));
-        appointment.setFullTime(true);
-        ctm.insert(appointment);
-        ctm.createDeleteException(appointment.getParentFolderID(), appointment.getObjectID(), 3);
-        Appointment loaded = ctm.get(appointment);
-        assertTrue("Expected one delete Exception.", loaded.getDeleteException() != null && loaded.getDeleteException().length == 1);
+    
+    @Test
+    public void testBug30414() throws Exception {
+        Appointment exception2 = ctm.createIdentifyingCopy(series);
+        exception2.setStartDate(D("02.02." + nextYear + " 08:00"));
+        exception2.setEndDate(D("02.02." + nextYear + " 09:00"));
+        exception2.setRecurrencePosition(2);
+        Appointment exception = series.clone();
+        exception.removeRecurrenceType();
+        exception.removeInterval();
+        exception.removeOccurrence();
+        exception.setIgnoreConflicts(false);
+        exception.setStartDate(D("02.02." + nextYear + " 08:00"));
+        exception.setEndDate(D("02.02." + nextYear + " 09:00"));
+        exception.setRecurrenceType(Appointment.NO_RECURRENCE);
+        exception.setRecurrencePosition(2);
+        ctm.update(exception);
+        
+        List<ConflictObject> conflicts = ((UpdateResponse) ctm.getLastResponse()).getConflicts();
+        boolean foundBadConflict = false;
+        if (conflicts != null) {
+            for (ConflictObject co : conflicts) {
+                if (co.getId() == single.getObjectID()) {
+                    foundBadConflict = true;
+                    break;
+                }
+            }
+        }
+        assertFalse("Found conflict", foundBadConflict);
     }
 
     @Override
+    @After
     public void tearDown() throws Exception {
         ctm.cleanUp();
         super.tearDown();

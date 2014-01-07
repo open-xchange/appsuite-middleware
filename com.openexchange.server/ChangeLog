@@ -1,3 +1,7 @@
+* 2014-01-07 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 30411: Bad conflict handling (Follow up of Bugfix #30118).
+
 * 2014-01-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 30439: Try to recover from "NO Unknown namespace" IMAP error on standard folder check
