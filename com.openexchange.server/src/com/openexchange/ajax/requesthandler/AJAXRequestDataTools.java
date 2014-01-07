@@ -271,7 +271,7 @@ public class AJAXRequestDataTools {
         if (null == value) {
             return defaultValue;
         }
-        return parseBoolParameter(value);
+        return BOOL_VALS.contains(toLowerCase(value.trim()));
     }
 
     private static final Set<String> BOOL_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
