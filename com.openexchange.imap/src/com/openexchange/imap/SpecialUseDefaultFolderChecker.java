@@ -229,7 +229,7 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
      * Internally used by {@link SpecialUseDefaultFolderChecker}.
      */
     @Override
-    protected String checkDefaultFolder(final int index, final String prefix, final String qualifiedName, final char sep, final int type, final int subscribe, final boolean isFullname, final AtomicBoolean modified) throws MessagingException, OXException {
+    protected String checkDefaultFolder(final int index, final String prefix, final String qualifiedName, final char sep, final int type, final int subscribe, final boolean isFullname, final String detectedPrefix, final AtomicBoolean modified) throws MessagingException, OXException {
         /*
          * Check default folder
          */

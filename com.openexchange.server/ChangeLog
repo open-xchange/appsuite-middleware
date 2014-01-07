@@ -1,3 +1,7 @@
+* 2014-01-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30439: Try to recover from "NO Unknown namespace" IMAP error on standard folder check
+
 * 2014-01-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 30467: Terminate "logconf" with status code 1 on success

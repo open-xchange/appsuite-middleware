@@ -84,6 +84,16 @@ public interface MailAccountStorageService {
     public void invalidateMailAccounts(int user, int cid) throws OXException;
 
     /**
+     * Clears full names for specified mail account.
+     *
+     * @param id The account ID
+     * @param user The user ID
+     * @param cid The context ID
+     * @throws OXException If invalidation fails
+     */
+    public void clearFullNamesForMailAccount(int id, int user, int cid) throws OXException;
+
+    /**
      * Gets the mail account identified by specified ID.
      *
      * @param id The mail account ID
