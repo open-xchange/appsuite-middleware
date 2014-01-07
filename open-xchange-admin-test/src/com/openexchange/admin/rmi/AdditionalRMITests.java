@@ -124,7 +124,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         User knownUser = new User();
         knownUser.setName(myUserName);
         User[] mailboxNames = new User[] { knownUser }; // users with only their mailbox name (User#name) - the rest is going to be looked
-                                                        // up
+        // up
         User[] queriedUsers = userInterface.getData(adminContext, mailboxNames, adminCredentials); // required line for test
 
         assertEquals("Query should return only one user", new Integer(1), Integer.valueOf(queriedUsers.length));
@@ -371,7 +371,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         User knownUser = new User();
         knownUser.setName("thorben");
         User[] mailboxNames = new User[] { knownUser }; // users with only their mailbox name (User#name) - the rest is going to be looked
-                                                        // up
+        // up
         User[] queriedUsers = userInterface.getData(context, mailboxNames, credentials); // query by mailboxNames (User.name)
 
         assertEquals("Query should return only one user", new Integer(1), Integer.valueOf(queriedUsers.length));
@@ -392,7 +392,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         // OXContextInterface.change(Context, null);
         OXContextInterface contextInterface = getContextInterface();
         Context context = contextInterface.getData(adminContext, superAdminCredentials);
-        Long maxQuotaBefore = context.getMaxQuota();
+        context.getMaxQuota();
         Long updatedMaxQuota = new Long(1024);
         context.setMaxQuota(updatedMaxQuota);
         contextInterface.change(context, superAdminCredentials);
@@ -411,7 +411,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         User knownUser = new User();
         knownUser.setName("thorben");
         User[] mailboxNames = new User[] { knownUser }; // users with only their mailbox name (User#name) - the rest is going to be looked
-                                                        // up
+        // up
         User[] queriedUsers = userInterface.getData(context, mailboxNames, credentials); // query by mailboxNames (User.name)
 
         assertEquals("Query should return only one user", new Integer(1), Integer.valueOf(queriedUsers.length));
@@ -432,7 +432,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         User knownUser = new User();
         knownUser.setName(myUserName);
         User[] mailboxNames = new User[] { knownUser }; // users with only their mailbox name (User#name) - the rest is going to be looked
-                                                        // up
+        // up
         User[] queriedUsers = userInterface.getData(context, mailboxNames, credentials); // query by mailboxNames (User.name)
 
         assertEquals("Query should return only one user", new Integer(1), Integer.valueOf(queriedUsers.length));
@@ -514,7 +514,7 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     @Test
     public void testNoSuchUserException() throws Exception {
-        OXUserInterface resInterface = getUserInterface();
+        OXUserInterface resInterface = (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
         User missingUser = new User();
         missingUser.setId(Integer.valueOf(Integer.MAX_VALUE));
         try {
