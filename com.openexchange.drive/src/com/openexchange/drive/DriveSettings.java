@@ -47,49 +47,60 @@
  *
  */
 
-package com.openexchange.drive.json.action;
+package com.openexchange.drive;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
 
 /**
- * {@link DriveActionFactory}
+ * {@link DriveSettings}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DriveActionFactory implements AJAXActionServiceFactory {
+public class DriveSettings {
 
-    private final Map<String, AJAXActionService> actions;
+    private String helpLink;
+    private DriveQuota quota;
 
-    public DriveActionFactory() {
+    /**
+     * Initializes a new {@link DriveSettings}.
+     */
+    public DriveSettings() {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(12);
-        actions.put("syncfolders", new SyncFoldersAction());
-        actions.put("syncfiles", new SyncFilesAction());
-        actions.put("upload", new UploadAction());
-        actions.put("download", new DownloadAction());
-        actions.put("listen", new ListenAction());
-        actions.put("quota", new QuotaAction());
-        actions.put("settings", new SettingsAction());
-        actions.put("subscribe", new SubscribeAction());
-        actions.put("unsubscribe", new UnsubscribeAction());
-        actions.put("updateToken", new UpdateTokenAction());
-        actions.put("fileMetadata", new FileMetadataAction());
-        actions.put("directoryMetadata", new DirectoryMetadataAction());
     }
 
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return actions.get(action);
+    /**
+     * Gets the helpLink
+     *
+     * @return The helpLink
+     */
+    public String getHelpLink() {
+        return helpLink;
     }
 
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    /**
+     * Sets the helpLink
+     *
+     * @param helpLink The helpLink to set
+     */
+    public void setHelpLink(String helpLink) {
+        this.helpLink = helpLink;
+    }
+
+    /**
+     * Gets the quota
+     *
+     * @return The quota
+     */
+    public DriveQuota getQuota() {
+        return quota;
+    }
+
+    /**
+     * Sets the quota
+     *
+     * @param quota The quota to set
+     */
+    public void setQuota(DriveQuota quota) {
+        this.quota = quota;
     }
 
 }

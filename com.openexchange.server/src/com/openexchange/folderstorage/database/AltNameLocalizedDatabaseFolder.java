@@ -53,51 +53,52 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import com.openexchange.folderstorage.AltNameAwareFolder;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.i18n.LocaleTools;
-import com.openexchange.i18n.tools.StringHelper;
 
 /**
- * {@link LocalizedDatabaseFolder} - A locale-sensitive database folder.
+ * {@link AltNameLocalizedDatabaseFolder} - A locale-sensitive database folder with respect to alternative App Suite folder names.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class LocalizedDatabaseFolder extends DatabaseFolder {
+public class AltNameLocalizedDatabaseFolder extends LocalizedDatabaseFolder implements AltNameAwareFolder {
 
-    private static final long serialVersionUID = 3830248343115931304L;
+    private static final long serialVersionUID = 3834568343115931304L;
 
-    /** Cache for already translated names */
-    protected ConcurrentMap<Locale, String> localizedNames;
+    private final String altName;
 
     /**
-     * Initializes a new cacheable {@link LocalizedDatabaseFolder} from given database folder.
+     * Initializes a new cacheable {@link AltNameLocalizedDatabaseFolder} from given database folder.
      * <p>
      * Subfolder identifiers and tree identifier are not set within this constructor. Moreover passed database folder is considered to be
      * subscribed.
      *
      * @param folderObject The underlying database folder
+     * @param altName The alternative App Suite folder name
      */
-    public LocalizedDatabaseFolder(final FolderObject folderObject) {
-        this(folderObject, true);
+    public AltNameLocalizedDatabaseFolder(final FolderObject folderObject, final String altName) {
+        this(folderObject, true, altName);
     }
 
     /**
-     * Initializes a new {@link LocalizedDatabaseFolder} from given database folder.
+     * Initializes a new {@link AltNameLocalizedDatabaseFolder} from given database folder.
      * <p>
      * Subfolder identifiers and tree identifier are not set within this constructor. Moreover passed database folder is considered to be
      * subscribed.
      *
      * @param folderObject The underlying database folder
      * @param cacheable <code>true</code> if this database folder is cacheable; otherwise <code>false</code>
+     * @param altName The alternative App Suite folder name
      */
-    public LocalizedDatabaseFolder(final FolderObject folderObject, final boolean cacheable) {
+    public AltNameLocalizedDatabaseFolder(final FolderObject folderObject, final boolean cacheable, final String altName) {
         super(folderObject, cacheable);
         localizedNames = new NonBlockingHashMap<Locale, String>(8);
+        this.altName = altName;
     }
 
     @Override
     public Object clone() {
-        final LocalizedDatabaseFolder clone = (LocalizedDatabaseFolder) super.clone();
+        final AltNameLocalizedDatabaseFolder clone = (AltNameLocalizedDatabaseFolder) super.clone();
         // Locale-sensitive names
         final ConcurrentMap<Locale, String> thisMap = localizedNames;
         if (null == localizedNames) {
@@ -114,31 +115,20 @@ public class LocalizedDatabaseFolder extends DatabaseFolder {
     }
 
     @Override
-    public String getLocalizedName(final Locale locale) {
-        return translationFor(getName(), locale);
+    public String getLocalizedName(Locale locale, boolean altName) {
+        if (!altName) {
+            return getLocalizedName(locale);
+        }
+        final String toTranslate = this.altName;
+        if (null == toTranslate) {
+            return getLocalizedName(locale);
+        }
+        return translationFor(toTranslate, locale);
     }
 
-    /**
-     * Gets the translation for specified name.
-     *
-     * @param toTranslate The name to translate
-     * @param locale The locale
-     * @return The translation or specified name
-     */
-    protected String translationFor(final String toTranslate, final Locale locale) {
-        final Locale loc = null == locale ? LocaleTools.DEFAULT_LOCALE : locale;
-        String translation = localizedNames.get(loc);
-        if (null == translation) {
-            if (null == toTranslate) {
-                return null;
-            }
-            final String ntranslation = StringHelper.valueOf(loc).getString(toTranslate);
-            translation = localizedNames.putIfAbsent(loc, ntranslation);
-            if (null == translation) {
-                translation = ntranslation;
-            }
-        }
-        return translation;
+    @Override
+    public boolean supportsAltName() {
+        return true;
     }
 
 }

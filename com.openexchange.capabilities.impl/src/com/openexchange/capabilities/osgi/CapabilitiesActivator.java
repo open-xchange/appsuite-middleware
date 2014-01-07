@@ -140,7 +140,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
                 "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
                 "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
                 "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
-            getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
+            getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf), true);
         }
         {
             final String regionName = "CapabilitiesUser";
@@ -158,7 +158,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
                 "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
                 "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
                 "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
-            getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
+            getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf), true);
         }
         {
             final String regionName = "Capabilities";
@@ -176,7 +176,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
                 "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
                 "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
                 "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
-            getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
+            getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf), true);
         }
 
         openTrackers();

@@ -68,6 +68,7 @@ import com.openexchange.drive.DriveFileMetadata;
 import com.openexchange.drive.DriveQuota;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSession;
+import com.openexchange.drive.DriveSettings;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.SyncResult;
 import com.openexchange.drive.actions.AbstractAction;
@@ -366,23 +367,19 @@ public class DriveServiceImpl implements DriveService {
 
     @Override
     public DriveQuota getQuota(DriveSession session) throws OXException {
-        final SyncSession driveSession = new SyncSession(session);
-        LOG.debug("Handling get-quota for root folder '{}'", session.getRootFolderID());
-        final Quota[] quota = driveSession.getStorage().getQuota();
-        LOG.debug("Got quota for root folder ''{}'': {}", session.getRootFolderID(), (null != quota ? Arrays.toString(quota) : ""));
-        final String manageLink = new DirectLinkGenerator(driveSession).getQuotaLink();
-        return new DriveQuota() {
+        return getSettings(session).getQuota();
+    }
 
-            @Override
-            public Quota[] getQuota() {
-                return quota;
-            }
-
-            @Override
-            public String getManageLink() {
-                return manageLink;
-            }
-        };
+    @Override
+    public DriveSettings getSettings(DriveSession session) throws OXException {
+        SyncSession syncSession = new SyncSession(session);
+        LOG.debug("Handling get-settings for '{}'", session);
+        DriveSettings settings = new DriveSettings();
+        Quota[] quota = syncSession.getStorage().getQuota();
+        LOG.debug("Got quota for root folder '{}': {}", session.getRootFolderID(), quota);
+        settings.setQuota(new DriveQuotaImpl(quota, syncSession.getLinkGenerator().getQuotaLink()));
+        settings.setHelpLink(syncSession.getLinkGenerator().getHelpLink());
+        return settings;
     }
 
     @Override

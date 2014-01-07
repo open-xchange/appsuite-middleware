@@ -370,7 +370,11 @@ public final class FolderWriter {
             @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final Locale locale = folder.getLocale();
-                jsonPutter.put(FolderField.FOLDER_NAME.getName(), folder.getLocalizedName(locale == null ? DEFAULT_LOCALE : locale));
+                if (folder.supportsAltName()) {
+                    jsonPutter.put(FolderField.FOLDER_NAME.getName(), folder.getLocalizedName(locale == null ? DEFAULT_LOCALE : locale, folder.isAltNames()));
+                } else {
+                    jsonPutter.put(FolderField.FOLDER_NAME.getName(), folder.getLocalizedName(locale == null ? DEFAULT_LOCALE : locale));
+                }
             }
         });
         m.put(FolderField.MODULE.getColumn(), new FolderFieldWriter() {

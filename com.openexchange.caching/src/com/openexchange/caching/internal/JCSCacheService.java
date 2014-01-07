@@ -166,7 +166,12 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
 
     @Override
     public void loadConfiguration(final InputStream inputStream) throws OXException {
-        JCSCacheServiceInit.getInstance().loadConfiguration(inputStream);
+        JCSCacheServiceInit.getInstance().loadConfiguration(inputStream, false);
+    }
+
+    @Override
+    public void loadConfiguration(final InputStream inputStream, final boolean overwrite) throws OXException {
+        JCSCacheServiceInit.getInstance().loadConfiguration(inputStream, overwrite);
     }
 
     @Override

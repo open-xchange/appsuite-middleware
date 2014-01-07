@@ -66,6 +66,7 @@ import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.StorageParametersUtility;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
@@ -345,6 +346,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
          * Set locale
          */
         userizedFolder.setLocale(getLocale());
+        userizedFolder.setAltNames(StorageParametersUtility.getBoolParameter("altNames", storageParameters));
         /*
          * Permissions
          */
