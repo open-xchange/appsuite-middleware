@@ -239,7 +239,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
         try {
             ct = ContextStorage.getStorageContext(so.getContextId());
         } catch (final OXException e) {
-            LOG.error("UNABLE TO LOAD LINK OBJECT FOR UPDATE (cid={} uid={} type={} fid={}{}", so.getContextId(), id, type, fid, ')', e);
+            LOG.error("UNABLE TO LOAD LINK OBJECT FOR UPDATE (cid={} uid={} type={} fid={})", so.getContextId(), id, type, fid, e);
             return;
         }
 
@@ -267,7 +267,7 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
                 }
             }
         } catch (final Exception e) {
-            LOG.error("UNABLE TO LOAD LINK OBJECT FOR UPDATE (cid={} uid={} type={} fid={}{}", so.getContextId(), id, type, fid, ')', e);
+            LOG.error("UNABLE TO LOAD LINK OBJECT FOR UPDATE (cid={} uid={} type={} fid={})", so.getContextId(), id, type, fid, e);
         } finally {
             DBUtils.closeResources(rs, smt, writecon, false, ct);
             rs = null;

@@ -222,7 +222,7 @@ public final class AllAction extends AppointmentAction {
                             recuResults = calColl.calculateFirstRecurring(appointment);
                             written = true;
                         } catch (final OXException e) {
-                            LOG.error("Can not calculate recurrence {}{}{}", appointment.getObjectID(), ':', session.getContextId(), e);
+                            LOG.error("Can not calculate recurrence {}:{}", appointment.getObjectID(), session.getContextId(), e);
                         }
                         if (recuResults != null && recuResults.size() == 1) {
                             appointment = appointment.clone();
@@ -241,7 +241,7 @@ public final class AllAction extends AppointmentAction {
                             recuResults = calColl.calculateRecurring(appointment, start.getTime(), end.getTime(), 0);
                             written = true;
                         } catch (final OXException e) {
-                            LOG.error("Can not calculate recurrence {}{}{}", appointment.getObjectID(), ':', session.getContextId(), e);
+                            LOG.error("Can not calculate recurrence {}:{}", appointment.getObjectID(), session.getContextId(), e);
                         }
                         if (recuResults != null) {
                             for (int a = 0; a < recuResults.size(); a++) {

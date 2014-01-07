@@ -552,7 +552,7 @@ public final class MessageUtility {
             try {
                 return tmp.toString(charset);
             } catch (final UnsupportedCharsetException e) {
-                LOG.error("Unsupported encoding in a message detected and monitored: \"{}{}", charset, '"', e);
+                LOG.error("Unsupported encoding in a message detected and monitored: \"{}\"", charset, e);
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(charset);
                 final byte[] bytes = tmp.toByteArray();
                 return new String(bytes, Charsets.forName(detectCharset(bytes)));

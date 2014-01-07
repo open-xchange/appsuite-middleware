@@ -256,7 +256,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
             try {
                 submitFolderJob(folder);
             } catch (final OXException e) {
-                LOG.warn("Could not schedule folder job for folder {}{}", folder, '.', e);
+                LOG.warn("Could not schedule folder job for folder {}.", folder, e);
             }
         }
 
@@ -324,7 +324,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         try {
             submitFolderJob(folder);
         } catch (final OXException e) {
-            LOG.warn("Could not schedule folder job for folder {}{}", folder, '.', e);
+            LOG.warn("Could not schedule folder job for folder {}.", folder, e);
         }
 
         return messages;

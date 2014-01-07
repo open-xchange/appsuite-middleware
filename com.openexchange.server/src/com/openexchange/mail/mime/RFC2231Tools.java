@@ -164,8 +164,7 @@ public final class RFC2231Tools {
         try {
             return cs.decode(bb).toString();
         } catch (final java.nio.BufferOverflowException e) {
-            LOG.warn("Decoding with charset \"{}\" failed for input string: \"{}{}", charset, encoded, '"',
-                e);
+            LOG.warn("Decoding with charset \"{}\" failed for input string: \"{}\"", charset, encoded, e);
             /*
              * Retry with own allocated char buffer
              */

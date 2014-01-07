@@ -79,7 +79,7 @@ public abstract class AbstractConfigWrapper {
 			try {
 				return Integer.parseInt(tmp);
 			} catch (final NumberFormatException ex) {
-				LOG.warn("property no parsable: {}{}{}", name, ':', value);
+				LOG.warn("property no parsable: {}:{}", name, Integer.valueOf(value));
 			}
 		}
 		return value;

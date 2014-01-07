@@ -272,8 +272,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                                     try {
                                         subfolder = tmp.getFolder(treeId, id, newParameters);
                                     } catch (final OXException e) {
-                                        log.warn("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}{}", id, treeId, tmp.getClass().getSimpleName(), '"',
-                                            e);
+                                        log.warn("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, tmp.getClass().getSimpleName(), e);
                                         addWarning(e);
                                         continue NextIndex;
                                     }

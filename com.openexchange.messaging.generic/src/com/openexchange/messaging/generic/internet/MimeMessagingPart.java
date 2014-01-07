@@ -411,7 +411,7 @@ public class MimeMessagingPart implements MessagingPart {
             LOG.debug("{} content could not be obtained.", clazz.getSimpleName(), e);
             return null;
         } catch (final ClassCastException e) {
-            LOG.debug("Content is not a {}{}", clazz.getName(), '.', e);
+            LOG.debug("Content is not a {}.", clazz.getName(), e);
             return null;
         }
     }
