@@ -212,7 +212,7 @@ public final class NewAction extends AbstractMailAction {
                         if (null != object) {
                             if (AJAXRequestDataTools.parseBoolParameter(object.toString())) {
                                 sendType = ComposeType.DRAFT_DELETE_ON_TRANSPORT;
-                            } else if (false && null != AJAXRequestDataTools.parseFalseBoolParameter(object.toString())) {
+                            } else if (false && Boolean.FALSE.equals(AJAXRequestDataTools.parseFalseBoolParameter(object.toString()))) {
                                 // Explicitly deny deletion of draft message
                                 sendType = ComposeType.DRAFT_NO_DELETE_ON_TRANSPORT;
                             }
@@ -222,7 +222,7 @@ public final class NewAction extends AbstractMailAction {
                         if (null != sDeleteDraftOnTransport) {
                             if (AJAXRequestDataTools.parseBoolParameter(sDeleteDraftOnTransport)) {
                                 sendType = ComposeType.DRAFT_DELETE_ON_TRANSPORT;
-                            } else if (false && null != AJAXRequestDataTools.parseFalseBoolParameter(sDeleteDraftOnTransport)) {
+                            } else if (false && Boolean.FALSE.equals(AJAXRequestDataTools.parseFalseBoolParameter(sDeleteDraftOnTransport))) {
                                 // Explicitly deny deletion of draft message
                                 sendType = ComposeType.DRAFT_NO_DELETE_ON_TRANSPORT;
                             }
@@ -242,11 +242,25 @@ public final class NewAction extends AbstractMailAction {
                 {
                     final String paramName = "copy2Sent";
                     if (jMail.hasAndNotNull(paramName)) { // Provided by JSON body
-                        final boolean copy2Sent = jMail.optBoolean(paramName, !usm.isNoCopyIntoStandardSentFolder());
-                        usm.setNoCopyIntoStandardSentFolder(!copy2Sent);
+                        final Object object = jMail.opt(paramName);
+                        if (null != object) {
+                            if (AJAXRequestDataTools.parseBoolParameter(object.toString())) {
+                                usm.setNoCopyIntoStandardSentFolder(false);
+                            } else if (Boolean.FALSE.equals(AJAXRequestDataTools.parseFalseBoolParameter(object.toString()))) {
+                                // Explicitly deny copy to sent folder
+                                usm.setNoCopyIntoStandardSentFolder(true);
+                            }
+                        }
                     } else if (request.containsParameter(paramName)) { // Provided as URL parameter
-                        final boolean copy2Sent = AJAXRequestDataTools.parseBoolParameter(paramName, request, !usm.isNoCopyIntoStandardSentFolder());
-                        usm.setNoCopyIntoStandardSentFolder(!copy2Sent);
+                        final String sCopy2Sent = request.getParameter(paramName);
+                        if (null != sCopy2Sent) {
+                            if (AJAXRequestDataTools.parseBoolParameter(sCopy2Sent)) {
+                                usm.setNoCopyIntoStandardSentFolder(false);
+                            } else if (Boolean.FALSE.equals(AJAXRequestDataTools.parseFalseBoolParameter(sCopy2Sent))) {
+                                // Explicitly deny copy to sent folder
+                                usm.setNoCopyIntoStandardSentFolder(true);
+                            }
+                        }
                     }
                 }
                 /*
