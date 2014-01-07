@@ -206,9 +206,27 @@ public final class NewAction extends AbstractMailAction {
                 final ComposedMailMessage[] composedMails = MessageParser.parse4Transport(jMail, uploadEvent, session, accountId, protocol, request.getHostname(), warnings);
                 ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : ComposeType.NEW;
                 if (ComposeType.DRAFT.equals(sendType)) {
-                    final boolean deleteDraftOnTransport = jMail.optBoolean("deleteDraftOnTransport", false);
-                    if (deleteDraftOnTransport || AJAXRequestDataTools.parseBoolParameter("deleteDraftOnTransport", request)) {
-                        sendType = ComposeType.DRAFT_DELETE_ON_TRANSPORT;
+                    final String paramName = "deleteDraftOnTransport";
+                    if (jMail.hasAndNotNull(paramName)) { // Provided by JSON body
+                        final Object object = jMail.opt(paramName);
+                        if (null != object) {
+                            if (AJAXRequestDataTools.parseBoolParameter(object.toString())) {
+                                sendType = ComposeType.DRAFT_DELETE_ON_TRANSPORT;
+                            } else if (false && null != AJAXRequestDataTools.parseFalseBoolParameter(object.toString())) {
+                                // Explicitly deny deletion of draft message
+                                sendType = ComposeType.DRAFT_NO_DELETE_ON_TRANSPORT;
+                            }
+                        }
+                    } else if (request.containsParameter(paramName)) { // Provided as URL parameter
+                        final String sDeleteDraftOnTransport = request.getParameter(paramName);
+                        if (null != sDeleteDraftOnTransport) {
+                            if (AJAXRequestDataTools.parseBoolParameter(sDeleteDraftOnTransport)) {
+                                sendType = ComposeType.DRAFT_DELETE_ON_TRANSPORT;
+                            } else if (false && null != AJAXRequestDataTools.parseFalseBoolParameter(sDeleteDraftOnTransport)) {
+                                // Explicitly deny deletion of draft message
+                                sendType = ComposeType.DRAFT_NO_DELETE_ON_TRANSPORT;
+                            }
+                        }
                     }
                 }
                 for (final ComposedMailMessage cm : composedMails) {
@@ -221,12 +239,15 @@ public final class NewAction extends AbstractMailAction {
                  */
                 final UserSettingMail usm = session.getUserSettingMail();
                 usm.setNoSave(true);
-                if (jMail.hasAndNotNull("copy2Sent")) { // Provided by JSON body
-                    final boolean copy2Sent = jMail.optBoolean("copy2Sent", !usm.isNoCopyIntoStandardSentFolder());
-                    usm.setNoCopyIntoStandardSentFolder(!copy2Sent);
-                } else if (request.containsParameter("copy2Sent")) { // Provided as URL parameter
-                    final boolean copy2Sent = AJAXRequestDataTools.parseBoolParameter("copy2Sent", request, !usm.isNoCopyIntoStandardSentFolder());
-                    usm.setNoCopyIntoStandardSentFolder(!copy2Sent);
+                {
+                    final String paramName = "copy2Sent";
+                    if (jMail.hasAndNotNull(paramName)) { // Provided by JSON body
+                        final boolean copy2Sent = jMail.optBoolean(paramName, !usm.isNoCopyIntoStandardSentFolder());
+                        usm.setNoCopyIntoStandardSentFolder(!copy2Sent);
+                    } else if (request.containsParameter(paramName)) { // Provided as URL parameter
+                        final boolean copy2Sent = AJAXRequestDataTools.parseBoolParameter(paramName, request, !usm.isNoCopyIntoStandardSentFolder());
+                        usm.setNoCopyIntoStandardSentFolder(!copy2Sent);
+                    }
                 }
                 /*
                  * Check

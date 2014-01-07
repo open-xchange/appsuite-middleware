@@ -271,15 +271,10 @@ public class AJAXRequestDataTools {
         if (null == value) {
             return defaultValue;
         }
-        return BOOL_VALS.contains(toLowerCase(value.trim()));
+        return TRUE_VALS.contains(toLowerCase(value.trim()));
     }
 
-    private static final Set<String> BOOL_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-        "true",
-        "1",
-        "yes",
-        "y",
-        "on")));
+    private static final Set<String> TRUE_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("true", "1", "yes", "y", "on")));
 
     /**
      * Parses denoted <tt>boolean</tt> value from specified <tt>String</tt> parameter value.
@@ -291,7 +286,25 @@ public class AJAXRequestDataTools {
      * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
      */
     public static boolean parseBoolParameter(final String parameter) {
-        return (null != parameter) && BOOL_VALS.contains(toLowerCase(parameter.trim()));
+        return (null != parameter) && TRUE_VALS.contains(toLowerCase(parameter.trim()));
+    }
+
+    private static final Set<String> FALSE_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("false", "0", "no", "n", "off")));
+
+    /**
+     * Parses denoted <tt>boolean</tt> value from specified <tt>String</tt> parameter value.
+     * <p>
+     * <code>Boolean.FALSE</code> if given value is not <code>null</code> and equals ignore-case to one of the values "false", "no", "n",
+     * "off", or "0".
+     *
+     * @param parameter The parameter value
+     * @return The parsed <tt>Boolean.FALSE</tt> value (<code>null</code> on absence or mismatch)
+     */
+    public static Boolean parseFalseBoolParameter(final String parameter) {
+        if (null == parameter) {
+            return null;
+        }
+        return FALSE_VALS.contains(toLowerCase(parameter.trim())) ? Boolean.FALSE : null;
     }
 
     /**
