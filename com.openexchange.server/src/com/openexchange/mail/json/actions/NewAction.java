@@ -221,8 +221,11 @@ public final class NewAction extends AbstractMailAction {
                  */
                 final UserSettingMail usm = session.getUserSettingMail();
                 usm.setNoSave(true);
-                if (jMail.hasAndNotNull("copy2Sent")) {
+                if (jMail.hasAndNotNull("copy2Sent")) { // Provided by JSON body
                     final boolean copy2Sent = jMail.optBoolean("copy2Sent", !usm.isNoCopyIntoStandardSentFolder());
+                    usm.setNoCopyIntoStandardSentFolder(!copy2Sent);
+                } else if (request.containsParameter("copy2Sent")) { // Provided as URL parameter
+                    final boolean copy2Sent = AJAXRequestDataTools.parseBoolParameter("copy2Sent", request, !usm.isNoCopyIntoStandardSentFolder());
                     usm.setNoCopyIntoStandardSentFolder(!copy2Sent);
                 }
                 /*
