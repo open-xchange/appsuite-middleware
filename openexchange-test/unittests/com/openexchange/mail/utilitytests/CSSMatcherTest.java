@@ -324,13 +324,15 @@ public class CSSMatcherTest extends TestCase {
         final String[] lines = saneCss.split("\r?\n");
 
         {
-            final String line = lines[0];
-            assertTrue("Unexpected CSS: "+saneCss, line.trim().startsWith("/* common --------------------------------------------------*/  #test {"));
+            String line = lines[0];
+            line = line.replaceAll("\\s+", "");
+            assertTrue("Unexpected CSS: "+line, line.startsWith("/*common--------------------------------------------------*/#test{"));
         }
 
         {
-            final String line = lines[1];
-            assertTrue("Unexpected CSS: "+saneCss, line.trim().startsWith("#test {"));
+            String line = lines[1];
+            line = line.trim();
+            assertTrue("Unexpected CSS: "+line, line.startsWith("#test #test-BodyImposter {"));
         }
     }
 }
