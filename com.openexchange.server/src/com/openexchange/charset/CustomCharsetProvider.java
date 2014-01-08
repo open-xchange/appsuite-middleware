@@ -145,10 +145,10 @@ public final class CustomCharsetProvider extends CharsetProvider {
         try {
             charset = Charset.forName(delegateName);
         } catch (final IllegalCharsetNameException e) {
-            LOG.error("Illegal charset name \"{}{}", e.getCharsetName(), '"', e);
+            LOG.error("Illegal charset name \"{}\"", e.getCharsetName(), e);
             return false;
         } catch (final UnsupportedCharsetException e) {
-            LOG.error("Detected no support for charset \"{}{}", e.getCharsetName(), '"', e);
+            LOG.error("Detected no support for charset \"{}\"", e.getCharsetName(), e);
             return false;
         }
         return addAliasCharset(charset, canonicalName, aliases);
@@ -211,10 +211,10 @@ public final class CustomCharsetProvider extends CharsetProvider {
         try {
             charset = Charset.forName(delegateName);
         } catch (final IllegalCharsetNameException e) {
-            LOG.error("Illegal charset name \"{}{}", e.getCharsetName(), '"', e);
+            LOG.error("Illegal charset name \"{}\"", e.getCharsetName(), e);
             return false;
         } catch (final UnsupportedCharsetException e) {
-            LOG.error("Detected no support for charset \"{}{}", e.getCharsetName(), '"', e);
+            LOG.error("Detected no support for charset \"{}\"", e.getCharsetName(), e);
             return false;
         }
         return addStartsWithCharset(charset, startsWithName);

@@ -115,7 +115,7 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
                         // A column whose VARCHAR size shall possibly be changed
                         final int size = rs.getInt("COLUMN_SIZE");
                         if (size >= DESIRED_SIZE) {
-                            LOG.info("{}: Column {}{}{} with size {} is already equal to/greater than {}", CalendarExtendDNColumnTask.class.getSimpleName(), tableName, '.', name, size, DESIRED_SIZE);
+                            LOG.info("{}: Column {}.{} with size {} is already equal to/greater than {}", CalendarExtendDNColumnTask.class.getSimpleName(), tableName, name, size, DESIRED_SIZE);
                             return;
                         }
                     }

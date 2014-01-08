@@ -278,7 +278,7 @@ public class DirectLinkGenerator {
     }
 
     private String getWebpath() {
-        return DriveConfig.getInstance().getUiWebPath();
+        return trimSlashes(DriveConfig.getInstance().getUiWebPath());
     }
 
     private String getDispatcherPrefix() {

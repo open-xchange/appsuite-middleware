@@ -56,7 +56,6 @@ import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
-import org.apache.commons.logging.LogFactory;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.Oid;
@@ -92,7 +91,7 @@ public final class KerberosUtils {
                         final PasswordCallback passCallback = (PasswordCallback) callback;
                         passCallback.setPassword(password.toCharArray());
                     } else {
-                        LOG.error("Unknown callback class: {}{}{}", callback.getClass().getName(), '#', callback);
+                        LOG.error("Unknown callback class: {}#{}", callback.getClass().getName(), callback);
                     }
                 }
             }

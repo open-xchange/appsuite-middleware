@@ -102,13 +102,15 @@ public class ActivatorTest {
         PowerMockito.mockStatic(LoggerFactory.class);
 
         Mockito.when(loggerContext.getLogger(Mockito.anyString())).thenReturn(logger);
+        PowerMockito.when(loggerContext.getProperty(Matchers.anyString())).thenReturn(null);
+
         Mockito.when(LoggerFactory.getILoggerFactory()).thenReturn(loggerContext);
 
         MockUtils.injectValueIntoPrivateField(Activator.class, "LOGGER", activatorLogger);
     }
 
     @Test
-    public void testOverrideLoggerLevels_loggerNotAvailable_LogWarning() {
+    public void testOverrideLoggerLevels_loggerNotAvailable_logWarning() {
         PowerMockito.when(loggerContext.getLogger(Matchers.anyString())).thenReturn(null);
 
         Mockito.mock(LoggerContext.class);
@@ -120,7 +122,9 @@ public class ActivatorTest {
     }
 
     @Test
-    public void testOverrideLoggerLevels_contextAndLoggerAvailable_SetNewLogLevel() {
+    public void testOverrideLoggerLevels_configuredLevelWARNTooCoarse_setNewLogLevel() {
+        Mockito.when(logger.getLevel()).thenReturn(Level.WARN);
+
         activator.overrideLoggerLevels(loggerContext);
 
         Mockito.verify(logger, Mockito.atLeast(1)).setLevel(Level.INFO);
@@ -129,7 +133,52 @@ public class ActivatorTest {
     }
 
     @Test
-    public void testStartBundle_ensureOverrideLoggerLevelsCalled_Successfull() throws Exception {
+    public void testOverrideLoggerLevels_configuredLevelOFFTooCoarse_setNewLogLevel() {
+        Mockito.when(logger.getLevel()).thenReturn(Level.OFF);
+
+        activator.overrideLoggerLevels(loggerContext);
+
+        Mockito.verify(logger, Mockito.atLeast(1)).setLevel(Level.INFO);
+        Mockito.verify(loggerContext, Mockito.atLeast(1)).getLogger(Matchers.anyString());
+        Mockito.verify(activatorLogger, Mockito.never()).warn(Matchers.anyString());
+    }
+
+    @Test
+    public void testOverrideLoggerLevels_configuredLevelINFOAdequate_doNotSetNewLogLevel() {
+        Mockito.when(logger.getLevel()).thenReturn(Level.INFO);
+
+        activator.overrideLoggerLevels(loggerContext);
+
+        Mockito.verify(logger, Mockito.never()).setLevel(Level.INFO);
+        Mockito.verify(loggerContext, Mockito.atLeast(1)).getLogger(Matchers.anyString());
+        Mockito.verify(activatorLogger, Mockito.never()).warn(Matchers.anyString());
+    }
+
+    @Test
+    public void testOverrideLoggerLevels_configuredLevelALLAdequate_doNotSetNewLogLevel() {
+        Mockito.when(logger.getLevel()).thenReturn(Level.ALL);
+
+        activator.overrideLoggerLevels(loggerContext);
+
+        Mockito.verify(logger, Mockito.never()).setLevel(Level.INFO);
+        Mockito.verify(loggerContext, Mockito.atLeast(1)).getLogger(Matchers.anyString());
+        Mockito.verify(activatorLogger, Mockito.never()).warn(Matchers.anyString());
+    }
+
+    @Test
+    public void testOverrideLoggerLevels_disableOverrideLogLevels_returnWithOverriding() {
+        Mockito.when(logger.getLevel()).thenReturn(Level.OFF);
+        PowerMockito.when(loggerContext.getProperty(Matchers.anyString())).thenReturn("true");
+
+        activator.overrideLoggerLevels(loggerContext);
+
+        Mockito.verify(logger, Mockito.never()).setLevel(Level.INFO);
+        Mockito.verify(loggerContext, Mockito.never()).getLogger(Matchers.anyString());
+        Mockito.verify(activatorLogger, Mockito.never()).warn(Matchers.anyString());
+    }
+
+    @Test
+    public void testStartBundle_ensureOverrideLoggerLevelsCalled_successfull() throws Exception {
         BundleContext bundleContext = PowerMockito.mock(BundleContext.class);
         Bundle bundle = PowerMockito.mock(Bundle.class);
         Mockito.when(bundleContext.getBundle()).thenReturn(bundle);
@@ -147,7 +196,7 @@ public class ActivatorTest {
     }
 
     @Test
-    public void testStartBundle_ensureInstallJulLevelChangePropagatorCalled_Successfull() throws Exception {
+    public void testStartBundle_ensureInstallJulLevelChangePropagatorCalled_successfull() throws Exception {
         BundleContext bundleContext = PowerMockito.mock(BundleContext.class);
         Bundle bundle = PowerMockito.mock(Bundle.class);
         Mockito.when(bundleContext.getBundle()).thenReturn(bundle);
@@ -165,7 +214,7 @@ public class ActivatorTest {
     }
 
     @Test
-    public void testInstallJulLevelChangePropagator_propagatorNotAvailable_AddPropagator() {
+    public void testInstallJulLevelChangePropagator_propagatorNotAvailable_addPropagator() {
         Activator activatorSpy = Mockito.spy(activator);
         Mockito.doReturn(false).when(activatorSpy).hasInstanceOf(Matchers.anyCollection(), Matchers.any(Class.class));
 

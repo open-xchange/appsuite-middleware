@@ -500,7 +500,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         String[] aliases;
         try {
             aliases = UserStorage.getInstance().getUser(user, cid).getAliases();
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.warn("", e);
             return sb.toString();
         }
@@ -518,6 +518,66 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
      */
     RdbMailAccountStorage() {
         super();
+    }
+
+    @Override
+    public void clearFullNamesForMailAccount(final int id, final int user, final int cid) throws OXException {
+        final Connection con = Database.get(cid, true);
+        boolean rollback = false;
+        try {
+            con.setAutoCommit(false);
+            rollback = true;
+            clearFullNamesForMailAccount(id, user, cid, con);
+            con.commit();
+            rollback = false;
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+            autocommit(con);
+            Database.back(cid, true, con);
+        }
+    }
+
+    /**
+     * Clears full names for specified mail account.
+     *
+     * @param id The account ID
+     * @param user The user ID
+     * @param cid The context ID
+     * @param con The connection to use
+     * @throws OXException If invalidation fails
+     */
+    public void clearFullNamesForMailAccount(final int id, final int user, final int cid, final Connection con) throws OXException {
+        if (null == con) {
+            clearFullNamesForMailAccount(id, user, cid);
+            return;
+        }
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE user_mail_account SET trash_fullname=?, sent_fullname=?, drafts_fullname=?, spam_fullname=?, confirmed_spam_fullname=?, confirmed_ham_fullname=? WHERE cid=? AND id=? AND user=?");
+            int num = 1;
+            stmt.setString(num++, "");
+            stmt.setString(num++, "");
+            stmt.setString(num++, "");
+            stmt.setString(num++, "");
+            stmt.setString(num++, "");
+            stmt.setString(num++, "");
+            stmt.setLong(num++, cid);
+            stmt.setLong(num++, id);
+            stmt.setLong(num++, user);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
     }
 
     @Override

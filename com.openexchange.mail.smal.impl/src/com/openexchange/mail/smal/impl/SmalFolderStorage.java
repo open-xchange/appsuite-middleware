@@ -124,7 +124,7 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
         try {
             submitFolderJob(fullName);
         } catch (final OXException e) {
-            LOG.warn("Could not schedule folder job for folder {}{}", fullName, '.', e);
+            LOG.warn("Could not schedule folder job for folder {}.", fullName, e);
         }
         return fullName;
     }
@@ -142,7 +142,7 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
             submitFolderJob(fullName);
             submitFolderJob(nfn);
         } catch (final OXException e) {
-            LOG.warn("Could not schedule folder job for folder {}{}", fullName, '.', e);
+            LOG.warn("Could not schedule folder job for folder {}.", fullName, e);
         }
 
         return nfn;
@@ -157,7 +157,7 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
                 submitFolderJob(getTrashFolder());
             }
         } catch (final OXException e) {
-            LOG.warn("Could not schedule folder job for folder {}{}", retval, '.', e);
+            LOG.warn("Could not schedule folder job for folder {}.", retval, e);
         }
         return retval;
     }
@@ -168,7 +168,7 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
         try {
             submitFolderJob(fullName);
         } catch (final OXException e) {
-            LOG.warn("Could not schedule folder job for folder {}{}", fullName, '.', e);
+            LOG.warn("Could not schedule folder job for folder {}.", fullName, e);
         }
     }
 
@@ -224,7 +224,7 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
             submitFolderJob(fullName);
             submitFolderJob(nfn);
         } catch (final OXException e) {
-            LOG.warn("Could not schedule folder job for folder {}{}", fullName, '.', e);
+            LOG.warn("Could not schedule folder job for folder {}.", fullName, e);
         }
 
         return nfn;

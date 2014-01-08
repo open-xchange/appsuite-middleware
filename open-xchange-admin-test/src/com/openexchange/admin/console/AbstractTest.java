@@ -188,8 +188,11 @@ public abstract class AbstractTest {
     protected static String getRMIHost() {
         String host = "localhost";
 
-        if (System.getProperty("rmi_test_host") != null) {
-            host = System.getProperty("rmi_test_host");
+        // if (System.getProperty("rmi_test_host") != null) {
+        // host = System.getProperty("rmi_test_host");
+        // }
+        if (System.getProperty("host") != null) {
+            host = System.getProperty("host");
         }
 
         return host;

@@ -2756,6 +2756,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     } else {
                         setFlagForward(supPath);
                     }
+                } else if (ComposeType.DRAFT_NO_DELETE_ON_TRANSPORT.equals(type)) {
+                    // Do not delete draft!
                 } else if (ComposeType.DRAFT.equals(type)) {
                     final ConfigViewFactory configViewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
                     if (null != configViewFactory) {

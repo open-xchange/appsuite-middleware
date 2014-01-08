@@ -309,7 +309,7 @@ public final class MimeProcessingUtility {
             String cs = contentType.getCharsetParameter();
             if (!CharsetDetector.isValid(cs)) {
                 if (null != cs) {
-                    LOG.warn("Illegal or unsupported encoding in a message detected: \"{}{}", cs, '"', new UnsupportedEncodingException(cs));
+                    LOG.warn("Illegal or unsupported encoding in a message detected: \"{}\"", cs, new UnsupportedEncodingException(cs));
                 }
                 if (contentType.startsWith(TEXT)) {
                     cs = CharsetDetector.detectCharset(mailPart.getInputStream());

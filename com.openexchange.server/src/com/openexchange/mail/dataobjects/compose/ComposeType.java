@@ -84,6 +84,10 @@ public enum ComposeType {
      * Draft with <code>deleteDraftOnTransport</code> enabled.
      */
     DRAFT_DELETE_ON_TRANSPORT(6),
+    /**
+     * Draft with <code>deleteDraftOnTransport</code> explicitly disabled.
+     */
+    DRAFT_NO_DELETE_ON_TRANSPORT(7),
 
     ;
 

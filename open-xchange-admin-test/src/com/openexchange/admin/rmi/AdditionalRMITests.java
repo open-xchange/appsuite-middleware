@@ -56,6 +56,7 @@ import static org.junit.Assert.fail;
 import java.rmi.Naming;
 import java.util.Arrays;
 import java.util.List;
+import junit.framework.Assert;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -119,12 +120,12 @@ public class AdditionalRMITests extends AbstractRMITest {
     @Test
     public void testGetOxAccount() throws Exception {
 
-        OXUserInterface userInterface = getUserInterface();
+        OXUserInterface userInterface = (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
 
         User knownUser = new User();
         knownUser.setName(myUserName);
         User[] mailboxNames = new User[] { knownUser }; // users with only their mailbox name (User#name) - the rest is going to be looked
-                                                        // up
+        // up
         User[] queriedUsers = userInterface.getData(adminContext, mailboxNames, adminCredentials); // required line for test
 
         assertEquals("Query should return only one user", new Integer(1), Integer.valueOf(queriedUsers.length));
@@ -140,7 +141,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         final Credentials credentials = DummyCredentials();
         Context context = getTestContextObject(credentials);
 
-        OXUserInterface userInterface = getUserInterface();
+        OXUserInterface userInterface = (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
         User[] allUsers = userInterface.listAll(context, credentials); // required line for test
         User[] queriedUsers = userInterface.getData(context, allUsers, credentials); // required line for test
         assertIDsAreEqual(allUsers, queriedUsers);
@@ -151,11 +152,11 @@ public class AdditionalRMITests extends AbstractRMITest {
      */
     @Test
     public void testGetOxGroups() throws Exception {
-        OXContextInterface conInterface = getContextInterface();
+        OXContextInterface conInterface = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
         Context updatedContext = conInterface.getData(adminContext, superAdminCredentials);
 
-        OXUserInterface userInterface = getUserInterface();
-        OXGroupInterface groupInterface = getGroupInterface();
+        OXUserInterface userInterface = (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
+        OXGroupInterface groupInterface = (OXGroupInterface) Naming.lookup(getRMIHostUrl() + OXGroupInterface.RMI_NAME);
 
         User myUser = new User();
         myUser.setName(myUserName);
@@ -181,7 +182,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         Resource res = getTestResource();
         createTestResource();
         try {
-            OXResourceInterface resInterface = getResourceInterface();
+            OXResourceInterface resInterface = (OXResourceInterface) Naming.lookup(getRMIHostUrl() + OXResourceInterface.RMI_NAME);
             List<Resource> allResources = Arrays.asList(resInterface.listAll(adminContext, adminCredentials));
             assertTrue("Should contain our trusty test resource", any(allResources, res, new Verifier<Resource, Resource>() {
 
@@ -202,7 +203,7 @@ public class AdditionalRMITests extends AbstractRMITest {
      */
     @Test
     public void testCreateFirstUser() throws Exception {
-        OXContextInterface conInterface = getContextInterface();
+        OXContextInterface conInterface = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
 
         Context newContext = newContext("newContext", 666);
 
@@ -226,7 +227,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         UserModuleAccess access = new UserModuleAccess();
 
         boolean userCreated = false;
-        OXUserInterface userInterface = getUserInterface();
+        OXUserInterface userInterface = (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
         try {
             myNewUser = userInterface.create(adminContext, myNewUser, access, adminCredentials);// required line for test
             userCreated = true;
@@ -243,7 +244,7 @@ public class AdditionalRMITests extends AbstractRMITest {
      */
     @Test
     public void testCreateOxGroup() throws Exception {
-        OXGroupInterface groupInterface = getGroupInterface();
+        OXGroupInterface groupInterface = (OXGroupInterface) Naming.lookup(getRMIHostUrl() + OXGroupInterface.RMI_NAME);
         boolean groupCreated = false;
         Group group = newGroup("groupdisplayname", "groupname");
         try {
@@ -259,7 +260,7 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     @Test
     public void testCreateOxResource() throws Exception {
-        OXResourceInterface resInterface = getResourceInterface();
+        OXResourceInterface resInterface = (OXResourceInterface) Naming.lookup(getRMIHostUrl() + OXResourceInterface.RMI_NAME);
         boolean resourceCreated = false;
         Resource res = newResource("resourceName", "resourceDisplayname", "resource@email.invalid");
         try {
@@ -275,7 +276,7 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     @Test
     public void testUpdateOxAdmin_updateOxUser() throws Exception {
-        OXUserInterface userInterface = getUserInterface();
+        OXUserInterface userInterface = (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
         boolean valueChanged = false;
         User admin = getAdminData();
         String originalValue = admin.getAssistant_name();
@@ -299,7 +300,7 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     @Test
     public void testUpdateOxGroup() throws Exception {
-        OXGroupInterface groupInterface = getGroupInterface();
+        OXGroupInterface groupInterface = (OXGroupInterface) Naming.lookup(getRMIHostUrl() + OXGroupInterface.RMI_NAME);
         boolean groupCreated = false;
         Group group = newGroup("groupdisplayname", "groupname");
         try {
@@ -321,7 +322,7 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     @Test
     public void testUpdateOxResource() throws Exception {
-        OXResourceInterface resInterface = getResourceInterface();
+        OXResourceInterface resInterface = (OXResourceInterface) Naming.lookup(getRMIHostUrl() + OXResourceInterface.RMI_NAME);
         boolean resourceCreated = false;
         Resource res = newResource("resourceName", "resourceDisplayname", "resource@email.invalid");
         try {
@@ -341,28 +342,24 @@ public class AdditionalRMITests extends AbstractRMITest {
     }
 
     @Test
-    public void testDeleteOxUsers() {
-        // already done in the clean-up procedures for #testUpdateOxResources and #testUpdateOxResources
-    }
+    public void testDeleteOxUsers() throws Exception {
+        OXResourceInterface resInterface = (OXResourceInterface) Naming.lookup(getRMIHostUrl() + OXResourceInterface.RMI_NAME);
+        boolean resourceDeleted = false;
+        Resource res = newResource("resourceName", "resourceDisplayname", "resource@email.invalid");
+        try {
+            res = resInterface.create(adminContext, res, adminCredentials);
 
-    @Test
-    public void testDeleteOxGroups() {
-        // already done in the clean-up procedures for testCreateOxResources and #testUpdateOxResources
-    }
-
-    @Test
-    public void testDeleteOxResources() {
-        // already done in the clean-up procedures for #testCreateOxResources and #testUpdateOxResources
-    }
-
-    @Test
-    public void testDeleteOxAccount() {
-        // already done in the clean-up procedure for #testCreateFirstUser()
+            Assert.assertNotNull("Resource id cannot be null", res.getId());
+            resInterface.delete(adminContext, res, adminCredentials);
+            resourceDeleted = true;
+        }
+        catch (Exception exception) {
+            Assert.assertTrue("Resource could not be deleted!", resourceDeleted);
+        }
     }
 
     @Test
     public void testGetUserAccessModules() throws Exception {
-        // OxUserInterface.getModuleAccess(Context, User, null);
         final Credentials credentials = DummyCredentials();
         Context context = getTestContextObject(credentials);
 
@@ -371,7 +368,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         User knownUser = new User();
         knownUser.setName("thorben");
         User[] mailboxNames = new User[] { knownUser }; // users with only their mailbox name (User#name) - the rest is going to be looked
-                                                        // up
+        // up
         User[] queriedUsers = userInterface.getData(context, mailboxNames, credentials); // query by mailboxNames (User.name)
 
         assertEquals("Query should return only one user", new Integer(1), Integer.valueOf(queriedUsers.length));
@@ -382,17 +379,9 @@ public class AdditionalRMITests extends AbstractRMITest {
     }
 
     @Test
-    public void testSetUserAccessModules() {
-        // OxUserInterface.changeModuleAccess(Context, User, UserModuleAccess, null);
-        // This is tested by #testUpdateModuleAccess() below
-    }
-
-    @Test
     public void testUpdateMaxCollapQuota() throws Exception {
-        // OXContextInterface.change(Context, null);
-        OXContextInterface contextInterface = getContextInterface();
+        OXContextInterface contextInterface = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
         Context context = contextInterface.getData(adminContext, superAdminCredentials);
-        Long maxQuotaBefore = context.getMaxQuota();
         Long updatedMaxQuota = new Long(1024);
         context.setMaxQuota(updatedMaxQuota);
         contextInterface.change(context, superAdminCredentials);
@@ -402,7 +391,6 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     @Test
     public void testGetUser() throws Exception {
-        // OxUserInterface.getData(Context, User, null); //query by mailboxName (User.name)
         final Credentials credentials = DummyCredentials();
         Context context = getTestContextObject(credentials);
 
@@ -411,19 +399,17 @@ public class AdditionalRMITests extends AbstractRMITest {
         User knownUser = new User();
         knownUser.setName("thorben");
         User[] mailboxNames = new User[] { knownUser }; // users with only their mailbox name (User#name) - the rest is going to be looked
-                                                        // up
+        // up
         User[] queriedUsers = userInterface.getData(context, mailboxNames, credentials); // query by mailboxNames (User.name)
 
         assertEquals("Query should return only one user", new Integer(1), Integer.valueOf(queriedUsers.length));
         User user = queriedUsers[0];
         User queriedUser = userInterface.getData(context, user, credentials);
         assertEquals("Should have looked up display name", myDisplayName, queriedUser.getDisplay_name());
-
     }
 
     @Test
     public void testUpdateModuleAccess() throws Exception {
-        // userInterface.changeModuleAccess(context, user, moduleAccess, auth);
         final Credentials credentials = DummyCredentials();
         Context context = getTestContextObject(credentials);
 
@@ -432,7 +418,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         User knownUser = new User();
         knownUser.setName(myUserName);
         User[] mailboxNames = new User[] { knownUser }; // users with only their mailbox name (User#name) - the rest is going to be looked
-                                                        // up
+        // up
         User[] queriedUsers = userInterface.getData(context, mailboxNames, credentials); // query by mailboxNames (User.name)
 
         assertEquals("Query should return only one user", new Integer(1), Integer.valueOf(queriedUsers.length));
@@ -449,12 +435,11 @@ public class AdditionalRMITests extends AbstractRMITest {
         userInterface.changeModuleAccess(context, user, access, credentials);
         access = userInterface.getModuleAccess(context, user, credentials);
         assertEquals("Calendar access should be granted again", true, access.getCalendar());
-
     }
 
     @Test
     public void testContextExistsException() throws Exception {
-        OXContextInterface conInterface = getContextInterface();
+        OXContextInterface conInterface = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
         boolean contextCreated = false;
         Context newContext = newContext("newContext", 666);
         User newAdmin = newUser("new_admin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
@@ -476,7 +461,7 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     @Test
     public void testNoSuchContextException() throws Exception {
-        OXContextInterface conInterface = getContextInterface();
+        OXContextInterface conInterface = (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
         Context missingContext = newContext("missing", Integer.MAX_VALUE);
         try {
             conInterface.delete(missingContext, superAdminCredentials);
@@ -488,7 +473,7 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     @Test
     public void testNoSuchGroupException() throws Exception {
-        OXGroupInterface groupInterface = getGroupInterface();
+        OXGroupInterface groupInterface = (OXGroupInterface) Naming.lookup(getRMIHostUrl() + OXGroupInterface.RMI_NAME);
         Group missingGroup = new Group();
         missingGroup.setId(Integer.valueOf(Integer.MAX_VALUE));
         try {
@@ -501,7 +486,7 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     @Test
     public void testNoSuchResourceException() throws Exception {
-        OXResourceInterface resInterface = getResourceInterface();
+        OXResourceInterface resInterface = (OXResourceInterface) Naming.lookup(getRMIHostUrl() + OXResourceInterface.RMI_NAME);
         Resource missingResource = new Resource();
         missingResource.setId(Integer.valueOf(Integer.MAX_VALUE));
         try {
@@ -514,7 +499,7 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     @Test
     public void testNoSuchUserException() throws Exception {
-        OXUserInterface resInterface = getUserInterface();
+        OXUserInterface resInterface = (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
         User missingUser = new User();
         missingUser.setId(Integer.valueOf(Integer.MAX_VALUE));
         try {

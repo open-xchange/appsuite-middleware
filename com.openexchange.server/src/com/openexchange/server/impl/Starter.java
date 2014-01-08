@@ -307,7 +307,7 @@ public class Starter implements Initialization {
     private static final void dumpServerInfos() {
         try {
             final Properties p = System.getProperties();
-            LOG.info("{}{}{}{}{}", p.getProperty("os.name"), ' ', p.getProperty("os.arch"), ' ', p.getProperty("os.version"));
+            LOG.info("{} {} {}", p.getProperty("os.name"), p.getProperty("os.arch"), p.getProperty("os.version"));
             LOG.info(p.getProperty("java.runtime.version"));
             final long totalMemory = Runtime.getRuntime().totalMemory() >> 10;
             LOG.info("VM Total Memory       : {} KB", NumberFormat.getNumberInstance().format(totalMemory));

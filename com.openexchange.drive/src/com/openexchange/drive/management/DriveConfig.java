@@ -414,7 +414,7 @@ public class DriveConfig implements Initialization {
          */
         directLinkQuota = configService.getProperty("com.openexchange.drive.directLinkQuota", "[protocol]://[hostname]");
         directLinkHelp = configService.getProperty("com.openexchange.drive.directLinkHelp",
-            "[protocol]://[hostname]/[dispatcherPrefix]/help/[locale]/index.html");
+            "[protocol]://[hostname]/[uiwebpath]/help/[locale]/index.html");
         directLinkFragmentsFile = configService.getProperty("com.openexchange.drive.directLinkFragmentsFile",
             "m=infostore&f=[folder]&i=[object]");
         directLinkFile = configService.getProperty("com.openexchange.drive.directLinkFile",

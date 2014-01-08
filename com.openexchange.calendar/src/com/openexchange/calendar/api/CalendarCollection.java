@@ -2821,6 +2821,43 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             }
         }
     }
+    
+    private void setStartAndEndDate(CalendarDataObject target, CalendarDataObject source) throws OXException {
+        if ((target.getRecurrenceDatePosition() != null || target.getRecurrencePosition() != 0) && target.getRecurrenceID() == 0) { //Create Exception
+            if (target.getStartDate() != null && target.getEndDate() != null) { 
+                return;
+            }
+            
+            CalendarDataObject clone = source.clone();
+            if (target.containsRecurrencePosition()) {
+                clone.setRecurrencePosition(target.getRecurrencePosition());
+            }
+            if (target.containsRecurrenceDatePosition()) {
+                clone.setRecurrenceDatePosition(target.getRecurrenceDatePosition());
+            }
+
+            recColl.setRecurrencePositionOrDateInDAO(clone, true);
+
+            RecurringResultsInterface rss = recColl.calculateRecurringIgnoringExceptions(source, 0, 0, clone.getRecurrencePosition());
+            if (rss == null) {
+                throw OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_RECURRING_POSITION.create(clone.getRecurrencePosition());
+            }
+            RecurringResultInterface rs = rss.getRecurringResult(0);
+            if (target.getStartDate() == null) {
+                target.setStartDate(new Date(rs.getStart()));
+            }
+            if (target.getEndDate() == null) {
+                target.setEndDate(new Date(rs.getEnd()));
+            }
+        } else {
+            if (!target.containsStartDate()) {
+                target.setStartDate(source.getStartDate());
+            }
+            if (!target.containsEndDate()) {
+                target.setEndDate(source.getEndDate());
+            }
+        }
+    }
 
     public CalendarDataObject fillFieldsForConflictQuery(final CalendarDataObject cdao, final CalendarDataObject edao, final boolean action) throws OXException {
         if (!action && !cdao.containsStartDate() && !cdao.containsEndDate() && !cdao.containsParticipants() && !cdao.containsRecurrenceType()) {
@@ -2828,12 +2865,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         }
 
         final CalendarDataObject clone = cdao.clone();
-        if (!clone.containsShownAs()) {
-            clone.setShownAs(edao.getShownAs());
-        }
-        if (!clone.containsStartDate()) {
-            clone.setStartDate(edao.getStartDate());
-        }
+        setStartAndEndDate(clone, edao);
         if (!clone.containsEndDate()) {
             clone.setEndDate(edao.getEndDate());
         }

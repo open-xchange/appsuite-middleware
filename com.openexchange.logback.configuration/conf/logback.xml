@@ -61,11 +61,11 @@
     Important note:
     The following option ensures, that all login relevant information is logged correctly. Such information is essential to detect
     and to address session issues, potentially caused by 3rd parties.
-    Open-Xchange strongly suggests NOT to modify this configuration setting unless you are forced to do so by specific legal
-    requirements, e.g. privacy regulations.
-
-    Please note: If these settings are changed, Open-Xchange will take no responsibility and will exclude support regarding any
-    session issues and potential security breaches arising thereof.
+    
+    Open-Xchange strongly suggests NOT to modify the configuration for the classes 'com.openexchange.login.internal.LoginPerformer'
+    and 'com.openexchange.sessiond.impl.SessionHandler' to coarser logging settings (like WARN, ERROR and OFF). If you do so
+    the Open-Xchange server will revert your change and set the log level for these classes to INFO. Finer settings (like TRACE, DEBUG 
+    and ALL) are allowed and will not be overridden.
     -->
     <logger name="com.openexchange.login.internal.LoginPerformer" level="INFO"/>
     <logger name="com.openexchange.sessiond.impl.SessionHandler" level="INFO"/>
