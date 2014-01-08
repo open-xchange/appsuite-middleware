@@ -107,6 +107,7 @@ public class SettingsAction extends AbstractDriveAction {
                         jsonObject.put("quota", jsonArray);
                     }
                 }
+                jsonObject.put("serverVersion", settings.getServerVersion());
             } catch (JSONException e) {
                 throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             }
