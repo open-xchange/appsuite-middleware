@@ -8,7 +8,7 @@
     <!-- Customizable values -->
     <!-- This values must be changed for defining other installation places -->
     <property name="logInstallDir" value="/var/log/open-xchange"/>
-	<property name="distribution" value="debian"/>
+    <property name="distribution" value="debian"/>
 
     <!-- Constants -->
     <property name="osgiDir" value="osgi"/>
@@ -37,17 +37,24 @@
     </target>
 
     <target name="patchAndInstallScripts" depends="patchScripts">
-    	<property name="libInstallDir" value="${destDir}/${prefix}/${libDir}"/>
-    	<copy todir="${libInstallDir}" overwrite="true">
-    		<fileset dir="${libDir}"/>
-    	</copy>
+        <property name="libInstallDir" value="${destDir}/${prefix}/${libDir}"/>
+        <copy todir="${libInstallDir}" overwrite="true">
+            <fileset dir="${libDir}"/>
+        </copy>
         <property name="sbinInstallDir" value="${destDir}/${prefix}/${sbinDir}"/>
         <copy todir="${sbinInstallDir}" overwrite="true">
             <fileset dir="${patchSbinDir}"/>
         </copy>
         <chmod perm="755" file="${sbinInstallDir}/checkconfigconsistency"/>
-    	<chmod perm="755" file="${sbinInstallDir}/open-xchange"/>
-
+        <chmod perm="755" file="${sbinInstallDir}/clearpreviewcache"/>
+        <chmod perm="755" file="${sbinInstallDir}/sanitizefilemimetypes"/>
+        <chmod perm="755" file="${sbinInstallDir}/closesessions"/>
+        <chmod perm="755" file="${sbinInstallDir}/forceupdatetask"/>
+        <chmod perm="755" file="${sbinInstallDir}/getmissingservices"/>
+        <chmod perm="755" file="${sbinInstallDir}/listExecutedUpdateTasks"/>
+        <chmod perm="755" file="${sbinInstallDir}/logincounter"/>
+        <chmod perm="755" file="${sbinInstallDir}/lastlogintimestamp"/>
+        <chmod perm="755" file="${sbinInstallDir}/open-xchange"/>
     </target>
 
     <target name="patchScripts">
@@ -61,7 +68,7 @@
             <fileset dir="${sbinDir}"/>
             <mapper type="glob" from="*.in" to="*"/>
         </copy>
-        <replace dir="${patchSbinDir}" includes="checkconfigconsistency open-xchange">
+        <replace dir="${patchSbinDir}" includes="checkconsistency checkconfigconsistency clearpreviewcache sanitizefilemimetypes closesessions forceupdatetask getmissingservices listExecutedUpdateTasks logincounter lastlogintimestamp open-xchange restoregabdefaults runupdate">
             <replacefilter token="@oxfunctions@" value="${prefix}/${libDir}/oxfunctions.sh"/>
             <replacefilter token="@oxscriptconf@" value="${confInstallDir}/ox-scriptconf.sh"/>
             <replacefilter token="@prefix@" value="${prefix}"/>
