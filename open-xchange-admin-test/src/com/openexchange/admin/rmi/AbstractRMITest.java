@@ -78,8 +78,8 @@ public abstract class AbstractRMITest extends AbstractTest {
      */
     public void assertIDsAreEqual(User[] arr1, User[] arr2) {
         Set<Integer> set1 = new HashSet<Integer>();
-        for(int i = 0; i < arr1.length; i++){
-            set1.add( arr1[i].getId() );
+        for (User element : arr1) {
+            set1.add( element.getId() );
         }
         Set<Integer> set2 = new HashSet<Integer>();
         for(int i = 0; i < arr1.length; i++){
@@ -181,19 +181,19 @@ public abstract class AbstractRMITest extends AbstractTest {
     /*** Interfaces ***/
 
     public OXGroupInterface getGroupInterface() throws MalformedURLException, RemoteException, NotBoundException{
-         return (OXGroupInterface) Naming.lookup( getRMIHostUrl( OXGroupInterface.RMI_NAME ) );
+        return (OXGroupInterface) Naming.lookup(getRMIHostUrl() + OXGroupInterface.RMI_NAME);
     }
 
     public OXUserInterface getUserInterface() throws MalformedURLException, RemoteException, NotBoundException{
-         return (OXUserInterface) Naming.lookup( getRMIHostUrl( OXUserInterface.RMI_NAME ) );
+        return (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
     }
 
     public OXContextInterface getContextInterface() throws MalformedURLException, RemoteException, NotBoundException{
-        return (OXContextInterface) Naming.lookup( getRMIHostUrl( OXContextInterface.RMI_NAME ) );
+        return (OXContextInterface) Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
     }
 
     public OXResourceInterface getResourceInterface() throws MalformedURLException, RemoteException, NotBoundException{
-        return (OXResourceInterface) Naming.lookup( getRMIHostUrl( OXResourceInterface.RMI_NAME ) );
+        return (OXResourceInterface) Naming.lookup(getRMIHostUrl() + OXResourceInterface.RMI_NAME);
     }
 
 
@@ -267,13 +267,13 @@ public abstract class AbstractRMITest extends AbstractTest {
      * @throws MalformedURLException
      * */
     public Resource createTestResource() throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, MalformedURLException, NotBoundException{
-        OXResourceInterface resInterface = (OXResourceInterface) Naming.lookup( getRMIHostUrl( OXResourceInterface.RMI_NAME ) );
+        OXResourceInterface resInterface = getResourceInterface();
         testResource = resInterface.create(adminContext, getTestResource(), adminCredentials);
         return testResource;
     }
 
     public void removeTestResource() throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, MalformedURLException, NotBoundException{
-        OXResourceInterface resInterface = (OXResourceInterface) Naming.lookup( getRMIHostUrl( OXResourceInterface.RMI_NAME ) );
+        OXResourceInterface resInterface = getResourceInterface();
         try {
             resInterface.delete(adminContext, testResource, adminCredentials);
         } catch (NoSuchResourceException e) {

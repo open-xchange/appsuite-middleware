@@ -58,6 +58,7 @@ package com.openexchange.drive;
 public class DriveSettings {
 
     private String helpLink;
+    private String serverVersion;
     private DriveQuota quota;
 
     /**
@@ -101,6 +102,24 @@ public class DriveSettings {
      */
     public void setQuota(DriveQuota quota) {
         this.quota = quota;
+    }
+
+    /**
+     * Sets the server version
+     *
+     * @param serverVersion The server version to set
+     */
+    public void setServerVersion(String serverVersion) {
+        this.serverVersion = serverVersion;
+    }
+
+    /**
+     * Gets the server version
+     *
+     * @return The server version
+     */
+    public String getServerVersion() {
+        return serverVersion;
     }
 
 }

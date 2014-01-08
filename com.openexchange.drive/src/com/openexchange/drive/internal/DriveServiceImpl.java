@@ -379,6 +379,7 @@ public class DriveServiceImpl implements DriveService {
         LOG.debug("Got quota for root folder '{}': {}", session.getRootFolderID(), quota);
         settings.setQuota(new DriveQuotaImpl(quota, syncSession.getLinkGenerator().getQuotaLink()));
         settings.setHelpLink(syncSession.getLinkGenerator().getHelpLink());
+        settings.setServerVersion(com.openexchange.version.Version.getInstance().getVersionString());
         return settings;
     }
 

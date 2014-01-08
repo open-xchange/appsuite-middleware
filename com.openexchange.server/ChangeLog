@@ -1,3 +1,7 @@
+* 2014-01-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30524: Fixed customizing of anchor's CSS selector
+
 * 2014-01-07 - martin.herfurth@open-xchange.com
 
  - Fix for bug 30411: Bad conflict handling (Follow up of Bugfix #30118).

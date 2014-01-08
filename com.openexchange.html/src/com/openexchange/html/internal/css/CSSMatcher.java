@@ -513,9 +513,6 @@ public final class CSSMatcher {
             return new StringAllocator(match).append('{').toString();
         }
         final int length = match.length();
-        if (1 == length) {
-            return new StringAllocator(match).append('{').toString();
-        }
         // Cut off trailing '{' character
         final String s = match.indexOf('{') < 0 ? match : match.substring(0, length - 1);
         if (isEmpty(s)) {
