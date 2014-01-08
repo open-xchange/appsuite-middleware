@@ -176,8 +176,8 @@ public class RdbSettingStorage extends SettingStorage {
             if (null != value && value.isWritable()) {
                 value.writeValue(session, ctx, user, setting);
             } else {
-                final OXException e = SettingExceptionCodes.NO_WRITE.create(setting.getName());
-                LOG.debug("", e);
+                // final OXException e = SettingExceptionCodes.NO_WRITE.create(setting.getName());
+                LOG.debug("Writing the setting {} is not permitted.", setting.getName());
             }
         } else {
             saveInternal(con, setting);
