@@ -134,7 +134,11 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
         IFileHolder fileHolder = null;
         try {
             // Check cache first
-            final ResourceCache resourceCache = ResourceCaches.getResourceCache();
+            final ResourceCache resourceCache;
+            {
+                final ResourceCache tmp = ResourceCaches.getResourceCache();
+                resourceCache = null == tmp ? null : (tmp.isEnabledFor(session.getContextId(), session.getUserId()) ? tmp : null);
+            }
             final String eTag = requestData.getETag();
             final boolean isValidEtag = !Strings.isEmpty(eTag);
             if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", requestData, true)) {

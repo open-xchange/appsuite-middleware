@@ -740,7 +740,11 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
 
         // Check cache first
-        final ResourceCache resourceCache = ResourceCaches.getResourceCache();
+        final ResourceCache resourceCache;
+        {
+            final ResourceCache tmp = ResourceCaches.getResourceCache();
+            resourceCache = null == tmp ? null : (tmp.isEnabledFor(request.getSession().getContextId(), request.getSession().getUserId()) ? tmp : null);
+        }
         // Get eTag from result that provides the IFileHolder
         final String eTag = result.getHeader("ETag");
         final boolean isValidEtag = !isEmpty(eTag);

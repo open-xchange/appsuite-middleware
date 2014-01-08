@@ -56,6 +56,9 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventConstants;
@@ -76,8 +79,14 @@ public abstract class AbstractResourceCache implements ResourceCache, EventHandl
 
     @Override
     public boolean isEnabledFor(int contextId, int userId) throws OXException {
-        // TODO: implement me with config cascade
-        return true;
+        final ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        final boolean defaultValue = true;
+        if (null == factory) {
+            return defaultValue;
+        }
+        final ConfigView configView = factory.getView(userId, contextId);
+        final ComposedConfigProperty<Boolean> enabledProp = configView.property("com.openexchange.preview.cache.enabled", boolean.class);
+        return enabledProp.isDefined() ? enabledProp.get().booleanValue() : defaultValue;
     }
 
     @Override

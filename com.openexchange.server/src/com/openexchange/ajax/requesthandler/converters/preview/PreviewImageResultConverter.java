@@ -122,7 +122,11 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
     public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         try {
             // Check cache first
-            final ResourceCache resourceCache = ResourceCaches.getResourceCache();
+            final ResourceCache resourceCache;
+            {
+                final ResourceCache tmp = ResourceCaches.getResourceCache();
+                resourceCache = null == tmp ? null : (tmp.isEnabledFor(session.getContextId(), session.getUserId()) ? tmp : null);
+            }
 
             // Get eTag from result that provides the IFileHolder
             final String eTag = result.getHeader("ETag");
