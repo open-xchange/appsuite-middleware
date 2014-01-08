@@ -639,29 +639,35 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             removed.remove(i);
         }
 
-        String objectId = fileID.getFileId();
-        FolderID folderID;
-        String fileFolder = fileID.getFolderId();
-        String fileName = null;
-        if (fileFolder == null) {
-            /*
-             * Reload the document to get it's folder id.
-             */
-            File fileMetadata = access.getFileMetadata(fileFolder, objectId, FileStorageFileAccess.CURRENT_VERSION);
-            fileName = fileMetadata.getFileName();
-            folderID = new FolderID(serviceId, accountId, fileMetadata.getFolderId());
-        } else {
-            folderID = new FolderID(serviceId, accountId, fileFolder);
+        /*
+         * prepare event if needed
+         */
+        if (0 < removed.size()) {
+            String objectId = fileID.getFileId();
+            FolderID folderID;
+            String fileFolder = fileID.getFolderId();
+            String fileName = null;
+            if (fileFolder == null) {
+                /*
+                 * Reload the document to get it's folder id.
+                 */
+                File fileMetadata = access.getFileMetadata(fileFolder, objectId, FileStorageFileAccess.CURRENT_VERSION);
+                fileName = fileMetadata.getFileName();
+                folderID = new FolderID(serviceId, accountId, fileMetadata.getFolderId());
+            } else {
+                folderID = new FolderID(serviceId, accountId, fileFolder);
+            }
+
+            postEvent(FileStorageEventHelper.buildDeleteEvent(
+                session,
+                serviceId,
+                accountId,
+                folderID.toUniqueID(),
+                fileID.toUniqueID(),
+                fileName,
+                removed));
         }
 
-        postEvent(FileStorageEventHelper.buildDeleteEvent(
-            session,
-            serviceId,
-            accountId,
-            folderID.toUniqueID(),
-            fileID.toUniqueID(),
-            fileName,
-            removed));
         return notRemoved;
     }
 

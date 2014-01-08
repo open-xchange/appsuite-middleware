@@ -186,8 +186,13 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
             }
             deletedVersions.add(String.valueOf(versionID));
         }
-        fireEvent(FileStorageEventHelper.buildDeleteEvent(
-            session, SERVICE_ID, ACCOUNT_ID, getFolderID(document), getFileID(document), document.getFileName(), null));
+        /*
+         * fire event if needed
+         */
+        if (0 < deletedVersions.size()) {
+            fireEvent(FileStorageEventHelper.buildDeleteEvent(
+                session, SERVICE_ID, ACCOUNT_ID, getFolderID(document), getFileID(document), document.getFileName(), deletedVersions));
+        }
         return notRemoved;
     }
 
