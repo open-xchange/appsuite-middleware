@@ -60,6 +60,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -69,6 +70,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.management.MBeanException;
+import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadataStore;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -79,6 +82,7 @@ import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.report.internal.Tools;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.sql.DBUtils;
@@ -101,7 +105,7 @@ public abstract class Consistency implements ConsistencyMBean {
             final DoNothingSolver doNothing = new DoNothingSolver();
             final RecordSolver recorder = new RecordSolver();
             final Context ctx = getContext(contextId);
-            checkOneContext(ctx, recorder, recorder, recorder, doNothing, getDatabase(), getAttachments(), getFileStorage(ctx));
+            checkOneContext(ctx, recorder, recorder, recorder, recorder, doNothing, getDatabase(), getAttachments(), getFileStorage(ctx));
             return recorder.getProblems();
         } catch (final OXException e) {
             LOG.error("", e);
@@ -177,7 +181,7 @@ public abstract class Consistency implements ConsistencyMBean {
             final DoNothingSolver doNothing = new DoNothingSolver();
             final RecordSolver recorder = new RecordSolver();
             final Context ctx = getContext(contextId);
-            checkOneContext(ctx, doNothing, doNothing, doNothing, recorder, getDatabase(), getAttachments(), getFileStorage(ctx));
+            checkOneContext(ctx, doNothing, doNothing, doNothing, doNothing, recorder, getDatabase(), getAttachments(), getFileStorage(ctx));
             return recorder.getProblems();
         } catch (final OXException e) {
             LOG.error("", e);
@@ -379,7 +383,7 @@ public abstract class Consistency implements ConsistencyMBean {
         final DoNothingSolver doNothing = new DoNothingSolver();
         for (final Context ctx : contexts) {
             final RecordSolver recorder = new RecordSolver();
-            checkOneContext(ctx, recorder, recorder, recorder, doNothing, getDatabase(), getAttachments(), getFileStorage(ctx));
+            checkOneContext(ctx, recorder, recorder, recorder, recorder, doNothing, getDatabase(), getAttachments(), getFileStorage(ctx));
             retval.put(Integer.valueOf(ctx.getContextId()), recorder.getProblems());
         }
         return retval;
@@ -390,7 +394,7 @@ public abstract class Consistency implements ConsistencyMBean {
         final DoNothingSolver doNothing = new DoNothingSolver();
         for (final Context ctx : contexts) {
             final RecordSolver recorder = new RecordSolver();
-            checkOneContext(ctx, doNothing, doNothing, doNothing, recorder, getDatabase(), getAttachments(), getFileStorage(ctx));
+            checkOneContext(ctx, doNothing, doNothing, doNothing, doNothing, recorder, getDatabase(), getAttachments(), getFileStorage(ctx));
             retval.put(Integer.valueOf(ctx.getContextId()), recorder.getProblems());
         }
         return retval;
@@ -475,10 +479,25 @@ public abstract class Consistency implements ConsistencyMBean {
             final FileStorage storage = getFileStorage(ctx);
 
             final ResolverPolicy resolvers = ResolverPolicy.parse(policy, database, attachments, storage, this);
+            checkOneContext(ctx, resolvers.dbsolver, resolvers.attachmentsolver, resolvers.snippetsolver, new DeleteBrokenPreviewReferences(), resolvers.filesolver, database, attachments, storage);
 
-            checkOneContext(ctx, resolvers.dbsolver, resolvers.attachmentsolver, resolvers.snippetsolver, resolvers.filesolver, database, attachments, storage);
+            /*
+             * The ResourceCache might store resources in the filestorage. Depending on its configuration (preview.properties)
+             * these files affect the contexts quota or not.
+             */
+            boolean quotaAware = false;
+            ConfigurationService configurationService = ServerServiceRegistry.getServize(ConfigurationService.class);
+            if (configurationService != null) {
+                quotaAware = configurationService.getBoolProperty("com.openexchange.preview.cache.quotaAware", false);
+            }
 
-            recalculateUsage(storage);
+            Set<String> filesToIgnore;
+            if (quotaAware) {
+                filesToIgnore = Collections.emptySet();
+            } else {
+                filesToIgnore = getPreviewCacheFileStoreLocationsperContext(ctx);
+            }
+            recalculateUsage(storage, filesToIgnore);
         }
     }
 
@@ -515,7 +534,7 @@ public abstract class Consistency implements ConsistencyMBean {
         return retval;
     }
 
-    private void checkOneContext(final Context ctx, final ProblemSolver dbSolver, final ProblemSolver attachmentSolver, final ProblemSolver snippetSolver, final ProblemSolver fileSolver, final DatabaseImpl database, final AttachmentBase attach, final FileStorage stor) throws OXException {
+    private void checkOneContext(final Context ctx, final ProblemSolver dbSolver, final ProblemSolver attachmentSolver, final ProblemSolver snippetSolver, final ProblemSolver previewSolver, final ProblemSolver fileSolver, final DatabaseImpl database, final AttachmentBase attach, final FileStorage stor) throws OXException {
 
         // We believe in the worst case, so lets check the storage first, so
         // that the state file is recreated
@@ -529,7 +548,9 @@ public abstract class Consistency implements ConsistencyMBean {
         final SortedSet<String> attachmentset = attach.getAttachmentFileStoreLocationsperContext(ctx);
         LOG.info("Found {} attachments", attachmentset.size());
         final SortedSet<String> snippetset = getSnippetFileStoreLocationsperContext(ctx);
-        LOG.info("Found {} attachments", attachmentset.size());
+        LOG.info("Found {} snippets", snippetset.size());
+        final SortedSet<String> previewset = getPreviewCacheFileStoreLocationsperContext(ctx);
+        LOG.info("Found {} previews", previewset.size());
         SortedSet<String> dbfileset;
         try {
             LOG.info("Loading all infostore filestore locations");
@@ -538,6 +559,7 @@ public abstract class Consistency implements ConsistencyMBean {
             final SortedSet<String> joineddbfileset = new TreeSet<String>(dbfileset);
             joineddbfileset.addAll(attachmentset);
             joineddbfileset.addAll(snippetset);
+            joineddbfileset.addAll(previewset);
 
             LOG.info("Found {} filestore ids in total. There are {} files in the filespool. A difference of {}", joineddbfileset.size(), filestoreset.size(), Math.abs(joineddbfileset.size() - filestoreset.size()));
 
@@ -564,6 +586,10 @@ public abstract class Consistency implements ConsistencyMBean {
                 snippetSolver.solve(ctx, snippetset);
             }
 
+            if (diffset(previewset, filestoreset, "database list of cached previews", "filestore list")) {
+                previewSolver.solve(ctx, previewset);
+            }
+
             // Build the difference set of the filestore set, so that the final
             // filestoreset contains all the members that aren't in the dbfileset or
             // the dbdelfileset
@@ -575,6 +601,12 @@ public abstract class Consistency implements ConsistencyMBean {
         } catch (final OXException e) {
             erroroutput(e);
         }
+    }
+
+    private SortedSet<String> getPreviewCacheFileStoreLocationsperContext(Context ctx) throws OXException {
+        ResourceCacheMetadataStore metadataStore = ResourceCacheMetadataStore.getInstance();
+        Set<String> refIds = metadataStore.loadRefIds(ctx.getContextId());
+        return new TreeSet<String>(refIds);
     }
 
     private SortedSet<String> getSnippetFileStoreLocationsperContext(Context ctx) throws OXException {
@@ -615,11 +647,11 @@ public abstract class Consistency implements ConsistencyMBean {
         return retval;
     }
 
-    private void recalculateUsage(final FileStorage storage) {
+    private void recalculateUsage(final FileStorage storage, final Set<String> filesToIgnore) {
         try {
             if (storage instanceof QuotaFileStorage) {
                 output("Recalculating usage...");
-                ((QuotaFileStorage) storage).recalculateUsage();
+                ((QuotaFileStorage) storage).recalculateUsage(filesToIgnore);
             }
         } catch (final OXException e) {
             erroroutput(e);
@@ -1363,6 +1395,27 @@ public abstract class Consistency implements ConsistencyMBean {
         public String description() {
             return "create infoitem";
         }
+    }
+
+    private static class DeleteBrokenPreviewReferences implements ProblemSolver {
+
+        private static final org.slf4j.Logger LOG1 =
+            org.slf4j.LoggerFactory.getLogger(DeleteBrokenPreviewReferences.class);
+
+        @Override
+        public void solve(Context ctx, Set<String> problems) throws OXException {
+            if (problems.size() > 0) {
+                ResourceCacheMetadataStore metadataStore = ResourceCacheMetadataStore.getInstance();
+                metadataStore.removeByRefId(ctx.getContextId(), problems);
+                LOG1.info("Deleted {} broken preview cache references.", problems.size());
+            }
+        }
+
+        @Override
+        public String description() {
+            return "delete broken preview references";
+        }
+
     }
 
     protected static boolean tableExists(final Connection con, final String table) throws SQLException {
