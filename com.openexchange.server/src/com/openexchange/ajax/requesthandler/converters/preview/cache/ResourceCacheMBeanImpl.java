@@ -68,11 +68,13 @@ import javax.management.StandardMBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.cache.ResourceCache;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 
@@ -93,6 +95,51 @@ public final class ResourceCacheMBeanImpl extends StandardMBean implements Resou
      */
     public ResourceCacheMBeanImpl() throws NotCompliantMBeanException {
         super(ResourceCacheMBean.class);
+    }
+
+    @Override
+    public void clear() throws MBeanException {
+        final ResourceCache resourceCache = CACHE_REF.get();
+        if (null != resourceCache) {
+            final Logger logger = LoggerFactory.getLogger(ResourceCacheMBeanImpl.class);
+            List<Integer> contextIds = null;
+            try {
+                contextIds = getContextIds();
+            } catch (OXException e) {
+                logger.error("", e);
+                final String message = e.getMessage();
+                throw new MBeanException(new Exception(message), message);
+            }
+
+            for (final Integer contextId : contextIds) {
+                try {
+                    resourceCache.clearFor(contextId.intValue());
+                } catch (final OXException e) {
+                    logger.error("", e);
+                    final String message = e.getMessage();
+                    throw new MBeanException(new Exception(message), message);
+                } catch (final RuntimeException e) {
+                    logger.error("", e);
+                    final String message = e.getMessage();
+                    throw new MBeanException(new Exception(message), message);
+                }
+            }
+        }
+    }
+
+    /**
+     * Gets available context identifier.
+     *
+     * @param optService The optional database service
+     * @return The context identifiers
+     * @throws OXException If identifiers cannot be loaded from configDB
+     */
+    private List<Integer> getContextIds() throws OXException {
+        final ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class);
+        if (null == contextService) {
+            throw ServiceExceptionCode.absentService(ContextService.class);
+        }
+        return contextService.getAllContextIds();
     }
 
     @Override
