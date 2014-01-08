@@ -10,6 +10,18 @@ open-xchange-themes-default (7.4.2-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 18 Dec 2013 17:34:53 +0100
 
+open-xchange-themes-default (7.4.1-13) stable; urgency=low
+
+  * Build for patch 2014-01-06
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 03 Jan 2014 15:41:15 +0100
+
+open-xchange-themes-default (7.4.1-12) stable; urgency=low
+
+  * Build for patch 2013-12-09
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 23 Dec 2013 16:25:55 +0100
+
 open-xchange-themes-default (7.4.1-11) stable; urgency=low
 
   * Build for patch 2013-12-23

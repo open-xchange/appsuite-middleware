@@ -419,8 +419,12 @@ Authors:
 %doc README.TXT
 
 %changelog
+* Fri Jan 03 2014 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2014-01-06
 * Mon Dec 23 2013 Carsten Hoeger <choeger@open-xchange.com>
 First release candidate for 7.4.2
+* Mon Dec 23 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-12-09
 * Thu Dec 19 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-12-23
 * Thu Dec 19 2013 Carsten Hoeger <choeger@open-xchange.com>
