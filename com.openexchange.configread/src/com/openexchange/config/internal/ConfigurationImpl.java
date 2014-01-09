@@ -269,7 +269,7 @@ public final class ConfigurationImpl implements ConfigurationService {
                 if (properties.containsKey(propName) && otherValue != null && !otherValue.equals(e.getValue())) {
                     final String otherFile = propertiesFiles.get(propName);
                     LOG.debug(
-                        "Overwriting property {} from file ''{}'' with property from file ''{}'', overwriting value ''{}'' with value ''{}",
+                        "Overwriting property {} from file ''{}'' with property from file ''{}'', overwriting value ''{}'' with value ''{}''",
                         propName,
                         otherFile,
                         propFilePath,
