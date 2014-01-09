@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import org.junit.After;
 import org.junit.Before;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -42,13 +41,8 @@ public abstract class AbstractRMITest extends AbstractTest {
         adminContext = getTestContextObject(adminCredentials);
 
         superAdmin = newUser("oxadminmaster","secret","ContextCreatingAdmin","Ad","Min","adminmaster@ox.invalid");
-        superAdminCredentials = new Credentials(superAdmin.getName(),superAdmin.getPassword());
+        superAdminCredentials = DummyMasterCredentials();
         superAdminContext = getTestContextObject(superAdminCredentials);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-
     }
 
     public Integer getContextID() {
@@ -194,28 +188,6 @@ public abstract class AbstractRMITest extends AbstractTest {
 
     public OXResourceInterface getResourceInterface() throws MalformedURLException, RemoteException, NotBoundException{
         return (OXResourceInterface) Naming.lookup(getRMIHostUrl() + OXResourceInterface.RMI_NAME);
-    }
-
-
-    /**
-     * Creates a URL that can be used for testing locally.
-     * Needs a RMI-class name added to it for lookup, though.
-     * @return
-     */
-    public String getRMIHostUrl(String classname) {
-        String host = getHostName();
-
-        if(System.getProperty("host")!=null){
-            host = System.getProperty("host");
-        }
-
-        if(!host.startsWith("rmi://")){
-            host = "rmi://"+host;
-        }
-        if(!host.endsWith("/")){
-            host = host+"/";
-        }
-        return host + classname;
     }
 
     /**

@@ -78,7 +78,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
  * */
 public class AdditionalRMITests extends AbstractRMITest {
 
-    public String myUserName = "thorben";
+    public String myUserName = "thorben.betten";
 
     public String myDisplayName = "Thorben Betten";
 
@@ -441,7 +441,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         OXContextInterface conInterface = getContextInterface();
         boolean contextCreated = false;
         Context newContext = newContext("newContext", 666);
-        User newAdmin = newUser("new_admin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
+        User newAdmin = newUser("oxadmin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
         try {
             newContext = conInterface.create(newContext, newAdmin, superAdminCredentials);
             contextCreated = true;
