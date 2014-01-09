@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime;
 
+import static com.openexchange.java.Strings.toLowerCase;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -63,7 +64,6 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.SystemConfig;
@@ -233,7 +233,7 @@ public final class MimeType2ExtMap {
         if (s1.length() == 0) {
             return MIME_APPL_OCTET;
         }
-        final String type = typeMap.get(s1.toLowerCase(Locale.ENGLISH));
+        final String type = typeMap.get(toLowerCase(s1));
         if (null == type) {
             return MIME_APPL_OCTET;
         }
@@ -251,7 +251,7 @@ public final class MimeType2ExtMap {
         if (null == extension || 0 == extension.length()) {
             return MIME_APPL_OCTET;
         }
-        final String type = typeMap.get(extension.toLowerCase(Locale.ENGLISH));
+        final String type = typeMap.get(toLowerCase(extension));
         if (null == type) {
             return MIME_APPL_OCTET;
         }
@@ -268,7 +268,7 @@ public final class MimeType2ExtMap {
      */
     public static List<String> getFileExtensions(String mimeType) {
         init();
-        if (!extMap.containsKey(mimeType.toLowerCase(Locale.ENGLISH))) {
+        if (!extMap.containsKey(toLowerCase(mimeType))) {
             return DEFAULT_EXT;
         }
         final List<String> list = extMap.get(mimeType);
@@ -283,7 +283,7 @@ public final class MimeType2ExtMap {
      */
     public static String getFileExtension(String mimeType) {
         init();
-        if (!extMap.containsKey(mimeType.toLowerCase(Locale.ENGLISH))) {
+        if (!extMap.containsKey(toLowerCase(mimeType))) {
             return "dat";
         }
         final List<String> list = extMap.get(mimeType);
@@ -407,10 +407,10 @@ public final class MimeType2ExtMap {
         } else {
             final String[] tokens = entry.split("[ \t\n\r\f]+");
             if (tokens.length > 1) {
-                final String type = tokens[0].toLowerCase(Locale.ENGLISH);
+                final String type = toLowerCase(tokens[0]);
                 final List<String> set = new ArrayList<String>();
                 for (int i = 1; i < tokens.length; i++) {
-                    final String ext = tokens[i].toLowerCase(Locale.ENGLISH);
+                    final String ext = toLowerCase(tokens[i]);
                     set.add(ext);
                     typeMap.put(ext, type);
                 }
