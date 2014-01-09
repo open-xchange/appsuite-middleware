@@ -58,6 +58,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.Lock;
 import org.apache.commons.lang.Validate;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
@@ -68,6 +69,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.lock.LockService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.DefaultAddSessionParameter;
@@ -264,22 +266,36 @@ public class TokenLoginServiceImpl implements TokenLoginService {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ContextService.class.getName());
         }
         // Look-up session identifier
-        String sessionId = token2sessionId.remove(token);
-        if (null == sessionId) {
-            // Local MISS, look up in Hazelcast map
-            final IMap<String, String> hzMap = hzMap();
-            if (null != hzMap) {
-                sessionId = hzMap.remove(token);
-            }
-            if (null == sessionId) {
-                throw TokenLoginExceptionCodes.NO_SUCH_TOKEN.create(token);
-            }
-        } else {
-            // Local HIT, remove from Hazelcast map
-            removeFromHzMap(token, false);
+        final Lock lock;
+        {
+            final LockService lockService = Services.getService(LockService.class);
+            lock = null == lockService ? Session.EMPTY_LOCK : lockService.getLockFor(token);
         }
-        // Remove from other mapping, too
-        sessionId2token.remove(sessionId);
+        // Get session identifier
+        String sessionId;
+
+        lock.lock();
+        try {
+            sessionId = token2sessionId.remove(token);
+            if (null == sessionId) {
+                // Local MISS, look up in Hazelcast map
+                final IMap<String, String> hzMap = hzMap();
+                if (null != hzMap) {
+                    sessionId = hzMap.remove(token);
+                }
+                if (null == sessionId) {
+                    throw TokenLoginExceptionCodes.NO_SUCH_TOKEN.create(token);
+                }
+            } else {
+                // Local HIT, remove from Hazelcast map
+                removeFromHzMap(token, false);
+            }
+            // Remove from other mapping, too
+            sessionId2token.remove(sessionId);
+        } finally {
+            lock.unlock();
+        }
+
         // Create duplicate session
         final Session session = sessiondService.getSession(sessionId);
         if (null == session) {
