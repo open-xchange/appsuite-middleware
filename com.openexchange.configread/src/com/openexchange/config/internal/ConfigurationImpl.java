@@ -88,17 +88,18 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigurationImpl.class);
 
-    private static final String EXT = ".properties";
-
     private static final class PropertyFileFilter implements FileFilter {
 
-        public PropertyFileFilter() {
+        private final String ext;
+
+        PropertyFileFilter() {
             super();
+            ext = ".properties";
         }
 
         @Override
         public boolean accept(final File pathname) {
-            return pathname.isDirectory() || pathname.getName().toLowerCase().endsWith(EXT);
+            return pathname.isDirectory() || pathname.getName().toLowerCase().endsWith(ext);
         }
 
     }
