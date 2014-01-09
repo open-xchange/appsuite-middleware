@@ -203,7 +203,7 @@ public class Multiple extends SessionServlet {
             try {
                 // Distinguish between serially and concurrently executable requests
                 List<JsonInOut> serialTasks = null;
-                CompletionService<Object> concurrentTasks = null;
+                CompletionService<Object> completionService = null;
                 int concurrentTasksCount = 0;
                 // Build-up mapping & schedule for either serial or concurrent execution
                 final ConcurrentTIntObjectHashMap<JsonInOut> mapping = new ConcurrentTIntObjectHashMap<JsonInOut>(length);
@@ -222,15 +222,15 @@ public class Multiple extends SessionServlet {
                         }
                         serialTasks.add(jsonInOut);
                     } else {
-                        if (null == concurrentTasks) {
+                        if (null == completionService) {
                             final int concurrencyLevel = CONCURRENCY_LEVEL;
                             if (concurrencyLevel <= 0 || length <= concurrencyLevel) {
-                                concurrentTasks = new ThreadPoolCompletionService<Object>(ThreadPools.getThreadPool()).setTrackable(true);
+                                completionService = new ThreadPoolCompletionService<Object>(ThreadPools.getThreadPool()).setTrackable(true);
                             } else {
-                                concurrentTasks = new BoundedCompletionService<Object>(ThreadPools.getThreadPool(), concurrencyLevel).setTrackable(true);
+                                completionService = new BoundedCompletionService<Object>(ThreadPools.getThreadPool(), concurrencyLevel).setTrackable(true);
                             }
                         }
-                        concurrentTasks.submit(new CallableImpl(jsonInOut, session, module, req));
+                        completionService.submit(new CallableImpl(jsonInOut, session, module, req));
                         concurrentTasksCount++;
                     }
                 }
@@ -248,16 +248,9 @@ public class Multiple extends SessionServlet {
                         serialTasks.get(i).setOutputObject((JSONValue) serialResponses.get(i));
                     }
                 }
-                if (null != concurrentTasks) {
+                if (null != completionService) {
                     // Await completion service
-                    for (int i = 0; i < concurrentTasksCount; i++) {
-                        try {
-                            concurrentTasks.take();
-                        } catch (final InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-                        }
-                    }
+                    awaitCompletionOfConcurrentTasks(completionService, concurrentTasksCount);
                 }
                 // Add single responses to JSON array
                 for (int pos = 0; pos < length; pos++) {
@@ -274,6 +267,17 @@ public class Multiple extends SessionServlet {
             }
         }
         return respArr;
+    }
+
+    private static void awaitCompletionOfConcurrentTasks(final CompletionService<Object> completionService, final int concurrentTasksCount) throws OXException {
+        for (int i = 0; i < concurrentTasksCount; i++) {
+            try {
+                completionService.take();
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        }
     }
 
     private static final Set<String> SERIAL_ON_MODIFICATION_MODULES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(MODULE_CALENDAR, MODULE_TASK, MODULE_FOLDER, MODULE_FOLDERS, MODULE_CONTACT)));
