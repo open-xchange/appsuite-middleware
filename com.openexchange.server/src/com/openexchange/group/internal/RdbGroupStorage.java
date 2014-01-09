@@ -66,6 +66,7 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.LdapUtility;
+import com.openexchange.java.Strings;
 import com.openexchange.server.impl.DBPool;
 
 /**
@@ -297,6 +298,9 @@ public class RdbGroupStorage extends GroupStorage {
      */
     @Override
     public Group[] searchGroups(final String pattern, final boolean loadMembers, final Context context) throws OXException {
+        if (Strings.isEmpty(pattern)) {
+            return new Group[0];
+        }
         final Connection con;
         try {
             con = DBPool.pickup(context);
@@ -305,15 +309,14 @@ public class RdbGroupStorage extends GroupStorage {
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
-        final String sql = SELECT_GROUPS + " AND (displayName LIKE ? OR identifier LIKE ?)";
-        final List<Group> groups = new ArrayList<Group>();
         try {
-            stmt = con.prepareStatement(sql);
+            stmt = con.prepareStatement(SELECT_GROUPS + " AND (displayName LIKE ? OR identifier LIKE ?)");
             stmt.setLong(1, context.getContextId());
             final String sqlPattern = LdapUtility.prepareSearchPattern(pattern);
             stmt.setString(2, sqlPattern);
             stmt.setString(3, sqlPattern);
             result = stmt.executeQuery();
+            final List<Group> groups = new ArrayList<Group>();
             while (result.next()) {
                 final Group group = new Group();
                 int pos = 1;
@@ -326,6 +329,7 @@ public class RdbGroupStorage extends GroupStorage {
                 }
                 groups.add(group);
             }
+            return groups.toArray(new Group[groups.size()]);
         } catch (final SQLException e) {
             throw GroupExceptionCodes.SQL_ERROR.create(e,
                 e.getMessage());
@@ -333,7 +337,6 @@ public class RdbGroupStorage extends GroupStorage {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
         }
-        return groups.toArray(new Group[groups.size()]);
     }
 
     /**

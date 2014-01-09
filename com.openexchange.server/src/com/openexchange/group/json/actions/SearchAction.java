@@ -53,6 +53,7 @@ import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -79,6 +80,8 @@ import com.openexchange.tools.session.ServerSession;
 responseDescription = "Response with timestamp: An array of group objects as described in Group data.")
 public final class SearchAction extends AbstractGroupAction {
 
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SearchAction.class);
+
     /**
      * Initializes a new {@link SearchAction}.
      * @param services
@@ -93,15 +96,17 @@ public final class SearchAction extends AbstractGroupAction {
             return new AJAXRequestResult(new JSONArray(0), "json");
         }
 
-        // Appropriate permissiin is granted
+        // Appropriate permission is granted
         // Continue processing search request
 
         final JSONObject jData = req.getData();
 
-        String searchpattern = null;
-        if (jData.has(SearchFields.PATTERN)) {
-            searchpattern = DataParser.parseString(jData, SearchFields.PATTERN);
+        if (!jData.hasAndNotNull(SearchFields.PATTERN)) {
+            LOG.warn("Missing field \"{}\" in JSON data. Searching for all as fallback", SearchFields.PATTERN);
+            return new com.openexchange.group.json.actions.AllAction(services).perform(req);
         }
+
+        final String searchpattern = DataParser.parseString(jData, SearchFields.PATTERN);
 
         Date timestamp = new Date(0);
         final ServerSession session = req.getSession();
