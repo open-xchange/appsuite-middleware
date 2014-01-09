@@ -217,6 +217,9 @@ public final class ImageTypeDetector {
         try {
             byte[] buf = new byte[32];
             final int read = binary.read(buf, 0, 32);
+            if (0 >= read) {
+                return "application/octet-stream";
+            }
             if (read < 32) {
                 byte[] tmp = new byte[read];
                 System.arraycopy(buf, 0, tmp, 0, read);

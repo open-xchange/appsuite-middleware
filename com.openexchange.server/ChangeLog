@@ -1,3 +1,7 @@
+* 2014-01-09 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30549: Don't try and guess mime type from empty stream
+
 * 2014-01-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 29639: Use configured default charset to url-decode incoming requests' URIs
