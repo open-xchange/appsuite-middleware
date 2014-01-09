@@ -49,7 +49,9 @@
 
 package com.openexchange.admin.user.copy.rmi;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -274,11 +276,6 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
         }
 
         super.tearDown();
-    }
-
-    @Override
-    public String getRMIHostUrl(String classname) {
-        return AbstractTest.getRMIHostUrl() + classname;
     }
 
     private OXUserCopyInterface getUserMoveClient() throws MalformedURLException, RemoteException, NotBoundException {

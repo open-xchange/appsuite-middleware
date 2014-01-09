@@ -68,12 +68,16 @@ public class UserCopyTest extends AbstractRMITest {
     private static final String PASSWORD = "secret";
     private static final String OXADMINMASTER = "oxadminmaster";
 
+    private int getRandomContextId() {
+        return (int) (Math.random() * 1000);
+    }
+
     @Test
     public final void testMoveUser() throws Throwable {
         final OXUserCopyInterface oxu = getUserMoveClient();
         final User user = new User(1);
-        final Context src = new Context(I(1));
-        final Context dest = new Context(I(2));
+        final Context src = new Context(I(getRandomContextId()));
+        final Context dest = new Context(I(getRandomContextId()));
         final Credentials auth = new Credentials(OXADMINMASTER, PASSWORD);
         oxu.copyUser(user, src, dest, auth);
     }
@@ -81,8 +85,8 @@ public class UserCopyTest extends AbstractRMITest {
     @Test
     public final void testMoveUserNoUser() throws Throwable {
         final OXUserCopyInterface oxu = getUserMoveClient();
-        final Context src = new Context(I(1));
-        final Context dest = new Context(I(2));
+        final Context src = new Context(I(getRandomContextId()));
+        final Context dest = new Context(I(getRandomContextId()));
         final Credentials auth = new Credentials(OXADMINMASTER, PASSWORD);
         try {
             oxu.copyUser(null, src, dest, auth);
@@ -96,8 +100,8 @@ public class UserCopyTest extends AbstractRMITest {
     public final void testMoveUserNoUserId() throws Throwable {
         final OXUserCopyInterface oxu = getUserMoveClient();
         final User user = new User();
-        final Context src = new Context(I(1));
-        final Context dest = new Context(I(2));
+        final Context src = new Context(I(getRandomContextId()));
+        final Context dest = new Context(I(getRandomContextId()));
         final Credentials auth = new Credentials(OXADMINMASTER, PASSWORD);
         try {
             oxu.copyUser(user, src, dest, auth);
@@ -112,7 +116,7 @@ public class UserCopyTest extends AbstractRMITest {
         final OXUserCopyInterface oxu = getUserMoveClient();
         final User user = new User(1);
         final Context src = null;
-        final Context dest = new Context(I(2));
+        final Context dest = new Context(I(getRandomContextId()));
         final Credentials auth = new Credentials(OXADMINMASTER, PASSWORD);
         try {
             oxu.copyUser(user, src, dest, auth);
@@ -127,7 +131,7 @@ public class UserCopyTest extends AbstractRMITest {
         final OXUserCopyInterface oxu = getUserMoveClient();
         final User user = new User(1);
         final Context src = new Context();
-        final Context dest = new Context(I(2));
+        final Context dest = new Context(I(getRandomContextId()));
         final Credentials auth = new Credentials(OXADMINMASTER, PASSWORD);
         try {
             oxu.copyUser(user, src, dest, auth);
@@ -141,7 +145,7 @@ public class UserCopyTest extends AbstractRMITest {
     public final void testMoveUserNoDestContext() throws Throwable {
         final OXUserCopyInterface oxu = getUserMoveClient();
         final User user = new User(1);
-        final Context src = new Context(I(1));
+        final Context src = new Context(I(getRandomContextId()));
         final Context dest = null;
         final Credentials auth = new Credentials(OXADMINMASTER, PASSWORD);
         try {
@@ -156,7 +160,7 @@ public class UserCopyTest extends AbstractRMITest {
     public final void testMoveUserNoDestContextId() throws Throwable {
         final OXUserCopyInterface oxu = getUserMoveClient();
         final User user = new User(1);
-        final Context src = new Context(I(1));
+        final Context src = new Context(I(getRandomContextId()));
         final Context dest = new Context();
         final Credentials auth = new Credentials(OXADMINMASTER, PASSWORD);
         try {

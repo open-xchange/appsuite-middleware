@@ -365,7 +365,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         OXUserInterface userInterface = getUserInterface();
 
         User knownUser = new User();
-        knownUser.setName("thorben");
+        knownUser.setName(this.myUserName);
         User[] mailboxNames = new User[] { knownUser }; // users with only their mailbox name (User#name) - the rest is going to be looked
         // up
         User[] queriedUsers = userInterface.getData(context, mailboxNames, credentials); // query by mailboxNames (User.name)
@@ -396,7 +396,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         OXUserInterface userInterface = getUserInterface();
 
         User knownUser = new User();
-        knownUser.setName("thorben");
+        knownUser.setName(this.myUserName);
         User[] mailboxNames = new User[] { knownUser }; // users with only their mailbox name (User#name) - the rest is going to be looked
         // up
         User[] queriedUsers = userInterface.getData(context, mailboxNames, credentials); // query by mailboxNames (User.name)
