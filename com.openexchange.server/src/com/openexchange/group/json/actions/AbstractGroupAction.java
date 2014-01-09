@@ -71,7 +71,8 @@ public abstract class AbstractGroupAction implements AJAXActionService {
 
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 
-    private final ServiceLookup services;
+    /** The service look-up */
+    protected final ServiceLookup services;
 
     /**
      * Initializes a new {@link AbstractGroupAction}.

@@ -62,6 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.LdapUtility;
+import com.openexchange.java.Strings;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceExceptionCode;
 import com.openexchange.resource.ResourceGroup;
@@ -320,13 +321,15 @@ public class RdbResourceStorage extends ResourceStorage {
 
     @Override
     public Resource[] searchResources(final String pattern, final Context context) throws OXException {
-        Connection con = null;
+        if (Strings.isEmpty(pattern)) {
+            return new Resource[0];
+        }
+        final Connection con;
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
             throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("RES");
         }
-        final List<Resource> resources = new ArrayList<Resource>();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -335,29 +338,32 @@ public class RdbResourceStorage extends ResourceStorage {
             stmt.setString(2, LdapUtility.prepareSearchPattern(pattern));
             stmt.setString(3, LdapUtility.prepareSearchPattern(pattern));
             result = stmt.executeQuery();
+            final List<Resource> resources = new ArrayList<Resource>();
             while (result.next()) {
                 resources.add(createResourceFromEntry(result));
             }
+            return resources.toArray(new Resource[resources.size()]);
         } catch (final SQLException e) {
             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("RES");
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
         }
-        return resources.toArray(new Resource[resources.size()]);
     }
 
     private static final String SQL_SELECT_RESOURCE4 = "SELECT id,identifier,displayName,mail,available,description,lastModified FROM resource WHERE cid = ? AND mail LIKE ?";
 
     @Override
     public Resource[] searchResourcesByMail(final String pattern, final Context context) throws OXException {
+        if (Strings.isEmpty(pattern)) {
+            return new Resource[0];
+        }
         Connection con = null;
         try {
             con = DBPool.pickup(context);
         } catch (final Exception e) {
             throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("RES");
         }
-        final List<Resource> resources = new ArrayList<Resource>();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -365,16 +371,17 @@ public class RdbResourceStorage extends ResourceStorage {
             stmt.setLong(1, context.getContextId());
             stmt.setString(2, LdapUtility.prepareSearchPattern(pattern));
             result = stmt.executeQuery();
+            final List<Resource> resources = new ArrayList<Resource>();
             while (result.next()) {
                 resources.add(createResourceFromEntry(result));
             }
+            return resources.toArray(new Resource[resources.size()]);
         } catch (final SQLException e) {
             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("RES");
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
         }
-        return resources.toArray(new Resource[resources.size()]);
     }
 
     private static final String SQL_SELECT_RESOURCE = "SELECT id,identifier,displayName,mail,available,description,lastModified " + "FROM resource WHERE cid = ? AND lastModified > ?";

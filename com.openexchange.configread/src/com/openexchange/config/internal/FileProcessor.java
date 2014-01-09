@@ -58,6 +58,12 @@ import java.io.File;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public interface FileProcessor {
-    
-    public void processFile(File file);
+
+    /**
+     * Processes given file.
+     *
+     * @param file The file
+     */
+    void processFile(File file);
+
 }

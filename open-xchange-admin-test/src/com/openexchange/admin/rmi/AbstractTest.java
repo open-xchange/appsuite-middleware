@@ -77,6 +77,16 @@ public abstract class AbstractTest {
         return host;
     }
     
+    protected static String getRMIHost() {
+        String host = "localhost";
+        
+        if (System.getProperty("rmi_test_host") != null) {
+            host = System.getProperty("rmi_test_host");
+        }
+        
+        return host;
+    }
+    
     public static Credentials DummyCredentials(){
         return new Credentials("oxadmin","secret");
     }    

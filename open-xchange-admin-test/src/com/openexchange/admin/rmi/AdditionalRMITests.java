@@ -78,7 +78,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
  * */
 public class AdditionalRMITests extends AbstractRMITest {
 
-    public String myUserName = "thorben";
+    public String myUserName = "thorben.betten";
 
     public String myDisplayName = "Thorben Betten";
 
@@ -204,7 +204,7 @@ public class AdditionalRMITests extends AbstractRMITest {
     public void testCreateFirstUser() throws Exception {
         OXContextInterface conInterface = getContextInterface();
 
-        Context newContext = newContext("newContext", (int) Math.random());
+        Context newContext = newContext("newContext", ((int) Math.random()) * 1000);
 
         User newAdmin = newUser("new_admin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
         try {
@@ -365,7 +365,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         OXUserInterface userInterface = getUserInterface();
 
         User knownUser = new User();
-        knownUser.setName("thorben");
+        knownUser.setName(this.myUserName);
         User[] mailboxNames = new User[] { knownUser }; // users with only their mailbox name (User#name) - the rest is going to be looked
         // up
         User[] queriedUsers = userInterface.getData(context, mailboxNames, credentials); // query by mailboxNames (User.name)
@@ -390,21 +390,31 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     @Test
     public void testGetUser() throws Exception {
-        final Credentials credentials = DummyCredentials();
-        Context context = getTestContextObject(credentials);
+        OXContextInterface conInterface = getContextInterface();
 
-        OXUserInterface userInterface = getUserInterface();
+        Context newContext = newContext("newContext", ((int) Math.random()) * 1000);
+        User newAdmin = newUser("new_admin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
+        newContext = conInterface.create(newContext, newAdmin, superAdminCredentials); // required line for test
 
-        User knownUser = new User();
-        knownUser.setName("thorben");
-        User[] mailboxNames = new User[] { knownUser }; // users with only their mailbox name (User#name) - the rest is going to be looked
-        // up
-        User[] queriedUsers = userInterface.getData(context, mailboxNames, credentials); // query by mailboxNames (User.name)
+        try {
+            OXUserInterface userInterface = getUserInterface();
+            User user = newUser(this.myUserName, "secret", this.myDisplayName, "", "", "");
+            userInterface.create(newContext, user, DummyCredentials());
 
-        assertEquals("Query should return only one user", new Integer(1), Integer.valueOf(queriedUsers.length));
-        User user = queriedUsers[0];
-        User queriedUser = userInterface.getData(context, user, credentials);
-        assertEquals("Should have looked up display name", myDisplayName, queriedUser.getDisplay_name());
+            User knownUser = new User();
+            knownUser.setName(this.myUserName);
+            User[] mailboxNames = new User[] { knownUser }; // users with only their mailbox name (User#name) - the rest is going to be looked
+            // up
+            User[] queriedUsers = userInterface.getData(newContext, mailboxNames, DummyCredentials()); // query by mailboxNames (User.name)
+
+            assertEquals("Query should return only one user", new Integer(1), Integer.valueOf(queriedUsers.length));
+            User receivedUser = queriedUsers[0];
+            User queriedUser = userInterface.getData(newContext, receivedUser, DummyCredentials());
+            assertEquals("Should have looked up display name", myDisplayName, queriedUser.getDisplay_name());
+        } finally {
+            // no need to delete the admin account. Actually, it is not possible at all.
+            conInterface.delete(newContext, superAdminCredentials);
+        }
     }
 
     @Test
@@ -415,7 +425,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         OXUserInterface userInterface = getUserInterface();
 
         User knownUser = new User();
-        knownUser.setName(myUserName);
+        knownUser.setName("oxadmin");
         User[] mailboxNames = new User[] { knownUser }; // users with only their mailbox name (User#name) - the rest is going to be looked
         // up
         User[] queriedUsers = userInterface.getData(context, mailboxNames, credentials); // query by mailboxNames (User.name)
@@ -441,7 +451,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         OXContextInterface conInterface = getContextInterface();
         boolean contextCreated = false;
         Context newContext = newContext("newContext", 666);
-        User newAdmin = newUser("new_admin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
+        User newAdmin = newUser("oxadmin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
         try {
             newContext = conInterface.create(newContext, newAdmin, superAdminCredentials);
             contextCreated = true;

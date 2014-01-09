@@ -93,9 +93,8 @@ public final class DefaultAuthorizationImpl implements AuthorizationService {
     public void authorizeUser(final Context ctx, final User user) throws OXException {
         try {
             if (!ctx.isEnabled()) {
-                final OXException e = ContextExceptionCodes.CONTEXT_DISABLED.create(Integer.valueOf(ctx.getContextId()), ctx.getName());
-                LOG.debug("", e);
-                throw AuthorizationExceptionCodes.USER_DISABLED.create(e);
+                LOG.debug("Context {} ({}) is disabled.", Integer.valueOf(ctx.getContextId()), ctx.getName());
+                throw AuthorizationExceptionCodes.USER_DISABLED.create(ContextExceptionCodes.CONTEXT_DISABLED.create(Integer.valueOf(ctx.getContextId()), ctx.getName()));
             }
         } catch (final UndeclaredThrowableException e) {
             throw AuthorizationExceptionCodes.UNKNOWN.create(e);

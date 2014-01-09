@@ -400,9 +400,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                 // Look-up character '='
                 final int pos = paramsNVP.indexOf('=');
                 if (pos >= 0) {
-                    servletRequest.setParameter(paramsNVP.substring(0, pos), decodeQueryStringValue(
-                        servletRequest.getCharacterEncoding(),
-                        paramsNVP.substring(pos + 1)));
+                    servletRequest.setParameter(paramsNVP.substring(0, pos), decodeQueryStringValue(AJPv13Config.getServerProperty(Property.DefaultEncoding), paramsNVP.substring(pos + 1)));
                 } else {
                     servletRequest.setParameter(paramsNVP, STR_EMPTY);
                 }

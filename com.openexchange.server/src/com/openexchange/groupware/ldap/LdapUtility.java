@@ -166,15 +166,19 @@ public final class LdapUtility {
     }
 
     /**
-     * This method prepare some pattern to make it useful for a relational
-     * database search. The pattern is surounded by wildcards and the wildcard
-     * character * is replaced with its database pendant %.
-     * @param pattern pattern to modify.
-     * @return the modified pattern.
+     * This method prepare some pattern to make it useful for a relational database search.
+     * <p>
+     * The pattern is surrounded by wild-cards and the wild-card character <code>'*'</code> is replaced with its database pendant
+     * <code>'%'</code>.
+     *
+     * @param pattern The pattern to modify
+     * @return The modified pattern or <code>null</code> if <code>pattern</code> is <code>null</code>
      */
     public static String prepareSearchPattern(final String pattern) {
-        final StringBuilder modifiedPattern = new StringBuilder(pattern.replace(
-            '*', '%'));
+        if (null == pattern) {
+            return null;
+        }
+        final StringBuilder modifiedPattern = new StringBuilder(pattern.replace('*', '%'));
         if (modifiedPattern.length() == 0) {
             modifiedPattern.append('%');
         }

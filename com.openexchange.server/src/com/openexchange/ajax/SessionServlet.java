@@ -538,7 +538,10 @@ public abstract class SessionServlet extends AJAXServlet {
      * White listed clients are necessary for the Mobile Web Interface. This clients often change their IP address in mobile data networks.
      */
     private static boolean isWhitelistedClient(final Session session, final ClientWhitelist whitelist) {
-        return null != whitelist && !whitelist.isEmpty() && whitelist.isAllowed(session.getClient());
+        if (null == whitelist || whitelist.isEmpty()) {
+            return false;
+        }
+        return whitelist.isAllowed(session.getClient());
     }
 
     public static boolean isWhitelistedFromIPCheck(final String actual, final List<IPRange> ranges) {

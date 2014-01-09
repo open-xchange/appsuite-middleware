@@ -1656,17 +1656,14 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      */
     private void parseQueryString(final String queryStr) {
         final String[] paramsNVPs = PATTERN_SPLIT.split(queryStr, 0);
-        String charEnc = request.getCharacterEncoding();
-        if (null == charEnc) {
-            charEnc = AJPv13Config.getServerProperty(Property.DefaultEncoding);
-        }
+        final String defaultCharEnc = AJPv13Config.getServerProperty(Property.DefaultEncoding);
         for (String paramsNVP : paramsNVPs) {
             paramsNVP = paramsNVP.trim();
             if (paramsNVP.length() > 0) {
                 // Look-up character '='
                 final int pos = paramsNVP.indexOf('=');
                 if (pos >= 0) {
-                    request.setParameter(paramsNVP.substring(0, pos), decodeUrl(paramsNVP.substring(pos + 1), charEnc));
+                    request.setParameter(paramsNVP.substring(0, pos), decodeUrl(paramsNVP.substring(pos + 1), defaultCharEnc));
                 } else {
                     request.setParameter(paramsNVP, "");
                 }
@@ -1680,11 +1677,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * @param requestURI The request URI
      */
     private void setServletInstance(final String requestURI) {
-        String charEnc = request.getCharacterEncoding();
-        if (null == charEnc) {
-            charEnc = AJPv13Config.getServerProperty(Property.DefaultEncoding);
-        }
-        final String decodedRequestURI = AJPv13Utility.decodeUrl(requestURI, charEnc);
+        final String defaultCharEnc = AJPv13Config.getServerProperty(Property.DefaultEncoding);
+        final String decodedRequestURI = AJPv13Utility.decodeUrl(requestURI, defaultCharEnc);
         /*
          * Remove leading slash character
          */
@@ -1697,7 +1691,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         }
         HttpServlet servlet = HttpServletManager.getServlet(path, servletId);
         if (servlet == null) {
-            servlet = new HttpErrorServlet("No servlet bound to path/alias: " + AJPv13Utility.urlEncode(decodedRequestURI, charEnc));
+            servlet = new HttpErrorServlet("No servlet bound to path/alias: " + AJPv13Utility.urlEncode(decodedRequestURI, defaultCharEnc));
         }
         this.servlet = servlet;
         // servletId = pathStorage.length() > 0 ? pathStorage.toString() : null;

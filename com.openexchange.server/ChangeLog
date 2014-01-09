@@ -1,3 +1,12 @@
+* 2014-01-09 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30549: Don't try and guess mime type from empty stream
+
+* 2014-01-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29639: Use configured default charset to url-decode incoming requests' URIs
+ - Fix for bug 30555: Fixed possible NPE through adding null guards and check for missing "pattern" in jSON layer, too
+
 * 2014-01-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 30524: Fixed customizing of anchor's CSS selector
