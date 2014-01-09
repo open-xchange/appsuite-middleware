@@ -50,13 +50,13 @@
 package com.openexchange.admin.console;
 
 import static org.junit.Assert.assertEquals;
-import org.junit.Before;
 import org.junit.Test;
+import com.openexchange.admin.rmi.AbstractRMITest;
 
 /**
  * @author d7
  */
-public class StatisticToolsTest extends AbstractTest {
+public class StatisticToolsTest extends AbstractRMITest {
 
     private int returnCodeXchange;
 
@@ -81,11 +81,6 @@ public class StatisticToolsTest extends AbstractTest {
     private int returnCodeDocumentconverter;
 
     private int returnCodeOffice;
-
-    @Before
-    public void setUp() throws Exception {
-        resetBuffers();
-    }
 
     @Test
     public void testGetXchangeStats() {
