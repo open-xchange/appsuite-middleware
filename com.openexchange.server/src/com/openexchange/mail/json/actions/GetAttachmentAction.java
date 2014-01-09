@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.actions;
 
+import static com.openexchange.java.Strings.toLowerCase;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
@@ -233,6 +234,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             final String uid = req.checkParameter(PARAMETER_ID);
             final String sequenceId = req.getParameter(PARAMETER_MAILATTCHMENT);
             final String imageContentId = req.getParameter(PARAMETER_MAILCID);
+            final String fileNameFromRequest = req.getParameter("save_as");
             final boolean saveToDisk;
             {
                 final String saveParam = req.getParameter(PARAMETER_SAVE);
@@ -310,11 +312,11 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
              */
             final FileHolder fileHolder;
             if (saveToDisk) {
-                fileHolder = new FileHolder(isClosure, size, MIME_APPL_OCTET, mailPart.getFileName());
+                fileHolder = new FileHolder(isClosure, size, MIME_APPL_OCTET, getFileName(fileNameFromRequest, mailPart.getFileName(), mailPart.getContentType().getBaseType()));
                 fileHolder.setDelivery("download");
                 req.getRequest().putParameter(PARAMETER_DELIVERY, "download");
             } else {
-                fileHolder = new FileHolder(isClosure, size, mailPart.getContentType().toString(), mailPart.getFileName());
+                fileHolder = new FileHolder(isClosure, size, mailPart.getContentType().toString(), getFileName(fileNameFromRequest, mailPart.getFileName(), mailPart.getContentType().getBaseType()));
             }
             final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
             /*
@@ -339,6 +341,17 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private String getFileName(final String fileNameFromRequest, final String mailPartFileName, final String baseType) {
+        if (!isEmpty(fileNameFromRequest)) {
+            return AJAXServlet.encodeUrl(fileNameFromRequest, true);
+        }
+        if (!isEmpty(mailPartFileName)) {
+            return mailPartFileName;
+        }
+        final String fileExtension = isEmpty(baseType) ? "dat" : MimeType2ExtMap.getFileExtension(baseType);
+        return new StringAllocator("file.").append(fileExtension).toString();
     }
 
     private AJAXRequestResult performPUT(final MailRequest req, final JSONObject bodyObject) throws OXException {
@@ -445,20 +458,6 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
 
     private String getHash(final String folderPath, final String uid, final String sequenceId) {
         return HashUtility.getHash(new StringAllocator(32).append(folderPath).append('/').append(uid).append('/').append(sequenceId).toString(), "md5", "hex");
-    }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 
     private String getPrimaryType(final String contentType) {
