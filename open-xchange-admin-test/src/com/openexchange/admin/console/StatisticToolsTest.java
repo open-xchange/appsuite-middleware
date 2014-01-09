@@ -96,6 +96,10 @@ public class StatisticToolsTest extends AbstractTest {
                 StatisticToolsTest.this.returnCodeXchange = exitCode;
             }
         };
+        
+        //some debug logging
+        System.out.println("Connecting to host " + getRMIHost());
+        
         statisticTools.start(new String[] { "-x", "-H", getRMIHost() }, "showruntimestats");
         assertEquals("Expected 0 as return code!", 0, this.returnCodeXchange);
     }
@@ -109,6 +113,10 @@ public class StatisticToolsTest extends AbstractTest {
                 StatisticToolsTest.this.returnCodeAll = exitCode;
             }
         };
+
+        //some debug logging
+        System.out.println("Connecting to host " + getRMIHost());
+        
         statisticTools.start(new String[] { "-a", "-H", getRMIHost() }, "showruntimestats");
         assertEquals("Expected 0 as return code!", 0, this.returnCodeAll);
     }
@@ -122,6 +130,10 @@ public class StatisticToolsTest extends AbstractTest {
                 StatisticToolsTest.this.returnCodeThreadpool = exitCode;
             }
         };
+
+        //some debug logging
+        System.out.println("Connecting to host " + getRMIHost());
+        
         statisticTools.start(new String[] { "-p", "-H", getRMIHost() }, "showruntimestats");
         assertEquals("Expected 0 as return code!", 0, this.returnCodeThreadpool);
     }
@@ -135,6 +147,10 @@ public class StatisticToolsTest extends AbstractTest {
                 StatisticToolsTest.this.returnCodeRuntime = exitCode;
             }
         };
+
+        //some debug logging
+        System.out.println("Connecting to host " + getRMIHost());
+        
         statisticTools.start(new String[] { "-r", "-H", getRMIHost() }, "showruntimestats");
         assertEquals("Expected 0 as return code!", 0, this.returnCodeRuntime);
     }
@@ -148,6 +164,10 @@ public class StatisticToolsTest extends AbstractTest {
                 StatisticToolsTest.this.returnCodeOs = exitCode;
             }
         };
+
+        //some debug logging
+        System.out.println("Connecting to host " + getRMIHost());
+        
         statisticTools.start(new String[] { "-o", "-H", getRMIHost() }, "showruntimestats");
         assertEquals("Expected 0 as return code!", 0, this.returnCodeOs);
     }
@@ -161,6 +181,10 @@ public class StatisticToolsTest extends AbstractTest {
                 StatisticToolsTest.this.returnCodeThreading = exitCode;
             }
         };
+
+        //some debug logging
+        System.out.println("Connecting to host " + getRMIHost());
+        
         statisticTools.start(new String[] { "-t", "-H", getRMIHost() }, "showruntimestats");
         assertEquals("Expected 0 as return code!", 0, this.returnCodeThreading);
     }
@@ -174,6 +198,10 @@ public class StatisticToolsTest extends AbstractTest {
                 StatisticToolsTest.this.returnCodeShowOperations = exitCode;
             }
         };
+
+        //some debug logging
+        System.out.println("Connecting to host " + getRMIHost());
+        
         statisticTools.start(new String[] { "-s", "-H", getRMIHost() }, "showruntimestats");
         assertEquals("Expected 0 as return code!", 0, this.returnCodeShowOperations);
     }
@@ -187,6 +215,10 @@ public class StatisticToolsTest extends AbstractTest {
                 StatisticToolsTest.this.returnCodeMemory = exitCode;
             }
         };
+
+        //some debug logging
+        System.out.println("Connecting to host " + getRMIHost());
+        
         statisticTools.start(new String[] { "-m", "-H", getRMIHost() }, "showruntimestats");
         assertEquals("Expected 0 as return code!", 0, this.returnCodeMemory);
     }
@@ -200,6 +232,10 @@ public class StatisticToolsTest extends AbstractTest {
                 StatisticToolsTest.this.returnCodeGc = exitCode;
             }
         };
+
+        //some debug logging
+        System.out.println("Connecting to host " + getRMIHost());
+        
         statisticTools.start(new String[] { "-z", "-H", getRMIHost() }, "showruntimestats");
         assertEquals("Expected 0 as return code!", 0, this.returnCodeGc);
     }
@@ -213,6 +249,10 @@ public class StatisticToolsTest extends AbstractTest {
                 StatisticToolsTest.this.returnCodeMemoryFull = exitCode;
             }
         };
+
+        //some debug logging
+        System.out.println("Connecting to host " + getRMIHost());
+        
         statisticTools.start(new String[] { "-M", "-H", getRMIHost() }, "showruntimestats");
         assertEquals("Expected 0 as return code!", 0, this.returnCodeMemoryFull);
     }
@@ -226,6 +266,10 @@ public class StatisticToolsTest extends AbstractTest {
                 StatisticToolsTest.this.returnCodeDocumentconverter = exitCode;
             }
         };
+
+        //some debug logging
+        System.out.println("Connecting to host " + getRMIHost());
+        
         statisticTools.start(new String[] { "-y", "-H", getRMIHost() }, "showruntimestats");
         assertEquals("Expected 0 as return code!", 0, this.returnCodeDocumentconverter);
     }
@@ -239,6 +283,10 @@ public class StatisticToolsTest extends AbstractTest {
                 StatisticToolsTest.this.returnCodeOffice = exitCode;
             }
         };
+
+        //some debug logging
+        System.out.println("Connecting to host " + getRMIHost());
+        
         statisticTools.start(new String[] { "-f", "-H", getRMIHost() }, "showruntimestats");
         assertEquals("Expected 0 as return code!", 0, this.returnCodeOffice);
     }
