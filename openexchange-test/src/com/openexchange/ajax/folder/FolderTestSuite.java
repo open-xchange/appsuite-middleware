@@ -93,7 +93,7 @@ public final class FolderTestSuite {
      * @return the task tests suite.
      */
     public static Test suite() {
-        final TestSuite tests = new TestSuite();
+        final TestSuite tests = new TestSuite("com.openexchange.ajax.folder.FolderTestSuite");
         // First the function tests.
         tests.addTestSuite(FunctionTests.class);
 

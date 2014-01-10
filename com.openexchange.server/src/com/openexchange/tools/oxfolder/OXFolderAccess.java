@@ -580,8 +580,6 @@ public class OXFolderAccess {
             } else if (module == FolderObject.CONTACT) {
                 final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
                 return contactService.containsForeignObjectInFolder(session, String.valueOf(folder.getObjectID()));
-            } else if (module == FolderObject.PROJECT) {
-                return false;
             } else if (module == FolderObject.INFOSTORE) {
                 final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
                 return db.hasFolderForeignObjects(folder.getObjectID(), ServerSessionAdapter.valueOf(session, ctx));
@@ -628,8 +626,6 @@ public class OXFolderAccess {
                 final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
                 return contactService.isFolderEmpty(session, String.valueOf(folder.getObjectID()));
             }
-            case FolderObject.PROJECT:
-                return true;
             case FolderObject.INFOSTORE: {
                 final InfostoreFacade db =
                     new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
@@ -656,7 +652,7 @@ public class OXFolderAccess {
      */
     public long getItemCount(final FolderObject folder, final Session session, final Context ctx) throws OXException {
         try {
-            final int userId = session.getUserId();
+            session.getUserId();
             switch (folder.getModule()) {
             case FolderObject.TASK: {
                 return new TasksSQLImpl(session).countTasks(folder);
@@ -677,8 +673,6 @@ public class OXFolderAccess {
                     }
                     throw e;
                 }
-            case FolderObject.PROJECT:
-                return 0;
             case FolderObject.INFOSTORE:
                 try {
                     final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));

@@ -48,6 +48,7 @@
  */
 package com.openexchange.admin.soap;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import com.openexchange.admin.soap.dataobjects.Context;
 import com.openexchange.admin.soap.dataobjects.Database;
@@ -79,7 +80,6 @@ public final class SOAPUtils {
         out.setIcal(in.getIcal());
         out.setInfostore(in.getInfostore());
         out.setPinboardWrite(in.getPinboardWrite());
-        out.setProjects(in.getProjects());
         out.setReadCreateSharedFolders(in.getReadCreateSharedFolders());
         out.setRssBookmarks(in.getRssBookmarks());
         out.setRssPortal(in.getRssPortal());
@@ -143,9 +143,6 @@ public final class SOAPUtils {
         }
         if( null != access.getPinboardWrite() ) {
             ret.setPinboardWrite(access.getPinboardWrite());
-        }
-        if( null != access.getProjects() ) {
-            ret.setProjects(access.getProjects());
         }
         if( null != access.getReadCreateSharedFolders() ) {
             ret.setReadCreateSharedFolders(access.getReadCreateSharedFolders());

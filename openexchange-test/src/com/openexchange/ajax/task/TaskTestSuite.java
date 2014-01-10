@@ -71,7 +71,7 @@ public final class TaskTestSuite {
      * @return the task tests suite.
      */
     public static Test suite() {
-        final TestSuite tests = new TestSuite();
+        final TestSuite tests = new TestSuite("com.openexchange.ajax.task.TaskTestSuite");
         // First the function tests.
         tests.addTestSuite(TasksTest.class);
         tests.addTestSuite(TaskAttachmentTests.class);

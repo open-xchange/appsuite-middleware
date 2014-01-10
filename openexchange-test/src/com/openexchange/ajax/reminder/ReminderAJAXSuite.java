@@ -55,7 +55,7 @@ import junit.framework.TestSuite;
 public class ReminderAJAXSuite extends TestSuite{
 
     public static Test suite(){
-        final TestSuite tests = new TestSuite();
+        final TestSuite tests = new TestSuite("com.openexchange.ajax.reminder.ReminderAJAXSuite");
         tests.addTestSuite(RangeTest.class);
         tests.addTestSuite(UpdatesTest.class);
         tests.addTestSuite(DeleteTest.class);

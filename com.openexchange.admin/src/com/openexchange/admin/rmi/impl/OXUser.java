@@ -1633,9 +1633,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         if (namedAccessCombination.getPinboardWrite()) {
             retval |= UserConfiguration.PINBOARD_WRITE_ACCESS;
         }
-        if (namedAccessCombination.getProjects()) {
-            retval |= UserConfiguration.PROJECTS;
-        }
         if (namedAccessCombination.isPublication()) {
             retval |= UserConfiguration.PUBLICATION;
         }

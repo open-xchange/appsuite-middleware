@@ -67,32 +67,32 @@ public final class InterfaceTests {
     public static final Test suite() {
         final TestSuite tests = new TestSuite();
         // First of all the smoke tests.
-        tests.addTest(com.openexchange.SmokeTestSuite.suite());
-
-        tests.addTestSuite(com.openexchange.ajax.FolderTest.class);
-        tests.addTestSuite(com.openexchange.ajax.LinkTest.class);
-        tests.addTestSuite(com.openexchange.ajax.MultipleTest.class);
-        tests.addTestSuite(com.openexchange.ajax.UserTest.class);
-
-        tests.addTest(com.openexchange.ajax.mailaccount.MailAccountSuite.suite());
-        tests.addTest(com.openexchange.ajax.appointment.AppointmentAJAXSuite.suite());
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.attach.AttachmentTests.class));
-        tests.addTest(com.openexchange.ajax.config.ConfigTestSuite.suite());
-        tests.addTest(com.openexchange.ajax.contact.ContactAJAXSuite.suite());
-        tests.addTest(com.openexchange.ajax.folder.FolderTestSuite.suite());
-        tests.addTest(com.openexchange.ajax.group.GroupTestSuite.suite());
-        tests.addTest(com.openexchange.ajax.importexport.ImportExportServerSuite.suite());
-        tests.addTest(com.openexchange.ajax.infostore.InfostoreAJAXSuite.suite());
-        tests.addTest(com.openexchange.ajax.links.LinksTestSuite.suite());
-        tests.addTest(com.openexchange.ajax.mail.MailTestSuite.suite());
-        tests.addTest(com.openexchange.ajax.mail.filter.MailFilterTestSuite.suite());
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.redirect.RedirectTests.class));
-        tests.addTest(com.openexchange.ajax.reminder.ReminderAJAXSuite.suite());
-        tests.addTest(com.openexchange.ajax.session.SessionTestSuite.suite());
-        tests.addTest(com.openexchange.ajax.task.TaskTestSuite.suite());
-        tests.addTest(com.openexchange.ajax.publish.PublishTestSuite.suite());
-        tests.addTest(com.openexchange.ajax.subscribe.SubscribeTestSuite.suite());
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.user.UserAJAXSuite.class));
+        // tests.addTest(com.openexchange.SmokeTestSuite.suite());
+        //
+        // tests.addTestSuite(com.openexchange.ajax.FolderTest.class);
+        // tests.addTestSuite(com.openexchange.ajax.LinkTest.class);
+        // tests.addTestSuite(com.openexchange.ajax.MultipleTest.class);
+        // tests.addTestSuite(com.openexchange.ajax.UserTest.class);
+        //
+        // tests.addTest(com.openexchange.ajax.mailaccount.MailAccountSuite.suite());
+        // tests.addTest(com.openexchange.ajax.appointment.AppointmentAJAXSuite.suite());
+        // tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.attach.AttachmentTests.class));
+        // tests.addTest(com.openexchange.ajax.config.ConfigTestSuite.suite());
+        // tests.addTest(com.openexchange.ajax.contact.ContactAJAXSuite.suite());
+        // tests.addTest(com.openexchange.ajax.folder.FolderTestSuite.suite());
+        // tests.addTest(com.openexchange.ajax.group.GroupTestSuite.suite());
+        // tests.addTest(com.openexchange.ajax.importexport.ImportExportServerSuite.suite());
+        // tests.addTest(com.openexchange.ajax.infostore.InfostoreAJAXSuite.suite());
+        // tests.addTest(com.openexchange.ajax.links.LinksTestSuite.suite());
+        // tests.addTest(com.openexchange.ajax.mail.MailTestSuite.suite());
+        // tests.addTest(com.openexchange.ajax.mail.filter.MailFilterTestSuite.suite());
+        // tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.redirect.RedirectTests.class));
+        // tests.addTest(com.openexchange.ajax.reminder.ReminderAJAXSuite.suite());
+        // tests.addTest(com.openexchange.ajax.session.SessionTestSuite.suite());
+        // tests.addTest(com.openexchange.ajax.task.TaskTestSuite.suite());
+        // tests.addTest(com.openexchange.ajax.publish.PublishTestSuite.suite());
+        // tests.addTest(com.openexchange.ajax.subscribe.SubscribeTestSuite.suite());
+        // tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.user.UserAJAXSuite.class));
         tests.addTest(com.openexchange.ajax.updater.UpdaterTestSuite.suite());
 
         tests.addTest(com.openexchange.dav.caldav.tests.CalDAVTestSuite.suite());

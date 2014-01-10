@@ -64,7 +64,7 @@ public class ResourceSuite extends TestSuite {
      * TODO add this tests to the AJAX interface test suite.
      */
     public static Test suite() {
-        final TestSuite tests = new TestSuite();
+        final TestSuite tests = new TestSuite("com.openexchange.ajax.resource.ResourceSuite");
         tests.addTestSuite(ResourceAllAJAXTest.class);
         tests.addTestSuite(ResourceDeleteAJAXTest.class);
         tests.addTestSuite(ResourceGetAJAXTest.class);

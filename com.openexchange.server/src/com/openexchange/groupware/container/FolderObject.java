@@ -115,8 +115,6 @@ public class FolderObject extends FolderChildObject implements Cloneable {
             return strHelper.getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME);
         case SYSTEM_OX_FOLDER_ID:
             return strHelper.getString(FolderStrings.SYSTEM_OX_FOLDER_NAME);
-        case SYSTEM_OX_PROJECT_FOLDER_ID:
-            return strHelper.getString(FolderStrings.SYSTEM_OX_PROJECT_FOLDER_NAME);
         case SYSTEM_INFOSTORE_FOLDER_ID:
             return strHelper.getString(FolderStrings.SYSTEM_INFOSTORE_FOLDER_NAME);
         case SYSTEM_USER_INFOSTORE_FOLDER_ID:
@@ -153,8 +151,6 @@ public class FolderObject extends FolderChildObject implements Cloneable {
 
     public static final int SYSTEM_OX_FOLDER_ID = 7;
 
-    public static final int SYSTEM_OX_PROJECT_FOLDER_ID = 8;
-
     public static final int SYSTEM_INFOSTORE_FOLDER_ID = 9;
 
     public static final int SYSTEM_USER_INFOSTORE_FOLDER_ID = 10;
@@ -185,8 +181,6 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     public static final String SYSTEM_LDAP_FOLDER_NAME = "system_ldap";
 
     public static final String SYSTEM_OX_FOLDER_NAME = "user";
-
-    public static final String SYSTEM_OX_PROJECT_FOLDER_NAME = "projects";
 
     public static final String SYSTEM_INFOSTORE_FOLDER_NAME = "infostore";
 
@@ -231,14 +225,14 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     public static final int SUBSCR_SUBFLDS = 315;
 
     public static final int[] ALL_COLUMNS =
-        {
-            // From FolderObject itself
-            FOLDER_NAME, MODULE, TYPE, SUBFOLDERS, OWN_RIGHTS, PERMISSIONS_BITS, SUMMARY, STANDARD_FOLDER, TOTAL, NEW, UNREAD, DELETED,
-            CAPABILITIES, SUBSCRIBED, SUBSCR_SUBFLDS,
-            // From FolderChildObject
-            FOLDER_ID,
-            // From DataObject
-            OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC };
+    {
+        // From FolderObject itself
+        FOLDER_NAME, MODULE, TYPE, SUBFOLDERS, OWN_RIGHTS, PERMISSIONS_BITS, SUMMARY, STANDARD_FOLDER, TOTAL, NEW, UNREAD, DELETED,
+        CAPABILITIES, SUBSCRIBED, SUBSCR_SUBFLDS,
+        // From FolderChildObject
+        FOLDER_ID,
+        // From DataObject
+        OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC };
 
     // Modules
     public static final int TASK = 1;
@@ -250,8 +244,6 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     public static final int UNBOUND = 4;
 
     public static final int SYSTEM_MODULE = 5;
-
-    public static final int PROJECT = 6;
 
     public static final int MAIL = 7;
 
@@ -358,11 +350,11 @@ public class FolderObject extends FolderChildObject implements Cloneable {
 
     /**
      * Initializes a new {@link FolderObject}
-     *
+     * 
      * @param folderName The folder name
      * @param objectId The object ID
      * @param module The module; {@link #TASK}, {@link #CALENDAR}, {@link #CONTACT} , {@link #UNBOUND}, {@link #SYSTEM_MODULE},
-     *            {@link #PROJECT}, {@link #MAIL}, or {@link #INFOSTORE}
+     *            {@link #MAIL}, or {@link #INFOSTORE}
      * @param type The type; {@link #PRIVATE}, {@link #PUBLIC}, or {@link #SYSTEM_TYPE}
      * @param creator The folder creator
      */
@@ -454,11 +446,11 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     }
 
     /**
-     * Gets the module; either {@link #TASK}, {@link #CALENDAR}, {@link #CONTACT} , {@link #UNBOUND}, {@link #SYSTEM_MODULE},
-     * {@link #PROJECT}, {@link #MAIL}, or {@link #INFOSTORE}
-     *
+     * Gets the module; either {@link #TASK}, {@link #CALENDAR}, {@link #CONTACT} , {@link #UNBOUND}, {@link #SYSTEM_MODULE}, {@link #MAIL},
+     * or {@link #INFOSTORE}
+     * 
      * @return The module; either {@link #TASK}, {@link #CALENDAR}, {@link #CONTACT} , {@link #UNBOUND}, {@link #SYSTEM_MODULE},
-     *         {@link #PROJECT}, {@link #MAIL}, or {@link #INFOSTORE}
+     *         {@link #MAIL}, or {@link #INFOSTORE}
      */
     public int getModule() {
         return module;
@@ -475,9 +467,9 @@ public class FolderObject extends FolderChildObject implements Cloneable {
 
     /**
      * Sets the module
-     *
+     * 
      * @param module The module to set; either {@link #TASK}, {@link #CALENDAR}, {@link #CONTACT} , {@link #UNBOUND}, {@link #SYSTEM_MODULE}
-     *            , {@link #PROJECT}, {@link #MAIL}, or {@link #INFOSTORE}
+     *            , {@link #MAIL}, or {@link #INFOSTORE}
      */
     public void setModule(final int module) {
         this.module = module;

@@ -60,7 +60,7 @@ import junit.framework.TestSuite;
 public final class CalDAVBugSuite {
 
     public static Test suite() {
-        final TestSuite suite = new TestSuite();
+        final TestSuite suite = new TestSuite("com.openexchange.dav.caldav.bugs.CalDAVBugSuite");
         suite.addTestSuite(Bug21794Test.class);
         suite.addTestSuite(Bug22094Test.class);
         suite.addTestSuite(Bug22352Test.class);

@@ -111,15 +111,6 @@ public class MutableUserConfiguration extends UserConfiguration {
     }
 
     /**
-     * Enables/Disables project access in user configuration.
-     *
-     * @param enableProject
-     */
-    public void setProject(final boolean enableProject) {
-        setPermission(enableProject, PROJECTS);
-    }
-
-    /**
      * Enables/Disables forum access in user configuration.
      *
      * @param enableForum

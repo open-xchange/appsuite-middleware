@@ -66,7 +66,7 @@ public final class GroupTestSuite {
     }
 
     public static Test suite() {
-        final TestSuite tests = new TestSuite();
+        final TestSuite tests = new TestSuite("com.openexchange.ajax.group.GroupTestSuite");
         tests.addTestSuite(FunctionTest.class);
         tests.addTestSuite(Bug11659Test.class);
         return tests;

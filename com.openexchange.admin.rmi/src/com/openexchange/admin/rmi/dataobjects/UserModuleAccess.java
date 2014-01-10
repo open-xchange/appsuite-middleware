@@ -86,8 +86,6 @@ public class UserModuleAccess implements Serializable {
 
     private boolean PinboardWrite = true;
 
-    private boolean Projects = true;
-
     private boolean readCreateSharedFolders = true;
 
     private boolean RssBookmarks = true;
@@ -151,7 +149,6 @@ public class UserModuleAccess implements Serializable {
         this.ical = true;
         this.infostore = true;
         this.PinboardWrite = true;
-        this.Projects = true;
         this.readCreateSharedFolders = true;
         this.RssBookmarks = true;
         this.RssPortal = true;
@@ -187,7 +184,6 @@ public class UserModuleAccess implements Serializable {
         this.ical = false;
         this.infostore = false;
         this.PinboardWrite = false;
-        this.Projects = false;
         this.readCreateSharedFolders = false;
         this.RssBookmarks = false;
         this.RssPortal = false;
@@ -419,20 +415,6 @@ public class UserModuleAccess implements Serializable {
         this.PinboardWrite = val;
     }
 
-    /**
-     * Currently NOT in use!
-     */
-    public boolean getProjects() {
-        return Projects;
-    }
-
-    /**
-     * Currently NOT in use!
-     */
-    public void setProjects(final boolean val) {
-        this.Projects = val;
-    }
-
     public boolean getReadCreateSharedFolders() {
         return readCreateSharedFolders;
     }
@@ -599,7 +581,6 @@ public class UserModuleAccess implements Serializable {
         result = prime * result + (MultipleMailAccounts ? 1231 : 1237);
         result = prime * result + (OLOX20 ? 1231 : 1237);
         result = prime * result + (PinboardWrite ? 1231 : 1237);
-        result = prime * result + (Projects ? 1231 : 1237);
         result = prime * result + (PublicFolderEditable ? 1231 : 1237);
         result = prime * result + (Publication ? 1231 : 1237);
         result = prime * result + (RssBookmarks ? 1231 : 1237);
@@ -661,9 +642,6 @@ public class UserModuleAccess implements Serializable {
             return false;
         }
         if (PinboardWrite != other.PinboardWrite) {
-            return false;
-        }
-        if (Projects != other.Projects) {
             return false;
         }
         if (PublicFolderEditable != other.PublicFolderEditable) {
@@ -839,12 +817,6 @@ public class UserModuleAccess implements Serializable {
             enabled.setPinboardWrite(true);
         } else {
             disabled.setPinboardWrite(true);
-        }
-
-        if (Projects) {
-            enabled.setProjects(true);
-        } else {
-            disabled.setProjects(true);
         }
 
         if (Publication) {

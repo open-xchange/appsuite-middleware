@@ -58,23 +58,23 @@ import junit.framework.TestSuite;
  */
 public final class ImportExportServerSuite {
 
-	public static Test suite() {
-		final TestSuite tests = new TestSuite();
-		tests.addTest(ICalTestSuite.suite());
+    public static Test suite() {
+        final TestSuite tests = new TestSuite("com.openexchange.ajax.importexport.ImportExportServerSuite");
+        tests.addTest(ICalTestSuite.suite());
 
-		//VCARD
+        //VCARD
         tests.addTest(VCardTestSuite.suite());
-		tests.addTestSuite(Bug9475Test.class);
-		tests.addTestSuite(VCardImportLosingAddressInfoTest.class);
+        tests.addTestSuite(Bug9475Test.class);
+        tests.addTestSuite(VCardImportLosingAddressInfoTest.class);
 
-		//CSV
-		tests.addTestSuite(CSVImportExportServletTest.class);
-		tests.addTestSuite(Bug18482Test_ByteOrderMarkOnUtf8.class);
+        //CSV
+        tests.addTestSuite(CSVImportExportServletTest.class);
+        tests.addTestSuite(Bug18482Test_ByteOrderMarkOnUtf8.class);
         tests.addTestSuite(Bug20516Test.class);
 
-		// Overall bug tests.
-		tests.addTestSuite(Bug9209Test.class);
-		tests.addTestSuite(DistributionListExportTest.class);
-		return tests;
-	}
+        // Overall bug tests.
+        tests.addTestSuite(Bug9209Test.class);
+        tests.addTestSuite(DistributionListExportTest.class);
+        return tests;
+    }
 }

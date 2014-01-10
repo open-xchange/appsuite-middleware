@@ -120,7 +120,6 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
         identifiers.add(FolderStrings.SYSTEM_INFOSTORE_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_LDAP_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_OX_FOLDER_NAME);
-        identifiers.add(FolderStrings.SYSTEM_OX_PROJECT_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_PRIVATE_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_PUBLIC_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME);

@@ -198,7 +198,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         accessIcal(6, OPT_ACCESS_ICAL, false),
         accessInfostore(7, OPT_ACCESS_INFOSTORE, false),
         accessPinboardWrite(8, OPT_ACCESS_PINBOARD_WRITE, false),
-        accessProjects(9, OPT_ACCESS_PROJECTS, false),
         accessReadCreateSharedFolders(10, OPT_ACCESS_READCREATE_SHARED_FOLDERS, false),
         accessRssBookmarks(11, OPT_ACCESS_RSS_BOOKMARKS, false),
         accessRssPortal(12, OPT_ACCESS_RSS_PORTAL, false),
@@ -457,7 +456,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_ACCESS_ICAL = "access-ical";
     protected static final String OPT_ACCESS_INFOSTORE = "access-infostore";
     protected static final String OPT_ACCESS_PINBOARD_WRITE = "access-pinboard-write";
-    protected static final String OPT_ACCESS_PROJECTS = "access-projects";
     protected static final String OPT_ACCESS_READCREATE_SHARED_FOLDERS = "access-read-create-shared-Folders";
     protected static final String OPT_ACCESS_RSS_BOOKMARKS = "access-rss-bookmarks";
     protected static final String OPT_ACCESS_RSS_PORTAL = "access-rss-portal";
@@ -646,7 +644,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected CLIOption accessIcalOption = null;
     protected CLIOption accessInfostoreOption = null;
     protected CLIOption accessPinboardWriteOption = null;
-    protected CLIOption accessProjectsOption = null;
     protected CLIOption accessReadCreateSharedFolderOption = null;
     protected CLIOption accessRssBookmarkOption = null;
     protected CLIOption accessRssPortalOption = null;
@@ -895,12 +892,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         if (-1 != p) {
             if (nextLine[p].length() > 0) {
                 moduleaccess.setPinboardWrite(stringToBool(nextLine[p]));
-            }
-        }
-        final int p2 = idarray[AccessCombinations.accessProjects.getIndex()];
-        if (-1 != p2) {
-            if (nextLine[p2].length() > 0) {
-                moduleaccess.setProjects(stringToBool(nextLine[p2]));
             }
         }
         final int q = idarray[AccessCombinations.accessPublication.getIndex()];
@@ -2027,8 +2018,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         // Split
         final String[] arr = s.split(" *, *", 0);
         final Set<String> set = new HashSet<String>(arr.length);
-        for (int i = 0; i < arr.length; i++) {
-            final String cap = arr[i];
+        for (String element : arr) {
+            final String cap = element;
             if (!isEmpty(cap)) {
                 set.add(toLowerCase(cap));
             }
@@ -2115,7 +2106,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         access.setIcal(accessOption2BooleanCreate(parser,this.accessIcalOption));
         access.setInfostore(accessOption2BooleanCreate(parser,this.accessInfostoreOption));
         access.setPinboardWrite(accessOption2BooleanCreate(parser,this.accessPinboardWriteOption));
-        access.setProjects(accessOption2BooleanCreate(parser,this.accessProjectsOption));
         access.setReadCreateSharedFolders(accessOption2BooleanCreate(parser,this.accessReadCreateSharedFolderOption));
         access.setRssBookmarks(accessOption2BooleanCreate(parser,this.accessRssBookmarkOption));
         access.setRssPortal(accessOption2BooleanCreate(parser,this.accessRssPortalOption));
@@ -2188,10 +2178,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         }
         if ((String) parser.getOptionValue(this.accessPinboardWriteOption) != null) {
             access.setPinboardWrite(accessOption2BooleanCreate(parser, this.accessPinboardWriteOption));
-            changed = true;
-        }
-        if ((String) parser.getOptionValue(this.accessProjectsOption) != null) {
-            access.setProjects(accessOption2BooleanCreate(parser, this.accessProjectsOption));
             changed = true;
         }
         if ((String) parser.getOptionValue(this.accessReadCreateSharedFolderOption) != null) {
@@ -2347,7 +2333,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.accessIcalOption = setLongOpt(admp, OPT_ACCESS_ICAL,"on/off","Ical module access (Default is off)", true, false,true);
         this.accessInfostoreOption = setLongOpt(admp, OPT_ACCESS_INFOSTORE,"on/off","Infostore module access (Default is off)", true, false,true);
         this.accessPinboardWriteOption = setLongOpt(admp, OPT_ACCESS_PINBOARD_WRITE,"on/off","Pinboard write access (Default is off)", true, false,true);
-        this.accessProjectsOption = setLongOpt(admp, OPT_ACCESS_PROJECTS,"on/off","Project module access (Default is off)", true, false,true);
         this.accessReadCreateSharedFolderOption = setLongOpt(admp, OPT_ACCESS_READCREATE_SHARED_FOLDERS,"on/off","Read create shared folder access (Default is off)", true, false,true);
         this.accessRssBookmarkOption= setLongOpt(admp, OPT_ACCESS_RSS_BOOKMARKS,"on/off","RSS bookmarks access (Default is off)", true, false,true);
         this.accessRssPortalOption = setLongOpt(admp, OPT_ACCESS_RSS_PORTAL,"on/off","RSS portal access (Default is off)", true, false,true);

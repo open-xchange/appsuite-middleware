@@ -25,6 +25,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.user.copy.rmi.OXUserCopyInterface;
 
 public abstract class AbstractRMITest extends AbstractTest {
 
@@ -194,6 +195,10 @@ public abstract class AbstractRMITest extends AbstractTest {
 
     public OXResourceInterface getResourceInterface() throws MalformedURLException, RemoteException, NotBoundException{
         return (OXResourceInterface) Naming.lookup(getRMIHostUrl() + OXResourceInterface.RMI_NAME);
+    }
+
+    public OXUserCopyInterface getUserMoveClient() throws MalformedURLException, RemoteException, NotBoundException {
+        return (OXUserCopyInterface) Naming.lookup(getRMIHostUrl() + OXUserCopyInterface.RMI_NAME);
     }
 
     /**

@@ -990,7 +990,6 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             ubp.setICal(access.getIcal());
             ubp.setInfostore(access.getInfostore());
             ubp.setPinboardWriteAccess(access.getPinboardWrite());
-            ubp.setProject(access.getProjects());
             ubp.setRSSBookmarks(access.getRssBookmarks());
             ubp.setRSSPortal(access.getRssPortal());
             ubp.setSyncML(access.getSyncml());

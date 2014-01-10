@@ -1406,11 +1406,6 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             moduleAccess.setPinboardWrite(booleanValue(tmp));
         }
 
-        tmp = soapModuleAccess.isProjects();
-        if (tmp != null) {
-            moduleAccess.setProjects(booleanValue(tmp));
-        }
-
         tmp = soapModuleAccess.isPublication();
         if (tmp != null) {
             moduleAccess.setPublication(booleanValue(tmp));
@@ -1504,7 +1499,6 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         soapModuleAccess.setMultipleMailAccounts(Boolean.valueOf(moduleAccess.isMultipleMailAccounts()));
         soapModuleAccess.setOLOX20(Boolean.valueOf(moduleAccess.isOLOX20()));
         soapModuleAccess.setPinboardWrite(Boolean.valueOf(moduleAccess.getPinboardWrite()));
-        soapModuleAccess.setProjects(Boolean.valueOf(moduleAccess.getProjects()));
         soapModuleAccess.setPublication(Boolean.valueOf(moduleAccess.isPublication()));
         soapModuleAccess.setPublicFolderEditable(Boolean.valueOf(moduleAccess.isPublicFolderEditable()));
         soapModuleAccess.setReadCreateSharedFolders(Boolean.valueOf(moduleAccess.getReadCreateSharedFolders()));
@@ -1628,8 +1622,8 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             return null;
         }
         final List<Restriction> soapRestrictions = new ArrayList<Restriction>(restrictions.length);
-        for (int i = 0; i < restrictions.length; i++) {
-            soapRestrictions.add(restriction2Soap(restrictions[i]));
+        for (com.openexchange.admin.reseller.rmi.dataobjects.Restriction restriction : restrictions) {
+            soapRestrictions.add(restriction2Soap(restriction));
         }
         return soapRestrictions;
     }

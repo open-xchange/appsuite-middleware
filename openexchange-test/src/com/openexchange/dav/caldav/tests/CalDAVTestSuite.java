@@ -60,7 +60,7 @@ import junit.framework.TestSuite;
 public final class CalDAVTestSuite {
 
     public static Test suite() {
-        final TestSuite suite = new TestSuite();
+        final TestSuite suite = new TestSuite("com.openexchange.dav.caldav.tests.CalDAVTestSuite");
         suite.addTestSuite(NewTest.class);
         suite.addTestSuite(FreeBusyTest.class);
         suite.addTestSuite(MkCalendarTest.class);

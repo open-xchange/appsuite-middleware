@@ -74,7 +74,7 @@ public final class PublishTestSuite extends TestSuite {
     }
 
     public static Test suite() {
-        final TestSuite suite = new TestSuite();
+        final TestSuite suite = new TestSuite("com.openexchange.ajax.publish.PublishTestSuite");
         suite.addTestSuite(AllPublicationsTest.class);
         suite.addTestSuite(CreatePublicationTest.class);
         suite.addTestSuite(GetPublicationTest.class);

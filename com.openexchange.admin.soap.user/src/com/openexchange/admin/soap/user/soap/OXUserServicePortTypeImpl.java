@@ -128,8 +128,8 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         // Split
         final String[] arr = s.split(" *, *", 0);
         final Set<String> set = new HashSet<String>(arr.length);
-        for (int i = 0; i < arr.length; i++) {
-            final String cap = arr[i];
+        for (String element : arr) {
+            final String cap = element;
             if (!isEmpty(cap)) {
                 set.add(toLowerCase(cap));
             }
@@ -1638,11 +1638,6 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             moduleAccess.setPinboardWrite(booleanValue(tmp));
         }
 
-        tmp = soapModuleAccess.isProjects();
-        if (tmp != null) {
-            moduleAccess.setProjects(booleanValue(tmp));
-        }
-
         tmp = soapModuleAccess.isPublication();
         if (tmp != null) {
             moduleAccess.setPublication(booleanValue(tmp));
@@ -1736,7 +1731,6 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         soapModuleAccess.setMultipleMailAccounts(Boolean.valueOf(moduleAccess.isMultipleMailAccounts()));
         soapModuleAccess.setOLOX20(Boolean.valueOf(moduleAccess.isOLOX20()));
         soapModuleAccess.setPinboardWrite(Boolean.valueOf(moduleAccess.getPinboardWrite()));
-        soapModuleAccess.setProjects(Boolean.valueOf(moduleAccess.getProjects()));
         soapModuleAccess.setPublication(Boolean.valueOf(moduleAccess.isPublication()));
         soapModuleAccess.setPublicFolderEditable(Boolean.valueOf(moduleAccess.isPublicFolderEditable()));
         soapModuleAccess.setReadCreateSharedFolders(Boolean.valueOf(moduleAccess.getReadCreateSharedFolders()));

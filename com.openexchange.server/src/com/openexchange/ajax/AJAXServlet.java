@@ -152,8 +152,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String MODULE_MAIL = "mail";
 
-    public static final String MODULE_PROJECT = "projects";
-
     public static final String MODULE_MESSAGING = "messaging";
 
     public static final String MODULE_INFOSTORE = "infostore";
@@ -421,9 +419,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     private static final String STR_ERROR_PARAMS = "error_params";
 
-	/**
-	 * JavaScript for <code>substituteJS()</code>.
-	 * <pre>
+    /**
+     * JavaScript for <code>substituteJS()</code>.
+     * <pre>
      *      &lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
      *      &lt;html&gt;
      *       &lt;head&gt;
@@ -433,14 +431,14 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      *        &lt;/script&gt;
      *       &lt;/head&gt;
      *      &lt;/html&gt;
-	 * </pre>
-	 */
-	public static final String JS_FRAGMENT = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\"><html><head>"
-			+ "<META http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">"
-			+ "<script type=\"text/javascript\">"
-			+ "(parent[\"callback_**action**\"] || window.opener && "
-			+ "window.opener[\"callback_**action**\"])(**json**)"
-			+ "</script></head></html>";
+     * </pre>
+     */
+    public static final String JS_FRAGMENT = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\"><html><head>"
+        + "<META http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">"
+        + "<script type=\"text/javascript\">"
+        + "(parent[\"callback_**action**\"] || window.opener && "
+        + "window.opener[\"callback_**action**\"])(**json**)"
+        + "</script></head></html>";
 
     public static final String SAVE_AS_TYPE = "application/octet-stream";
 
@@ -1023,7 +1021,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             final JSONObject obj = new JSONObject();
             obj.put(STR_ERROR, error);
             obj.put(STR_ERROR_PARAMS, Collections.emptyList());
-			w.write(substituteJS(obj.toString(), action));
+            w.write(substituteJS(obj.toString(), action));
         } catch (final JSONException e) {
             LOG.error("", e);
         } finally {
@@ -1067,10 +1065,10 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         sendErrorAsJS(res, msg);
     }
 
-	public static String substituteJS(final String json, final String action) {
-		return JS_FRAGMENT.replace("**json**", json.replaceAll(Pattern.quote("</") , "<\\/")).replace("**action**",
-				action);
-	}
+    public static String substituteJS(final String json, final String action) {
+        return JS_FRAGMENT.replace("**json**", json.replaceAll(Pattern.quote("</") , "<\\/")).replace("**action**",
+            action);
+    }
 
     /* --------------------- STUFF FOR UPLOAD --------------------- */
 
@@ -1245,7 +1243,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return Strings.isEmpty(string);
     }
 
- 	private static final UploadFile processUploadedFile(final FileItem item, final String uploadDir, final String fileName) throws Exception {
+    private static final UploadFile processUploadedFile(final FileItem item, final String uploadDir, final String fileName) throws Exception {
         try {
             final UploadFile retval = new UploadFileImpl();
             retval.setFieldName(item.getFieldName());
@@ -1382,16 +1380,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         case FolderObject.MAIL:
             moduleStr = MODULE_MAIL;
             break;
-        case FolderObject.PROJECT:
-            moduleStr = MODULE_PROJECT;
-            break;
         case FolderObject.INFOSTORE:
             moduleStr = MODULE_INFOSTORE;
             break;
         case FolderObject.SYSTEM_MODULE:
-            if (objectId == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
-                moduleStr = MODULE_PROJECT;
-            } else if (objectId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
+            if (objectId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
                 moduleStr = MODULE_INFOSTORE;
             } else {
                 moduleStr = MODULE_SYSTEM;
@@ -1425,8 +1418,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             module = FolderObject.UNBOUND;
         } else if (MODULE_MAIL.equalsIgnoreCase(moduleStr)) {
             module = FolderObject.MAIL;
-        } else if (MODULE_PROJECT.equalsIgnoreCase(moduleStr)) {
-            module = FolderObject.PROJECT;
         } else if (MODULE_INFOSTORE.equalsIgnoreCase(moduleStr)) {
             module = FolderObject.INFOSTORE;
         } else {

@@ -73,8 +73,6 @@ public class FolderStrings implements LocalizableStrings {
 
     public static final String SYSTEM_OX_FOLDER_NAME = "OX folders";
 
-    public static final String SYSTEM_OX_PROJECT_FOLDER_NAME = "Projects";
-
     public static final String SYSTEM_INFOSTORE_FOLDER_NAME = "Infostore";
 
     public static final String SYSTEM_USER_INFOSTORE_FOLDER_NAME = "Userstore";

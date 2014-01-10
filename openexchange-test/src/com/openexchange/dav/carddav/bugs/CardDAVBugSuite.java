@@ -60,7 +60,7 @@ import junit.framework.TestSuite;
 public final class CardDAVBugSuite {
 
     public static Test suite() {
-        final TestSuite suite = new TestSuite();
+        final TestSuite suite = new TestSuite("com.openexchange.dav.carddav.bugs.CardDAVBugSuite");
         suite.addTestSuite(Bug20665Test.class);
         suite.addTestSuite(Bug21079Test.class);
         suite.addTestSuite(Bug21177Test.class);

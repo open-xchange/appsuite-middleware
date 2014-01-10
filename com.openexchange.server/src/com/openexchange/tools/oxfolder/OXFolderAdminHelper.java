@@ -110,30 +110,6 @@ public final class OXFolderAdminHelper {
         super();
     }
 
-    /*
-     * INSERT INTO oxfolder_tree VALUES (1, 0, 'private', 'system', 'system','system', 'system', 'now', 'System', null, null); INSERT INTO
-     * oxfolder_tree VALUES (2, 0, 'public', 'system', 'system','system', 'system', 'now', 'System', null, null); INSERT INTO oxfolder_tree
-     * VALUES (3, 0, 'shared', 'system', 'system','system', 'system', 'now', 'System', null, null); INSERT INTO oxfolder_tree VALUES (4, 0,
-     * 'system', 'system', 'system','system', 'system', 'now', 'System', null, null); INSERT INTO oxfolder_tree VALUES (5, 4,
-     * 'system_global', 'contact', 'system','system', 'system', 'now', 'System', null, null); INSERT INTO oxfolder_tree VALUES (6, 4,
-     * 'system_ldap', 'contact', 'system','system', 'system', 'now', 'System', null, null); INSERT INTO oxfolder_tree VALUES (7, 0, 'user',
-     * 'system', 'system','system', 'system', 'now', 'System', null, null); INSERT INTO oxfolder_tree VALUES (8, 7, 'projects', 'projects',
-     * 'system','system', 'system', 'now', 'System', null, null); INSERT INTO oxfolder_permissions VALUES ((select nextval('serial_id')), 1,
-     * 512,'all_ox_users_and_ox_groups', 0, 8, 0, 0, 0); INSERT INTO oxfolder_permissions VALUES ((select nextval('serial_id')), 2, 512,
-     * 'all_ox_users_and_ox_groups', 0, 8, 0, 0, 0); INSERT INTO oxfolder_permissions VALUES ((select nextval('serial_id')), 3, 512,
-     * 'all_ox_users_and_ox_groups', 0, 2, 0, 0, 0); INSERT INTO oxfolder_permissions VALUES ((select nextval('serial_id')), 4, 512,
-     * 'all_ox_users_and_ox_groups', 0, 2, 0, 0, 0); INSERT INTO oxfolder_permissions VALUES ((select nextval('serial_id')), 5, 512,
-     * 'all_ox_users_and_ox_groups', 0, 4, 128, 128, 128); INSERT INTO oxfolder_permissions VALUES ((select nextval('serial_id')), 6, 512,
-     * 'all_ox_users_and_ox_groups', 0, 2, 4, 0, 0); INSERT INTO oxfolder_permissions VALUES ((select nextval('serial_id')), 7, 512,
-     * 'all_ox_users_and_ox_groups', 0, 2, 0, 0, 0); INSERT INTO oxfolder_permissions VALUES ((select nextval('serial_id')), 8, 512,
-     * 'all_ox_users_and_ox_groups', 0, 8, 4, 2, 2); INSERT INTO oxfolder_permissions VALUES ((select nextval('serial_id')), 8, 32768,
-     * 'mailadmin', 0, 128, 128, 128, 128); INSERT INTO oxfolder_specialfolders VALUES ('private', 1); INSERT INTO oxfolder_specialfolders
-     * VALUES ('public', 2); INSERT INTO oxfolder_specialfolders VALUES ('shared', 3); INSERT INTO oxfolder_specialfolders VALUES ('system',
-     * 4); INSERT INTO oxfolder_specialfolders VALUES ('system_global', 5); INSERT INTO oxfolder_specialfolders VALUES ('system_ldap', 6);
-     * INSERT INTO oxfolder_specialfolders VALUES ('user', 7); INSERT INTO oxfolder_userfolders VALUES ('projects',
-     * 'projects/projects_list_all', null, 'folder/item_projects.png');
-     */
-
     private static final int[] CHANGEABLE_PUBLIC_FOLDERS =
         { FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
 
@@ -753,27 +729,6 @@ public final class OXFolderAdminHelper {
             cid,
             writeCon);
         /*
-         * Insert system projects folder
-         */
-        systemPermission.setAllPermission(
-            OCLPermission.CREATE_SUB_FOLDERS,
-            OCLPermission.READ_ALL_OBJECTS,
-            OCLPermission.WRITE_OWN_OBJECTS,
-            OCLPermission.DELETE_OWN_OBJECTS);
-        systemPermission.setFolderAdmin(false);
-        createSystemFolder(
-            FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID,
-            FolderObject.SYSTEM_OX_PROJECT_FOLDER_NAME,
-            systemPermission,
-            FolderObject.SYSTEM_OX_FOLDER_ID,
-            FolderObject.SYSTEM_MODULE,
-            true,
-            creatingTime,
-            mailAdmin,
-            true,
-            cid,
-            writeCon);
-        /*
          * Insert system userstore infostore folder
          */
         systemPermission.setAllPermission(
@@ -854,18 +809,6 @@ public final class OXFolderAdminHelper {
                 cid,
                 writeCon);
         }
-        /*
-         * Grant full access for project folder to admin
-         */
-        createSingleUserPermission(
-            FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID,
-            mailAdmin,
-            new int[] {
-                OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION },
-            true,
-            cid,
-            writeCon);
         addUserToOXFolders(mailAdmin, mailAdminDisplayName, language, cid, writeCon);
         LOG.info("Folder rights for mail admin successfully added for context {}", cid);
     }

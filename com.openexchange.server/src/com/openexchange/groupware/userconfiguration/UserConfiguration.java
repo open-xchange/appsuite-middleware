@@ -408,15 +408,6 @@ public class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
-     * Detects if user configuration allows project access.
-     *
-     * @return <code>true</code> if enabled; otherwise <code>false</code>
-     */
-    public boolean hasProject() {
-        return hasPermission(PROJECTS);
-    }
-
-    /**
      * Detects if user configuration allows forum access.
      *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
@@ -566,8 +557,8 @@ public class UserConfiguration implements Serializable, Cloneable {
      * holds module access to a certain module (or invoke <code>{@link UserConfiguration#hasModuleAccess(int)}</code>).
      * <p>
      * The <code>int</code> values matches the constants <code>{@link FolderObject#TASK}</code>, <code>{@link FolderObject#CALENDAR}</code>,
-     * <code>{@link FolderObject#CONTACT}</code>, <code>{@link FolderObject#UNBOUND}</code>, <code>{@link FolderObject#SYSTEM_MODULE}</code>, <code>{@link FolderObject#PROJECT}</code>, <code>{@link FolderObject#MAIL}</code>, <code>{@link FolderObject#INFOSTORE}</code>
-     *
+     * <code>{@link FolderObject#CONTACT}</code>, <code>{@link FolderObject#UNBOUND}</code>, <code>{@link FolderObject#SYSTEM_MODULE}</code>, <code>{@link FolderObject#MAIL}</code>, <code>{@link FolderObject#INFOSTORE}</code>
+     * 
      * @return A sorted array of <code>int</code> carrying accessible module integer constants
      */
     public int[] getAccessibleModules() {
@@ -583,9 +574,6 @@ public class UserConfiguration implements Serializable, Cloneable {
         }
         array.add(FolderObject.UNBOUND); // 4
         array.add(FolderObject.SYSTEM_MODULE); // 5
-        if (hasProject()) {
-            array.add(FolderObject.PROJECT); // 6
-        }
         if (hasWebMail()) {
             array.add(FolderObject.MAIL); // 7
         }
@@ -612,7 +600,6 @@ public class UserConfiguration implements Serializable, Cloneable {
      *            {@link FolderObject#UNBOUND}</code>, <code>
      *            {@link FolderObject#SYSTEM_MODULE}</code>
      *            , <code>
-     *            {@link FolderObject#PROJECT}</code>, <code>
      *            {@link FolderObject#MAIL}</code> , <code>
      *            {@link FolderObject#INFOSTORE}</code>
      * @return <code>true</code> if user configuration permits access to given module; otherwise <code>false</code>

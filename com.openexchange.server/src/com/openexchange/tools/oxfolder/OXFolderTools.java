@@ -1528,9 +1528,6 @@ public class OXFolderTools {
                 case FolderObject.CONTACT:
                     ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
                     return false == contactService.containsForeignObjectInFolder(session, String.valueOf(fo.getObjectID()));
-                case FolderObject.PROJECT:
-                    // TODO:
-                    break;
                 case FolderObject.INFOSTORE:
                     final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
                     return !db.hasFolderForeignObjects(
@@ -1554,8 +1551,6 @@ public class OXFolderTools {
                 case FolderObject.CONTACT:
                     ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
                     return contactService.isFolderEmpty(session, String.valueOf(fo.getObjectID()));
-                case FolderObject.PROJECT:
-                    break;
                 case FolderObject.INFOSTORE:
                     final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
                     return db.isFolderEmpty(fo.getObjectID(), ctx);
@@ -1564,7 +1559,6 @@ public class OXFolderTools {
                         Integer.valueOf(ctx.getContextId()));
                 }
             }
-            return false;
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final Throwable t) {

@@ -72,10 +72,6 @@ public enum EnumComponent implements Component {
      */
     KNOWLEDGE("KNW"),
     /**
-     * Module PROJECT
-     */
-    PROJECT("PRJ"),
-    /**
      * Module DOCUMENT
      */
     DOCUMENT("DOC"),

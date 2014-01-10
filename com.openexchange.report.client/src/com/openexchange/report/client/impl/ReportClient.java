@@ -438,7 +438,6 @@ public class ReportClient extends AbstractJMXTools {
             put("ICAL", "access-ical");
             put("INFOSTORE", "access-infostore");
             put("PINBOARD_WRITE_ACCESS", "access-pinboard-write");
-            put("PROJECTS", "access-projects");
             put("READ_CREATE_SHARED_FOLDERS", "access-read-create-shared-Folders");
             put("RSS_BOOKMARKS", "access-rss-bookmarks");
             put("RSS_PORTAL", "access-rss-portal");
@@ -655,8 +654,7 @@ public class ReportClient extends AbstractJMXTools {
             if (reports.length == 0) {
                 System.out.println("Nothing to cancel, there are no reports currently pending.");
             }
-            for (int i = 0; i < reports.length; i++) {
-                CompositeData report = reports[i];
+            for (CompositeData report : reports) {
                 Object uuid = report.get("uuid");
                 System.out.println("Cancelling " + uuid);
 
@@ -686,8 +684,8 @@ public class ReportClient extends AbstractJMXTools {
             if (reports.length == 0) {
                 System.out.println("There are no reports currently pending.");
             }
-            for (int i = 0; i < reports.length; i++) {
-                printASDiagnostics(reports[i]);
+            for (CompositeData report : reports) {
+                printASDiagnostics(report);
             }
         } catch (Exception e) {
             e.printStackTrace();

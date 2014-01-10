@@ -1939,10 +1939,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
 
         final Setting[] modules = ConfigTree.getInstance().getSettingByPath("modules").getElements();
-        for (int i = 0; i < modules.length; i++) {
-            final Setting guiSetting = modules[i].getElement("gui");
+        for (Setting module : modules) {
+            final Setting guiSetting = module.getElement("gui");
             if( guiSetting != null ) {
-                final String path = modules[i].getPath() + "/gui";
+                final String path = module.getPath() + "/gui";
                 settStor.readValues(con, guiSetting);
                 if( ret == null ) {
                     ret = new HashMap<String, String>();
@@ -2516,7 +2516,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             acc.setIcal(user.hasPermission(UserConfiguration.ICAL));
             acc.setInfostore(user.hasPermission(UserConfiguration.INFOSTORE));
             acc.setPinboardWrite(user.hasPermission(UserConfiguration.PINBOARD_WRITE_ACCESS));
-            acc.setProjects(user.hasPermission(UserConfiguration.PROJECTS));
             acc.setRssBookmarks(user.hasPermission(UserConfiguration.RSS_BOOKMARKS));
             acc.setRssPortal(user.hasPermission(UserConfiguration.RSS_PORTAL));
             acc.setSyncml(user.hasPermission(UserConfiguration.MOBILITY));
@@ -2748,7 +2747,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             user.setICal(access.getIcal());
             user.setInfostore(access.getInfostore());
             user.setPinboardWriteAccess(access.getPinboardWrite());
-            user.setProject(access.getProjects());
             user.setRSSBookmarks(access.getRssBookmarks());
             user.setRSSPortal(access.getRssPortal());
             user.setSyncML(access.getSyncml());

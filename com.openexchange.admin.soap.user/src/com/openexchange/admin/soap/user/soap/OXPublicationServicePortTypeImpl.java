@@ -1259,11 +1259,6 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
             moduleAccess.setPinboardWrite(booleanValue(tmp));
         }
 
-        tmp = soapModuleAccess.isProjects();
-        if (tmp != null) {
-            moduleAccess.setProjects(booleanValue(tmp));
-        }
-
         tmp = soapModuleAccess.isPublication();
         if (tmp != null) {
             moduleAccess.setPublication(booleanValue(tmp));
@@ -1357,7 +1352,6 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
         soapModuleAccess.setMultipleMailAccounts(Boolean.valueOf(moduleAccess.isMultipleMailAccounts()));
         soapModuleAccess.setOLOX20(Boolean.valueOf(moduleAccess.isOLOX20()));
         soapModuleAccess.setPinboardWrite(Boolean.valueOf(moduleAccess.getPinboardWrite()));
-        soapModuleAccess.setProjects(Boolean.valueOf(moduleAccess.getProjects()));
         soapModuleAccess.setPublication(Boolean.valueOf(moduleAccess.isPublication()));
         soapModuleAccess.setPublicFolderEditable(Boolean.valueOf(moduleAccess.isPublicFolderEditable()));
         soapModuleAccess.setReadCreateSharedFolders(Boolean.valueOf(moduleAccess.getReadCreateSharedFolders()));

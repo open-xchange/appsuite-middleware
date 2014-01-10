@@ -68,7 +68,7 @@ public class UpdaterTestSuite {
     }
 
     public static Test suite() {
-        final TestSuite tests = new TestSuite();
+        final TestSuite tests = new TestSuite("com.openexchange.ajax.updater.UpdaterTestSuite");
         tests.addTestSuite(UpdaterDownloadTest.class);
         tests.addTestSuite(UpdaterXMLTest.class);
 

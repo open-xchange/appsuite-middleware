@@ -65,7 +65,7 @@ public final class MailTestSuite extends TestSuite {
     }
 
     public static Test suite() {
-        final TestSuite mailSuite = new TestSuite();
+        final TestSuite mailSuite = new TestSuite("com.openexchange.ajax.mail.MailTestSuite");
         mailSuite.addTestSuite(AllTest.class);
         mailSuite.addTestSuite(AttachmentTest.class);
         mailSuite.addTestSuite(ClearTest.class);

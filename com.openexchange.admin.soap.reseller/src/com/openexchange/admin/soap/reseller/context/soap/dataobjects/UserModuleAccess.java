@@ -35,7 +35,6 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name="infostore" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="multipleMailAccounts" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="pinboardWrite" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="projects" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="publicFolderEditable" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="publication" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="readCreateSharedFolders" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
@@ -76,7 +75,6 @@ import javax.xml.bind.annotation.XmlType;
     "infostore",
     "multipleMailAccounts",
     "pinboardWrite",
-    "projects",
     "publicFolderEditable",
     "publication",
     "readCreateSharedFolders",
@@ -128,8 +126,6 @@ public class UserModuleAccess {
     protected Boolean multipleMailAccounts;
     @XmlElement(nillable = true)
     protected Boolean pinboardWrite;
-    @XmlElement(nillable = true)
-    protected Boolean projects;
     @XmlElement(nillable = true)
     protected Boolean publicFolderEditable;
     @XmlElement(nillable = true)
@@ -585,30 +581,6 @@ public class UserModuleAccess {
      */
     public void setPinboardWrite(Boolean value) {
         this.pinboardWrite = value;
-    }
-
-    /**
-     * Ruft den Wert der projects-Eigenschaft ab.
-     *
-     * @return
-     *     possible object is
-     *     {@link Boolean }
-     *
-     */
-    public Boolean isProjects() {
-        return projects;
-    }
-
-    /**
-     * Legt den Wert der projects-Eigenschaft fest.
-     *
-     * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *
-     */
-    public void setProjects(Boolean value) {
-        this.projects = value;
     }
 
     /**

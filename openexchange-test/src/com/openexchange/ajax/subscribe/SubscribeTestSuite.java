@@ -71,7 +71,7 @@ public class SubscribeTestSuite extends TestSuite {
     }
 
     public static Test suite() {
-        final TestSuite suite = new TestSuite();
+        final TestSuite suite = new TestSuite("com.openexchange.ajax.subscribe.SubscribeTestSuite");
         /* there is not test for action=get : many tests validate their result using get, so no need for explicit testing */
         suite.addTestSuite(NewSubscriptionTest.class);
         suite.addTestSuite(DeleteSubscriptionTest.class);

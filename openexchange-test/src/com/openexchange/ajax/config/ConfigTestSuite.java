@@ -70,7 +70,7 @@ public class ConfigTestSuite {
      * @return the task tests suite.
      */
     public static Test suite() {
-        final TestSuite tests = new TestSuite();
+        final TestSuite tests = new TestSuite("com.openexchange.ajax.config.ConfigTestSuite");
         tests.addTestSuite(AvailableModulesTest.class);
         tests.addTestSuite(ConfigMenuTest.class);
         tests.addTestSuite(ForwardInlineOrAttachmentTest.class);

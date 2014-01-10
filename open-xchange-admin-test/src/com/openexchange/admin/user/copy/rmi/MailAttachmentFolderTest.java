@@ -54,10 +54,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import org.json.JSONException;
 import org.junit.Test;
 import com.openexchange.admin.rmi.AbstractRMITest;
@@ -276,10 +272,6 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
         }
 
         super.tearDown();
-    }
-
-    private OXUserCopyInterface getUserMoveClient() throws MalformedURLException, RemoteException, NotBoundException {
-        return (OXUserCopyInterface) Naming.lookup(getRMIHostUrl() + OXUserCopyInterface.RMI_NAME);
     }
 
     private AJAXSession performLogin(final String login, final String password) throws OXException, IOException, JSONException {

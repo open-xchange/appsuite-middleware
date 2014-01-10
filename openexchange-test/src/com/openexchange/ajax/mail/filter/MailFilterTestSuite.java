@@ -60,18 +60,18 @@ import junit.framework.TestSuite;
  */
 public final class MailFilterTestSuite {
 
-	/**
-	 * Initializes a new {@link MailFilterTestSuite}
-	 */
-	private MailFilterTestSuite() {
-		super();
-	}
+    /**
+     * Initializes a new {@link MailFilterTestSuite}
+     */
+    private MailFilterTestSuite() {
+        super();
+    }
 
-	 /**
+    /**
      * @return a test suite containing smoke tests.
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite();
+        TestSuite suite = new TestSuite("com.openexchange.ajax.mail.filter.MailFilterTestSuite");
         suite.addTestSuite(ConfigTest.class);
         suite.addTestSuite(NewTest.class);
         suite.addTestSuite(UpdateTest.class);

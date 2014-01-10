@@ -72,8 +72,6 @@ public class UserModuleAccess {
 
     private Boolean PinboardWrite = true;
 
-    private Boolean Projects = true;
-
     private Boolean readCreateSharedFolders = true;
 
     private Boolean RssBookmarks = true;
@@ -336,20 +334,6 @@ public class UserModuleAccess {
      */
     public void setPinboardWrite(final Boolean val) {
         this.PinboardWrite = val;
-    }
-
-    /**
-     * Currently NOT in use!
-     */
-    public Boolean getProjects() {
-        return Projects;
-    }
-
-    /**
-     * Currently NOT in use!
-     */
-    public void setProjects(final Boolean val) {
-        this.Projects = val;
     }
 
     public Boolean getReadCreateSharedFolders() {

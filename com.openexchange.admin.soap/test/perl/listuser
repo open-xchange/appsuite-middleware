@@ -193,7 +193,6 @@ sub doRequest {
 			   "ical",
 			   "rssPortal",
 			   "delegateTask",
-			   "projects",
 			   "forum",
 			   "editPassword",
 			   "editPublicFolders",

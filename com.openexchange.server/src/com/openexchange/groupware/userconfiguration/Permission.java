@@ -69,7 +69,6 @@ public enum Permission {
     CONTACTS(UserConfiguration.CONTACTS, "Contacts"),
     TASKS(UserConfiguration.TASKS, "Tasks"),
     INFOSTORE(UserConfiguration.INFOSTORE, "Infostore"),
-    PROJECTS(UserConfiguration.PROJECTS, "Projects"),
     FORUM(UserConfiguration.FORUM, "Forum"),
     PINBOARD_WRITE_ACCESS(UserConfiguration.PINBOARD_WRITE_ACCESS, "PinboardWriteAccess"),
     WEBDAV_XML(UserConfiguration.WEBDAV_XML, "WebDAVXML"),

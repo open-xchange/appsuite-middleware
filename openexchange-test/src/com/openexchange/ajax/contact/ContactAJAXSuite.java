@@ -56,7 +56,7 @@ import com.openexchange.ajax.contact.action.ExemplaryContactTestManagerTest;
 public class ContactAJAXSuite extends TestSuite {
 
     public static Test suite() {
-        final TestSuite tests = new TestSuite();
+        final TestSuite tests = new TestSuite("com.openexchange.ajax.contact.ContactAJAXSuite");
         tests.addTestSuite(AllTest.class);
         tests.addTestSuite(CopyTest.class);
         tests.addTestSuite(DeleteTest.class);

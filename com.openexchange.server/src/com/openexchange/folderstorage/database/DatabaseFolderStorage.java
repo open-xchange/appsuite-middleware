@@ -586,8 +586,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             type = FolderObject.PRIVATE;
         } else if (Arrays.binarySearch(PUBLIC_FOLDER_IDS, pid) >= 0) {
             type = FolderObject.PUBLIC;
-        } else if (pid == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
-            type = FolderObject.PROJECT;
         } else {
             type = getFolderAccess(ctx, con).getFolderType(pid);
         }
@@ -697,8 +695,6 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             return PrivateType.getInstance();
         } else if (Arrays.binarySearch(PUBLIC_FOLDER_IDS, pid) >= 0) {
             return PublicType.getInstance();
-        } else if (pid == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
-            return SystemType.getInstance();
         } else {
             final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
             try {

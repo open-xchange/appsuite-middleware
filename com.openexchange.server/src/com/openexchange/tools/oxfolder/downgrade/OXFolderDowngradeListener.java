@@ -356,8 +356,6 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
             case FolderObject.INFOSTORE:
                 deleteContainedDocuments(fuid, event);
                 break;
-            case FolderObject.PROJECT:
-                break;
             default:
                 throw OXFolderExceptionCode.UNKNOWN_MODULE.create(Integer.valueOf(imodule),
                     Integer.valueOf(event.getContext().getContextId()));
@@ -479,9 +477,9 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
         }
         final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
         if (null != eventAdmin) {
-            for (int i = 0; i < folderIDs.length; i++) {
+            for (int folderID : folderIDs) {
                 final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-                props.put(FolderEventConstants.PROPERTY_FOLDER, String.valueOf(folderIDs[i]));
+                props.put(FolderEventConstants.PROPERTY_FOLDER, String.valueOf(folderID));
                 props.put(FolderEventConstants.PROPERTY_CONTEXT, Integer.valueOf(ctx.getContextId()));
                 props.put(FolderEventConstants.PROPERTY_USER, Integer.valueOf(userId));
                 props.put(FolderEventConstants.PROPERTY_CONTENT_RELATED, Boolean.FALSE);

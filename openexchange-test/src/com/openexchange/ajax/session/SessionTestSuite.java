@@ -63,7 +63,7 @@ public final class SessionTestSuite {
     }
 
     public static Test suite() {
-        final TestSuite tests = new TestSuite();
+        final TestSuite tests = new TestSuite("com.openexchange.ajax.session.SessionTestSuite");
         tests.addTestSuite(LoginTest.class);
         tests.addTestSuite(StoreTest.class);
         tests.addTestSuite(RedirectTest.class);

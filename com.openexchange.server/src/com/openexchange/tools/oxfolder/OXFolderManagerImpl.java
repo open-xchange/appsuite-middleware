@@ -1362,9 +1362,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         case FolderObject.INFOSTORE:
             deleteContainedDocuments(fo.getObjectID());
             break;
-        case FolderObject.PROJECT:
-            // TODO: Delete all projects in project folder
-            break;
         default:
             throw OXFolderExceptionCode.UNKNOWN_MODULE.create(Integer.valueOf(module), Integer.valueOf(ctx.getContextId()));
         }
@@ -1750,9 +1747,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         case FolderObject.INFOSTORE:
             deleteContainedDocuments(folderID);
             break;
-        case FolderObject.PROJECT:
-            // TODO: Delete all projects in project folder
-            break;
         default:
             throw OXFolderExceptionCode.UNKNOWN_MODULE.create(Integer.valueOf(module), Integer.valueOf(ctx.getContextId()));
         }
@@ -1936,13 +1930,13 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
      */
     @Override
     public void cleanUpTestFolders(final int[] fuids, final Context ctx) {
-        for (int i = 0; i < fuids.length; i++) {
+        for (int fuid : fuids) {
             try {
-                OXFolderSQL.hardDeleteOXFolder(fuids[i], ctx, null);
+                OXFolderSQL.hardDeleteOXFolder(fuid, ctx, null);
                 ConditionTreeMapManagement.dropFor(ctx.getContextId());
                 if (FolderCacheManager.isEnabled() && FolderCacheManager.isInitialized()) {
                     try {
-                        FolderCacheManager.getInstance().removeFolderObject(fuids[i], ctx);
+                        FolderCacheManager.getInstance().removeFolderObject(fuid, ctx);
                     } catch (final OXException e) {
                         LOG.warn("", e);
                     }

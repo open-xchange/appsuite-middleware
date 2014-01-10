@@ -64,7 +64,7 @@ public class PubSubSuite {
     }
 
     public static final Test suite() {
-        TestSuite suite = new TestSuite();
+        TestSuite suite = new TestSuite("com.openexchange.ajax.roundtrip.pubsub.PubSubSuite");
 
         suite.addTestSuite(DoNotDuplicateEmptyContactsTest.class);
         suite.addTestSuite(DoNotLoseContactsWhenPublishingAndSubscribing.class);
