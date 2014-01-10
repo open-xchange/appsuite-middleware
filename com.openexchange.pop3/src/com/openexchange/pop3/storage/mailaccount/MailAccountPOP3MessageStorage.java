@@ -50,19 +50,25 @@
 package com.openexchange.pop3.storage.mailaccount;
 
 import static com.openexchange.pop3.storage.mailaccount.util.Utility.prependPath2Fullname;
+import gnu.trove.map.TIntObjectMap;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import javax.mail.Message;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.IMailMessageStorageMimeSupport;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.mime.dataobjects.MimeRawSource;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -71,13 +77,14 @@ import com.openexchange.pop3.storage.FullnameUIDPair;
 import com.openexchange.pop3.storage.POP3StorageTrashContainer;
 import com.openexchange.pop3.storage.POP3StorageUIDLMap;
 import com.openexchange.session.Session;
+import com.sun.mail.pop3.POP3Message;
 
 /**
  * {@link MailAccountPOP3MessageStorage} - POP3 storage message storage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
+public class MailAccountPOP3MessageStorage implements IMailMessageStorage, IMailMessageStorageMimeSupport {
 
     private final IMailMessageStorage delegatee;
     private final MailAccountPOP3Storage storage;
@@ -125,6 +132,22 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
     }
 
     @Override
+    public boolean isMimeSupported() throws OXException {
+        return ((delegatee instanceof IMailMessageStorageMimeSupport) && ((IMailMessageStorageMimeSupport) delegatee).isMimeSupported());
+    }
+
+    @Override
+    public String[] appendMimeMessages(String destFolder, Message[] msgs) throws OXException {
+        if (delegatee instanceof IMailMessageStorageMimeSupport) {
+            final IMailMessageStorageMimeSupport streamSupport = (IMailMessageStorageMimeSupport) delegatee;
+            if (streamSupport.isMimeSupported()) {
+                return streamSupport.appendMimeMessages(destFolder, msgs);
+            }
+        }
+        throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
+    }
+
+    @Override
     public String[] appendMessages(final String destFolder, final MailMessage[] msgs) throws OXException {
         /*
          * Append to mail account storage and return storage's IDs, NOT UIDLS!!!
@@ -140,22 +163,74 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
      * @param pop3Messages The POP3 messages
      * @throws OXException If append operation fails
      */
-    public void appendPOP3Messages(final MailMessage[] pop3Messages) throws OXException {
-        final MailMessage[] pop3Msgs;
-        {
-            final int length = pop3Messages.length;
-            final List<MailMessage> tmp = new ArrayList<MailMessage>(length);
-            for (int i = 0; i < length; i++) {
-                final MailMessage m = pop3Messages[i];
-                if (null != m && null != m.getMailId()) {
-                    tmp.add(m);
-                }
+    public void appendPOP3Messages(final Message[] pop3Messages, final TIntObjectMap<String> seqnum2uidl) throws OXException {
+        if (null == pop3Messages || 0 == pop3Messages.length) {
+            return;
+        }
+        final String[] uidls = new String[pop3Messages.length];
+        for (int i = 0; i < uidls.length; i++) {
+            final POP3Message msg = (POP3Message) pop3Messages[i];
+            if (null != msg) {
+                uidls[i] = seqnum2uidl.get(msg.getMessageNumber());
             }
-            pop3Msgs = tmp.toArray(new MailMessage[tmp.size()]);
+        }
+        final String[] uids;
+        if ((delegatee instanceof IMailMessageStorageMimeSupport)) {
+            final IMailMessageStorageMimeSupport streamSupport = (IMailMessageStorageMimeSupport) delegatee;
+            if (streamSupport.isMimeSupported()) {
+                uids = streamSupport.appendMimeMessages(getRealFullname("INBOX"), pop3Messages);
+            } else {
+                throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
+            }
+        } else {
+            throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
+        }
+        /*
+         * Add mappings
+         */
+        final FullnameUIDPair[] pairs = new FullnameUIDPair[uids.length];
+        for (int i = 0; i < pairs.length; i++) {
+            final String mailId = uids[i];
+            if (null != mailId) {
+                pairs[i] = FullnameUIDPair.newINBOXInstance(mailId);
+            }
+        }
+        uidlMap.addMappings(uidls, pairs);
+    }
+
+    /**
+     * Appends specified POP3 messages fetched from POP3 account to this storage's INBOX folder.
+     * <p>
+     * The new UIDLs are automatically added to used {@link POP3StorageUIDLMap UIDL map}.
+     *
+     * @param pop3Messages The POP3 messages
+     * @throws OXException If append operation fails
+     */
+    public void appendPOP3Messages(final MailMessage[] pop3Messages) throws OXException {
+        if (null == pop3Messages || 0 == pop3Messages.length) {
+            return;
         }
         /*
          * This method has a special meaning since it's called during synchronization of actual POP3 content with storage content
          */
+        final MailMessage[] pop3Msgs;
+        {
+            final int length = pop3Messages.length;
+            final List<MailMessage> tmp = new LinkedList<MailMessage>();
+            boolean failee = false;
+            for (int i = 0; i < length; i++) {
+                final MailMessage m = pop3Messages[i];
+                if (null != m && null != m.getMailId()) {
+                    tmp.add(m);
+                } else {
+                    failee = true;
+                }
+            }
+            pop3Msgs = failee ? tmp.toArray(new MailMessage[tmp.size()]) : pop3Messages;
+        }
+        if (null == pop3Msgs || 0 == pop3Msgs.length) {
+            return;
+        }
         final String[] uidls = new String[pop3Msgs.length];
         for (int i = 0; i < uidls.length; i++) {
             final MailMessage mailMessage = pop3Msgs[i];
@@ -166,7 +241,21 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
         /*
          * Append to mail account storage
          */
-        final String[] uids = delegatee.appendMessages(getRealFullname("INBOX"), pop3Msgs);
+        final String[] uids;
+        if ((pop3Msgs[0] instanceof MimeRawSource) && (delegatee instanceof IMailMessageStorageMimeSupport)) {
+            final IMailMessageStorageMimeSupport streamSupport = (IMailMessageStorageMimeSupport) delegatee;
+            if (streamSupport.isMimeSupported()) {
+                final List<Message> tmp = new LinkedList<Message>();
+                for (final MailMessage pop3Message : pop3Msgs) {
+                    tmp.add((Message) ((MimeRawSource) pop3Message).getPart());
+                }
+                uids = streamSupport.appendMimeMessages(getRealFullname("INBOX"), tmp.toArray(new Message[0]));
+            } else {
+                uids = delegatee.appendMessages(getRealFullname("INBOX"), pop3Msgs);
+            }
+        } else {
+            uids = delegatee.appendMessages(getRealFullname("INBOX"), pop3Msgs);
+        }
         /*
          * Add mappings
          */

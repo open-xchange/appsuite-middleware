@@ -51,6 +51,7 @@ package com.openexchange.mail.smal.impl;
 
 import java.util.Collections;
 import java.util.List;
+import javax.mail.Message;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.AccountFolders;
@@ -70,6 +71,7 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageBatch;
 import com.openexchange.mail.api.IMailMessageStorageExt;
+import com.openexchange.mail.api.IMailMessageStorageMimeSupport;
 import com.openexchange.mail.api.ISimplifiedThreadStructure;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -100,7 +102,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch, ISimplifiedThreadStructure {
+public final class SmalMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch, ISimplifiedThreadStructure, IMailMessageStorageMimeSupport {
 
     /**
      * Initializes a new {@link SmalMessageStorage}.
@@ -124,6 +126,24 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
         final IMailMessageStorage messageStorage = smalMailAccess.getDelegateMailAccess().getMessageStorage();
         if (messageStorage instanceof ISimplifiedThreadStructure) {
             return ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(folder, includeSent, cache, indexRange, max, sortField, order, fields);
+        }
+        throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
+    }
+
+    @Override
+    public boolean isMimeSupported() throws OXException {
+        final IMailMessageStorage messageStorage = smalMailAccess.getDelegateMailAccess().getMessageStorage();
+        return (messageStorage instanceof IMailMessageStorageMimeSupport) && ((IMailMessageStorageMimeSupport) messageStorage).isMimeSupported();
+    }
+
+    @Override
+    public String[] appendMimeMessages(String destFolder, Message[] msgs) throws OXException {
+        final IMailMessageStorage messageStorage = smalMailAccess.getDelegateMailAccess().getMessageStorage();
+        if (messageStorage instanceof IMailMessageStorageMimeSupport) {
+            final IMailMessageStorageMimeSupport streamSupport = (IMailMessageStorageMimeSupport) messageStorage;
+            if (streamSupport.isMimeSupported()) {
+                return streamSupport.appendMimeMessages(destFolder, msgs);
+            }
         }
         throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
     }

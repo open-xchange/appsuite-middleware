@@ -257,8 +257,7 @@ public class DocumentMetadataResource extends AbstractResource implements
 			} catch (final OXException x) {
 				if (com.openexchange.exception.Category.CATEGORY_PERMISSION_DENIED == x
 						.getCategory()) {
-					throw WebdavProtocolException.Code.GENERAL_ERROR.create(
-							getUrl(), HttpServletResponse.SC_FORBIDDEN, x);
+					throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_UNAUTHORIZED, x);
 				}
 				throw WebdavProtocolException.Code.GENERAL_ERROR.create(
 						getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
@@ -484,8 +483,7 @@ public class DocumentMetadataResource extends AbstractResource implements
 				final Context ctx = session.getContext();
 				final EffectiveInfostorePermission perm = security.getInfostorePermission(getId(), ctx, session.getUser(), session.getUserPermissionBits());
 				if (!perm.canWriteObject()) {
-					throw WebdavProtocolException.Code.NO_WRITE_PERMISSION
-							.create(getUrl(), HttpServletResponse.SC_FORBIDDEN);
+					throw WebdavProtocolException.Code.NO_WRITE_PERMISSION.create(getUrl(), HttpServletResponse.SC_UNAUTHORIZED);
 				}
 			}
 			propertyHelper.dumpPropertiesToDB();
@@ -763,8 +761,7 @@ public class DocumentMetadataResource extends AbstractResource implements
 					throw x;
 				} catch (final OXException x) {
 					if (CATEGORY_PERMISSION_DENIED == x.getCategory()) {
-						throw WebdavProtocolException.Code.GENERAL_ERROR
-								.create(url, HttpServletResponse.SC_FORBIDDEN);
+						throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_UNAUTHORIZED);
 					}
 					throw WebdavProtocolException.Code.GENERAL_ERROR.create(
 							url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, x, new Object[0]);
@@ -798,11 +795,8 @@ public class DocumentMetadataResource extends AbstractResource implements
 								throw WebdavProtocolException.Code.GENERAL_ERROR
 										.create(getUrl(), Protocol.SC_LOCKED);
 							}
-							if (CATEGORY_PERMISSION_DENIED == iStoreException
-									.getCategory()) {
-								throw WebdavProtocolException.Code.GENERAL_ERROR
-										.create(url,
-												HttpServletResponse.SC_FORBIDDEN);
+							if (CATEGORY_PERMISSION_DENIED == iStoreException.getCategory()) {
+								throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_UNAUTHORIZED);
 							}
 						}
 					}
@@ -839,8 +833,7 @@ public class DocumentMetadataResource extends AbstractResource implements
 				throw WebdavProtocolException.Code.GENERAL_ERROR.create(
 						getUrl(), HttpServletResponse.SC_CONFLICT);
 			} else if (parent.isRoot()) {
-				throw WebdavProtocolException.Code.GENERAL_ERROR.create(
-						getUrl(), HttpServletResponse.SC_FORBIDDEN);
+				throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_UNAUTHORIZED);
 			}
 		} catch (final ClassCastException x) {
 			throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(),

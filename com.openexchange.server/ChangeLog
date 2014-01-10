@@ -1,3 +1,13 @@
+* 2014-01-10- jan.bauerdick@open-xchange.com
+
+ - Fix for bug 30544: sanitizefilemimetypes.in was located in 2 bundles (c.o.oxscripts.clt & oxscripts).
+                      Deleted it from oxscripts.
+
+* 2014-01-10 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 29950: Respond with HTTP 401 Unauthorized in case of access restrictions  
+ - Fix for bug 30552: Allow UNLOCK for WebDAV resources only for the lock-owning user and the context administrator 
+
 * 2014-01-09 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 30549: Don't try and guess mime type from empty stream

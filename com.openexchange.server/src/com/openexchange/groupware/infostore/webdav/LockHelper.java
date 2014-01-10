@@ -124,6 +124,7 @@ public abstract class LockHelper {
                 return;
 			}
 
+			lock.setOwnerID(getSession().getUserId());
 			final int lockId = saveLock(lock);
 			lock.setToken("http://www.open-xchange.com/webdav/locks/"+lockId);
 			locks.put(lock.getToken(), lock);
