@@ -159,10 +159,10 @@ public class PermissionTest extends TestCase implements SessionHolder {
             resource.save();
             fail("Shouldn't be able to save this, as user2 doesn't have write permissions");
         } catch(final WebdavProtocolException x) {
-            if(x.getStatus() != 403) {
+            if(x.getStatus() != HttpServletResponse.SC_UNAUTHORIZED) {
                 x.printStackTrace();
             }
-            assertEquals("Expected Forbidden Status", 403, x.getStatus());
+            assertEquals("Expected Unauthorized Status", HttpServletResponse.SC_UNAUTHORIZED, x.getStatus());
         }
     }
 
@@ -182,10 +182,10 @@ public class PermissionTest extends TestCase implements SessionHolder {
             collection.save();
             fail("Shouldn't be able to save this, as user2 doesn't have write permissions");
         } catch(final WebdavProtocolException x) {
-            if (x.getStatus() != HttpServletResponse.SC_UNAUTHORIZED) {
+            if (x.getStatus() != HttpServletResponse.SC_FORBIDDEN) {
                 x.printStackTrace();
             }
-            assertEquals("Expected Unauthorized Status", HttpServletResponse.SC_UNAUTHORIZED, x.getStatus());
+            assertEquals("Expected Forbidden Status", HttpServletResponse.SC_FORBIDDEN, x.getStatus());
         }
     }
 
