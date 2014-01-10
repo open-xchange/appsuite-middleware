@@ -153,6 +153,7 @@ import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailMessageStorageBatch;
 import com.openexchange.mail.api.IMailMessageStorageExt;
+import com.openexchange.mail.api.IMailMessageStorageMimeSupport;
 import com.openexchange.mail.api.ISimplifiedThreadStructure;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.IDMailMessage;
@@ -203,13 +204,15 @@ import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.Rights;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
+import com.sun.mail.util.MessageRemovedIOException;
+import com.sun.mail.util.ReadableMime;
 
 /**
  * {@link IMAPMessageStorage} - The IMAP implementation of message storage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailMessageStorageExt, IMailMessageStorageBatch, ISimplifiedThreadStructure {
+public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailMessageStorageExt, IMailMessageStorageBatch, ISimplifiedThreadStructure, IMailMessageStorageMimeSupport {
 
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPMessageStorage.class));
@@ -2795,6 +2798,169 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
         }
         return uids;
+    }
+
+    @Override
+    public boolean isMimeSupported() {
+        return true;
+    }
+
+    @Override
+    public String[] appendMimeMessages(final String destFullName, final Message[] msgs) throws OXException {
+        if (null == msgs) {
+            return new String[0];
+        }
+        final int length = msgs.length;
+        if (length == 0) {
+            return new String[0];
+        }
+        try {
+            /*
+             * Open and check user rights on source folder
+             */
+            try {
+                imapFolder = setAndOpenFolder(imapFolder, destFullName, READ_WRITE);
+            } catch (final MessagingException e) {
+                final Exception next = e.getNextException();
+                if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                    throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", destFullName));
+                }
+                throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, destFullName);
+            }
+            try {
+                if (!holdsMessages()) {
+                    throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, imapFolder.getFullName());
+                }
+                if (imapConfig.isSupportsACLs() && !aclExtension.canInsert(RightsCache.getCachedRights(imapFolder, true, session, accountId))) {
+                    throw IMAPException.create(IMAPException.Code.NO_INSERT_ACCESS, imapConfig, session, imapFolder.getFullName());
+                }
+            } catch (final MessagingException e) {
+                throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, imapFolder.getFullName());
+            }
+            final OperationKey opKey = new OperationKey(Type.MSG_APPEND, accountId, new Object[] { destFullName });
+            final boolean marked = setMarker(opKey);
+            try {
+                imapFolderStorage.removeFromCache(destFullName);
+                /*
+                 * Check if destination folder supports user flags
+                 */
+                final boolean supportsUserFlags = UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId);
+                if (!supportsUserFlags) {
+                    /*
+                     * Remove all user flags from messages before appending to folder
+                     */
+                    for (final Message message : msgs) {
+                        if (null != message) {
+                            removeUserFlagsFromMessage(message);
+                        }
+                    }
+                }
+                /*
+                 * Mark first message for later lookup
+                 */
+                final List<Message> filteredMsgs = filterNullElements(msgs);
+                final String hash = randomUUID();
+                /*
+                 * Try to set marker header
+                 */
+                try {
+                    filteredMsgs.get(0).setHeader(MessageHeaders.HDR_X_OX_MARKER, fold(13, hash));
+                } catch (final Exception e) {
+                    // Is read-only -- create a copy from first message
+                    final MimeMessage newMessage;
+                    final Message removed = filteredMsgs.remove(0);
+                    if (removed instanceof ReadableMime) {
+                        newMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), ((ReadableMime) removed).getMimeStream());
+                        newMessage.setFlags(removed.getFlags(), true);
+                    } else {
+                        newMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), MimeMessageUtility.getStreamFromPart(removed));
+                        newMessage.setFlags(removed.getFlags(), true);
+                    }
+                    newMessage.setHeader(MessageHeaders.HDR_X_OX_MARKER, fold(13, hash));
+                    filteredMsgs.add(0, newMessage);
+                }
+                /*
+                 * ... and append them to folder
+                 */
+                String[] retval = null;
+                final boolean hasUIDPlus = imapConfig.getImapCapabilities().hasUIDPlus();
+                try {
+                    if (hasUIDPlus) {
+                        // Perform append expecting APPENUID response code
+                        retval = longs2uids(checkAndConvertAppendUID(imapFolder.appendUIDMessages(filteredMsgs.toArray(new Message[0]))));
+                    } else {
+                        // Perform simple append
+                        imapFolder.appendMessages(filteredMsgs.toArray(new Message[0]));
+                    }
+                } catch (final MessagingException e) {
+                    final Exception nextException = e.getNextException();
+                    if (nextException instanceof com.sun.mail.iap.CommandFailedException) {
+                        throw IMAPException.create(IMAPException.Code.INVALID_MESSAGE, imapConfig, session, e, new Object[0]);
+                    }
+                    throw e;
+                }
+                if (null != retval) {
+                    /*
+                     * Close affected IMAP folder to ensure consistency regarding IMAFolder's internal cache.
+                     */
+                    notifyIMAPFolderModification(destFullName);
+                    if (retval.length >= length) {
+                        return retval;
+                    }
+                    final String[] longs = new String[length];
+                    for (int i = 0, k = 0; i < length; i++) {
+                        if (null != msgs[i]) {
+                            longs[i] = retval[k++];
+                        }
+                    }
+                    return longs;
+                }
+                /*-
+                 * OK, go the long way:
+                 * 1. Find the marker in folder's messages
+                 * 2. Get the UIDs from found message's position
+                 */
+                if (hasUIDPlus) {
+                    /*
+                     * Missing UID information in APPENDUID response
+                     */
+                    LOG.warn("Missing UID information in APPENDUID response");
+                }
+                retval = new String[msgs.length];
+                final long[] uids = IMAPCommandsCollection.findMarker(hash, retval.length, imapFolder);
+                if (uids.length == 0) {
+                    Arrays.fill(retval, null);
+                } else {
+                    System.arraycopy(uids, 0, retval, 0, uids.length);
+                }
+                /*
+                 * Close affected IMAP folder to ensure consistency regarding IMAFolder's internal cache.
+                 */
+                notifyIMAPFolderModification(destFullName);
+                if (retval.length >= length) {
+                    return retval;
+                }
+                final String[] longs = new String[length];
+                for (int i = 0, k = 0; i < length; i++) {
+                    if (null != msgs[i]) {
+                        longs[i] = retval[k++];
+                    }
+                }
+                return longs;
+            } finally {
+                if (marked) {
+                    unsetMarker(opKey);
+                }
+            }
+        } catch (final MessagingException e) {
+            throw IMAPException.handleMessagingException(e, imapConfig, session, imapFolder, accountId, mapFor("fullName", destFullName));
+        } catch (final MessageRemovedIOException e) {
+            throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+        } catch (final IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
     }
 
     @Override
