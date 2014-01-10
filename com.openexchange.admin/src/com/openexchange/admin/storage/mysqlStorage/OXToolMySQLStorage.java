@@ -62,6 +62,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import org.osgi.framework.BundleContext;
+import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -82,6 +84,8 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -2361,6 +2365,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
     }
 
+    private static final String SYMBOLIC_NAME_CACHE = "com.openexchange.caching";
+
+    private static final String NAME_OXCACHE = "oxcache";
+
     private void changeAccessCombination(int cid, int filter, int addAccess, int removeAccess) throws StorageException {
         Connection con = null;
         Table table = new Table("user_configuration");
@@ -2379,6 +2387,24 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 values.add(filter);
             }
             new StatementBuilder().executeStatement(con, update, values);
+
+            // JCS
+            final BundleContext context = AdminCache.getBundleContext();
+            if (null != context) {
+                final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
+                    CacheService.class);
+                if (null != cacheService) {
+                    try {
+                        final Cache cache = cacheService.getCache("Capabilities");
+                        cache.invalidateGroup(Integer.toString(cid));
+                    } catch (final OXException e) {
+                        log.error("", e);
+                    } finally {
+                        AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+                    }
+                }
+            }
+            // End of JCS
         } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
