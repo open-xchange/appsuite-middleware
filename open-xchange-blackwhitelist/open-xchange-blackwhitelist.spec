@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-core >= @OXVERSION@
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define         ox_release 1
+%define         ox_release 2
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -55,12 +55,16 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 %doc com.openexchange.blackwhitelist/ChangeLog
 
 %changelog
+* Fri Jan 10 2014 Carsten Hoeger <choeger@open-xchange.com>
+Second release candidate for 7.4.2
 * Fri Jan 03 2014 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2014-01-06
 * Mon Dec 23 2013 Carsten Hoeger <choeger@open-xchange.com>
-First release candidate for 7.4.2
-* Mon Dec 23 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-12-09
+* Mon Dec 23 2013 Carsten Hoeger <choeger@open-xchange.com>
+First release candidate for 7.4.2
+* Thu Dec 19 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-12-23
 * Thu Dec 19 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-12-23
 * Thu Dec 19 2013 Carsten Hoeger <choeger@open-xchange.com>
