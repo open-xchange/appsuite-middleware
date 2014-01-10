@@ -1289,7 +1289,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                                     appendStackTrace(thread.getStackTrace(), logBuilder);
                                     LOG.info(logBuilder);
                                 } else {
-                                    final Throwable t = new Throwable();
+                                    final Throwable t = new FastThrowable();
                                     t.setStackTrace(thread.getStackTrace());
                                     LOG.info(logBuilder, t);
                                 }
@@ -1351,6 +1351,18 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             this.t = t;
             stamp = System.currentTimeMillis();
             this.logProperties = logProperties;
+        }
+    }
+
+    private static final class FastThrowable extends Throwable {
+
+        FastThrowable() {
+            super();
+        }
+
+        @Override
+        public synchronized Throwable fillInStackTrace() {
+            return this;
         }
     }
 
