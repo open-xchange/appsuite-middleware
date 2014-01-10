@@ -52,7 +52,6 @@ package com.openexchange.http.grizzly.osgi;
 import java.util.concurrent.ExecutorService;
 import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.comet.CometAddOn;
-import org.glassfish.grizzly.http.KeepAlive;
 import org.glassfish.grizzly.http.ajp.AjpAddOn;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.http.server.OXHttpServer;
@@ -149,11 +148,17 @@ public class GrizzlyActivator extends HousekeepingActivator {
             }
 
             // Configure keep-alive
-            {
-                final KeepAlive keepAlive = networkListener.getKeepAlive();
-                keepAlive.setIdleTimeoutInSeconds(-1);
-                keepAlive.setMaxRequestsCount(-1);
-            }
+            /*-
+             * Keep default settings for now.
+             * Otherwise alter KeepAlive instance.
+             *
+             * {
+             *     final KeepAlive keepAlive = networkListener.getKeepAlive();
+             *     keepAlive.setIdleTimeoutInSeconds(-1);
+             *     keepAlive.setMaxRequestsCount(-1);
+             * }
+             *
+             */
 
             if (grizzlyConfig.isJMXEnabled()) {
                 grizzly.getServerConfiguration().setJmxEnabled(true);
