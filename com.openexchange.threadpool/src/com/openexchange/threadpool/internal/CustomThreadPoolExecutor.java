@@ -1280,7 +1280,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                                 logBuilder.append("\" exceeds max. running time of ").append(maxRunningTime);
                                 logBuilder.append("msec -> Processing time: ").append(System.currentTimeMillis() - taskInfo.stamp);
                                 logBuilder.append("msec");
-                                final Throwable t = new Throwable();
+                                final Throwable t = new FastThrowable();
                                 t.setStackTrace(thread.getStackTrace());
                                 LOG.info(logBuilder.toString(), t);
                             }
@@ -1341,6 +1341,18 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             this.t = t;
             stamp = System.currentTimeMillis();
             this.logProperties = logProperties;
+        }
+    }
+
+    private static final class FastThrowable extends Throwable {
+
+        FastThrowable() {
+            super();
+        }
+
+        @Override
+        public synchronized Throwable fillInStackTrace() {
+            return this;
         }
     }
 
