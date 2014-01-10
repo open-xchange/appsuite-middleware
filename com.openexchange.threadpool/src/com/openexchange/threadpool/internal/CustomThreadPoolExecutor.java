@@ -429,6 +429,11 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         final Worker w = new Worker(firstTask);
         final Thread t = threadFactory.newThread(w);
         if (null != t) {
+            // Log spawning of a new thread
+            if (null != firstTask) {
+                LOG.debug("Spawned new thread for {}", firstTask.getClass().getName(), new Throwable("Thread-Creation-Watcher"));
+            }
+            // Continue initialization worker
             w.thread = t;
             workers.put(w, PRESENT);
             final int nt = ++poolSize;
