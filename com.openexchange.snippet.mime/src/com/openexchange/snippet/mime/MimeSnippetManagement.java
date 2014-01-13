@@ -309,8 +309,12 @@ public final class MimeSnippetManagement implements SnippetManagement {
         try {
             final String file;
             final int creator;
+            final String displayName;
+            final String module;
+            final String type;
+            final boolean shared;
             {
-                stmt = con.prepareStatement("SELECT refId, user FROM snippet WHERE cid=? AND id=? AND refType=" + FS_TYPE);
+                stmt = con.prepareStatement("SELECT refId, user, displayName, module, type, shared FROM snippet WHERE cid=? AND id=? AND refType=" + FS_TYPE);
                 int pos = 0;
                 stmt.setInt(++pos, contextId);
                 stmt.setString(++pos, identifier);
@@ -320,6 +324,10 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 }
                 file = rs.getString(1);
                 creator = rs.getInt(2);
+                displayName = rs.getString(3);
+                module = rs.getString(4);
+                type = rs.getString(5);
+                shared = rs.getInt(6) > 0;
                 closeSQLStuff(rs, stmt);
                 rs = null;
                 stmt = null;
@@ -348,6 +356,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             } else {
                 parseSnippet(mimeMessage, mimeMessage, snippet);
             }
+            snippet.setDisplayName(displayName).setModule(module).setType(type).setShared(shared);
             return snippet;
         } catch (final SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -747,10 +756,10 @@ public final class MimeSnippetManagement implements SnippetManagement {
                             stmt.setNull(++pos, Types.INTEGER);
                         }
                     }
-                    stmt.setString(++pos, updateMessage.getHeader(Property.DISPLAY_NAME.getPropName(), null));
-                    stmt.setString(++pos, updateMessage.getHeader(Property.MODULE.getPropName(), null));
-                    stmt.setString(++pos, updateMessage.getHeader(Property.TYPE.getPropName(), null));
-                    stmt.setInt(++pos, Boolean.parseBoolean(updateMessage.getHeader(Property.SHARED.getPropName(), null)) ? 1 : 0);
+                    stmt.setString(++pos, snippet.getDisplayName());
+                    stmt.setString(++pos, snippet.getModule());
+                    stmt.setString(++pos, snippet.getType());
+                    stmt.setInt(++pos, snippet.isShared() ? 1 : 0);
                     stmt.setLong(++pos, System.currentTimeMillis());
                     stmt.setString(++pos, newFile);
                     stmt.executeUpdate();
