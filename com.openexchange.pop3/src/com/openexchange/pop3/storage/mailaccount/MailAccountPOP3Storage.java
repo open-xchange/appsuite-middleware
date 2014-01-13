@@ -560,8 +560,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         // Start sync process
         POP3Store pop3Store = null;
         try {
-            final POP3StoreResult result =
-                POP3StoreConnector.getPOP3Store(pop3Access.getPOP3Config(), pop3Access.getMailProperties(), false, session, !expunge);
+            final POP3StoreResult result = POP3StoreConnector.getPOP3Store(pop3Access.getPOP3Config(), pop3Access.getMailProperties(), false, session, !expunge);
             pop3Store = result.getPop3Store();
             final boolean containsWarnings = result.containsWarnings();
             if (containsWarnings) {
@@ -658,9 +657,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                     }
                 } catch (final Exception e) {
                     final POP3Config pop3Config = pop3Access.getPOP3Config();
-                    LOG.warn(
-                        "POP3 mailbox " + pop3Config.getServer() + " could not be expunged/closed for login " + pop3Config.getLogin(),
-                        e);
+                    LOG.warn("POP3 mailbox " + pop3Config.getServer() + " could not be expunged/closed for login " + pop3Config.getLogin(), e);
                 }
                 // Trashed UIDLs not needed anymore
                 if (doExpunge) {
