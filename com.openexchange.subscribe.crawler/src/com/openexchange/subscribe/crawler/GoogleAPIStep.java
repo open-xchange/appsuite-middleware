@@ -77,6 +77,7 @@ import com.google.gdata.util.ServiceException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
@@ -358,7 +359,7 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
                     final int year = Integer.parseInt(matcher.group(1));
                     final int month = Integer.parseInt(matcher.group(2));
                     final int day = Integer.parseInt(matcher.group(3));
-                    final Calendar cal = Calendar.getInstance();
+                    final Calendar cal = Calendar.getInstance(TimeZones.UTC);
                     cal.clear();
                     cal.set(Calendar.DAY_OF_MONTH, day);
                     cal.set(Calendar.MONTH, month - 1);
