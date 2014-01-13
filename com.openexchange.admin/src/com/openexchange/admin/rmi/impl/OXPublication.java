@@ -93,10 +93,11 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             basicauth.doAuthentication(auth, ctx);
+            final com.openexchange.groupware.contexts.Context oxCtx = contexts.getContext(ctx.getId());
             for (PublicationTarget pubTar : discovery.listTargets()) {
                 final PublicationService publicationService = pubTar.getPublicationService();
                 if (null != publicationService) {
-                    com.openexchange.publish.Publication currentPublication = publicationService.resolveUrl(contexts, url);
+                    com.openexchange.publish.Publication currentPublication = publicationService.resolveUrl(oxCtx, url);
                     if (null != currentPublication) {
                         String description = publicationService.getInformation(currentPublication);
                         return parsePublication(currentPublication, description);
@@ -128,10 +129,11 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             basicauth.doAuthentication(auth, ctx);
+            final com.openexchange.groupware.contexts.Context oxCtx = contexts.getContext(ctx.getId());
             for (PublicationTarget pubTar : discovery.listTargets()) {
                 final PublicationService publicationService = pubTar.getPublicationService();
                 if (null != publicationService) {
-                    com.openexchange.publish.Publication currentPublication = publicationService.resolveUrl(contexts, url);
+                    com.openexchange.publish.Publication currentPublication = publicationService.resolveUrl(oxCtx, url);
                     if (null != currentPublication) {
                         publicationService.delete(currentPublication);
                         return true;

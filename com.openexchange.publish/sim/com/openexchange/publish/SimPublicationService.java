@@ -52,7 +52,6 @@ package com.openexchange.publish;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
@@ -170,7 +169,7 @@ public class SimPublicationService implements PublicationService {
 	}
 
     @Override
-    public Publication resolveUrl(ContextService service, String URL) throws OXException {
+    public Publication resolveUrl(Context ctx, String URL) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }

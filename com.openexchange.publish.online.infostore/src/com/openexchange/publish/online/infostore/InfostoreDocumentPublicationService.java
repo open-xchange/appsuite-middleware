@@ -55,7 +55,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.regex.Pattern;
-import com.openexchange.context.ContextService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
@@ -172,35 +171,17 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
     }
 
     @Override
-    public Publication resolveUrl(final ContextService service, String URL) throws OXException {
+    public Publication resolveUrl(final Context ctx, final String URL) throws OXException {
         if(!URL.contains(PREFIX)){
             return null;
         }
         final Pattern SPLIT = Pattern.compile("/");
         final String[] path = SPLIT.split(URL, 0);
-        final int cid = getContext(path);
         final String secret = getSecret(path);
-        if (cid == -1 || secret == null) {
+        if (secret == null) {
             return null;
         }
-        System.out.println("cid: " + cid + " secret: " + secret);
-        final Context ctx = service.getContext(cid);
         return getPublication(ctx, secret);
-    }
-
-    private int getContext(final String[] path) throws OXException {
-        int cid = -1;
-        for(int i = 0; i < path.length; i++) {
-            if(path[i].equals("documents") && path.length > i+1) {
-                try {
-                    cid = Integer.parseInt(path[i+1]);
-                    break;
-                } catch (final NumberFormatException x) {
-                    //
-                }
-            }
-        }
-        return cid;
     }
 
     private String getSecret(final String[] path) {

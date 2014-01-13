@@ -53,10 +53,8 @@ import junit.framework.TestCase;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.powermock.modules.junit4.PowerMockRunner;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.contexts.Context;
@@ -73,9 +71,6 @@ public class InfostoreDocumentPublicationServiceTest extends TestCase {
 
     @InjectMocks
     private InfostoreDocumentPublicationService publicationService;
-
-    @Mock
-    private ContextService contextService;
 
     @Mock
     private IDBasedFileAccessFactory fileAccessFactory = null;
@@ -149,9 +144,7 @@ public class InfostoreDocumentPublicationServiceTest extends TestCase {
         assertNotNull(publication.getConfiguration().get("url"));
         assertEquals("/publications/documents/1337/theSecret", publication.getConfiguration().get("url"));
 
-        Mockito.when(contextService.getContext(1337)).thenReturn(simContext);
-
-        final Publication comparePublication = publicationService.resolveUrl(contextService, "/publications/documents/1337/theSecret");
+        final Publication comparePublication = publicationService.resolveUrl(simContext, "/publications/documents/1337/theSecret");
         assertNotNull("Returned publication of resolveUrl is null!", comparePublication);
 
         assertNotNull(comparePublication.getConfiguration().get("url"));
