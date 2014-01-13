@@ -2103,7 +2103,7 @@ public final class MimeMessageUtility {
      */
     public static InputStream getStreamFromPart(final Part part) throws IOException {
         final PipedOutputStream pos = new PipedOutputStream();
-        final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos);
+        final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
 
         final Runnable r = new Runnable() {
 
@@ -2138,7 +2138,7 @@ public final class MimeMessageUtility {
     public static InputStream getStreamFromMailPart(final MailPart part) throws OXException {
         try {
             final PipedOutputStream pos = new PipedOutputStream();
-            final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos);
+            final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
 
             final Runnable r = new Runnable() {
 

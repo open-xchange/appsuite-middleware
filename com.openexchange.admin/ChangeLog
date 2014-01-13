@@ -1,3 +1,7 @@
+* 2014-01-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30568: Invalidate "Capabilities" cache at various modifying methods
+
 * 2013-12-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 30144: Properly set login mappings (no "null" strings) in case autocontextid is active

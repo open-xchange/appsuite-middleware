@@ -65,6 +65,14 @@ public class WebdavLock {
 	private boolean neverExpires;
 	private String token;
 	private final long creationTime = System.currentTimeMillis();
+	private int ownerID;
+
+	/**
+	 * Initializes a new {@link WebdavLock}.
+	 */
+	public WebdavLock() {
+	    super();
+	}
 
 	public int getDepth() {
 		return depth;
@@ -115,6 +123,24 @@ public class WebdavLock {
 		this.type = type;
 	}
 
+    /**
+     * Gets the user ID of the lock's owner.
+     *
+     * @return The lock owner's user ID
+     */
+    public int getOwnerID() {
+        return ownerID;
+    }
+
+    /**
+     * Sets the user ID of the lock's owner.
+     *
+     * @param ownerID The owner ID to set
+     */
+    public void setOwnerID(int ownerID) {
+        this.ownerID = ownerID;
+    }
+
 	public boolean locks(final WebdavResource locked, final WebdavResource resource) {
 		final WebdavPath urlLocked = locked.getUrl();
 		final WebdavPath urlRes = resource.getUrl();
@@ -151,6 +177,5 @@ public class WebdavLock {
 	public boolean isActive(final long time) {
 		return getTimeout()!=0;
 	}
-
 
 }

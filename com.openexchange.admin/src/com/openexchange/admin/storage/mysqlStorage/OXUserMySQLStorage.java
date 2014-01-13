@@ -953,6 +953,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         cache.remove(key);
                         cache = cacheService.getCache("UserSettingMail");
                         cache.remove(key);
+                        cache = cacheService.getCache("Capabilities");
+                        cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
                         if (displayNameUpdate) {
                             final int fuid = getDefaultInfoStoreFolder(usrdata, ctx, con);
                             if (fuid > 0) {
@@ -2306,6 +2308,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             cache.remove(key);
                             cache = cacheService.getCache("UserSettingMail");
                             cache.remove(key);
+                            cache = cacheService.getCache("Capabilities");
+                            cache.removeFromGroup(user.getId(), ctx.getId().toString());
                         } catch (final OXException e) {
                             log.error("", e);
                         } finally {
@@ -2466,6 +2470,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             cache.remove(key);
                             cache = cacheService.getCache("UserSettingMail");
                             cache.remove(key);
+                            cache = cacheService.getCache("Capabilities");
+                            cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
                         }
                     } catch (final OXException e) {
                         log.error("", e);

@@ -50,17 +50,60 @@
 package com.openexchange.webdav.action;
 
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
+import com.openexchange.java.Strings;
+import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 public class WebdavUnlockAction extends AbstractAction {
 
-	@Override
-    public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws WebdavProtocolException {
-		req.getResource().unlock(getToken(req.getHeader("Lock-Token")));
-		res.setStatus(HttpServletResponse.SC_OK);
-	}
+    @Override
+    public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
+        /*
+         * check lock token
+         */
+        String token = getToken(req.getHeader("Lock-Token"));
+        if (Strings.isEmpty(token)) {
+            throw WebdavProtocolException.generalError(req.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+        }
+        /*
+         * check lock exists
+         */
+        WebdavLock lock = req.getResource().getLock(token);
+        if (null == lock) {
+            throw WebdavProtocolException.generalError(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
+        }
+        /*
+         * check if current user holds the lock
+         */
+        if (null != lock && WebdavLock.Scope.EXCLUSIVE_LITERAL.equals(lock.getScope())) {
+            WebdavLock ownLock = req.getResource().getOwnLock(token);
+            if (null == ownLock) {
+                throw WebdavProtocolException.generalError(req.getUrl(), HttpServletResponse.SC_UNAUTHORIZED);
+            }
+            if (0 < ownLock.getOwnerID()) {
+                InfostoreWebdavFactory factory = (InfostoreWebdavFactory)req.getFactory();
+                int currentUserID = factory.getSessionHolder().getSessionObject().getUserId();
+                if (ownLock.getOwnerID() != currentUserID &&
+                    factory.getSessionHolder().getContext().getMailadmin() != currentUserID) {
+                    throw WebdavProtocolException.generalError(req.getUrl(), HttpServletResponse.SC_UNAUTHORIZED);
+                }
+            }
+        }
+        /*
+         * perform unlock
+         */
+        req.getResource().unlock(token);
+        res.setStatus(HttpServletResponse.SC_OK);
+    }
 
+//    @Override
+//    public void perform(final WebdavRequest req, final WebdavResponse res)
+//            throws WebdavProtocolException {
+//        req.getResource().unlock(getToken(req.getHeader("Lock-Token")));
+//        res.setStatus(HttpServletResponse.SC_OK);
+//    }
+//
 	private String getToken(final String header) {
 		return header.substring(1,header.length()-1);
 	}

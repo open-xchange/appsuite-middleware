@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Thread Pool Test Injector
+Bundle-SymbolicName: com.openexchange.threadpool.testinjector
+Bundle-Version: 7.4.2
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.java,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.threadpool,
+ com.openexchange.threadpool.behavior,
+ com.openexchange.timer,
+ javax.management,
+ org.apache.commons.logging,
+ org.cliffc.high_scale_lib,
+ org.osgi.framework,
+ org.osgi.service.event,
+ org.osgi.util.tracker,
+ sun.misc
+Bundle-Activator: com.openexchange.threadpool.testinjector.osgi.ThreadPoolInjectorActivator

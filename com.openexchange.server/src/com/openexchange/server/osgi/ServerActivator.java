@@ -49,6 +49,7 @@
 
 package com.openexchange.server.osgi;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.nio.charset.spi.CharsetProvider;
 import java.util.ArrayList;
@@ -147,6 +148,8 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.index.IndexFacadeService;
+import com.openexchange.lock.LockService;
+import com.openexchange.lock.impl.LockServiceImpl;
 import com.openexchange.log.Slf4jLogger;
 import com.openexchange.login.BlockingLoginHandlerService;
 import com.openexchange.login.LoginHandlerService;
@@ -730,6 +733,29 @@ public final class ServerActivator extends HousekeepingActivator {
 
         ServerServiceRegistry.getInstance().addService(SecretService.class, secretService = new WhiteboardSecretService(context));
         secretService.open();
+
+        // Cache for generic volatile locks
+        {
+            final String regionName = "GenLocks";
+            final byte[] ccf = ("jcs.region."+regionName+"=\n" +
+                "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                "jcs.region."+regionName+".cacheattributes.MaxObjects=1000000\n" +
+                "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
+                "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=150\n" +
+                "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=30\n" +
+                "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
+                "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=-1\n" +
+                "jcs.region."+regionName+".elementattributes.IdleTime=150\n" +
+                "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
+                "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
+                "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+            getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf), true);
+            final LockService lockService = new LockServiceImpl();
+            ServerServiceRegistry.getInstance().addService(LockService.class, lockService);
+            registerService(LockService.class, lockService);
+        }
 
         /*
          * Register servlets

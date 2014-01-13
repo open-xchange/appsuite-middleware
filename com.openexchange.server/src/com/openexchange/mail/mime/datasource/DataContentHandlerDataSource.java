@@ -90,7 +90,7 @@ public final class DataContentHandlerDataSource implements DataSource {
     @Override
     public InputStream getInputStream() throws IOException {
         final PipedOutputStream pos = new PipedOutputStream();
-        final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos);
+        final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
 
         final DataContentHandler dch = this.dch;
         final Object object = this.object;

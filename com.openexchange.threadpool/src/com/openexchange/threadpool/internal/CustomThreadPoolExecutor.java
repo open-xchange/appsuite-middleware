@@ -429,6 +429,11 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         final Worker w = new Worker(firstTask);
         final Thread t = threadFactory.newThread(w);
         if (null != t) {
+            // Log spawning of a new thread
+            if (null != firstTask) {
+                LOG.debug("Spawned new thread for {}", firstTask.getClass().getName(), new Throwable("Thread-Creation-Watcher"));
+            }
+            // Continue initialization worker
             w.thread = t;
             workers.put(w, PRESENT);
             final int nt = ++poolSize;
@@ -1275,7 +1280,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                                 logBuilder.append("\" exceeds max. running time of ").append(maxRunningTime);
                                 logBuilder.append("msec -> Processing time: ").append(System.currentTimeMillis() - taskInfo.stamp);
                                 logBuilder.append("msec");
-                                final Throwable t = new Throwable();
+                                final Throwable t = new FastThrowable();
                                 t.setStackTrace(thread.getStackTrace());
                                 LOG.info(logBuilder.toString(), t);
                             }
@@ -1336,6 +1341,18 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             this.t = t;
             stamp = System.currentTimeMillis();
             this.logProperties = logProperties;
+        }
+    }
+
+    private static final class FastThrowable extends Throwable {
+
+        FastThrowable() {
+            super();
+        }
+
+        @Override
+        public synchronized Throwable fillInStackTrace() {
+            return this;
         }
     }
 

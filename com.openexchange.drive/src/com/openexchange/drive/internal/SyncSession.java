@@ -104,7 +104,8 @@ public class SyncSession {
         if (isTraceEnabled()) {
             trace("Creating new sync session for user " + session.getServerSession().getLoginName() + " (" +
                 session.getServerSession().getUserId() + ") in context " + session.getServerSession().getContextId() +
-                ", root folder ID is " + session.getRootFolderID());
+                ", root folder ID is " + session.getRootFolderID() +
+                " via client " + session.getClientType() + " v" + session.getClientVersion());
         }
     }
 

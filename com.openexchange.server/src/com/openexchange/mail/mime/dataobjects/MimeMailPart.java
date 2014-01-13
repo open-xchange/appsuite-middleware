@@ -848,7 +848,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      */
     private static InputStream getStreamFromPart(final Part part) throws IOException {
         final PipedOutputStream pos = new PipedOutputStream();
-        final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos);
+        final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
 
         {
             final Runnable r = new Runnable() {
@@ -885,7 +885,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      */
     private static InputStream getStreamFromMultipart(final Multipart multipart) throws IOException {
         final PipedOutputStream pos = new PipedOutputStream();
-        final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos);
+        final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
 
         {
             final Runnable r = new Runnable() {

@@ -358,6 +358,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 jcs = cacheService.getCache("UserSettingMail");
                 jcs.remove(key);
 
+                jcs = cacheService.getCache("Capabilities");
+                jcs.removeFromGroup(userid, ctx.getId().toString());
+
                 jcs = cacheService.getCache("MailAccount");
                 jcs.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.valueOf(0), userid));
                 jcs.invalidateGroup(ctx.getId().toString());
@@ -514,11 +517,40 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw e;
         }
 
-//      JCS
+        // JCS
         try {
             UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
         } catch (final OXException e) {
             log.error("Error removing user {} in context {} from configuration storage", user.getId(), ctx.getId(),e);
+        }
+        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context, CacheService.class);
+        if (null != cacheService) {
+            try {
+                final Cache usercCache = cacheService.getCache("User");
+                final Cache upCache = cacheService.getCache("UserPermissionBits");
+                final Cache ucCache = cacheService.getCache("UserConfiguration");
+                final Cache usmCache = cacheService.getCache("UserSettingMail");
+                final Cache capabilitiesCache = cacheService.getCache("Capabilities");
+                {
+                    final CacheKey key = cacheService.newCacheKey(i(ctx.getId()), user.getId());
+                    usercCache.remove(key);
+                    usercCache.remove(cacheService.newCacheKey(i(ctx.getId()), user.getName()));
+                    upCache.remove(key);
+                    ucCache.remove(key);
+                    usmCache.remove(key);
+                    capabilitiesCache.removeFromGroup(user.getId(), ctx.getId().toString());
+                    try {
+                        UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(),
+                                new ContextImpl(ctx.getId().intValue()));
+                    } catch (final OXException e) {
+                        log.error("Error removing user {} in context {} from configuration storage", user.getId(), ctx.getId(), e);
+                    }
+                }
+            } catch (final OXException e) {
+                log.error("", e);
+            } finally {
+                AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+            }
         }
         // END OF JCS
 
@@ -956,6 +988,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 final Cache upCache = cacheService.getCache("UserPermissionBits");
                 final Cache ucCache = cacheService.getCache("UserConfiguration");
                 final Cache usmCache = cacheService.getCache("UserSettingMail");
+                final Cache capabilitiesCache = cacheService.getCache("Capabilities");
                 for (final User user : users) {
                     final CacheKey key = cacheService.newCacheKey(i(ctx.getId()), user.getId());
                     usercCache.remove(key);
@@ -963,6 +996,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     upCache.remove(key);
                     ucCache.remove(key);
                     usmCache.remove(key);
+                    capabilitiesCache.removeFromGroup(user.getId(), ctx.getId().toString());
                     try {
                         UserConfigurationStorage.getInstance().invalidateCache(user.getId().intValue(),
                                 new ContextImpl(ctx.getId().intValue()));

@@ -81,6 +81,7 @@ public class EntityLockHelper extends LockHelper {
 		l.setType(WebdavLock.Type.WRITE_LITERAL);
 		l.setScope((lock.getScope().equals(LockManager.Scope.EXCLUSIVE)? WebdavLock.Scope.EXCLUSIVE_LITERAL : WebdavLock.Scope.SHARED_LITERAL));
 		l.setOwner(lock.getOwnerDescription());
+		l.setOwnerID(lock.getOwner());
 		return l;
 	}
 
@@ -88,7 +89,7 @@ public class EntityLockHelper extends LockHelper {
 	protected Lock toLock(final WebdavLock lock) {
 		final Lock l = new Lock();
 		l.setId(Integer.parseInt(lock.getToken().substring( 41 )));
-		//TODOl.setOwner(userid)
+		l.setOwner(lock.getOwnerID());
 		l.setOwnerDescription(lock.getOwner());
 		l.setScope(lock.getScope().equals(WebdavLock.Scope.EXCLUSIVE_LITERAL) ? LockManager.Scope.EXCLUSIVE : LockManager.Scope.SHARED);
 		l.setType(LockManager.Type.WRITE);

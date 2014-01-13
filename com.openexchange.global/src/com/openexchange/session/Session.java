@@ -49,6 +49,7 @@
 
 package com.openexchange.session;
 
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -60,6 +61,44 @@ import com.openexchange.sessiond.SessiondService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Session {
+
+    static final Condition EMPTY_CONDITION = new Condition() {
+
+        @Override
+        public void signalAll() {
+            // Nothing to do
+        }
+
+        @Override
+        public void signal() {
+            // Nothing to do
+        }
+
+        @Override
+        public boolean awaitUntil(Date deadline) throws InterruptedException {
+            return true;
+        }
+
+        @Override
+        public void awaitUninterruptibly() {
+            // Nothing to do
+        }
+
+        @Override
+        public long awaitNanos(long nanosTimeout) throws InterruptedException {
+            return 0;
+        }
+
+        @Override
+        public boolean await(long time, TimeUnit unit) throws InterruptedException {
+            return true;
+        }
+
+        @Override
+        public void await() throws InterruptedException {
+            // Nothing to do
+        }
+    };
 
     /**
      * The empty lock, doing nothing on invocations.
@@ -81,12 +120,9 @@ public interface Session {
             return true;
         }
 
-        /**
-         * Empty lock provides no condition. Therefore a <code>UnsupportedOperationException</code> is thrown on invocation attempt.
-         */
         @Override
         public Condition newCondition() {
-            throw new UnsupportedOperationException("Empty lock provides no condition.");
+            return EMPTY_CONDITION;
         }
 
         @Override

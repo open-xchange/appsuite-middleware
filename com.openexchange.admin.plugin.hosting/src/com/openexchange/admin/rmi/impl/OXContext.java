@@ -443,8 +443,10 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context, CacheService.class);
             if (null != cacheService) {
                 try {
-                    final Cache cache = cacheService.getCache("MailAccount");
+                    Cache cache = cacheService.getCache("MailAccount");
                     cache.clear();
+                    cache = cacheService.getCache("Capabilities");
+                    cache.invalidateGroup(ctx.getId().toString());
                 } catch (final OXException e) {
                     log.error("", e);
                 } finally {
