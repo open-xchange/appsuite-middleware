@@ -57,6 +57,7 @@ import java.lang.reflect.Field;
 import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -552,6 +553,11 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 Database.back(cid, true, con);
             }
         }
+        // Acquire DB lock
+        if (false == acquireLock(session)) {
+            // Another thread is already in process.
+            return;
+        }
         // Start sync process
         POP3Store pop3Store = null;
         try {
@@ -685,6 +691,95 @@ public class MailAccountPOP3Storage implements POP3Storage {
             } catch (final MessagingException e) {
                 LOG.error(e.getMessage(), e);
             }
+            releaseLock(session);
+        }
+    }
+
+    private boolean acquireLock(final Session session) throws OXException {
+        // Acquire DB lock
+        final int cid = session.getContextId();
+        final Connection con = Database.get(cid, true);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            final int user = session.getUserId();
+            final int accountId = pop3Access.getAccountId();
+            int pos = 1;
+            stmt = con.prepareStatement("SELECT 1 FROM user_mail_account_properties WHERE id=? AND cid=? AND user=? AND name=?");
+            stmt.setInt(pos++, accountId);
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, user);
+            stmt.setString(pos++, "pop3.lock");
+            rs = stmt.executeQuery();
+            final boolean update = rs.next();
+            closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+            pos = 1;
+            // Either INSERT or UPDATE
+            if (update) {
+                stmt = con.prepareStatement("UPDATE user_mail_account_properties SET value=? WHERE id=? AND cid=? AND user=? AND name=? AND value=?");
+                stmt.setString(pos++, "1");
+                stmt.setInt(pos++, accountId);
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, user);
+                stmt.setString(pos++, "pop3.lock");
+                stmt.setString(pos++, "0");
+                final int result = stmt.executeUpdate();
+                if (result <= 0) {
+                    // Another thread is already in process.
+                    return false;
+                }
+            } else {
+                stmt = con.prepareStatement("INSERT INTO user_mail_account_properties (id,cid,user,name,value) VALUES (?,?,?,?,?)");
+                stmt.setInt(pos++, accountId);
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, user);
+                stmt.setString(pos++, "pop3.lock");
+                stmt.setString(pos++, "1");
+                // Uniquely INSERT
+                try {
+                    final int result = stmt.executeUpdate();
+                    if (result <= 0) {
+                        // Another thread is already in process.
+                        return false;
+                    }
+                } catch (final SQLException e) {
+                    // INSERT failed. Another thread is already in process.
+                    return false;
+                }
+            }
+            // Locked...
+            return true;
+        } catch (final SQLException e) {
+            // Concurrency check failed
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+            Database.back(cid, true, con);
+        }
+    }
+
+    private void releaseLock(final Session session) throws OXException {
+        // Release DB lock
+        final int cid = session.getContextId();
+        final Connection con = Database.get(cid, true);
+        PreparedStatement stmt = null;
+        try {
+            int pos = 1;
+            stmt = con.prepareStatement("UPDATE user_mail_account_properties SET value=? WHERE id=? AND cid=? AND user=? AND name=?");
+            stmt.setString(pos++, "0");
+            stmt.setInt(pos++, pop3Access.getAccountId());
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, session.getUserId());
+            stmt.setString(pos++, "pop3.lock");
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            // Concurrency check failed
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(null, stmt);
+            Database.back(cid, true, con);
         }
     }
 
