@@ -432,16 +432,23 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         if (null != t) {
             // Log spawning of a new thread
             if (null != firstTask) {
-                final Object task;
-                if (firstTask instanceof CustomFutureTask) {
-                    final Task<?> tsk = ((CustomFutureTask<?>) firstTask).getTask();
-                    task = tsk instanceof TaskWrapper ? ((TaskWrapper) tsk).getWrapped() : tsk;
-                } else if (firstTask instanceof ScheduledFutureTask) {
-                    task = ((ScheduledFutureTask<?>) firstTask).getWrapped();
-                } else {
-                    task = firstTask;
-                }
-                LOG.debug("Spawned new thread for {}", task.getClass().getName(), new Throwable("Thread-Creation-Watcher"));
+                final Object stringer = new Object() {
+
+                    @Override
+                    public String toString() {
+                        final Object task;
+                        if (firstTask instanceof CustomFutureTask) {
+                            final Task<?> tsk = ((CustomFutureTask<?>) firstTask).getTask();
+                            task = tsk instanceof TaskWrapper ? ((TaskWrapper) tsk).getWrapped() : tsk;
+                        } else if (firstTask instanceof ScheduledFutureTask) {
+                            task = ((ScheduledFutureTask<?>) firstTask).getWrapped();
+                        } else {
+                            task = firstTask;
+                        }
+                        return task.getClass().getName();
+                    }
+                };
+                LOG.debug("Spawned new thread for {}", stringer, new Throwable("Thread-Creation-Watcher"));
             }
             // Continue initialization worker
             w.thread = t;
