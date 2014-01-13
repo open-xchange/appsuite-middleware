@@ -1,3 +1,9 @@
+open-xchange-drive-comet (7.4.1-14) stable; urgency=low
+
+  * Build for patch 2014-01-14
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 13 Jan 2014 13:11:45 +0100
+
 open-xchange-drive-comet (7.4.1-13) stable; urgency=low
 
   * Build for patch 2014-01-06
