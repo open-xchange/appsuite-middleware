@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.util.TimeZones;
 
 /**
  * Unit tests for {@link GoogleAPIStep}
@@ -34,9 +35,33 @@ public class GoogleAPIStepTest {
 
         googleAPIStep.setBirthday(contact, birthday);
 
-        final Calendar cal = Calendar.getInstance();
+        final Calendar cal = Calendar.getInstance(TimeZones.UTC);
         cal.clear();
         cal.set(1995, 11, 10);
+        Assert.assertEquals("Returned birthday not as expected.", cal.getTime(), contact.getBirthday());
+    }
+
+    @Test
+    public void testSetBirthday_setCorrectly2_contactHasCorrectBirthday() {
+        String birthday = "1995-04-01";
+
+        googleAPIStep.setBirthday(contact, birthday);
+
+        final Calendar cal = Calendar.getInstance(TimeZones.UTC);
+        cal.clear();
+        cal.set(1995, 3, 1);
+        Assert.assertEquals("Returned birthday not as expected.", cal.getTime(), contact.getBirthday());
+    }
+
+    @Test
+    public void testSetBirthday_setCorrectly3_contactHasCorrectBirthday() {
+        String birthday = "1995-02-29";
+
+        googleAPIStep.setBirthday(contact, birthday);
+
+        final Calendar cal = Calendar.getInstance(TimeZones.UTC);
+        cal.clear();
+        cal.set(1995, 1, 29);
         Assert.assertEquals("Returned birthday not as expected.", cal.getTime(), contact.getBirthday());
     }
 }

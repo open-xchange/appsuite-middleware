@@ -2,6 +2,18 @@
 
  - Fix for bug 30543, removed obsolete code for feature 'projects'
 
+* 2014-01-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30571: Load snippet attributes from database, do not parse them from MIME content
+
+* 2014-01-13 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 30607: Use https instead of http
+
+* 2014-01-13 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 29807: Missing confirmations status of participants in update mail and bad check for last modified.
+
 * 2014-01-10- jan.bauerdick@open-xchange.com
 
  - Fix for bug 30544: sanitizefilemimetypes.in was located in 2 bundles (c.o.oxscripts.clt & oxscripts).

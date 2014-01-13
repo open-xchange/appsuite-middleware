@@ -49,10 +49,9 @@
 
 package com.openexchange.oauth.facebook;
 
-import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
@@ -60,7 +59,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import org.apache.commons.lang.time.DateUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,6 +72,7 @@ import org.scribe.oauth.OAuthService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
@@ -285,23 +284,28 @@ public class FacebookServiceImpl implements FacebookService {
     protected void setBirthday(Contact contact, String birthdayString) {
         if (isValid(birthdayString) && !"00/00/0000".equals(birthdayString)) {
 
-            Date birthday = null;
-            try {
-                birthday = DateUtils.parseDate(birthdayString, new String[] { "MM/dd/yyyy" });
-            } catch (ParseException parseException) {
+            final String regex = "([0-9]{2})/([0-9]{2})/([0-9]{4})";
+            if (birthdayString.matches(regex)) {
+                final Pattern pattern = Pattern.compile(regex);
+                final Matcher matcher = pattern.matcher(birthdayString);
+                if (matcher.matches() && matcher.groupCount() == 3) {
+                    final int month = Integer.parseInt(matcher.group(1));
+                    final int day = Integer.parseInt(matcher.group(2));
+                    final int year = Integer.parseInt(matcher.group(3));
+                    final Calendar cal = Calendar.getInstance(TimeZones.UTC);
+                    cal.clear();
+                    cal.set(Calendar.DAY_OF_MONTH, day);
+                    cal.set(Calendar.MONTH, month - 1);
+                    cal.set(Calendar.YEAR, year);
+                    contact.setBirthday(cal.getTime());
+                }
+            }
+            else {
                 LOG.info(
-                    "Unable to parse birthday string for facebook user '{} {}'! Tried to parse {}.",
+                    "Unable to parse birthday string for facebook user '{} {}' because pattern did not match! Tried to parse {}.",
                     contact.getGivenName(),
                     contact.getSurName(),
-                    birthdayString,
-                    parseException);
-            }
-
-            // only set the birthday if there is a year given as well (Bug 23009 - Facebook birthday stored as "0000-00-00" in
-            // the database)
-            // because of the defined format 'MM/dd/yyyy' dates without a year are not accepted and 'birthday' will be null
-            if (birthday != null) {
-                contact.setBirthday(birthday);
+                    birthdayString);
             }
         }
     }

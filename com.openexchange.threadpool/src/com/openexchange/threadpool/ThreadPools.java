@@ -532,7 +532,7 @@ public final class ThreadPools {
     /**
      * A {@link Callable} that runs given task and returns given result
      */
-    private static class RunnableAdapter<T> implements Callable<T> {
+    private static class RunnableAdapter<T> implements Callable<T>, TaskWrapper {
 
         private final Runnable task;
 
@@ -543,6 +543,16 @@ public final class ThreadPools {
             this.result = result;
         }
 
+        /**
+         * Gets the {@link Runnable} instance
+         *
+         * @return The {@link Runnable} instance
+         */
+        @Override
+        public Runnable getWrapped() {
+            return task;
+        }
+
         @Override
         public T call() {
             task.run();
@@ -551,7 +561,7 @@ public final class ThreadPools {
 
     }
 
-    private static class TaskAdapter<V> implements Task<V> {
+    private static class TaskAdapter<V> implements Task<V>, TaskWrapper {
 
         private final Callable<V> callable;
 
@@ -561,6 +571,11 @@ public final class ThreadPools {
         TaskAdapter(final Callable<V> callable) {
             super();
             this.callable = callable;
+        }
+
+        @Override
+        public Object getWrapped() {
+            return callable instanceof TaskWrapper ? ((TaskWrapper) callable).getWrapped() : callable;
         }
 
         @Override
@@ -592,7 +607,7 @@ public final class ThreadPools {
         }
     }
 
-    private static class RenamingTaskAdapter<V> implements Task<V> {
+    private static class RenamingTaskAdapter<V> implements Task<V>, TaskWrapper {
 
         private final Callable<V> callable;
 
@@ -605,6 +620,11 @@ public final class ThreadPools {
             super();
             this.callable = callable;
             this.prefix = prefix;
+        }
+
+        @Override
+        public Object getWrapped() {
+            return callable instanceof TaskWrapper ? ((TaskWrapper) callable).getWrapped() : callable;
         }
 
         @Override

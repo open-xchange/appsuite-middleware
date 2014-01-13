@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,34 +47,22 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.threadpool;
 
-import java.util.Collection;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link TaskWrapper}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface PublicationService {
+public interface TaskWrapper {
 
-    public void create(Publication publication) throws OXException;
-    public void update(Publication publication) throws OXException;
-    public Collection<Publication> getAllPublications(Context ctx, int userId, String module) throws OXException;
-    public Collection<Publication> getAllPublications(Context ctx) throws OXException;
-    public Collection<Publication> getAllPublications(Context ctx, String entityId) throws OXException;
-    public boolean knows(Context ctx, int publicationId) throws OXException;
-    public Publication load(Context ctx, int publicationId) throws OXException;
-    public void delete(Publication publication) throws OXException;
-    public PublicationTarget getTarget() throws OXException;
     /**
-     * This Method should only be used by the admin daemon to get a Publication by its URL
-     * @param ctx context, where this publication is located
-     * @param URL the URL for a Publication
-     * @return the Publication if found, else null
-     * @throws OXException
+     * Gets the actual task instance
+     *
+     * @return The actual task instance
      */
-    public Publication resolveUrl(Context ctx, String URL) throws OXException;
-    public String getInformation(Publication publication);
+    Object getWrapped();
 
 }

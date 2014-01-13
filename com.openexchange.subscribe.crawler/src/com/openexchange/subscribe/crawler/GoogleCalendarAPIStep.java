@@ -89,7 +89,9 @@ public class GoogleCalendarAPIStep extends AbstractStep<CalendarDataObject[], Ob
         final CalendarService myService = new CalendarService("com.openexchange");
         try {
             myService.setUserCredentials(username, password);
-            final URL feedUrl = new URL("http://www.google.com/calendar/feeds/" + username + "/private/full");
+            final URL feedUrl = new URL("https://www.google.com/calendar/feeds/" + username + "/private/full");
+            exchangeURLStreamHandler(feedUrl);
+
             final CalendarEventFeed myFeed = myService.getFeed(feedUrl, CalendarEventFeed.class);
             final List<CalendarDataObject> events = new ArrayList<CalendarDataObject>();
 

@@ -2,6 +2,7 @@ package com.openexchange.oauth.facebook;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,6 +10,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.util.TimeZones;
 
 /**
  * Unit tests for {@link FacebookServiceImpl}
@@ -62,7 +64,43 @@ public class FacebookServiceImplTest {
 
         facebookServiceImpl.setBirthday(contact, birthday);
 
-        Assert.assertEquals("Birthday not as expected!", new SimpleDateFormat("MM/dd/yyyy").parse(birthday), contact.getBirthday());
+        final Calendar cal = Calendar.getInstance(TimeZones.UTC);
+        cal.clear();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
+        simpleDateFormat.setTimeZone(TimeZones.UTC);
+        cal.setTime(simpleDateFormat.parse(birthday));
+
+        Assert.assertEquals("Birthday not as expected!", cal.getTime(), contact.getBirthday());
+    }
+
+    @Test
+    public void testSetBirthday_validEntry2_saveBirthday() throws ParseException {
+        String birthday = "04/01/1982";
+
+        facebookServiceImpl.setBirthday(contact, birthday);
+
+        final Calendar cal = Calendar.getInstance(TimeZones.UTC);
+        cal.clear();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
+        simpleDateFormat.setTimeZone(TimeZones.UTC);
+        cal.setTime(simpleDateFormat.parse(birthday));
+
+        Assert.assertEquals("Birthday not as expected!", cal.getTime(), contact.getBirthday());
+    }
+
+    @Test
+    public void testSetBirthday_validEntry3_saveBirthday() throws ParseException {
+        String birthday = "02/29/1982";
+
+        facebookServiceImpl.setBirthday(contact, birthday);
+
+        final Calendar cal = Calendar.getInstance(TimeZones.UTC);
+        cal.clear();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy");
+        simpleDateFormat.setTimeZone(TimeZones.UTC);
+        cal.setTime(simpleDateFormat.parse(birthday));
+
+        Assert.assertEquals("Birthday not as expected!", cal.getTime(), contact.getBirthday());
     }
 
     @Test
