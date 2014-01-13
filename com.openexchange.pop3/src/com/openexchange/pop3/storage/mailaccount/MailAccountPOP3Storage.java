@@ -824,12 +824,13 @@ public class MailAccountPOP3Storage implements POP3Storage {
             for (int i = 0; i < msgs.length; i++) {
                 final Message message = msgs[i];
                 if (null != message) {
+                    final int msgno = message.getMessageNumber();
                     try {
                         final MailMessage mm = MimeMessageConverter.convertMessage((MimeMessage) message, false);
-                        mm.setMailId(seqnum2uidl.get(message.getMessageNumber()));
+                        mm.setMailId(seqnum2uidl.get(msgno));
                         toAppend.add(mm);
                     } catch (final Exception e) {
-                        LOG.warn("POP3 message #{} could not be fetched from POP3 server.", message.getMessageNumber(), e);
+                        LOG.warn("POP3 message #{} could not be fetched from POP3 server.", msgno, e);
                     }
                 }
             }

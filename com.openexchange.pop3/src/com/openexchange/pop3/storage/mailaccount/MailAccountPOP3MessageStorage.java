@@ -77,7 +77,6 @@ import com.openexchange.pop3.storage.FullnameUIDPair;
 import com.openexchange.pop3.storage.POP3StorageTrashContainer;
 import com.openexchange.pop3.storage.POP3StorageUIDLMap;
 import com.openexchange.session.Session;
-import com.sun.mail.pop3.POP3Message;
 
 /**
  * {@link MailAccountPOP3MessageStorage} - POP3 storage message storage.
@@ -169,7 +168,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage, IMail
         }
         final String[] uidls = new String[pop3Messages.length];
         for (int i = 0; i < uidls.length; i++) {
-            final POP3Message msg = (POP3Message) pop3Messages[i];
+            final Message msg = pop3Messages[i];
             if (null != msg) {
                 uidls[i] = seqnum2uidl.get(msg.getMessageNumber());
             }
