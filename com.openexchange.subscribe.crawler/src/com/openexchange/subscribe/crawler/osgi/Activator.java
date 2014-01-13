@@ -57,6 +57,7 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.net.ssl.HttpsURLConnection;
 import org.ho.yaml.Yaml;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -67,6 +68,7 @@ import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.crawler.CrawlerDescription;
 import com.openexchange.subscribe.crawler.internal.GenericSubscribeService;
+import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
  * {@link Activator}
@@ -106,6 +108,8 @@ public class Activator implements BundleActivator {
         for (final ServiceTracker<?,?> tracker : trackers) {
             tracker.open();
         }
+
+        HttpsURLConnection.setDefaultSSLSocketFactory(TrustAllSSLSocketFactory.getDefault());
     }
 
     @Override

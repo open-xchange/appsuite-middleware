@@ -54,11 +54,27 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.TypeVariable;
+import java.net.Proxy;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.subscribe.crawler.GoogleAPIStep;
 import com.openexchange.subscribe.crawler.Workflow;
 
 public abstract class AbstractStep<O,I> implements Step<O,I>{
@@ -189,4 +205,176 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
         return this.getClass().getTypeParameters();
     }
     // Convenience Methods for Development / Debugging
+
+    private static volatile Field handlerField;
+    private static Field handlerField() {
+        Field f = handlerField;
+        if (null == f) {
+            synchronized (GoogleAPIStep.class) {
+                f = handlerField;
+                if (null == f) {
+                    try {
+                        f = URL.class.getDeclaredField("handler");
+                        f.setAccessible(true);
+                        handlerField = f;
+                    } catch (final RuntimeException e) {
+                        throw e;
+                    } catch (final Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
+        return f;
+    }
+
+    private static volatile Method openConnectionMethod;
+    static Method openConnectionMethod() {
+        Method m = openConnectionMethod;
+        if (null == m) {
+            synchronized (GoogleAPIStep.class) {
+                m = openConnectionMethod;
+                if (null == m) {
+                    try {
+                        m = URLStreamHandler.class.getDeclaredMethod("openConnection", new Class<?>[] { URL.class });
+                        m.setAccessible(true);
+                        openConnectionMethod = m;
+                    } catch (final RuntimeException e) {
+                        throw e;
+                    } catch (final Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
+        return m;
+    }
+
+    private static volatile Method openConnectionWithProxyMethod;
+    static Method openConnectionWithProxyMethod() {
+        Method m = openConnectionWithProxyMethod;
+        if (null == m) {
+            synchronized (GoogleAPIStep.class) {
+                m = openConnectionWithProxyMethod;
+                if (null == m) {
+                    try {
+                        m = URLStreamHandler.class.getDeclaredMethod("openConnection", new Class<?>[] { URL.class, Proxy.class });
+                        m.setAccessible(true);
+                        openConnectionWithProxyMethod = m;
+                    } catch (final RuntimeException e) {
+                        throw e;
+                    } catch (final Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
+        return m;
+    }
+
+    /** A trust manager that does not validate certificate chains */
+    static final TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+
+        @Override
+        public void checkClientTrusted(final X509Certificate[] chain, final String authType) {
+            // Nothing
+        }
+
+        @Override
+        public void checkServerTrusted(final X509Certificate[] chain, final String authType) {
+            // Nothing
+        }
+
+        @Override
+        public X509Certificate[] getAcceptedIssuers() {
+            return null;
+        }
+    } };
+
+    /**
+     * Prepares given {@link URLConnection} instance if an all-trusting trust manager needs to be applied.
+     *
+     * @param urlCon The URL connection to check
+     * @throws NoSuchAlgorithmException If preparation fails
+     * @throws KeyManagementException If preparation fails
+     */
+    static void prepareURLConnection(final URLConnection urlCon) throws NoSuchAlgorithmException, KeyManagementException {
+        if (urlCon instanceof HttpsURLConnection) {
+            final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) urlCon;
+            SSLSocketFactory sslSocketFactory = httpsURLConnection.getSSLSocketFactory();
+            if ((null == sslSocketFactory) || !(sslSocketFactory instanceof com.openexchange.tools.ssl.TrustAllSSLSocketFactory)) {
+                // Install the all-trusting trust manager
+                final SSLContext sslContext = SSLContext.getInstance("SSL");
+                sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+                // Create an ssl socket factory with our all-trusting manager
+                sslSocketFactory = sslContext.getSocketFactory();
+                // Tell the url connection object to use our socket factory which bypasses security checks
+                httpsURLConnection.setSSLSocketFactory(sslSocketFactory);
+            }
+        }
+    }
+
+    /**
+     * Exchanges the {@link URLStreamHandler} instance in specified {@link URL} object.
+     * <p>
+     * In case given URL is of type <code>https</code>, established URL connections will trust all certificates.
+     *
+     * @param url The URL object
+     */
+    protected void exchangeURLStreamHandler(final URL url) {
+        try {
+            final Field handlerField = handlerField();
+            // Get current handler
+            final URLStreamHandler delegate = (URLStreamHandler) handlerField.get(url);
+            // Instantiate new delege handler
+            final URLStreamHandler newHandler = new URLStreamHandler() {
+
+                @Override
+                protected URLConnection openConnection(final URL u) throws IOException {
+                    try {
+                        final URLConnection urlCon = (URLConnection) openConnectionMethod().invoke(delegate, u);
+                        prepareURLConnection(urlCon);
+                        return urlCon;
+                    } catch (final IllegalArgumentException e) {
+                        throw new IOException("Failed openConnection(URL) invocation.", e);
+                    } catch (final InvocationTargetException e) {
+                        final Throwable cause = e.getCause();
+                        throw cause instanceof IOException ? (IOException) cause : new IOException("Failed openConnection(URL) invocation.", cause);
+                    } catch (final IllegalAccessException e) {
+                        throw new IOException("Failed openConnection(URL) invocation.", e);
+                    } catch (final NoSuchAlgorithmException e) {
+                        throw new IOException("Failed openConnection(URL) invocation.", e);
+                    } catch (final KeyManagementException e) {
+                        throw new IOException("Failed openConnection(URL) invocation.", e);
+                    }
+                }
+
+                @Override
+                protected URLConnection openConnection(final URL u, final Proxy p) throws IOException {
+                    try {
+                        final URLConnection urlCon = (URLConnection) openConnectionWithProxyMethod().invoke(delegate, u, p);
+                        prepareURLConnection(urlCon);
+                        return urlCon;
+                    } catch (final IllegalArgumentException e) {
+                        throw new IOException("Failed openConnection(URL) invocation.", e);
+                    } catch (final InvocationTargetException e) {
+                        final Throwable cause = e.getCause();
+                        throw cause instanceof IOException ? (IOException) cause : new IOException("Failed openConnection(URL) invocation.", cause);
+                    } catch (final IllegalAccessException e) {
+                        throw new IOException("Failed openConnection(URL) invocation.", e);
+                    } catch (final NoSuchAlgorithmException e) {
+                        throw new IOException("Failed openConnection(URL) invocation.", e);
+                    } catch (final KeyManagementException e) {
+                        throw new IOException("Failed openConnection(URL) invocation.", e);
+                    }
+                }
+            };
+            // Set new handler
+            handlerField.set(url, newHandler);
+        } catch (final Exception e) {
+            // Failed to replace URLStreamHandler
+            LOG.warn("Failed to replace URLStreamHandler for URL \"{}\"", url.toString(), e);
+        }
+    }
+
 }

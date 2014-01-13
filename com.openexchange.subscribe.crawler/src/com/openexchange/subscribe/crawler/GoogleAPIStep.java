@@ -119,6 +119,7 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
             final ContactsService myService = new ContactsService("com.openexchange");
             myService.setUserCredentials(username, password);
             feedUrl = new URL("https://www.google.com/m8/feeds/contacts/" + username + "/full?max-results=5000");
+            exchangeURLStreamHandler(feedUrl);
 
             final List<ContactEntry> entries = myService.getFeed(feedUrl, ContactFeed.class).getEntries();
             final int size = entries.size();
@@ -344,7 +345,7 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
 
     /**
      * Sets the birthday for the contact based on the google information
-     * 
+     *
      * @param contact - the {@link Contact} to set the birthday for
      * @param birthday - the string the birthday is included in
      */
