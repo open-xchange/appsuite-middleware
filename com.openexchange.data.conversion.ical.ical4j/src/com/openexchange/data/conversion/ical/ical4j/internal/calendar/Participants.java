@@ -163,7 +163,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             attendee.setValue("mailto:" + IDNA.toACE(externalUserParticipant.getEmailAddress()));
             final ParameterList parameters = attendee.getParameters();
             parameters.add(CuType.INDIVIDUAL);
-            parameters.add(PartStat.NEEDS_ACTION);
+            parameters.add(getPartStat(externalUserParticipant));
             parameters.add(Role.REQ_PARTICIPANT);
             parameters.add(Rsvp.TRUE);
             component.getProperties().add(attendee);
@@ -171,6 +171,20 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             LOG.error("", e); // Shouldn't happen
         } catch (AddressException e) {
             LOG.error("", e);
+        }
+    }
+    
+    private PartStat getPartStat(ExternalUserParticipant external) {
+        switch (external.getStatus()) {
+        case ACCEPT:
+            return PartStat.ACCEPTED;
+        case DECLINE:
+            return PartStat.DECLINED;
+        case TENTATIVE:
+            return PartStat.TENTATIVE;
+        case NONE:
+        default:
+            return PartStat.NEEDS_ACTION;
         }
     }
 
@@ -197,7 +211,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             parameters.add(CuType.INDIVIDUAL);
             final String displayName = this.resolveUserDisplayName(index, userParticipant, ctx);
             parameters.add(new Cn(null != displayName && 0 < displayName.length() ? displayName : address));
-            switch (userParticipant.getConfirm()) {
+            switch (getConfirm(userParticipant, obj)) {
             case CalendarObject.ACCEPT:
                 parameters.add(PartStat.ACCEPTED);
                 break;
@@ -216,6 +230,19 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         } catch (AddressException e) {
             LOG.error("", e);
         }
+    }
+    
+    private int getConfirm(UserParticipant p, U obj) {
+        if (p.containsConfirm()) {
+            return p.getConfirm();
+        }
+        
+        for (UserParticipant u : obj.getUsers()) {
+            if (u.getIdentifier() == p.getIdentifier()) {
+                return u.getConfirm();
+            }
+        }
+        return 0;
     }
 
     protected String resolveUserDisplayName(int index, UserParticipant userParticipant, Context ctx) throws ConversionError {
