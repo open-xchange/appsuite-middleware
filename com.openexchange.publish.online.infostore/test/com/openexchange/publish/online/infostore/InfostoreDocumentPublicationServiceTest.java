@@ -53,25 +53,29 @@ import junit.framework.TestCase;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.publish.Publication;
 
-
 /**
  * {@link InfostoreDocumentPublicationServiceTest}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 @RunWith(PowerMockRunner.class)
-public class InfostoreDocumentPublicationServiceTest extends TestCase{
+public class InfostoreDocumentPublicationServiceTest extends TestCase {
 
     @InjectMocks
     private InfostoreDocumentPublicationService publicationService;
+
+    @Mock
+    private ContextService contextService;
 
     @Mock
     private IDBasedFileAccessFactory fileAccessFactory = null;
@@ -122,5 +126,42 @@ public class InfostoreDocumentPublicationServiceTest extends TestCase{
 
         assertFalse("Secret still set", publication.getConfiguration().containsKey("secret"));
 
+    }
+
+    public void testGenerateURL() throws OXException {
+        final Publication publication = new Publication();
+        final SimContext simContext = new SimContext(1337);
+        publication.setContext(simContext);
+        publication.getConfiguration().put("secret", "theSecret");
+
+        publicationService = new InfostoreDocumentPublicationService(this.fileAccessFactory) {
+
+            public Publication getPublication(Context ctx, String secret) throws OXException {
+                if (simContext.getContextId() == 1337 && secret.equalsIgnoreCase("theSecret")) {
+                    return publication;
+                }
+                return null;
+            }
+        };
+
+        publicationService.modifyOutgoing(publication);
+
+        assertNotNull(publication.getConfiguration().get("url"));
+        assertEquals("/publications/documents/1337/theSecret", publication.getConfiguration().get("url"));
+
+        Mockito.when(contextService.getContext(1337)).thenReturn(simContext);
+
+        final Publication comparePublication = publicationService.resolveUrl(contextService, "/publications/documents/1337/theSecret");
+        assertNotNull("Returned publication of resolveUrl is null!", comparePublication);
+
+        assertNotNull(comparePublication.getConfiguration().get("url"));
+        assertEquals("/publications/documents/1337/theSecret", comparePublication.getConfiguration().get("url"));
+
+        assertEqualPublication(publication, comparePublication);
+    }
+
+    public void assertEqualPublication(final Publication publication, final Publication other) {
+        assertEquals(publication.getContext().getContextId(), other.getContext().getContextId());
+        assertEquals(publication.getId(), other.getId());
     }
 }

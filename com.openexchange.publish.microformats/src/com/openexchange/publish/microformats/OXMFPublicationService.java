@@ -59,7 +59,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -337,25 +336,46 @@ public class OXMFPublicationService extends AbstractPublicationService {
     }
 
     @Override
-    public Publication resolveUrl(final ContextService service, String URL) throws OXException {
-        String re1=".*?";   // Non-greedy match on filler
-        String re2="("+rootURL+")";    // Word 1
-        String re3="(\\/)"; // Any Single Character 2
-        String re4="(\\d+)";    // Integer Number 1
-        String re5="(\\/)"; // Any Single Character 3
-        String re6="((?:\\w+))"; // Word 3
-
-        Pattern p = Pattern.compile(re1 + re2 + re3 + re4 + re5 + re6, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-        Matcher m = p.matcher(URL);
-        if (m.find()) {
-            String contextId = m.group(3);
-            String site = m.group(5);
-
-            final Context ctx = service.getContext(Integer.parseInt(contextId));
-            return getPublication(ctx, site);
+    public Publication resolveUrl(final ContextService service, final String URL) throws OXException {
+        String tmpRootUrl = getRootURL();
+        if (tmpRootUrl == null) {
+            return null;
         }
+        if(!URL.contains(getRootURL())){
+            return null;
+        }
+        final Pattern SPLIT = Pattern.compile("/");
+        final String[] path = SPLIT.split(URL, 0);
+        final int cid = getContext(path);
+        final String site = getSite(path);
+        if (cid == -1 || site == null) {
+            return null;
+        }
+        final Context ctx = service.getContext(cid);
+        return getPublication(ctx, site);
+    }
 
-        return null;
+    private String getSite(final String[] path) {
+        String tmpPath = path[path.length-1];
+        if (tmpPath.contains("?secret")){
+            return tmpPath.split("\\?secret",0)[0];
+        }
+        return tmpPath;
+    }
+
+    private int getContext(final String[] path) throws OXException {
+        int cid = -1;
+        for(int i = 0; i < path.length; i++) {
+            if(path[i].equals("publications") && path.length > i+2) {
+                try {
+                    cid = Integer.parseInt(path[i+2]);
+                    break;
+                } catch (final NumberFormatException x) {
+                    //
+                }
+            }
+        }
+        return cid;
     }
 
     @Override

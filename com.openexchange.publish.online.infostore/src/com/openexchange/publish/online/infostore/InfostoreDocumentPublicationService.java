@@ -54,7 +54,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.context.ContextService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
@@ -174,25 +173,38 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
 
     @Override
     public Publication resolveUrl(final ContextService service, String URL) throws OXException {
-
-        String re1=".*?";   // Non-greedy match on filler
-        String re2="("+PREFIX+")";    // Word 1
-        String re3="(\\/)"; // Any Single Character 2
-        String re4="(\\d+)";    // Integer Number 1
-        String re5="(\\/)"; // Any Single Character 3
-        String re6="((?:[a-z][a-z]+))"; // Word 3
-
-        Pattern p = Pattern.compile(re1+re2+re3+re4+re5+re6,Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-        Matcher m = p.matcher(URL);
-        if (m.find())
-        {
-            String contextId=m.group(3);
-            String secret=m.group(5);
-
-            final Context ctx = service.getContext(Integer.parseInt(contextId));
-            return getPublication(ctx, secret);
+        if(!URL.contains(PREFIX)){
+            return null;
         }
-        return null;
+        final Pattern SPLIT = Pattern.compile("/");
+        final String[] path = SPLIT.split(URL, 0);
+        final int cid = getContext(path);
+        final String secret = getSecret(path);
+        if (cid == -1 || secret == null) {
+            return null;
+        }
+        System.out.println("cid: " + cid + " secret: " + secret);
+        final Context ctx = service.getContext(cid);
+        return getPublication(ctx, secret);
+    }
+
+    private int getContext(final String[] path) throws OXException {
+        int cid = -1;
+        for(int i = 0; i < path.length; i++) {
+            if(path[i].equals("documents") && path.length > i+1) {
+                try {
+                    cid = Integer.parseInt(path[i+1]);
+                    break;
+                } catch (final NumberFormatException x) {
+                    //
+                }
+            }
+        }
+        return cid;
+    }
+
+    private String getSecret(final String[] path) {
+        return path[path.length-1];
     }
 
     @Override
