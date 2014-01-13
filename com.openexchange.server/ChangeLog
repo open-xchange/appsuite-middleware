@@ -1,3 +1,7 @@
+* 2014-01-13 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 30607: Use https instead of http
+
 * 2014-01-13 - martin.herfurth@open-xchange.com
 
  - Fix for bug 29807: Missing confirmations status of participants in update mail and bad check for last modified.
