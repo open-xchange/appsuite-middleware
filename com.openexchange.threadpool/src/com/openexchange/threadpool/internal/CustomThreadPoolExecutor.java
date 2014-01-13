@@ -89,6 +89,7 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.TaskWrapper;
 import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.threadpool.Trackable;
 import com.openexchange.threadpool.osgi.ThreadPoolServiceRegistry;
@@ -433,8 +434,17 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         final Thread t = threadFactory.newThread(w);
         if (null != t) {
             // Log spawning of a new thread
-            if (null != firstTask && LOG.isDebugEnabled()) {
-                LOG.debug(new StringBuilder("Spawned new thread for ").append(firstTask.getClass().getName()), new Throwable("Thread-Creation-Watcher"));
+            if (null != firstTask) {
+                final Object task;
+                if (firstTask instanceof CustomFutureTask) {
+                    final Task<?> tsk = ((CustomFutureTask<?>) firstTask).getTask();
+                    task = tsk instanceof TaskWrapper ? ((TaskWrapper) tsk).getWrapped() : tsk;
+                } else if (firstTask instanceof ScheduledFutureTask) {
+                    task = ((ScheduledFutureTask<?>) firstTask).getWrapped();
+                } else {
+                    task = firstTask;
+                }
+                LOG.debug(new StringBuilder("Spawned new thread for ").append(task.getClass().getName()), new Throwable("Thread-Creation-Watcher"));
             }
             // Continue initialization worker
             w.thread = t;
@@ -862,10 +872,16 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         private final long period;
 
         /**
+         * The task being executed.
+         */
+        private final Object task;
+
+        /**
          * Creates a one-shot action with given nanoTime-based trigger time
          */
         ScheduledFutureTask(final Runnable r, final V result, final long ns) {
             super(r, result);
+            this.task = r;
             this.time = ns;
             this.period = 0;
             this.sequenceNumber = getSequencer().getAndIncrement();
@@ -876,6 +892,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
          */
         ScheduledFutureTask(final Runnable r, final V result, final long ns, final long period) {
             super(r, result);
+            this.task = r;
             this.time = ns;
             this.period = period;
             this.sequenceNumber = getSequencer().getAndIncrement();
@@ -886,9 +903,19 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
          */
         ScheduledFutureTask(final Callable<V> callable, final long ns) {
             super(callable);
+            this.task = callable;
             this.time = ns;
             this.period = 0;
             this.sequenceNumber = getSequencer().getAndIncrement();
+        }
+
+        /**
+         * Gets the actual task instance
+         *
+         * @return The actual task instance
+         */
+        public Object getWrapped() {
+            return task;
         }
 
         @Override
