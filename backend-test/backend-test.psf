@@ -37,6 +37,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.2,com.openexchange.messaging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.2,com.openexchange.messaging.generic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.2,com.openexchange.messaging.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.2,com.openexchange.oauth.facebook"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.2,com.openexchange.oauth.linkedin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.2,com.openexchange.oauth.msn"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.4.2,com.openexchange.publish"/>
