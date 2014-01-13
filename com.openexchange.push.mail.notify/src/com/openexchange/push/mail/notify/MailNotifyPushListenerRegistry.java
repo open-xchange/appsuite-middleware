@@ -49,9 +49,10 @@
 
 package com.openexchange.push.mail.notify;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
@@ -116,6 +117,7 @@ public final class MailNotifyPushListenerRegistry {
                 LOG.debug("added mboxid {} to map for user {} in context {}", id, Integer.valueOf(userId), Integer.valueOf(contextId));
             } else {
                 // Listener wasn't put into map
+                LOG.debug("mboxid {} was not put into map (as already present) for user {} in context {}", id, Integer.valueOf(userId), Integer.valueOf(contextId));
                 if (notYetPushed) {
                     notYetPushed = false;
                 }
@@ -132,12 +134,12 @@ public final class MailNotifyPushListenerRegistry {
      * @return List of mbox identifiers
      * @throws OXException
      */
-    private final List<String> getMboxIds(final int contextId, final int userId) throws OXException {
+    private final Set<String> getMboxIds(final int contextId, final int userId) throws OXException {
         final User user = UserStorage.getInstance().getUser(userId, contextId);
 
         final String[] aliases = user.getAliases();
         final int alength = aliases.length;
-        final List<String> ret = new ArrayList<String>(alength + 1);
+        final Set<String> ret = new LinkedHashSet<String>(alength + 1);
         for (int i = 0; i < alength; i++) {
             final String alias = aliases[i];
             if( useEmailAddress ) {
@@ -232,7 +234,7 @@ public final class MailNotifyPushListenerRegistry {
         return false;
     }
 
-    private boolean removeListener(final List<String> mboxIds) {
+    private boolean removeListener(final Collection<String> mboxIds) {
         for(final String id : mboxIds) {
             LOG.debug("removing alias {} from map", id);
             final MailNotifyPushListener listener = listenerMap.remove(id);
