@@ -1,3 +1,7 @@
+* 2014-01-14 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 30390: forwarded mail with attachment gets crippled
+
 * 2014-01-13 - thorben.betten@open-xchange.com
 
  - Fix for bug 30571: Load snippet attributes from database, do not parse them from MIME content
