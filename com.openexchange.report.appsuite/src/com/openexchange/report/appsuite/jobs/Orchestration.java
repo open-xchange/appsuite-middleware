@@ -55,7 +55,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ILock;
 import com.hazelcast.core.IMap;
@@ -88,6 +90,8 @@ public class Orchestration implements ReportService {
     
     private static final AtomicReference<Orchestration> INSTANCE = new AtomicReference<Orchestration>(new Orchestration());
     
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(Orchestration.class);
+    
     public static Orchestration getInstance() {
         return INSTANCE.get();
     }
@@ -113,16 +117,14 @@ public class Orchestration implements ReportService {
         
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         
-        // Firstly retrieve the global lock per this report type to make sure, we are the only one coordinating a report run of this type for now.
-        ILock lock = hazelcast.getLock("com.openexchange.report.Reports." + reportType);
         String uuid;
         IMap<Object, Object> pendingReports;
         int numberOfTasks;
         List<Integer> allContextIds;
-        
+        // Firstly retrieve the global lock per this report type to make sure, we are the only one coordinating a report run of this type for now.
+        ILock lock = hazelcast.getLock("com.openexchange.report.Reports." + reportType);
+        lock.lock();
         try {
-            lock.lock();
-
             // Is a report pending?
            pendingReports = hazelcast.getMap("com.openexchange.report.PendingReports." + reportType);
             
@@ -154,7 +156,9 @@ public class Orchestration implements ReportService {
             pendingReports.put(uuid, report);
              
         } finally {
-            lock.unlock();
+            if (lock != null) {
+                lock.forceUnlock();
+            }
         }
 
         // Set up an AnalyzeContextBatch instance for every chunk of contextIds
@@ -174,9 +178,7 @@ public class Orchestration implements ReportService {
         
         return uuid;
     }
-    
-   
-    
+
     @Override
     public Report[] getPendingReports(String reportType) {
         // Simply look up the pending reports for this type in a hazelcast map
@@ -235,7 +237,15 @@ public class Orchestration implements ReportService {
         ILock lock = hazelcast.getLock("com.openexchange.report.Reports.Merge." + reportType);
         Report report;
         try {
-            lock.lock();
+            if(!lock.tryLock(60, TimeUnit.MINUTES)) {
+                // Abort report
+                flushPending(contextReport.getUUID(), reportType);
+                LOG.error("Could not acquire merge lock! Aborting " + contextReport.getUUID() + " for type: " + reportType);
+            }
+        } catch (InterruptedException e) {
+            return;
+        }
+        try {
             report = (Report) pendingReports.get(contextReport.getUUID());
             if (report == null) {
                 // Somebody cancelled the report, so just discard the result
@@ -301,7 +311,14 @@ public class Orchestration implements ReportService {
         ILock lock = hazelcast.getLock("com.openexchange.report.Reports.Merge." + reportType);
         Report report;
         try {
-            lock.lock();
+            if(!lock.tryLock(10, TimeUnit.MINUTES)) {
+                // Abort report
+                lock = null; // Don't care about locking then
+            }
+        } catch (InterruptedException e) {
+            return;
+        }
+        try {
             report = (Report) pendingReports.get(uuid);
             if (report == null) {
                 lock.unlock();
@@ -313,7 +330,7 @@ public class Orchestration implements ReportService {
             report.markTaskAsDone();    
         } finally {
             if (lock != null) {
-                lock.unlock();                
+                lock.unlock();
             }
         }
         
@@ -321,6 +338,4 @@ public class Orchestration implements ReportService {
             finishUpReport(reportType, hazelcast, pendingReports, lock, report);
         }
     }
-
-
 }
