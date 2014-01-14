@@ -66,24 +66,17 @@ public class ListServerTest extends AbstractRMITest {
     public void testListServer() throws IOException, InterruptedException {
         final ShellExecutor se = new ShellExecutor();
         final ArrayOutput result = se.executeprocargs(new String[] {
-            prefix + "listserver", "-c", ctxid, "-A", OXADMINMASTER, "-P", MASTER_PW, "-N", "test", "-q", "1000", "-u", ADMIN_USER, "-d",
-            "admin", "-g", "admin", "-s", "admin", "-e", "xyz@bla.de", "-p", ADMIN_PW, "-H", getRMIHost() });
+            prefix + "listserver", "-A", OXADMINMASTER, "-P", MASTER_PW, "-H", getRMIHost() });
         assertTrue("Listing of server failed: " + result.errOutput, result.exitstatus == 0);
     }
 
-    //
-    // @Test
-    // public void testListServerCSV() {
-    //
-    // new ListServer(getCSVMasterOptionData()){
-    // @Override
-    // protected void sysexit(int exitCode) {
-    // ListServerTest.this.returnListServerCSV = exitCode;
-    // }
-    // };
-    //
-    // assertTrue("Expected 0 as return code!", 0 == this.returnListServerCSV);
-    // }
+    @Test
+    public void testListServerCSV() throws IOException, InterruptedException {
+        final ShellExecutor se = new ShellExecutor();
+        final ArrayOutput result = se.executeprocargs(new String[] {
+            prefix + "listserver", "-A", OXADMINMASTER, "-P", MASTER_PW, "-H", getRMIHost(), "--csv" });
+        assertTrue("Listing of server failed: " + result.errOutput, result.exitstatus == 0);
+    }
     //
     // @Test
     // public void testListServerInvalidCredentials() {
