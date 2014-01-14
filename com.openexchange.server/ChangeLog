@@ -1,3 +1,7 @@
+* 2014-01-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 30634: Fixed broken update task. Removed local variable to ensure the method for the DatabaseService is used.
+
 * 2014-01-14 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 30390: forwarded mail with attachment gets crippled
