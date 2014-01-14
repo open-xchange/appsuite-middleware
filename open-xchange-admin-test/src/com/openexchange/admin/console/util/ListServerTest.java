@@ -67,6 +67,7 @@ public class ListServerTest extends AbstractRMITest {
         final ShellExecutor se = new ShellExecutor();
         final ArrayOutput result = se.executeprocargs(new String[] {
             prefix + "listserver", "-A", OXADMINMASTER, "-P", MASTER_PW, "-H", getRMIHost() });
+
         assertTrue("Listing of server failed: " + result.errOutput, result.exitstatus == 0);
     }
 
@@ -75,38 +76,25 @@ public class ListServerTest extends AbstractRMITest {
         final ShellExecutor se = new ShellExecutor();
         final ArrayOutput result = se.executeprocargs(new String[] {
             prefix + "listserver", "-A", OXADMINMASTER, "-P", MASTER_PW, "-H", getRMIHost(), "--csv" });
+
         assertTrue("Listing of server failed: " + result.errOutput, result.exitstatus == 0);
     }
-    //
-    // @Test
-    // public void testListServerInvalidCredentials() {
-    //
-    // new ListServer(getWrongMasterCredentialsOptionData()){
-    // @Override
-    // protected void sysexit(int exitCode) {
-    // ListServerTest.this.returnListServerInvalidCredentials = exitCode;
-    // }
-    // };
-    //
-    // assertTrue(
-    // "Expected invalid credentials as return code!",
-    // BasicCommandlineOptions.SYSEXIT_INVALID_CREDENTIALS == this.returnListServerInvalidCredentials);
-    // }
-    //
-    // @Test
-    // public void testListServerUnknownOption() {
-    //
-    // new ListServer(getUnknownOptionData()){
-    // @Override
-    // protected void sysexit(int exitCode) {
-    // ListServerTest.this.returnListServerUnknownOption = exitCode;
-    // }
-    // };
-    //
-    // assertTrue(
-    // "Expected unknown options as return code!",
-    // BasicCommandlineOptions.SYSEXIT_UNKNOWN_OPTION == this.returnListServerUnknownOption);
-    // }
 
+    @Test
+    public void testListServerInvalidCredentials() throws IOException, InterruptedException {
+        final ShellExecutor se = new ShellExecutor();
+        final ArrayOutput result = se.executeprocargs(new String[] {
+            prefix + "listserver", "-A", OXADMINMASTER + "_xyzfoobar", "-P", MASTER_PW + "_xyzfoobar", "-H", getRMIHost() });
 
+        assertTrue("Listing of server failed: " + result.errOutput, result.exitstatus == 0);
+    }
+
+    @Test
+    public void testListServerUnknownOption() throws IOException, InterruptedException {
+        final ShellExecutor se = new ShellExecutor();
+        final ArrayOutput result = se.executeprocargs(new String[] {
+            prefix + "listserver", "-A", OXADMINMASTER, "-P", MASTER_PW, "-H", getRMIHost(), "--foouknownoption", "bar" });
+
+        assertTrue("Listing of server failed: " + result.errOutput, result.exitstatus == 0);
+    }
 }
