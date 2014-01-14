@@ -312,7 +312,8 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
              */
             final FileHolder fileHolder;
             if (saveToDisk) {
-                fileHolder = new FileHolder(isClosure, size, MIME_APPL_OCTET, getFileName(fileNameFromRequest, mailPart.getFileName(), mailPart.getContentType().getBaseType()));
+                String filename = getFileName(fileNameFromRequest, mailPart.getFileName(), mailPart.getContentType().getBaseType());
+                fileHolder = new FileHolder(isClosure, size, MimeType2ExtMap.getContentType(filename), filename);
                 fileHolder.setDelivery("download");
                 req.getRequest().putParameter(PARAMETER_DELIVERY, "download");
             } else {
