@@ -51,6 +51,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc config
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Mon Jan 13 2014 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2014-01-14
 * Fri Jan 10 2014 Carsten Hoeger <choeger@open-xchange.com>
 Second release candidate for 7.4.2
 * Fri Jan 03 2014 Carsten Hoeger <choeger@open-xchange.com>
