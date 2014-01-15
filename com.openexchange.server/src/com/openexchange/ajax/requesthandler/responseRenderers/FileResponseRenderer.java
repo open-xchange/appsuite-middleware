@@ -858,7 +858,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 return handleFailure(file, stream, markSupported);
             }
             // Return immediately if not cacheable
-            if (!cachingAdvised || null == resourceCache || !isValidEtag) {
+            if (!cachingAdvised || null == resourceCache || !isValidEtag || !AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
                 return new FileHolder(Streams.newByteArrayInputStream(transformed), -1, file.getContentType(), file.getName());
             }
 

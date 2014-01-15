@@ -72,7 +72,6 @@ import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.images.TransformedImage;
-import com.openexchange.tools.images.impl.JavaImageTransformationService;
 import com.openexchange.tools.session.SimServerSession;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.tools.strings.StringParser;
@@ -242,7 +241,7 @@ public class FileResponseRendererTest extends TestCase {
         final TestableResourceCache resourceCache = new TestableResourceCache(false);
         ResourceCaches.setResourceCache(resourceCache);
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
-        fileResponseRenderer.setScaler(new JavaImageTransformationService());
+        fileResponseRenderer.setScaler(new TestableImageTransformationService(bytes, ImageTransformations.HIGH_EXPENSE));
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.setSession(new SimServerSession(1, 1));
         final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
@@ -254,6 +253,39 @@ public class FileResponseRendererTest extends TestCase {
         fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
         assertEquals("isEnabled() not called", 1, resourceCache.callsToIsEnabledFor);
         assertEquals("get() called", 0, resourceCache.callsToGet);
+        assertEquals("save() called", 0, resourceCache.callsToSave);
+    }
+
+    public void testResourceCacheIsDisabled2() throws Exception {
+        final int length = 2048;
+        final byte[] bytes = new byte[length];
+        for (int i = 0; i < length; i++) {
+            bytes[i] = (byte) i;
+        }
+
+        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
+        fileHolder.setContentType("image/jpeg");
+        fileHolder.setDelivery("view");
+        fileHolder.setDisposition("inline");
+        fileHolder.setName("someimage.jpg");
+        ServerServiceRegistry.getInstance().addService(StringParser.class, new BasicTypesStringParser());
+        final TestableResourceCache resourceCache = new TestableResourceCache(true);
+        ResourceCaches.setResourceCache(resourceCache);
+        final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+        fileResponseRenderer.setScaler(new TestableImageTransformationService(bytes, ImageTransformations.HIGH_EXPENSE));
+        final AJAXRequestData requestData = new AJAXRequestData();
+        requestData.setSession(new SimServerSession(1, 1));
+        requestData.putParameter("width", "10");
+        requestData.putParameter("height", "10");
+        requestData.putParameter("cache", "false");
+        final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+        result.setHeader("ETag", "1323jjlksldfsdkfms");
+        final SimHttpServletRequest req = new SimHttpServletRequest();
+        final SimHttpServletResponse resp = new SimHttpServletResponse();
+        final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+        resp.setOutputStream(servletOutputStream);
+        fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+        assertEquals("get() not called", 0, resourceCache.callsToGet);
         assertEquals("save() called", 0, resourceCache.callsToSave);
     }
 
