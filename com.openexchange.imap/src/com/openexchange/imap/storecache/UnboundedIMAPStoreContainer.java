@@ -166,6 +166,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
 
     @Override
     public void clear() {
+        final InheritedPriorityBlockingQueue availableQueue = this.availableQueue;
         if (null == availableQueue) {
             return;
         }
@@ -174,7 +175,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
             closeSafe(wrapper.imapStore);
         }
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.imap.storecache.IMAPStoreContainer#hasElapsed(long)
      */
@@ -201,7 +202,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
             lock = new ReentrantLock(true);
             notEmpty = lock.newCondition();
         }
-        
+
         public boolean hasElapsed(long millis) {
             final ReentrantLock lock = this.lock;
             lock.lock();
