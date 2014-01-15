@@ -88,6 +88,10 @@ public final class QuotaFileStorage extends FileStorage {
         qfs.recalculateUsage();
     }
 
+    public void recalculateUsage(Set<String> filesToIgnore) throws OXException {
+        qfs.recalculateUsage(filesToIgnore);
+    }
+
     public long getQuota() {
         return qfs.getQuota();
     }

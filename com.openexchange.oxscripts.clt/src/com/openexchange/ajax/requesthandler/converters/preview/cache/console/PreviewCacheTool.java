@@ -83,13 +83,14 @@ public final class PreviewCacheTool {
         sOptions = new Options();
         sOptions.addOption("h", "help", false, "Prints a help text");
         sOptions.addOption("c", "context", true, "Required. The context identifier");
+        sOptions.addOption("a", "all", false, "Required. The flag to signal that contexts shall be processed. Hence option -c/--context is then obsolete.");
 
         sOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
         sOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
         sOptions.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
 
-        sOptions.addOption("A", "adminuser", true, "Admin username.");
-        sOptions.addOption("P", "adminpass", true, "Admin password.");
+        sOptions.addOption("A", "adminuser", true, "Admin username. In case -a/--all is provided master administrator's user name is required; else the one for context administrator");
+        sOptions.addOption("P", "adminpass", true, "Admin password. In case -a/--all is provided master administrator's password is required; else the one for context administrator");
     }
 
     /**
@@ -115,14 +116,18 @@ public final class PreviewCacheTool {
                 return;
             }
 
-            if (!cmd.hasOption('c')) {
-                System.out.println("Parameter 'context' is required.");
-                printHelp();
-                System.exit(1);
-                return;
+            final String contextOptionVal;
+            if (cmd.hasOption('a')) {
+                contextOptionVal = null;
+            } else {
+                if (!cmd.hasOption('c')) {
+                    System.out.println("Either parameter 'context' or parameter 'all' is required.");
+                    printHelp();
+                    System.exit(1);
+                    return;
+                }
+                contextOptionVal = cmd.getOptionValue('c');
             }
-
-            final String contextOptionVal = cmd.getOptionValue('c');
 
             int port = 9999;
             if (cmd.hasOption('p')) {
@@ -186,12 +191,16 @@ public final class PreviewCacheTool {
                     final AuthenticatorMBean authenticator = authenticatorMBean(mbsc);
                     final ResourceCacheMBean previceCacheProxy = previewCacheMBean(mbsc);
 
-                    final int contextId = Integer.parseInt(contextOptionVal.trim());
-
-                    authenticator.doAuthentication(login, password, contextId);
-                    previceCacheProxy.clearFor(contextId);
-
-                    System.out.println("All cache entries cleared for context " + contextOptionVal);
+                    if (null == contextOptionVal) {
+                        authenticator.doAuthentication(login, password);
+                        previceCacheProxy.clear();
+                        System.out.println("All cache entries cleared.");
+                    } else {
+                        final int contextId = Integer.parseInt(contextOptionVal.trim());
+                        authenticator.doAuthentication(login, password, contextId);
+                        previceCacheProxy.clearFor(contextId);
+                        System.out.println("All cache entries cleared for context " + contextId);
+                    }
                 } catch (final Exception e) {
                     final String errMsg = e.getMessage();
                     System.out.println(errMsg == null ? "An error occurred." : errMsg);

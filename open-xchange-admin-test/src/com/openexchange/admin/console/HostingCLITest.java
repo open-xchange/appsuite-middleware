@@ -53,18 +53,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import org.junit.After;
 import org.junit.Test;
+import com.openexchange.admin.rmi.AbstractRMITest;
 import com.openexchange.admin.tools.ShellExecutor;
 import com.openexchange.admin.tools.ShellExecutor.ArrayOutput;
 
-public class HostingCLITest extends AbstractTest{
-
-    private static final String ADMIN_USER = "oxadmin";
-    private static final String ADMIN_PW = "secret";
-    private static final String MASTER_PW = "secret";
-    private static final String OXADMINMASTER = "oxadminmaster";
-    private static String ctxid = "666";
-
-    private String prefix = "/opt/open-xchange/sbin/";
+public class HostingCLITest extends AbstractRMITest {
 
     @After
     public void teardown() throws IOException, InterruptedException {

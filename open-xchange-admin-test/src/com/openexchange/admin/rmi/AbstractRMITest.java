@@ -29,6 +29,18 @@ import com.openexchange.admin.user.copy.rmi.OXUserCopyInterface;
 
 public abstract class AbstractRMITest extends AbstractTest {
 
+    public static final String ADMIN_USER = "oxadmin";
+
+    public static final String ADMIN_PW = "secret";
+
+    public static final String MASTER_PW = "secret";
+
+    public static final String OXADMINMASTER = "oxadminmaster";
+
+    public static String ctxid = "666";
+
+    public String prefix = "/opt/open-xchange/sbin/";
+
     public Credentials adminCredentials;
     public Credentials superAdminCredentials;
     public Context adminContext;
@@ -42,7 +54,7 @@ public abstract class AbstractRMITest extends AbstractTest {
         adminCredentials = DummyCredentials();
         adminContext = getTestContextObject(adminCredentials);
 
-        superAdmin = newUser("oxadminmaster","secret","ContextCreatingAdmin","Ad","Min","adminmaster@ox.invalid");
+        superAdmin = newUser(OXADMINMASTER, MASTER_PW, "ContextCreatingAdmin", "Ad", "Min", "adminmaster@ox.invalid");
         superAdminCredentials = DummyMasterCredentials();
         superAdminContext = getTestContextObject(superAdminCredentials);
     }
@@ -57,11 +69,7 @@ public abstract class AbstractRMITest extends AbstractTest {
     }
 
     public Credentials getCredentials() {
-        return new Credentials("oxadmin","secret");
-    }
-
-    public String getHostName() {
-        return "localhost";
+        return new Credentials(ADMIN_USER, ADMIN_PW);
     }
 
     public User getAdminData() throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException, MalformedURLException, NotBoundException{

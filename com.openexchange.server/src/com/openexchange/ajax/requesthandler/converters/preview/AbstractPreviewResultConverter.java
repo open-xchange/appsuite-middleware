@@ -134,7 +134,11 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
         IFileHolder fileHolder = null;
         try {
             // Check cache first
-            final ResourceCache resourceCache = ResourceCaches.getResourceCache();
+            final ResourceCache resourceCache;
+            {
+                final ResourceCache tmp = ResourceCaches.getResourceCache();
+                resourceCache = null == tmp ? null : (tmp.isEnabledFor(session.getContextId(), session.getUserId()) ? tmp : null);
+            }
             final String eTag = requestData.getETag();
             final boolean isValidEtag = !Strings.isEmpty(eTag);
             if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", requestData, true)) {
@@ -253,11 +257,15 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                             final String fileType = fileHolder.getContentType();
                             // Specify task
                             final Task<Void> task = new AbstractTask<Void>() {
-
                                 @Override
-                                public Void call() throws OXException {
-                                    final CachedResource preview = new CachedResource(bytes, fileName, fileType, bytes.length);
-                                    resourceCache.save(cacheKey, preview, 0, session.getContextId());
+                                public Void call() {
+                                    try {
+                                        final CachedResource preview = new CachedResource(bytes, fileName, fileType, bytes.length);
+                                        resourceCache.save(cacheKey, preview, 0, session.getContextId());
+                                    } catch (OXException e) {
+                                        LOG.warn("Could not cache preview.", e);
+                                    }
+
                                     return null;
                                 }
                             };

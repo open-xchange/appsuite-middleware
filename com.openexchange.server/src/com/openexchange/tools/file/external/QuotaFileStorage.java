@@ -50,6 +50,7 @@
 package com.openexchange.tools.file.external;
 
 import java.io.InputStream;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 
 public interface QuotaFileStorage extends FileStorage {
@@ -59,6 +60,8 @@ public interface QuotaFileStorage extends FileStorage {
     long getUsage() throws OXException;
 
     void recalculateUsage() throws OXException;
+
+    void recalculateUsage(Set<String> filesToIgnore) throws OXException;
 
     String saveNewFile(InputStream file, long sizeHint) throws OXException;
 

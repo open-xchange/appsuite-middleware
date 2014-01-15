@@ -215,8 +215,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }
 
-            callPluginMethod("changeCapabilities", ctx, capsToAdd, capsToRemove, auth);
-
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
             oxcox.changeCapabilities(ctx, capsToAdd, capsToRemove, auth);
         } catch (final StorageException e) {

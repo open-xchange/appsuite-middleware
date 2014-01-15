@@ -560,7 +560,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         file.setId(FileStorageFileAccess.NEW);
         file.setFolderId(String.valueOf(folderId));
         file.setFileName(name);
-        file.setFileMIMEType(attachment.getContentType().toString());
+        file.setFileMIMEType(attachment.getContentType().getBaseType());
         file.setTitle(name);
         if (null != msgInfo) {
             // Description

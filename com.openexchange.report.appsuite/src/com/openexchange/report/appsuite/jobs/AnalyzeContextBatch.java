@@ -96,6 +96,8 @@ public class AnalyzeContextBatch implements Runnable, Serializable {
 
     @Override
     public void run() {
+        int previousPriority = Thread.currentThread().getPriority();
+        Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
         try {
             
             if (reportType == null) {
@@ -150,6 +152,8 @@ public class AnalyzeContextBatch implements Runnable, Serializable {
                 Orchestration.getInstance().abort(uuid, reportType, ctxId);
             }
             LOG.error("", t);
+        } finally {
+            Thread.currentThread().setPriority(previousPriority);
         }
         
     }

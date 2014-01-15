@@ -60,6 +60,13 @@ import javax.management.MBeanException;
 public interface ResourceCacheMBean {
 
     /**
+     * Clears all cache entries.
+     *
+     * @throws MBeanException If operation fails
+     */
+    void clear() throws MBeanException;
+
+    /**
      * Clears all cache entries for given context.
      *
      * @param contextId The context identifier

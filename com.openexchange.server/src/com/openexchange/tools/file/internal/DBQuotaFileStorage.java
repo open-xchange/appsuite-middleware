@@ -58,6 +58,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.SortedSet;
@@ -328,12 +329,20 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
      */
     @Override
     public void recalculateUsage() throws OXException {
+        Set<String> filesToIgnore = Collections.emptySet();
+        recalculateUsage(filesToIgnore);
+    }
+
+    @Override
+    public void recalculateUsage(Set<String> filesToIgnore) throws OXException {
         LOG.info("Recalculating usage for Context {}", context.getContextId());
         final SortedSet<String> filenames = fileStorage.getFileList();
         long entireFileSize = 0;
 
         for (final String filename : filenames) {
-            entireFileSize += fileStorage.getFileSize(filename);
+            if (!filesToIgnore.contains(filename)) {
+                entireFileSize += fileStorage.getFileSize(filename);
+            }
         }
 
         final Connection con = db.getWritable(context);

@@ -63,15 +63,14 @@ import org.scribe.model.Response;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.facebook.osgi.Activator;
 
 
 /**
- * {@link FacebookConnectionTest}
- *
+ * Only for local tests. Do not add to automation!
+ * 
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class FacebookConnectionTest  extends TestCase {
@@ -80,7 +79,7 @@ public class FacebookConnectionTest  extends TestCase {
 
     @Override
     public void setUp(){
-        final Activator activator = new Activator();
+        new Activator();
         facebook = new FacebookServiceImpl(new MockOAuthService(), new OAuthServiceMetaDataFacebookImpl(null));
     }
 
@@ -94,11 +93,11 @@ public class FacebookConnectionTest  extends TestCase {
         final String apiKey = "842495cb6b4d939cf998fd9239b5fe6f";
         final String apiSecret = "9876bb887fac4be7518055b487eda4d9";
         final OAuthService service = new ServiceBuilder()
-                                      .provider(FacebookApi.class)
-                                      .apiKey(apiKey)
-                                      .apiSecret(apiSecret)
-                                      .callback("http://localhost/~karstenwill/")
-                                      .build();
+        .provider(FacebookApi.class)
+        .apiKey(apiKey)
+        .apiSecret(apiSecret)
+        .callback("http://localhost/~karstenwill/")
+        .build();
         final Scanner in = new Scanner(System.in);
 
         System.out.println("=== " + NETWORK_NAME + "'s OAuth Workflow ===");
@@ -201,15 +200,15 @@ public class FacebookConnectionTest  extends TestCase {
     }
 
     public void testNewWorkflow(){
-     // This is basically scribes example
+        // This is basically scribes example
         final String apiKey = "842495cb6b4d939cf998fd9239b5fe6f";
         final String apiSecret = "9876bb887fac4be7518055b487eda4d9";
         final OAuthService service = new ServiceBuilder()
-                                      .provider(FacebookApi.class)
-                                      .apiKey(apiKey)
-                                      .apiSecret(apiSecret)
-                                      .callback("http://localhost/~karstenwill/?parameter=value")
-                                      .build();
+        .provider(FacebookApi.class)
+        .apiKey(apiKey)
+        .apiSecret(apiSecret)
+        .callback("http://localhost/~karstenwill/?parameter=value")
+        .build();
         final Scanner in = new Scanner(System.in);
 
         System.out.println("=== " + NETWORK_NAME + "'s OAuth Workflow ===");
@@ -248,11 +247,11 @@ public class FacebookConnectionTest  extends TestCase {
         final String apiKey = "842495cb6b4d939cf998fd9239b5fe6f";
         final String apiSecret = "9876bb887fac4be7518055b487eda4d9";
         final OAuthService service = new ServiceBuilder()
-                                      .provider(FacebookApi.class)
-                                      .apiKey(apiKey)
-                                      .apiSecret(apiSecret)
-                                      .callback("http://localhost/~karstenwill/")
-                                      .build();
+        .provider(FacebookApi.class)
+        .apiKey(apiKey)
+        .apiSecret(apiSecret)
+        .callback("http://localhost/~karstenwill/")
+        .build();
         final MockOAuthService mock = new MockOAuthService();
         // get the wall
         final Token accessToken = new Token(mock.getAccount(1, null, 1, 1).getToken(),"");
@@ -287,19 +286,19 @@ public class FacebookConnectionTest  extends TestCase {
 
     // for more detailed information please see http://developers.facebook.com/docs/reference/api/
     public void testPostToWall(){
-//        You can publish to the Facebook graph by issuing HTTP POST requests to the appropriate connection URLs, using an user access token or an app access token (for Open Graph Pages). For example, you can post a new wall post on Arjun's wall by issuing a POST request to https://graph.facebook.com/arjun/feed:
-//
-//        curl -F 'access_token=...' \
-//             -F 'message=Hello, Arjun. I like this new API.' \
-//             https://graph.facebook.com/arjun/feed
+        //        You can publish to the Facebook graph by issuing HTTP POST requests to the appropriate connection URLs, using an user access token or an app access token (for Open Graph Pages). For example, you can post a new wall post on Arjun's wall by issuing a POST request to https://graph.facebook.com/arjun/feed:
+        //
+        //        curl -F 'access_token=...' \
+        //             -F 'message=Hello, Arjun. I like this new API.' \
+        //             https://graph.facebook.com/arjun/feed
         final String apiKey = "842495cb6b4d939cf998fd9239b5fe6f";
         final String apiSecret = "9876bb887fac4be7518055b487eda4d9";
         final OAuthService service = new ServiceBuilder()
-                                      .provider(FacebookApi.class)
-                                      .apiKey(apiKey)
-                                      .apiSecret(apiSecret)
-                                      .callback("http://localhost/~karstenwill/")
-                                      .build();
+        .provider(FacebookApi.class)
+        .apiKey(apiKey)
+        .apiSecret(apiSecret)
+        .callback("http://localhost/~karstenwill/")
+        .build();
         final MockOAuthService mock = new MockOAuthService();
         // get the wall
         final Token accessToken = new Token(mock.getAccount(1, null, 1, 1).getToken(),"");
@@ -337,10 +336,10 @@ public class FacebookConnectionTest  extends TestCase {
         final String apiKey = "842495cb6b4d939cf998fd9239b5fe6f";
         final String apiSecret = "9876bb887fac4be7518055b487eda4d9";
         final OAuthService service = new ServiceBuilder()
-                                      .provider(FacebookApi.class)
-                                      .apiKey(apiKey)
-                                      .apiSecret(apiSecret)
-                                      .build();
+        .provider(FacebookApi.class)
+        .apiKey(apiKey)
+        .apiSecret(apiSecret)
+        .build();
         final MockOAuthService mock = new MockOAuthService();
         // get the wall
         final Token accessToken = new Token(mock.getAccount(1, null, 1, 1).getToken(),"");

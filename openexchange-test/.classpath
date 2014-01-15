@@ -3,7 +3,6 @@
 	<classpathentry kind="src" path="common"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="unittests"/>
-	<classpathentry kind="lib" path="lib/httpmime-4.1.jar"/>
 	<classpathentry kind="lib" path="lib/httpunit-1.7.jar" sourcepath="lib/source/httpunit-1.7-sources.zip"/>
 	<classpathentry kind="lib" path="lib/jchronic-0.2.6.jar"/>
 	<classpathentry kind="lib" path="lib/junit-4.11.jar" sourcepath="lib/source/junit-4.11-sources.jar"/>
@@ -32,8 +31,8 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi_3.9.0.v20130529-1710.jar" sourcepath="/com.openexchange.bundles/source/org.eclipse.osgi.source_3.9.0.v20130529-1710.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.lang_2.6.0.v201205030909.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.lang.source_2.6.0.v201205030909.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-api-1.7.5.jar"/>
-	<classpathentry kind="lib" path="lib/httpclient-4.2.1.jar"/>
-	<classpathentry kind="lib" path="lib/httpcore-4.2.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/httpclient-4.2.1.jar" sourcepath="lib/source/httpcomponents-client-4.2.1-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/httpcore-4.2.1.jar" sourcepath="lib/source/httpcomponents-core-4.2.1-src.zip"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.calendar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.conversion"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.conversion.engine"/>
@@ -112,5 +111,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.file.storage"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.contactcollector.impl"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jcl-over-slf4j-1.7.5.jar" sourcepath="/com.openexchange.bundles/source/jcl-over-slf4j-1.7.5-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/httpmime-4.2.1.jar" sourcepath="lib/source/httpcomponents-client-4.2.1-src.zip"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

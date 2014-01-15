@@ -50,78 +50,51 @@
 package com.openexchange.admin.console.util;
 
 import static org.junit.Assert.assertTrue;
-
+import java.io.IOException;
 import org.junit.Test;
-
-import com.openexchange.admin.console.AbstractTest;
-import com.openexchange.admin.console.BasicCommandlineOptions;
-import com.openexchange.admin.console.util.server.ListServer;
+import com.openexchange.admin.rmi.AbstractRMITest;
+import com.openexchange.admin.tools.ShellExecutor;
+import com.openexchange.admin.tools.ShellExecutor.ArrayOutput;
 
 /**
  * @author cutmasta
  *
  */
-public class ListServerTest extends AbstractTest {
-    
+public class ListServerTest extends AbstractRMITest {
+
     @Test
-    public void testListServer() {
-        
-        resetBuffers();
-        
-        new ListServer(getMasterCredentialsOptionData()){
-            @Override
-            protected void sysexit(int exitCode) {
-                ListServerTest.this.returnCode = exitCode;
-            }
-        };
-        
-        assertTrue("Expected 0 as return code!",0==this.returnCode);
+    public void testListServer() throws IOException, InterruptedException {
+        final ShellExecutor se = new ShellExecutor();
+        final ArrayOutput result = se.executeprocargs(new String[] {
+            prefix + "listserver", "-A", OXADMINMASTER, "-P", MASTER_PW, "-H", getRMIHost() });
+
+        assertTrue("Listing of server failed: " + result.errOutput, result.exitstatus == 0);
     }
-    
+
     @Test
-    public void testListServerCSV() {
-        
-        resetBuffers();
-        
-        new ListServer(getCSVMasterOptionData()){
-            @Override
-            protected void sysexit(int exitCode) {
-                ListServerTest.this.returnCode = exitCode;
-            }
-        };
-        
-        assertTrue("Expected 0 as return code!",0==this.returnCode);
+    public void testListServerCSV() throws IOException, InterruptedException {
+        final ShellExecutor se = new ShellExecutor();
+        final ArrayOutput result = se.executeprocargs(new String[] {
+            prefix + "listserver", "-A", OXADMINMASTER, "-P", MASTER_PW, "-H", getRMIHost(), "--csv" });
+
+        assertTrue("Listing of server failed: " + result.errOutput, result.exitstatus == 0);
     }
-    
+
     @Test
-    public void testListServerInvalidCredentials() {
-        
-        resetBuffers();
-        
-        new ListServer(getWrongMasterCredentialsOptionData()){
-            @Override
-            protected void sysexit(int exitCode) {
-                ListServerTest.this.returnCode = exitCode;
-            }
-        };
-        
-        assertTrue("Expected invalid credentials as return code!",BasicCommandlineOptions.SYSEXIT_INVALID_CREDENTIALS==this.returnCode);
+    public void testListServerInvalidCredentials() throws IOException, InterruptedException {
+        final ShellExecutor se = new ShellExecutor();
+        final ArrayOutput result = se.executeprocargs(new String[] {
+            prefix + "listserver", "-A", OXADMINMASTER + "_xyzfoobar", "-P", MASTER_PW + "_xyzfoobar", "-H", getRMIHost() });
+
+        assertTrue("Listing of server failed: " + result.errOutput, result.exitstatus == 0);
     }
-    
+
     @Test
-    public void testListServerUnknownOption() {
-        
-        resetBuffers();
-        
-        new ListServer(getUnknownOptionData()){
-            @Override
-            protected void sysexit(int exitCode) {
-                ListServerTest.this.returnCode = exitCode;
-            }
-        };
-        
-        assertTrue("Expected unknown options as return code!",BasicCommandlineOptions.SYSEXIT_UNKNOWN_OPTION==this.returnCode);
+    public void testListServerUnknownOption() throws IOException, InterruptedException {
+        final ShellExecutor se = new ShellExecutor();
+        final ArrayOutput result = se.executeprocargs(new String[] {
+            prefix + "listserver", "-A", OXADMINMASTER, "-P", MASTER_PW, "-H", getRMIHost(), "--foouknownoption", "bar" });
+
+        assertTrue("Listing of server failed: " + result.errOutput, result.exitstatus == 0);
     }
-    
-    
 }

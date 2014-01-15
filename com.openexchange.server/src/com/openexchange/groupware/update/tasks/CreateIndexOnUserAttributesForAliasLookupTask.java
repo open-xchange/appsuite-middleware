@@ -61,7 +61,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 public class CreateIndexOnUserAttributesForAliasLookupTask extends CreateIndexUpdateTask {
 
     public CreateIndexOnUserAttributesForAliasLookupTask() {
-        super(null, "user_attribute", "cid", "cid", "name", "value(20)");
+        super("user_attribute", "cid", "cid", "name", "value(20)");
     }
 
     @Override

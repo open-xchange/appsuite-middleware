@@ -64,11 +64,10 @@ import com.openexchange.tools.update.IndexNotFoundException;
  */
 public abstract class CreateIndexUpdateTask extends UpdateTaskAdapter {
 
-    private final DatabaseService dbService;
     private final Index index;
 
-    public CreateIndexUpdateTask(DatabaseService dbService, String table, String indexName, String...columns) {
-        this.dbService = dbService;
+    public CreateIndexUpdateTask(String table, String indexName, String...columns) {
+        super();
         index = new Index();
         index.setTable(table);
         index.setName(indexName);
@@ -77,25 +76,21 @@ public abstract class CreateIndexUpdateTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-    	int contextId = params.getContextId();
-    	Connection con = null;
+        int contextId = params.getContextId();
+        Connection con = null;
         try {
-        	con = dbService.getForUpdateTask(contextId);
+            con = getDatabaseService().getForUpdateTask(contextId);
             if (!hasIndex(con)) {
                 createIndex(con);
             }
         } catch (SQLException x) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(x.getMessage(), x);
         } finally {
-            dbService.backForUpdateTask(contextId, con);
+            getDatabaseService().backForUpdateTask(contextId, con);
         }
     }
 
-
-
-    protected DatabaseService getDatabaseService() {
-        return dbService;
-    }
+    protected abstract DatabaseService getDatabaseService();
 
     protected void createIndex(Connection con) throws SQLException {
         index.create(con);

@@ -61,7 +61,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 public class CreateIndexOnContextAttributesTask extends CreateIndexUpdateTask {
 
     public CreateIndexOnContextAttributesTask() {
-        super(null, "contextAttribute", "cid", "cid", "name", "value(20)");
+        super("contextAttribute", "cid", "cid", "name", "value(20)");
     }
 
     @Override

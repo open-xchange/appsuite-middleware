@@ -52,6 +52,8 @@ package com.openexchange.config.cascade.user.cache;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.session.Session;
 
 /**
@@ -81,7 +83,7 @@ public final class PropertyMapManagement {
      */
     private PropertyMapManagement() {
         super();
-        map = new NonBlockingHashMap<Integer, ConcurrentMap<Integer, PropertyMap>>(64);
+        map = new ConcurrentLinkedHashMap.Builder<Integer, ConcurrentMap<Integer, PropertyMap>>().maximumWeightedCapacity(5000).weigher(Weighers.entrySingleton()).build();
     }
 
     /**

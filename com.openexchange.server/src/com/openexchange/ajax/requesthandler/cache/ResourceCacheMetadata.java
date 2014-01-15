@@ -47,47 +47,99 @@
  *
  */
 
-package com.openexchange.server;
-
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+package com.openexchange.ajax.requesthandler.cache;
 
 /**
- * {@link UnitTests}
+ * An instance of {@link ResourceCacheMetadata} identifies the metadata record
+ * of a cached resource. A resource can always be uniquely identified by a tuple
+ * of (contextId, userId, resourceId). If the {@link ResourceCache} is
+ * configured to store resources in the filestore, a metadata records always has
+ * a reference id set. This id can be used to identify the resource in the
+ * filestore. If the database is used to store resources, the reference id will
+ * always be <code>null</code> for metadata records.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    com.openexchange.ajax.ProcessUploadStaticTest.class,
-    com.openexchange.ajax.parser.ContactSearchtermSqlConverterTest.class,
-    com.openexchange.ajax.parser.TaskLastModifiedTest.class,
-    com.openexchange.ajax.LoginAddFragmentTest.class,
-    com.openexchange.groupware.ldap.UserAttributeDiffTest.class,
-    com.openexchange.i18n.tools.replacement.TaskEndDateReplacementTest.class,
-    com.openexchange.tools.collections.OXCollectionsTest.class,
-    com.openexchange.tools.iterator.SearchIteratorDelegatorTest.class,
-    com.openexchange.tools.net.URIParserTest.class,
-    com.openexchange.mail.utils.MsisdnUtilityTest.class,
-    com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTableTest.class,
-    com.openexchange.ajax.MailAttachmentTest.class,
-    com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class,
-    com.openexchange.groupware.userconfiguration.AllowAllUserConfigurationTest.class,
-    com.openexchange.groupware.userconfiguration.UserConfigurationTest.class,
-    com.openexchange.mail.mime.MimeStructureFixerTest.class,
-    com.openexchange.mail.mime.MimeSmilFixerTest.class,
-    com.openexchange.groupware.notify.ParticipantNotifyTest.class,
-    com.openexchange.mail.json.actions.GetAttachmentActionTest.class,
-    com.openexchange.ajax.requesthandler.converters.preview.cache.FileStoreResourceCacheImplTest.class
-})
-public class UnitTests {
+public class ResourceCacheMetadata {
 
-    /**
-     * Initializes a new {@link UnitTests}.
-     */
-    public UnitTests() {
-        super();
+    private int contextId;
+
+    private int userId;
+
+    private String resourceId;
+
+    private long size;
+
+    private long createdAt;
+
+    private String fileName;
+
+    private String fileType;
+
+    private String refId;
+
+    public int getContextId() {
+        return contextId;
+    }
+
+    public void setContextId(int contextId) {
+        this.contextId = contextId;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public String getResourceId() {
+        return resourceId;
+    }
+
+    public void setResourceId(String resourceId) {
+        this.resourceId = resourceId;
+    }
+
+    public long getSize() {
+        return size;
+    }
+
+    public void setSize(long size) {
+        this.size = size;
+    }
+
+    public long getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(long createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
+
+    public String getRefId() {
+        return refId;
+    }
+
+    public void setRefId(String refId) {
+        this.refId = refId;
     }
 
 }

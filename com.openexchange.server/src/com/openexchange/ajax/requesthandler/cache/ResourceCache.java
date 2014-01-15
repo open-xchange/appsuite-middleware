@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.requesthandler.cache;
 
-import java.io.InputStream;
 import com.openexchange.exception.OXException;
 
 /**
@@ -60,44 +59,27 @@ import com.openexchange.exception.OXException;
 public interface ResourceCache {
 
     /**
-     * Stores given resource's binary content.
+     * Checks whether caching is allowed for the given (contextId, userId) tuple. This must
+     * be invoked before any other operation.
+     * @param userId The user identifier. May be < 0 for context-global caching.
+     * @param contextId The context identifier.
+     * @return <code>true</code> if caching is allowed, <code>false</code> if not.
+     * @throws OXException If operations fails
+     */
+    boolean isEnabledFor(int contextId, int userId) throws OXException;
+
+    /**
+     * Stores given resource's binary content. Before saving, you have to check, if caching is allowed.
+     * See {@link ResourceCache#isEnabledFor(int, int)}.
      *
      * @param id The identifier (cache key) for the cached document
      * @param resource The cached preview
-     * @param userId The user identifier
+     * @param userId The user identifier. May be < 0 context-global caching.
      * @param contextId The context identifier
      * @return <code>true</code> if successfully saved; otherwise <code>false</code> if impossible to store (e.g. due to quota restrictions)
      * @throws OXException If operations fails
      */
     boolean save(String id, CachedResource resource, int userId, int contextId) throws OXException;
-
-    /**
-     * Stores given resource's binary content.
-     *
-     * @param id The identifier (cache key) for the cached document
-     * @param in The binary stream
-     * @param optName The optional file name
-     * @param optType The optional file MIME type; e.g. <code>"image/jpeg"</code>
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return <code>true</code> if successfully saved; otherwise <code>false</code> if impossible to store (e.g. due to quota restrictions)
-     * @throws OXException If operations fails
-     */
-    boolean save(String id, InputStream in, String optName, String optType, int userId, int contextId) throws OXException;
-
-    /**
-     * Stores given resource's binary content.
-     *
-     * @param id The identifier (cache key) for the cached document
-     * @param bytes The binary content
-     * @param optName The optional file name
-     * @param optType The optional file MIME type; e.g. <code>"image/jpeg"</code>
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return <code>true</code> if successfully saved; otherwise <code>false</code> if impossible to store (e.g. due to quota restrictions)
-     * @throws OXException If operations fails
-     */
-    boolean save(String id, byte[] bytes, String optName, String optType, int userId, int contextId) throws OXException;
 
     /**
      * Gets the caching quota for denoted context.
@@ -106,19 +88,6 @@ public interface ResourceCache {
      * @return The context quota or <code>-1</code> if unlimited
      */
     long[] getContextQuota(int contextId);
-
-    /**
-     * Ensures enough space is available for desired size if context-sensitive caching quota is specified.
-     *
-     * @param desiredSize The desired size
-     * @param total The context-sensitive caching quota
-     * @param totalPerDocument The context-sensitive caching quota per document
-     * @param contextId The context identifier
-     * @param ignoree The optional identifier to ignore while checking
-     * @return <code>true</code> If enough space is available; otherwise <code>false</code>
-     * @throws OXException If an error occurs
-     */
-    boolean ensureUnexceededContextQuota(long desiredSize, long total, long totalPerDocument, int contextId, String ignoree) throws OXException;
 
     /**
      * Gets the resource.

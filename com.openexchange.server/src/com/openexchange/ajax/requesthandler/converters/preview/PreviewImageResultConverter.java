@@ -91,6 +91,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class PreviewImageResultConverter extends AbstractPreviewResultConverter {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PreviewImageResultConverter.class);
+
     private static final String PARAMETER_ACTION = AJAXServlet.PARAMETER_ACTION;
     private static final String PARAMETER_SESSION = AJAXServlet.PARAMETER_SESSION;
 
@@ -120,7 +122,11 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
     public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         try {
             // Check cache first
-            final ResourceCache resourceCache = ResourceCaches.getResourceCache();
+            final ResourceCache resourceCache;
+            {
+                final ResourceCache tmp = ResourceCaches.getResourceCache();
+                resourceCache = null == tmp ? null : (tmp.isEnabledFor(session.getContextId(), session.getUserId()) ? tmp : null);
+            }
 
             // Get eTag from result that provides the IFileHolder
             final String eTag = result.getHeader("ETag");
@@ -221,11 +227,15 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                 // Specify task
                 final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData);
                 final AbstractTask<Void> task = new AbstractTask<Void>() {
-
                     @Override
-                    public Void call() throws OXException {
-                        final CachedResource preview = new CachedResource(bytes, fileName, "image/jpeg", bytes.length);
-                        resourceCache.save(cacheKey, preview, 0, session.getContextId());
+                    public Void call() {
+                        try {
+                            final CachedResource preview = new CachedResource(bytes, fileName, "image/jpeg", bytes.length);
+                            resourceCache.save(cacheKey, preview, 0, session.getContextId());
+                        } catch (OXException e) {
+                            LOG.warn("Could not cache preview.", e);
+                        }
+
                         return null;
                     }
                 };
