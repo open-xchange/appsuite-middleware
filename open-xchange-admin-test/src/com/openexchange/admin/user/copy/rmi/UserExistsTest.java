@@ -51,10 +51,6 @@ package com.openexchange.admin.user.copy.rmi;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import org.junit.Test;
 import com.openexchange.admin.rmi.AbstractRMITest;
 import com.openexchange.admin.rmi.OXContextInterface;
@@ -70,7 +66,7 @@ import com.openexchange.admin.rmi.exceptions.UserExistsException;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class UserExistsTest extends AbstractRMITest {
-    
+
     private OXContextInterface ci;
     private OXUserInterface ui;
     private final OXUserCopyInterface oxu;
@@ -88,7 +84,7 @@ public class UserExistsTest extends AbstractRMITest {
         super();
         oxu = getUserCopyClient();
     }
-    
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -102,7 +98,7 @@ public class UserExistsTest extends AbstractRMITest {
         final User dstTest = newUser("user", "secret", "Test User", "Test", "User", "test.user@netline.de");
         dstUser = ui.create(dstCtx, dstTest, getCredentials());
     }
-    
+
     @Override
     public void tearDown() throws Exception {
         ui.delete(srcCtx, srcUser, getCredentials());
@@ -111,7 +107,7 @@ public class UserExistsTest extends AbstractRMITest {
         ci.delete(dstCtx, superAdminCredentials);
         super.tearDown();
     }
-    
+
     @Test
     public void testUserExists() throws Exception {
         try {
@@ -119,12 +115,7 @@ public class UserExistsTest extends AbstractRMITest {
             fail("No exception thrown");
         } catch (Exception e) {
             assertTrue("No UserExistsException thrown.", e instanceof UserExistsException);
-            
+
         }
     }
-    
-    private OXUserCopyInterface getUserCopyClient() throws MalformedURLException, RemoteException, NotBoundException {
-        return (OXUserCopyInterface) Naming.lookup(getRMIHostUrl() + OXUserCopyInterface.RMI_NAME);
-    }
-
 }

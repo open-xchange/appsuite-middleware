@@ -50,10 +50,6 @@
 package com.openexchange.admin.user.copy.rmi;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.admin.rmi.AbstractRMITest;
@@ -65,29 +61,26 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 public class UserCopyTest extends AbstractRMITest {
 
-    private static final String PASSWORD = "secret";
-    private static final String OXADMINMASTER = "oxadminmaster";
-
     private int getRandomContextId() {
         return (int) (Math.random() * 1000);
     }
 
     @Test
     public final void testMoveUser() throws Throwable {
-        final OXUserCopyInterface oxu = getUserMoveClient();
+        final OXUserCopyInterface oxu = getUserCopyClient();
         final User user = new User(1);
         final Context src = new Context(I(getRandomContextId()));
         final Context dest = new Context(I(getRandomContextId()));
-        final Credentials auth = new Credentials(OXADMINMASTER, PASSWORD);
+        final Credentials auth = new Credentials(OXADMINMASTER, MASTER_PW);
         oxu.copyUser(user, src, dest, auth);
     }
 
     @Test
     public final void testMoveUserNoUser() throws Throwable {
-        final OXUserCopyInterface oxu = getUserMoveClient();
+        final OXUserCopyInterface oxu = getUserCopyClient();
         final Context src = new Context(I(getRandomContextId()));
         final Context dest = new Context(I(getRandomContextId()));
-        final Credentials auth = new Credentials(OXADMINMASTER, PASSWORD);
+        final Credentials auth = new Credentials(OXADMINMASTER, MASTER_PW);
         try {
             oxu.copyUser(null, src, dest, auth);
             Assert.fail("No error message thrown");
@@ -98,11 +91,11 @@ public class UserCopyTest extends AbstractRMITest {
 
     @Test
     public final void testMoveUserNoUserId() throws Throwable {
-        final OXUserCopyInterface oxu = getUserMoveClient();
+        final OXUserCopyInterface oxu = getUserCopyClient();
         final User user = new User();
         final Context src = new Context(I(getRandomContextId()));
         final Context dest = new Context(I(getRandomContextId()));
-        final Credentials auth = new Credentials(OXADMINMASTER, PASSWORD);
+        final Credentials auth = new Credentials(OXADMINMASTER, MASTER_PW);
         try {
             oxu.copyUser(user, src, dest, auth);
             Assert.fail("No error message thrown");
@@ -113,11 +106,11 @@ public class UserCopyTest extends AbstractRMITest {
 
     @Test
     public final void testMoveUserNoSrcContext() throws Throwable {
-        final OXUserCopyInterface oxu = getUserMoveClient();
+        final OXUserCopyInterface oxu = getUserCopyClient();
         final User user = new User(1);
         final Context src = null;
         final Context dest = new Context(I(getRandomContextId()));
-        final Credentials auth = new Credentials(OXADMINMASTER, PASSWORD);
+        final Credentials auth = new Credentials(OXADMINMASTER, MASTER_PW);
         try {
             oxu.copyUser(user, src, dest, auth);
             Assert.fail("No error message thrown");
@@ -128,11 +121,11 @@ public class UserCopyTest extends AbstractRMITest {
 
     @Test
     public final void testMoveUserNoSrcContextId() throws Throwable {
-        final OXUserCopyInterface oxu = getUserMoveClient();
+        final OXUserCopyInterface oxu = getUserCopyClient();
         final User user = new User(1);
         final Context src = new Context();
         final Context dest = new Context(I(getRandomContextId()));
-        final Credentials auth = new Credentials(OXADMINMASTER, PASSWORD);
+        final Credentials auth = new Credentials(OXADMINMASTER, MASTER_PW);
         try {
             oxu.copyUser(user, src, dest, auth);
             Assert.fail("No error message thrown");
@@ -143,11 +136,11 @@ public class UserCopyTest extends AbstractRMITest {
 
     @Test
     public final void testMoveUserNoDestContext() throws Throwable {
-        final OXUserCopyInterface oxu = getUserMoveClient();
+        final OXUserCopyInterface oxu = getUserCopyClient();
         final User user = new User(1);
         final Context src = new Context(I(getRandomContextId()));
         final Context dest = null;
-        final Credentials auth = new Credentials(OXADMINMASTER, PASSWORD);
+        final Credentials auth = new Credentials(OXADMINMASTER, MASTER_PW);
         try {
             oxu.copyUser(user, src, dest, auth);
             Assert.fail("No error message thrown");
@@ -158,20 +151,16 @@ public class UserCopyTest extends AbstractRMITest {
 
     @Test
     public final void testMoveUserNoDestContextId() throws Throwable {
-        final OXUserCopyInterface oxu = getUserMoveClient();
+        final OXUserCopyInterface oxu = getUserCopyClient();
         final User user = new User(1);
         final Context src = new Context(I(getRandomContextId()));
         final Context dest = new Context();
-        final Credentials auth = new Credentials(OXADMINMASTER, PASSWORD);
+        final Credentials auth = new Credentials(OXADMINMASTER, MASTER_PW);
         try {
             oxu.copyUser(user, src, dest, auth);
             Assert.fail("No error message thrown");
         } catch (final InvalidDataException e) {
             Assert.assertEquals("Client sent invalid destination context data object", e.getMessage());
         }
-    }
-
-    private OXUserCopyInterface getUserMoveClient() throws MalformedURLException, RemoteException, NotBoundException {
-        return (OXUserCopyInterface) Naming.lookup(getRMIHostUrl()+ OXUserCopyInterface.RMI_NAME);
     }
 }
