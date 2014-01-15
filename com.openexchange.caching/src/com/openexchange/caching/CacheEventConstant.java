@@ -86,16 +86,13 @@ public final class CacheEventConstant {
     /** The topic for cache cleansing */
     public static final String TOPIC_CLEAR = "com/openexchange/cache/clear";
 
-    /** The topic for remote cache invalidation */
-    public static final String TOPIC_REMOTE_INVALIDATE = "com/openexchange/cache/remote/invalidate";
-
     /**
      * Gets all known cache event topics.
      *
      * @return The topics
      */
     public static String[] getTopics() {
-        return new String[] { TOPIC_REMOTE_INVALIDATE, TOPIC_REMOVE, TOPIC_CLEAR };
+        return new String[] { TOPIC_REMOVE, TOPIC_CLEAR };
     }
 
 }

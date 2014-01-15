@@ -50,6 +50,7 @@
 package com.openexchange.caching.events.internal;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -111,22 +112,33 @@ public final class CacheEventServiceImpl implements CacheEventService {
     }
 
     @Override
-    public void notify(Object sender, CacheEvent event) {
-        LOG.debug("notify: {}", event);
-        List<Runnable> notificationRunnables = new ArrayList<Runnable>();
+    public void notify(Object sender, CacheEvent event, boolean fromRemote) {
+        LOG.debug("Notifying listeners about {} event: {}", fromRemote ? "remote" : "local", event);
+        // Possible list of Runnables
+        List<Runnable> notificationRunnables = null;
+        // Notify listeners
         if (null != event.getRegion()) {
-            for (CacheListener listener : getListeners(event.getRegion())) {
-                if (listener != sender) {
-                    notificationRunnables.add(getNotificationRunnable(listener, sender, event));
+            final List<CacheListener> listeners = new ArrayList<CacheListener>(getListeners(event.getRegion()));
+            listeners.remove(sender);
+            for (CacheListener listener : listeners) {
+                if (null == notificationRunnables) {
+                    notificationRunnables = new LinkedList<Runnable>();
                 }
+                notificationRunnables.add(getNotificationRunnable(listener, sender, event, fromRemote));
+             }
+        }
+        List<CacheListener> genericCacheListeners = cacheListeners;
+        if (false == genericCacheListeners.isEmpty()) {
+            genericCacheListeners = new ArrayList<CacheListener>(genericCacheListeners);
+            genericCacheListeners.remove(sender);
+            for (CacheListener listener : genericCacheListeners) {
+                if (null == notificationRunnables) {
+                    notificationRunnables = new LinkedList<Runnable>();
+                }
+                notificationRunnables.add(getNotificationRunnable(listener, sender, event, fromRemote));
             }
         }
-        for (CacheListener listener : cacheListeners) {
-            if (listener != sender) {
-                notificationRunnables.add(getNotificationRunnable(listener, sender, event));
-            }
-        }
-        if (0 < notificationRunnables.size()) {
+        if (null != notificationRunnables) {
             ExecutorService executorService = getExecutorService();
             if (null == executorService) {
                 for (Runnable runnable : notificationRunnables) {
@@ -158,13 +170,13 @@ public final class CacheEventServiceImpl implements CacheEventService {
         return listeners;
     }
 
-    private static Runnable getNotificationRunnable(final CacheListener listener, final Object sender, final CacheEvent event) {
+    private static Runnable getNotificationRunnable(final CacheListener listener, final Object sender, final CacheEvent event, final boolean fromRemote) {
         return new Runnable() {
 
             @Override
             public void run() {
                 try {
-                    listener.onEvent(sender, event);
+                    listener.onEvent(sender, event, fromRemote);
                 } catch (Throwable t) {
                     ExceptionUtils.handleThrowable(t);
                     LOG.error("Error while excuting event listener.", t);
