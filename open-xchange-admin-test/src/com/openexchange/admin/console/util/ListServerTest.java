@@ -52,6 +52,7 @@ package com.openexchange.admin.console.util;
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import org.junit.Test;
+import com.openexchange.admin.console.util.server.ListServer;
 import com.openexchange.admin.rmi.AbstractRMITest;
 import com.openexchange.admin.tools.ShellExecutor;
 import com.openexchange.admin.tools.ShellExecutor.ArrayOutput;
@@ -62,13 +63,19 @@ import com.openexchange.admin.tools.ShellExecutor.ArrayOutput;
  */
 public class ListServerTest extends AbstractRMITest {
 
-    @Test
-    public void testListServer() throws IOException, InterruptedException {
-        final ShellExecutor se = new ShellExecutor();
-        final ArrayOutput result = se.executeprocargs(new String[] {
-            prefix + "listserver", "-A", OXADMINMASTER, "-P", MASTER_PW, "-H", getRMIHost() });
+    private int returnCode;
 
-        assertTrue("Listing of server failed: " + result.errOutput, result.exitstatus == 0);
+    @Test
+    public void testListServer() {
+
+        new ListServer(new String[] { "-A", OXADMINMASTER, "-P", MASTER_PW, "-H", getRMIHost() }){
+            @Override
+            protected void sysexit(int exitCode) {
+                ListServerTest.this.returnCode = exitCode;
+            }
+        };
+
+        assertTrue("Listing of server failed with return code: " + returnCode, returnCode == 0);
     }
 
     @Test
