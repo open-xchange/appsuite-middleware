@@ -53,6 +53,7 @@ import java.util.Iterator;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
@@ -256,7 +257,7 @@ public final class IMAPStoreCache {
             final long stamp = System.currentTimeMillis() - IDLE_MILLIS;
             do {
                 final IMAPStoreContainer container = containers.next();
-                if (null != container) {
+                if (null != container && container.hasElapsed(stamp)) {
                     threadPool.submit(ThreadPools.trackableTask(new ContainerCloseElapsedRunnable(container, stamp, debug)), behavior);
                 }
             } while (containers.hasNext());

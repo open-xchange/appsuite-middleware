@@ -174,6 +174,14 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
             closeSafe(wrapper.imapStore);
         }
     }
+    
+    /* (non-Javadoc)
+     * @see com.openexchange.imap.storecache.IMAPStoreContainer#hasElapsed(long)
+     */
+    @Override
+    public boolean hasElapsed(long millis) {
+        return availableQueue.hasElapsed(millis);
+    }
 
     private static class InheritedPriorityBlockingQueue extends AbstractQueue<IMAPStoreWrapper> implements BlockingQueue<IMAPStoreWrapper>, java.io.Serializable {
 
@@ -192,6 +200,17 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
             q = new PriorityQueue<IMAPStoreWrapper>();
             lock = new ReentrantLock(true);
             notEmpty = lock.newCondition();
+        }
+        
+        public boolean hasElapsed(long millis) {
+            final ReentrantLock lock = this.lock;
+            lock.lock();
+            try {
+                final IMAPStoreWrapper e = q.peek();
+                return (null != e && e.lastAccessed < millis);
+            } finally {
+                lock.unlock();
+            }
         }
 
         @Override
