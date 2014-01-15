@@ -142,7 +142,7 @@
                 <#--Check, that the file is not hidden-->
                 <#if item.fileName?? && !item.fileName!?starts_with('_') && !item.fileName!?starts_with('.') >
                     <#--Check for the correct file type-->
-                    <#if (item.fileName!?last_index_of('.') >= 0) && item.fileName!?substring(item.fileName!?last_index_of('.') + 1)?matches('(gif|bmp|tiff|jpe?g|png)')>
+                    <#if (item.fileName!?last_index_of('.') >= 0) && (item.fileName!?substring(item.fileName!?last_index_of('.') + 1)?lower_case)?matches('(gif|bmp|tiff|jpe?g|png)')>
                         {url: '${utils.getScheme(request)!"http"}${request.serverName}${utils.getFileURL(publication, item)!?html}',
                         name: '${item.fileName!?substring(0, item.fileName!?last_index_of('.'))}'}<#if item_has_next>,</#if>
                     </#if>
