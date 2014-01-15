@@ -4472,7 +4472,7 @@ msgstr ""
 #. Somebody else modified the same object just before the actual change should be saved. Actual change is denied and user should refresh
 #. his object.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:83
-msgid "Edit Conflict. Refresh object."
+msgid "An edit conflict occurred. To edit the contact please reload it."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:85
