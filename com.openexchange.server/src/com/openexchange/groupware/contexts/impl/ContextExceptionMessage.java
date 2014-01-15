@@ -61,6 +61,7 @@ public class ContextExceptionMessage implements LocalizableStrings {
 
     public final static String NOT_FOUND_MSG = "The account %1$d was not found.";
     public final static String UPDATE_MSG = "The server is currently down for maintenance. Please try again later.";
+    public final static String NO_CONNECTION_TO_CONTEXT_MSG = "Could not connect to the context storage.";
     public final static String NO_MAPPING_MSG = "The account \"%1$s\" was not found.";
 
     /**

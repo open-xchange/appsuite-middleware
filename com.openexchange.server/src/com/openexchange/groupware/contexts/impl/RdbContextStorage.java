@@ -103,7 +103,12 @@ public class RdbContextStorage extends ContextStorage {
 
     @Override
     public int getContextId(final String loginInfo) throws OXException {
-        final Connection con = DBPool.pickup();
+        final Connection con;
+        try {
+            con = DBPool.pickup();
+        } catch (final OXException e) {
+            throw ContextExceptionCodes.NO_CONNECTION.create(e);
+        }
         int contextId = NOT_FOUND;
         PreparedStatement stmt = null;
         ResultSet result = null;

@@ -86,7 +86,11 @@ public enum DBJSlobStorageExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Unlock failed for entry with identifier: %1$s
      */
-    UNLOCK_FAILED(DBJSlobStorageExceptionCode.UNLOCK_FAILED_MSG, EnumCategory.ERROR, 6), ;
+    UNLOCK_FAILED(DBJSlobStorageExceptionCode.UNLOCK_FAILED_MSG, EnumCategory.ERROR, 6),
+    /**
+     * Connection failed to JSlob storage
+     */
+    CONNECTION_ERROR(DBJSlobStorageExceptionCode.NO_CONNECTION_MSG, EnumCategory.SERVICE_DOWN, 7, OXExceptionStrings.MESSAGE_RETRY);
 
     // An unexpected error occurred: %1$s
     private static final String UNEXPECTED_ERROR_MSG = "An unexpected error occurred: %1$s";
@@ -106,6 +110,8 @@ public enum DBJSlobStorageExceptionCode implements DisplayableOXExceptionCode {
     // Unlock failed for entry with identifier: %1$s
     private static final String UNLOCK_FAILED_MSG = "Unlock failed for entry with identifier: %1$s";
 
+    // Connection to database failed
+    private static final String NO_CONNECTION_MSG = "Connection to database failed";
     /**
      * The error code prefix for JSlob exceptions.
      */

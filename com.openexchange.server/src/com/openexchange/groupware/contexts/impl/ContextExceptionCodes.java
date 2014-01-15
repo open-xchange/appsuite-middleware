@@ -71,7 +71,7 @@ public enum ContextExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * No connection to database.
      */
-    NO_CONNECTION("Cannot get connection to database.", OXExceptionStrings.MESSAGE_RETRY, Category.CATEGORY_SERVICE_DOWN, 5),
+    NO_CONNECTION("Cannot get connection to database.", ContextExceptionMessage.NO_CONNECTION_TO_CONTEXT_MSG, Category.CATEGORY_SERVICE_DOWN, 5),
     /**
      * SQL problem: %1$s.
      */
