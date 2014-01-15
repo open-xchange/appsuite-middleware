@@ -97,7 +97,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
 
     public final static String BAD_PARAM_VALUE_MSG = "Bad value \"%1$s\" in parameter \"%2$s\".";
 
-    public final static String NO_MULTIPLE_REPLY_MSG = "No reply on multiple message possible.";
+    public final static String NO_MULTIPLE_REPLY_MSG = "No reply on multiple messages possible.";
 
     public final static String ATTACHMENT_NOT_FOUND_MSG = "Attachment \"%1$s\" not found inside mail \"%2$s\" of mail folder \"%3$s\".";
 

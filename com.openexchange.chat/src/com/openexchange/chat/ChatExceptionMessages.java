@@ -81,7 +81,7 @@ public final class ChatExceptionMessages implements LocalizableStrings {
     public static final String MESSAGE_NOT_FOUND_MSG = "Message with identifier \"%1$s\" does not exist in chat \"%2$s\".";
 
     // No member found with identifier "%1$s".
-    public static final String MEMBER_NOT_FOUND_MSG = "Member with identified \"%1$s\" does not exist.";
+    public static final String MEMBER_NOT_FOUND_MSG = "Member with identifier \"%1$s\" does not exist.";
 
     // Invalid conversation identifier: "%1$s"
     public static final String INVALID_CONVERSATION_ID_MSG = "Invalid chat identifier: \"%1$s\"";

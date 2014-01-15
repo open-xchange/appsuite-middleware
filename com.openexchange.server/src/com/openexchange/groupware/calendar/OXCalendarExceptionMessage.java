@@ -118,11 +118,6 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
     public static final String MANDATORY_FIELD_TITLE_MSG = "Required value \"Title\" was not supplied.";
 
     /**
-     * Invalid recurrence position: %d.
-     */
-    public static final String UNABLE_TO_CALCULATE_RECURRING_POSITION_DISPLAY = "Invalid recurrence position: %d.";
-
-    /**
      * Move not supported: Cannot move an appointment from folder %d to folder %d.
      */
     public static final String MOVE_NOT_SUPPORTED_MSG = "Move not supported: Cannot move an appointment from folder %d to folder %d.";
@@ -148,9 +143,9 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
     public static final String NON_CALENDAR_FOLDER_MSG = "Folder is not of type Calendar.";
 
     /**
-     * Moving an appointment to a public folder flagged as private is not allowed.
+     * Moving an appointment with private flag to a public folder is not allowed.
      */
-    public static final String PRIVATE_MOVE_TO_PUBLIC_MSG = "Moving an appointment to a public folder flagged as private is not allowed.";
+    public static final String PRIVATE_MOVE_TO_PUBLIC_MSG = "Moving an appointment with private flag to a public folder is not allowed.";
 
     /**
      * You do not have the appropriate permissions to modify this object.
@@ -183,9 +178,9 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
     public static final String RECURRING_EXCEPTION_MOVE_EXCEPTION_MSG = "Moving an instance of a recurring appointment into another folder is not allowed.";
 
     /**
-     * Moving an appointment to a shared folder flagged as private is not allowed.
+     * Moving an appointment with private flag to a shared folder is not allowed.
      */
-    public static final String MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED_DISPLAY = "Moving an appointment to a shared folder flagged as private is not allowed.";
+    public static final String MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED_DISPLAY = "Moving an appointment with private flag to a shared folder is not allowed.";
 
     /**
      * You can not use different private flags for one element of a recurring appointment.

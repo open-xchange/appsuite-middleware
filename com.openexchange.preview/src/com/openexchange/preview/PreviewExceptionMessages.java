@@ -61,7 +61,7 @@ public final class PreviewExceptionMessages implements LocalizableStrings {
 
     public static final String TRUNCATED_MSG = "The following field(s) are too long: %1$s. Please shorten the values and try again";
 
-    public static final String UNABLE_TO_CHANGE_DATA_MSG = "The data you provided (%1$s) cannot undergo to a change.";
+    public static final String UNABLE_TO_CHANGE_DATA_MSG = "The data you provided (%1$s) cannot be changed.";
 
     // Thumbnail image not available.
     public static final String THUMBNAIL_NOT_AVAILABLE = "Thumbnail image not available.";
