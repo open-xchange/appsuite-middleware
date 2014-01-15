@@ -104,6 +104,7 @@ import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.images.ImageTransformationUtility;
 import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.ScaleType;
+import com.openexchange.tools.images.TransformedImage;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -834,10 +835,17 @@ public class FileResponseRenderer implements ResponseRenderer {
         /*
          * Transform
          */
+        boolean cachingAdvised = false;
         try {
-            InputStream transformed;
+            final byte[] transformed;
             try {
-                transformed = transformations.getInputStream(file.getContentType());
+                TransformedImage transformedImage = transformations.getTransformedImage(file.getContentType());
+                int expenses = transformedImage.getTransformationExpenses();
+                if (expenses >= ImageTransformations.HIGH_EXPENSE) {
+                    cachingAdvised = true;
+                }
+
+                transformed = transformedImage.getImageData();
             } catch (final IOException ioe) {
                 if ("Unsupported Image Type".equals(ioe.getMessage())) {
                     return handleFailure(file, stream, markSupported);
@@ -846,17 +854,16 @@ public class FileResponseRenderer implements ResponseRenderer {
                 throw ioe;
             }
             if (null == transformed) {
-                    LOG.debug("Got no resulting input stream from transformation, trying to recover original input");
+                LOG.debug("Got no resulting input stream from transformation, trying to recover original input");
                 return handleFailure(file, stream, markSupported);
             }
             // Return immediately if not cacheable
-            if (null == resourceCache || !isValidEtag) {
-                return new FileHolder(transformed, -1, file.getContentType(), file.getName());
+            if (!cachingAdvised || null == resourceCache || !isValidEtag) {
+                return new FileHolder(Streams.newByteArrayInputStream(transformed), -1, file.getContentType(), file.getName());
             }
+
             // (Asynchronously) Add to cache if possible
-            final byte[] bytes = Streams.stream2bytes(transformed);
-            final int size = bytes.length;
-            // Specify task
+            final int size = transformed.length;
             final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request);
             final ServerSession session = request.getSession();
             final String fileName = file.getName();
@@ -865,7 +872,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 @Override
                 public Void call() {
                     try {
-                        final CachedResource preview = new CachedResource(bytes, fileName, contentType, bytes.length);
+                        final CachedResource preview = new CachedResource(transformed, fileName, contentType, size);
                         resourceCache.save(cacheKey, preview, 0, session.getContextId());
                     } catch (OXException e) {
                         LOG.warn("Could not cache preview.", e);
@@ -897,7 +904,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 threadPool.submit(task);
             }
             // Return
-            return new FileHolder(new ByteArrayInputStreamClosure(bytes), size, contentType, fileName);
+            return new FileHolder(new ByteArrayInputStreamClosure(transformed), size, contentType, fileName);
         } catch (final RuntimeException e) {
             if (LOG.isDebugEnabled() && file.repetitive()) {
                 try {

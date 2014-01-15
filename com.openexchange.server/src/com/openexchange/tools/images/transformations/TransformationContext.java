@@ -49,63 +49,22 @@
 
 package com.openexchange.tools.images.transformations;
 
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import com.mortennobel.imagescaling.DimensionConstrain;
-import com.mortennobel.imagescaling.ResampleOp;
-import com.openexchange.tools.images.ImageTransformations;
-import com.openexchange.tools.images.ScaleType;
-import com.openexchange.tools.images.impl.AutoDimensionConstrain;
-import com.openexchange.tools.images.impl.ContainDimensionConstrain;
-import com.openexchange.tools.images.impl.CoverDimensionConstrain;
-import com.openexchange.tools.images.impl.ImageInformation;
 
 /**
- * {@link ScaleTransformation}
+ * {@link TransformationContext}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ScaleTransformation implements ImageTransformation {
+public class TransformationContext {
 
-    private final int maxWidth, maxHeight;
-    private final ScaleType scaleType;
+    private int expenses = 0;
 
-    public ScaleTransformation(int maxWidth, int maxHeight, ScaleType scaleType) {
-        super();
-        this.maxWidth = maxWidth;
-        this.maxHeight = maxHeight;
-        this.scaleType = scaleType;
+    public void addExpense(int expense) {
+        expenses += expense;
     }
 
-    @Override
-    public BufferedImage perform(BufferedImage sourceImage, TransformationContext transformationContext, ImageInformation imageInformation) throws IOException {
-        DimensionConstrain constrain;
-        switch (scaleType) {
-        case COVER:
-            constrain = new CoverDimensionConstrain(maxWidth, maxHeight);
-            break;
-        case CONTAIN:
-            if (null != sourceImage && maxWidth >= sourceImage.getWidth() && maxHeight >= sourceImage.getHeight()) {
-                return sourceImage; // nothing to do
-            }
-            constrain = new ContainDimensionConstrain(maxWidth, maxHeight);
-            break;
-        default:
-            constrain = new AutoDimensionConstrain(maxWidth, maxHeight);
-            break;
-        }
-        transformationContext.addExpense(ImageTransformations.HIGH_EXPENSE);
-        return new ResampleOp(constrain).filter(sourceImage, null);
-    }
-
-    @Override
-    public boolean needsImageInformation() {
-        return false;
-    }
-
-    @Override
-    public boolean supports(String formatName) {
-        return true;
+    public int getExpenses() {
+        return expenses;
     }
 
 }

@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 import javax.servlet.http.sim.SimHttpServletRequest;
 import javax.servlet.http.sim.SimHttpServletResponse;
 import javax.servlet.sim.ByteArrayServletOutputStream;
@@ -65,8 +68,14 @@ import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.SimHtmlService;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.images.ImageTransformationService;
+import com.openexchange.tools.images.ImageTransformations;
+import com.openexchange.tools.images.ScaleType;
+import com.openexchange.tools.images.TransformedImage;
 import com.openexchange.tools.images.impl.JavaImageTransformationService;
 import com.openexchange.tools.session.SimServerSession;
+import com.openexchange.tools.strings.BasicTypesStringParser;
+import com.openexchange.tools.strings.StringParser;
 
 /**
  * {@link FileResponseRendererTest}
@@ -230,13 +239,14 @@ public class FileResponseRendererTest extends TestCase {
         fileHolder.setDisposition("inline");
         fileHolder.setName("someimage.jpg");
 
-        final TestableResourceCache resourceCache = new TestableResourceCache();
+        final TestableResourceCache resourceCache = new TestableResourceCache(false);
         ResourceCaches.setResourceCache(resourceCache);
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
         fileResponseRenderer.setScaler(new JavaImageTransformationService());
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.setSession(new SimServerSession(1, 1));
         final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+        result.setHeader("ETag", "1323jjlksldfsdkfms");
         final SimHttpServletRequest req = new SimHttpServletRequest();
         final SimHttpServletResponse resp = new SimHttpServletResponse();
         final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
@@ -247,7 +257,71 @@ public class FileResponseRendererTest extends TestCase {
         assertEquals("save() called", 0, resourceCache.callsToSave);
     }
 
+    public void testNoCachingOnCheapTransformations() throws Exception {
+        final int length = 2048;
+        final byte[] bytes = new byte[length];
+        for (int i = 0; i < length; i++) {
+            bytes[i] = (byte) i;
+        }
+
+        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
+        fileHolder.setContentType("image/jpeg");
+        fileHolder.setDelivery("view");
+        fileHolder.setDisposition("inline");
+        fileHolder.setName("someimage.jpg");
+
+        final TestableResourceCache resourceCache = new TestableResourceCache(true);
+        ResourceCaches.setResourceCache(resourceCache);
+        final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+        fileResponseRenderer.setScaler(new TestableImageTransformationService(bytes, ImageTransformations.LOW_EXPENSE));
+        final AJAXRequestData requestData = new AJAXRequestData();
+        requestData.setSession(new SimServerSession(1, 1));
+        final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+        result.setHeader("ETag", "1323jjlksldfsdkfms");
+        final SimHttpServletRequest req = new SimHttpServletRequest();
+        final SimHttpServletResponse resp = new SimHttpServletResponse();
+        final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+        resp.setOutputStream(servletOutputStream);
+        fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+        assertEquals("get() not called", 1, resourceCache.callsToGet);
+        assertEquals("save() called", 0, resourceCache.callsToSave);
+    }
+
+    public void testCachingOnExpensiveTransformations() throws Exception {
+        final int length = 2048;
+        final byte[] bytes = new byte[length];
+        for (int i = 0; i < length; i++) {
+            bytes[i] = (byte) i;
+        }
+
+        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
+        fileHolder.setContentType("image/jpeg");
+        fileHolder.setDelivery("view");
+        fileHolder.setDisposition("inline");
+        fileHolder.setName("someimage.jpg");
+        ServerServiceRegistry.getInstance().addService(StringParser.class, new BasicTypesStringParser());
+        final TestableResourceCache resourceCache = new TestableResourceCache(true);
+        ResourceCaches.setResourceCache(resourceCache);
+        final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+        fileResponseRenderer.setScaler(new TestableImageTransformationService(bytes, ImageTransformations.HIGH_EXPENSE));
+        final AJAXRequestData requestData = new AJAXRequestData();
+        requestData.setSession(new SimServerSession(1, 1));
+        requestData.putParameter("width", "10");
+        requestData.putParameter("height", "10");
+        final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+        result.setHeader("ETag", "1323jjlksldfsdkfms");
+        final SimHttpServletRequest req = new SimHttpServletRequest();
+        final SimHttpServletResponse resp = new SimHttpServletResponse();
+        final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+        resp.setOutputStream(servletOutputStream);
+        fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+        assertEquals("get() not called", 1, resourceCache.callsToGet);
+        assertEquals("save() called", 1, resourceCache.callsToSave);
+    }
+
     private static final class TestableResourceCache implements ResourceCache {
+
+        private final boolean isEnabled;
 
         int callsToIsEnabledFor = 0;
 
@@ -255,10 +329,15 @@ public class FileResponseRendererTest extends TestCase {
 
         int callsToSave = 0;
 
+        public TestableResourceCache(final boolean isEnabled) {
+            super();
+            this.isEnabled = isEnabled;
+        }
+
         @Override
         public boolean isEnabledFor(int contextId, int userId) throws OXException {
             callsToIsEnabledFor++;
-            return false;
+            return isEnabled;
         }
 
         @Override
@@ -296,6 +375,123 @@ public class FileResponseRendererTest extends TestCase {
         @Override
         public boolean exists(String id, int userId, int contextId) throws OXException {
             return false;
+        }
+    }
+
+    private static final class TestableImageTransformations implements ImageTransformations {
+
+        private final byte[] imageData;
+
+        private final int expenses;
+
+        public TestableImageTransformations(byte[] imageData, int expenses) {
+            super();
+            this.imageData = imageData;
+            this.expenses = expenses;
+        }
+
+        @Override
+        public ImageTransformations rotate() {
+            return this;
+        }
+
+        @Override
+        public ImageTransformations scale(int maxWidth, int maxHeight, ScaleType scaleType) {
+            return this;
+        }
+
+        @Override
+        public ImageTransformations crop(int x, int y, int width, int height) {
+            return this;
+        }
+
+        @Override
+        public ImageTransformations compress() {
+            return this;
+        }
+
+        @Override
+        public BufferedImage getImage() throws IOException {
+            return null;
+        }
+
+        @Override
+        public byte[] getBytes(String formatName) throws IOException {
+            return null;
+        }
+
+        @Override
+        public InputStream getInputStream(String formatName) throws IOException {
+            return null;
+        }
+
+        @Override
+        public TransformedImage getTransformedImage(String formatName) throws IOException {
+            return new TransformedImage() {
+
+                @Override
+                public int getWidth() {
+                    return 0;
+                }
+
+                @Override
+                public int getTransformationExpenses() {
+                    return expenses;
+                }
+
+                @Override
+                public long getSize() {
+                    return 0;
+                }
+
+                @Override
+                public byte[] getMD5() {
+                    return null;
+                }
+
+                @Override
+                public byte[] getImageData() {
+                    return imageData;
+                }
+
+                @Override
+                public int getHeight() {
+                    return 0;
+                }
+
+                @Override
+                public String getFormatName() {
+                    return null;
+                }
+            };
+        }
+    }
+
+    private static final class TestableImageTransformationService implements ImageTransformationService {
+
+        private final byte[] imageData;
+
+        private final int expenses;
+
+        public TestableImageTransformationService(byte[] imageData, int expenses) {
+            super();
+            this.imageData = imageData;
+            this.expenses = expenses;
+        }
+
+        @Override
+        public ImageTransformations transfom(BufferedImage sourceImage) {
+            return new TestableImageTransformations(imageData, expenses);
+        }
+
+        @Override
+        public ImageTransformations transfom(InputStream imageStream) throws IOException {
+            return new TestableImageTransformations(imageData, expenses);
+        }
+
+        @Override
+        public ImageTransformations transfom(byte[] imageData) throws IOException {
+            return new TestableImageTransformations(imageData, expenses);
         }
 
     }
