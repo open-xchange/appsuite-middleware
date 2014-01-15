@@ -298,7 +298,7 @@ public final class FolderCacheManager {
             return ((FolderObject) object).clone();
         }
         final FolderObject fo = loadFolderObjectInternal(objectId, ctx, readCon);
-        putFolderObject(fo, ctx, true, null);
+        putFolderObject(fo, ctx, false == fromCache, null);
         return fo.clone();
     }
 

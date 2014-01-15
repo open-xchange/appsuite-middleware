@@ -61,8 +61,9 @@ public interface CacheEventService {
      *
      * @param sender The sender of the event
      * @param event The cache event
+     * @param fromRemote If event was remotely received
      */
-    void notify(Object sender, CacheEvent event);
+    void notify(Object sender, CacheEvent event, boolean fromRemote);
 
     /**
      * Registers a cache listener to receive cache events for all regions.
