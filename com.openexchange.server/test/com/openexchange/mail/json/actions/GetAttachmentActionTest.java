@@ -49,8 +49,12 @@
 
 package com.openexchange.mail.json.actions;
 
-import static org.junit.Assert.*;
-import static org.powermock.api.mockito.PowerMockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.powermock.api.mockito.PowerMockito.doReturn;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.spy;
+import static org.powermock.api.mockito.PowerMockito.when;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -65,6 +69,9 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.strings.BasicTypesStringParser;
+import com.openexchange.tools.strings.StringParser;
 
 
 /**
@@ -87,12 +94,13 @@ public class GetAttachmentActionTest {
      * only 'image/jpeg' here.
      */
     @Test
-    public void testReturnedContentType() throws Exception {
+    public void testReturnedContentTypeAndModifiedParameters() throws Exception {
         String folder = "default0/INBOX";
         String uid = "1";
         String attachmentId = "2";
 
         ServiceLookup serviceLookup = mock(ServiceLookup.class);
+        ServerServiceRegistry.getInstance().addService(StringParser.class, new BasicTypesStringParser());
         AJAXRequestData ajaxRequestData = new AJAXRequestData();
         MailRequest mailRequest = mock(MailRequest.class);
         doReturn(folder).when(mailRequest).checkParameter(AJAXServlet.PARAMETER_FOLDERID);
@@ -117,6 +125,7 @@ public class GetAttachmentActionTest {
         AJAXRequestResult result = action.perform(mailRequest);
         Object object = result.getResultObject();
         assertEquals("Wrong format", "file", ajaxRequestData.getFormat());
+        assertEquals("Wrong caching value", false, ajaxRequestData.getParameter("cache", boolean.class));
         assertTrue("Wrong class", IFileHolder.class.isInstance(object));
         assertEquals("Wrong content type", "image/jpeg", ((IFileHolder) object).getContentType());
     }

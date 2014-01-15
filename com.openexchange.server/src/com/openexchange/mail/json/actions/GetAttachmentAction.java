@@ -321,8 +321,9 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             }
             final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
             /*
-             * Set format
+             * Set format and disallow resource caching
              */
+            requestData.putParameter("cache", "false");
             if (!isPreviewImage) {
                 requestData.setFormat("file");
             }
