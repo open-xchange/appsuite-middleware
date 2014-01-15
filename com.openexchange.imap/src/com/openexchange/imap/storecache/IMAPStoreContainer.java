@@ -104,4 +104,12 @@ public interface IMAPStoreContainer {
      * @return The number of stores currently in-use
      */
     int getInUseCount();
+    
+    /**
+     * Determines whether the IMAPStoreContainer has elapsed
+     * 
+     * @param millis 
+     * @return true if elapsed; false otherwise
+     */
+    boolean hasElapsed(long millis);
 }
