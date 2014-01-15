@@ -220,6 +220,21 @@ public abstract class AbstractPerformer {
      * @throws OXException If name look-up fails
      */
     protected CheckForDuplicateResult getCheckForDuplicateResult(final String name, final String treeId, final String parentId, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
+        return getCheckForDuplicateResult(name, treeId, parentId, null, openedStorages);
+    }
+
+    /**
+     * Checks for duplicate folder through a LIST request.
+     *
+     * @param name The name to check for
+     * @param treeId The tree identifier
+     * @param parentId The parent identifier
+     * @param excludee The identifier of the folder to exclude
+     * @param openedStorages The list containing already opened folder storages
+     * @return The check result or <code>null</code> if no duplicate/conflict found
+     * @throws OXException If name look-up fails
+     */
+    protected CheckForDuplicateResult getCheckForDuplicateResult(final String name, final String treeId, final String parentId, final String excludee, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
         if (!check4Duplicates || null == name) {
             return null;
         }
@@ -231,7 +246,7 @@ public abstract class AbstractPerformer {
         if (!FolderStorage.REAL_TREE_ID.equals(treeId)) {
             for (final UserizedFolder userizedFolder : new ListPerformer(session, null, folderStorageDiscoverer).doList(treeId, parentId, true, true)) {
                 final String localizedName = userizedFolder.getLocalizedName(locale);
-                if (localizedName.toLowerCase(locale).equals(lcName)) {
+                if (localizedName.toLowerCase(locale).equals(lcName) && (null == excludee || !excludee.equals(userizedFolder.getID()))) {
                     final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
                     checkOpenedStorage(realStorage, openedStorages);
                     final OXException e = FolderExceptionErrorMessage.EQUAL_NAME.create(name, realStorage.getFolder(FolderStorage.REAL_TREE_ID, parentId, storageParameters).getLocalizedName(locale), treeId);

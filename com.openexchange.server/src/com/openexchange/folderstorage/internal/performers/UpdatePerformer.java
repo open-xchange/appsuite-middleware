@@ -389,7 +389,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
     }
 
     private void checkForDuplicateOnRename(final Folder folder, final String treeId, final List<FolderStorage> openedStorages, final Folder storageFolder, final String newName, final boolean allowAutoRename) throws OXException {
-        CheckForDuplicateResult result = getCheckForDuplicateResult(newName, treeId, storageFolder.getParentID(), openedStorages);
+        CheckForDuplicateResult result = getCheckForDuplicateResult(newName, treeId, storageFolder.getParentID(), storageFolder.getID(), openedStorages);
         if (null != result) {
             if (!allowAutoRename) {
                 throw result.error;
