@@ -62,7 +62,8 @@ public interface CacheListener {
      *
      * @param sender The sender of the event
      * @param cacheEvent The cache event
+     * @param fromRemote If event was remotely received
      */
-    void onEvent(Object sender, CacheEvent cacheEvent);
+    void onEvent(Object sender, CacheEvent cacheEvent, boolean fromRemote);
 
 }

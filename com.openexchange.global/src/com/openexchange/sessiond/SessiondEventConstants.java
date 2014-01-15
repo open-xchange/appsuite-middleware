@@ -71,11 +71,15 @@ public final class SessiondEventConstants {
 
     /**
      * The topic on single session removal.
+     * <p>
+     * Provides {@link #PROP_SESSION} property.
      */
     public static final String TOPIC_REMOVE_SESSION = "com/openexchange/sessiond/remove/session";
 
     /**
      * The topic on session container removal.
+     * <p>
+     * Provides {@link #PROP_CONTAINER} property.
      */
     public static final String TOPIC_REMOVE_CONTAINER = "com/openexchange/sessiond/remove/container";
 
@@ -83,6 +87,8 @@ public final class SessiondEventConstants {
      * This event topic is used when sessions walk into the long term session life time container. If this event is emitted all temporary
      * session data should be removed. A complete UI reload is suggested to get the session back out of the long term life time container or
      * at first, we expect that to reduce the amount of used memory.
+     * <p>
+     * Provides {@link #PROP_CONTAINER} property.
      */
     public static final String TOPIC_REMOVE_DATA = "com/openexchange/sessiond/remove/data";
 

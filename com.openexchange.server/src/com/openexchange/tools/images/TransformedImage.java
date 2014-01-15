@@ -99,4 +99,11 @@ public interface TransformedImage {
      */
     byte[] getMD5();
 
+    /**
+     * Gets the sum of transformation expenses.
+     * @see {@link ImageTransformations#LOW_EXPENSE} and {@link ImageTransformations#HIGH_EXPENSE}.
+     * @return The expenses.
+     */
+    int getTransformationExpenses();
+
 }

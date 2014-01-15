@@ -50,7 +50,6 @@
 package com.openexchange.folderstorage.cache.osgi;
 
 import static com.openexchange.folderstorage.cache.CacheServiceRegistry.getServiceRegistry;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -64,8 +63,8 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventConstants;
@@ -76,7 +75,6 @@ import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.folderstorage.cache.lock.TreeLockManagement;
 import com.openexchange.folderstorage.cache.lock.UserLockManagement;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
-import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.DeferredActivator;
@@ -165,6 +163,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
             // Register service trackers
             serviceTrackers = new ArrayList<ServiceTracker<?,?>>(4);
             serviceTrackers.add(new ServiceTracker<FolderStorage,FolderStorage>(context, FolderStorage.class, new CacheFolderStorageServiceTracker(context)));
+            serviceTrackers.add(new ServiceTracker<CacheEventService, CacheEventService>(context, CacheEventService.class, new FolderMapInvalidator(context)));
             for (final ServiceTracker<?,?> serviceTracker : serviceTrackers) {
                 serviceTracker.open();
             }
@@ -311,38 +310,6 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
             };
             final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
             dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            registrations.add(context.registerService(EventHandler.class, eventHandler, dict));
-        }
-        {
-            final EventHandler eventHandler = new EventHandler() {
-
-                @Override
-                public void handleEvent(final Event event) {
-                    final String region = (String) event.getProperty("region");
-                    if ("GlobalFolderCache".equals(region)) {
-                        final int contextId = Tools.getUnsignedInteger((String) event.getProperty("group"));
-                        if (null == event.getProperty("key")) {
-                            FolderMapManagement.getInstance().dropFor(contextId);
-                        } else {
-                            final Serializable[] keys = ((CacheKey) event.getProperty("key")).getKeys();
-                            final String id = keys[1].toString();
-                            final String treeId = keys[0].toString();
-                            removeFromUserCache(id, treeId, contextId);
-                        }
-                    } else if ("OXFolderCache".equals(region)) {
-                        CacheKey cacheKey = (CacheKey) event.getProperty("key");
-                        final String id = cacheKey.getKeys()[0].toString();
-                        final String treeId = FolderStorage.REAL_TREE_ID;
-                        removeFromUserCache(id, treeId, cacheKey.getContextId());
-                    }
-                }
-
-                private void removeFromUserCache(final String id, final String treeId, final int contextId) {
-                    FolderMapManagement.getInstance().dropFor(id, treeId, -1, contextId);
-                }
-            };
-            final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
-            dict.put(EventConstants.EVENT_TOPIC, "com/openexchange/cache/remote/invalidate");
             registrations.add(context.registerService(EventHandler.class, eventHandler, dict));
         }
         {

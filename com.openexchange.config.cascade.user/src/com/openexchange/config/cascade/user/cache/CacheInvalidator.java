@@ -78,7 +78,7 @@ public class CacheInvalidator implements CacheListener, ServiceTrackerCustomizer
      * CacheListener
      */
     @Override
-    public void onEvent(Object sender, CacheEvent cacheEvent) {
+    public void onEvent(Object sender, CacheEvent cacheEvent, boolean fromRemote) {
         if ("UserConfiguration".equals(cacheEvent.getRegion())) {
             Serializable key = cacheEvent.getKey();
             if (CacheKey.class.isInstance(key)) {
@@ -108,7 +108,7 @@ public class CacheInvalidator implements CacheListener, ServiceTrackerCustomizer
     @Override
     public CacheEventService addingService(ServiceReference<CacheEventService> reference) {
         CacheEventService service = context.getService(reference);
-        service.addListener(this);
+        service.addListener("UserConfiguration", this);
         return service;
     }
 
@@ -117,7 +117,7 @@ public class CacheInvalidator implements CacheListener, ServiceTrackerCustomizer
 
     @Override
     public void removedService(ServiceReference<CacheEventService> reference, CacheEventService service) {
-        service.removeListener(this);
+        service.removeListener("UserConfiguration", this);
     }
 
     /*

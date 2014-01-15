@@ -101,6 +101,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
 
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ImageTransformationsImpl.class);
 
+    private final TransformationContext transformationContext;
     private final InputStream sourceImageStream;
     private final List<ImageTransformation> transformations;
     private BufferedImage sourceImage;
@@ -112,6 +113,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
         this.sourceImage = sourceImage;
         this.sourceImageStream = sourceImageStream;
         this.transformations = new ArrayList<ImageTransformation>();
+        this.transformationContext = new TransformationContext();
     }
 
     /**
@@ -226,7 +228,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
             ImageInformation imageInformation = null != this.metadata ? getImageInformation(this.metadata) : null;
             for (ImageTransformation transformation : transformations) {
                 if (transformation.supports(formatName)) {
-                    image = transformation.perform(image, imageInformation);
+                    image = transformation.perform(image, transformationContext, imageInformation);
                 }
             }
         }
@@ -284,14 +286,15 @@ public class ImageTransformationsImpl implements ImageTransformations {
             outputStream = new UnsynchronizedByteArrayOutputStream(8192);
             digestOutputStream = new DigestOutputStream(outputStream, MessageDigest.getInstance("MD5"));
             if (needsCompression(formatName)) {
-                writeCompressed(image, formatName, digestOutputStream);
+                writeCompressed(image, formatName, digestOutputStream, transformationContext);
             } else {
                 write(image, formatName, digestOutputStream);
             }
+
             byte[] imageData = outputStream.toByteArray();
             byte[] md5 = digestOutputStream.getMessageDigest().digest();
-            return new TransformedImageImpl(
-                image.getWidth(), image.getHeight(), null != imageData ? imageData.length : 0, formatName, imageData, md5);
+            long size = null != imageData ? imageData.length : 0L;
+            return new TransformedImageImpl(image.getWidth(), image.getHeight(), size, formatName, imageData, md5, transformationContext.getExpenses());
         } catch (NoSuchAlgorithmException e) {
             throw new IOException(e);
         } finally {
@@ -315,7 +318,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
         try {
             outputStream = new UnsynchronizedByteArrayOutputStream(8192);
             if (needsCompression(formatName)) {
-                writeCompressed(image, formatName, outputStream);
+                writeCompressed(image, formatName, outputStream, transformationContext);
             } else {
                 write(image, formatName, outputStream);
             }
@@ -335,7 +338,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
         }
     }
 
-    private static void writeCompressed(BufferedImage image, String formatName, OutputStream output) throws IOException {
+    private static void writeCompressed(BufferedImage image, String formatName, OutputStream output, TransformationContext transformationContext) throws IOException {
         ImageWriter writer = null;
         ImageOutputStream imageOutputStream = null;
         try {
@@ -353,6 +356,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
             writer.setOutput(imageOutputStream);
             IIOImage iioImage = new IIOImage(image, null, null);
             writer.write(null, iioImage, iwp);
+            transformationContext.addExpense(ImageTransformations.LOW_EXPENSE);
         } finally {
             if (null != writer) {
                 writer.dispose();

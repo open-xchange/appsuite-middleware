@@ -73,7 +73,7 @@ public class OXJSONExceptionMessage implements LocalizableStrings {
     /**
      * The value \"%1$s\" you set for attribute %2$s do not have to contain non digit characters.
      */
-    public static final String CONTAINS_NON_DIGITS_MSG_DISPLAY = "The value \"%1$s\" you set for attribute %2$s do not have to contain non digit characters.";
+    public static final String CONTAINS_NON_DIGITS_MSG_DISPLAY = "The value \"%1$s\" you set for attribute %2$s must not contain non digit characters.";
 
     /**
      * You inserted too many digits into field %1$s.

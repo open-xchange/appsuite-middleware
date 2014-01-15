@@ -47,25 +47,55 @@
  *
  */
 
-package com.openexchange.passwordchange.servlet;
+package com.openexchange.test.resourcecache.actions;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.Date;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.ProblematicAttribute;
+
 
 /**
- * {@link PasswordChangeServletExceptionMessage}
+ * {@link DownloadResponse}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class PasswordChangeServletExceptionMessage implements LocalizableStrings {
+public class DownloadResponse extends AbstractAJAXResponse {
 
-    /**
-     * Initializes a new {@link PasswordChangeServletExceptionMessage}.
-     */
-    private PasswordChangeServletExceptionMessage() {
-        super();
+    private final byte[] bytes;
+
+    public DownloadResponse(byte[] bytes) {
+        super(null);
+        this.bytes = bytes;
     }
 
-    public static final String PW_CHANGE_SUCCEEDED_MSG = "Password changed successfully. Please logout and login back again.";
+    @Override
+    public Object getData() {
+        return getBytes();
+    }
 
-    public static final String PW_CHANGE_ERROR_MSG = "Password was not changed.";
+    @Override
+    public OXException getException() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ProblematicAttribute[] getProblematics() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Date getTimestamp() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean hasError() {
+        throw new UnsupportedOperationException();
+    }
+
+    public byte[] getBytes() {
+        return bytes;
+    }
+
 }

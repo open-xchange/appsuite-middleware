@@ -51,15 +51,10 @@ package com.openexchange.caching.internal;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheElement;
-import com.openexchange.caching.CacheEventConstant;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheStatistics;
 import com.openexchange.caching.ElementAttributes;
@@ -303,14 +298,13 @@ public class NotifyingCache extends AbstractCache implements Cache, CacheListene
     }
 
     @Override
-    public void onEvent(Object sender, CacheEvent cacheEvent) {
-        if (sender != this && null != cacheEvent) {
+    public void onEvent(Object sender, CacheEvent cacheEvent, boolean fromRemote) {
+        if (fromRemote && sender != this && null != cacheEvent) {
             LOG.debug("onEvent: {}", cacheEvent);
             try {
                 switch (cacheEvent.getOperation()) {
                 case INVALIDATE_GROUP:
                     delegate.invalidateGroup(cacheEvent.getGroupName());
-                    locallyPostInvalidateEvent(cacheEvent);
                     break;
                 case INVALIDATE:
                     if (null != cacheEvent.getGroupName()) {
@@ -318,7 +312,6 @@ public class NotifyingCache extends AbstractCache implements Cache, CacheListene
                     } else {
                         delegate.remove(cacheEvent.getKey());
                     }
-                    locallyPostInvalidateEvent(cacheEvent);
                     break;
                 default:
                     LOG.warn("Unknown cache event operation: {}", cacheEvent.getOperation());
@@ -329,30 +322,11 @@ public class NotifyingCache extends AbstractCache implements Cache, CacheListene
         }
     }
 
-    private static final String TOPIC_REMOTE_INVALIDATE = CacheEventConstant.TOPIC_REMOTE_INVALIDATE;
-
-    private static final String PROP_REGION = CacheEventConstant.PROP_REGION;
-    private static final String PROP_KEY = CacheEventConstant.PROP_KEY;
-    private static final String PROP_GROUP = CacheEventConstant.PROP_GROUP;
-    private static final String PROP_OPERATION = CacheEventConstant.PROP_OPERATION;
-
-    private void locallyPostInvalidateEvent(final CacheEvent cacheEvent) {
-        final EventAdmin eventAdmin = EVENT_ADMIN_REF.get();
-        if (null != eventAdmin && null != cacheEvent) {
-            final Map<String, Object> properties = new HashMap<String, Object>(4);
-            properties.put(PROP_REGION, cacheEvent.getRegion());
-            properties.put(PROP_OPERATION, cacheEvent.getOperation().toString());
-            properties.put(PROP_GROUP, cacheEvent.getGroupName());
-            properties.put(PROP_KEY, cacheEvent.getKey());
-            eventAdmin.postEvent(new Event(TOPIC_REMOTE_INVALIDATE, properties));
-        }
-    }
-
     private void fireInvalidateGroup(String groupName) {
         if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
             CacheEvent event = CacheEvent.INVALIDATE_GROUP(region, groupName);
             LOG.debug("fireInvalidateGroup: {}", event);
-            eventService.notify(this, event);
+            eventService.notify(this, event, false);
         }
     }
 
@@ -364,7 +338,7 @@ public class NotifyingCache extends AbstractCache implements Cache, CacheListene
         if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
             CacheEvent event = CacheEvent.INVALIDATE(region, groupName, key);
             LOG.debug("fireInvalidate: {}", event);
-            eventService.notify(this, event);
+            eventService.notify(this, event, false);
         }
     }
 

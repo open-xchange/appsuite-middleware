@@ -94,10 +94,6 @@ public enum POP3ExceptionCode implements DisplayableOXExceptionCode {
      */
     NO_ACCESS("No access to mail folder %1$s", POP3ExceptionMessage.NO_ACCESS_MSG, CATEGORY_PERMISSION_DENIED, 2003),
     /**
-     * No lookup access to mail folder %1$s
-     */
-    NO_LOOKUP_ACCESS("No lookup access to mail folder %1$s", POP3ExceptionMessage.NO_LOOKUP_ACCESS_MSG, CATEGORY_PERMISSION_DENIED, 2004),
-    /**
      * No read access on mail folder %1$s
      */
     NO_READ_ACCESS("No read access on mail folder %1$s", POP3ExceptionMessage.NO_READ_ACCESS_MSG, CATEGORY_PERMISSION_DENIED, 2005),
@@ -323,10 +319,6 @@ public enum POP3ExceptionCode implements DisplayableOXExceptionCode {
      * POP3 does not support to copy messages.
      */
     COPY_MSGS_DENIED("POP3 does not support to copy messages.", POP3ExceptionMessage.COPY_MSGS_DENIED_MSG, CATEGORY_ERROR, 2057),
-    /**
-     * POP3 does not support to append messages.
-     */
-    APPEND_MSGS_DENIED("POP3 does not support to append messages.", POP3ExceptionMessage.APPEND_MSGS_DENIED_MSG, CATEGORY_ERROR, 2058),
     /**
      * POP3 does not support draft messages.
      */

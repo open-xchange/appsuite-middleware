@@ -205,8 +205,12 @@ public abstract class AbstractRMITest extends AbstractTest {
         return (OXResourceInterface) Naming.lookup(getRMIHostUrl() + OXResourceInterface.RMI_NAME);
     }
 
-    public OXUserCopyInterface getUserMoveClient() throws MalformedURLException, RemoteException, NotBoundException {
+    public OXUserCopyInterface getUserCopyClient() throws MalformedURLException, RemoteException, NotBoundException {
         return (OXUserCopyInterface) Naming.lookup(getRMIHostUrl() + OXUserCopyInterface.RMI_NAME);
+    }
+
+    public OXUtilInterface getUtilInterface() throws MalformedURLException, RemoteException, NotBoundException {
+        return (OXUtilInterface) Naming.lookup(getRMIHostUrl() + OXUtilInterface.RMI_NAME);
     }
 
     /**

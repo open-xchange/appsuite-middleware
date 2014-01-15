@@ -166,6 +166,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
 
     @Override
     public void clear() {
+        final InheritedPriorityBlockingQueue availableQueue = this.availableQueue;
         if (null == availableQueue) {
             return;
         }
@@ -175,6 +176,14 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         }
     }
     
+    /* (non-Javadoc)
+     * @see com.openexchange.imap.storecache.IMAPStoreContainer#hasElapsed(long)
+     */
+    @Override
+    public boolean hasElapsed(long millis) {
+        return availableQueue.hasElapsed(millis);
+    }
+
     /* (non-Javadoc)
      * @see com.openexchange.imap.storecache.IMAPStoreContainer#hasElapsed(long)
      */
@@ -202,6 +211,17 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
             notEmpty = lock.newCondition();
         }
         
+        public boolean hasElapsed(long millis) {
+            final ReentrantLock lock = this.lock;
+            lock.lock();
+            try {
+                final IMAPStoreWrapper e = q.peek();
+                return (null != e && e.lastAccessed < millis);
+            } finally {
+                lock.unlock();
+            }
+        }
+
         public boolean hasElapsed(long millis) {
             final ReentrantLock lock = this.lock;
             lock.lock();

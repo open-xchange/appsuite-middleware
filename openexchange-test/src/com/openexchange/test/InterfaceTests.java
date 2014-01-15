@@ -119,6 +119,7 @@ public final class InterfaceTests {
         tests.addTestSuite(com.openexchange.ajax.contact.AdvancedSearchTest.class);
         tests.addTestSuite(com.openexchange.ajax.tokenloginV2.TokenLoginV2Test.class);
         tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.oauth.OAuthTests.class));
+        tests.addTestSuite(com.openexchange.test.resourcecache.ResourceCacheTest.class);
         return tests;
     }
 }

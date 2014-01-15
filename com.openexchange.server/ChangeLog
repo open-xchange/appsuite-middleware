@@ -1,3 +1,11 @@
+* 2014-01-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30643: Don't conflict with same folder on duplicate check
+
+* 2014-01-15 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30384: Don't trigger unnecessary events, don't spawn new threads for checking idle time in IMAP store containers
+
 * 2014-01-14 - marcus.klein@open-xchange.com
 
  - Fix for bug 30634: Fixed broken update task. Removed local variable to ensure the method for the DatabaseService is used.

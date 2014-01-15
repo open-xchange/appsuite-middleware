@@ -47,25 +47,53 @@
  *
  */
 
-package com.openexchange.passwordchange.servlet;
+package com.openexchange.test.resourcecache.actions;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.io.IOException;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.ParseException;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+
 
 /**
- * {@link PasswordChangeServletExceptionMessage}
+ * {@link DownloadResponseParser}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class PasswordChangeServletExceptionMessage implements LocalizableStrings {
+public class DownloadResponseParser extends AbstractAJAXParser<DownloadResponse> {
 
-    /**
-     * Initializes a new {@link PasswordChangeServletExceptionMessage}.
-     */
-    private PasswordChangeServletExceptionMessage() {
-        super();
+    private byte[] downloaderBytes = null;
+
+    protected DownloadResponseParser(boolean failOnError) {
+        super(failOnError);
     }
 
-    public static final String PW_CHANGE_SUCCEEDED_MSG = "Password changed successfully. Please logout and login back again.";
+    @Override
+    public String checkResponse(HttpResponse resp) throws ParseException ,IOException {
+        assertEquals("Response code is not okay.", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
+        HttpEntity entity = resp.getEntity();
+        if (entity.getContentType().getValue().startsWith("text/javascript")) {
+            EntityUtils.consume(entity);
+            return null;
+        }
 
-    public static final String PW_CHANGE_ERROR_MSG = "Password was not changed.";
+        downloaderBytes = EntityUtils.toByteArray(entity);
+        return null;
+    }
+
+    @Override
+    protected DownloadResponse createResponse(Response response) throws JSONException {
+        return null;
+    }
+
+    @Override
+    public DownloadResponse parse(String body) throws JSONException {
+        return new DownloadResponse(downloaderBytes);
+    }
+
 }

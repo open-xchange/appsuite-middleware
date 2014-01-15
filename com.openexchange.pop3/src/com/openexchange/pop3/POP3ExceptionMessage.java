@@ -78,10 +78,6 @@ public class POP3ExceptionMessage implements LocalizableStrings {
      */
     public final static String NO_ACCESS_MSG = "You do not have the appropriate permissions to access the mail folder %1$s";
     /**
-     * No lookup access to mail folder %1$s
-     */
-    public final static String NO_LOOKUP_ACCESS_MSG = "You do not have the appropriate permissions to lookup mail folder %1$s";
-    /**
      * No read access on mail folder %1$s
      */
     public final static String NO_READ_ACCESS_MSG = "You do not have the appropriate permissions to read mail folder %1$s";
@@ -104,7 +100,7 @@ public class POP3ExceptionMessage implements LocalizableStrings {
     /**
      * No keep-seen access on mail folder %1$s
      */
-    public final static String NO_KEEP_SEEN_ACCESS_MSG = "You do not have the appropriate permissions to keep seen messages in mail folder %1$s";
+    public final static String NO_KEEP_SEEN_ACCESS_MSG = "You do not have the appropriate permissions for a Read/Unread access in the mail folder %1$s";
     /**
      * Folder %1$s does not allow subfolders.
      */
@@ -169,7 +165,7 @@ public class POP3ExceptionMessage implements LocalizableStrings {
     /**
      * Unknown search field: %1$s
      */
-    public final static String UNKNOWN_SEARCH_FIELD_MSG = "The suppied search field \"%1$s\" is unknown.";
+    public final static String UNKNOWN_SEARCH_FIELD_MSG = "The supplied search field \"%1$s\" is unknown.";
     /**
      * Mail folder %1$s must not be moved to subsequent folder %2$s
      */
@@ -251,10 +247,6 @@ public class POP3ExceptionMessage implements LocalizableStrings {
      * POP3 does not support to copy messages.
      */
     public final static String COPY_MSGS_DENIED_MSG = "Copying messages is not supported by the server.";
-    /**
-     * POP3 does not support to append messages.
-     */
-    public final static String APPEND_MSGS_DENIED_MSG = "Appending to messages is not supported by the server.";
     /**
      * POP3 does not support draft messages.
      */

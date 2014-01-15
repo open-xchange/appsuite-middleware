@@ -47,25 +47,48 @@
  *
  */
 
-package com.openexchange.passwordchange.servlet;
+package com.openexchange.test.resourcecache.actions;
 
-import com.openexchange.i18n.LocalizableStrings;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+
 
 /**
- * {@link PasswordChangeServletExceptionMessage}
+ * {@link DeleteRequest}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class PasswordChangeServletExceptionMessage implements LocalizableStrings {
+public class DeleteRequest extends AbstractResourceCacheRequest<DeleteResponse> {
 
-    /**
-     * Initializes a new {@link PasswordChangeServletExceptionMessage}.
-     */
-    private PasswordChangeServletExceptionMessage() {
-        super();
+    private final String id;
+
+    public DeleteRequest() {
+        this(null);
     }
 
-    public static final String PW_CHANGE_SUCCEEDED_MSG = "Password changed successfully. Please logout and login back again.";
+    public DeleteRequest(String id) {
+        super("delete");
+        this.id = id;
+    }
 
-    public static final String PW_CHANGE_ERROR_MSG = "Password was not changed.";
+    @Override
+    protected Parameter[] getAdditionalParameters() {
+        if (id == null) {
+            return super.getAdditionalParameters();
+        }
+
+        return new Parameter[] { new URLParameter("id", id) };
+    }
+
+    @Override
+    public AbstractAJAXParser<DeleteResponse> getParser() {
+        return new AbstractAJAXParser<DeleteResponse>(true) {
+            @Override
+            protected DeleteResponse createResponse(Response response) throws JSONException {
+                return new DeleteResponse(response);
+            }
+        };
+    }
+
 }

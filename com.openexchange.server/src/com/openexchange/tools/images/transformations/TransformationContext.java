@@ -47,25 +47,24 @@
  *
  */
 
-package com.openexchange.passwordchange.servlet;
+package com.openexchange.tools.images.transformations;
 
-import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link PasswordChangeServletExceptionMessage}
+ * {@link TransformationContext}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class PasswordChangeServletExceptionMessage implements LocalizableStrings {
+public class TransformationContext {
 
-    /**
-     * Initializes a new {@link PasswordChangeServletExceptionMessage}.
-     */
-    private PasswordChangeServletExceptionMessage() {
-        super();
+    private int expenses = 0;
+
+    public void addExpense(int expense) {
+        expenses += expense;
     }
 
-    public static final String PW_CHANGE_SUCCEEDED_MSG = "Password changed successfully. Please logout and login back again.";
+    public int getExpenses() {
+        return expenses;
+    }
 
-    public static final String PW_CHANGE_ERROR_MSG = "Password was not changed.";
 }

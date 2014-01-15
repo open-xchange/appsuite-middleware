@@ -47,25 +47,55 @@
  *
  */
 
-package com.openexchange.passwordchange.servlet;
+package com.openexchange.test.resourcecache.actions;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.ajax.framework.Header;
+import com.openexchange.ajax.framework.Header.SimpleHeader;
+
 
 /**
- * {@link PasswordChangeServletExceptionMessage}
+ * {@link UploadRequest}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class PasswordChangeServletExceptionMessage implements LocalizableStrings {
+public class UploadRequest extends AbstractResourceCacheRequest<UploadResponse> {
 
-    /**
-     * Initializes a new {@link PasswordChangeServletExceptionMessage}.
-     */
-    private PasswordChangeServletExceptionMessage() {
-        super();
+    private final List<FileParameter> files = new ArrayList<FileParameter>();
+
+    public UploadRequest() {
+        super("upload");
     }
 
-    public static final String PW_CHANGE_SUCCEEDED_MSG = "Password changed successfully. Please logout and login back again.";
+    public void addFile(String fileName, String mimeType, InputStream is) {
+        files.add(new FileParameter("resource_" + files.size(), fileName, is, mimeType));
+    }
 
-    public static final String PW_CHANGE_ERROR_MSG = "Password was not changed.";
+    @Override
+    public Method getMethod() {
+        return Method.POST;
+    }
+
+    @Override
+    public Parameter[] getAdditionalParameters() {
+        Parameter[] params = new Parameter[files.size()];
+        for (int i = 0; i < files.size(); i++) {
+            params[i] = files.get(i);
+        }
+
+        return params;
+    }
+
+    @Override
+    public UploadResponseParser getParser() {
+        return new UploadResponseParser(true);
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return new Header[] { new SimpleHeader("Content-Type", "multipart/form-data") };
+    }
+
 }

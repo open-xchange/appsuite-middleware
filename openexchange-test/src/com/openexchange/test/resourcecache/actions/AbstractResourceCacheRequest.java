@@ -47,25 +47,71 @@
  *
  */
 
-package com.openexchange.passwordchange.servlet;
+package com.openexchange.test.resourcecache.actions;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import org.json.JSONException;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
+
 
 /**
- * {@link PasswordChangeServletExceptionMessage}
+ * {@link AbstractResourceCacheRequest}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class PasswordChangeServletExceptionMessage implements LocalizableStrings {
+public abstract class AbstractResourceCacheRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
-    /**
-     * Initializes a new {@link PasswordChangeServletExceptionMessage}.
-     */
-    private PasswordChangeServletExceptionMessage() {
+    private final String action;
+
+    protected String cacheType = null;
+
+    public AbstractResourceCacheRequest(String action) {
         super();
+        this.action = action;
     }
 
-    public static final String PW_CHANGE_SUCCEEDED_MSG = "Password changed successfully. Please logout and login back again.";
+    public void setCacheType(String cacheType) {
+        this.cacheType = cacheType;
+    }
 
-    public static final String PW_CHANGE_ERROR_MSG = "Password was not changed.";
+    @Override
+    public Method getMethod() {
+        return Method.GET;
+    }
+
+    @Override
+    public String getServletPath() {
+        return "/ajax/resourcecachetest";
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
+    }
+
+    @Override
+    public Parameter[] getParameters() throws IOException, JSONException {
+        List<Parameter> params = new ArrayList<Parameter>(Arrays.asList(getAdditionalParameters()));
+        params.add(new URLParameter("action", action));
+        if (cacheType != null) {
+            params.add(new URLParameter("cacheType", cacheType));
+        }
+
+        return params.toArray(new Parameter[params.size()]);
+    }
+
+    protected Parameter[] getAdditionalParameters() {
+        return new Parameter[0];
+    }
+
 }

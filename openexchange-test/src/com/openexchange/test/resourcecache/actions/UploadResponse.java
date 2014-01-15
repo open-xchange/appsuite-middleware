@@ -47,25 +47,38 @@
  *
  */
 
-package com.openexchange.passwordchange.servlet;
+package com.openexchange.test.resourcecache.actions;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.writer.ResponseWriter;
+
 
 /**
- * {@link PasswordChangeServletExceptionMessage}
+ * {@link UploadResponse}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class PasswordChangeServletExceptionMessage implements LocalizableStrings {
+public class UploadResponse extends AbstractAJAXResponse {
 
-    /**
-     * Initializes a new {@link PasswordChangeServletExceptionMessage}.
-     */
-    private PasswordChangeServletExceptionMessage() {
-        super();
+    protected UploadResponse(Response response) {
+        super(response);
     }
 
-    public static final String PW_CHANGE_SUCCEEDED_MSG = "Password changed successfully. Please logout and login back again.";
+    public List<String> getIds() throws JSONException {
+        List<String> ids = new ArrayList<String>();
+        JSONObject json = ResponseWriter.getJSON(getResponse());
+        JSONArray jsonIds = json.getJSONArray("data");
+        for (int i = 0; i < jsonIds.length(); i++) {
+            ids.add(jsonIds.getString(i));
+        }
 
-    public static final String PW_CHANGE_ERROR_MSG = "Password was not changed.";
+        return ids;
+    }
+
 }

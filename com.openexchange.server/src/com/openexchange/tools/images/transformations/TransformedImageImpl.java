@@ -64,15 +64,18 @@ public class TransformedImageImpl implements TransformedImage {
     private final String formatName;
     private final byte[] imageData;
     private final byte[] md5;
+    private final int transformationExpenses;
 
-    public TransformedImageImpl(int width, int height, long size, String formatName, byte[] imageData, byte[] md5) {
+    public TransformedImageImpl(int width, int height, long size, String formatName, byte[] imageData, byte[] md5, final int transformationExpenses) {
         super();
         this.width = width;
         this.height = height;
         this.size = size;
         this.formatName = formatName;
         this.imageData = imageData;
-        this.md5 = md5;    }
+        this.md5 = md5;
+        this.transformationExpenses = transformationExpenses;
+    }
 
     @Override
     public int getWidth() {
@@ -102,6 +105,11 @@ public class TransformedImageImpl implements TransformedImage {
     @Override
     public byte[] getMD5() {
         return md5;
+    }
+
+    @Override
+    public int getTransformationExpenses() {
+        return transformationExpenses;
     }
 
     @Override

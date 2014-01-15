@@ -175,7 +175,7 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Unable to create exception, recurring position (%d) can not be calculated.
      */
-    UNABLE_TO_CALCULATE_RECURRING_POSITION(OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_RECURRING_POSITION_MSG, OXCalendarExceptionMessage.UNABLE_TO_CALCULATE_RECURRING_POSITION_DISPLAY, 29, Category.CATEGORY_USER_INPUT),
+    UNABLE_TO_CALCULATE_RECURRING_POSITION(OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_RECURRING_POSITION_MSG, 29, Category.CATEGORY_USER_INPUT),
     /**
      * Got an UserParticipant object with an identifier < 1 Identifier:Folder_Type = %d:%d
      */

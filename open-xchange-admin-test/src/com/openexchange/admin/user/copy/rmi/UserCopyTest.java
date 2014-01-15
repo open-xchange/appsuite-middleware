@@ -66,18 +66,20 @@ public class UserCopyTest extends AbstractRMITest {
 
     @Test
     public final void testMoveUser() throws Throwable {
-        final OXUserCopyInterface oxu = getUserMoveClient();
+        final OXUserCopyInterface oxu = getUserCopyClient();
         final User user = new User(1);
         final Context src = new Context(I(getRandomContextId()));
         final Context dest = new Context(I(getRandomContextId()));
-        oxu.copyUser(user, src, dest, DummyMasterCredentials());
+        final Credentials auth = new Credentials(OXADMINMASTER, MASTER_PW);
+        oxu.copyUser(user, src, dest, auth);
     }
 
     @Test
     public final void testMoveUserNoUser() throws Throwable {
-        final OXUserCopyInterface oxu = getUserMoveClient();
+        final OXUserCopyInterface oxu = getUserCopyClient();
         final Context src = new Context(I(getRandomContextId()));
         final Context dest = new Context(I(getRandomContextId()));
+        final Credentials auth = new Credentials(OXADMINMASTER, MASTER_PW);
         try {
             oxu.copyUser(null, src, dest, DummyMasterCredentials());
             Assert.fail("No error message thrown");
@@ -88,10 +90,11 @@ public class UserCopyTest extends AbstractRMITest {
 
     @Test
     public final void testMoveUserNoUserId() throws Throwable {
-        final OXUserCopyInterface oxu = getUserMoveClient();
+        final OXUserCopyInterface oxu = getUserCopyClient();
         final User user = new User();
         final Context src = new Context(I(getRandomContextId()));
         final Context dest = new Context(I(getRandomContextId()));
+        final Credentials auth = new Credentials(OXADMINMASTER, MASTER_PW);
         try {
             oxu.copyUser(user, src, dest, DummyMasterCredentials());
             Assert.fail("No error message thrown");
@@ -102,10 +105,11 @@ public class UserCopyTest extends AbstractRMITest {
 
     @Test
     public final void testMoveUserNoSrcContext() throws Throwable {
-        final OXUserCopyInterface oxu = getUserMoveClient();
+        final OXUserCopyInterface oxu = getUserCopyClient();
         final User user = new User(1);
         final Context src = null;
         final Context dest = new Context(I(getRandomContextId()));
+        final Credentials auth = new Credentials(OXADMINMASTER, MASTER_PW);
         try {
             oxu.copyUser(user, src, dest, DummyMasterCredentials());
             Assert.fail("No error message thrown");
@@ -116,10 +120,11 @@ public class UserCopyTest extends AbstractRMITest {
 
     @Test
     public final void testMoveUserNoSrcContextId() throws Throwable {
-        final OXUserCopyInterface oxu = getUserMoveClient();
+        final OXUserCopyInterface oxu = getUserCopyClient();
         final User user = new User(1);
         final Context src = new Context();
         final Context dest = new Context(I(getRandomContextId()));
+        final Credentials auth = new Credentials(OXADMINMASTER, MASTER_PW);
         try {
             oxu.copyUser(user, src, dest, DummyMasterCredentials());
             Assert.fail("No error message thrown");
@@ -130,10 +135,11 @@ public class UserCopyTest extends AbstractRMITest {
 
     @Test
     public final void testMoveUserNoDestContext() throws Throwable {
-        final OXUserCopyInterface oxu = getUserMoveClient();
+        final OXUserCopyInterface oxu = getUserCopyClient();
         final User user = new User(1);
         final Context src = new Context(I(getRandomContextId()));
         final Context dest = null;
+        final Credentials auth = new Credentials(OXADMINMASTER, MASTER_PW);
         try {
             oxu.copyUser(user, src, dest, DummyMasterCredentials());
             Assert.fail("No error message thrown");
@@ -144,10 +150,11 @@ public class UserCopyTest extends AbstractRMITest {
 
     @Test
     public final void testMoveUserNoDestContextId() throws Throwable {
-        final OXUserCopyInterface oxu = getUserMoveClient();
+        final OXUserCopyInterface oxu = getUserCopyClient();
         final User user = new User(1);
         final Context src = new Context(I(getRandomContextId()));
         final Context dest = new Context();
+        final Credentials auth = new Credentials(OXADMINMASTER, MASTER_PW);
         try {
             oxu.copyUser(user, src, dest, DummyMasterCredentials());
             Assert.fail("No error message thrown");

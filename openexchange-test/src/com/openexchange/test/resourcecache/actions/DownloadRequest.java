@@ -47,25 +47,35 @@
  *
  */
 
-package com.openexchange.passwordchange.servlet;
+package com.openexchange.test.resourcecache.actions;
 
-import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link PasswordChangeServletExceptionMessage}
+ * {@link DownloadRequest}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class PasswordChangeServletExceptionMessage implements LocalizableStrings {
+public class DownloadRequest extends AbstractResourceCacheRequest<DownloadResponse> {
 
-    /**
-     * Initializes a new {@link PasswordChangeServletExceptionMessage}.
-     */
-    private PasswordChangeServletExceptionMessage() {
-        super();
+    private final String id;
+
+    public DownloadRequest(String id) {
+        super("download");
+        this.id = id;
     }
 
-    public static final String PW_CHANGE_SUCCEEDED_MSG = "Password changed successfully. Please logout and login back again.";
+    @Override
+    protected com.openexchange.ajax.framework.AJAXRequest.Parameter[] getAdditionalParameters() {
+        return new Parameter[] {
+            new URLParameter("delivery", "download"),
+            new URLParameter("id", id)
+        };
+    }
 
-    public static final String PW_CHANGE_ERROR_MSG = "Password was not changed.";
+    @Override
+    public DownloadResponseParser getParser() {
+        return new DownloadResponseParser(true);
+    }
+
 }

@@ -47,25 +47,27 @@
  *
  */
 
-package com.openexchange.passwordchange.servlet;
+package com.openexchange.test.resourcecache.actions;
 
-import com.openexchange.i18n.LocalizableStrings;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+
 
 /**
- * {@link PasswordChangeServletExceptionMessage}
+ * {@link UploadResponseParser}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class PasswordChangeServletExceptionMessage implements LocalizableStrings {
+public class UploadResponseParser extends AbstractAJAXParser<UploadResponse> {
 
-    /**
-     * Initializes a new {@link PasswordChangeServletExceptionMessage}.
-     */
-    private PasswordChangeServletExceptionMessage() {
-        super();
+    protected UploadResponseParser(boolean failOnError) {
+        super(failOnError);
     }
 
-    public static final String PW_CHANGE_SUCCEEDED_MSG = "Password changed successfully. Please logout and login back again.";
+    @Override
+    protected UploadResponse createResponse(Response response) throws JSONException {
+        return new UploadResponse(response);
+    }
 
-    public static final String PW_CHANGE_ERROR_MSG = "Password was not changed.";
 }

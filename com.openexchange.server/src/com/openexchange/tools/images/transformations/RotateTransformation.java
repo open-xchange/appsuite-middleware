@@ -54,6 +54,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.impl.ImageInformation;
 
 /**
@@ -70,7 +71,7 @@ public class RotateTransformation implements ImageTransformation {
     }
 
     @Override
-    public BufferedImage perform(BufferedImage sourceImage, ImageInformation imageInformation) throws IOException {
+    public BufferedImage perform(BufferedImage sourceImage, TransformationContext transformationContext, ImageInformation imageInformation) throws IOException {
         if (null == imageInformation) {
             LOG.debug("No image information available, unable to rotate image");
             return sourceImage;
@@ -94,6 +95,7 @@ public class RotateTransformation implements ImageTransformation {
         g.setBackground(Color.WHITE);
         g.clearRect(0, 0, destinationImage.getWidth(), destinationImage.getHeight());
         g.drawImage(sourceImage, exifTransformation, null);
+        transformationContext.addExpense(ImageTransformations.LOW_EXPENSE);
         return destinationImage;
     }
 
