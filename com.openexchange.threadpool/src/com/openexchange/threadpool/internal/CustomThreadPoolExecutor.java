@@ -89,6 +89,7 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.TaskWrapper;
 import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.threadpool.Trackable;
 import com.openexchange.threadpool.osgi.ThreadPoolServiceRegistry;
@@ -320,6 +321,13 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     private final AtomicInteger activeCount = new AtomicInteger();
 
     /**
+     * The threshold indicating when a pool size should be considered to hold too many threads.
+     * <p>
+     * If pool size exceeds that threshold, idle workers will be closed immediately regardless of keep-alive time.
+     */
+    private final int keepAliveThreshold;
+
+    /**
      * Timeout in nanoseconds for idle threads waiting for work. Threads use this timeout only when there are more than corePoolSize
      * present. Otherwise they wait forever for new work.
      */
@@ -425,6 +433,20 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         final Worker w = new Worker(firstTask);
         final Thread t = threadFactory.newThread(w);
         if (null != t) {
+            // Log spawning of a new thread
+            if (null != firstTask) {
+                final Object task;
+                if (firstTask instanceof CustomFutureTask) {
+                    final Task<?> tsk = ((CustomFutureTask<?>) firstTask).getTask();
+                    task = tsk instanceof TaskWrapper ? ((TaskWrapper) tsk).getWrapped() : tsk;
+                } else if (firstTask instanceof ScheduledFutureTask) {
+                    task = ((ScheduledFutureTask<?>) firstTask).getWrapped();
+                } else {
+                    task = firstTask;
+                }
+                LOG.debug(new StringBuilder("Spawned new thread for ").append(task.getClass().getName()), new Throwable("Thread-Creation-Watcher"));
+            }
+            // Continue initialization worker
             w.thread = t;
             workers.put(w, PRESENT);
             final int nt = ++poolSize;
@@ -511,9 +533,11 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                      */
                     return workQueue.take();
                 }
-
+                /*
+                 * Check whether to immediately release worker
+                 */
                 final long timeout = keepAliveTime;
-                if (timeout <= 0) {
+                if ((timeout <= 0) || ((keepAliveThreshold > 0) && (poolSize > keepAliveThreshold))) {
                     return null;
                 }
                 /*
@@ -848,10 +872,16 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         private final long period;
 
         /**
+         * The task being executed.
+         */
+        private final Object task;
+
+        /**
          * Creates a one-shot action with given nanoTime-based trigger time
          */
         ScheduledFutureTask(final Runnable r, final V result, final long ns) {
             super(r, result);
+            this.task = r;
             this.time = ns;
             this.period = 0;
             this.sequenceNumber = getSequencer().getAndIncrement();
@@ -862,6 +892,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
          */
         ScheduledFutureTask(final Runnable r, final V result, final long ns, final long period) {
             super(r, result);
+            this.task = r;
             this.time = ns;
             this.period = period;
             this.sequenceNumber = getSequencer().getAndIncrement();
@@ -872,9 +903,19 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
          */
         ScheduledFutureTask(final Callable<V> callable, final long ns) {
             super(callable);
+            this.task = callable;
             this.time = ns;
             this.period = 0;
             this.sequenceNumber = getSequencer().getAndIncrement();
+        }
+
+        /**
+         * Gets the actual task instance
+         *
+         * @return The actual task instance
+         */
+        public Object getWrapped() {
+            return task;
         }
 
         @Override
@@ -1275,7 +1316,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                                     appendStackTrace(thread.getStackTrace(), logBuilder);
                                     LOG.info(logBuilder);
                                 } else {
-                                    final Throwable t = new Throwable();
+                                    final Throwable t = new FastThrowable();
                                     t.setStackTrace(thread.getStackTrace());
                                     LOG.info(logBuilder, t);
                                 }
@@ -1340,6 +1381,18 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         }
     }
 
+    private static final class FastThrowable extends Throwable {
+
+        FastThrowable() {
+            super();
+        }
+
+        @Override
+        public synchronized Throwable fillInStackTrace() {
+            return this;
+        }
+    }
+
     // Public methods
 
     /**
@@ -1348,6 +1401,8 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      *
      * @param corePoolSize the number of threads to keep in the pool, even if they are idle.
      * @param maximumPoolSize the maximum number of threads to allow in the pool.
+     * @param keepAliveThreshold The threshold indicating when a pool size should be considered as too many threads. If pool size exceeds that
+     *            threshold, idle workers will be closed immediately regardless of keep-alive time.
      * @param keepAliveTime when the number of threads is greater than the core, this is the maximum time that excess idle threads will wait
      *            for new tasks before terminating.
      * @param unit the time unit for the keepAliveTime argument.
@@ -1357,8 +1412,8 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      *             or if corePoolSize greater than maximumPoolSize.
      * @throws NullPointerException if <tt>workQueue</tt> is <code>null</code>
      */
-    public CustomThreadPoolExecutor(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final TimeUnit unit, final BlockingQueue<Runnable> workQueue) {
-        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, false, Executors.defaultThreadFactory(), DEFAULT_HANDLER);
+    public CustomThreadPoolExecutor(final int corePoolSize, final int maximumPoolSize, final int keepAliveThreshold, final long keepAliveTime, final TimeUnit unit, final BlockingQueue<Runnable> workQueue) {
+        this(corePoolSize, maximumPoolSize, keepAliveThreshold, keepAliveTime, unit, workQueue, false, Executors.defaultThreadFactory(), DEFAULT_HANDLER);
     }
 
     /**
@@ -1366,6 +1421,8 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      *
      * @param corePoolSize the number of threads to keep in the pool, even if they are idle.
      * @param maximumPoolSize the maximum number of threads to allow in the pool.
+     * @param keepAliveThreshold The threshold indicating when a pool size should be considered as too many threads. If pool size exceeds that
+     *            threshold, idle workers will be closed immediately regardless of keep-alive time.
      * @param keepAliveTime when the number of threads is greater than the core, this is the maximum time that excess idle threads will wait
      *            for new tasks before terminating.
      * @param unit the time unit for the keepAliveTime argument.
@@ -1376,8 +1433,8 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      *             or if corePoolSize greater than maximumPoolSize.
      * @throws NullPointerException if <tt>workQueue</tt> or <tt>threadFactory</tt> are <code>null</code>.
      */
-    public CustomThreadPoolExecutor(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final TimeUnit unit, final BlockingQueue<Runnable> workQueue, final ThreadFactory threadFactory) {
-        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, false, threadFactory, DEFAULT_HANDLER);
+    public CustomThreadPoolExecutor(final int corePoolSize, final int maximumPoolSize, final int keepAliveThreshold, final long keepAliveTime, final TimeUnit unit, final BlockingQueue<Runnable> workQueue, final ThreadFactory threadFactory) {
+        this(corePoolSize, maximumPoolSize, keepAliveThreshold, keepAliveTime, unit, workQueue, false, threadFactory, DEFAULT_HANDLER);
     }
 
     /**
@@ -1385,6 +1442,8 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      *
      * @param corePoolSize the number of threads to keep in the pool, even if they are idle.
      * @param maximumPoolSize the maximum number of threads to allow in the pool.
+     * @param keepAliveThreshold The threshold indicating when a pool size should be considered as too many threads. If pool size exceeds that
+     *            threshold, idle workers will be closed immediately regardless of keep-alive time.
      * @param keepAliveTime when the number of threads is greater than the core, this is the maximum time that excess idle threads will wait
      *            for new tasks before terminating.
      * @param unit the time unit for the keepAliveTime argument.
@@ -1395,8 +1454,8 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      *             or if corePoolSize greater than maximumPoolSize.
      * @throws NullPointerException if <tt>workQueue</tt> or <tt>handler</tt> are <code>null</code>.
      */
-    public CustomThreadPoolExecutor(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final TimeUnit unit, final BlockingQueue<Runnable> workQueue, final RejectedExecutionHandler handler) {
-        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, false, Executors.defaultThreadFactory(), handler);
+    public CustomThreadPoolExecutor(final int corePoolSize, final int maximumPoolSize, final int keepAliveThreshold, final long keepAliveTime, final TimeUnit unit, final BlockingQueue<Runnable> workQueue, final RejectedExecutionHandler handler) {
+        this(corePoolSize, maximumPoolSize, keepAliveThreshold, keepAliveTime, unit, workQueue, false, Executors.defaultThreadFactory(), handler);
     }
 
     /**
@@ -1404,6 +1463,8 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      *
      * @param corePoolSize the number of threads to keep in the pool, even if they are idle.
      * @param maximumPoolSize the maximum number of threads to allow in the pool.
+     * @param keepAliveThreshold The threshold indicating when a pool size should be considered as too many threads. If pool size exceeds that
+     *            threshold, idle workers will be closed immediately regardless of keep-alive time.
      * @param keepAliveTime when the number of threads is greater than the core, this is the maximum time that excess idle threads will wait
      *            for new tasks before terminating.
      * @param unit the time unit for the keepAliveTime argument.
@@ -1418,7 +1479,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      *             or if corePoolSize greater than maximumPoolSize.
      * @throws NullPointerException if <tt>workQueue</tt> or <tt>threadFactory</tt> or <tt>handler</tt> are <code>null</code>.
      */
-    public CustomThreadPoolExecutor(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final TimeUnit unit, final BlockingQueue<Runnable> workQueue, final boolean blocking, final ThreadFactory threadFactory, final RejectedExecutionHandler handler) {
+    public CustomThreadPoolExecutor(final int corePoolSize, final int maximumPoolSize, final int keepAliveThreshold, final long keepAliveTime, final TimeUnit unit, final BlockingQueue<Runnable> workQueue, final boolean blocking, final ThreadFactory threadFactory, final RejectedExecutionHandler handler) {
         super(0, 1, 0L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(1));
         if ((corePoolSize < 0) || (maximumPoolSize <= 0) || (maximumPoolSize < corePoolSize) || (keepAliveTime < 0)) {
             throw new IllegalArgumentException();
@@ -1451,6 +1512,10 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
          * Monitor threads
          */
         monitorThreads = false;
+        /*
+         * Set threshold
+         */
+        this.keepAliveThreshold = keepAliveThreshold <= 0 ? 0 : (keepAliveThreshold > maximumPoolSize ? 0 : keepAliveThreshold);
     }
 
     /**

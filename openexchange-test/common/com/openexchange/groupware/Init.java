@@ -406,7 +406,7 @@ public final class Init {
     }
 
     /**
-     * 
+     *
      */
     private static void startAndInjectCapabilitiesServices() {
         AbstractCapabilityService c = new AbstractCapabilityService(new ServiceLookup() {
@@ -433,7 +433,7 @@ public final class Init {
     }
 
     /**
-     * 
+     *
      */
     private static void startAndInjectFullPrimaryKeySupportService() {
         FullPrimaryKeySupportImpl s = new FullPrimaryKeySupportImpl(null);
@@ -464,6 +464,7 @@ public final class Init {
                 ThreadPoolServiceImpl.newInstance(
                     props.getCorePoolSize(),
                     props.getMaximumPoolSize(),
+                    props.getKeepAliveThreshold(),
                     props.getKeepAliveTime(),
                     props.getWorkQueue(),
                     props.getWorkQueueSize(),

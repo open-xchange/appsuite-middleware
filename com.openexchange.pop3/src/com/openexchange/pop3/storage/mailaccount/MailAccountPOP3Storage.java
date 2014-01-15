@@ -57,7 +57,9 @@ import java.lang.reflect.Field;
 import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -551,6 +553,11 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 Database.back(cid, true, con);
             }
         }
+        // Acquire DB lock
+        if (false == acquireLock(session)) {
+            // Another thread is already in process.
+            return;
+        }
         // Start sync process
         POP3Store pop3Store = null;
         try {
@@ -684,6 +691,95 @@ public class MailAccountPOP3Storage implements POP3Storage {
             } catch (final MessagingException e) {
                 LOG.error(e.getMessage(), e);
             }
+            releaseLock(session);
+        }
+    }
+
+    private boolean acquireLock(final Session session) throws OXException {
+        // Acquire DB lock
+        final int cid = session.getContextId();
+        final Connection con = Database.get(cid, true);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            final int user = session.getUserId();
+            final int accountId = pop3Access.getAccountId();
+            int pos = 1;
+            stmt = con.prepareStatement("SELECT 1 FROM user_mail_account_properties WHERE id=? AND cid=? AND user=? AND name=?");
+            stmt.setInt(pos++, accountId);
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, user);
+            stmt.setString(pos++, "pop3.lock");
+            rs = stmt.executeQuery();
+            final boolean update = rs.next();
+            closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+            pos = 1;
+            // Either INSERT or UPDATE
+            if (update) {
+                stmt = con.prepareStatement("UPDATE user_mail_account_properties SET value=? WHERE id=? AND cid=? AND user=? AND name=? AND value=?");
+                stmt.setString(pos++, "1");
+                stmt.setInt(pos++, accountId);
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, user);
+                stmt.setString(pos++, "pop3.lock");
+                stmt.setString(pos++, "0");
+                final int result = stmt.executeUpdate();
+                if (result <= 0) {
+                    // Another thread is already in process.
+                    return false;
+                }
+            } else {
+                stmt = con.prepareStatement("INSERT INTO user_mail_account_properties (id,cid,user,name,value) VALUES (?,?,?,?,?)");
+                stmt.setInt(pos++, accountId);
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, user);
+                stmt.setString(pos++, "pop3.lock");
+                stmt.setString(pos++, "1");
+                // Uniquely INSERT
+                try {
+                    final int result = stmt.executeUpdate();
+                    if (result <= 0) {
+                        // Another thread is already in process.
+                        return false;
+                    }
+                } catch (final SQLException e) {
+                    // INSERT failed. Another thread is already in process.
+                    return false;
+                }
+            }
+            // Locked...
+            return true;
+        } catch (final SQLException e) {
+            // Concurrency check failed
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+            Database.back(cid, true, con);
+        }
+    }
+
+    private void releaseLock(final Session session) throws OXException {
+        // Release DB lock
+        final int cid = session.getContextId();
+        final Connection con = Database.get(cid, true);
+        PreparedStatement stmt = null;
+        try {
+            int pos = 1;
+            stmt = con.prepareStatement("UPDATE user_mail_account_properties SET value=? WHERE id=? AND cid=? AND user=? AND name=?");
+            stmt.setString(pos++, "0");
+            stmt.setInt(pos++, pop3Access.getAccountId());
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, session.getUserId());
+            stmt.setString(pos++, "pop3.lock");
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            // Concurrency check failed
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(null, stmt);
+            Database.back(cid, true, con);
         }
     }
 
@@ -770,69 +866,95 @@ public class MailAccountPOP3Storage implements POP3Storage {
     };
 
     private void doBatchAppendWithFallback(final POP3Folder inbox, final Message[] msgs, final TIntObjectMap<String> seqnum2uidl) throws OXException {
-        /*
-         * Fetch ENVELOPE for new messages
-         */
-        try {
-            final long start = System.currentTimeMillis();
-            inbox.fetch(msgs, FETCH_PROFILE_ENVELOPE);
-            MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-        } catch (final MessagingException e) {
-            // Try one-by-one loading
-            LOG.debug("Batch retrieval of POP3 messages failed. Retry with one-by-one loading.", e);
-            for (int i = 0; i < msgs.length; i++) {
-                final int msgno = msgs[i].getMessageNumber();
-                try {
-                    msgs[i] = inbox.getMessage(msgno);
-                } catch (final MessagingException inner) {
-                    LOG.warn("Retrieval of POP3 message " + msgno + " failed.", inner);
-                    msgs[i] = null;
-                }
-            }
-        }
-        /*
-         * Append them to storage
-         */
-        final List<MailMessage> toAppend = new ArrayList<MailMessage>(msgs.length);
-        for (int i = 0; i < msgs.length; i++) {
-            final Message message = msgs[i];
-            if (null != message) {
-                try {
-                    final MailMessage mm = MimeMessageConverter.convertMessage((MimeMessage) message, false);
-                    mm.setMailId(seqnum2uidl.get(message.getMessageNumber()));
-                    toAppend.add(mm);
-                } catch (final Exception e) {
-                    LOG.warn("POP3 message #" + message.getMessageNumber() + " could not be fetched from POP3 server.", e);
-                }
-            }
-        }
-        /*
-         * First try batch append operation
-         */
         final MailAccountPOP3MessageStorage pop3MessageStorage = (MailAccountPOP3MessageStorage) getMessageStorage();
-        try {
-            pop3MessageStorage.appendPOP3Messages(toAppend.toArray(new MailMessage[toAppend.size()]));
-        } catch (final OXException e) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Batch append operation to POP3 storage failed: " + e.getMessage(), e);
-            }
-            final Throwable cause = e.getCause();
-            if ((cause instanceof MessagingException) && toLowerCase(cause.getMessage()).indexOf("quota") >= 0) {
+        if (pop3MessageStorage.isMimeSupported()) {
+            try {
+                pop3MessageStorage.appendPOP3Messages(msgs, seqnum2uidl);
+            } catch (final OXException e) {
+                LOG.debug("Batch append operation to POP3 storage failed", e);
+                final Throwable cause = e.getCause();
+                if ((cause instanceof MessagingException) && toLowerCase(cause.getMessage()).indexOf("quota") >= 0) {
+                    /*
+                     * Apparently cause by exceeded quota constraint; abort immediately
+                     */
+                    throw POP3ExceptionCode.QUOTA_CONSTRAINT.create(cause, new Object[0]);
+                }
                 /*
-                 * Apparently cause by exceeded quota constraint; abort immediately
+                 * Retry one-by-one. Handling each mail message.
                  */
-                throw POP3ExceptionCode.QUOTA_CONSTRAINT.create(cause, new Object[0]);
+                final Message[] arr = new Message[1];
+                for (final Message msg : msgs) {
+                    try {
+                        arr[0] = msg;
+                        pop3MessageStorage.appendPOP3Messages(arr, seqnum2uidl);
+                    } catch (final OXException inner) {
+                        LOG.warn("POP3 message could not be appended to POP3 storage", inner);
+                    }
+                }
+            }
+        } else {
+            /*
+             * Fetch ENVELOPE for new messages
+             */
+            try {
+                final long start = System.currentTimeMillis();
+                inbox.fetch(msgs, FETCH_PROFILE_ENVELOPE);
+                MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+            } catch (final MessagingException e) {
+                // Try one-by-one loading
+                LOG.debug("Batch retrieval of POP3 messages failed. Retry with one-by-one loading.", e);
+                for (int i = 0; i < msgs.length; i++) {
+                    final int msgno = msgs[i].getMessageNumber();
+                    try {
+                        msgs[i] = inbox.getMessage(msgno);
+                    } catch (final MessagingException inner) {
+                        LOG.warn(MessageFormat.format("Retrieval of POP3 message {0} failed.", msgno), inner);
+                        msgs[i] = null;
+                    }
+                }
             }
             /*
-             * Retry one-by-one. Handling each mail message.
+             * Append them to storage
              */
-            final MailMessage[] arr = new MailMessage[1];
-            for (final MailMessage mailMessage : toAppend) {
-                try {
-                    arr[0] = mailMessage;
-                    pop3MessageStorage.appendPOP3Messages(arr);
-                } catch (final OXException inner) {
-                    LOG.warn("POP3 message could not be appended to POP3 storage: " + inner.getMessage(), inner);
+            final List<MailMessage> toAppend = new ArrayList<MailMessage>(msgs.length);
+            for (int i = 0; i < msgs.length; i++) {
+                final Message message = msgs[i];
+                if (null != message) {
+                    final int msgno = message.getMessageNumber();
+                    try {
+                        final MailMessage mm = MimeMessageConverter.convertMessage((MimeMessage) message, false);
+                        mm.setMailId(seqnum2uidl.get(msgno));
+                        toAppend.add(mm);
+                    } catch (final Exception e) {
+                        LOG.warn(MessageFormat.format("POP3 message #{0} could not be fetched from POP3 server.", msgno), e);
+                    }
+                }
+            }
+            /*
+             * First try batch append operation
+             */
+            try {
+                pop3MessageStorage.appendPOP3Messages(toAppend.toArray(new MailMessage[toAppend.size()]));
+            } catch (final OXException e) {
+                LOG.debug("Batch append operation to POP3 storage failed", e);
+                final Throwable cause = e.getCause();
+                if ((cause instanceof MessagingException) && toLowerCase(cause.getMessage()).indexOf("quota") >= 0) {
+                    /*
+                     * Apparently cause by exceeded quota constraint; abort immediately
+                     */
+                    throw POP3ExceptionCode.QUOTA_CONSTRAINT.create(cause, new Object[0]);
+                }
+                /*
+                 * Retry one-by-one. Handling each mail message.
+                 */
+                final MailMessage[] arr = new MailMessage[1];
+                for (final MailMessage mailMessage : toAppend) {
+                    try {
+                        arr[0] = mailMessage;
+                        pop3MessageStorage.appendPOP3Messages(arr);
+                    } catch (final OXException inner) {
+                        LOG.warn("POP3 message could not be appended to POP3 storage", inner);
+                    }
                 }
             }
         }
