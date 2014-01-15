@@ -80,7 +80,7 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     // Somebody else modified the same object just before the actual change should be saved. Actual change is denied and user should refresh
     // his object.
-    public final static String OBJECT_HAS_CHANGED_DISPLAY = "Edit Conflict. Refresh object.";
+    public final static String OBJECT_HAS_CHANGED_DISPLAY = "An edit conflict occurred. To edit the contact please reload it.";
 
     public final static String NO_CHANGES_DISPLAY = "No changes found. No update required.";
 
