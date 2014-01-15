@@ -220,7 +220,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             // (Asynchronously) Put to cache if ETag is available
             final String fileName = previewDocument.getMetaData().get("resourcename");
             int size = -1;
-            if (null != resourceCache && isValidEtag) {
+            if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", requestData, true)) {
                 final byte[] bytes = Streams.stream2bytes(thumbnail);
                 thumbnail = Streams.newByteArrayInputStream(bytes);
                 size = bytes.length;

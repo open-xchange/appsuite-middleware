@@ -234,7 +234,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                 }
                 previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(stream, dataProperties), getOutput(), session, pages);
                 // Put to cache
-                if (null != resourceCache && isValidEtag) {
+                if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", requestData, true)) {
                     final List<String> content = previewDocument.getContent();
                     if (null != content) {
                         final int size = content.size();
