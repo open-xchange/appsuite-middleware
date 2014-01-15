@@ -56,11 +56,17 @@ import junit.framework.TestCase;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.cache.CachedResource;
+import com.openexchange.ajax.requesthandler.cache.ResourceCache;
+import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.SimConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.SimHtmlService;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.images.impl.JavaImageTransformationService;
+import com.openexchange.tools.session.SimServerSession;
 
 /**
  * {@link FileResponseRendererTest}
@@ -209,6 +215,89 @@ public class FileResponseRendererTest extends TestCase {
             e.printStackTrace();
             fail(e.getMessage());
         }
+    }
+
+    public void testResourceCacheIsDisabled() throws Exception {
+        final int length = 2048;
+        final byte[] bytes = new byte[length];
+        for (int i = 0; i < length; i++) {
+            bytes[i] = (byte) i;
+        }
+
+        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
+        fileHolder.setContentType("image/jpeg");
+        fileHolder.setDelivery("view");
+        fileHolder.setDisposition("inline");
+        fileHolder.setName("someimage.jpg");
+
+        final TestableResourceCache resourceCache = new TestableResourceCache();
+        ResourceCaches.setResourceCache(resourceCache);
+        final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+        fileResponseRenderer.setScaler(new JavaImageTransformationService());
+        final AJAXRequestData requestData = new AJAXRequestData();
+        requestData.setSession(new SimServerSession(1, 1));
+        final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+        final SimHttpServletRequest req = new SimHttpServletRequest();
+        final SimHttpServletResponse resp = new SimHttpServletResponse();
+        final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+        resp.setOutputStream(servletOutputStream);
+        fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+        assertEquals("isEnabled() not called", 1, resourceCache.callsToIsEnabledFor);
+        assertEquals("get() called", 0, resourceCache.callsToGet);
+        assertEquals("save() called", 0, resourceCache.callsToSave);
+    }
+
+    private static final class TestableResourceCache implements ResourceCache {
+
+        int callsToIsEnabledFor = 0;
+
+        int callsToGet = 0;
+
+        int callsToSave = 0;
+
+        @Override
+        public boolean isEnabledFor(int contextId, int userId) throws OXException {
+            callsToIsEnabledFor++;
+            return false;
+        }
+
+        @Override
+        public boolean save(String id, CachedResource resource, int userId, int contextId) throws OXException {
+            callsToSave++;
+            return false;
+        }
+
+        @Override
+        public long[] getContextQuota(int contextId) {
+            return null;
+        }
+
+        @Override
+        public CachedResource get(String id, int userId, int contextId) throws OXException {
+            callsToGet++;
+            return null;
+        }
+
+        @Override
+        public void remove(int userId, int contextId) throws OXException {
+
+        }
+
+        @Override
+        public void removeAlikes(String id, int userId, int contextId) throws OXException {
+
+        }
+
+        @Override
+        public void clearFor(int contextId) throws OXException {
+
+        }
+
+        @Override
+        public boolean exists(String id, int userId, int contextId) throws OXException {
+            return false;
+        }
+
     }
 
 }
