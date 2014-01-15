@@ -16,6 +16,12 @@ open-xchange-recaptcha (7.4.2-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 18 Dec 2013 17:34:38 +0100
 
+open-xchange-recaptcha (7.4.1-14) stable; urgency=low
+
+  * Build for patch 2014-01-14
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 13 Jan 2014 13:12:45 +0100
+
 open-xchange-recaptcha (7.4.1-13) stable; urgency=low
 
   * Build for patch 2014-01-06
