@@ -62,7 +62,7 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    HostingCLITest.class,
+//    HostingCLITest.class,
     StatisticToolsTest.class,
     UniqueCLTParameterTest.class
 })
