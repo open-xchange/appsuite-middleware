@@ -126,18 +126,18 @@ public final class LimitedExecutorService implements ExecutorService {
 
     private static final class ReschedulingRunnable implements Runnable {
 
-        private final Runnable runnable;
+        private final Runnable firstTask;
         private final ScheduledLock scheduledLock;
 
-        ReschedulingRunnable(final Runnable runnable, final ScheduledLock scheduledLock) {
+        ReschedulingRunnable(final Runnable firstTask, final ScheduledLock scheduledLock) {
             super();
-            this.runnable = runnable;
+            this.firstTask = firstTask;
             this.scheduledLock = scheduledLock;
         }
 
         @Override
         public void run() {
-            Runnable next = runnable;
+            Runnable next = firstTask;
             while (null != next) { // Use this thread to execute either the initial task or dequeued tasks
                 try {
                     next.run();
