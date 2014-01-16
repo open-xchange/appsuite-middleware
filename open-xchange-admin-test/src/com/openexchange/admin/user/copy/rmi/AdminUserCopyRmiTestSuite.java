@@ -64,7 +64,6 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
     RoundtripTest.class,
     UserCopyTest.class,
-    UserExistsTest.class,
     MailAttachmentFolderTest.class
 })
 public class AdminUserCopyRmiTestSuite {

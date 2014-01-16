@@ -46,8 +46,8 @@
                 <pathelement path="${binDir}"/>
             </classpath>
             <test name="com.openexchange.admin.console.util.AdminConsoleUtilTestSuite" todir="${logDir}"/>
-            <test name="com.openexchange.admin.console.AdminConsoleTestSuite" todir="${logDir}"/>
-            <test name="com.openexchange.admin.contextrestore.AdminContextrestoreTestSuite" todir="${logDir}"/>
+            <!-- <test name="com.openexchange.admin.console.AdminConsoleTestSuite" todir="${logDir}"/> -->
+            <!-- <test name="com.openexchange.admin.contextrestore.AdminContextrestoreTestSuite" todir="${logDir}"/> -->
             <test name="com.openexchange.admin.reseller.rmi.AdminResellerRmiTestSuite" todir="${logDir}"/>
             <test name="com.openexchange.admin.rmi.AdminRmiTestSuite" todir="${logDir}"/>
             <test name="com.openexchange.admin.tools.AdminToolsTestSuite" todir="${logDir}"/>

@@ -193,7 +193,11 @@ public class Executor extends Assert {
             throw AjaxExceptionCodes.IMVALID_PARAMETER.create(request.getMethod().name());
         }
         for (final Header header : request.getHeaders()) {
-            if (method == Method.POST && !"Content-Type".equalsIgnoreCase(header.getName())) {
+            if (method == Method.POST ) {
+                if (!"Content-Type".equalsIgnoreCase(header.getName())) {
+                    httpRequest.addHeader(header.getName(), header.getValue());
+                }
+            } else {
                 httpRequest.addHeader(header.getName(), header.getValue());
             }
         }

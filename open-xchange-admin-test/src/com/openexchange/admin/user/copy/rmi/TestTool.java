@@ -86,18 +86,21 @@ public class TestTool {
 
     public static Context createContext(OXContextInterface ci, String prefix, User admin, String accessCombinationName, Credentials superAdminCredentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         Context ctx = null;
-        int ctxId = Integer.MAX_VALUE;
+        int ctxId = getRandomContextId();
         boolean created = false;
         while (!created) {
             try {
                 ctx = ci.create(AbstractRMITest.newContext(prefix + ctxId, ctxId), admin, accessCombinationName, superAdminCredentials);
                 created = true;
             } catch (ContextExistsException e) {
-                --ctxId;
+                ctxId = getRandomContextId();
             }
         }
 
         return ctx;
     }
 
+    private static int getRandomContextId() {
+        return (int) (Math.random() * 1000);
+    }
 }

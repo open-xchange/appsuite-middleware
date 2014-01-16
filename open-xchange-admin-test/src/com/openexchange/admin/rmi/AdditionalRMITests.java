@@ -69,13 +69,14 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
+import com.openexchange.admin.user.copy.rmi.TestTool;
 
 /**
  * {@link AdditionalRMITests}
  * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- * */
+ */
 public class AdditionalRMITests extends AbstractRMITest {
 
     public String myUserName = "thorben.betten";
@@ -351,8 +352,7 @@ public class AdditionalRMITests extends AbstractRMITest {
             Assert.assertNotNull("Resource id cannot be null", res.getId());
             resInterface.delete(adminContext, res, adminCredentials);
             resourceDeleted = true;
-        }
-        catch (Exception exception) {
+        } catch (Exception exception) {
             Assert.assertTrue("Resource could not be deleted!", resourceDeleted);
         }
     }
@@ -393,23 +393,26 @@ public class AdditionalRMITests extends AbstractRMITest {
         OXContextInterface conInterface = getContextInterface();
 
         Context newContext = newContext("newContext", ((int) Math.random()) * 1000);
-        User newAdmin = newUser("new_admin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
-        newContext = conInterface.create(newContext, newAdmin, superAdminCredentials); // required line for test
+        final User newAdmin = newUser("new_admin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
+        final Credentials newAdminCredentials = new Credentials("new_admin", "secret");
+        
+        newContext = TestTool.createContext(conInterface, "newContext", newAdmin, "all", superAdminCredentials);
 
         try {
             OXUserInterface userInterface = getUserInterface();
             User user = newUser(this.myUserName, "secret", this.myDisplayName, "", "", "");
-            userInterface.create(newContext, user, DummyCredentials());
+            userInterface.create(newContext, user, newAdminCredentials);
 
             User knownUser = new User();
             knownUser.setName(this.myUserName);
-            User[] mailboxNames = new User[] { knownUser }; // users with only their mailbox name (User#name) - the rest is going to be looked
+            User[] mailboxNames = new User[] { knownUser }; // users with only their mailbox name (User#name) - the rest is going to be
+                                                            // looked
             // up
-            User[] queriedUsers = userInterface.getData(newContext, mailboxNames, DummyCredentials()); // query by mailboxNames (User.name)
+            User[] queriedUsers = userInterface.getData(newContext, mailboxNames, newAdminCredentials); // query by mailboxNames (User.name)
 
             assertEquals("Query should return only one user", new Integer(1), Integer.valueOf(queriedUsers.length));
             User receivedUser = queriedUsers[0];
-            User queriedUser = userInterface.getData(newContext, receivedUser, DummyCredentials());
+            User queriedUser = userInterface.getData(newContext, receivedUser, newAdminCredentials);
             assertEquals("Should have looked up display name", myDisplayName, queriedUser.getDisplay_name());
         } finally {
             // no need to delete the admin account. Actually, it is not possible at all.
