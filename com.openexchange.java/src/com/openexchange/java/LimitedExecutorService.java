@@ -108,6 +108,7 @@ public final class LimitedExecutorService implements ExecutorService {
             // Acquire lock
             lock.lock();
             try {
+                // Once again check work queue since lock is acquired
                 fromQueue = workQueue.poll();
                 if (null != fromQueue) {
                     return fromQueue;
@@ -126,26 +127,22 @@ public final class LimitedExecutorService implements ExecutorService {
     private static final class ReschedulingRunnable implements Runnable {
 
         private final Runnable runnable;
-        private final ExecutorService executor;
         private final ScheduledLock scheduledLock;
 
-        ReschedulingRunnable(final Runnable runnable, final ExecutorService executor, final ScheduledLock scheduledLock) {
+        ReschedulingRunnable(final Runnable runnable, final ScheduledLock scheduledLock) {
             super();
             this.runnable = runnable;
-            this.executor = executor;
             this.scheduledLock = scheduledLock;
         }
 
         @Override
         public void run() {
-            try {
-                runnable.run();
-            } finally {
-                final Runnable fromQueue = scheduledLock.decrementIfNoneInQueue();
-                if (null != fromQueue) {
-                    // Might lead to a small time span in which another thread is used/yielded
-                    // while this thread has not left the run() method
-                    executor.execute(new ReschedulingRunnable(fromQueue, executor, scheduledLock));
+            Runnable next = runnable;
+            while (null != next) { // Use this thread to execute either the initial task or dequeued tasks
+                try {
+                    next.run();
+                } finally {
+                    next = scheduledLock.decrementIfNoneInQueue();
                 }
             }
         }
@@ -175,7 +172,7 @@ public final class LimitedExecutorService implements ExecutorService {
             throw new NullPointerException("Runnable is null");
         }
         if (scheduledLock.incrementFor(command)) {
-            executor.execute(new ReschedulingRunnable(command, executor, scheduledLock));
+            executor.execute(new ReschedulingRunnable(command, scheduledLock));
         } // Otherwise added to work queue
     }
 
