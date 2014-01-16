@@ -49,6 +49,8 @@
 
 package com.openexchange.admin.user.copy.rmi;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.rmi.RemoteException;
 import org.junit.After;
 import org.junit.Assert;
@@ -64,6 +66,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.exceptions.UserExistsException;
 import com.openexchange.configuration.AJAXConfig;
 
 public class UserCopyTest extends AbstractRMITest {
@@ -106,7 +109,7 @@ public class UserCopyTest extends AbstractRMITest {
     @Test
     public final void testMoveUser() throws Throwable {
         final OXUserCopyInterface oxu = getUserCopyClient();
-        User srcUser = createUser();
+        User srcUser = createUser(srcCtx);
         oxu.copyUser(srcUser, srcCtx, dstCtx, superAdminCredentials);
     }
 
@@ -185,12 +188,26 @@ public class UserCopyTest extends AbstractRMITest {
         }
     }
 
-    private User createUser() throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        User srcUser = newUser("user", "secret", "Test User", "Test", "User", "oxuser@example.com");
-        srcUser.setImapServer("example.com");
-        srcUser.setImapLogin("oxuser");
-        srcUser.setSmtpServer("example.com");
-        ui.create(srcCtx, srcUser, getCredentials());
-        return srcUser;
+    @Test
+    public final void testUserExists() throws Exception {
+        final OXUserCopyInterface oxu = getUserCopyClient();
+        final User srcUser = createUser(srcCtx);
+        final User dstUser = createUser(dstCtx);
+        try {
+            oxu.copyUser(srcUser, srcCtx, dstCtx, superAdminCredentials);
+            fail("No exception thrown");
+        } catch (Exception e) {
+            assertTrue("No UserExistsException thrown.", e instanceof UserExistsException);
+
+        }
+    }
+
+    private User createUser(Context ctx) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+        User user = newUser("user", "secret", "Test User", "Test", "User", "oxuser@example.com");
+        user.setImapServer("example.com");
+        user.setImapLogin("oxuser");
+        user.setSmtpServer("example.com");
+        ui.create(ctx, user, getCredentials());
+        return user;
     }
 }
