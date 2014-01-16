@@ -51,12 +51,12 @@ package com.openexchange.java;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
+import java.util.Queue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Lock;
@@ -76,9 +76,9 @@ public final class LimitedExecutorService implements ExecutorService {
         private int count;
         private final Lock lock;
         private final int max;
-        private final BlockingQueue<Runnable> workQueue;
+        private final Queue<Runnable> workQueue;
 
-        ScheduledLock(final int max, final BlockingQueue<Runnable> workQueue) {
+        ScheduledLock(final int max, final Queue<Runnable> workQueue) {
             super();
             this.workQueue = workQueue;
             this.max = max;
@@ -93,7 +93,7 @@ public final class LimitedExecutorService implements ExecutorService {
                     count++;
                     return true;
                 }
-                workQueue.add(command);
+                workQueue.offer(command);
                 return false;
             } finally {
                 lock.unlock();
@@ -163,7 +163,7 @@ public final class LimitedExecutorService implements ExecutorService {
             throw new IllegalArgumentException("concurrencyLimit is less than or equal to zero.");
         }
         this.executor = executor;
-        scheduledLock = new ScheduledLock(concurrencyLimit, new LinkedBlockingQueue<Runnable>());
+        scheduledLock = new ScheduledLock(concurrencyLimit, new ConcurrentLinkedQueue<Runnable>());
     }
 
     @Override
