@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.upload.quotachecker;
 
+import org.apache.commons.lang.Validate;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
@@ -59,8 +60,12 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailUploadQuotaChecker} - Quota checker for mail module.
- *
+ * {@link MailUploadQuotaChecker} - Quota checker for mail module. <br/>
+ * <br/>
+ * Checks the value set for com.openexchange.mail.usersetting.UserSettingMail.uploadQuota and
+ * com.openexchange.mail.usersetting.UserSettingMail.uploadQuotaPerFile (based on DB entries) and set the value that will be used for mail
+ * attachments file size. In some cases a fallback to server.properties file is used.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailUploadQuotaChecker extends UploadQuotaChecker {
@@ -78,14 +83,13 @@ public final class MailUploadQuotaChecker extends UploadQuotaChecker {
      */
     public MailUploadQuotaChecker(final UserSettingMail settings) {
         super();
-        if (settings.getUploadQuota() > 0) {
+
+        Validate.notNull(settings, "UserSettingMail cannot be null!");
+
+        if (settings.getUploadQuota() >= 0) {
             uploadQuota = settings.getUploadQuota();
-        } else if (settings.getUploadQuota() == 0) {
-            uploadQuota = -1;
         } else {
-            /*
-             * Fallback to global upload quota
-             */
+            LOG.debug("Upload quota is less than zero. Using global server property \"MAX_UPLOAD_SIZE\" instead.");
             int globalQuota;
             try {
                 globalQuota = ServerConfig.getInt(Property.MAX_UPLOAD_SIZE);
@@ -93,12 +97,9 @@ public final class MailUploadQuotaChecker extends UploadQuotaChecker {
                 LOG.error("", e);
                 globalQuota = 0;
             }
-            if (globalQuota > 0) {
-                uploadQuota = globalQuota;
-            } else {
-                uploadQuota = -1;
-            }
+            uploadQuota = globalQuota;
         }
+
         uploadQuotaPerFile = settings.getUploadQuotaPerFile() > 0 ? settings.getUploadQuotaPerFile() : -1;
     }
 
@@ -109,30 +110,7 @@ public final class MailUploadQuotaChecker extends UploadQuotaChecker {
      * @param ctx The context
      */
     public MailUploadQuotaChecker(final Session session, final Context ctx) {
-        super();
-        final UserSettingMail settings = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
-        if (settings.getUploadQuota() > 0) {
-            uploadQuota = settings.getUploadQuota();
-        } else if (settings.getUploadQuota() == 0) {
-            uploadQuota = -1;
-        } else {
-            /*
-             * Fallback to global upload quota
-             */
-            int globalQuota;
-            try {
-                globalQuota = ServerConfig.getInt(Property.MAX_UPLOAD_SIZE);
-            } catch (final OXException e) {
-                LOG.error("", e);
-                globalQuota = 0;
-            }
-            if (globalQuota > 0) {
-                uploadQuota = globalQuota;
-            } else {
-                uploadQuota = -1;
-            }
-        }
-        uploadQuotaPerFile = settings.getUploadQuotaPerFile() > 0 ? settings.getUploadQuotaPerFile() : -1;
+        this(UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx));
     }
 
     @Override
@@ -144,5 +122,4 @@ public final class MailUploadQuotaChecker extends UploadQuotaChecker {
     public long getQuotaMax() {
         return uploadQuota;
     }
-
 }

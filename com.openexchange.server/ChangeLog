@@ -1,3 +1,7 @@
+* 2014-01-16 - martin.schneider@open-xchange.com
+
+ - Fix for bug 30534: Cleaned up and fixed usage of MAX_UPLOAD_SIZE parameter.
+
 * 2014-01-16 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 30641: Recognize "FF D8 FF E2" byte signature as JPEG image
