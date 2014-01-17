@@ -52,6 +52,8 @@ package com.openexchange.file.storage.cifs.cache;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.file.storage.cifs.CIFSFileStorageService;
 import com.openexchange.file.storage.cifs.CIFSServices;
 import com.openexchange.session.Session;
@@ -86,7 +88,7 @@ public final class SmbFileMapManagement {
      */
     private SmbFileMapManagement() {
         super();
-        map = new ConcurrentHashMap<Integer, ConcurrentMap<Integer, SmbFileMap>>(64);
+        map = new ConcurrentLinkedHashMap.Builder<Integer, ConcurrentMap<Integer, SmbFileMap>>().initialCapacity(64).maximumWeightedCapacity(5000).weigher(Weighers.entrySingleton()).build();
     }
 
     /**

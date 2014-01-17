@@ -55,7 +55,6 @@ import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.session.Session;
@@ -107,7 +106,7 @@ public final class ThreadableCache {
      */
     private ThreadableCache() {
         super();
-        userMap = new NonBlockingHashMap<UserKey, ConcurrentTIntObjectHashMap<ConcurrentMap<String, ThreadableCacheEntry>>>(1024);
+        userMap = new ConcurrentLinkedHashMap.Builder<UserKey, ConcurrentTIntObjectHashMap<ConcurrentMap<String, ThreadableCacheEntry>>>().initialCapacity(1024).maximumWeightedCapacity(5000).weigher(Weighers.entrySingleton()).build();
     }
 
     /**

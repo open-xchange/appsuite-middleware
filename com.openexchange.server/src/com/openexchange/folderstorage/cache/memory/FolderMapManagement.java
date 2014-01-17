@@ -52,6 +52,8 @@ package com.openexchange.folderstorage.cache.memory;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.session.Session;
 
@@ -82,7 +84,7 @@ public final class FolderMapManagement {
      */
     private FolderMapManagement() {
         super();
-        map = new NonBlockingHashMap<Integer, ConcurrentMap<Integer, FolderMap>>(64);
+        map = new ConcurrentLinkedHashMap.Builder<Integer, ConcurrentMap<Integer, FolderMap>>().initialCapacity(64).maximumWeightedCapacity(5000).weigher(Weighers.entrySingleton()).build();
     }
 
     /**
