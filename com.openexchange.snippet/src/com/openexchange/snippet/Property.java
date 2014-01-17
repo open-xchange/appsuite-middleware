@@ -49,6 +49,10 @@
 
 package com.openexchange.snippet;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 /**
  * {@link Property} - A snippet's properties.
  *
@@ -157,4 +161,24 @@ public enum Property {
             throw new IllegalArgumentException();
         }
     }
+
+    private static final Set<String> PROP_NAMES;
+    static {
+        final Property[] props = values();
+        final Set<String> names = new LinkedHashSet<String>(props.length);
+        for (final Property property : props) {
+            names.add(property.propName);
+        }
+        PROP_NAMES = Collections.unmodifiableSet(names);
+    }
+
+    /**
+     * Gets an unmodifiable set containing all property names.
+     *
+     * @return An unmodifiable set containing all property names
+     */
+    public static Set<String> getPropertyNames() {
+        return PROP_NAMES;
+    }
+
 }
