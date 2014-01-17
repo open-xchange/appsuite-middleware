@@ -91,6 +91,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -206,6 +207,20 @@ public final class NewAction extends AbstractMailAction {
                 final String protocol = request.isSecure() ? "https://" : "http://";
                 final ComposedMailMessage[] composedMails = MessageParser.parse4Transport(jMail, uploadEvent, session, accountId, protocol, request.getHostname(), warnings);
                 ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : ComposeType.NEW;
+                final String folder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
+                if (null != folder) {
+                    final MailTransport mailTransport = MailTransport.getInstance(session, accountId);
+                    final MailMessage mm = mailTransport.sendMailMessage(composedMails[0], sendType, new javax.mail.Address[] { MimeMessageUtility.POISON_ADDRESS });
+                    final String[] ids = mailInterface.appendMessages(folder, new MailMessage[] { mm }, false);
+                    msgIdentifier = ids[0];
+                    mailInterface.updateMessageFlags(folder, ids, MailMessage.FLAG_SEEN, true);
+                    final JSONObject responseObj = new JSONObject(2);
+                    responseObj.put(FolderChildFields.FOLDER_ID, folder);
+                    responseObj.put(DataFields.ID, ids[0]);
+                    final AJAXRequestResult result = new AJAXRequestResult(responseObj, "json");
+                    return result;
+                }
+                // Normal transport
                 if (ComposeType.DRAFT.equals(sendType)) {
                     final String paramName = "deleteDraftOnTransport";
                     if (jMail.hasAndNotNull(paramName)) { // Provided by JSON body
