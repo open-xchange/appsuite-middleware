@@ -51,8 +51,8 @@ package com.openexchange.mail.json.parser;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -85,26 +85,18 @@ public abstract class AbstractAttachmentHandler implements IAttachmentHandler {
     public AbstractAttachmentHandler(final Session session) throws OXException {
         super();
         attachments = new ArrayList<MailPart>(4);
+
         final UserSettingMail usm;
         if (session instanceof ServerSession) {
             usm = ((ServerSession) session).getUserSettingMail();
         } else {
             usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId());
         }
-        if (usm.getUploadQuota() >= 0) {
-            this.uploadQuota = usm.getUploadQuota();
-        } else {
-            LOG.debug("Upload quota is less than zero. Using global server property \"MAX_UPLOAD_SIZE\" instead.");
-            long tmp;
-            try {
-                tmp = ServerConfig.getInt(ServerConfig.Property.MAX_UPLOAD_SIZE);
-            } catch (final Exception e) {
-                LOG.warn("Using no upload restrictions as fallback.", e);
-                tmp = 0;
-            }
-            this.uploadQuota = tmp;
-        }
-        this.uploadQuotaPerFile = usm.getUploadQuotaPerFile();
+
+        final MailUploadQuotaChecker checker = new MailUploadQuotaChecker(usm);
+        this.uploadQuota = checker.getQuotaMax();
+        this.uploadQuotaPerFile = checker.getFileQuotaMax();
+
         doAction = ((uploadQuotaPerFile > 0) || (uploadQuota > 0));
     }
 }

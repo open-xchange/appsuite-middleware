@@ -264,7 +264,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             return null;
         }
         final Object object = cache.getFromGroup(Integer.valueOf(userId), Integer.toString(contextId));
-        return (object instanceof CapabilitySet) ? (CapabilitySet) object : null;
+        return (object instanceof CapabilitySet) ? ((CapabilitySet) object).clone() : null;
     }
 
     private boolean autologin() {
