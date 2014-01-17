@@ -62,6 +62,9 @@ import com.openexchange.jslob.storage.db.Services;
  */
 public final class DelayedStoreOp implements Delayed {
 
+    /** The poison element */
+    public static final DelayedStoreOp POISON = new DelayedStoreOp(null, null, null, true);
+
     /**
      * The delay for pooled messages: <code>30sec</code>
      */
@@ -97,7 +100,14 @@ public final class DelayedStoreOp implements Delayed {
     /**
      * Initializes a new {@link DelayedStoreOp}.
      */
-    public DelayedStoreOp(final String id, final String group, final JSlobId jSlobId, final boolean poison) {
+    public DelayedStoreOp(final String id, final String group, final JSlobId jSlobId) {
+        this(id, group, jSlobId, false);
+    }
+
+    /**
+     * Initializes a new {@link DelayedStoreOp}.
+     */
+    private DelayedStoreOp(final String id, final String group, final JSlobId jSlobId, final boolean poison) {
         super();
         stamp = poison ? 0L : System.currentTimeMillis();
         this.poison = poison;

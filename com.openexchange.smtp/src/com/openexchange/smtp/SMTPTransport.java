@@ -647,22 +647,26 @@ public final class SMTPTransport extends MailTransport {
              */
             final Address[] recipients = allRecipients == null ? smtpMessage.getAllRecipients() : allRecipients;
             processAddressHeader(smtpMessage);
-            checkRecipients(recipients);
-            try {
-                final long start = System.currentTimeMillis();
-                final Transport transport = getSMTPSession().getTransport(SMTP);
+            final boolean poisoned = checkRecipients(recipients);
+            if (poisoned) {
+                saveChangesSafe(smtpMessage);
+            } else {
                 try {
-                    connectTransport(transport, smtpConfig);
-                    saveChangesSafe(smtpMessage);
-                    transport(smtpMessage, recipients, transport, smtpConfig);
-                    mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                } catch (final javax.mail.AuthenticationFailedException e) {
-                    throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
-                } finally {
-                    transport.close();
+                    final long start = System.currentTimeMillis();
+                    final Transport transport = getSMTPSession().getTransport(SMTP);
+                    try {
+                        connectTransport(transport, smtpConfig);
+                        saveChangesSafe(smtpMessage);
+                        transport(smtpMessage, recipients, transport, smtpConfig);
+                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    } catch (final javax.mail.AuthenticationFailedException e) {
+                        throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
+                    } finally {
+                        transport.close();
+                    }
+                } catch (final MessagingException e) {
+                    throw MimeMailException.handleMessagingException(e, smtpConfig, session);
                 }
-            } catch (final MessagingException e) {
-                throw MimeMailException.handleMessagingException(e, smtpConfig, session);
             }
             return MimeMessageConverter.convertMessage(smtpMessage);
         } catch (final MessagingException e) {
@@ -733,22 +737,26 @@ public final class SMTPTransport extends MailTransport {
                  */
                 final Address[] recipients = allRecipients == null ? mimeMessage.getAllRecipients() : allRecipients;
                 processAddressHeader(mimeMessage);
-                checkRecipients(recipients);
-                try {
-                    final long start = System.currentTimeMillis();
-                    final Transport transport = getSMTPSession().getTransport(SMTP);
+                final boolean poisoned = checkRecipients(recipients);
+                if (poisoned) {
+                    saveChangesSafe(mimeMessage);
+                } else {
                     try {
-                        connectTransport(transport, smtpConfig);
-                        saveChangesSafe(mimeMessage);
-                        transport(mimeMessage, recipients, transport, smtpConfig);
-                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                    } catch (final javax.mail.AuthenticationFailedException e) {
-                        throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
-                    } finally {
-                        transport.close();
+                        final long start = System.currentTimeMillis();
+                        final Transport transport = getSMTPSession().getTransport(SMTP);
+                        try {
+                            connectTransport(transport, smtpConfig);
+                            saveChangesSafe(mimeMessage);
+                            transport(mimeMessage, recipients, transport, smtpConfig);
+                            mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                        } catch (final javax.mail.AuthenticationFailedException e) {
+                            throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
+                        } finally {
+                            transport.close();
+                        }
+                    } catch (final MessagingException e) {
+                        throw MimeMailException.handleMessagingException(e, smtpConfig, session);
                     }
-                } catch (final MessagingException e) {
-                    throw MimeMailException.handleMessagingException(e, smtpConfig, session);
                 }
                 return MimeMessageConverter.convertMessage(mimeMessage);
             }
@@ -777,30 +785,34 @@ public final class SMTPTransport extends MailTransport {
                 } else {
                     recipients = allRecipients;
                 }
-                checkRecipients(recipients);
+                final boolean poisoned = checkRecipients(recipients);
                 smtpFiller.setSendHeaders(composedMail, smtpMessage);
                 processAddressHeader(smtpMessage);
                 /*
                  * Drop special "x-original-headers" header
                  */
                 smtpMessage.removeHeader("x-original-headers");
-                final long start = System.currentTimeMillis();
-                final Transport transport = getSMTPSession().getTransport(SMTP);
-                try {
-                    connectTransport(transport, smtpConfig);
-                    /*
-                     * Save changes
-                     */
+                if (poisoned) {
                     saveChangesSafe(smtpMessage);
-                    /*
-                     * TODO: Do encryption here
-                     */
-                    transport(smtpMessage, recipients, transport, smtpConfig);
-                    mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                } catch (final javax.mail.AuthenticationFailedException e) {
-                    throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
-                }  finally {
-                    transport.close();
+                } else {
+                    final long start = System.currentTimeMillis();
+                    final Transport transport = getSMTPSession().getTransport(SMTP);
+                    try {
+                        connectTransport(transport, smtpConfig);
+                        /*
+                         * Save changes
+                         */
+                        saveChangesSafe(smtpMessage);
+                        /*
+                         * TODO: Do encryption here
+                         */
+                        transport(smtpMessage, recipients, transport, smtpConfig);
+                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    } catch (final javax.mail.AuthenticationFailedException e) {
+                        throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
+                    }  finally {
+                        transport.close();
+                    }
                 }
             } finally {
                 invokeLater(new MailCleanerTask(composedMail));
@@ -999,18 +1011,35 @@ public final class SMTPTransport extends MailTransport {
         }
     }
 
-    private static void checkRecipients(final Address[] recipients) throws OXException {
+    private static final boolean isPoisoned(final Address[] recipients) {
+        if ((recipients == null) || (recipients.length == 0)) {
+            return false;
+        }
+        for (final Address address : recipients) {
+            if (MimeMessageUtility.POISON_ADDRESS == address) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean checkRecipients(final Address[] recipients) throws OXException {
         if ((recipients == null) || (recipients.length == 0)) {
             throw SMTPExceptionCode.MISSING_RECIPIENTS.create();
         }
+        Boolean poisoned = null;
         final ConfigurationService service = Services.getService(ConfigurationService.class);
         if (null != service) {
             final Filter filter = service.getFilterFromProperty("com.openexchange.mail.transport.redirectWhitelist");
             if (null != filter) {
                 for (final Address address : recipients) {
-                    final InternetAddress internetAddress = (InternetAddress) address;
-                    if (!filter.accepts(internetAddress.getAddress())) {
-                        throw SMTPExceptionCode.RECIPIENT_NOT_ALLOWED.create(internetAddress.toUnicodeString());
+                    if (MimeMessageUtility.POISON_ADDRESS == address) {
+                        poisoned = Boolean.TRUE;
+                    } else {
+                        final InternetAddress internetAddress = (InternetAddress) address;
+                        if (!filter.accepts(internetAddress.getAddress())) {
+                            throw SMTPExceptionCode.RECIPIENT_NOT_ALLOWED.create(internetAddress.toUnicodeString());
+                        }
                     }
                 }
             }
@@ -1018,21 +1047,26 @@ public final class SMTPTransport extends MailTransport {
         if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
             InternetAddress internetAddress;
             for (final Address address : recipients) {
-                internetAddress = (InternetAddress) address;
-                final String sAddress = internetAddress.getAddress();
-                if (MsisdnCheck.checkMsisdn(sAddress)) {
-                    if (sAddress.indexOf('/') < 0) {
-                        // Detected a MSISDN address that misses "/TYPE=" appendix necessary for the MTA
-                        internetAddress.setAddress(sAddress + "/TYPE=PLMN");
-                    }
-                    try {
-                        internetAddress.setPersonal("", "US-ASCII");
-                    } catch (final UnsupportedEncodingException e) {
-                        // Ignore as personal is cleared
+                if (MimeMessageUtility.POISON_ADDRESS == address) {
+                    poisoned = Boolean.TRUE;
+                } else {
+                    internetAddress = (InternetAddress) address;
+                    final String sAddress = internetAddress.getAddress();
+                    if (MsisdnCheck.checkMsisdn(sAddress)) {
+                        if (sAddress.indexOf('/') < 0) {
+                            // Detected a MSISDN address that misses "/TYPE=" appendix necessary for the MTA
+                            internetAddress.setAddress(sAddress + "/TYPE=PLMN");
+                        }
+                        try {
+                            internetAddress.setPersonal("", "US-ASCII");
+                        } catch (final UnsupportedEncodingException e) {
+                            // Ignore as personal is cleared
+                        }
                     }
                 }
             }
         }
+        return null == poisoned ? isPoisoned(recipients) : poisoned.booleanValue();
     }
 
     private static final class MailCleanerTask implements Runnable {

@@ -365,6 +365,52 @@ public class JSONObject extends AbstractJSONValue {
         }
     }
 
+    @Override
+    public boolean isEqualTo(final JSONValue jsonValue) {
+        if (jsonValue == this) {
+            return true;
+        }
+        if ((null == jsonValue) || !jsonValue.isObject()) {
+            return false;
+        }
+        final Map<String, Object> m = jsonValue.toObject().myHashMap;
+        if (myHashMap.size() != m.size()) {
+            return false;
+        }
+        try {
+            final Iterator<Entry<String, Object>> i = myHashMap.entrySet().iterator();
+            while (i.hasNext()) {
+                final Entry<String, Object> e = i.next();
+                final String key = e.getKey();
+                final Object value = e.getValue();
+                if (isNull(value)) {
+                    if (!m.containsKey(key)) {
+                        return false;
+                    }
+                    if (!isNull(m.get(key))) {
+                        return false;
+                    }
+                } else {
+                    if (value instanceof JSONValue) {
+                        final Object object = m.get(key);
+                        if (!(object instanceof JSONValue)) {
+                            return false;
+                        } else if (!((JSONValue) value).isEqualTo((JSONValue) object)) {
+                            return false;
+                        }
+                    } else if (!value.equals(m.get(key))) {
+                        return false;
+                    }
+                }
+            }
+        } catch (final ClassCastException unused) {
+            return false;
+        } catch (final NullPointerException unused) {
+            return false;
+        }
+        return true;
+    }
+
     /**
      * Gets the {@link Map map} view for this JSON object.
      *

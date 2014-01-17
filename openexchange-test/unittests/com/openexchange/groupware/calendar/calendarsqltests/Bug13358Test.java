@@ -73,6 +73,7 @@ public class Bug13358Test extends CalendarSqlTest {
         final Connection writecon = DBPool.pickupWriteable(ctx);
         final CalendarAdministration ca = new CalendarAdministration();
         ca.deletePerformed(deleteEvent, readcon, writecon);
+        Thread.sleep(500);
 
         final CalendarDataObject loadApp = appointments.load(objectId, folders.getStandardFolder(userId, ctx));
         Participant[] participants = loadApp.getParticipants();

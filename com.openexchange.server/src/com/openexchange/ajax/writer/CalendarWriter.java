@@ -202,7 +202,7 @@ public abstract class CalendarWriter extends CommonWriter {
     }
 
     private static JSONObject getUserParticipantAsJSONObject(final UserParticipant userParticipant) throws JSONException {
-        final JSONObject jsonObj = new JSONObject();
+        final JSONObject jsonObj = new JSONObject(6);
         writeParameter(ParticipantsFields.ID, userParticipant.getIdentifier(), jsonObj);
         writeParameter(ParticipantsFields.CONFIRMATION, userParticipant.getConfirm(), jsonObj, userParticipant.containsConfirm());
         writeParameter(ParticipantsFields.CONFIRM_MESSAGE, userParticipant.getConfirmMessage(), jsonObj, userParticipant.containsConfirmMessage());

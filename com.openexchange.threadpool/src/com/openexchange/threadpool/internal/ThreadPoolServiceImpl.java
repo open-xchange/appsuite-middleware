@@ -93,7 +93,6 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         return newInstance(
             properties.getCorePoolSize(),
             properties.getMaximumPoolSize(),
-            properties.getKeepAliveThreshold(),
             properties.getKeepAliveTime(),
             properties.getWorkQueue(),
             properties.getWorkQueueSize(),
@@ -106,8 +105,6 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
      *
      * @param corePoolSize The number of threads to keep in the pool, even if they are idle.
      * @param maximumPoolSize The maximum number of threads to allow in the pool.
-     * @param keepAliveThreshold The threshold indicating when a pool size should be considered as too many threads. If pool size exceeds that
-     *            threshold, idle workers will be closed immediately regardless of keep-alive time.
      * @param keepAliveTime When the number of threads is greater than the core, this is the maximum time in milliseconds that excess idle
      *            threads will wait for new tasks before terminating.
      * @param workQueue The queue to use for holding tasks before they are executed.
@@ -121,8 +118,8 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
      *             be resolved.
      * @throws NullPointerException If <tt>workQueue</tt> or <tt>refusedExecutionBehavior</tt> are <code>null</code>.
      */
-    public static ThreadPoolServiceImpl newInstance(final int corePoolSize, final int maximumPoolSize, final int keepAliveThreshold, final long keepAliveTime, final String workQueue, final int workQueueSize, final boolean blocking, final String refusedExecutionBehavior) {
-        return new ThreadPoolServiceImpl(corePoolSize, maximumPoolSize, keepAliveThreshold, keepAliveTime, workQueue, workQueueSize, blocking, refusedExecutionBehavior);
+    public static ThreadPoolServiceImpl newInstance(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final String workQueue, final int workQueueSize, final boolean blocking, final String refusedExecutionBehavior) {
+        return new ThreadPoolServiceImpl(corePoolSize, maximumPoolSize, keepAliveTime, workQueue, workQueueSize, blocking, refusedExecutionBehavior);
     }
 
     private final CustomThreadPoolExecutor threadPoolExecutor;
@@ -134,8 +131,6 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
      *
      * @param corePoolSize The number of threads to keep in the pool, even if they are idle.
      * @param maximumPoolSize The maximum number of threads to allow in the pool.
-     * @param keepAliveThreshold The threshold indicating when a pool size should be considered as too many threads. If pool size exceeds that
-     *            threshold, idle workers will be closed immediately regardless of keep-alive time.
      * @param keepAliveTime When the number of threads is greater than the core, this is the maximum time in milliseconds that excess idle
      *            threads will wait for new tasks before terminating.
      * @param workQueue The queue to use for holding tasks before they are executed.
@@ -144,7 +139,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
      *             or if corePoolSize greater than maximumPoolSize.
      * @throws NullPointerException if <tt>workQueue</tt> or <tt>threadFactory</tt> are <code>null</code>.
      */
-    private ThreadPoolServiceImpl(final int corePoolSize, final int maximumPoolSize, final int keepAliveThreshold, final long keepAliveTime, final String workQueue, final int workQueueSize, final boolean blocking, final String refusedExecutionBehavior) {
+    private ThreadPoolServiceImpl(final int corePoolSize, final int maximumPoolSize, final long keepAliveTime, final String workQueue, final int workQueueSize, final boolean blocking, final String refusedExecutionBehavior) {
         final QueueType queueType = QueueType.getQueueType(workQueue);
         if (null == queueType) {
             throw new IllegalArgumentException("Unknown queue type: " + workQueue);
@@ -160,7 +155,6 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
                 new CustomThreadPoolExecutor(
                     this.corePoolSize,
                     maximumPoolSize,
-                    keepAliveThreshold,
                     keepAliveTime,
                     TimeUnit.MILLISECONDS,
                     scalingQueue,
@@ -175,7 +169,6 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
                 new CustomThreadPoolExecutor(
                     queueType.isFixedSize() ? maximumPoolSize : this.corePoolSize,
                     maximumPoolSize,
-                    keepAliveThreshold,
                     keepAliveTime,
                     TimeUnit.MILLISECONDS,
                     queueType.newWorkQueue(workQueueSize),

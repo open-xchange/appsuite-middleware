@@ -64,14 +64,20 @@ import com.openexchange.config.ConfigurationService;
 public final class ThreadPoolProperties {
 
     private int corePoolSize;
+
     private boolean prestartAllCoreThreads;
+
     private int maximumPoolSize;
+
     private long keepAliveTime;
+
     private String workQueue;
+
     private int workQueueSize;
+
     private String refusedExecutionBehavior;
+
     private boolean blocking;
-    private int keepAliveThreshold;
 
     /**
      * Initializes a new {@link ThreadPoolProperties}.
@@ -129,18 +135,6 @@ public final class ThreadPoolProperties {
                         keepAliveTime = Long.parseLong(tmp.trim());
                     } catch (final NumberFormatException e) {
                         keepAliveTime = 60000L;
-                    }
-                }
-            }
-
-            keepAliveThreshold = 1000;
-            {
-                final String tmp = configurationService.getProperty("com.openexchange.threadpool.keepAliveThreshold");
-                if (null != tmp) {
-                    try {
-                        keepAliveThreshold = Integer.parseInt(tmp.trim());
-                    } catch (final NumberFormatException e) {
-                        keepAliveThreshold = 1000;
                     }
                 }
             }
@@ -206,56 +200,45 @@ public final class ThreadPoolProperties {
     }
 
     /**
-     * Gets the core pool size
+     * Gets the corePoolSize
      *
-     * @return The core pool size
+     * @return The corePoolSize
      */
     public int getCorePoolSize() {
         return corePoolSize;
     }
 
     /**
-     * Gets the <code>prestartAllCoreThreads</code> flag
+     * Gets the prestartAllCoreThreads
      *
-     * @return <code>true</code> to pre-start all core threads; otherwise <code>false</code>
+     * @return The prestartAllCoreThreads
      */
     public boolean isPrestartAllCoreThreads() {
         return prestartAllCoreThreads;
     }
 
     /**
-     * Gets the maximum pool size
+     * Gets the maximumPoolSize
      *
-     * @return The maximum pool size
+     * @return The maximumPoolSize
      */
     public int getMaximumPoolSize() {
         return maximumPoolSize;
     }
 
     /**
-     * Gets the keep-alive time
+     * Gets the keepAliveTime
      *
-     * @return The keep-alive time
+     * @return The keepAliveTime
      */
     public long getKeepAliveTime() {
         return keepAliveTime;
     }
 
     /**
-     * Gets the threshold indicating when a pool size should be considered as too many threads
-     * <p>
-     * If pool size exceeds that threshold, idle workers will be closed immediately regardless of keep-alive time.
+     * Gets the workQueue
      *
-     * @return The keep-alive threshold
-     */
-    public int getKeepAliveThreshold() {
-        return keepAliveThreshold;
-    }
-
-    /**
-     * Gets the work queue
-     *
-     * @return The work queue
+     * @return The workQueue
      */
     public String getWorkQueue() {
         return workQueue;

@@ -130,7 +130,7 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
     }
 
     /** The poison element */
-    private static final DelayedStoreOp POISON = new DelayedStoreOp(null, null, null, true);
+    private static final DelayedStoreOp POISON = DelayedStoreOp.POISON;
 
     /** Proxy attribute for the object implementing the persistent methods. */
     private final DBJSlobStorage delegate;
@@ -309,12 +309,9 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
             return delegate.store(id, t);
         }
 
-        // Explicitly invalidate cache entry
-        final String groupName = groupName(id);
-        cache.removeFromGroup(id.getId(), groupName);
-
         // Delay store operation
-        if (delayedStoreOps.offer(new DelayedStoreOp(id.getId(), groupName, id, false))) {
+        final String groupName = groupName(id);
+        if (delayedStoreOps.offer(new DelayedStoreOp(id.getId(), groupName, id))) {
             // Added to delay queue -- put current to cache
             cache.putInGroup(id.getId(), groupName, t.setId(id), false);
             return true;

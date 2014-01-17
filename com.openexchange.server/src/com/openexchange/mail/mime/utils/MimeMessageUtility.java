@@ -82,6 +82,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Header;
 import javax.mail.MessagingException;
@@ -134,6 +135,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.utils.CP932EmojiMapping;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -2227,5 +2229,36 @@ public final class MimeMessageUtility {
             return CharsetDetector.detectCharset(rawIn);
         }
     }
+
+    /**
+     * The special poison address that denies a message being sent via
+     * {@link MailTransport#sendMailMessage(com.openexchange.mail.dataobjects.compose.ComposedMailMessage, com.openexchange.mail.dataobjects.compose.ComposeType, Address[])}
+     * .
+     */
+    public static final InternetAddress POISON_ADDRESS = new InternetAddress() {
+
+        private static final long serialVersionUID = -6860515616722560896L;
+
+        {
+            address = "poison@unknown-domain.invalid";
+            personal = "Poison";
+            encodedPersonal = "Poison";
+        }
+
+        @Override
+        public String toString() {
+            return "poison";
+        }
+
+        @Override
+        public String getType() {
+            return "rfc822";
+        }
+
+        @Override
+        public boolean equals(final Object address) {
+            return (this == address);
+        }
+    };
 
 }

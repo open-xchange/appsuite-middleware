@@ -103,6 +103,14 @@ public interface JSONValue extends Serializable {
     boolean isEmpty();
 
     /**
+     * Checks if this JSON value is equal to specified JSON value.
+     *
+     * @param jsonValue The JSON value
+     * @return <code>true</code> if equals; otherwise <code>false</code>
+     */
+    boolean isEqualTo(JSONValue jsonValue);
+
+    /**
      * Make a pretty-printed JSON text of this JSON value.
      * <p>
      * Warning: This method assumes that the data structure is acyclically.
