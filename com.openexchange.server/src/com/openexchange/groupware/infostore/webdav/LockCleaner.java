@@ -96,8 +96,8 @@ public class LockCleaner implements FolderEventInterface, EventHandler {
 	}
 
     @Override
-    public void handleEvent(Event event) {
-        if (FileStorageEventHelper.isInfostoreEvent(event) && FileStorageEventHelper.isUpdateEvent(event)) {
+    public void handleEvent(final Event event) {
+        if (FileStorageEventHelper.isInfostoreEvent(event) && FileStorageEventHelper.isDeleteEvent(event)) {
             try {
                 int id = Integer.parseInt(FileStorageEventHelper.extractObjectId(event));
                 ServerSession session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
@@ -108,9 +108,8 @@ public class LockCleaner implements FolderEventInterface, EventHandler {
                 // Obviously no numeric identifier; therefore not related to InfoStore file storage
                 LOG.debug(e.getMessage(), e);
             }
-
             if (LOG.isDebugEnabled()) {
-                LOG.debug(FileStorageEventHelper.createDebugMessage("UpdateEvent", event));
+                LOG.debug(FileStorageEventHelper.createDebugMessage("DeleteEvent", event));
             }
         }
     }

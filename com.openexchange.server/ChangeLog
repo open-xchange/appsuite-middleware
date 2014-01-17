@@ -1,3 +1,7 @@
+* 2014-01-03 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30435: Don't remove locks upon infostore update events, but on delete events
+ 
 * 2013-12-17 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 30254: Added column names to SQL statement
