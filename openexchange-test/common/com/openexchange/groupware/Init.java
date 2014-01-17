@@ -462,7 +462,6 @@ public final class Init {
                 ThreadPoolServiceImpl.newInstance(
                     props.getCorePoolSize(),
                     props.getMaximumPoolSize(),
-                    props.getKeepAliveThreshold(),
                     props.getKeepAliveTime(),
                     props.getWorkQueue(),
                     props.getWorkQueueSize(),
