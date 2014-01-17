@@ -94,7 +94,9 @@ public class NotifyingCache extends AbstractCache implements Cache, CacheListene
         this.delegate = delegate;
         this.eventService = eventService;
         this.notifyOnLocalOperations = notifyOnLocalOperations;
-        this.eventService.addListener(region, this);
+        if (null != eventService && (notifyOnLocalOperations || false == isLocal())) {
+            this.eventService.addListener(region, this);
+        }
     }
 
     /**
@@ -340,6 +342,11 @@ public class NotifyingCache extends AbstractCache implements Cache, CacheListene
             LOG.debug("fireInvalidate: {}", event);
             eventService.notify(this, event, false);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "NotifyingCache [region=" + region + ", isLocal=" + isLocal() + "]";
     }
 
 }
