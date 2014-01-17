@@ -265,14 +265,16 @@ public class SharedFileInputStream extends BufferedInputStream
 		buf = nbuf;
 	    }
         count = pos;
-	in.seek(bufpos + pos);
 	// limit to datalen
 	int len = buf.length - pos;
 	if (bufpos - start + pos + len > datalen)
 	    len = (int)(datalen - (bufpos - start + pos));
-	int n = in.read(buf, pos, len);
-        if (n > 0)
-            count = n + pos;
+	synchronized (in) {
+	    in.seek(bufpos + pos);
+	    int n = in.read(buf, pos, len);
+	    if (n > 0)
+		count = n + pos;
+	}
     }
 
     /**
