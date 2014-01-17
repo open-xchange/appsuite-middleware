@@ -496,7 +496,7 @@ public final class NewAction extends AbstractMailAction {
                     /*
                      * Compose JSON object
                      */
-                    responseData = new JSONObject();
+                    responseData = new JSONObject(2);
                     responseData.put(FolderChildFields.FOLDER_ID, MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, sentFullname));
                     responseData.put(DataFields.ID, uidArr[0]);
                 } finally {
