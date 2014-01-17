@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -55,6 +55,7 @@ public class Status {
     public long uidnext = -1;
     public long uidvalidity = -1;
     public int unseen = -1;
+    public long highestmodseq = -1;
 
     static final String[] standardItems =
 	{ "MESSAGES", "RECENT", "UNSEEN", "UIDNEXT", "UIDVALIDITY" };
@@ -96,6 +97,8 @@ public class Status {
 		uidvalidity = r.readLong();
 	    else if (attr.equalsIgnoreCase("UNSEEN"))
 		unseen = r.readNumber();
+	    else if (attr.equalsIgnoreCase("HIGHESTMODSEQ"))
+		highestmodseq = r.readLong();
 	} while (r.readByte() != ')');
     }
 
@@ -110,5 +113,7 @@ public class Status {
 	    s1.uidvalidity = s2.uidvalidity;
 	if (s2.unseen != -1)
 	    s1.unseen = s2.unseen;
+	if (s2.highestmodseq != -1)
+	    s1.highestmodseq = s2.highestmodseq;
     }
 }

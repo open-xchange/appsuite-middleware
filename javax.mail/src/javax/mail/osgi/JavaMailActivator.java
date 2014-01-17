@@ -115,6 +115,9 @@ public final class JavaMailActivator implements BundleActivator {
                 mc.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822");
             }
             CommandMap.setDefaultCommandMap(mc);
+
+            // Set JavaMail-related system properties
+            System.getProperties().setProperty("mail.mime.parameters.strict", "false");
         } catch (final Exception e) {
             final MailLogger logger = new MailLogger(JavaMailActivator.class, "JavaMail Activator", true, System.out);
             logger.log(Level.SEVERE, "Error starting JavaMail bundle.", e);

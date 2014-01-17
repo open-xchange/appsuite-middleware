@@ -56,7 +56,7 @@ public final class OrTerm extends SearchTerm {
      *
      * @serial
      */
-    protected SearchTerm[] terms;
+    private SearchTerm[] terms;
 
     private static final long serialVersionUID = 5380534067523646936L;
 

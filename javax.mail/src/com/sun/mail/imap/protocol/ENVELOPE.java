@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,6 +40,7 @@
 
 package com.sun.mail.imap.protocol;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
@@ -89,10 +90,11 @@ public class ENVELOPE implements Item {
 	    synchronized (mailDateFormat) {
 		date = mailDateFormat.parse(s);
 	    }
-	    } catch (Exception pex) {
+	    } catch (ParseException pex) {
+	    } catch (RuntimeException pex) {
 		// We need to be *very* tolerant about bogus dates (and
-		// there's lot of 'em around), so we ignore any 
-		// exception (including RunTimeExceptions) and just let 
+		// there's lots of 'em around), so we ignore any 
+		// exception (including RuntimeExceptions) and just let 
 		// date be null.
 	    }
 	}
@@ -117,7 +119,17 @@ public class ENVELOPE implements Item {
 
 	byte b = r.readByte();
 	if (b == '(') {
-	    List<IMAPAddress> v = new ArrayList<IMAPAddress>();
+	    /*
+	     * Some broken servers (e.g., Yahoo Mail) return an empty
+	     * list instead of NIL.  Handle that here even though it
+	     * doesn't conform to the IMAP spec.
+	     */
+	    if (r.peekByte() == ')') {
+		r.skip(1);
+		return null;
+	    }
+
+	    List<InternetAddress> v = new ArrayList<InternetAddress>();
 
 	    do {
 		IMAPAddress a = new IMAPAddress(r);
@@ -129,8 +141,7 @@ public class ENVELOPE implements Item {
 	    // skip the terminating ')' at the end of the addresslist
 	    r.skip(1);
 
-	    InternetAddress[] a = v.toArray(new InternetAddress[v.size()]);
-	    return a;
+	    return v.toArray(new InternetAddress[v.size()]);
 	} else if (b == 'N' || b == 'n') { // NIL
 	    r.skip(2); // skip 'NIL'
 	    return null;
@@ -170,11 +181,11 @@ class IMAPAddress extends InternetAddress {
 	    if (groupname == null)	// end of group list
 		return;
 	    // Accumulate a group list.  The members of the group
-	    // are accumulated in a Vector and the corresponding string
+	    // are accumulated in a List and the corresponding string
 	    // representation of the group is accumulated in a StringBuffer.
 	    StringBuilder sb = new StringBuilder();
 	    sb.append(groupname).append(':');
-	    List<IMAPAddress> v = new ArrayList<IMAPAddress>();
+	    List<InternetAddress> v = new ArrayList<InternetAddress>();
 	    while (r.peekByte() != ')') {
 		IMAPAddress a = new IMAPAddress(r);
 		if (a.isEndOfGroup())	// reached end of group
