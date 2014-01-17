@@ -150,6 +150,7 @@ public final class NewAction extends AbstractMailAction {
         final ServerSession session = req.getSession();
         final UploadEvent uploadEvent = request.getUploadEvent();
         String msgIdentifier = null;
+        UserSettingMail userSettingMail = null;
         {
             final JSONObject jMail;
             {
@@ -263,6 +264,7 @@ public final class NewAction extends AbstractMailAction {
                         }
                     }
                 }
+                userSettingMail = usm;
                 /*
                  * Check
                  */
@@ -290,6 +292,11 @@ public final class NewAction extends AbstractMailAction {
             }
         }
         if (msgIdentifier == null) {
+            if (null != userSettingMail && userSettingMail.isNoCopyIntoStandardSentFolder()) {
+                final AJAXRequestResult result = new AJAXRequestResult(JSONObject.NULL, "json");
+                result.addWarnings(warnings);
+                return result;
+            }
             if (warnings.isEmpty()) {
                 throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();
             }
