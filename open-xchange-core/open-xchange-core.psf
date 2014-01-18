@@ -132,6 +132,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.version"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.xml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,javax.mail"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.apache.felix.eventadmin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.apache.tika"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.ho.jyaml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.javasimon"/>
