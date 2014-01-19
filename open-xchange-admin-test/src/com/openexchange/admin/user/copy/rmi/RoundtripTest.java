@@ -54,10 +54,6 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -402,10 +398,6 @@ public class RoundtripTest extends AbstractRMITest {
         }
 
         super.tearDown();
-    }
-
-    private OXUserCopyInterface getUserMoveClient() throws MalformedURLException, RemoteException, NotBoundException {
-        return (OXUserCopyInterface) Naming.lookup(getRMIHostUrl() + OXUserCopyInterface.RMI_NAME);
     }
 
     private AJAXSession performLogin(final String login, final String password) throws OXException, IOException, JSONException {

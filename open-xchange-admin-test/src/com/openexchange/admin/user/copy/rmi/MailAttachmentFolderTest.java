@@ -54,10 +54,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import org.json.JSONException;
 import org.junit.Test;
 import com.openexchange.admin.rmi.AbstractRMITest;
@@ -148,9 +144,9 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
         AJAXClient dummyClient = new AJAXClient(dummySession, false);
         FolderTestManager ftm = new FolderTestManager(dummyClient);
         FolderObject dummyFolders[] = new FolderObject[7];
-        
+
         // some debug logging for jenkins
-        
+
         System.out.println("Dummy ContextID: "+ dummyClient.getValues().getContextId());
         System.out.println("Dummy DefaultAddress: "+ dummyClient.getValues().getDefaultAddress());
         System.out.println("Dummy DraftsFolder: "+ dummyClient.getValues().getDraftsFolder());
@@ -162,8 +158,8 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
         System.out.println("Dummy SendAdress: "+ dummyClient.getValues().getSendAddress());
         System.out.println("Dummy TrashFolder: "+ dummyClient.getValues().getTrashFolder());
         System.out.println("Dummy UserId: "+ dummyClient.getValues().getUserId());
-        
-        
+
+
         for (int i = 0; i < 7; i++) {
             FolderObject pf = ftm.generatePrivateFolder(
                 "dummy_folder_" + i,
@@ -276,10 +272,6 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
         }
 
         super.tearDown();
-    }
-
-    private OXUserCopyInterface getUserMoveClient() throws MalformedURLException, RemoteException, NotBoundException {
-        return (OXUserCopyInterface) Naming.lookup(getRMIHostUrl() + OXUserCopyInterface.RMI_NAME);
     }
 
     private AJAXSession performLogin(final String login, final String password) throws OXException, IOException, JSONException {
