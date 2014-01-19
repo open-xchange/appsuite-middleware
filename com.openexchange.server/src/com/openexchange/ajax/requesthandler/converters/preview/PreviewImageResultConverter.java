@@ -51,8 +51,6 @@ package com.openexchange.ajax.requesthandler.converters.preview;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Set;
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
@@ -68,9 +66,6 @@ import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MimeType2ExtMap;
-import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.preview.ContentTypeChecker;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewExceptionCodes;
@@ -90,9 +85,6 @@ import com.openexchange.tools.session.ServerSession;
 public class PreviewImageResultConverter extends AbstractPreviewResultConverter {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PreviewImageResultConverter.class);
-
-    private static final String PARAMETER_ACTION = AJAXServlet.PARAMETER_ACTION;
-    private static final String PARAMETER_SESSION = AJAXServlet.PARAMETER_SESSION;
 
     /**
      * Initializes a new {@link PreviewImageResultConverter}.
@@ -186,7 +178,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
 
                     // Obtain preview
                     final PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
-                    final DataProperties dataProperties = new DataProperties(9);
+                    final DataProperties dataProperties = new DataProperties(12);
                     dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null));
                     dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
                     dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
@@ -277,43 +269,6 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
         requestData.putParameter("transformationNeeded", "false");
         final FileHolder responseFileHolder = new FileHolder(thumbnail, bytes.length, "image/jpeg", "thumbs.jpg");
         result.setResultObject(responseFileHolder, "file");
-    }
-
-    private static final Set<String> INVALIDS = MimeTypes.INVALIDS;
-
-    private String getContentType(final IFileHolder fileHolder, final ContentTypeChecker checker) {
-        String contentType = fileHolder.getContentType();
-        if (Strings.isEmpty(contentType)) {
-            // Determine Content-Type by file name
-            return MimeType2ExtMap.getContentType(fileHolder.getName());
-        }
-        // Cut to base type & sanitize
-        contentType = sanitizeContentType(getLowerCaseBaseType(contentType));
-        contentType = MimeTypes.checkedMimeType(contentType, fileHolder.getName(), INVALIDS);
-        if (INVALIDS.contains(contentType) || (null != checker && !checker.isValid(contentType))) {
-            // Determine Content-Type by file name
-            contentType = MimeType2ExtMap.getContentType(fileHolder.getName());
-        }
-        return contentType == null ? "application/octet-stream" : contentType;
-    }
-
-    private String sanitizeContentType(final String contentType) {
-        if (null == contentType) {
-            return null;
-        }
-        try {
-            return new ContentType(contentType).getBaseType();
-        } catch (final OXException e) {
-            return contentType;
-        }
-    }
-
-    private String getLowerCaseBaseType(final String contentType) {
-        if (null == contentType) {
-            return null;
-        }
-        final int pos = contentType.indexOf(';');
-        return Strings.toLowerCase(pos > 0 ? contentType.substring(0, pos) : contentType).trim();
     }
 
 }
