@@ -318,7 +318,8 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 fileHolder.setDelivery("download");
                 req.getRequest().putParameter(PARAMETER_DELIVERY, "download");
             } else {
-                fileHolder = new FileHolder(isClosure, size, mailPart.getContentType().getBaseType(), getFileName(fileNameFromRequest, mailPart.getFileName(), mailPart.getContentType().getBaseType()));
+                final String baseType = mailPart.getContentType().getBaseType();
+                fileHolder = new FileHolder(isClosure, size, baseType, getFileName(fileNameFromRequest, mailPart.getFileName(), baseType));
             }
             final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
             /*
