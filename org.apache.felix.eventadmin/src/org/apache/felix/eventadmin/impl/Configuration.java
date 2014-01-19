@@ -126,12 +126,12 @@ public class Configuration
     private volatile EventAdminImpl m_admin;
 
     // The registration of the security decorator factory (i.e., the service)
-    private volatile ServiceRegistration m_registration;
+    private volatile ServiceRegistration<?> m_registration;
 
     // all adapters
     private AbstractAdapter[] m_adapters;
 
-    private ServiceRegistration m_managedServiceReg;
+    private ServiceRegistration<?> m_managedServiceReg;
 
     public Configuration( BundleContext bundleContext )
     {
@@ -159,7 +159,7 @@ public class Configuration
                     interfaceNames = new String[] {ManagedService.class.getName(), MetaTypeProvider.class.getName()};
                     service = enhancedService;
                 }
-                Dictionary props = new Hashtable();
+                Dictionary<String, Object> props = new Hashtable<String, Object>(2);
                 props.put( Constants.SERVICE_PID, PID );
                 m_managedServiceReg = m_bundleContext.registerService( interfaceNames, service, props );
             }
@@ -170,19 +170,21 @@ public class Configuration
         }
     }
 
-    void updateFromConfigAdmin(final Dictionary config)
+    void updateFromConfigAdmin(final Dictionary<String, Object> config)
     {
         // do this in the background as we don't want to stop
         // the config admin
         new Thread()
         {
 
+            @Override
             public void run()
             {
-                synchronized ( Configuration.this )
+                final Configuration configuration = Configuration.this;
+                synchronized ( configuration )
                 {
-                    Configuration.this.configure( config );
-                    Configuration.this.startOrUpdate();
+                    configuration.configure( config );
+                    configuration.startOrUpdate();
                 }
             }
 
@@ -193,7 +195,7 @@ public class Configuration
     /**
      * Configures this instance.
      */
-    void configure( Dictionary config )
+    void configure( Dictionary<String, Object> config )
     {
         if ( config == null )
         {
@@ -272,7 +274,7 @@ public class Configuration
         }
     }
 
-    private void startOrUpdate()
+    void startOrUpdate()
     {
         LogWrapper.getLogger().setLogLevel(m_logLevel);
         LogWrapper.getLogger().log(LogWrapper.LOG_DEBUG,
@@ -412,6 +414,7 @@ public class Configuration
         {
             return new ManagedService()
             {
+                @Override
                 public void updated( Dictionary properties ) throws ConfigurationException
                 {
                     updateFromConfigAdmin(properties);

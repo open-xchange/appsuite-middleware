@@ -51,6 +51,7 @@ public class Activator implements BundleActivator
      *
      * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
      */
+    @Override
     public void start(final BundleContext context)
     {
         // init the LogWrapper. Subsequently, the static methods of the LogWrapper
@@ -94,6 +95,7 @@ public class Activator implements BundleActivator
      *
      * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
      */
+    @Override
     public void stop(final BundleContext context)
     {
         if ( m_config != null )

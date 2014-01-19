@@ -23,7 +23,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import org.apache.felix.eventadmin.impl.handler.EventHandlerProxy;
 import org.osgi.service.event.Event;
 
 /**
@@ -40,10 +42,13 @@ public class AsyncDeliverTasks
      * is the sync deliver tasks as this has all the code for timeout
      * handling etc.
      */
-    private final SyncDeliverTasks m_deliver_task;
+    final SyncDeliverTasks m_deliver_task;
 
     /** A map of running threads currently delivering async events. */
-    private final Map m_running_threads = new HashMap();
+    final Map<Thread, TaskExecuter> m_running_threads = new HashMap<Thread, TaskExecuter>();
+
+    /** The counter for pending events */
+    final AtomicLong eventCount;
 
     /**
      * The constructor of the class that will use the asynchronous.
@@ -57,6 +62,17 @@ public class AsyncDeliverTasks
     {
         m_pool = pool;
         m_deliver_task = deliverTask;
+        eventCount = new AtomicLong();
+    }
+
+    /**
+     * Gets the number of events currently awaiting execution.
+     * 
+     * @return The number of events currently awaiting execution
+     */
+    public long getEventCount()
+    {
+        return eventCount.get();
     }
 
     /**
@@ -65,7 +81,7 @@ public class AsyncDeliverTasks
      * @param tasks The event handler dispatch tasks to execute
      *
      */
-    public void execute(final Collection tasks, final Event event)
+    public void execute(final Collection<EventHandlerProxy> tasks, final Event event)
     {
         /*
         final Iterator i = tasks.iterator();
@@ -89,7 +105,7 @@ public class AsyncDeliverTasks
             TaskExecuter executer = null;
             synchronized (m_running_threads )
             {
-                final TaskExecuter runningExecutor = (TaskExecuter)m_running_threads.get(currentThread);
+                final TaskExecuter runningExecutor = m_running_threads.get(currentThread);
                 if ( runningExecutor != null )
                 {
                     runningExecutor.add(tasks, event);
@@ -109,30 +125,33 @@ public class AsyncDeliverTasks
 
     private final class TaskExecuter implements Runnable
     {
-        private final List m_tasks = new LinkedList();
+        private final List<EventTask> m_tasks = new LinkedList<EventTask>();
 
         private final Object m_key;
 
-        public TaskExecuter(final Collection tasks, final Event event, final Object key)
+        public TaskExecuter(final Collection<EventHandlerProxy> tasks, final Event event, final Object key)
         {
             m_key = key;
-            m_tasks.add(new Object[] {tasks, event});
+            m_tasks.add(new EventTask(tasks, event));
+            eventCount.incrementAndGet();
         }
 
+        @Override
         public void run()
         {
             boolean running;
             do
             {
-                Object[] tasks = null;
+                EventTask eventTask = null;
                 synchronized ( m_tasks )
                 {
-                    tasks = (Object[]) m_tasks.remove(0);
+                    eventTask = m_tasks.remove(0);
                 }
-                m_deliver_task.execute((Collection)tasks[0], (Event)tasks[1], true);
+                eventCount.decrementAndGet();
+                m_deliver_task.execute(eventTask.tasks, eventTask.event, true);
                 synchronized ( m_running_threads )
                 {
-                    running = m_tasks.size() > 0;
+                    running = !m_tasks.isEmpty(); //  m_tasks.size() > 0;
                     if ( !running )
                     {
                         m_running_threads.remove(m_key);
@@ -141,12 +160,26 @@ public class AsyncDeliverTasks
             } while ( running );
         }
 
-        public void add(final Collection tasks, final Event event)
+        public void add(final Collection<EventHandlerProxy> tasks, final Event event)
         {
             synchronized ( m_tasks )
             {
-                m_tasks.add(new Object[] {tasks, event});
+                m_tasks.add(new EventTask(tasks, event));
             }
+            eventCount.incrementAndGet();
         }
     }
+
+    private final class EventTask {
+
+        final Collection<EventHandlerProxy> tasks;
+        final Event event;
+
+        EventTask(Collection<EventHandlerProxy> tasks, Event event) {
+            super();
+            this.tasks = tasks;
+            this.event = event;
+        }
+    }
+
 }

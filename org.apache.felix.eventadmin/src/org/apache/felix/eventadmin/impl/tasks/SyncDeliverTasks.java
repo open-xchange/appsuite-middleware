@@ -99,17 +99,18 @@ public class SyncDeliverTasks
      * event is send (or a timeout occurs).
      *
      * @param tasks The event handler dispatch tasks to execute
-     *
+     * @param event The event
+     * @param filterAsyncUnordered Signals unordered asynchronous execution
      */
-    public void execute(final Collection tasks, final Event event, final boolean filterAsyncUnordered)
+    public void execute(final Collection<EventHandlerProxy> tasks, final Event event, final boolean filterAsyncUnordered)
     {
         final Thread sleepingThread = Thread.currentThread();
         final SyncThread syncThread = sleepingThread instanceof SyncThread ? (SyncThread)sleepingThread : null;
 
-        final Iterator i = tasks.iterator();
+        final Iterator<EventHandlerProxy> i = tasks.iterator();
         while ( i.hasNext() )
         {
-            final EventHandlerProxy task = (EventHandlerProxy)i.next();
+            final EventHandlerProxy task = i.next();
 //            if ( !filterAsyncUnordered || task.isAsyncOrderedDelivery() )
 //            {
                 if ( !useTimeout(task) )
@@ -134,6 +135,7 @@ public class SyncDeliverTasks
                     final Rendezvous timerBarrier = new Rendezvous();
                     this.pool.executeTask(new Runnable()
                     {
+                        @Override
                         public void run()
                         {
                             try

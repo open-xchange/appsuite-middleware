@@ -20,7 +20,6 @@ package org.apache.felix.eventadmin.impl.handler;
 
 import java.util.Collection;
 import java.util.Iterator;
-
 import org.apache.felix.eventadmin.impl.security.PermissionsUtil;
 import org.apache.felix.eventadmin.impl.util.LogWrapper;
 import org.osgi.framework.Bundle;
@@ -43,7 +42,7 @@ import org.osgi.service.event.EventHandler;
 public class EventHandlerProxy {
 
     /** The service reference for the event handler. */
-    private final ServiceReference reference;
+    private final ServiceReference<EventHandler> reference;
 
     /** The handler context. */
     private final EventHandlerTracker.HandlerContext handlerContext;
@@ -73,7 +72,7 @@ public class EventHandlerProxy {
      * @param reference Reference to the EventHandler
      */
     public EventHandlerProxy(final EventHandlerTracker.HandlerContext context,
-                    final ServiceReference reference)
+                    final ServiceReference<EventHandler> reference)
     {
         this.handlerContext = context;
         this.reference = reference;
@@ -123,11 +122,11 @@ public class EventHandlerProxy {
         }
         else if (topicObj instanceof Collection)
         {
-            final Collection col = (Collection)topicObj;
+            final Collection<?> col = (Collection<?>) topicObj;
             final String[] values = new String[col.size()];
             int index = 0;
             // check if one value matches '*'
-            final Iterator i = col.iterator();
+            final Iterator<?> i = col.iterator();
             boolean matchAll = false;
             while ( i.hasNext() )
             {
@@ -212,7 +211,9 @@ public class EventHandlerProxy {
         Object delivery = reference.getProperty(EventConstants.EVENT_DELIVERY);
         if ( delivery instanceof Collection )
         {
-            delivery = ((Collection)delivery).toArray(new String[((Collection)delivery).size()]);
+            @SuppressWarnings("unchecked")
+            Collection<String> dcol = (Collection<String>) delivery;
+            delivery = dcol.toArray(new String[dcol.size()]);
         }
         if ( delivery instanceof String )
         {
@@ -280,7 +281,7 @@ public class EventHandlerProxy {
         {
             try
             {
-                this.handler = (EventHandler)this.handlerContext.bundleContext.getService(this.reference);
+                this.handler = this.handlerContext.bundleContext.getService(this.reference);
                 if ( this.handler != null )
                 {
                     this.checkTimeout(this.handler.getClass().getName());

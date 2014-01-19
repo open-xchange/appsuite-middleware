@@ -95,6 +95,7 @@ public class EventAdminImpl implements EventAdmin
      *
      * @see org.osgi.service.event.EventAdmin#postEvent(org.osgi.service.event.Event)
      */
+    @Override
     public void postEvent(final Event event)
     {
         m_postManager.execute(this.getTracker().getHandlers(event), event);
@@ -109,6 +110,7 @@ public class EventAdminImpl implements EventAdmin
      *
      * @see org.osgi.service.event.EventAdmin#sendEvent(org.osgi.service.event.Event)
      */
+    @Override
     public void sendEvent(final Event event)
     {
         m_sendManager.execute(this.getTracker().getHandlers(event), event, false);
