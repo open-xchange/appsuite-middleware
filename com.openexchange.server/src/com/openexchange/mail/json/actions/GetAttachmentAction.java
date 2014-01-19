@@ -50,6 +50,7 @@
 package com.openexchange.mail.json.actions;
 
 import static com.openexchange.java.Strings.toLowerCase;
+import static com.openexchange.mail.mime.MimeTypes.equalPrimaryTypes;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
@@ -460,21 +461,6 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
 
     private String getHash(final String folderPath, final String uid, final String sequenceId) {
         return HashUtility.getHash(new StringAllocator(32).append(folderPath).append('/').append(uid).append('/').append(sequenceId).toString(), "md5", "hex");
-    }
-
-    private String getPrimaryType(final String contentType) {
-        if (isEmpty(contentType)) {
-            return contentType;
-        }
-        final int pos = contentType.indexOf('/');
-        return pos > 0 ? contentType.substring(0, pos) : contentType;
-    }
-
-    private boolean equalPrimaryTypes(final String contentType1, final String contentType2) {
-        if (null == contentType1 || null == contentType2) {
-            return false;
-        }
-        return toLowerCase(getPrimaryType(contentType1)).startsWith(toLowerCase(getPrimaryType(contentType2)));
     }
 
 }

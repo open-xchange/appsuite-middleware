@@ -51,9 +51,6 @@ package com.openexchange.ajax.requesthandler.converters.preview;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
@@ -73,6 +70,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.preview.ContentTypeChecker;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewExceptionCodes;
@@ -281,17 +279,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
         result.setResultObject(responseFileHolder, "file");
     }
 
-    private static final Set<String> INVALIDS = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList(
-        "application/octet-stream",
-        "application/force-download",
-        "application/binary",
-        "application/x-download",
-        "application/vnd",
-        "application/vnd.ms-word.document.12n",
-        "application/vnd.ms-word.document.12",
-        "application/vnd.ms-word",
-        "application/odt",
-        "application/x-pdf")));
+    private static final Set<String> INVALIDS = MimeTypes.INVALIDS;
 
     private String getContentType(final IFileHolder fileHolder, final ContentTypeChecker checker) {
         String contentType = fileHolder.getContentType();
@@ -301,6 +289,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
         }
         // Cut to base type & sanitize
         contentType = sanitizeContentType(getLowerCaseBaseType(contentType));
+        contentType = MimeTypes.checkedMimeType(contentType, fileHolder.getName(), INVALIDS);
         if (INVALIDS.contains(contentType) || (null != checker && !checker.isValid(contentType))) {
             // Determine Content-Type by file name
             contentType = MimeType2ExtMap.getContentType(fileHolder.getName());
@@ -313,7 +302,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             return null;
         }
         try {
-            return new ContentType(contentType).toString();
+            return new ContentType(contentType).getBaseType();
         } catch (final OXException e) {
             return contentType;
         }

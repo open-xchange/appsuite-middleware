@@ -221,7 +221,7 @@ public final class MimeType2ExtMap {
      */
     public static String getContentType(final String fileName) {
         init();
-        if (null == fileName) {
+        if (Strings.isEmpty(fileName)) {
             return MIME_APPL_OCTET;
         }
         final String fn = Strings.unquote(fileName);
@@ -248,7 +248,7 @@ public final class MimeType2ExtMap {
      */
     public static String getContentTypeByExtension(final String extension) {
         init();
-        if (null == extension || 0 == extension.length()) {
+        if (Strings.isEmpty(extension)) {
             return MIME_APPL_OCTET;
         }
         final String type = typeMap.get(toLowerCase(extension));
@@ -258,7 +258,9 @@ public final class MimeType2ExtMap {
         return type;
     }
 
-    private static final List<String> DEFAULT_EXT = Collections.unmodifiableList(Arrays.asList("dat"));
+    private static final String DEFAULT_EXT = "dat";
+
+    private static final List<String> DEFAULT_EXTENSIONS = Collections.unmodifiableList(Arrays.asList(DEFAULT_EXT));
 
     /**
      * Gets the file extension for given MIME type.
@@ -268,11 +270,14 @@ public final class MimeType2ExtMap {
      */
     public static List<String> getFileExtensions(String mimeType) {
         init();
+        if (Strings.isEmpty(mimeType)) {
+            return DEFAULT_EXTENSIONS;
+        }
         if (!extMap.containsKey(toLowerCase(mimeType))) {
-            return DEFAULT_EXT;
+            return DEFAULT_EXTENSIONS;
         }
         final List<String> list = extMap.get(mimeType);
-        return null == list ? DEFAULT_EXT : Collections.unmodifiableList(list);
+        return null == list ? DEFAULT_EXTENSIONS : Collections.unmodifiableList(list);
     }
 
     /**
@@ -283,11 +288,14 @@ public final class MimeType2ExtMap {
      */
     public static String getFileExtension(String mimeType) {
         init();
+        if (Strings.isEmpty(mimeType)) {
+            return DEFAULT_EXT;
+        }
         if (!extMap.containsKey(toLowerCase(mimeType))) {
-            return "dat";
+            return DEFAULT_EXT;
         }
         final List<String> list = extMap.get(mimeType);
-        return null == list || list.isEmpty() ? "dat" : list.get(0);
+        return null == list || list.isEmpty() ? DEFAULT_EXT : list.get(0);
     }
 
     /**
