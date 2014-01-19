@@ -41,6 +41,7 @@ public class DefaultThreadPool
             this.setThreadFactory(new ThreadFactory()
             {
 
+                @Override
                 public Thread newThread( final Runnable command )
                 {
                     final Thread thread = new SyncThread( command );
@@ -56,6 +57,7 @@ public class DefaultThreadPool
             this.setThreadFactory(new ThreadFactory()
             {
 
+                @Override
                 public Thread newThread( final Runnable command )
                 {
                     final Thread thread = new Thread( command );

@@ -56,9 +56,11 @@ public class Rendezvous extends CyclicBarrier
         }
         catch (BrokenBarrierException ignore1)
         {
+            // Ignore
         }
         catch (InterruptedException ignore2)
         {
+            // Ignore
         }
     }
 
@@ -75,6 +77,7 @@ public class Rendezvous extends CyclicBarrier
         }
         catch (BrokenBarrierException ignore1)
         {
+            // Ignore
         }
         catch (TimeoutException te)
         {
@@ -83,6 +86,7 @@ public class Rendezvous extends CyclicBarrier
         }
         catch (InterruptedException ignore2)
         {
+            // Ignore
         }
     }
 }
