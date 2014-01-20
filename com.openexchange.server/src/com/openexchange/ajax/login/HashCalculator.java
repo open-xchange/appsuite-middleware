@@ -213,12 +213,12 @@ public class HashCalculator {
     }
 
     /**
-     *  Gets the <code>"User-Agent"</code> request header or an empty String if absent.
+     * Gets the <code>"User-Agent"</code> request header or an empty String if absent.
      *
      * @param req The request
      * @return The <code>"User-Agent"</code> request header or an empty String if absent
      */
-    private static String getUserAgent(final HttpServletRequest req) {
+    public static String getUserAgent(final HttpServletRequest req) {
         final String header = req.getHeader(Header.USER_AGENT);
         if (header == null) {
             return "";
