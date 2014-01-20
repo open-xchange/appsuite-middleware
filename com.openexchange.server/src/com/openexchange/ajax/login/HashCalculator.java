@@ -196,8 +196,8 @@ public class HashCalculator {
      * @return The calculated hash string
      */
     public String getUserAgentHash(final HttpServletRequest req, final String userAgent) {
-        final String sha256 = com.openexchange.tools.HashUtility.getSha256(null == userAgent ? getUserAgent(req) : userAgent, "hex");
-        return null == sha256 ? "" : sha256;
+        final String md5 = com.openexchange.tools.HashUtility.getMD5(null == userAgent ? getUserAgent(req) : userAgent, "hex");
+        return null == md5 ? "" : md5;
     }
 
     /**
@@ -213,12 +213,12 @@ public class HashCalculator {
     }
 
     /**
-     *  Gets the <code>"User-Agent"</code> request header or an empty String if absent.
+     * Gets the <code>"User-Agent"</code> request header or an empty String if absent.
      *
      * @param req The request
      * @return The <code>"User-Agent"</code> request header or an empty String if absent
      */
-    private static String getUserAgent(final HttpServletRequest req) {
+    public static String getUserAgent(final HttpServletRequest req) {
         final String header = req.getHeader(Header.USER_AGENT);
         if (header == null) {
             return "";

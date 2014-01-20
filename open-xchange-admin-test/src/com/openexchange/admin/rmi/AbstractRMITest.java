@@ -98,10 +98,6 @@ public abstract class AbstractRMITest extends AbstractTest {
         assertEquals("Both arrays should return the same IDs", set1, set2 );
     }
 
-    protected OXUserCopyInterface getUserMoveClient() throws MalformedURLException, RemoteException, NotBoundException {
-        return (OXUserCopyInterface) Naming.lookup(getRMIHostUrl() + OXUserCopyInterface.RMI_NAME);
-    }
-
     /*** Asserts for mandatory fields ***/
 
     public void assertUserEquals(User expected, User actual){

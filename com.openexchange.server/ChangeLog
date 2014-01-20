@@ -1,3 +1,16 @@
+* 2014-01-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30721: Explicitly connect when retrieving an account's root folder
+
+* 2014-01-20 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23480: Set autoReconnect for MySQL JDBC connections to false. Changed exception handling in database pooling to fall back to
+   master without throwing an exception to the calling code.
+
+* 2014-01-20 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30716: Evaluate more detailed permissions when checking if folder deletion is allowed 
+
 * 2014-01-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 30671: Fetch a cloned version of the CapabilitySet from "Capabilities" cache
@@ -9,6 +22,10 @@
 * 2014-01-16 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 30641: Recognize "FF D8 FF E2" byte signature as JPEG image
+
+* 2014-01-15 - steffen.templin@open-xchange.com
+
+ - Fix for bug 30441: Fixed resource cache to avoid flooding the file storage with unreferenced files.
 
 * 2014-01-15 - thorben.betten@open-xchange.com
 

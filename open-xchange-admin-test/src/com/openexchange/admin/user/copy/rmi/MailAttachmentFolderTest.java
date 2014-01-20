@@ -210,7 +210,7 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
 
     @Test
     public void testCopyWrongMailAttachments() throws Exception {
-        OXUserCopyInterface umi = getUserMoveClient();
+        OXUserCopyInterface umi = getUserCopyClient();
         User dstUser = umi.copyUser(srcUser, srcCtx, dstCtx, superAdminCredentials);
         dstUser = ui.getData(dstCtx, dstUser, getCredentials());
         System.err.println("DstUser: " + dstUser.getId() + "(" + dstCtx.getIdAsString() + ")");

@@ -90,5 +90,4 @@ public interface ConfigDatabaseService {
     int getServerId() throws OXException;
 
     String getServerName() throws OXException;
-
 }

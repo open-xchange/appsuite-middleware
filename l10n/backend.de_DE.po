@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-01-16 12:57+0100\n"
+"PO-Revision-Date: 2014-01-20 11:50+0100\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -7188,7 +7188,7 @@ msgid ""
 "of %2$s."
 msgstr ""
 "Anfrage abgelehnt. Die Größe (%1$s) übersteigt die maximal zulässige Größe "
-"von %2$d."
+"von %2$s."
 
 #. Missing parameter %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:85

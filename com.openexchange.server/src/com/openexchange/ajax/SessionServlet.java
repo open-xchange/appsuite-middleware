@@ -679,21 +679,10 @@ public abstract class SessionServlet extends AJAXServlet {
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
         if (null != cookies) {
             final String cookieName = getPublicSessionCookieName(req);
-            Cookie cookie = cookies.get(cookieName);
-            if (null == cookie) {
+            if (null == cookies.get(cookieName)) {
                 LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), LoginServlet.getLoginConfiguration());
-                 LOG.info("Restored public session cookie for \"{}\": {}", session.getLogin(), cookieName);
+                LOG.info("Restored public session cookie for \"{}\": {} (User-Agent: {})", session.getLogin(), cookieName, HashCalculator.getUserAgent(req));
             }
-//            else {
-//                final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
-//                if ((null != altId) && !altId.equals(cookie.getValue()) && (null == sessiondService.getSessionByAlternativeId(altId))) {
-//                    removeOXCookies(req, resp, Collections.singletonList(cookieName));
-//                    LoginServlet.writePublicSessionCookie(req, resp, session, req.isSecure(), req.getServerName(), LoginServlet.getLoginConfiguration());
-//                    if (INFO) {
-//                        LOG.info("Restored public session cookie for \"{}\": {}", session.getLogin(), cookieName);
-//                    }
-//                }
-//            }
         }
     }
 

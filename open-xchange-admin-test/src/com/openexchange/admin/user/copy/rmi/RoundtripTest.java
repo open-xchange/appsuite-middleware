@@ -160,7 +160,7 @@ public class RoundtripTest extends AbstractRMITest {
 
     public RoundtripTest() throws Exception {
         super();
-        oxu = getUserMoveClient();
+        oxu = getUserCopyClient();
     }
 
     @Override
