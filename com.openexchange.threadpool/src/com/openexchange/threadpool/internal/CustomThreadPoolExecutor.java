@@ -2015,7 +2015,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      *
      * @return The delayed work queue
      */
-    DelayedWorkQueue getDelayedWorkQueue() {
+    public DelayedWorkQueue getDelayedWorkQueue() {
         return delayedWorkQueue;
     }
 
