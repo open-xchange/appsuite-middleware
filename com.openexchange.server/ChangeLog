@@ -1,3 +1,7 @@
+* 2014-01-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30721: Explicitly connect when retrieving an account's root folder
+
 * 2014-01-20 - marcus.klein@open-xchange.com
 
  - Fix for bug 23480: Set autoReconnect for MySQL JDBC connections to false. Changed exception handling in database pooling to fall back to
