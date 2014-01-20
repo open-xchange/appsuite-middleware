@@ -326,7 +326,9 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
         if (DriveConstants.ROOT_PATH.equals(version.getPath())) {
             return false;
         }
-        return session.getStorage().getOwnPermission(version.getPath()).isAdmin();
+        FileStoragePermission ownPermission = session.getStorage().getOwnPermission(version.getPath());
+        return ownPermission.isAdmin() && (DriveConstants.EMPTY_MD5.equals(version.getChecksum()) ||
+                FileStoragePermission.DELETE_OWN_OBJECTS < ownPermission.getDeletePermission());
     }
 
     private boolean mayCreate(String parentPath) throws OXException {
