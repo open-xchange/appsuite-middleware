@@ -84,7 +84,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * client_db.setPoolInitial(5);
  * client_db.setPoolMax(100);
  * client_db.setUrl("jdbc:mysql://localhost/?useUnicode=true&characterEncoding=UTF-8&
- * autoReconnect=true&useUnicode=true&useServerPrepStmts=false&useTimezone=true&
+ * autoReconnect=false&useUnicode=true&useServerPrepStmts=false&useTimezone=true&
  * serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
  * client_db.setClusterWeight(100);
  *
@@ -259,7 +259,7 @@ public interface OXUtilInterface extends Remote {
      * client_db.setPoolHardLimit(20);
      * client_db.setPoolInitial(2);
      * client_db.setPoolMax(100);
-     * client_db.setUrl(&quot;jdbc:mysql://localhost/?useUnicode=true&amp;characterEncoding=UTF-8&amp;&quot; + &quot;autoReconnect=true&amp;useUnicode=true&amp;useServerPrepStmts=false&amp;useTimezone=true&amp;&quot; + &quot;serverTimezone=UTC&amp;connectTimeout=15000&amp;socketTimeout=15000&quot;);
+     * client_db.setUrl(&quot;jdbc:mysql://localhost/?useUnicode=true&amp;characterEncoding=UTF-8&amp;&quot; + &quot;autoReconnect=false&amp;useUnicode=true&amp;useServerPrepStmts=false&amp;useTimezone=true&amp;&quot; + &quot;serverTimezone=UTC&amp;connectTimeout=15000&amp;socketTimeout=15000&quot;);
      * </pre>
      *
      * </blockquote>

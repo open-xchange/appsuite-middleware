@@ -316,7 +316,7 @@ class UtilTests extends PHPUnit_Framework_TestCase {
         $db->name = "name_by_soap" . $random_id;
         $db->password = "password_by_soap." . $random_id;
         $db->login = "login_by_soap" . $random_id;
-        $db->url = "jdbc:mysql://soaphost" . $random_id . "/?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&useUnicode=true&useServerPrepStmts=false&useTimezone=true&serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000";
+        $db->url = "jdbc:mysql://soaphost" . $random_id . "/?useUnicode=true&characterEncoding=UTF-8&autoReconnect=false&useUnicode=true&useServerPrepStmts=false&useTimezone=true&serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000";
         $db->masterId = 0;
         $db->master = true;
         $db->clusterWeight = 100;
@@ -338,7 +338,7 @@ class UtilTests extends PHPUnit_Framework_TestCase {
         $db->name = "name_by_soap" . $random_id;
         $db->password = "password_by_soap." . $random_id;
         $db->login = "login_by_soap" . $random_id;
-        $db->url = "jdbc:mysql://soaphost" . $random_id . "/?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&useUnicode=true&useServerPrepStmts=false&useTimezone=true&serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000";
+        $db->url = "jdbc:mysql://soaphost" . $random_id . "/?useUnicode=true&characterEncoding=UTF-8&autoReconnect=false&useUnicode=true&useServerPrepStmts=false&useTimezone=true&serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000";
         $db->masterId = 0;
         $db->master = true;
         $db->clusterWeight = 100;

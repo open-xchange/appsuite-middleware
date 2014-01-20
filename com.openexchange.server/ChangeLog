@@ -1,3 +1,8 @@
+* 2014-01-20 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23480: Set autoReconnect for MySQL JDBC connections to false. Changed exception handling in database pooling to fall back to
+   master without throwing an exception to the calling code.
+
 * 2014-01-20 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 30716: Evaluate more detailed permissions when checking if folder deletion is allowed 
