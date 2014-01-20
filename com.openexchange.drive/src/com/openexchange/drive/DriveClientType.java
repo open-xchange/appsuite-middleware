@@ -81,7 +81,7 @@ public enum DriveClientType {
     /**
      * The Android mobile client
      */
-    ANDROID("ox-client.android.normal.hdpi"),
+    ANDROID("OpenXchange.Android.OXDrive"),
 
     /**
      * The .NET test drive client
