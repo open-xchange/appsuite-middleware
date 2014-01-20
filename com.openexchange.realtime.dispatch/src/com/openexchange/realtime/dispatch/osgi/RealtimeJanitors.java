@@ -47,52 +47,25 @@
  *
  */
 
-package com.openexchange.realtime.group.osgi;
+package com.openexchange.realtime.dispatch.osgi;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.conversion.simple.SimplePayloadConverter;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
-import com.openexchange.realtime.cleanup.RealtimeJanitor;
-import com.openexchange.realtime.dispatch.MessageDispatcher;
-import com.openexchange.realtime.group.GroupCommand;
-import com.openexchange.realtime.group.GroupDispatcher;
-import com.openexchange.realtime.group.GroupManager;
-import com.openexchange.realtime.group.conversion.GroupCommand2JSON;
-import com.openexchange.realtime.group.conversion.JSON2GroupCommand;
-import com.openexchange.realtime.payload.converter.PayloadTreeConverter;
-import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.realtime.cleanup.AbstractJanitors;
+/**
+ * {@link RealtimeJanitors}
+ *
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ */
+public class RealtimeJanitors extends AbstractJanitors {
+    
+    private static RealtimeJanitors instance = new RealtimeJanitors();
 
-
-public class RTGroupActivator extends HousekeepingActivator implements BundleActivator {
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[]{MessageDispatcher.class, PayloadTreeConverter.class, ThreadPoolService.class, GlobalRealtimeCleanup.class};
+    /**
+     * Return the instance of the RealtimeJanitors singleton
+     *
+     * @return the instance of the RealtimeJanitors singleton
+     */
+    public static RealtimeJanitors getInstance() {
+        return instance;
     }
-
-    @Override
-    protected void startBundle() throws Exception {
-        GroupServiceRegistry.SERVICES.set(this);
-        GroupDispatcher.GROUPMANAGER_REF.set(new GroupManager());
-
-        getService(PayloadTreeConverter.class).declarePreferredFormat(new ElementPath("group", "command"), GroupCommand.class.getName());
-
-        registerService(SimplePayloadConverter.class, new GroupCommand2JSON());
-        registerService(SimplePayloadConverter.class, new JSON2GroupCommand());
-        for(RealtimeJanitor realtimeJanitor : RealtimeJanitors.getInstance().getJanitors()) {
-            registerService(RealtimeJanitor.class, realtimeJanitor);
-        }
-
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        RealtimeJanitors.getInstance().cleanup();
-        GroupServiceRegistry.SERVICES.set(null);
-        GroupDispatcher.GROUPMANAGER_REF.set(null);
-    }
-
 }
+

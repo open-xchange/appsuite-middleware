@@ -84,6 +84,7 @@ public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup {
 
     @Override
     public void cleanForId(ID id) {
+        LOG.debug("Starting global realtime cleanup for ID: {}", id);
         try {
             Collection<ID> removeFromResourceDirectory = removeFromResourceDirectory(id);
             if(removeFromResourceDirectory.isEmpty()) {

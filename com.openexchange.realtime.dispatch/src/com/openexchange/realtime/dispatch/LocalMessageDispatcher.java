@@ -89,10 +89,4 @@ public interface LocalMessageDispatcher {
      */
     public void removeChannel(final Channel channel);
 
-    /**
-     * Get the gate associated with this MessageDispatcher
-     * @return the gate associated with this MessageDispatcher
-     */
-    public RealtimeJanitor getGate();
-
 }

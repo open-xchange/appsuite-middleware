@@ -78,6 +78,6 @@ public @NotThreadSafe interface ComponentHandle {
      * Get the id used to direct messages at this {@link ComponentHandle}
      * @return the id used to direct messages at this {@link ComponentHandle}
      */
-    ID getID();
+    ID getId();
 
 }

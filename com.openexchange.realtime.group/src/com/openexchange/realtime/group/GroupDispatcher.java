@@ -68,6 +68,7 @@ import com.openexchange.realtime.ComponentHandle;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.commands.LeaveCommand;
+import com.openexchange.realtime.group.osgi.GroupServiceRegistry;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.packet.Message;
@@ -76,7 +77,7 @@ import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.ActionHandler;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * A {@link GroupDispatcher} is a utility superclass for implmenting chat room like functionality. Clients can join and leave the chat room,
@@ -85,14 +86,15 @@ import com.openexchange.server.ServiceLookup;
  * the introspection magic.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class GroupDispatcher implements ComponentHandle, Evictable {
+
+public class GroupDispatcher implements ComponentHandle {
 
     /** The logger constant. */
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupDispatcher.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupDispatcher.class);
 
-    /** The <code>ServiceLookup</code> reference. */
-    public static final AtomicReference<ServiceLookup> SERVICE_REF = new AtomicReference<ServiceLookup>();
+    public static final AtomicReference<GroupManager> GROUPMANAGER_REF = new AtomicReference<GroupManager>();
 
     /** The collection of IDs that might be concurrently accessed */
     private final AtomicReference<Set<ID>> idsRef = new AtomicReference<Set<ID>>(Collections.<ID> emptySet());
@@ -100,7 +102,7 @@ public class GroupDispatcher implements ComponentHandle, Evictable {
     private final Map<ID, String> stamps = new ConcurrentHashMap<ID, String>();
 
     /** ID of the group */
-    private final ID id;
+    private final ID groupId;
 
     /** Sequence numer */
     private final AtomicLong sequenceNumber = new AtomicLong();
@@ -127,12 +129,11 @@ public class GroupDispatcher implements ComponentHandle, Evictable {
      */
     public GroupDispatcher(ID id, ActionHandler handler) {
         super();
-        this.id = id;
+        this.groupId = id;
         this.handler = handler;
         final AtomicReference<Set<ID>> idsRef = this.idsRef;
         id.on(ID.Events.DISPOSE, new IDEventHandler() {
 
-            Move this to implementation of evictable interface
             @Override
             public void handle(String event, ID id, Object source, Map<String, Object> properties) {
                 try {
@@ -168,7 +169,7 @@ public class GroupDispatcher implements ComponentHandle, Evictable {
      */
     @Override
     public void process(Stanza stanza) throws OXException {
-        stanza.trace("Arrived in group dispatcher: " + id);
+        stanza.trace("Arrived in group dispatcher: " + groupId);
         if (!handleGroupCommand(stanza)) {
             processStanza(stanza);
         }
@@ -214,7 +215,7 @@ public class GroupDispatcher implements ComponentHandle, Evictable {
      * Send a copy of the stanza to all members of this group, excluding the ones provided as the rest of the arguments.
      */
     public void relayToAll(Stanza stanza, Stanza inResponseTo, ID... excluded) throws OXException {
-        MessageDispatcher dispatcher = SERVICE_REF.get().getService(MessageDispatcher.class);
+        MessageDispatcher dispatcher = GroupServiceRegistry.getInstance().getService(MessageDispatcher.class);
         Set<ID> ex = new HashSet<ID>(Arrays.asList(excluded));
         // Iterate over snapshot
         for (ID id : idsRef.get()) {
@@ -250,7 +251,7 @@ public class GroupDispatcher implements ComponentHandle, Evictable {
      * Relay this message just to a specific receiver
      */
     public void relayToID(Stanza stanza, ID id) throws OXException {
-        MessageDispatcher dispatcher = SERVICE_REF.get().getService(MessageDispatcher.class);
+        MessageDispatcher dispatcher = GroupServiceRegistry.getInstance().getService(MessageDispatcher.class);
 
         // Send a copy of the stanza
         Stanza copy = copyFor(stanza, id);
@@ -263,7 +264,7 @@ public class GroupDispatcher implements ComponentHandle, Evictable {
      */
     public void send(Stanza stanza) throws OXException {
         stamp(stanza);
-        MessageDispatcher dispatcher = SERVICE_REF.get().getService(MessageDispatcher.class);
+        MessageDispatcher dispatcher = GroupServiceRegistry.getInstance().getService(MessageDispatcher.class);
 
         dispatcher.send(stanza);
     }
@@ -279,12 +280,14 @@ public class GroupDispatcher implements ComponentHandle, Evictable {
      */
     public void join(ID id, String stamp) {
         if (idsRef.get().contains(id)) {
+            LOG.info("{} is already a member of {}.", id, groupId);
             return;
         }
 
         beforeJoin(id);
 
         if (!mayJoin(id)) {
+            LOG.info("{} is already a member of {}.", id, groupId);
             return;
         }
 
@@ -302,17 +305,21 @@ public class GroupDispatcher implements ComponentHandle, Evictable {
             added = ids.add(id);
         } while (!idsRef.compareAndSet(expected, ids));
 
-        LOG.debug("joining:{}", id);
+        LOG.debug("{} is joining {},", id, groupId);
 
         stamps.put(id, stamp);
-        id.on(ID.Events.DISPOSE, LEAVE);
         if (first) {
             firstJoined(id);
         }
         if (added) {
+            GroupManager groupManager = GROUPMANAGER_REF.get();
+            if(groupManager == null) {
+                LOG.error("GroupManager reference unset.");
+            } else {
+                groupManager.add(id, groupId);
+            }
             onJoin(id);
         }
-        //TODO: add to global ID -> Groupchat directory
     }
 
     /**
@@ -322,9 +329,7 @@ public class GroupDispatcher implements ComponentHandle, Evictable {
     public void leave(ID id) throws OXException {
         beforeLeave(id);
 
-        LOG.debug("leaving: {}", id);
-
-        id.off(ID.Events.DISPOSE, LEAVE);
+        LOG.debug("{} is leaving {}", id, groupId);
 
         // Perform a compare-and-set to atomically remove
         boolean removed = false;
@@ -342,24 +347,32 @@ public class GroupDispatcher implements ComponentHandle, Evictable {
         stamps.remove(id);
 
         if (removed) {
+            GroupManager groupManager = GROUPMANAGER_REF.get();
+            if (groupManager == null) {
+                LOG.error("GroupManager reference unset.");
+            } else {
+                groupManager.remove(id, groupId);
+            }
             onLeave(id);
         }
 
-        //TODO: remove client from global ID -> Groupchat directory
         if (empty) {
-            //TODO: remove dispatcher from global ID -> Groupchat directory
             Map<String, Object> properties = new HashMap<String, Object>();
             properties.put("id", id);
             onDispose(id);
             isDisposed = true;
-            boolean disposed = this.id.dispose(this, properties);
+            boolean disposed = groupId.dispose(this, properties);
             /*
              * If nobody vetoed the disposal of this GroupDispatcher we have to issue a cluster wide cleanup to remove entries from
              * StanzaSequenceGate instances
              */
             if(disposed) {
-                GlobalRealtimeCleanup globalRealtimeCleanup = SERVICE_REF.get().getService(GlobalRealtimeCleanup.class);
-                globalRealtimeCleanup.cleanForId(this.id);
+                GlobalRealtimeCleanup globalRealtimeCleanup = GroupServiceRegistry.getInstance().getService(GlobalRealtimeCleanup.class);
+                if(globalRealtimeCleanup == null) {
+                    LOG.error("Unable to initiate global cleanup for {} cleanup", id, ServiceExceptionCode.serviceUnavailable(GlobalRealtimeCleanup.class));
+                } else {
+                    globalRealtimeCleanup.cleanForId(groupId);
+                }
             }
         }
     }
@@ -377,7 +390,7 @@ public class GroupDispatcher implements ComponentHandle, Evictable {
      */
     public void stamp(Stanza s) {
         s.setSelector(getStamp(s.getTo()));
-        s.setSequencePrincipal(id);
+        s.setSequencePrincipal(groupId);
         s.setSequenceNumber(sequenceNumber.getAndIncrement());
     }
 
@@ -391,8 +404,9 @@ public class GroupDispatcher implements ComponentHandle, Evictable {
     /**
      * Get the id of this group
      */
+    @Override
     public ID getId() {
-        return id;
+        return groupId;
     }
 
     /**
@@ -490,18 +504,6 @@ public class GroupDispatcher implements ComponentHandle, Evictable {
         LOG.error("Couldn't find matching handler for {}. \nUse default", stanza);
     }
 
-    private final IDEventHandler LEAVE = new IDEventHandler() {
-
-        @Override
-        public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-            try {
-                leave(id);
-            } catch (OXException e) {
-                LOG.error("Error while handling LEAVE for ID:{}", id, e);
-            }
-        }
-    };
-
     @Override
     public boolean shouldBeDoneInGlobalThread(Stanza stanza) {
         PayloadElement payload = stanza.getPayload();
@@ -532,11 +534,6 @@ public class GroupDispatcher implements ComponentHandle, Evictable {
         goodbye.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
                         new PayloadElement("Goodbye", "json", "group", "message")).build()));
         return goodbye;
-    }
-
-    @Override
-    public ID getID() {
-        return id;
     }
 
 }

@@ -446,7 +446,6 @@ public class ID implements Serializable {
         }
         List<IDEventHandler> handlerList = new ArrayList<IDEventHandler>(handlerList(event));
         for (IDEventHandler handler : handlerList) {
-            System.out.println("Handler: " + handler);
             handler.handle(event, this, source, properties);
         }
         if (event.equals("dispose")) {

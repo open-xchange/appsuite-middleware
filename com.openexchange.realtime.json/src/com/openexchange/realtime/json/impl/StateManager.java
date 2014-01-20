@@ -50,16 +50,13 @@
 package com.openexchange.realtime.json.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.realtime.cleanup.CleanupScope;
+import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.cleanup.RealtimeJanitor;
+import com.openexchange.realtime.json.osgi.JSONServiceRegistry;
 import com.openexchange.realtime.json.protocol.RTClientState;
 import com.openexchange.realtime.json.protocol.StanzaTransmitter;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.IDEventHandler;
 
 /**
  * The {@link StateManager} manages the state of connected clients.
@@ -88,16 +85,6 @@ public class StateManager implements RealtimeJanitor {
             RTClientState meantime = states.putIfAbsent(id, state);
             created = meantime == null;
             state = (created) ? state : meantime;
-            if (created) {
-                id.on(ID.Events.DISPOSE, new IDEventHandler() {
-
-                    @Override
-                    public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-                        states.remove(id);
-                        transmitters.remove(id);
-                    }
-                });
-            }
         }
         StanzaTransmitter transmitter = transmitters.get(id);
 
@@ -133,17 +120,14 @@ public class StateManager implements RealtimeJanitor {
     public void timeOutStaleStates(long timestamp) {
         for (RTClientState state : new ArrayList<RTClientState>(states.values())) {
             if (state.isTimedOut(timestamp)) {
-                LOG.debug("State for id {} is timed out. Last seen: {}", state.getId(), state.getLastSeen());
                 /*
-                 * Client could have been rerouted
-                 * if(rerouted) {
-                 *     the state should have been removed by the global cleanup already!
-                 * } else {
-                 *     remove from hazelcastdirectory
-                 *     globalcleanup
-                 * }
+                 * The client timed out: if he'd be still active and was just rerouted to another backend the cleanup would have already
+                 * happened during enrol on the other node. As we reached this code there was no cleanup yet and we still have to do
+                 * it cluster-wide.
                  */
-                state.getId().dispose(this, null);
+                LOG.debug("State for id {} is timed out. Last seen: {}", state.getId(), state.getLastSeen());
+                GlobalRealtimeCleanup globalRealtimeCleanup = JSONServiceRegistry.getInstance().getService(GlobalRealtimeCleanup.class);
+                globalRealtimeCleanup.cleanForId(state.getId());
             } else {
                 state.getId().trigger(ID.Events.REFRESH, this);
             }

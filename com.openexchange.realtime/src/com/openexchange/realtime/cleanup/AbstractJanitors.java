@@ -47,52 +47,66 @@
  *
  */
 
-package com.openexchange.realtime.group.osgi;
+package com.openexchange.realtime.cleanup;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.conversion.simple.SimplePayloadConverter;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
-import com.openexchange.realtime.cleanup.RealtimeJanitor;
-import com.openexchange.realtime.dispatch.MessageDispatcher;
-import com.openexchange.realtime.group.GroupCommand;
-import com.openexchange.realtime.group.GroupDispatcher;
-import com.openexchange.realtime.group.GroupManager;
-import com.openexchange.realtime.group.conversion.GroupCommand2JSON;
-import com.openexchange.realtime.group.conversion.JSON2GroupCommand;
-import com.openexchange.realtime.payload.converter.PayloadTreeConverter;
-import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.threadpool.ThreadPoolService;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.ConcurrentHashSet;
 
+/**
+ * {@link AbstractJanitors} - Collection of RealtimeJanitors on bundle level.
+ *
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ */
+public abstract class AbstractJanitors {
 
-public class RTGroupActivator extends HousekeepingActivator implements BundleActivator {
+    private final Set<RealtimeJanitor> janitors;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[]{MessageDispatcher.class, PayloadTreeConverter.class, ThreadPoolService.class, GlobalRealtimeCleanup.class};
+    /**
+     * Initializes a new {@link AbstractJanitor}.
+     *
+     * @param janitors
+     */
+    protected AbstractJanitors() {
+        super();
+        janitors = new ConcurrentHashSet<RealtimeJanitor>();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        GroupServiceRegistry.SERVICES.set(this);
-        GroupDispatcher.GROUPMANAGER_REF.set(new GroupManager());
-
-        getService(PayloadTreeConverter.class).declarePreferredFormat(new ElementPath("group", "command"), GroupCommand.class.getName());
-
-        registerService(SimplePayloadConverter.class, new GroupCommand2JSON());
-        registerService(SimplePayloadConverter.class, new JSON2GroupCommand());
-        for(RealtimeJanitor realtimeJanitor : RealtimeJanitors.getInstance().getJanitors()) {
-            registerService(RealtimeJanitor.class, realtimeJanitor);
-        }
-
+    /**
+     * Reset all states to uninitialized.
+     */
+    public void cleanup() throws OXException {
+        janitors.clear();
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        RealtimeJanitors.getInstance().cleanup();
-        GroupServiceRegistry.SERVICES.set(null);
-        GroupDispatcher.GROUPMANAGER_REF.set(null);
+    /**
+     * Add a new RealtimeJanitor
+     *
+     * @param janitor The {@link RealimteJanitor} to add
+     * @return true if the object was successfully added, false if an Object with the same name already exists.
+     */
+    public boolean addJanitor(RealtimeJanitor janitor) {
+        return janitors.add(janitor);
+    }
+
+    /**
+     * Remove a RealtimeJanitor
+     *
+     * @param janitor The {@link RealimteJanitor} to remove
+     * @return true if the object was successfully removed
+     */
+    public boolean removeJanitor(RealtimeJanitor janitor) {
+        return janitors.remove(janitor);
+    }
+    
+    /**
+     * Get an unmodifiable view of the currently known {@link RealtimeJanitor}s.
+     * @return an unmodifiable {@link Collection} containing the currently known {@link RealtimeJanitor}s.
+     */
+    public Collection<RealtimeJanitor> getJanitors() {
+        return Collections.unmodifiableCollection(janitors);
     }
 
 }

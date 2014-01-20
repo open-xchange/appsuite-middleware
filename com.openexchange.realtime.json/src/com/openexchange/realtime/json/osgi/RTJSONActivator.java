@@ -58,6 +58,7 @@ import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.management.ManagementService;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
+import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.exception.RealtimeException;
@@ -139,11 +140,19 @@ public class RTJSONActivator extends AJAXModuleActivator {
 
         getService(CapabilityService.class).declareCapability("rt");
         managementHouseKeeper.exposeManagementObjects();
+
+        /*
+         * Register all RealtimeJanitor services contained in this bundle
+         */
+        for(RealtimeJanitor realtimeJanitor : RealtimeJanitors.getInstance().getJanitors()) {
+            registerService(RealtimeJanitor.class, realtimeJanitor);
+        }
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
         ManagementHouseKeeper.getInstance().cleanup();
+        RealtimeJanitors.getInstance().cleanup();
         unregisterService(realtimeActions);
         JSONServiceRegistry.SERVICES.set(null);
         super.stop(context);

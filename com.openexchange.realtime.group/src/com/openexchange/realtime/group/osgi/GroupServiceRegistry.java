@@ -49,50 +49,41 @@
 
 package com.openexchange.realtime.group.osgi;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.conversion.simple.SimplePayloadConverter;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
-import com.openexchange.realtime.cleanup.RealtimeJanitor;
-import com.openexchange.realtime.dispatch.MessageDispatcher;
-import com.openexchange.realtime.group.GroupCommand;
-import com.openexchange.realtime.group.GroupDispatcher;
-import com.openexchange.realtime.group.GroupManager;
-import com.openexchange.realtime.group.conversion.GroupCommand2JSON;
-import com.openexchange.realtime.group.conversion.JSON2GroupCommand;
-import com.openexchange.realtime.payload.converter.PayloadTreeConverter;
-import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.threadpool.ThreadPoolService;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
+/**
+ * {@link GroupServiceRegistry} - Singleton that acts as central accesspoint for classes of the bundle.
+ *
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ */
+public class GroupServiceRegistry implements ServiceLookup {
 
-public class RTGroupActivator extends HousekeepingActivator implements BundleActivator {
+    private static final GroupServiceRegistry INSTANCE = new GroupServiceRegistry();
+    public static AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[]{MessageDispatcher.class, PayloadTreeConverter.class, ThreadPoolService.class, GlobalRealtimeCleanup.class};
+    /**
+     * Encapsulated constructor.
+     */
+    private GroupServiceRegistry() {
+    }
+
+    /**
+     * Get the Registry singleton.
+     *
+     * @return the Registry singleton
+     */
+    public static GroupServiceRegistry getInstance() {
+        return INSTANCE;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        GroupServiceRegistry.SERVICES.set(this);
-        GroupDispatcher.GROUPMANAGER_REF.set(new GroupManager());
-
-        getService(PayloadTreeConverter.class).declarePreferredFormat(new ElementPath("group", "command"), GroupCommand.class.getName());
-
-        registerService(SimplePayloadConverter.class, new GroupCommand2JSON());
-        registerService(SimplePayloadConverter.class, new JSON2GroupCommand());
-        for(RealtimeJanitor realtimeJanitor : RealtimeJanitors.getInstance().getJanitors()) {
-            registerService(RealtimeJanitor.class, realtimeJanitor);
-        }
-
+    public <S> S getService(Class<? extends S> clazz) {
+        return SERVICES.get().getService(clazz);
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        RealtimeJanitors.getInstance().cleanup();
-        GroupServiceRegistry.SERVICES.set(null);
-        GroupDispatcher.GROUPMANAGER_REF.set(null);
+    public <S> S getOptionalService(Class<? extends S> clazz) {
+        return SERVICES.get().getOptionalService(clazz);
     }
-
 }

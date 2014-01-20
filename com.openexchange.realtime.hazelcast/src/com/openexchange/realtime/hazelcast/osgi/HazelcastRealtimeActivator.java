@@ -62,6 +62,7 @@ import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
+import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
@@ -151,6 +152,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         
         directory.addChannel(globalDispatcher.getChannel());
         managementHouseKeeper.exposeManagementObjects();
+        registerService(RealtimeJanitor.class, globalDispatcher);
     }
 
     @Override

@@ -62,6 +62,7 @@ import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.json.management.ManagementHouseKeeper;
 import com.openexchange.realtime.json.osgi.JSONServiceRegistry;
+import com.openexchange.realtime.json.osgi.RealtimeJanitors;
 import com.openexchange.realtime.json.protocol.RTProtocol;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
@@ -79,7 +80,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class RTJSONHandler implements StanzaSender {
 
-    protected final StateManager stateManager = new StateManager();
+    protected final StateManager stateManager;
     protected final RTProtocol protocol;
     protected final StanzaSequenceGate gate;
 
@@ -87,6 +88,8 @@ public class RTJSONHandler implements StanzaSender {
 
     public RTJSONHandler() {
         super();
+        stateManager = new StateManager();
+        RealtimeJanitors.getInstance().addJanitor(stateManager);
         protocol = RTProtocolImpl.getInstance();
         gate = new StanzaSequenceGate(RTJSONHandler.class.getSimpleName()) {
 
@@ -96,6 +99,7 @@ public class RTJSONHandler implements StanzaSender {
             }
         };
         ManagementHouseKeeper.getInstance().addManagementObject(gate.getManagementObject());
+        RealtimeJanitors.getInstance().addJanitor(gate);
         protocolHandler = new JSONProtocolHandler(protocol, gate);
         startCleanupTimer();
     }

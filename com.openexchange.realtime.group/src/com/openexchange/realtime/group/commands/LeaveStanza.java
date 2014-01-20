@@ -47,52 +47,35 @@
  *
  */
 
-package com.openexchange.realtime.group.osgi;
+package com.openexchange.realtime.group.commands;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.conversion.simple.SimplePayloadConverter;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
-import com.openexchange.realtime.cleanup.RealtimeJanitor;
-import com.openexchange.realtime.dispatch.MessageDispatcher;
-import com.openexchange.realtime.group.GroupCommand;
-import com.openexchange.realtime.group.GroupDispatcher;
-import com.openexchange.realtime.group.GroupManager;
-import com.openexchange.realtime.group.conversion.GroupCommand2JSON;
-import com.openexchange.realtime.group.conversion.JSON2GroupCommand;
-import com.openexchange.realtime.payload.converter.PayloadTreeConverter;
-import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Message;
+import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.payload.PayloadTreeNode;
 
+/**
+ * {@link LeaveStanza} - Message containing a {@link LeaveCommand} wich can be send to a group to signal a leaving client.
+ *
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ */
 
-public class RTGroupActivator extends HousekeepingActivator implements BundleActivator {
+public class LeaveStanza extends Message {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[]{MessageDispatcher.class, PayloadTreeConverter.class, ThreadPoolService.class, GlobalRealtimeCleanup.class};
-    }
+    private static final long serialVersionUID = -5652689517169221820L;
 
-    @Override
-    protected void startBundle() throws Exception {
-        GroupServiceRegistry.SERVICES.set(this);
-        GroupDispatcher.GROUPMANAGER_REF.set(new GroupManager());
-
-        getService(PayloadTreeConverter.class).declarePreferredFormat(new ElementPath("group", "command"), GroupCommand.class.getName());
-
-        registerService(SimplePayloadConverter.class, new GroupCommand2JSON());
-        registerService(SimplePayloadConverter.class, new JSON2GroupCommand());
-        for(RealtimeJanitor realtimeJanitor : RealtimeJanitors.getInstance().getJanitors()) {
-            registerService(RealtimeJanitor.class, realtimeJanitor);
-        }
-
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        RealtimeJanitors.getInstance().cleanup();
-        GroupServiceRegistry.SERVICES.set(null);
-        GroupDispatcher.GROUPMANAGER_REF.set(null);
+    /**
+     * 
+     * Initializes a new {@link LeaveStanza}.
+     * @param from The sender
+     * @param to The recipient
+     * @param enabled true if the client should start injecting tracing ids into it's stanzas, false if it should stop
+     */
+    public LeaveStanza(ID from, ID to) {
+        super();
+        setTo(to);
+        setFrom(from);
+        addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload("leave", "json", "group", "command").build()));
     }
 
 }
