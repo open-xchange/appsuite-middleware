@@ -196,8 +196,8 @@ public class HashCalculator {
      * @return The calculated hash string
      */
     public String getUserAgentHash(final HttpServletRequest req, final String userAgent) {
-        final String sha256 = com.openexchange.tools.HashUtility.getSha256(null == userAgent ? getUserAgent(req) : userAgent, "hex");
-        return null == sha256 ? "" : sha256;
+        final String md5 = com.openexchange.tools.HashUtility.getMD5(null == userAgent ? getUserAgent(req) : userAgent, "hex");
+        return null == md5 ? "" : md5;
     }
 
     /**
