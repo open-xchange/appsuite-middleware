@@ -394,12 +394,8 @@ public class ContextTest extends AbstractTest {
         // then check if a database is in db for the new ctx, if not register
         // database first,
         // THEN we can add the context with its data
-        String dbhost = "localhost";
-        if(System.getProperty("rmi_test_dbhost")!=null){
-            dbhost = System.getProperty("rmi_test_dbhost");
-        }        
         if (oxu.listDatabase("test-ox-db", cred).length == 0) {
-            Database db = UtilTest.getTestDatabaseObject(dbhost, "test-ox-db");
+            Database db = UtilTest.getTestDatabaseObject("localhost", "test-ox-db");
             oxu.registerDatabase(db, cred);
         }
         

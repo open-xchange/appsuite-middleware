@@ -72,7 +72,8 @@ import org.junit.runners.Suite.SuiteClasses;
     ResourceTest.class,
     TaskMgmtTest.class,
     UserTest.class,
-    UtilTest.class
+    UtilTest.class,
+    UtilDatabaseTest.class
 })
 public class AdminRmiTestSuite {
 
