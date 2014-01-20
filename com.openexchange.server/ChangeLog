@@ -10,6 +10,10 @@
 
  - Fix for bug 30641: Recognize "FF D8 FF E2" byte signature as JPEG image
 
+* 2014-01-15 - steffen.templin@open-xchange.com
+
+ - Fix for bug 30441: Fixed resource cache to avoid flooding the file storage with unreferenced files.
+
 * 2014-01-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 30643: Don't conflict with same folder on duplicate check
