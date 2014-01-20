@@ -3,5 +3,6 @@
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.bundles"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.system.extension"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,org.apache.felix.eventadmin"/>
 </provider>
 </psf>
