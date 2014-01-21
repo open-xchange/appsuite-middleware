@@ -216,8 +216,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private final int contextId;
 
     private volatile Future<Object> imapIdleFuture;
-    private volatile IMAPStore imapStore;
-    private volatile IMAPFolder imapFolder;
+    private volatile IMAPFolder imapFolderInUse;
 
     private MailService mailService;
 
@@ -401,20 +400,11 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             LOG.info("stopping IDLE for Context: {}, Login: {}", Integer.valueOf(contextId), (null == session ? "unknown" : session.getLoginName()), new Throwable("Closing IMAP IDLE push listener"));
         }
         // Close IMAP resources, too
-        final IMAPFolder imapFolder = this.imapFolder;
-        if (null != imapFolder) {
-            this.imapFolder = null;
+        final IMAPFolder imapFolderInUse = this.imapFolderInUse;
+        if (null != imapFolderInUse) {
+            this.imapFolderInUse = null;
             try {
-                imapFolder.close(false);
-            } catch (final Exception e) {
-                // Ignore
-            }
-        }
-        final IMAPStore imapStore = this.imapStore;
-        if (null != imapStore) {
-            this.imapStore = null;
-            try {
-                imapStore.close();
+                imapFolderInUse.close(false);
             } catch (final Exception e) {
                 // Ignore
             }
@@ -523,9 +513,8 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 istore = (IMAPFolderStorage) fstore;
             }
             imapStore = istore.getImapStore();
-            this.imapStore = imapStore;
             final IMAPFolder inbox = (IMAPFolder) imapStore.getFolder(folder);
-            this.imapFolder = inbox;
+            this.imapFolderInUse = inbox;
             try {
                 inbox.open(Folder.READ_WRITE);
                 if (isDebugEnabled()) {
@@ -599,7 +588,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                  * if e.g. cyrus client timeout happens (idling for too long)
                  */
             } finally {
-                this.imapFolder = null;
+                this.imapFolderInUse = null;
                 inbox.close(false);
             }
             error = false;
@@ -626,17 +615,6 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             dropSessionRef(false);
             sleep(errDelay, e);
         } finally {
-            if (null != imapStore) {
-                this.imapStore = null;
-                if (error) {
-                    try {
-                        imapStore.close();
-                    } catch (final Exception e) {
-                        // Ingore
-                    }
-                }
-                imapStore = null;
-            }
             if (null != mailAccess) {
                 mailAccess.close(false);
                 mailAccess = null;
