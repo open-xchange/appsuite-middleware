@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Monitoring for Apache Felix EventAdmin implementation
+Bundle-SymbolicName: org.apache.felix.eventadmin.monitoring
+Bundle-Version: 7.4.2
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.exception,
+ com.openexchange.management,
+ org.apache.felix.eventadmin,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j,
+ javax.management
+Bundle-Activator: org.apache.felix.eventadmin.monitoring.Activator
