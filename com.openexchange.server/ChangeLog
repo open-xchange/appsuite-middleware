@@ -10,6 +10,7 @@
 
  - Second fix for bug 30684: Ensure IMAP-IDLE push listener is gracefully shut-down on permanent authentication failures
  - Fix for bug 30739: Added null guard to avoid NPE and enhanced affected routine by some logging to detect what went wrong
+ - Fix for bug 30680: Support for several bogus "Content-Disposition" header values
 
 * 2014-01-20 - thorben.betten@open-xchange.com
 
