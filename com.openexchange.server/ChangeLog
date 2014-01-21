@@ -1,3 +1,7 @@
+* 2014-01-21 - marc.arens@open-xchange.com
+
+ - Fix for bug 30737: Proper null check and test case
+ 
 * 2014-01-21 - thorben.betten@open-xchange.com
 
  - Second fix for bug 30684: Ensure IMAP-IDLE push listener is gracefully shut-down on permanent authentication failures
@@ -15,6 +19,10 @@
 
  - Fix for bug 30716: Evaluate more detailed permissions when checking if folder deletion is allowed 
 
+* 2014-01-17 - marc.arens@open-xchange.com
+
+ - Fix for bug 30540: Fix race condition in grizzly framework
+ 
 * 2014-01-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 30671: Fetch a cloned version of the CapabilitySet from "Capabilities" cache

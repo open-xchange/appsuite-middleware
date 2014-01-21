@@ -49,75 +49,53 @@
 
 package com.openexchange.realtime.json.util;
 
-import java.util.List;
+import static org.junit.Assert.assertEquals;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
-import org.json.JSONObject;
-import com.openexchange.realtime.json.actions.RTAction;
+import org.junit.Before;
+import org.junit.Test;
 
 
 /**
- * {@link RTResultFormatter} Format a Realtime JSON Result.
+ * {@link RTResultFormatterTest}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class RTResultFormatter {
+public class RTResultFormatterTest {
 
-    @SuppressWarnings("unchecked")
-    public static String format(Map<String, Object> resultMap) {
-        StringBuilder formatter = new StringBuilder(1024);
-
-        formatter.append("Result: {").append("\n");
-
-        List<Long> acknowledgements = (List<Long>) resultMap.get(RTAction.ACKS);
-        formatter.append("\tacks:").append("\n");
-        if(acknowledgements == null) {
-            formatter.append("\t\t[]").append("\n");
-        } else {
-            formatter.append("\t\t").append(acknowledgements.toString()).append("\n");
-        }
-
-        JSONObject error = (JSONObject) resultMap.get(RTAction.ERROR);
-        formatter.append("\terror:").append("\n");
-        if(error == null) {
-            formatter.append("\t\t").append("none").append("\n");
-        } else {
-            formatter.append("\t\t").append(shortenOutput(error.toString())).append("\n");
-        }
-
-        JSONObject result = (JSONObject) resultMap.get(RTAction.RESULT);
-        formatter.append("\tresult:").append("\n");
-        if(result == null) {
-            formatter.append("\t\t").append("none").append("\n");
-        } else {
-            formatter.append("\t\t").append(shortenOutput(result.toString())).append("\n");
-        }
-
-        List<JSONObject> stanzas = (List<JSONObject>) resultMap.get(RTAction.STANZAS);
-        formatter.append("\tstanzas:").append("\n");
-        if(stanzas == null || stanzas.isEmpty()) {
-            formatter.append("\t\t{}").append("\n");
-        } else {
-            for (JSONObject stanza : stanzas) {
-                formatter.append("\t\t").append(shortenOutput(stanza.toString())).append("\n");
-            }
-        }
-
-        formatter.append("}").append("\n");
-
-        return formatter.toString();
+    private Map<String, Object> emptyMap;
+    private String TOO_LONG;
+    private final static String EMPTYMAP =  "Result: {\n\tacks:\n\t\t[]\n\terror:\n\t\tnone\n\tresult:\n\t\tnone\n\tstanzas:\n\t\t{}\n}\n";
+    
+    @Before
+    public void setUp() throws Exception {
+        emptyMap = new HashMap<String, Object>();
+        char[] toFill = new char[600];
+        Arrays.fill(toFill, 'A');
+        TOO_LONG = new String(toFill);
     }
 
     /**
-     * Shorten given String to 500 characters and add '...' as ellipsis.
-     * 
-     * @param input the input string
-     * @return the maybe shortened input string
+     * Test method for {@link com.openexchange.realtime.json.util.RTResultFormatter#format(java.util.Map)}.
      */
-    public static String shortenOutput(String input) {
-        if (input.length() > 500) {
-            return input.substring(0, 500) + "...";
-        } else {
-            return input;
-        }
+    @Test
+    public void testFormatEmptyMap() {
+        String format = RTResultFormatter.format(emptyMap);
+        System.out.println(format);
+        assertEquals("Empty Map didn't match expected format",EMPTYMAP, format);
     }
+
+    /**
+     * Test method for {@link com.openexchange.realtime.json.util.RTResultFormatter#shortenOutput(java.lang.String)}.
+     */
+    @Test
+    public void testShortenOutput() {
+        String shortenedOutput = RTResultFormatter.shortenOutput(TOO_LONG);
+        char[] fivehundredA = new char[500];
+        Arrays.fill(fivehundredA, 'A');
+        String expected = new String(fivehundredA) + "...";
+        assertEquals("TOO_LONG should have been shortened", expected, shortenedOutput);
+    }
+
 }
