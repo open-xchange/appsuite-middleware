@@ -70,7 +70,6 @@ import javax.mail.internet.MimeMultipart;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Charsets;
 import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -642,17 +641,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
     /** Gets the multipart content from specified part. */
     private static Multipart getMultipartContentFrom(final Part part, final String contentType) throws MessagingException, IOException {
-        final Object content = part.getContent();
-        if (content instanceof Multipart) {
-            return (Multipart) content;
-        }
-        if (content instanceof InputStream) {
-            return new MimeMultipart(new MessageDataSource((InputStream) content, contentType));
-        }
-        if (content instanceof String) {
-            return new MimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(((String) content).getBytes(Charsets.ISO_8859_1)), contentType));
-        }
-        return null;
+        return MimeMessageUtility.getMultipartContentFrom(part, contentType);
     }
 
     /**
@@ -811,6 +800,9 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * @throws IOException If an I/O error occurs
      */
     private static MimeBodyPart createBodyMultipart(final InputStream data, final String contentType) throws MessagingException, IOException {
+        if (null == data) {
+            return null;
+        }
         final MimeBodyPart mimeBodyPart = new MimeBodyPart();
         MessageUtility.setContent(new MimeMultipart(new MessageDataSource(data, contentType)), mimeBodyPart);
         // mimeBodyPart.setContent(new MimeMultipart(new MessageDataSource(data, contentType)));
@@ -847,6 +839,9 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * @throws IOException If an I/O error occurs
      */
     private static InputStream getStreamFromPart(final Part part) throws IOException {
+        if (null == part) {
+            return null;
+        }
         final PipedOutputStream pos = new PipedOutputStream();
         final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
 
@@ -884,6 +879,9 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * @throws IOException If an I/O error occurs
      */
     private static InputStream getStreamFromMultipart(final Multipart multipart) throws IOException {
+        if (null == multipart) {
+            return null;
+        }
         final PipedOutputStream pos = new PipedOutputStream();
         final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
 

@@ -85,6 +85,7 @@ import java.util.regex.Pattern;
 import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Header;
+import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
@@ -2016,6 +2017,9 @@ public final class MimeMessageUtility {
      * @throws OXException If detecting charset fails
      */
     public static String getCharset(final MailPart mailPart, final ContentType contentType) throws OXException {
+        if (null == mailPart) {
+            return null;
+        }
         final String charset;
         if (mailPart.containsHeader(HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();
@@ -2058,6 +2062,9 @@ public final class MimeMessageUtility {
      * @throws IOException If reading content fails with an I/O error
      */
     public static String readContent(final MailPart mailPart, final ContentType contentType) throws OXException, IOException {
+        if (null == mailPart) {
+            return null;
+        }
         /*
          * Read content
          */
@@ -2104,6 +2111,9 @@ public final class MimeMessageUtility {
      * @throws IOException If an I/O error occurs
      */
     public static InputStream getStreamFromPart(final Part part) throws IOException {
+        if (null == part) {
+            return null;
+        }
         final PipedOutputStream pos = new PipedOutputStream();
         final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
 
@@ -2138,6 +2148,9 @@ public final class MimeMessageUtility {
      * @throws OXException If an I/O error occurs
      */
     public static InputStream getStreamFromMailPart(final MailPart part) throws OXException {
+        if (null == part) {
+            return null;
+        }
         try {
             final PipedOutputStream pos = new PipedOutputStream();
             final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
@@ -2187,6 +2200,25 @@ public final class MimeMessageUtility {
         if (null == contentType || !toLowerCase(contentType).startsWith("multipart/")) {
             return null;
         }
+        return getMultipartContentFrom(part, contentType);
+    }
+
+    /**
+     * Gets the multipart content from specified part.
+     *
+     * @param part The part
+     * @param contentType The <code>Content-Type</code> header value
+     * @return The multipart or <code>null</code>
+     * @throws MessagingException If a messaging error occurs
+     * @throws IOException If an I/O error occurs
+     */
+    public static Multipart getMultipartContentFrom(final Part part, final String contentType) throws MessagingException, IOException {
+        if (null == part) {
+            return null;
+        }
+        if (null == contentType || !toLowerCase(contentType).startsWith("multipart/")) {
+            return null;
+        }
         final Object content = part.getContent();
         if (content instanceof Multipart) {
             return (Multipart) content;
@@ -2194,9 +2226,13 @@ public final class MimeMessageUtility {
         if (content instanceof InputStream) {
             return new MimeMultipart(new MessageDataSource((InputStream) content, contentType));
         }
+        if (content instanceof Message) {
+            return getMultipartContentFrom((Message) content);
+        }
         if (content instanceof String) {
             return new MimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(((String) content).getBytes(Charsets.ISO_8859_1)), contentType));
         }
+        LOG.warn("Unable to retrieve multipart content fromt part with Content-Type={}. Conent signals to be {}.", contentType, null == content ? "null" : content.getClass().getName());
         return null;
     }
 
@@ -2208,6 +2244,9 @@ public final class MimeMessageUtility {
      * @throws MessagingException If an error occurs in part's getter methods
      */
     public static String detectPartCharset(final Part p) throws MessagingException {
+        if (null == p) {
+            return null;
+        }
         try {
             return CharsetDetector.detectCharset(p.getInputStream());
         } catch (final IOException e) {
