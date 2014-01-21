@@ -110,6 +110,9 @@ public class StatisticTools extends AbstractJMXTools {
     private static final char OPT_MEMORY_THREADS_STATS_SHORT = 'm';
     private static final String OPT_MEMORY_THREADS_STATS_LONG = "memory";
 
+    private static final char OPT_EVENT_ADMIN_STATS_SHORT = 'e';
+    private static final String OPT_EVENT_ADMIN_STATS_LONG = "eventstats";
+
     private static final char OPT_GC_STATS_SHORT = 'z';
 
     private static final String OPT_GC_STATS_LONG = "gcstats";
@@ -139,6 +142,7 @@ public class StatisticTools extends AbstractJMXTools {
     private CLIOption grizzlyStats = null;
     private CLIOption documentconverterstats = null;
     private CLIOption officestats = null;
+    private CLIOption eventadminstats = null;
 
     /**
      * Option for garbage collection statistics
@@ -195,6 +199,10 @@ public class StatisticTools extends AbstractJMXTools {
             System.out.print(showGcData(mbc));
             count++;
         }
+        if (null != parser.getOptionValue(this.eventadminstats) && 0 == count) {
+            System.out.print(showEventAdminData(mbc));
+            count++;
+        }
         if (null != parser.getOptionValue(this.allstats) && 0 == count) {
             System.out.print(showOXData(mbc));
             System.out.print(getStats(mbc, "com.openexchange.sessiond", "name", "SessionD Toolkit"));
@@ -206,6 +214,7 @@ public class StatisticTools extends AbstractJMXTools {
             System.out.print(showGrizzlyData(mbc));
             System.out.print(showGcData(mbc));
             System.out.print(getStats(mbc, "com.openexchange.usm.session", "name", "com.openexchange.usm.session.impl.USMSessionInformation"));
+            System.out.println(showEventAdminData(mbc));
             count++;
         }
         if (null != parser.getOptionValue(this.showoperation) && 0 == count) {
@@ -462,6 +471,13 @@ public class StatisticTools extends AbstractJMXTools {
             "shows the office stats",
             false,
             NeededQuadState.notneeded);
+        this.eventadminstats = setShortLongOpt(
+            parser,
+            OPT_EVENT_ADMIN_STATS_SHORT,
+            OPT_EVENT_ADMIN_STATS_LONG,
+            "shows the OSGi EventAdmin stats",
+            false,
+            NeededQuadState.notneeded);
     }
 
     static String showMemoryPoolData(MBeanServerConnection con) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
@@ -611,6 +627,10 @@ public class StatisticTools extends AbstractJMXTools {
 
     static String showOfficeData(final MBeanServerConnection mbeanServerConnection) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
         return getStats(mbeanServerConnection, "com.openexchange.office:name=OfficeMonitoring").toString();
+    }
+
+    static String showEventAdminData(final MBeanServerConnection mbeanServerConnection) throws IOException, NullPointerException, IllegalStateException, JMException {
+        return getStats(mbeanServerConnection, "org.apache.felix.eventadmin.monitoring", "type", "EventAdminMBean").toString();
     }
 
     /**
