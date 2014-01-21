@@ -290,14 +290,23 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     }
 
     /**
-     * Gets the session
+     * Gets the currently referenced session
      *
-     * @return The session
+     * @return The currently referenced session or <code>null</code>
+     */
+    public Session getSessionRef() {
+        return sessionRef.get();
+    }
+
+    /**
+     * Gets the session; trying to obtain a new one if currently referenced session is invalid/obsolete.
+     *
+     * @return The session or <code>null</code>
      */
     public Session getSession() {
+        final SessiondService service = Services.getService(SessiondService.class);
         Session session = sessionRef.get();
         if (null == session) {
-            final SessiondService service = Services.getService(SessiondService.class);
             final ConcurrentMap<String, String> invalidSessionIds = this.invalidSessionIds;
             session = service.findFirstMatchingSessionForUser(userId, contextId, new AbstractSessionMatcher() {
 
@@ -314,6 +323,25 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             });
             if (!sessionRef.compareAndSet(null, session)) {
                 session = sessionRef.get();
+            }
+        } else if (null == service.getSession(session.getSessionID())) {
+            sessionRef.set(null);
+            final ConcurrentMap<String, String> invalidSessionIds = this.invalidSessionIds;
+            session = service.findFirstMatchingSessionForUser(userId, contextId, new AbstractSessionMatcher() {
+
+                @Override
+                public boolean accepts(final Session tmp) {
+                    return !invalidSessionIds.containsKey(tmp.getSessionID()) && PushUtility.allowedClient(tmp.getClient());
+                }
+
+                @Override
+                public Set<Flag> flags() {
+                    return EnumSet.of(Flag.IGNORE_SESSION_STORAGE);
+                }
+
+            });
+            if (null != session) {
+                sessionRef.set(session);
             }
         }
         return session;
@@ -396,7 +424,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         }
         shutdown = true;
         if (isDebugEnabled()) {
-            final Session session = getSession();
+            final Session session = getSessionRef();
             LOG.info("stopping IDLE for Context: {}, Login: {}", Integer.valueOf(contextId), (null == session ? "unknown" : session.getLoginName()), new Throwable("Closing IMAP IDLE push listener"));
         }
         // Close IMAP resources, too
