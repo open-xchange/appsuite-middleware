@@ -79,7 +79,6 @@ public class ConfigTestSuite {
         tests.addTestSuite(ModulesTest.class);
         tests.addTestSuite(BugTests.class);
         tests.addTestSuite(Bug15354Test.class);
-        tests.addTestSuite(Bug19226Test.class);
         tests.addTestSuite(Bug21619Test.class); // This test hammers 1 minute on the backend to try to reproduce an endless loop.
         tests.addTestSuite(Bug22389Test.class);
         return tests;
