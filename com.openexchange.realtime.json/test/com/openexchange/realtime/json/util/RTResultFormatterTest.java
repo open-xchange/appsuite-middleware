@@ -82,7 +82,6 @@ public class RTResultFormatterTest {
     @Test
     public void testFormatEmptyMap() {
         String format = RTResultFormatter.format(emptyMap);
-        System.out.println(format);
         assertEquals("Empty Map didn't match expected format",EMPTYMAP, format);
     }
 
