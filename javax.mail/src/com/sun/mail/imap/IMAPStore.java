@@ -2154,4 +2154,15 @@ public class IMAPStore extends Store
         return port;
     }
 
+    /**
+     * Is this IMAP store currently connected?
+     * <p>
+     * This method just returns the value of a private boolean field and does not verify connected state via <code>NOOP</code> command.
+     * 
+     * @return <code>true</code> if the service is connected, <code>false</code> if it is not connected
+     */
+    public boolean isConnectedUnsafe() {
+        return super.isConnected();
+    }
+
 }
