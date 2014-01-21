@@ -126,8 +126,6 @@ public class LostAndFoundInterfaceTests {
     	tests.addTestSuite(com.openexchange.ajax.task.Bug10941Test.class);
     	tests.addTestSuite(com.openexchange.ajax.task.Bug14450Test.class);
     	tests.addTestSuite(com.openexchange.ajax.task.Bug21026Test.class);
-    	tests.addTestSuite(com.openexchange.ajax.updater.UpdaterDownloadTest.class);
-    	tests.addTestSuite(com.openexchange.ajax.updater.UpdaterXMLTest.class);
     	tests.addTestSuite(com.openexchange.ajax.voipnow.CallReportTest.class);
     	tests.addTestSuite(com.openexchange.ajax.voipnow.ClientDetailsTest.class);
     	tests.addTestSuite(com.openexchange.ajax.voipnow.ExtensionDetailsTest.class);
