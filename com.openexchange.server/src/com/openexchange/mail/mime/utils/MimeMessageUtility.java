@@ -2232,7 +2232,7 @@ public final class MimeMessageUtility {
         if (content instanceof String) {
             return new MimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(((String) content).getBytes(Charsets.ISO_8859_1)), contentType));
         }
-        LOG.warn("Unable to retrieve multipart content fromt part with Content-Type={}. Conent signals to be {}.", contentType, null == content ? "null" : content.getClass().getName());
+        LOG.warn("Unable to retrieve multipart content fromt part with Content-Type={}. Content signals to be {}.", contentType, null == content ? "null" : content.getClass().getName());
         return null;
     }
 
