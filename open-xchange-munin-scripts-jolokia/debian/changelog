@@ -16,6 +16,12 @@ open-xchange-munin-scripts-jolokia (7.4.2-0) unstable; urgency=low
 
  -- Felix Marx <felix.marx@open-xchange.com>  Wed, 18 Dec 2013 17:34:23 +0100
 
+open-xchange-munin-scripts-jolokia (7.4.1-16) stable; urgency=low
+
+  * Build for patch 2014-01-20
+
+ -- Felix Marx <felix.marx@open-xchange.com>  Mon, 20 Jan 2014 10:37:13 +0100
+
 open-xchange-munin-scripts-jolokia (7.4.1-15) stable; urgency=low
 
   * Build for patch 2014-01-16
