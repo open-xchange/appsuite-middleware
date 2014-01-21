@@ -496,6 +496,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             }
             return true;
         }
+        boolean error = true;
         final int errDelay = errordelay;
         MailAccess<?, ?> mailAccess = null;
         IMAPStore imapStore = null;
@@ -601,6 +602,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 this.imapFolder = null;
                 inbox.close(false);
             }
+            error = false;
         } catch (final OXException e) {
             if ("PUSH".equals(e.getPrefix())) {
                 throw e;
@@ -624,18 +626,20 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             dropSessionRef(false);
             sleep(errDelay, e);
         } finally {
+            if (null != imapStore) {
+                this.imapStore = null;
+                if (error) {
+                    try {
+                        imapStore.close();
+                    } catch (final Exception e) {
+                        // Ingore
+                    }
+                }
+                imapStore = null;
+            }
             if (null != mailAccess) {
                 mailAccess.close(false);
                 mailAccess = null;
-            }
-            if (null != imapStore) {
-                this.imapStore = null;
-                try {
-                    imapStore.close();
-                } catch (final Exception e) {
-                    // Ingore
-                }
-                imapStore = null;
             }
             running.set(false);
         }
