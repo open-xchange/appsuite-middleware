@@ -71,7 +71,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class NotifyingCache extends AbstractCache implements Cache, CacheListener {
+public class NotifyingCache extends AbstractCache implements CacheListener {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(NotifyingCache.class);
 
@@ -348,5 +348,4 @@ public class NotifyingCache extends AbstractCache implements Cache, CacheListene
     public String toString() {
         return "NotifyingCache [region=" + region + ", isLocal=" + isLocal() + "]";
     }
-
 }
