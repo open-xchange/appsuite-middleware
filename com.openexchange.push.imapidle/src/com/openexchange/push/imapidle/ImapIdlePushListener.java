@@ -514,7 +514,6 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             }
             return true;
         }
-        boolean error = true;
         final int errDelay = errordelay;
         MailAccess<?, ?> mailAccess = null;
         IMAPStore imapStore = null;
@@ -617,9 +616,12 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                  */
             } finally {
                 this.imapFolderInUse = null;
-                inbox.close(false);
+                try {
+                    inbox.close(false);
+                } catch (final Exception e) {
+                    // Ignore
+                }
             }
-            error = false;
         } catch (final OXException e) {
             if ("PUSH".equals(e.getPrefix())) {
                 throw e;
