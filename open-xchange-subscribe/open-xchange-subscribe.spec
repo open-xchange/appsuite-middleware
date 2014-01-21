@@ -141,6 +141,8 @@ fi
 %doc docs/
 
 %changelog
+* Fri Jan 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-17
 * Thu Dec 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-12-23
 * Tue Dec 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
