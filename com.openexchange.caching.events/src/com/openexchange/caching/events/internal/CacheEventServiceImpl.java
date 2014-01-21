@@ -189,5 +189,4 @@ public final class CacheEventServiceImpl implements CacheEventService {
         ThreadPoolService threadPoolService = CacheEventServiceLookup.getService(ThreadPoolService.class);
         return null != threadPoolService ? threadPoolService.getExecutor() : null;
     }
-
 }
