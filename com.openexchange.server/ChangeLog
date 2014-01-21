@@ -1,3 +1,7 @@
+* 2014-01-21 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 30738: Avoid NPE.
+
 * 2014-01-21 - thorben.betten@open-xchange.com
 
  - Second fix for bug 30684: Ensure IMAP-IDLE push listener is gracefully shut-down on permanent authentication failures
