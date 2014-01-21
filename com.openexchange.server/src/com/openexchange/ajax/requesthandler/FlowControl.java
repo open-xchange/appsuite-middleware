@@ -68,6 +68,11 @@ public class FlowControl {
 
         private static final long serialVersionUID = -4574040443336613087L;
 
+        @Override
+        public synchronized Throwable fillInStackTrace() {
+            return this;
+        }
+
     };
 
 }
