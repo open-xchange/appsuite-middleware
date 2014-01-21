@@ -70,6 +70,8 @@ import com.openexchange.imap.cache.NamespaceFoldersCache;
 import com.openexchange.imap.cache.RootSubfolderCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.services.Services;
+import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.log.Log;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailSessionCache;
@@ -451,12 +453,12 @@ public class IMAPDefaultFolderChecker {
             if (isEmpty(fullName)) {
                 if (isEmpty(name)) {
                     // Neither full name nor name
-                    setDefaultMailFolder(index, checkDefaultFolder(index, prefix, getFallbackName(index), sep, type, subscribe, false, modified), cache);
+                    setDefaultMailFolder(index, checkDefaultFolder(index, prefix, getFallbackName(index), sep, type, subscribe, false, prefix, modified), cache);
                 } else {
-                    setDefaultMailFolder(index, checkDefaultFolder(index, prefix, name, sep, type, subscribe, false, modified), cache);
+                    setDefaultMailFolder(index, checkDefaultFolder(index, prefix, name, sep, type, subscribe, false, prefix, modified), cache);
                 }
             } else {
-                setDefaultMailFolder(index, checkDefaultFolder(index, "", fullName, sep, type, subscribe, true, modified), cache);
+                setDefaultMailFolder(index, checkDefaultFolder(index, "", fullName, sep, type, subscribe, true, prefix, modified), cache);
             }
         } catch (final OXException e) {
             final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
@@ -643,14 +645,14 @@ public class IMAPDefaultFolderChecker {
     /**
      * Internally used by {@link IMAPDefaultFolderChecker}.
      */
-    protected String checkDefaultFolder(final int index, final String prefix, final String qualifiedName, final char sep, final int type, final int subscribe, final boolean isFullname, final AtomicBoolean modified) throws MessagingException, OXException {
+    protected String checkDefaultFolder(final int index, final String prefix, final String qualifiedName, final char sep, final int type, final int subscribe, final boolean isFullname, final String detectedPrefix, final AtomicBoolean modified) throws MessagingException, OXException {
         /*
          * Check default folder
          */
         final StringBuilder tmp = new StringBuilder(32);
         final long st = DEBUG ? System.currentTimeMillis() : 0L;
         final int prefixLen = prefix.length();
-        final String fullName = prefixLen == 0 ? qualifiedName : tmp.append(prefix).append(qualifiedName).toString();
+        final String fullName = prefixLen == 0 ? qualifiedName : new StringAllocator(prefix).append(qualifiedName).toString();
         {
             final ListLsubEntry entry =
                 modified.get() ? ListLsubCache.getActualLISTEntry(fullName, accountId, imapStore, session) : ListLsubCache.getCachedLISTEntry(
@@ -680,7 +682,6 @@ public class IMAPDefaultFolderChecker {
             }
         }
         IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullName);
-        tmp.setLength(0);
         if (isFullname) {
             /*
              * OK, a full name was passed. Try to create obviously non-existing IMAP folder.
@@ -717,6 +718,21 @@ public class IMAPDefaultFolderChecker {
                             if (isOverQuotaException(e)) {
                                 throw e;
                             }
+                            // Check for possibly wrong namespace
+                            if (!Strings.isEmpty(detectedPrefix) && !fullName.startsWith(detectedPrefix)) {
+                                final String checkedFullName = checkDefaultFolder(index, "", detectedPrefix + fullName, sep, type, subscribe, isFullname, detectedPrefix, modified);
+                                // Invalidate mail account settings as obviously wrong
+                                final MailAccountStorageService mass = Services.optService(MailAccountStorageService.class);
+                                if (null != mass) {
+                                    try {
+                                        mass.clearFullNamesForMailAccount(accountId, session.getUserId(), session.getContextId());
+                                    } catch (final Exception x) {
+                                        LOG.warn("Failed to clear full names for mail account " + accountId, x);
+                                    }
+                                }
+                                return checkedFullName;
+                            }
+                            // Failed for any reason
                             throw e;
                         }
                     } else {
@@ -782,6 +798,11 @@ public class IMAPDefaultFolderChecker {
                     if (isOverQuotaException(e)) {
                         throw e;
                     }
+                    // Check for possibly wrong namespace
+                    if (!Strings.isEmpty(detectedPrefix) && !fullName.startsWith(detectedPrefix)) {
+                        return checkDefaultFolder(index, "", detectedPrefix + fullName, sep, type, subscribe, isFullname, detectedPrefix, modified);
+                    }
+                    // Failed for any reason
                     throw e;
                 }
             } else {
