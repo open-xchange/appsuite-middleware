@@ -1,3 +1,7 @@
+* 2014-01-21 - thorben.betten@open-xchange.com
+
+ - Second fix for bug 30684: Ensure IMAP-IDLE push listener is gracefully shut-down on permanent authentication failures
+
 * 2014-01-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 30721: Explicitly connect when retrieving an account's root folder
