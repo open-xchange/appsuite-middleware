@@ -47,50 +47,72 @@
  *
  */
 
-package com.openexchange.server;
+package com.openexchange.push.imapidle;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link UnitTests}
+ * {@link Services} - The static service lookup.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    com.openexchange.ajax.ProcessUploadStaticTest.class,
-    com.openexchange.ajax.parser.ContactSearchtermSqlConverterTest.class,
-    com.openexchange.ajax.parser.TaskLastModifiedTest.class,
-    com.openexchange.ajax.LoginAddFragmentTest.class,
-    com.openexchange.groupware.ldap.UserAttributeDiffTest.class,
-    com.openexchange.i18n.tools.replacement.TaskEndDateReplacementTest.class,
-    com.openexchange.tools.collections.OXCollectionsTest.class,
-    com.openexchange.tools.iterator.SearchIteratorDelegatorTest.class,
-    com.openexchange.tools.net.URIParserTest.class,
-    com.openexchange.mail.utils.MsisdnUtilityTest.class,
-    com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTableTest.class,
-    com.openexchange.ajax.MailAttachmentTest.class,
-    com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class,
-    com.openexchange.groupware.userconfiguration.AllowAllUserConfigurationTest.class,
-    com.openexchange.groupware.userconfiguration.UserConfigurationTest.class,
-    com.openexchange.mail.mime.ContentDispositionTest.class,
-    com.openexchange.mail.mime.MimeStructureFixerTest.class,
-    com.openexchange.mail.mime.MimeSmilFixerTest.class,
-    com.openexchange.groupware.notify.ParticipantNotifyTest.class,
-    com.openexchange.mail.json.actions.GetAttachmentActionTest.class,
-    com.openexchange.ajax.requesthandler.converters.preview.cache.FileStoreResourceCacheImplTest.class,
-    com.openexchange.server.services.SharedInfostoreJSlobTest.class,
-    com.openexchange.groupware.upload.quotachecker.MailUploadQuotaCheckerTest.class
-})
-public class UnitTests {
+public final class Services {
 
     /**
-     * Initializes a new {@link UnitTests}.
+     * Initializes a new {@link Services}.
      */
-    public UnitTests() {
+    private Services() {
         super();
+    }
+
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
+
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.push.imapidle\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
     }
 
 }

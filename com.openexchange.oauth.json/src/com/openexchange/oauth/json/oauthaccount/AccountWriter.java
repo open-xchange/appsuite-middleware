@@ -77,7 +77,7 @@ public class AccountWriter {
      * @throws JSONException If writing to JSON fails
      */
     public static JSONObject write(final OAuthAccount account) throws JSONException {
-        final JSONObject accountJSON = new JSONObject();
+        final JSONObject accountJSON = new JSONObject(5);
         accountJSON.put(AccountField.ID.getName(), account.getId());
         accountJSON.put(AccountField.DISPLAY_NAME.getName(), account.getDisplayName());
         accountJSON.put(AccountField.SERVICE_ID.getName(), account.getMetaData().getId());
@@ -93,7 +93,7 @@ public class AccountWriter {
      * @throws JSONException If writing to JSON fails
      */
     public static JSONObject write(final OAuthInteraction interaction, final String uuid) throws JSONException {
-        final JSONObject json = new JSONObject();
+        final JSONObject json = new JSONObject(6);
         json.put(AccountField.AUTH_URL.getName(), interaction.getAuthorizationURL());
         json.put(AccountField.INTERACTION_TYPE.getName(), interaction.getInteractionType().getName());
         json.put(AccountField.TOKEN.getName(), interaction.getRequestToken().getToken());

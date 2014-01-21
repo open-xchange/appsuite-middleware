@@ -1040,7 +1040,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     private static String getRealFilename(final Part part) throws MessagingException {
-        final String fileName = part.getFileName();
+        String fileName;
+        try {
+            fileName = part.getFileName();
+        } catch (final javax.mail.internet.ParseException e) {
+            // JavaMail failed to parse Content-Disposition header
+            fileName = null;
+        }
         if (fileName != null) {
             return fileName;
         }
@@ -1059,15 +1065,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private static final String PARAM_NAME = "name";
-
     private static String getContentTypeFilename(final Part part) throws MessagingException {
         final String hdr = getFirstHeaderFrom(MessageHeaders.HDR_CONTENT_TYPE, part);
         if (hdr == null || hdr.length() == 0) {
             return null;
         }
         try {
-            return new ContentType(hdr).getParameter(PARAM_NAME);
+            return new ContentType(hdr).getNameParameter();
         } catch (final OXException e) {
             LOG.error("", e);
             return null;
@@ -1075,14 +1079,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     private static String getFirstHeaderFrom(final String name, final Part part) throws MessagingException {
-        if (null == part || null == name) {
-            return null;
-        }
-        final String[] header = part.getHeader(name);
-        if (null == header || 0 == header.length) {
-            return null;
-        }
-        return header[0];
+        return MimeMessageUtility.getHeader(name, null, part);
     }
 
     private static final FetchProfile FETCH_PROFILE_ENVELOPE = new FetchProfile() {

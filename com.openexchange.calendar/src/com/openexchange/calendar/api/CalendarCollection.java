@@ -460,7 +460,7 @@ public final class CalendarCollection implements CalendarCollectionService {
     public long getLongByPosition(final CalendarDataObject cdao, final int pos) throws OXException {
         fillDAO(cdao);
         final RecurringResultsInterface rrs  = calculateRecurring(cdao, 0, 0, pos);
-        if (rrs.size() == 1) {
+        if (rrs != null && rrs.size() == 1) {
             final RecurringResultInterface rr = rrs.getRecurringResult(0);
             if (pos == rr.getPosition()) {
                 return rr.getNormalized();

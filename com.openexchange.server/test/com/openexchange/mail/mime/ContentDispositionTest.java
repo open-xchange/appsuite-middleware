@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,23 +47,42 @@
  *
  */
 
-package com.openexchange.push.imapidle.services;
+package com.openexchange.mail.mime;
 
-import com.openexchange.osgi.AbstractServiceRegistry;
+import junit.framework.TestCase;
+
 
 /**
- * {@link ImapIdleServiceRegistry} - A registry for services needed by IMAP IDLE bundle
+ * {@link ContentDispositionTest}
  *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ImapIdleServiceRegistry extends AbstractServiceRegistry {
+public class ContentDispositionTest extends TestCase {
 
-    private static final ImapIdleServiceRegistry REGISTRY = new ImapIdleServiceRegistry();
-
-    public static ImapIdleServiceRegistry getServiceRegistry() {
-        return REGISTRY;
-    }
-
-    private ImapIdleServiceRegistry() {
+    /**
+     * Initializes a new {@link ContentDispositionTest}.
+     */
+    public ContentDispositionTest() {
         super();
     }
+
+    public void testFileNameParameterFromBogusHeaders() {
+        try {
+            String hdr = "attachment; filename=Jana's application 4 cell phone.rtf";
+            String fileName = new com.openexchange.mail.mime.ContentDisposition(hdr).getFilenameParameter();
+            assertEquals("Unpexpected \"filename\" parameter.", "Jana's application 4 cell phone.rtf", fileName);
+
+            hdr = "attachment; filename*0=Test - Test.pdf";
+            fileName = new com.openexchange.mail.mime.ContentDisposition(hdr).getFilenameParameter();
+            assertEquals("Unpexpected \"filename\" parameter.", "Test - Test.pdf", fileName);
+
+            hdr = "filename=\"Scan1852.pdf\"; filename=\"Scan1852.pdf\"";
+            fileName = new com.openexchange.mail.mime.ContentDisposition(hdr).getFilenameParameter();
+            assertEquals("Unpexpected \"filename\" parameter.", "Scan1852.pdf", fileName);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
 }

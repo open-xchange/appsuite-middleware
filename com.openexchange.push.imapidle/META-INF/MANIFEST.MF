@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.push.imapidle
 Bundle-Version: 7.4.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.config,
+Import-Package: com.googlecode.concurrentlinkedhashmap,
+ com.openexchange.config,
  com.openexchange.context,
  com.openexchange.exception,
  com.openexchange.groupware,
@@ -27,6 +28,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.session,
  com.openexchange.sessiond,
  com.openexchange.threadpool,
+ com.openexchange.timer,
  com.openexchange.tools,
  com.sun.mail.imap,
  javax.mail,

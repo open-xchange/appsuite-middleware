@@ -47,50 +47,54 @@
  *
  */
 
-package com.openexchange.server;
+package com.openexchange.realtime.json.util;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import static org.junit.Assert.assertEquals;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import org.junit.Before;
+import org.junit.Test;
+
 
 /**
- * {@link UnitTests}
+ * {@link RTResultFormatterTest}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    com.openexchange.ajax.ProcessUploadStaticTest.class,
-    com.openexchange.ajax.parser.ContactSearchtermSqlConverterTest.class,
-    com.openexchange.ajax.parser.TaskLastModifiedTest.class,
-    com.openexchange.ajax.LoginAddFragmentTest.class,
-    com.openexchange.groupware.ldap.UserAttributeDiffTest.class,
-    com.openexchange.i18n.tools.replacement.TaskEndDateReplacementTest.class,
-    com.openexchange.tools.collections.OXCollectionsTest.class,
-    com.openexchange.tools.iterator.SearchIteratorDelegatorTest.class,
-    com.openexchange.tools.net.URIParserTest.class,
-    com.openexchange.mail.utils.MsisdnUtilityTest.class,
-    com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTableTest.class,
-    com.openexchange.ajax.MailAttachmentTest.class,
-    com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class,
-    com.openexchange.groupware.userconfiguration.AllowAllUserConfigurationTest.class,
-    com.openexchange.groupware.userconfiguration.UserConfigurationTest.class,
-    com.openexchange.mail.mime.ContentDispositionTest.class,
-    com.openexchange.mail.mime.MimeStructureFixerTest.class,
-    com.openexchange.mail.mime.MimeSmilFixerTest.class,
-    com.openexchange.groupware.notify.ParticipantNotifyTest.class,
-    com.openexchange.mail.json.actions.GetAttachmentActionTest.class,
-    com.openexchange.ajax.requesthandler.converters.preview.cache.FileStoreResourceCacheImplTest.class,
-    com.openexchange.server.services.SharedInfostoreJSlobTest.class,
-    com.openexchange.groupware.upload.quotachecker.MailUploadQuotaCheckerTest.class
-})
-public class UnitTests {
+public class RTResultFormatterTest {
+
+    private Map<String, Object> emptyMap;
+    private String TOO_LONG;
+    private final static String EMPTYMAP =  "Result: {\n\tacks:\n\t\t[]\n\terror:\n\t\tnone\n\tresult:\n\t\tnone\n\tstanzas:\n\t\t{}\n}\n";
+    
+    @Before
+    public void setUp() throws Exception {
+        emptyMap = new HashMap<String, Object>();
+        char[] toFill = new char[600];
+        Arrays.fill(toFill, 'A');
+        TOO_LONG = new String(toFill);
+    }
 
     /**
-     * Initializes a new {@link UnitTests}.
+     * Test method for {@link com.openexchange.realtime.json.util.RTResultFormatter#format(java.util.Map)}.
      */
-    public UnitTests() {
-        super();
+    @Test
+    public void testFormatEmptyMap() {
+        String format = RTResultFormatter.format(emptyMap);
+        assertEquals("Empty Map didn't match expected format",EMPTYMAP, format);
+    }
+
+    /**
+     * Test method for {@link com.openexchange.realtime.json.util.RTResultFormatter#shortenOutput(java.lang.String)}.
+     */
+    @Test
+    public void testShortenOutput() {
+        String shortenedOutput = RTResultFormatter.shortenOutput(TOO_LONG);
+        char[] fivehundredA = new char[500];
+        Arrays.fill(fivehundredA, 'A');
+        String expected = new String(fivehundredA) + "...";
+        assertEquals("TOO_LONG should have been shortened", expected, shortenedOutput);
     }
 
 }

@@ -692,7 +692,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                         /*
                          * Remember a timed-out IMAP server on connect attempt
                          */
-                        timedOutServers.put(new HostAndPort(config.getServer(), config.getPort()), Long.valueOf(System.currentTimeMillis()));
+                        final Map<HostAndPort, Long> map = timedOutServers;
+                        if (null != map) {
+                            map.put(new HostAndPort(config.getServer(), config.getPort()), Long.valueOf(System.currentTimeMillis()));
+                        }
                     }
                 }
                 throw e;
@@ -1107,9 +1110,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             cleanUpTimerTask.cancel(false);
             IMAPAccess.cleanUpTimerTask = null;
         }
-        if (null != aclCapableServers) {
-            aclCapableServers = null;
-        }
+        aclCapableServers = null;
         timedOutServers = null;
     }
 

@@ -769,7 +769,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         } else {
             final String serviceId = metaData.getId().toLowerCase(Locale.ENGLISH);
             if (serviceId.indexOf("twitter") >= 0) {
-                apiClass = TwitterApi.class;
+                apiClass = TwitterApi.SSL.class;  
             } else if (serviceId.indexOf("linkedin") >= 0) {
                 apiClass = LinkedInApi.class;
             } else if (serviceId.indexOf("google") >= 0) {

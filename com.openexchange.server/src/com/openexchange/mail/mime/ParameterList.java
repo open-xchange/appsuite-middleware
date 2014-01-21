@@ -63,6 +63,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.MimeUtility;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 
@@ -135,11 +136,16 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
      */
     private static String correctParamList(final String parameterList) {
         String toParse = parameterList;
-        final int len = toParse.length();
+        int len = toParse.length();
         if (len > 0 && ';' != toParse.charAt(0)) {
             toParse = new com.openexchange.java.StringAllocator(len + 2).append("; ").append(toParse).toString();
         }
-        return PATTERN_PARAM_CORRECT.matcher(toParse).replaceAll("$1$2\"$3\"$4");
+        toParse = PATTERN_PARAM_CORRECT.matcher(toParse).replaceAll("$1$2\"$3\"$4");
+        len = toParse.length();
+        if (len > 0 && ';' != toParse.charAt(0)) {
+            toParse = new com.openexchange.java.StringAllocator(len + 2).append("; ").append(toParse).toString();
+        }
+        return toParse;
     }
 
     @Override
@@ -215,7 +221,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         try {
             final Matcher m = PATTERN_PARAM_LIST.matcher(parameterList);
             while (m.find()) {
-                parseParameter(m.group(1).toLowerCase(Locale.ENGLISH), m.group(2));
+                parseParameter(Strings.toLowerCase(m.group(1)), m.group(2));
             }
         } catch (final StackOverflowError regexFailed) {
             /*

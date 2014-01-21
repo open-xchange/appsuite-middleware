@@ -49,7 +49,6 @@
 
 package com.openexchange.push.imapidle.osgi;
 
-import static com.openexchange.push.imapidle.services.ImapIdleServiceRegistry.getServiceRegistry;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
@@ -65,7 +64,7 @@ import com.openexchange.push.imapidle.ImapIdlePushListener;
 import com.openexchange.push.imapidle.ImapIdlePushListener.PushMode;
 import com.openexchange.push.imapidle.ImapIdlePushListenerRegistry;
 import com.openexchange.push.imapidle.ImapIdlePushManagerService;
-import com.openexchange.push.imapidle.services.ImapIdleServiceRegistry;
+import com.openexchange.push.imapidle.Services;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -90,44 +89,25 @@ public final class ImapIdleActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            MailService.class, EventAdmin.class, ConfigurationService.class, ContextService.class, ThreadPoolService.class, SessiondService.class };
+            MailService.class, EventAdmin.class,
+            ConfigurationService.class, ContextService.class,
+            ThreadPoolService.class, SessiondService.class };
     }
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
         LOG.info("Re-available service: {}", clazz.getName());
-        getServiceRegistry().addService(clazz, getService(clazz));
-        if (ThreadPoolService.class == clazz) {
-            ImapIdlePushListenerRegistry.getInstance().openAll();
-        }
     }
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
         LOG.warn("Absent service: {}", clazz.getName());
-        if (ThreadPoolService.class == clazz) {
-            ImapIdlePushListenerRegistry.getInstance().closeAll();
-        }
-        getServiceRegistry().removeService(clazz);
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
-            /*
-             * (Re-)Initialize service registry with available services
-             */
-            {
-                final ImapIdleServiceRegistry registry = getServiceRegistry();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (int i = 0; i < classes.length; i++) {
-                    final Object service = getService(classes[i]);
-                    if (null != service) {
-                        registry.addService(classes[i], service);
-                    }
-                }
-            }
+            Services.setServiceLookup(this);
             /*
              * Initialize & open tracker for SessionD service
              */
@@ -199,7 +179,7 @@ public final class ImapIdleActivator extends HousekeepingActivator {
             /*
              * Clear service registry
              */
-            getServiceRegistry().clearRegistry();
+            Services.setServiceLookup(null);
             /*
              * Reset
              */

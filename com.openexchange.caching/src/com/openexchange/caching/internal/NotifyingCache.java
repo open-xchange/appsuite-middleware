@@ -53,6 +53,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.CacheKey;
@@ -73,7 +74,7 @@ import com.openexchange.exception.OXException;
  */
 public class NotifyingCache extends AbstractCache implements CacheListener {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(NotifyingCache.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NotifyingCache.class);
 
     private final Cache delegate;
     private final String region;
