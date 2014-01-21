@@ -104,7 +104,7 @@ public final class IMAPNotifierRegistry implements IMAPNotifierRegistryService {
         /*
          * Check for available full names
          */
-        if (null == fullNames) {
+        if (null == fullNames || null == session) {
             return false;
         }
         /*

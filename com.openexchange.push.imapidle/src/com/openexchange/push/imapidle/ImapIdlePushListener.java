@@ -216,8 +216,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private final int contextId;
 
     private volatile Future<Object> imapIdleFuture;
-    private volatile IMAPStore imapStore;
-    private volatile IMAPFolder imapFolder;
+    private volatile IMAPFolder imapFolderInUse;
 
     private MailService mailService;
 
@@ -291,14 +290,23 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     }
 
     /**
-     * Gets the session
+     * Gets the currently referenced session
      *
-     * @return The session
+     * @return The currently referenced session or <code>null</code>
+     */
+    public Session getSessionRef() {
+        return sessionRef.get();
+    }
+
+    /**
+     * Gets the session; trying to obtain a new one if currently referenced session is invalid/obsolete.
+     *
+     * @return The session or <code>null</code>
      */
     public Session getSession() {
+        final SessiondService service = Services.getService(SessiondService.class);
         Session session = sessionRef.get();
         if (null == session) {
-            final SessiondService service = Services.getService(SessiondService.class);
             final ConcurrentMap<String, String> invalidSessionIds = this.invalidSessionIds;
             session = service.findFirstMatchingSessionForUser(userId, contextId, new AbstractSessionMatcher() {
 
@@ -315,6 +323,25 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             });
             if (!sessionRef.compareAndSet(null, session)) {
                 session = sessionRef.get();
+            }
+        } else if (null == service.getSession(session.getSessionID())) {
+            sessionRef.set(null);
+            final ConcurrentMap<String, String> invalidSessionIds = this.invalidSessionIds;
+            session = service.findFirstMatchingSessionForUser(userId, contextId, new AbstractSessionMatcher() {
+
+                @Override
+                public boolean accepts(final Session tmp) {
+                    return !invalidSessionIds.containsKey(tmp.getSessionID()) && PushUtility.allowedClient(tmp.getClient());
+                }
+
+                @Override
+                public Set<Flag> flags() {
+                    return EnumSet.of(Flag.IGNORE_SESSION_STORAGE);
+                }
+
+            });
+            if (null != session) {
+                sessionRef.set(session);
             }
         }
         return session;
@@ -397,24 +424,15 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         }
         shutdown = true;
         if (isDebugEnabled()) {
-            final Session session = getSession();
+            final Session session = getSessionRef();
             LOG.info("stopping IDLE for Context: {}, Login: {}", Integer.valueOf(contextId), (null == session ? "unknown" : session.getLoginName()), new Throwable("Closing IMAP IDLE push listener"));
         }
         // Close IMAP resources, too
-        final IMAPFolder imapFolder = this.imapFolder;
-        if (null != imapFolder) {
-            this.imapFolder = null;
+        final IMAPFolder imapFolderInUse = this.imapFolderInUse;
+        if (null != imapFolderInUse) {
+            this.imapFolderInUse = null;
             try {
-                imapFolder.close(false);
-            } catch (final Exception e) {
-                // Ignore
-            }
-        }
-        final IMAPStore imapStore = this.imapStore;
-        if (null != imapStore) {
-            this.imapStore = null;
-            try {
-                imapStore.close();
+                imapFolderInUse.close(false);
             } catch (final Exception e) {
                 // Ignore
             }
@@ -522,9 +540,8 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 istore = (IMAPFolderStorage) fstore;
             }
             imapStore = istore.getImapStore();
-            this.imapStore = imapStore;
             final IMAPFolder inbox = (IMAPFolder) imapStore.getFolder(folder);
-            this.imapFolder = inbox;
+            this.imapFolderInUse = inbox;
             try {
                 inbox.open(Folder.READ_WRITE);
                 if (isDebugEnabled()) {
@@ -598,8 +615,12 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                  * if e.g. cyrus client timeout happens (idling for too long)
                  */
             } finally {
-                this.imapFolder = null;
-                inbox.close(false);
+                this.imapFolderInUse = null;
+                try {
+                    inbox.close(false);
+                } catch (final Exception e) {
+                    // Ignore
+                }
             }
         } catch (final OXException e) {
             if ("PUSH".equals(e.getPrefix())) {
@@ -627,15 +648,6 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             if (null != mailAccess) {
                 mailAccess.close(false);
                 mailAccess = null;
-            }
-            if (null != imapStore) {
-                this.imapStore = null;
-                try {
-                    imapStore.close();
-                } catch (final Exception e) {
-                    // Ingore
-                }
-                imapStore = null;
             }
             running.set(false);
         }

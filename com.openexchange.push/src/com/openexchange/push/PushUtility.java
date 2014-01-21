@@ -91,6 +91,9 @@ public final class PushUtility {
      * @throws OXException If posting event fails
      */
     public static void triggerOSGiEvent(final String folder, final Session session) throws OXException {
+        if (null == folder || null == session) {
+            return;
+        }
         try {
             final EventAdmin eventAdmin = ServiceRegistry.getInstance().getService(EventAdmin.class, true);
             final int contextId = session.getContextId();
