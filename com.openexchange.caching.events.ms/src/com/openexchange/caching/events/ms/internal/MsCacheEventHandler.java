@@ -53,8 +53,6 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
@@ -70,7 +68,7 @@ import com.openexchange.server.ServiceExceptionCode;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class MsCacheEventHandler implements CacheListener, MessageListener<Map<String, Serializable>>, EventHandler {
+public final class MsCacheEventHandler implements CacheListener, MessageListener<Map<String, Serializable>> {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(MsCacheEventHandler.class);
     private static final String TOPIC_NAME = "cacheEvents-0";
@@ -102,15 +100,6 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
         topic.addMessageListener(this);
     }
 
-    @Override
-    public void handleEvent(Event event) {
-        // com.openexchange.push.ms.PushMsListener
-
-        // com.openexchange.event.RemoteEvent
-
-        // Topic: "com/openexchange/remote/*";
-    }
-
     public void stop() {
         cacheEvents.removeListener(this);
         try {
@@ -121,14 +110,16 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
     }
 
     @Override
-    public void onEvent(Object sender, CacheEvent cacheEvent) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("publish: " + cacheEvent + " [" + senderId + "]");
-        }
-        try {
-            getTopic().publish(CacheEventWrapper.wrap(cacheEvent));
-        } catch (OXException e) {
-            LOG.warn("Error publishing cache event", e);
+    public void onEvent(Object sender, CacheEvent cacheEvent, boolean fromRemote) {
+        if (false == fromRemote) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Re-publishing locally received cache event to remote: " + cacheEvent + " [" + senderId + "]");
+            }
+            try {
+                getTopic().publish(CacheEventWrapper.wrap(cacheEvent));
+            } catch (OXException e) {
+                LOG.warn("Error publishing cache event", e);
+            }
         }
     }
 
@@ -146,9 +137,10 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
             Map<String, Serializable> cacheEvent = message.getMessageObject();
             if (null != cacheEvent) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("onMessage: " + message.getMessageObject() + " [" + message.getSenderId() + "]");
+                    LOG.debug("Re-publishing remotely received cache event locally: "
+                        + message.getMessageObject() + " [" + message.getSenderId() + "]");
                 }
-                cacheEvents.notify(this, CacheEventWrapper.unwrap(cacheEvent));
+                cacheEvents.notify(this, CacheEventWrapper.unwrap(cacheEvent), true);
             } else {
                 LOG.warn("Discarding empty cache event message.");
             }

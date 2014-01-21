@@ -304,6 +304,11 @@ public class Multiple extends SessionServlet {
             return false;
         }
 
+        // Check for templating module (causes concurrent lookup of the templating folders)
+        if ("templating".equals(module)) {
+            return true;
+        }
+
         // No action that needs serial execution
         return false;
     }

@@ -47,69 +47,52 @@
  *
  */
 
-package com.openexchange.imap.storecache;
-
-import javax.mail.MessagingException;
-import com.openexchange.imap.IMAPProvider;
-import com.sun.mail.imap.IMAPStore;
+package com.openexchange.caching;
 
 
 /**
- * {@link IMAPStoreContainer} - A container for connected {@link IMAPStore} instances.
+ * {@link CacheEventConstant}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.2
  */
-public interface IMAPStoreContainer {
+public final class CacheEventConstant {
 
     /**
-     * The IMAP protocol name: <code>"imap"</code>.
+     * Initializes a new {@link CacheEventConstant}.
      */
-    public static final String PROTOCOL_NAME = IMAPProvider.PROTOCOL_IMAP.getName();
+    private CacheEventConstant() {
+        super();
+    }
+
+    /** The property name for cache region (value is of type <code>java.lang.String</code>) */
+    public static final String PROP_REGION = "region";
+
+    /** The property name for cache key (value is of type <code>java.io.Serializable</code>) */
+    public static final String PROP_KEY = "key";
+
+    /** The property name for cache group (value is of type <code>java.lang.String</code>) */
+    public static final String PROP_GROUP = "group";
+
+    /** The property name for cache operation (value is of type <code>java.lang.String</code>) */
+    public static final String PROP_OPERATION = "operation";
+
+    /** The property name for exceeded cache element event (value is of type <code>java.lang.Boolean</code>) */
+    public static final String PROP_EXCEEDED = "exceeded";
+
+    /** The topic for cache element removal */
+    public static final String TOPIC_REMOVE = "com/openexchange/cache/remove";
+
+    /** The topic for cache cleansing */
+    public static final String TOPIC_CLEAR = "com/openexchange/cache/clear";
 
     /**
-     * Gets a connected IMAP store.
+     * Gets all known cache event topics.
      *
-     * @param imapSession The IMAP session
-     * @param login The login
-     * @param pw The password
-     * @return The connected IMAP store or <code>null</code> if currently impossible to do so
-     * @throws MessagingException If returning a connected IMAP store fails
-     * @throws InterruptedException If thread is interrupted when possibly waiting for free resources
+     * @return The topics
      */
-    IMAPStore getStore(javax.mail.Session imapSession, String login, String pw) throws MessagingException, InterruptedException;
+    public static String[] getTopics() {
+        return new String[] { TOPIC_REMOVE, TOPIC_CLEAR };
+    }
 
-    /**
-     * Returns specified IMAP store to container.
-     *
-     * @param imapStore The IMAP store to return
-     */
-    void backStore(IMAPStore imapStore);
-
-    /**
-     * Close elapsed {@link IMAPStore} instances.
-     *
-     * @param stamp The stamp to check against
-     * @param debugBuilder The optional debug builder
-     */
-    void closeElapsed(long stamp, StringBuilder debugBuilder);
-
-    /**
-     * Orderly clears this container.
-     */
-    void clear();
-
-    /**
-     * Gets the number of stores currently in-use.
-     *
-     * @return The number of stores currently in-use
-     */
-    int getInUseCount();
-    
-    /**
-     * Determines whether the IMAPStoreContainer has elapsed
-     * 
-     * @param millis 
-     * @return true if elapsed; false otherwise
-     */
-    boolean hasElapsed(long millis);
 }

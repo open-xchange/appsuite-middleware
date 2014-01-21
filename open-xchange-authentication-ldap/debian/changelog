@@ -1,3 +1,9 @@
+open-xchange-authentication-ldap (7.4.1-15) stable; urgency=low
+
+  * Build for patch 2014-01-16
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 16 Jan 2014 10:59:04 +0100
+
 open-xchange-authentication-ldap (7.4.1-14) stable; urgency=low
 
   * Build for patch 2014-01-14

@@ -51,11 +51,8 @@ package com.openexchange.caching.internal;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheElement;
@@ -85,7 +82,7 @@ public class NotifyingCache implements Cache, CacheListener {
 
     /**
      * Sets the event admin.
-     * 
+     *
      * @param eventAdmin The event admin or <code>null</code>
      */
     public static void setEventAdmin(final EventAdmin eventAdmin) {
@@ -315,8 +312,8 @@ public class NotifyingCache implements Cache, CacheListener {
     }
 
     @Override
-    public void onEvent(Object sender, CacheEvent cacheEvent) {
-        if (sender != this && null != cacheEvent) {
+    public void onEvent(Object sender, CacheEvent cacheEvent, boolean fromRemote) {
+        if (fromRemote && sender != this && null != cacheEvent) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("onEvent: " + cacheEvent);
             }
@@ -324,7 +321,6 @@ public class NotifyingCache implements Cache, CacheListener {
                 switch (cacheEvent.getOperation()) {
                 case INVALIDATE_GROUP:
                     delegate.invalidateGroup(cacheEvent.getGroupName());
-                    locallyPostInvalidateEvent(cacheEvent);
                     break;
                 case INVALIDATE:
                     if (null != cacheEvent.getGroupName()) {
@@ -332,7 +328,6 @@ public class NotifyingCache implements Cache, CacheListener {
                     } else {
                         delegate.remove(cacheEvent.getKey());
                     }
-                    locallyPostInvalidateEvent(cacheEvent);
                     break;
                 default:
                     LOG.warn("Unknown cache event operation: " + cacheEvent.getOperation());
@@ -343,25 +338,13 @@ public class NotifyingCache implements Cache, CacheListener {
         }
     }
 
-    private void locallyPostInvalidateEvent(final CacheEvent cacheEvent) {
-        final EventAdmin eventAdmin = EVENT_ADMIN_REF.get();
-        if (null != eventAdmin && null != cacheEvent) {
-            final Map<String, Object> properties = new HashMap<String, Object>(4);
-            properties.put("region", cacheEvent.getRegion());
-            properties.put("operation", cacheEvent.getOperation().toString());
-            properties.put("group", cacheEvent.getGroupName());
-            properties.put("key", cacheEvent.getKey());
-            eventAdmin.postEvent(new Event("com/openexchange/cache/remote/invalidate", properties));
-        }
-    }
-
     private void fireInvalidateGroup(String groupName) {
         if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
             CacheEvent event = CacheEvent.INVALIDATE_GROUP(region, groupName);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("fireInvalidateGroup: " + event);
             }
-            eventService.notify(this, event);
+            eventService.notify(this, event, false);
         }
     }
 
@@ -375,7 +358,7 @@ public class NotifyingCache implements Cache, CacheListener {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("fireInvalidate: " + event);
             }
-            eventService.notify(this, event);
+            eventService.notify(this, event, false);
         }
     }
 
