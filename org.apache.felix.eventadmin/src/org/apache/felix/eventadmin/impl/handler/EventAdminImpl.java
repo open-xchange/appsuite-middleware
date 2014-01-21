@@ -150,4 +150,8 @@ public class EventAdminImpl implements EventAdmin
             throw new NullPointerException(name + " may not be null");
         }
     }
+
+    public AsyncDeliverTasks getAsyncDeliverTasks() {
+        return m_postManager;
+    }
 }

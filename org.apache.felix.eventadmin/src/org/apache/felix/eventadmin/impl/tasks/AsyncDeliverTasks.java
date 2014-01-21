@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.felix.eventadmin.impl.handler.EventHandlerProxy;
 import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 
 /**
  * This class does the actual work of the asynchronous event dispatch.
@@ -47,7 +48,9 @@ public class AsyncDeliverTasks
     final Map<Thread, TaskExecuter> m_running_threads = new HashMap<Thread, TaskExecuter>();
 
     /** The counter for pending events */
-    final AtomicLong eventCount;
+    final AtomicLong postedEvents;
+
+    final AtomicLong deliveredEvents;
 
     /**
      * The constructor of the class that will use the asynchronous.
@@ -61,17 +64,14 @@ public class AsyncDeliverTasks
     {
         m_pool = pool;
         m_deliver_task = deliverTask;
-        eventCount = new AtomicLong();
+        postedEvents = new AtomicLong();
+        deliveredEvents = new AtomicLong();
     }
 
-    /**
-     * Gets the number of events currently awaiting execution.
-     * 
-     * @return The number of events currently awaiting execution
-     */
-    public long getEventCount()
-    {
-        return eventCount.get();
+    public Measurement createMeasurement() {
+        long tmpDelivered = deliveredEvents.get();
+        long tmpPosted = postedEvents.get();
+        return new Measurement(tmpPosted, tmpDelivered);
     }
 
     /**
@@ -107,6 +107,9 @@ public class AsyncDeliverTasks
                 final TaskExecuter runningExecutor = m_running_threads.get(currentThread);
                 if ( runningExecutor != null )
                 {
+                    if (postedEvents.incrementAndGet() < 0L) {
+                        postedEvents.set(0L);
+                    }
                     runningExecutor.add(tasks, event);
                 }
                 else
@@ -117,6 +120,9 @@ public class AsyncDeliverTasks
             }
             if ( executer != null )
             {
+                if (postedEvents.incrementAndGet() < 0L) {
+                    postedEvents.set(0L);
+                }
                 m_pool.executeTask(executer);
             }
         //}
@@ -132,7 +138,6 @@ public class AsyncDeliverTasks
         {
             m_key = key;
             m_tasks.add(new EventTask(tasks, event));
-            eventCount.incrementAndGet();
         }
 
         @Override
@@ -146,8 +151,10 @@ public class AsyncDeliverTasks
                 {
                     eventTask = m_tasks.remove(0);
                 }
-                eventCount.decrementAndGet();
                 m_deliver_task.execute(eventTask.tasks, eventTask.event, true);
+                if (deliveredEvents.incrementAndGet() < 0L) {
+                    deliveredEvents.set(0L);
+                }
                 synchronized ( m_running_threads )
                 {
                     running = !m_tasks.isEmpty(); //  m_tasks.size() > 0;
@@ -165,7 +172,6 @@ public class AsyncDeliverTasks
             {
                 m_tasks.add(new EventTask(tasks, event));
             }
-            eventCount.incrementAndGet();
         }
     }
 
@@ -178,6 +184,43 @@ public class AsyncDeliverTasks
             super();
             this.tasks = tasks;
             this.event = event;
+        }
+    }
+
+    public final class Measurement {
+
+        private final long timestamp;
+
+        private final long postedEvents;
+
+        private final long deliveredEvents;
+
+        public Measurement(long postedEvents, long deliveredEvents) {
+            super();
+            this.postedEvents = postedEvents;
+            this.deliveredEvents = deliveredEvents;
+            this.timestamp = System.currentTimeMillis();
+        }
+
+        /**
+         * Gets the time in milliseconds after 1970-01-01 00:00:00 UTC when this measurement was created.
+         */
+        public long getTimestamp() {
+            return timestamp;
+        }
+
+        /**
+         * Gets the total number of events that have been enqueued via {@link EventAdmin#postEvent(Event)}.
+         */
+        public long getPostedEvents() {
+            return postedEvents;
+        }
+
+        /**
+         * Gets the total number of events that have already been delivered.
+         */
+        public long getDeliveredEvents() {
+            return deliveredEvents;
         }
     }
 

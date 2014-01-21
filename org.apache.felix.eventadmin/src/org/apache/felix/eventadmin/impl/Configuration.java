@@ -19,14 +19,23 @@
 package org.apache.felix.eventadmin.impl;
 
 
-import java.util.*;
-
-import org.apache.felix.eventadmin.impl.adapter.*;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.StringTokenizer;
+import javax.management.NotCompliantMBeanException;
+import org.apache.felix.eventadmin.EventAdminMBean;
+import org.apache.felix.eventadmin.impl.adapter.AbstractAdapter;
+import org.apache.felix.eventadmin.impl.adapter.BundleEventAdapter;
+import org.apache.felix.eventadmin.impl.adapter.FrameworkEventAdapter;
+import org.apache.felix.eventadmin.impl.adapter.LogEventAdapter;
+import org.apache.felix.eventadmin.impl.adapter.ServiceEventAdapter;
 import org.apache.felix.eventadmin.impl.handler.EventAdminImpl;
 import org.apache.felix.eventadmin.impl.security.SecureEventAdminFactory;
 import org.apache.felix.eventadmin.impl.tasks.DefaultThreadPool;
 import org.apache.felix.eventadmin.impl.util.LogWrapper;
-import org.osgi.framework.*;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.event.EventAdmin;
@@ -132,6 +141,10 @@ public class Configuration
     private AbstractAdapter[] m_adapters;
 
     private ServiceRegistration<?> m_managedServiceReg;
+
+    private ServiceRegistration<?> m_mbean_registration;
+
+    private EventAdminMBeanImpl m_mbean;
 
     public Configuration( BundleContext bundleContext )
     {
@@ -325,6 +338,13 @@ public class Configuration
             // appropriated permissions of each calling bundle
             m_registration = m_bundleContext.registerService(EventAdmin.class.getName(),
                     new SecureEventAdminFactory(m_admin), null);
+
+            try {
+                m_mbean = new EventAdminMBeanImpl(m_admin.getAsyncDeliverTasks());
+                m_mbean_registration = m_bundleContext.registerService(EventAdminMBean.class.getName(), m_mbean, null);
+            } catch (NotCompliantMBeanException e) {
+                LogWrapper.getLogger().log(LogWrapper.LOG_WARNING, "Could not register EventAdminMBean.", e);
+            }
         }
         else
         {
@@ -356,6 +376,15 @@ public class Configuration
             {
                 m_managedServiceReg.unregister();
                 m_managedServiceReg = null;
+            }
+            // unregister OX custom MBean
+            if ( m_mbean_registration != null ) {
+                m_mbean_registration.unregister();
+                m_mbean_registration = null;
+                if (m_mbean != null) {
+                    m_mbean.close();
+                    m_mbean = null;
+                }
             }
             // We need to unregister manually
             if ( m_registration != null )
