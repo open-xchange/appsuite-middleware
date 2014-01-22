@@ -47,6 +47,8 @@ import java.io.*;
 import java.util.*;
 import java.text.ParseException;
 import com.sun.mail.util.*;
+import javax.mail.util.LimitExceededException;
+import javax.mail.util.LimitedStringBuilder;
 import javax.mail.util.SharedByteArrayInputStream;
 
 /**
@@ -2169,15 +2171,19 @@ public class MimeMessage extends Message implements MimePart {
                 if (!hdrLines.hasMoreElements()) {
                     return "";
                 }
-                final StringBuilder sb = new StringBuilder(8192);
-                final String crlf = "\r\n";
-                while (hdrLines.hasMoreElements()) {
-                    sb.append(hdrLines.nextElement().toString()).append(crlf);
+                final LimitedStringBuilder sb = new LimitedStringBuilder(8192);
+                try {
+                    final String crlf = "\r\n";
+                    while (hdrLines.hasMoreElements()) {
+                        sb.append(hdrLines.nextElement().toString()).append(crlf);
+                    }
+                    // The CRLF separator between header and content
+                    sb.append(crlf);
+                    sb.append("<unknown-content>");
+                    return sb.toString();
+                } catch (final LimitExceededException e) {
+                    return sb.appendDots().toString();
                 }
-                // The CRLF separator between header and content
-                sb.append(crlf);
-                sb.append("<unknown-content>");
-                return sb.toString();
             }
 
             if (modified) {
@@ -2337,18 +2343,6 @@ public class MimeMessage extends Message implements MimePart {
             return new String(buf, hibyte, 0, count);
         }
 
-    }
-    
-    private static final class LimitExceededException extends RuntimeException {
-
-        LimitExceededException(String message) {
-            super(message);
-        }
-
-        @Override
-        public synchronized Throwable fillInStackTrace() {
-            return this;
-        }
     }
     
 }
