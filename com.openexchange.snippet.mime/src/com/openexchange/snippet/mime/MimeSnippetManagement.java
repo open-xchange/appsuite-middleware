@@ -57,6 +57,7 @@ import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -407,6 +408,14 @@ public final class MimeSnippetManagement implements SnippetManagement {
     }
 
     private static final Set<String> IGNORABLES = new HashSet<String>(Arrays.asList(Snippet.PROP_MISC));
+
+    private static String encode(String value) {
+        try {
+            return MimeUtility.encodeText(value, "UTF-8", "Q");
+        } catch (UnsupportedEncodingException e) {
+            return value;
+        }
+    }
 
     @Override
     public String createSnippet(final Snippet snippet) throws OXException {
