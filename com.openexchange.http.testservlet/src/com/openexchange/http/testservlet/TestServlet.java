@@ -95,9 +95,10 @@ public class TestServlet extends HttpServlet {
         /*-
          *
         try {
-           System.out.println("Going asleep...");
-           Thread.sleep(100000);
-           System.out.println("... and now continues processing.");
+            int millis = 110000;
+            System.out.println("Going asleep for " + millis + "msec...");
+            Thread.sleep(millis);
+            System.out.println("... and now continues processing.");
         } catch (final InterruptedException e) {
            e.printStackTrace();
         }
@@ -197,7 +198,10 @@ public class TestServlet extends HttpServlet {
         try {
             int count = 0;
             final char[] c = new char[8192];
-            final String charset = null == req.getCharacterEncoding() ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
+            String charset = null == req.getCharacterEncoding() ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
+            if (null == charset) {
+                charset = "UTF-8";
+            }
             isr = new InputStreamReader(req.getInputStream(), charset);
             if ((count = isr.read(c)) > 0) {
                 final StringBuilder sb = new StringBuilder(16384);
