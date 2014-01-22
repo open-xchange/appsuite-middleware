@@ -47,56 +47,43 @@
  *
  */
 
-package com.openexchange.emig.json;
+package com.openexchange.emig;
 
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 
 /**
- * {@link Enabled}
+ * {@link Status} - Represents an EmiG status.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.2
  */
-public class Enabled implements PreferencesItemService {
-
-    final ServiceLookup services;
+public enum Status {
 
     /**
-     * Initializes a new {@link Enabled}.
+     * Indicates a contact/person with no EmiG information.
      */
-    public Enabled(final ServiceLookup services) {
-        this.services = services;
+    NONE(0),
+    /**
+     * <div style="color:grey"><b>grey</b></div> Indicates a non-EmiG-secured contact/person.
+     */
+    MEMBER(1),
+    /**
+     * <div style="color:green"><b>green</b></div> Indicates an EmiG-secured contact/person.
+     */
+    SECURE(2);
+
+    private int status;
+
+    private Status(final int status) {
+        this.status = status;
     }
 
-    @Override
-    public String[] getPath() {
-        return new String[] { "modules", "com.openexchange.emig", "module" };
+    /**
+     * Gets this status' integer representation.
+     *
+     * @return The associated <code>int</code> value
+     */
+    public int getStatus() {
+        return status;
     }
 
-    @Override
-    public IValueHandler getSharedValue() {
-        return new ReadOnlyValue() {
-
-            @Override
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
-                boolean enabled = services.getService(CapabilityService.class).getCapabilities(session).contains("emig");
-                setting.setSingleValue(Boolean.valueOf(enabled));
-            }
-
-            @Override
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return true;
-            }
-        };
-
-    }
 }
