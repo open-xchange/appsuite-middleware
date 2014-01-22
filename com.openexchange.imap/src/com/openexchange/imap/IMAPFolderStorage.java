@@ -462,7 +462,18 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             if (ListLsubCache.getCachedLISTEntry(fullName, accountId, imapStore, session).exists()) {
                 return true;
             }
-            return (checkForNamespaceFolder(fullName) != null);
+            if (checkForNamespaceFolder(fullName) != null) {
+                return true;
+            }
+            // The hard way...
+            final boolean exists = imapStore.getFolder(fullName).exists();
+            if (exists) {
+                // IMAP does signal folder existence, but not reflected in caches
+                FolderCache.removeCachedFolders(session, accountId);
+                ListLsubCache.clearCache(accountId, session);
+                return true;
+            }
+            return false;
         } catch (final MessagingException e) {
             throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
         } catch (final RuntimeException e) {
