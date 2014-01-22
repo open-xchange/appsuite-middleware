@@ -52,7 +52,7 @@ package org.apache.felix.eventadmin.impl;
 import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import org.apache.felix.eventadmin.EventAdminMBean;
@@ -70,7 +70,7 @@ public class EventAdminMBeanImpl extends StandardMBean implements EventAdminMBea
     /** Window size for average calculation: 1 hour */
     private static final long WINDOW_SIZE = 60L * 60000L;
 
-    private final ConcurrentLinkedQueue<Measurement> measurements;
+    private final LinkedBlockingDeque<Measurement> measurements;
 
     private final AsyncDeliverTasks m_postManager;
 
@@ -79,7 +79,7 @@ public class EventAdminMBeanImpl extends StandardMBean implements EventAdminMBea
     public EventAdminMBeanImpl(final AsyncDeliverTasks m_postManager) throws NotCompliantMBeanException {
         super(EventAdminMBean.class);
         this.m_postManager = m_postManager;
-        measurements = new ConcurrentLinkedQueue<AsyncDeliverTasks.Measurement>();
+        measurements = new LinkedBlockingDeque<AsyncDeliverTasks.Measurement>();
         timer = new Timer(true);
         timer.schedule(new MeasureTask(), 0L, 60000L);
     }
@@ -110,7 +110,7 @@ public class EventAdminMBeanImpl extends StandardMBean implements EventAdminMBea
 
     @Override
     public long getEnqueuedEvents() {
-        Measurement current = measurements.peek();
+        Measurement current = measurements.peekLast();
         if (current != null) {
             return current.getPostedEvents() - current.getDeliveredEvents();
         }
@@ -120,7 +120,7 @@ public class EventAdminMBeanImpl extends StandardMBean implements EventAdminMBea
 
     @Override
     public long getTotalEventCount() {
-        Measurement current = measurements.peek();
+        Measurement current = measurements.peekLast();
         if (current != null) {
             return current.getPostedEvents();
         }

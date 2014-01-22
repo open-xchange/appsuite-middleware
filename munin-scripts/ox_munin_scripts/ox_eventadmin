@@ -23,36 +23,27 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
     print "graph_title OSGi EventAdmin\n";
     print "graph_category Open Xchange\n";
     print "graph_vlabel number of events\n";
-    print "a.label total event count\n";
-    print "a.graph? no\n";
-    print "b.label enqueued events\n";
-    print "b.draw LINE\n";
-    print "c.label events per minute\n";
-    print "c.draw AREA\n";
+    print "graph_period minute\n";
+    print "enqueued.label enqueued events\n";
+    print "avg.label events per minute\n";
+    print "avg.draw AREA\n";
     exit 0
 }
-                                    
 
 open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";
 
 while (<SHOWRUNTIME>)
 {
-    if ( $_ =~ /EventAdminMBean,TotalEventCount/) {
-        s/.*\=//;
-        $val=$_+0;
-        print "a.value $val\n";
-        next;
-    }
     if ( $_ =~ /EventAdminMBean,EnqueuedEvents/) {
         s/.*\=//;
         $val=$_+0;
-        print "b.value $val\n";
+        print "enqueued.value $val\n";
         next;
     }
     if ( $_ =~ /EventAdminMBean,EventsPerMinute/) {
         s/.*\=//;
         $val=$_+0;
-        print "c.value $val\n";
+        print "avg.value $val\n";
         next;
     }
 }
