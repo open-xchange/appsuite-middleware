@@ -49,6 +49,7 @@
 
 package com.openexchange.osgi.console;
 
+import java.util.Collections;
 import java.util.List;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
@@ -74,7 +75,9 @@ public final class ServiceStateCommandProvider implements CommandProvider {
     public Object _serviceState(final CommandInterpreter intp) {
         final String bundleName = intp.nextArgument();
         if (bundleName == null) {
-            for (final String name : stateLookup.getNames()) {
+            final List<String> names = stateLookup.getNames();
+            Collections.sort(names);
+            for (final String name : names) {
                 print(name, stateLookup.determineState(name), intp);
             }
         } else {
