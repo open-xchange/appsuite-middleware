@@ -231,7 +231,7 @@ public final class Cookies {
                         return null; // Equal to server name
                     }
                     final String domain = serverName.substring(fpos);
-                    final InternetDomainName tmp = InternetDomainName.fromLenient(domain);
+                    final InternetDomainName tmp = InternetDomainName.from(domain);
                     if (tmp.isPublicSuffix()) {
                         return null; // Equal to server name
                     }
