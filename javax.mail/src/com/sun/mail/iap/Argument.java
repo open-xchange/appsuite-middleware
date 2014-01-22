@@ -43,6 +43,7 @@ package com.sun.mail.iap;
 import java.util.List;
 import java.util.ArrayList;
 import java.io.*;
+import java.nio.charset.Charset;
 import com.sun.mail.util.*;
 
 /**
@@ -98,6 +99,18 @@ public class Argument {
     }
 
     /**
+     * Convert the given string into bytes in the specified
+     * charset, and write the bytes out as an ASTRING
+     */
+    public Argument writeString(String s, Charset charset) {
+    if (charset == null) // convenience
+        writeString(s);
+    else
+        items.add(new AString(s.getBytes(charset)));
+    return this;
+    }
+
+    /**
      * Write out given string as an NSTRING, depending on the type
      * of the characters inside the string. The string should
      * contain only ASCII characters. <p>
@@ -128,6 +141,22 @@ public class Argument {
 	else
 	    items.add(new NString(s.getBytes(charset)));
 	return this;
+    }
+
+    /**
+     * Convert the given string into bytes in the specified
+     * charset, and write the bytes out as an NSTRING
+     *
+     * @since   JavaMail 1.5.1
+     */
+    public Argument writeNString(String s, Charset charset) {
+    if (s == null)
+        items.add(new NString(null));
+    else if (charset == null) // convenience
+        writeString(s);
+    else
+        items.add(new NString(s.getBytes(charset)));
+    return this;
     }
 
     /**
