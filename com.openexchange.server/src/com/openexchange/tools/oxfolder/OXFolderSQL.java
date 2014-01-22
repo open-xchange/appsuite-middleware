@@ -86,6 +86,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -477,8 +478,6 @@ public final class OXFolderSQL {
         return -1;
     }
 
-    private static final String SQL_EXISTS = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND fuid = ?";
-
     /**
      * Checks if underlying storage contains a folder whose ID matches given ID
      *
@@ -494,7 +493,7 @@ public final class OXFolderSQL {
                 readCon = DBPool.pickup(ctx);
                 closeReadCon = true;
             }
-            stmt = readCon.prepareStatement(SQL_EXISTS);
+            stmt = readCon.prepareStatement("SELECT 1 FROM oxfolder_tree WHERE cid = ? AND fuid = ?");
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             rs = executeQuery(stmt);
@@ -519,7 +518,7 @@ public final class OXFolderSQL {
                 readCon = DBPool.pickup(ctx);
                 closeReadCon = true;
             }
-            stmt = readCon.prepareStatement(new StringBuilder(40).append("SELECT fuid FROM ").append(table).append(
+            stmt = readCon.prepareStatement(new StringAllocator(40).append("SELECT 1 FROM ").append(table).append(
                 " WHERE cid = ? AND fuid = ?").toString());
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
