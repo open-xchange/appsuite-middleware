@@ -50,29 +50,30 @@
 package com.openexchange.eventsystem;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link EventSystemExceptionCodes} - Enumeration of all {@link OXException}s known in event system module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum EventSystemExceptionCodes implements OXExceptionCode {
+public enum EventSystemExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(EventSystemExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An error occurred: %1$s", CATEGORY_ERROR, 1, null),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(EventSystemExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 2),
+    IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 2, null),
     /**
      * The event cannot be claimed.
      */
-    EVENT_NOT_CLAIMABLE(EventSystemExceptionMessages.EVENT_NOT_CLAIMABLE_MSG, CATEGORY_ERROR, 3)
+    EVENT_NOT_CLAIMABLE("The event cannot be claimed.", CATEGORY_ERROR, 3, null)
     ;
 
     /**
@@ -85,11 +86,14 @@ public enum EventSystemExceptionCodes implements OXExceptionCode {
     private final int detailNumber;
 
     private final String message;
+    
+    private String displayMessage;
 
-    private EventSystemExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private EventSystemExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -110,6 +114,11 @@ public enum EventSystemExceptionCodes implements OXExceptionCode {
     @Override
     public String getPrefix() {
         return PREFIX;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override
