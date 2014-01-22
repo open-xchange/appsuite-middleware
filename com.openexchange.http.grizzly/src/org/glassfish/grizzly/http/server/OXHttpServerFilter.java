@@ -378,48 +378,46 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                             boolean pingIssued = false;
                             if (null != watchInfo && (watchInfo.handlerResponse instanceof OXResponse)) {
                                 final StampingNIOOutputStreamImpl stamped = (StampingNIOOutputStreamImpl) ((OXResponse) watchInfo.handlerResponse).createOutputStream();
-                                if (!stamped.closed) {
-                                    final long lastAccessed = stamped.lastAccessed;
-                                    if (lastAccessed > 0 && (System.currentTimeMillis() - lastAccessed) >= pingDelay) {
-                                        // Check whether to issue a ping
-                                        if (pingCount.decrementAndGet() < 0) {
-                                            // Not allowed to issue a further ping
-                                            final ScheduledTimerTask timerTask = ref.get();
-                                            if (null != timerTask) {
-                                                timerTask.cancel(false);
-                                            }
-                                            return;
+                                // Issue a ping as long as nothing has been written to upstream
+                                if (!stamped.closed && stamped.doPing) {
+                                    // Check whether to issue a ping
+                                    if (pingCount.decrementAndGet() < 0) {
+                                        // Not allowed to issue a further ping
+                                        final ScheduledTimerTask timerTask = ref.get();
+                                        if (null != timerTask) {
+                                            timerTask.cancel(false);
                                         }
-
-                                        // Issue a ping
-                                        final MemoryManager memoryManager = ctx.getMemoryManager();
-                                        if (Ping.PROCESSING == ping) {
-                                            final Buffer encodedBuffer = memoryManager.allocate(128);
-                                            put(memoryManager, encodedBuffer, Charsets.toAsciiBytes("HTTP/1.1 102 Processing"));
-                                            put(memoryManager, encodedBuffer, crlfBytes);
-                                            put(memoryManager, encodedBuffer, crlfBytes);
-                                            encodedBuffer.trim();
-                                            encodedBuffer.allowBufferDispose(true);
-                                            ctx.write(encodedBuffer, true);
-                                        } else if (Ping.CONTINUE == ping) {
-                                            final Buffer encodedBuffer = memoryManager.allocate(128);
-                                            put(memoryManager, encodedBuffer, Charsets.toAsciiBytes("HTTP/1.1 100 Continue"));
-                                            put(memoryManager, encodedBuffer, crlfBytes);
-                                            put(memoryManager, encodedBuffer, crlfBytes);
-                                            encodedBuffer.trim();
-                                            encodedBuffer.allowBufferDispose(true);
-                                            ctx.write(encodedBuffer, true);
-                                        } else {
-                                            final Buffer buffer = memoryManager.allocate(128);
-                                            put(memoryManager, buffer, Charsets.toAsciiBytes(" "));
-                                            buffer.trim();
-                                            buffer.allowBufferDispose(true);
-                                            final OutputBuffer outputBuffer = handlerResponse.getOutputBuffer();
-                                            outputBuffer.writeBuffer(buffer);
-                                            outputBuffer.flush();
-                                        }
-                                        pingIssued = true;
+                                        return;
                                     }
+
+                                    // Issue a ping
+                                    final MemoryManager memoryManager = ctx.getMemoryManager();
+                                    if (Ping.PROCESSING == ping) {
+                                        final Buffer encodedBuffer = memoryManager.allocate(128);
+                                        put(memoryManager, encodedBuffer, Charsets.toAsciiBytes("HTTP/1.1 102 Processing"));
+                                        put(memoryManager, encodedBuffer, crlfBytes);
+                                        put(memoryManager, encodedBuffer, crlfBytes);
+                                        encodedBuffer.trim();
+                                        encodedBuffer.allowBufferDispose(true);
+                                        ctx.write(encodedBuffer, true);
+                                    } else if (Ping.CONTINUE == ping) {
+                                        final Buffer encodedBuffer = memoryManager.allocate(128);
+                                        put(memoryManager, encodedBuffer, Charsets.toAsciiBytes("HTTP/1.1 100 Continue"));
+                                        put(memoryManager, encodedBuffer, crlfBytes);
+                                        put(memoryManager, encodedBuffer, crlfBytes);
+                                        encodedBuffer.trim();
+                                        encodedBuffer.allowBufferDispose(true);
+                                        ctx.write(encodedBuffer, true);
+                                    } else {
+                                        final Buffer buffer = memoryManager.allocate(128);
+                                        put(memoryManager, buffer, Charsets.toAsciiBytes(" "));
+                                        buffer.trim();
+                                        buffer.allowBufferDispose(true);
+                                        final OutputBuffer outputBuffer = handlerResponse.getOutputBuffer();
+                                        outputBuffer.writeBuffer(buffer);
+                                        outputBuffer.flush();
+                                    }
+                                    pingIssued = true;
                                 }
                                 pingIssued = true;
                             }
