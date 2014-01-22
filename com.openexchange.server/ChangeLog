@@ -1,3 +1,7 @@
+* 2014-01-22 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30747: Don't preserve creation timestamp of source file when copying infostore files  
+
 * 2014-01-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 29367: Filter already contained messages from E-Mail conversation thread
