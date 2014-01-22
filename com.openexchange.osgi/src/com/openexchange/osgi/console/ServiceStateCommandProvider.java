@@ -115,7 +115,9 @@ public final class ServiceStateCommandProvider implements CommandProvider {
     public Object _missing(final CommandInterpreter intp) {
         final String bundleName = intp.nextArgument();
         if (bundleName == null) {
-            for (final String name : stateLookup.getNames()) {
+            final List<String> names = stateLookup.getNames();
+            Collections.sort(names);
+            for (final String name : names) {
                 final ServiceState state = stateLookup.determineState(name);
                 final List<String> services = state.getMissingServices();
                 if (!services.isEmpty()) {
