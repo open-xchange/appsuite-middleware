@@ -69,7 +69,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
@@ -150,29 +149,25 @@ public abstract class SessionServlet extends AJAXServlet {
      */
     protected SessionServlet() {
         super();
-    }
-
-    @Override
-    public void init(final ServletConfig config) throws ServletException {
-        super.init(config);
-        if (INITIALIZED.compareAndSet(false, true)) {
-            checkIP = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
-            hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
-            clientWhitelist = new ClientWhitelist().add(config.getInitParameter(Property.IP_CHECK_WHITELIST.getPropertyName()));
-            final String ipMaskV4 = config.getInitParameter(ServerConfig.Property.IP_MASK_V4.getPropertyName());
-            final String ipMaskV6 = config.getInitParameter(ServerConfig.Property.IP_MASK_V6.getPropertyName());
+        final ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (null != configService && INITIALIZED.compareAndSet(false, true)) {
+            checkIP = Boolean.parseBoolean(configService.getProperty(ServerConfig.Property.IP_CHECK.getPropertyName()));
+            hashSource = CookieHashSource.parse(configService.getProperty(Property.COOKIE_HASH.getPropertyName()));
+            clientWhitelist = new ClientWhitelist().add(configService.getProperty(Property.IP_CHECK_WHITELIST.getPropertyName()));
+            final String ipMaskV4 = configService.getProperty(ServerConfig.Property.IP_MASK_V4.getPropertyName());
+            final String ipMaskV6 = configService.getProperty(ServerConfig.Property.IP_MASK_V6.getPropertyName());
             allowedSubnet = new SubnetMask(ipMaskV4, ipMaskV6);
+            initRanges(configService);
         }
-        initRanges(config);
     }
 
-    private void initRanges(final ServletConfig config) {
+    private void initRanges(final ConfigurationService configService) {
         if (rangesLoaded) {
             return;
         }
         if (checkIP) {
             String text = null;
-            text = config.getInitParameter(SESSION_WHITELIST_FILE);
+            text = configService.getProperty(SESSION_WHITELIST_FILE);
             if (text == null) {
                 // Fall back to configuration service
                 final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);

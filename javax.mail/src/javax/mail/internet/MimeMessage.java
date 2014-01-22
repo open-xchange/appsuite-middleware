@@ -1821,10 +1821,10 @@ public class MimeMessage extends Message implements MimePart {
 
 	// Else, the content is untouched, so we can just output it
 	// First, write out the header
-	Enumeration hdrLines = getNonMatchingHeaderLines(ignoreList);
+	Enumeration<?> hdrLines = getNonMatchingHeaderLines(ignoreList);
 	LineOutputStream los = new LineOutputStream(os);
 	while (hdrLines.hasMoreElements())
-	    los.writeln((String)hdrLines.nextElement());
+	    los.writeln(hdrLines.nextElement().toString());
 
 	// The CRLF separator between header and content
 	los.writeln();
@@ -2203,4 +2203,197 @@ public class MimeMessage extends Message implements MimePart {
 				throws MessagingException {
 	return new MimeMessage(session);
     }
+
+    @Override
+    public String toString() {
+        LimitedByteArrayOutputStream os = null;
+        try {
+            if (!saved) {
+                // MIME message not saved; only output headers
+                final Enumeration<?> hdrLines = getAllHeaderLines();
+                if (!hdrLines.hasMoreElements()) {
+                    return "";
+                }
+                final StringBuilder sb = new StringBuilder(8192);
+                final String crlf = "\r\n";
+                while (hdrLines.hasMoreElements()) {
+                    sb.append(hdrLines.nextElement().toString()).append(crlf);
+                }
+                // The CRLF separator between header and content
+                sb.append(crlf);
+                sb.append("<unknown-content>");
+                return sb.toString();
+            }
+
+            if (modified) {
+                os = new LimitedByteArrayOutputStream(65536);
+                MimeBodyPart.writeTo(this, os, null);
+                return os.toString("ISO-8859-1");
+            }
+
+            // Else, the content is untouched, so we can just output it
+            // First, write out the header
+            os = new LimitedByteArrayOutputStream(65536);
+            Enumeration<?> hdrLines = getAllHeaderLines();
+            LineOutputStream los = new LineOutputStream(os);
+            while (hdrLines.hasMoreElements()) {
+                los.writeln(hdrLines.nextElement().toString());
+            }
+
+            // The CRLF separator between header and content
+            los.writeln();
+
+            // Finally, the content.
+            if (content == null) {
+                // call getContentStream to give subclass a chance to
+                // provide the data on demand
+                InputStream is = null;
+                try {
+                    is = getContentStream();
+                    // now copy the data to the output stream
+                    final byte[] buf = new byte[8192];
+                    for (int len; (len = is.read(buf)) > 0;) {
+                        os.write(buf, 0, len);
+                    }
+                } finally {
+                    if (is != null) {
+                        try {
+                            is.close();
+                        } catch (final Exception x) {
+                            // Ignore
+                        }
+                    }
+                }
+            } else {
+                os.write(content);
+            }
+            return os.toString("ISO-8859-1");
+        } catch (UnsupportedEncodingException e) {
+            // Cannot occur
+            return super.toString();
+        } catch (final LimitExceededException e) {
+            // Output what is available
+            if (null == os) {
+                return super.toString();
+            }
+            os.appendDots();
+            try {
+                return os.toString("ISO-8859-1");
+            } catch (final UnsupportedEncodingException x) {
+                // Cannot occur
+                return super.toString();
+            }
+        } catch (final Exception e) {
+            return super.toString();
+        }
+    }
+
+    private static final class LimitedByteArrayOutputStream extends ByteArrayOutputStream {
+
+        private final int limit;
+
+        LimitedByteArrayOutputStream(int limit) {
+            super(limit + 8);
+            this.limit = limit;
+        }
+        
+        /**
+         * Appends abbreviating dots: <code>"..."</code>
+         */
+        public void appendDots() {
+            int newcount = count + 3;
+            if (newcount > buf.length) {
+                buf = Arrays.copyOf(buf, Math.max(buf.length << 1, newcount));
+            }
+            final byte[] b = new byte[] { (byte)'.', (byte)'.', (byte)'.' };
+            System.arraycopy(b, 0, buf, count, 3);
+            count = newcount;
+        }
+
+        /**
+         * Writes the specified byte to this byte array output stream.
+         * 
+         * @param b the byte to be written.
+         */
+        @Override
+        public void write(int b) {
+            int newcount = count + 1;
+            if (newcount > limit) {
+                throw new LimitExceededException("Exceeded max. limit of " + limit + " bytes");
+            }
+            if (newcount > buf.length) {
+                buf = Arrays.copyOf(buf, Math.max(buf.length << 1, newcount));
+            }
+            buf[count] = (byte) b;
+            count = newcount;
+        }
+
+        @Override
+        public void write(byte b[], int off, int len) {
+            if ((off < 0) || (off > b.length) || (len < 0) || ((off + len) > b.length) || ((off + len) < 0)) {
+                throw new IndexOutOfBoundsException();
+            } else if (len == 0) {
+                return;
+            }
+            int newcount = count + len;
+            if (newcount > limit) {
+                throw new LimitExceededException("Exceeded max. limit of " + limit + " bytes");
+            }
+            if (newcount > buf.length) {
+                buf = Arrays.copyOf(buf, Math.max(buf.length << 1, newcount));
+            }
+            System.arraycopy(b, off, buf, count, len);
+            count = newcount;
+        }
+
+        @Override
+        public void writeTo(OutputStream out) throws IOException {
+            out.write(buf, 0, count);
+        }
+
+        @Override
+        public void reset() {
+            count = 0;
+        }
+
+        @Override
+        public byte toByteArray()[] {
+            return Arrays.copyOf(buf, count);
+        }
+
+        @Override
+        public int size() {
+            return count;
+        }
+
+        @Override
+        public String toString() {
+            return new String(buf, 0, count);
+        }
+
+        @Override
+        public String toString(String charsetName) throws UnsupportedEncodingException {
+            return new String(buf, 0, count, charsetName);
+        }
+
+        @Override
+        @Deprecated
+        public String toString(int hibyte) {
+            return new String(buf, hibyte, 0, count);
+        }
+
+    }
+    
+    private static final class LimitExceededException extends RuntimeException {
+
+        LimitExceededException(String message) {
+            super(message);
+        }
+
+        @Override
+        public synchronized Throwable fillInStackTrace() {
+            return this;
+        }
+    }
+    
 }

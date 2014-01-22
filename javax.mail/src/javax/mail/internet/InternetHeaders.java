@@ -44,6 +44,7 @@ import java.io.*;
 import java.util.*;
 import javax.mail.*;
 import com.sun.mail.util.LineInputStream;
+import com.sun.mail.util.LineOutputStream;
 import com.sun.mail.util.PropUtil;
 
 /**
@@ -606,4 +607,20 @@ public class InternetHeaders {
     public Enumeration getNonMatchingHeaderLines(String[] names) {
 	return (new MatchEnum(headers, names, false, true));
     }
+
+    @Override
+    public String toString() {
+        final Enumeration<?> hdrLines = getAllHeaderLines();
+        if (!hdrLines.hasMoreElements()) {
+            return "";
+        }
+        final StringBuilder sb = new StringBuilder(8192);
+        sb.append(hdrLines.nextElement().toString());
+        final String crlf = "\r\n";
+        while (hdrLines.hasMoreElements()) {
+            sb.append(crlf).append(hdrLines.nextElement().toString());
+        }
+        return sb.toString();
+    }
+
 }

@@ -233,7 +233,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         userId = session.getUserId();
         contextId = session.getContextId();
         mailService = null;
-        errordelay = 1000;
+        errordelay = 2000;
         shutdown = false;
     }
 
@@ -248,7 +248,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         this.userId = userId;
         this.contextId = contextId;
         mailService = null;
-        errordelay = 1000;
+        errordelay = 2000;
         shutdown = false;
     }
 

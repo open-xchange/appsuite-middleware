@@ -114,6 +114,11 @@ public final class JerichoParser {
             super(cause);
         }
 
+        @Override
+        public synchronized Throwable fillInStackTrace() {
+            return this;
+        }
+
     } // End of ParsingDeniedException
 
     private static final JerichoParser INSTANCE = new JerichoParser();

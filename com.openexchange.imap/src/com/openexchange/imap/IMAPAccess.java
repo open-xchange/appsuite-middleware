@@ -383,9 +383,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     final IMAPStoreCache imapStoreCache = IMAPStoreCache.getInstance();
                     if (null == imapStoreCache) {
                         closeSafely(imapStore);
-                    } else if (imapStore.isConnected()) {
+                    } else if (imapStore.isConnectedUnsafe()) {
                         imapStoreCache.returnIMAPStore(imapStore, accountId, server, port, login);
                     } else {
+                        // Not null AND not connected...?
                         closeSafely(imapStore);
                     }
                 } else {
