@@ -184,15 +184,19 @@ public final class Conversation {
      * @return <code>true</code> if references or referenced-by; otherwise <code>false</code>
      */
     public boolean referencesOrIsReferencedBy(final MailMessage message) {
-        if (!this.references.isEmpty()) {
-            final String messageId = message.getMessageId();
-            if (null != messageId && this.references.contains(messageId)) {
+        if (!this.messageIds.isEmpty()) {
+            if (this.messageIds.contains(message.getMessageId())) {
+                // Already contained
+                return false;
+            }
+            final String[] sReferences = message.getReferences();
+            if (null != sReferences && containsAny(this.messageIds, Arrays.asList(sReferences))) {
                 return true;
             }
         }
-        if (!this.messageIds.isEmpty()) {
-            final String[] sReferences = message.getReferences();
-            if (null != sReferences && containsAny(this.messageIds, Arrays.asList(sReferences))) {
+        if (!this.references.isEmpty()) {
+            final String messageId = message.getMessageId();
+            if (null != messageId && this.references.contains(messageId)) {
                 return true;
             }
         }
