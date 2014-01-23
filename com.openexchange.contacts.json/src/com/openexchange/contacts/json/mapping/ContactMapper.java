@@ -137,14 +137,14 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 					setFields.add(ContactField.IMAGE1_URL); // assume virtual IMAGE1_URL is set, too
 				} else if (ContactField.LAST_MODIFIED.equals(field)) {
 					setFields.add(ContactField.LAST_MODIFIED_UTC); // assume virtual LAST_MODIFIED_UTC is set, too
-				}
+                }
 			}
 		}
 		if (null != mandatoryFields) {
 			setFields.addAll(Arrays.asList(mandatoryFields));
 		}
 		return setFields.toArray(newArray(setFields.size()));
-	}
+    }
 
     @Override
 	public Contact newInstance() {
@@ -2983,7 +2983,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.YOMI_FIRST_NAME, new StringMapping<Contact>(ContactFields.YOMI_FIRST_NAME, 610) {
+        mappings.put(ContactField.YOMI_FIRST_NAME, new StringMapping<Contact>(ContactFields.YOMI_FIRST_NAME, Contact.YOMI_FIRST_NAME) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -3006,7 +3006,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.YOMI_LAST_NAME, new StringMapping<Contact>(ContactFields.YOMI_LAST_NAME, 611) {
+        mappings.put(ContactField.YOMI_LAST_NAME, new StringMapping<Contact>(ContactFields.YOMI_LAST_NAME, Contact.YOMI_LAST_NAME) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -3029,7 +3029,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.YOMI_COMPANY, new StringMapping<Contact>(ContactFields.YOMI_COMPANY, 612) {
+        mappings.put(ContactField.YOMI_COMPANY, new StringMapping<Contact>(ContactFields.YOMI_COMPANY, Contact.YOMI_COMPANY) {
 
             @Override
             public void set(Contact contact, String value) {

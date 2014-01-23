@@ -1,3 +1,7 @@
+* 2014-01-23 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 25300: Exchanged conflicting column ids in contact details
+ 
 * 2014-01-22 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 30747: Don't preserve creation timestamp of source file when copying infostore files  

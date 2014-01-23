@@ -304,16 +304,16 @@ public class Contact extends CommonObject {
     /**
      * Additional fields for kana based search in japanese environments.
      */
-    public static final int YOMI_FIRST_NAME = 610;
-    public static final int YOMI_LAST_NAME = 611;
-    public static final int YOMI_COMPANY = 612;
+    public static final int YOMI_FIRST_NAME = 616;
+    public static final int YOMI_LAST_NAME = 617;
+    public static final int YOMI_COMPANY = 618;
 
     /**
      * Additional fields for Outlook address fields.
      */
-    public static final int ADDRESS_HOME = 613;
-    public static final int ADDRESS_BUSINESS = 614;
-    public static final int ADDRESS_OTHER = 615;
+    public static final int ADDRESS_HOME = 619;
+    public static final int ADDRESS_BUSINESS = 620;
+    public static final int ADDRESS_OTHER = 621;
 
     /**
      * Sorted array of fields belonging to business address.
