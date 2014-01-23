@@ -1,4 +1,4 @@
-package com.openexchange.spamhandler.spamexperts.impl;
+package com.openexchange.spamhandler.spamexperts.servlets;
 
 /*
  *

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,27 +52,26 @@ package com.openexchange.spamhandler.spamexperts.osgi;
 import com.openexchange.osgi.ServiceRegistry;
 
 /**
-* {@link MyServiceRegistry} - A registry for services
-*
-*/
-public final class MyServiceRegistry {
+ * {@link SpamExpertsServiceRegistry}
+ */
+public final class SpamExpertsServiceRegistry extends ServiceRegistry {
 
-	private static final ServiceRegistry REGISTRY = new ServiceRegistry();
+    private static final SpamExpertsServiceRegistry instance = new SpamExpertsServiceRegistry();
 
-	/**
-	 * Gets the service registry
-	 *
-	 * @return The service registry
-	 */
-	public static ServiceRegistry getServiceRegistry() {
-		return REGISTRY;
-	}
+    /**
+     * Gets the service registry instance.
+     *
+     * @return The service registry instance.
+     */
+    public static SpamExpertsServiceRegistry getInstance() {
+        return instance;
+    }
 
-	/**
-	 * Initializes a new {@link MyServiceRegistry}
-	 */
-	private MyServiceRegistry() {
-		super();
-	}
+    /**
+     * Initializes a new {@link SpamExpertsServiceRegistry}.
+     */
+    private SpamExpertsServiceRegistry() {
+        super(2);
+    }
 
 }
