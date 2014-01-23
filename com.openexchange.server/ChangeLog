@@ -1,3 +1,7 @@
+* 2014-01-23 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30777: Use relative identifier when retrieving metadata from ID based file access  
+
 * 2014-01-22 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 30747: Don't preserve creation timestamp of source file when copying infostore files  
