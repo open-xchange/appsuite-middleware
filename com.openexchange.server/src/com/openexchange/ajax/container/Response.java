@@ -124,6 +124,12 @@ public final class Response {
     private boolean includeStackTraceOnError;
 
     /**
+     * Signals whether the data provided by this response is not yet finished or final, but rather reflects an intermediate state and the
+     * client is supposed to request again to get full results.
+     */
+    private Continuation continuation;
+
+    /**
      * This constructor parses a server response into an object.
      *
      * @param response the response JSON object.
@@ -132,6 +138,7 @@ public final class Response {
         this(DEFAULT_LOCALE);
         this.json = response;
         includeStackTraceOnError = false;
+        continuation = null;
     }
 
     /**
@@ -172,6 +179,7 @@ public final class Response {
         this.json = null;
         this.locale = locale;
         includeStackTraceOnError = false;
+        continuation = null;
     }
 
     /**
@@ -487,6 +495,28 @@ public final class Response {
      */
     public boolean includeStackTraceOnError() {
         return includeStackTraceOnError;
+    }
+
+    /**
+     * Sets whether the data provided by this response is not yet finished or final, but rather reflects an intermediate state and the
+     * client is supposed to request again to get full results.
+     *
+     * @param continuation The continuative status to set
+     * @return A reference to this response
+     */
+    public Response setContinuation(final Continuation continuation) {
+        this.continuation = continuation;
+        return this;
+    }
+
+    /**
+     * Checks whether the data provided by this response is not yet finished or final, but rather reflects an intermediate state and the
+     * client is supposed to request again to get full results.
+     *
+     * @return The continuative status
+     */
+    public Continuation getContinuation() {
+        return continuation;
     }
 
     private static Locale localeFrom(final Session session) throws OXException {

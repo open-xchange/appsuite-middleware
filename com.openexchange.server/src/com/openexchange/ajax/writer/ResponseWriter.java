@@ -250,6 +250,11 @@ public final class ResponseWriter {
         if (null != response.getTimestamp()) {
             json.put(TIMESTAMP, response.getTimestamp().getTime());
         }
+
+        if (null != response.getContinuation()) {
+            ContinuationWriter.write(response.getContinuation(), json);
+        }
+
         final List<OXException> warnings = response.getWarnings();
         final OXException exception = response.getException();
         if (null == exception) {
