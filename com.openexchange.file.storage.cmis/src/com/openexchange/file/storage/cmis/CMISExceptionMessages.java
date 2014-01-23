@@ -59,9 +59,6 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class CMISExceptionMessages implements LocalizableStrings {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
     // A CMIS error occurred: %1$s
     public static final String CMIS_ERROR_MSG = "A CMIS error occurred: %1$s";
 
