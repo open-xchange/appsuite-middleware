@@ -29,4 +29,14 @@ public class TestServletActivator extends HousekeepingActivator {
         service.registerServlet("/servlet/Ping", new PingServlet(), null, null);
     }
 
+    @Override
+    protected void stopBundle() throws Exception {
+        HttpService service = getService(HttpService.class);
+        if (service != null) {
+            service.unregister("/servlet/TestServlet");
+            service.unregister("/servlet/Ping");
+        }
+
+    }
+
 }
