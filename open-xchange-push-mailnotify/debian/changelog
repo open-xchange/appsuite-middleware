@@ -1,3 +1,9 @@
+open-xchange-push-mailnotify (7.4.2-3) stable; urgency=low
+
+  * Third release candidate for 7.4.2
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 23 Jan 2014 16:02:06 +0100
+
 open-xchange-push-mailnotify (7.4.2-2) stable; urgency=low
 
   * Second release candidate for 7.4.2

@@ -1,3 +1,9 @@
+open-xchange-audit (7.4.2-3) stable; urgency=low
+
+  * Third release candidate for 7.4.2
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 23 Jan 2014 16:00:43 +0100
+
 open-xchange-audit (7.4.2-2) stable; urgency=low
 
   * Second release candidate for 7.4.2
