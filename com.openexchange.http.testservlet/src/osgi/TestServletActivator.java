@@ -36,7 +36,7 @@ public class TestServletActivator extends HousekeepingActivator {
             service.unregister("/servlet/TestServlet");
             service.unregister("/servlet/Ping");
         }
-
+        super.stopBundle();
     }
 
 }
