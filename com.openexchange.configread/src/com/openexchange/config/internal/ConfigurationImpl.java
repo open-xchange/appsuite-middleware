@@ -266,7 +266,7 @@ public final class ConfigurationImpl implements ConfigurationService {
                 final Entry<Object, Object> e = iter.next();
                 final String propName = e.getKey().toString().trim();
                 final String otherValue = properties.get(propName);
-                if (properties.containsKey(propName) && otherValue != null && !otherValue.equals(e.getValue())) {
+                if (otherValue != null && !otherValue.equals(e.getValue())) {
                     final String otherFile = propertiesFiles.get(propName);
                     LOG.debug(
                         "Overwriting property {} from file ''{}'' with property from file ''{}'', overwriting value ''{}'' with value ''{}''",
@@ -311,7 +311,8 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     @Override
     public String getProperty(final String name, final String defaultValue) {
-        return properties.containsKey(name) ? properties.get(name) : defaultValue;
+        final String value = properties.get(name);
+        return null == value ? defaultValue : value;
     }
 
     @Override
@@ -439,17 +440,17 @@ public final class ConfigurationImpl implements ConfigurationService {
      * @return true if the property with the given name can be found and a watcher is added, else false
      */
     private boolean watchProperty(final String name, final PropertyListener propertyListener) {
-        if (properties.containsKey(name)) {
-            final PropertyWatcher pw = PropertyWatcher.addPropertyWatcher(name, properties.get(name), true);
-            pw.addPropertyListener(propertyListener);
-            final FileWatcher fileWatcher = FileWatcher.getFileWatcher(new File(propertiesFiles.get(name)));
-            fileWatcher.addFileListener(pw);
-            fileWatcher.startFileWatcher(10000);
-            return true;
-        } else {
+        final String value = properties.get(name);
+        if (null == value) {
             LOG.error("Unable to watch missing property: {}", name);
             return false;
         }
+        final PropertyWatcher pw = PropertyWatcher.addPropertyWatcher(name, value, true);
+        pw.addPropertyListener(propertyListener);
+        final FileWatcher fileWatcher = FileWatcher.getFileWatcher(new File(propertiesFiles.get(name)));
+        fileWatcher.addFileListener(pw);
+        fileWatcher.startFileWatcher(10000);
+        return true;
     }
 
     @Override
