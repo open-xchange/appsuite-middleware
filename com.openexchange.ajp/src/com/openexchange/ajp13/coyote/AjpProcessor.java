@@ -1677,21 +1677,26 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * @param requestURI The request URI
      */
     private void setServletInstance(final String requestURI) {
-        final String defaultCharEnc = AJPv13Config.getServerProperty(Property.DefaultEncoding);
-        final String decodedRequestURI = AJPv13Utility.decodeUrl(requestURI, defaultCharEnc);
-        /*
-         * Remove leading slash character
-         */
-        final String path = decodedRequestURI.length() > 1 ? removeFromPath(decodedRequestURI, '/') : decodedRequestURI;
-        /*
-         * Lookup path in available servlet paths
-         */
         if (servletId.length() > 0) {
             servletId.setLength(0);
         }
+        String reqURI = requestURI;
+        // Remove leading slash character
+        String path = reqURI.length() > 1 ? removeFromPath(reqURI, '/') : reqURI;
         HttpServlet servlet = HttpServletManager.getServlet(path, servletId);
         if (servlet == null) {
-            servlet = new HttpErrorServlet("No servlet bound to path/alias: " + AJPv13Utility.urlEncode(decodedRequestURI, defaultCharEnc));
+            // Retry look-up using decoded form
+            final String defaultCharEnc = AJPv13Config.getServerProperty(Property.DefaultEncoding);
+            if (servletId.length() > 0) {
+                servletId.setLength(0);
+            }
+            reqURI = AJPv13Utility.decodeUrl(requestURI, defaultCharEnc);
+            // Remove leading slash character
+            path = reqURI.length() > 1 ? removeFromPath(reqURI, '/') : reqURI;
+            servlet = HttpServletManager.getServlet(path, servletId);
+            if (servlet == null) {
+                servlet = new HttpErrorServlet("No servlet bound to path/alias: " + AJPv13Utility.urlEncode(reqURI, defaultCharEnc));
+            }
         }
         this.servlet = servlet;
         // servletId = pathStorage.length() > 0 ? pathStorage.toString() : null;
@@ -1713,7 +1718,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 /*
                  * Set complete request URI as path info
                  */
-                request.setPathInfo(decodedRequestURI);
+                request.setPathInfo(reqURI);
             } else {
                 /*
                  * The path starts with a "/" character and includes either the servlet name or a path to the servlet, but does not include
@@ -1724,8 +1729,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                  * Set path info: The extra path information follows the servlet path but precedes the query string and will start with a
                  * "/" character.
                  */
-                if ((decodedRequestURI.length() > servletPathLen) /* && requestURI.startsWith(servletPath) */) {
-                    request.setPathInfo(decodedRequestURI.substring(servletPathLen));
+                if ((reqURI.length() > servletPathLen) /* && requestURI.startsWith(servletPath) */) {
+                    request.setPathInfo(reqURI.substring(servletPathLen));
                 } else {
                     request.setPathInfo(null);
                 }
