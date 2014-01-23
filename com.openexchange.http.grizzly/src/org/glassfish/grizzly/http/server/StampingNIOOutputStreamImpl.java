@@ -60,7 +60,7 @@ import org.glassfish.grizzly.Buffer;
  */
 public class StampingNIOOutputStreamImpl extends NIOOutputStreamImpl {
 
-    protected volatile boolean doPing = true;
+    protected volatile long lastAccessed = -1L;
     protected volatile boolean closed = false;
 
     /**
@@ -73,19 +73,19 @@ public class StampingNIOOutputStreamImpl extends NIOOutputStreamImpl {
     @Override
     public void write(int b) throws IOException {
         super.write(b);
-        doPing = false;
+        lastAccessed = System.currentTimeMillis();
     }
 
     @Override
     public void write(byte[] b) throws IOException {
         super.write(b);
-        doPing = false;
+        lastAccessed = System.currentTimeMillis();
     }
 
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
         super.write(b, off, len);
-        doPing = false;
+        lastAccessed = System.currentTimeMillis();
     }
 
     @Override
@@ -97,13 +97,13 @@ public class StampingNIOOutputStreamImpl extends NIOOutputStreamImpl {
     @Override
     public void write(Buffer buffer) throws IOException {
         super.write(buffer);
-        doPing = false;
+        lastAccessed = System.currentTimeMillis();
     }
 
     @Override
     public void recycle() {
         closed = false;
-        doPing = true;
+        lastAccessed = -1L;
         super.recycle();
     }
 
