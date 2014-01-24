@@ -83,21 +83,12 @@ public final class CustomThreadFactory implements java.util.concurrent.ThreadFac
 
     @Override
     public CustomThread newThread(Runnable r) {
-        /*
-         * Ensure a positive thread number
-         */
-        int threadNum = threadNumber.incrementAndGet();
-        if (threadNum <= 0) {
-            boolean check = false;
-            do {
-                if (threadNumber.compareAndSet(threadNum, 1)) {
-                    threadNum = 1;
-                } else {
-                    threadNum = threadNumber.get();
-                    check = true;
-                }
-            } while (threadNum <= 0);
-            if (check && 1 == threadNum) {
+        // Ensure a positive thread number
+        int threadNum;
+        while ((threadNum = threadNumber.incrementAndGet()) <= 0) {
+            if (threadNumber.compareAndSet(threadNum, 1)) {
+                threadNum = 1;
+            } else {
                 threadNum = threadNumber.incrementAndGet();
             }
         }
