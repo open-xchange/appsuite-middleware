@@ -115,7 +115,7 @@ public class SpamExpertsActivator extends HousekeepingActivator {
 
 			SpamExpertsConfig.getInstance().start();
 			registerService(SpamHandler.class, SpamExpertsSpamHandler.getInstance(), dictionary);
-			servletRegistration = new HTTPServletRegistration(context, new com.openexchange.spamhandler.spamexperts.servlets.MyServlet(), SpamExpertsConfig.getInstance().getPanelServlet());
+			servletRegistration = new HTTPServletRegistration(context, new com.openexchange.spamhandler.spamexperts.servlets.SpamExpertsServlet(), SpamExpertsConfig.getInstance().getPanelServlet());
 
 		} catch (final Throwable t) {
 			LOG.error("", t);

@@ -81,7 +81,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  *
  */
-public final class MyServletRequest  {
+public final class SpamExpertsServletRequest  {
 
 	private final Session sessionObj;
 	private User user;
@@ -97,11 +97,11 @@ public final class MyServletRequest  {
 
 
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MyServletRequest.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamExpertsServletRequest.class);
 
 	public static final String ACTION_GET_NEW_PANEL_SESSION = "generate_panel_session";
 
-	public MyServletRequest(final Session sessionObj, final Context ctx) throws OXException {
+	public SpamExpertsServletRequest(final Session sessionObj, final Context ctx) throws OXException {
 		this.sessionObj = sessionObj;
 		try {
 			this.user = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
