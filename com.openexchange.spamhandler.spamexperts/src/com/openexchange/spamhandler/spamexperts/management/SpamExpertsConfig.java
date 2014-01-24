@@ -49,7 +49,6 @@
 
 package com.openexchange.spamhandler.spamexperts.management;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -74,17 +73,31 @@ public class SpamExpertsConfig implements Initialization {
 
     private static final Logger LOG = LoggerFactory.getLogger(SpamExpertsConfig.class);
 
-    private static final String CONFIG_SP_IMAPURL = "com.openexchange.custom.spamexperts.imapurl";
-    private static final String CONFIG_SP_IMAPUSER = "com.openexchange.custom.spamexperts.imapuser";
-    private static final String CONFIG_SP_IMAPPASSWORD = "com.openexchange.custom.spamexperts.imappassword";
-    private static final String CONFIG_SP_TRAIN_SPAM_FOLDER = "com.openexchange.custom.spamexperts.trainspamfolder";
-    private static final String CONFIG_SP_TRAIN_HAM_FOLDER = "com.openexchange.custom.spamexperts.trainhamfolder";
+    private static final String PROPERTY_IMAPURL = "com.openexchange.custom.spamexperts.imapurl";
+    private static final String PROPERTY_IMAPUSER = "com.openexchange.custom.spamexperts.imapuser";
+    private static final String PROPERTY_IMAPPASSWORD = "com.openexchange.custom.spamexperts.imappassword";
+    private static final String PROPERTY_TRAIN_SPAM_FOLDER = "com.openexchange.custom.spamexperts.trainspamfolder";
+    private static final String PROPERTY_TRAIN_HAM_FOLDER = "com.openexchange.custom.spamexperts.trainhamfolder";
+
+    private static final String PROPERTY_PANEL_API_ADMIN_USER = "com.openexchange.custom.spamexperts.panel.admin_user";
+    private static final String PROPERTY_PANEL_API_ADMIN_PASSWORD = "com.openexchange.custom.spamexperts.panel.admin_password";
+    private static final String PROPERTY_PANEL_API_URL = "com.openexchange.custom.spamexperts.panel.api_interface_url";
+    private static final String PROPERTY_PANEL_API_AUTH_ATTRIBUTE = "com.openexchange.custom.spamexperts.panel.api_auth_attribute";
+    private static final String PROPERTY_PANEL_WEB_UI_URL = "com.openexchange.custom.spamexperts.panel.web_ui_url";
+    private static final String PROPERTY_PANEL_SERVLET = "com.openexchange.custom.spamexperts.panel_servlet";
 
     private URLName imapUrl;
     private String imapUser;
     private String imappassword;
     private String trainSpamFolder;
     private String trainHamFolder;
+    
+    private String panelAdmin;
+    private String panelAdminPw;
+    private String panelApiUrl;
+    private String panelApiAuthAttr;
+    private String panelWebUiUrl;
+    private String panelServlet;
     
     public static SpamExpertsConfig getInstance() {
         return instance;
@@ -174,6 +187,73 @@ public class SpamExpertsConfig implements Initialization {
         this.trainHamFolder = trainHamFolder;
     }
 
+    
+    public String getPanelAdmin() {
+        return panelAdmin;
+    }
+
+    
+    public void setPanelAdmin(String panelAdmin) {
+        this.panelAdmin = panelAdmin;
+    }
+
+    
+    public String getPanelAdminPw() {
+        return panelAdminPw;
+    }
+
+    
+    public void setPanelAdminPw(String panelAdminPw) {
+        this.panelAdminPw = panelAdminPw;
+    }
+
+    
+    public String getPanelApiUrl() {
+        return panelApiUrl;
+    }
+
+    
+    public void setPanelApiUrl(String panelApiUrl) {
+        this.panelApiUrl = panelApiUrl;
+    }
+
+    
+    public String getPanelApiAuthAttr() {
+        return panelApiAuthAttr;
+    }
+
+    
+    public void setPanelApiAuthAttr(String panelApiAuthAttr) {
+        this.panelApiAuthAttr = panelApiAuthAttr;
+    }
+
+    private void urlCheck(final String url) throws OXException, URISyntaxException {
+        URI tmp = new URI(url);
+        if( null == tmp.getHost() || tmp.getHost().length() == 0) {
+            throw SpamExpertsExceptionCode.INVALID_URL.create(url);
+        }
+    }
+    
+    
+    public String getPanelWebUiUrl() {
+        return panelWebUiUrl;
+    }
+
+    
+    public void setPanelWebUiUrl(String panelWebUiUrl) {
+        this.panelWebUiUrl = panelWebUiUrl;
+    }
+
+    
+    public String getPanelServlet() {
+        return panelServlet;
+    }
+
+    
+    public void setPanelServlet(String panelServlet) {
+        this.panelServlet = panelServlet;
+    }
+
     /**
      * Loads all relevant properties from the configuration service.
      *
@@ -181,36 +261,69 @@ public class SpamExpertsConfig implements Initialization {
      * @throws OXException
      */
     private void load(ConfigurationService configService) throws OXException {
-        final String iurl = configService.getProperty(CONFIG_SP_IMAPURL);
+        final String iurl = configService.getProperty(PROPERTY_IMAPURL);
         if( null == iurl || iurl.length() == 0) {
-            throw SpamExpertsExceptionCode.MISSING_CONFIG_OPTION.create(CONFIG_SP_IMAPURL);
+            throw SpamExpertsExceptionCode.MISSING_CONFIG_OPTION.create(PROPERTY_IMAPURL);
         }
         try {
-            URI tmp = new URI(iurl);
-            if( null == tmp.getHost() || tmp.getHost().length() == 0) {
-                throw SpamExpertsExceptionCode.INVALID_IMAP_URL.create(iurl);
-            }
+            urlCheck(iurl);
             imapUrl = new URLName(iurl);
         } catch (URISyntaxException e) {
             LOG.error(e.getMessage(), e);
-            throw SpamExpertsExceptionCode.INVALID_IMAP_URL.create(iurl);
+            throw SpamExpertsExceptionCode.INVALID_URL.create(iurl);
         }
         
-        imapUser = configService.getProperty(CONFIG_SP_IMAPUSER);
+        imapUser = configService.getProperty(PROPERTY_IMAPUSER);
         if( null == imapUser || imapUser.length() == 0) {
-            throw SpamExpertsExceptionCode.MISSING_CONFIG_OPTION.create(CONFIG_SP_IMAPUSER);
+            throw SpamExpertsExceptionCode.MISSING_CONFIG_OPTION.create(PROPERTY_IMAPUSER);
         }
-        imappassword = configService.getProperty(CONFIG_SP_IMAPPASSWORD);
+        imappassword = configService.getProperty(PROPERTY_IMAPPASSWORD);
         if( null == imappassword ) {
-            throw SpamExpertsExceptionCode.MISSING_CONFIG_OPTION.create(CONFIG_SP_IMAPPASSWORD);
+            throw SpamExpertsExceptionCode.MISSING_CONFIG_OPTION.create(PROPERTY_IMAPPASSWORD);
         }
-        trainHamFolder = configService.getProperty(CONFIG_SP_TRAIN_HAM_FOLDER);
+        trainHamFolder = configService.getProperty(PROPERTY_TRAIN_HAM_FOLDER);
         if( null == trainHamFolder || trainHamFolder.length() == 0) {
-            throw SpamExpertsExceptionCode.MISSING_CONFIG_OPTION.create(CONFIG_SP_TRAIN_HAM_FOLDER);
+            throw SpamExpertsExceptionCode.MISSING_CONFIG_OPTION.create(PROPERTY_TRAIN_HAM_FOLDER);
         }
-        trainSpamFolder = configService.getProperty(CONFIG_SP_TRAIN_SPAM_FOLDER);
+        trainSpamFolder = configService.getProperty(PROPERTY_TRAIN_SPAM_FOLDER);
         if( null == trainSpamFolder || trainSpamFolder.length() == 0) {
-            throw SpamExpertsExceptionCode.MISSING_CONFIG_OPTION.create(CONFIG_SP_TRAIN_SPAM_FOLDER);
+            throw SpamExpertsExceptionCode.MISSING_CONFIG_OPTION.create(PROPERTY_TRAIN_SPAM_FOLDER);
         }
+        
+        panelAdmin = configService.getProperty(PROPERTY_PANEL_API_ADMIN_USER);
+        if( null == panelAdmin || panelAdmin.length() == 0) {
+            throw SpamExpertsExceptionCode.MISSING_CONFIG_OPTION.create(PROPERTY_PANEL_API_ADMIN_USER);
+        }
+        panelAdminPw = configService.getProperty(PROPERTY_PANEL_API_ADMIN_PASSWORD);
+
+        panelApiUrl = configService.getProperty(PROPERTY_PANEL_API_URL);
+        if( null == panelApiUrl || panelApiUrl.length() == 0) {
+            throw SpamExpertsExceptionCode.MISSING_CONFIG_OPTION.create(PROPERTY_IMAPURL);
+        }
+        try {
+            urlCheck(panelApiUrl);
+        } catch (URISyntaxException e) {
+            LOG.error(e.getMessage(), e);
+            throw SpamExpertsExceptionCode.INVALID_URL.create(panelApiUrl);
+        }
+        panelApiAuthAttr = configService.getProperty(PROPERTY_PANEL_API_AUTH_ATTRIBUTE);
+
+        panelWebUiUrl = configService.getProperty(PROPERTY_PANEL_WEB_UI_URL);
+        if( null == panelWebUiUrl || panelWebUiUrl.length() == 0) {
+            throw SpamExpertsExceptionCode.MISSING_CONFIG_OPTION.create(PROPERTY_PANEL_WEB_UI_URL);
+        }
+        try {
+            urlCheck(panelWebUiUrl);
+        } catch (URISyntaxException e) {
+            LOG.error(e.getMessage(), e);
+            throw SpamExpertsExceptionCode.INVALID_URL.create(panelWebUiUrl);
+        }
+
+        panelServlet = configService.getProperty(PROPERTY_PANEL_SERVLET);
+        if( null == panelServlet || panelServlet.length() == 0) {
+            throw SpamExpertsExceptionCode.MISSING_CONFIG_OPTION.create(PROPERTY_PANEL_SERVLET);
+        }
+        panelServlet = configService.getProperty(PROPERTY_PANEL_SERVLET);
+
     }
 }

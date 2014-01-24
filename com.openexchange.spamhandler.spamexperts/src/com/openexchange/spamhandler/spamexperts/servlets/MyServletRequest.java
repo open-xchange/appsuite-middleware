@@ -24,6 +24,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.spamexperts.exceptions.SpamExpertsExceptionCode;
+import com.openexchange.spamhandler.spamexperts.management.SpamExpertsConfig;
 import com.openexchange.spamhandler.spamexperts.osgi.SpamExpertsServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -103,11 +104,6 @@ public final class MyServletRequest  {
 
 	public static final String ACTION_GET_NEW_PANEL_SESSION = "generate_panel_session";
 
-	// config options
-	private static final String PROPERTY_PANEL_API_ADMIN_USER = "com.openexchange.custom.spamexperts.panel.admin_user";
-	private static final String PROPERTY_PANEL_API_ADMIN_PASSWORD = "com.openexchange.custom.spamexperts.panel.admin_password";
-	private static final String PROPERTY_PANEL_API_URL = "com.openexchange.custom.spamexperts.panel.api_interface_url";
-	private static final String PROPERTY_PANEL_API_AUTH_ATTRIBUTE = "com.openexchange.custom.spamexperts.panel.api_auth_attribute";
 	public MyServletRequest(final Session sessionObj, final Context ctx) throws OXException {
 		this.sessionObj = sessionObj;
 		try {
@@ -164,7 +160,7 @@ public final class MyServletRequest  {
 			// add valid data to response
 			// UI Plugin will format session and URL and redirect
 			jsonResponseObject.put("panel_session",sessionid); // send session id
-			jsonResponseObject.put("panel_web_ui_url",getFromConfig("com.openexchange.custom.spamexperts.panel.web_ui_url")); // send UI URL
+			jsonResponseObject.put("panel_web_ui_url",SpamExpertsConfig.getInstance().getPanelWebUiUrl()); // send UI URL
 
 		} catch (final URIException e) {
 			LOG.error("error creating uri object of spamexperts api interface", e);
@@ -197,7 +193,7 @@ public final class MyServletRequest  {
 
 		String authid = null; // FALLBACK IS MAIL
 
-		String authid_attribute = getAuthIDAttribute();
+		String authid_attribute = SpamExpertsConfig.getInstance().getPanelApiAuthAttr();
 		if(authid_attribute==null || authid_attribute.trim().length()==0){
 			authid_attribute = AUTH_ID_MAIL;
 			LOG.debug("Using {} from user {} in context {} as authentication attribute against panel API", authid_attribute, getCurrentUserUsername(), getCurrentUserContextID());
@@ -218,12 +214,13 @@ public final class MyServletRequest  {
 		LOG.debug("Using {} as authID string from user {} in context {} to authenticate against panel API", authid, getCurrentUserUsername(), getCurrentUserContextID());
 
 		// call the API to retrieve the URL to access panel
-        final GetMethod GET = new GetMethod(getPanelApiURL()+authid);
+        final GetMethod GET = new GetMethod(SpamExpertsConfig.getInstance().getPanelApiUrl()+authid);
         // send request
 
         HTTPCLIENT.getState().setCredentials(
                         new AuthScope(GET.getURI().getHost(), 80, "API user authentication"),
-                        new UsernamePasswordCredentials(getPanelApiAdminUser(), getPanelApiAdminPassword())
+                        new UsernamePasswordCredentials(SpamExpertsConfig.getInstance().getPanelAdmin(),
+                            SpamExpertsConfig.getInstance().getPanelAdminPw())
         );
 
 		try {
@@ -259,27 +256,6 @@ public final class MyServletRequest  {
             }
         }
 
-	}
-
-
-	private String getPanelApiURL() throws OXException{
-		return getFromConfig(PROPERTY_PANEL_API_URL);
-	}
-
-	private String getAuthIDAttribute() throws OXException{
-		return getFromConfig(PROPERTY_PANEL_API_AUTH_ATTRIBUTE);
-	}
-
-	private String getPanelApiAdminUser() throws OXException{
-		return getFromConfig(PROPERTY_PANEL_API_ADMIN_USER);
-	}
-
-	private String getPanelApiAdminPassword() throws OXException{
-		return getFromConfig(PROPERTY_PANEL_API_ADMIN_PASSWORD);
-	}
-
-	private String getFromConfig(final String key) throws OXException{
-		return this.configservice.getProperty(key);
 	}
 
 	private String getCurrentUserUsername(){

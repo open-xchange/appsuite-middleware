@@ -77,7 +77,7 @@ public enum SpamExpertsExceptionCode implements DisplayableOXExceptionCode {
     
     MISSING_CONFIG_OPTION("Missing configuration option \"%1$s\"", CATEGORY_CONFIGURATION, 6),
     
-    INVALID_IMAP_URL("Specified imap url is wrong: \"%1$s\"", CATEGORY_CONFIGURATION,7);
+    INVALID_URL("Specified url is wrong: \"%1$s\"", CATEGORY_CONFIGURATION,7);
 
 
     private Category category;

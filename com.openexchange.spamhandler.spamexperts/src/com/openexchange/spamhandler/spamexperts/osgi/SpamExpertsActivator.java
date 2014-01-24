@@ -55,7 +55,6 @@ import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.spamhandler.SpamHandler;
@@ -116,7 +115,7 @@ public class SpamExpertsActivator extends HousekeepingActivator {
 
 			SpamExpertsConfig.getInstance().start();
 			registerService(SpamHandler.class, SpamExpertsSpamHandler.getInstance(), dictionary);
-			servletRegistration = new HTTPServletRegistration(context, new com.openexchange.spamhandler.spamexperts.servlets.MyServlet(), getFromConfig("com.openexchange.custom.spamexperts.panel_servlet"));
+			servletRegistration = new HTTPServletRegistration(context, new com.openexchange.spamhandler.spamexperts.servlets.MyServlet(), SpamExpertsConfig.getInstance().getPanelServlet());
 
 		} catch (final Throwable t) {
 			LOG.error("", t);
@@ -124,11 +123,6 @@ public class SpamExpertsActivator extends HousekeepingActivator {
 		}
 
 	}
-
-	private String getFromConfig(final String key) throws OXException {
-        final ConfigurationService configservice = SpamExpertsServiceRegistry.getInstance().getService(ConfigurationService.class,true);
-        return configservice.getProperty(key);
-    }
 
 	@Override
 	protected void stopBundle() throws Exception {
