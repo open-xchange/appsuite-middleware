@@ -325,11 +325,11 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
         } catch (final MalformedURLException e) {
             LOG.error(e.toString());
             LOG.error("User with id={} and context={} failed to subscribe source={} with display_name={}", workflow.getSubscription().getUserId(), workflow.getSubscription().getContext(), workflow.getSubscription().getSource().getDisplayName(), workflow.getSubscription().getDisplayName());
-            throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create();
         } catch (final IOException e) {
             LOG.error(e.toString());
             LOG.error("User with id={} and context={} failed to subscribe source={} with display_name={}", workflow.getSubscription().getUserId(), workflow.getSubscription().getContext(), workflow.getSubscription().getSource().getDisplayName(), workflow.getSubscription().getDisplayName());
-            throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create();
         } catch (final InvalidCredentialsException e) {
             LOG.error("User with id={} and context={} failed to subscribe source={} with display_name={}", workflow.getSubscription().getUserId(), workflow.getSubscription().getContext(), workflow.getSubscription().getSource().getDisplayName(), workflow.getSubscription().getDisplayName());
             throw SubscriptionErrorMessage.INVALID_LOGIN.create();
@@ -339,7 +339,7 @@ public class GoogleAPIStep extends AbstractStep<Contact[], Object> implements Lo
         } catch (final ServiceException e) {
             LOG.error("", e);
             LOG.error("User with id={} and context={} failed to subscribe source={} with display_name={}", workflow.getSubscription().getUserId(), workflow.getSubscription().getContext(), workflow.getSubscription().getSource().getDisplayName(), workflow.getSubscription().getDisplayName());
-            throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create();
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create();
         }
     }
 

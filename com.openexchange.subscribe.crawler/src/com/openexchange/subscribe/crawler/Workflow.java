@@ -216,7 +216,7 @@ public class Workflow {
             return (Object[]) result;
         } catch (RuntimeException e) {
             LOG.error("User with id={} and context={} failed to subscribe source={} with display_name={}", subscription.getUserId(), subscription.getContext(), subscription.getSource().getDisplayName(), subscription.getDisplayName(), e);
-            throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create(e);
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         } finally {
             /*MultiThreadedHttpConnectionManager manager = (MultiThreadedHttpConnectionManager) crawlerConnection.getHttpClient().getHttpConnectionManager();
             manager.shutdown(); */
