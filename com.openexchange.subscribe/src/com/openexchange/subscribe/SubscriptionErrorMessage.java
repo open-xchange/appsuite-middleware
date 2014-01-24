@@ -50,9 +50,10 @@
 package com.openexchange.subscribe;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 
 /**
@@ -61,58 +62,127 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public enum SubscriptionErrorMessage implements OXExceptionCode {
+public enum SubscriptionErrorMessage implements DisplayableOXExceptionCode {
 
     /**
-     * A SQL Error occurred.
+     * Error while reading/writing data from/to the database.
      */
-    SQLException(CATEGORY_ERROR, 1, SubscriptionErrorStrings.TRY_AGAIN, SubscriptionErrorStrings.SQL_ERROR),
+    SQLException(CATEGORY_ERROR, 1, SubscriptionErrorMessage.SQL_ERROR, OXExceptionStrings.SQL_ERROR_MSG),
     /**
      * A parsing error occurred: %1$s.
      */
-    ParseException(CATEGORY_ERROR, 2, SubscriptionErrorStrings.WELL_FORMED, SubscriptionErrorStrings.PARSING_ERROR),
+    ParseException(CATEGORY_ERROR, 2, SubscriptionErrorMessage.PARSING_ERROR),
     /**
      * Can not save a given ID.
      */
-    IDGiven(CATEGORY_ERROR, 3, SubscriptionErrorStrings.DONT_SET_ID, SubscriptionErrorStrings.CANT_SAVE_ID),
-    /**
-     * Could not find Subscription (according ID and Context).
-     */
-    SubscriptionNotFound(CATEGORY_USER_INPUT, 5, SubscriptionErrorStrings.PROVIDE_VALID_ID, SubscriptionErrorStrings.CANT_FIND_SUBSCRIPTION),
+    IDGiven(CATEGORY_ERROR, 3, SubscriptionErrorMessage.CANT_SAVE_ID),
     /**
      * Parsing error.
      */
-    ParsingError(CATEGORY_ERROR, 6, SubscriptionErrorStrings.CHECK_VALUE, SubscriptionErrorStrings.PARSING_ERROR2),
+    ParsingError(CATEGORY_ERROR, 6, SubscriptionErrorMessage.PARSING_ERROR),
     /**
-     * The login or password you entered are wrong.
+     * Could not find Subscription (according ID and Context).
      */
-    INVALID_LOGIN(CATEGORY_USER_INPUT, 7, SubscriptionErrorStrings.CORRECT_PASSWORD, SubscriptionErrorStrings.WRONG_PASSWORD),
-    COMMUNICATION_PROBLEM(CATEGORY_SERVICE_DOWN, 8, SubscriptionErrorStrings.CHECK_WEBSITE, SubscriptionErrorStrings.SERVICE_UNAVAILABLE),
-    TEMPORARILY_UNAVAILABLE(CATEGORY_SERVICE_DOWN, 8, SubscriptionErrorStrings.TRY_AGAIN_LATER, SubscriptionErrorStrings.SERVICE_TEMPORARILY_UNAVAILABLE),
-    INVALID_WORKFLOW(CATEGORY_CONFIGURATION, 9, SubscriptionErrorStrings.OUTPUT_MUST_MATCH_INPUT, SubscriptionErrorStrings.INCONSISTENT_WORKFLOW),
-    INACTIVE_SOURCE(CATEGORY_CONFIGURATION, 10, SubscriptionErrorStrings.INACTIVE_SOURCE, SubscriptionErrorStrings.SUBSCRIPTION_SOURCE_CANT_PROVIDE_DATA),
-    MISSING_ARGUMENT(CATEGORY_USER_INPUT, 11, SubscriptionErrorStrings.MISSING_ARGUMENT, SubscriptionErrorStrings.MISSING_ARGUMENT),
-    PERMISSION_DENIED(CATEGORY_WARNING, 12, SubscriptionErrorStrings.PERMISSION_DENIED, SubscriptionErrorStrings.PERMISSION_DENIED),
+    SubscriptionNotFound(CATEGORY_USER_INPUT, 5, SubscriptionErrorMessage.CANT_FIND_SUBSCRIPTION, SubscriptionErrorStrings.CANT_FIND_SUBSCRIPTION_DISPLAY),
+    /**
+     * Inserted login or password have been wrong.
+     */
+    INVALID_LOGIN(CATEGORY_USER_INPUT, 7, SubscriptionErrorMessage.WRONG_PASSWORD, SubscriptionErrorStrings.WRONG_PASSWORD_DISPLAY),
+    /**
+     * 
+     */
+    COMMUNICATION_PROBLEM(CATEGORY_SERVICE_DOWN, 8, SubscriptionErrorMessage.SERVICE_UNAVAILABLE, SubscriptionErrorStrings.SERVICE_UNAVAILABLE_DISPLAY),
+    /**
+     * 
+     */
+    INVALID_WORKFLOW(CATEGORY_CONFIGURATION, 9, SubscriptionErrorMessage.INCONSISTENT_WORKFLOW),
+    /**
+     * 
+     */
+    INACTIVE_SOURCE(CATEGORY_CONFIGURATION, 10, SubscriptionErrorMessage.INACTIVE_SOURCE_MSG, SubscriptionErrorStrings.INACTIVE_SOURCE_DISPLAY),
+    /**
+     * 
+     */
+    MISSING_ARGUMENT(CATEGORY_USER_INPUT, 11, SubscriptionErrorMessage.MISSING_ARGUMENT_MSG, SubscriptionErrorStrings.MISSING_ARGUMENT_DISPLAY),
+    /**
+     * 
+     */
+    PERMISSION_DENIED(CATEGORY_WARNING, 12, SubscriptionErrorMessage.PERMISSION_DENIED_MSG, SubscriptionErrorStrings.PERMISSION_DENIED_DISPLAY),
     /**
      * Please specify your full E-Mail address as login name.
      */
-    EMAIL_ADDR_LOGIN(CATEGORY_TRY_AGAIN, 13, SubscriptionErrorStrings.EMAIL_ADDR_LOGIN, SubscriptionErrorStrings.EMAIL_ADDR_LOGIN),
+    EMAIL_ADDR_LOGIN(CATEGORY_TRY_AGAIN, 13, SubscriptionErrorMessage.EMAIL_ADDR_LOGIN_MSG, SubscriptionErrorStrings.EMAIL_ADDR_LOGIN_DISPLAY),
     /**
      * An unexpected error occurred: %1$s.
      */
-    UNEXPECTED_ERROR(CATEGORY_ERROR, 9999, SubscriptionErrorStrings.UNEXPECTED_ERROR, SubscriptionErrorStrings.UNEXPECTED_ERROR),
+    UNEXPECTED_ERROR(CATEGORY_ERROR, 9999, SubscriptionErrorMessage.UNEXPECTED_ERROR_MSG),
+    /**
+     * 
+     */
+    NO_OAUTH_ACCOUNT_GIVEN(CATEGORY_USER_INPUT, 90111, SubscriptionErrorMessage.NO_OAUTH_ACCOUNT_GIVEN_MSG, SubscriptionErrorStrings.NO_OAUTH_ACCOUNT_GIVEN_DISPLAY);
     ;
+
+    private static final String SQL_ERROR = "A SQL error occurred.";
+
+    private static final String PARSING_ERROR = "A parsing error occurred: %1$s.";
+
+    private static final String CANT_SAVE_ID = "Unable to save a given ID.";
+
+    private static final String CANT_FIND_SUBSCRIPTION = "Not able to find the requested subscription";
+
+    private static final String WRONG_PASSWORD = "Inserted login or password have been wrong.";
+
+    private static final String SERVICE_UNAVAILABLE = "Subscription or an involved service is currently not available.";
+
+    private static final String INCONSISTENT_WORKFLOW = "The steps of the crawling workflow do not fit together.";
+
+    private static final String INACTIVE_SOURCE_MSG = "Cannot access subscription source.";
+
+    private static final String MISSING_ARGUMENT_MSG = "The argument %1$s is missing to process the subscription.";
+
+    private static final String PERMISSION_DENIED_MSG = "User do not have appropriate permissions to complete the operation.";
+
+    private static final String EMAIL_ADDR_LOGIN_MSG = "The user has to specify full E-Mail address as login name.";
+
+    private static final String UNEXPECTED_ERROR_MSG = "An unexpected error occurred: %1$s.";
+
+    private static final String NO_OAUTH_ACCOUNT_GIVEN_MSG = "User does not have an OAuth-account to access this service.";
 
     private Category category;
     private int errorCode;
-    private String help;
     private String message;
 
-    private SubscriptionErrorMessage(final Category category, final int errorCode, final String help, final String message) {
+    /**
+     * Message displayed to the user
+     */
+    private String displayMessage;
+
+    /**
+     * Initializes a new {@link SubscriptionErrorMessage}.
+     * 
+     * @param category
+     * @param errorCode
+     * @param help
+     * @param message
+     * @param displayMessage
+     */
+    private SubscriptionErrorMessage(final Category category, final int errorCode, final String message, final String displayMessage) {
         this.category = category;
         this.errorCode = errorCode;
-        this.help = help;
         this.message = message;
+        this.displayMessage = displayMessage == null ? OXExceptionStrings.MESSAGE : displayMessage;
+    }
+
+    /**
+     * Initializes a new {@link SubscriptionErrorMessage}.
+     * 
+     * @param category
+     * @param errorCode
+     * @param help
+     * @param message
+     */
+    private SubscriptionErrorMessage(final Category category, final int errorCode, final String message) {
+        this(category, errorCode, message, null);
     }
 
     @Override
@@ -130,10 +200,6 @@ public enum SubscriptionErrorMessage implements OXExceptionCode {
         return errorCode;
     }
 
-    public String getHelp() {
-        return help;
-    }
-
     @Override
     public String getMessage() {
         return message;
@@ -142,6 +208,14 @@ public enum SubscriptionErrorMessage implements OXExceptionCode {
     @Override
     public boolean equals(final OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDisplayMessage() {
+        return this.displayMessage;
     }
 
     /**
