@@ -1,3 +1,7 @@
+* 2014-01-24 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30692: Preserve previous filename unless explicitly set when creating a new file version   
+
 * 2014-01-23 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 30777: Use relative identifier when retrieving metadata from ID based file access  
