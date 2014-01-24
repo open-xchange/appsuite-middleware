@@ -23,7 +23,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.session.Session;
-import com.openexchange.spamhandler.spamexperts.exceptions.SpamhandlerSpamExpertsExceptionCode;
+import com.openexchange.spamhandler.spamexperts.exceptions.SpamExpertsExceptionCode;
 import com.openexchange.spamhandler.spamexperts.osgi.SpamExpertsServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -158,7 +158,7 @@ public final class MyServletRequest  {
 
 
 			if(sessionid==null){
-				throw SpamhandlerSpamExpertsExceptionCode.SPAMEXPERTS_COMMUNICATION_ERROR.create("save and cache session", "invalid data for sessionid");
+				throw SpamExpertsExceptionCode.SPAMEXPERTS_COMMUNICATION_ERROR.create("save and cache session", "invalid data for sessionid");
 			}
 
 			// add valid data to response
@@ -168,13 +168,13 @@ public final class MyServletRequest  {
 
 		} catch (final URIException e) {
 			LOG.error("error creating uri object of spamexperts api interface", e);
-			throw SpamhandlerSpamExpertsExceptionCode.HTTP_COMMUNICATION_ERROR.create(e.getMessage());
+			throw SpamExpertsExceptionCode.HTTP_COMMUNICATION_ERROR.create(e.getMessage());
 		} catch (final HttpException e) {
 			LOG.error("http communication error detected with spamexperts api interface", e);
-			throw SpamhandlerSpamExpertsExceptionCode.HTTP_COMMUNICATION_ERROR.create(e.getMessage());
+			throw SpamExpertsExceptionCode.HTTP_COMMUNICATION_ERROR.create(e.getMessage());
 		} catch (final IOException e) {
 			LOG.error("IO error occured while communicating with spamexperts api interface");
-			throw SpamhandlerSpamExpertsExceptionCode.HTTP_COMMUNICATION_ERROR.create(e.getMessage());
+			throw SpamExpertsExceptionCode.HTTP_COMMUNICATION_ERROR.create(e.getMessage());
 		}finally{
 			// add clean up stuff for http client here
 		}
@@ -232,7 +232,7 @@ public final class MyServletRequest  {
 
 			if (statusCode != HttpStatus.SC_OK) {
 				LOG.error("HTTP request to create new spamexperts panel session failed with status: {}", GET.getStatusLine());
-				throw SpamhandlerSpamExpertsExceptionCode.SPAMEXPERTS_COMMUNICATION_ERROR.create("create panel authticket", GET.getStatusLine());
+				throw SpamExpertsExceptionCode.SPAMEXPERTS_COMMUNICATION_ERROR.create("create panel authticket", GET.getStatusLine());
 			}
 
 			final String resp = reponse2String(GET);
@@ -240,7 +240,7 @@ public final class MyServletRequest  {
 
 			if(resp.indexOf("ERROR")!=-1){
 				// ERROR DETECTED
-				throw SpamhandlerSpamExpertsExceptionCode.SPAMEXPERTS_COMMUNICATION_ERROR.create("create panel authticket", resp);
+				throw SpamExpertsExceptionCode.SPAMEXPERTS_COMMUNICATION_ERROR.create("create panel authticket", resp);
 			}
 
 			return resp;

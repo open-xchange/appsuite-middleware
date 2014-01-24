@@ -60,6 +60,7 @@ import com.openexchange.mail.service.MailService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.spamexperts.SpamExpertsSpamHandler;
+import com.openexchange.spamhandler.spamexperts.management.SpamExpertsConfig;
 import com.openexchange.tools.servlet.http.HTTPServletRegistration;
 import com.openexchange.user.UserService;
 
@@ -98,6 +99,7 @@ public class SpamExpertsActivator extends HousekeepingActivator {
 
 	@Override
 	protected void startBundle() throws Exception {
+        LOG.info("starting bundle: \"com.openexchange.spamhandler.spamexperts\"");
 
 		try {
 			{
@@ -112,10 +114,9 @@ public class SpamExpertsActivator extends HousekeepingActivator {
 				}
 			}
 
-            registerService(SpamHandler.class, SpamExpertsSpamHandler.getInstance(), dictionary);
-
+			SpamExpertsConfig.getInstance().start();
+			registerService(SpamHandler.class, SpamExpertsSpamHandler.getInstance(), dictionary);
 			servletRegistration = new HTTPServletRegistration(context, new com.openexchange.spamhandler.spamexperts.servlets.MyServlet(), getFromConfig("com.openexchange.custom.spamexperts.panel_servlet"));
-
 
 		} catch (final Throwable t) {
 			LOG.error("", t);

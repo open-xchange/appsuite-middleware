@@ -56,7 +56,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
-public enum SpamhandlerSpamExpertsExceptionCode implements DisplayableOXExceptionCode {
+public enum SpamExpertsExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Can't handle spam because MailService isn't available
      */
@@ -75,7 +75,9 @@ public enum SpamhandlerSpamExpertsExceptionCode implements DisplayableOXExceptio
     
     UNABLE_TO_GET_MAILS("Unable to get mails from mailbox", CATEGORY_ERROR, 5),
     
-    MISSING_CONFIG_OPTION("Missing configuration option \"%1$s\"", CATEGORY_CONFIGURATION, 6);
+    MISSING_CONFIG_OPTION("Missing configuration option \"%1$s\"", CATEGORY_CONFIGURATION, 6),
+    
+    INVALID_IMAP_URL("Specified imap url is wrong: \"%1$s\"", CATEGORY_CONFIGURATION,7);
 
 
     private Category category;
@@ -86,14 +88,14 @@ public enum SpamhandlerSpamExpertsExceptionCode implements DisplayableOXExceptio
     
     private String displayMessage;
 
-    private SpamhandlerSpamExpertsExceptionCode(String message, String displayMessage, Category category, int detailNumber) {
+    private SpamExpertsExceptionCode(String message, String displayMessage, Category category, int detailNumber) {
         this.message = message;
         this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
         this.detailNumber = detailNumber;
         this.category = category;
     }
     
-    private SpamhandlerSpamExpertsExceptionCode(String message, Category category, int detailNumber) {
+    private SpamExpertsExceptionCode(String message, Category category, int detailNumber) {
         this(message, null, category, detailNumber);
     }
 

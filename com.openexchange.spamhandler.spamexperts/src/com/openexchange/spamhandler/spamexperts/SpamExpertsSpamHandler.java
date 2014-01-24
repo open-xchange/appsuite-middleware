@@ -50,17 +50,11 @@
 package com.openexchange.spamhandler.spamexperts;
 
 import java.io.ByteArrayInputStream;
-import java.io.StringBufferInputStream;
-import java.io.StringReader;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Properties;
 import javax.mail.MessagingException;
-import javax.mail.URLName;
 import javax.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
@@ -68,7 +62,8 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandler;
-import com.openexchange.spamhandler.spamexperts.exceptions.SpamhandlerSpamExpertsExceptionCode;
+import com.openexchange.spamhandler.spamexperts.exceptions.SpamExpertsExceptionCode;
+import com.openexchange.spamhandler.spamexperts.management.SpamExpertsConfig;
 import com.openexchange.spamhandler.spamexperts.osgi.SpamExpertsServiceRegistry;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
@@ -80,17 +75,10 @@ import com.sun.mail.imap.IMAPStore;
  */
 public class SpamExpertsSpamHandler extends SpamHandler {
 
-
     private static final SpamExpertsSpamHandler instance = new SpamExpertsSpamHandler();
     
     private static final Logger LOG = LoggerFactory.getLogger(SpamExpertsSpamHandler.class);
-    
-    private static final String CONFIG_SP_IMAPURL = "com.openexchange.custom.spamexperts.imapurl";
-    private static final String CONFIG_SP_IMAPUSER = "com.openexchange.custom.spamexperts.imapuser";
-    private static final String CONFIG_SP_IMAPPASSWORD = "com.openexchange.custom.spamexperts.imappassword";
-    private static final String CONFIG_SP_TRAIN_SPAM_FOLDER = "com.openexchange.custom.spamexperts.trainspamfolder";
-    private static final String CONFIG_SP_TRAIN_HAM_FOLDER = "com.openexchange.custom.spamexperts.trainhamfolder";
-    
+
     /**
      * Initializes a new {@link SpamExpertsSpamHandler}.
      */
@@ -111,36 +99,18 @@ public class SpamExpertsSpamHandler extends SpamHandler {
     }
 
     private void copyToSpamexpertsFolder(final String folder, final MailMessage []messages) throws OXException {
-        ConfigurationService cfgsrv = SpamExpertsServiceRegistry.getInstance().getService(ConfigurationService.class);
-        if( null == cfgsrv ) {
-            throw SpamhandlerSpamExpertsExceptionCode.CONFIGSERVICE_MISSING.create();
-        }
-        final String spImapUrl = cfgsrv.getProperty(CONFIG_SP_IMAPURL);
-        if( null == spImapUrl ) {
-            throw SpamhandlerSpamExpertsExceptionCode.MISSING_CONFIG_OPTION.create(CONFIG_SP_IMAPURL);
-        }
-        final String spImapUser = cfgsrv.getProperty(CONFIG_SP_IMAPUSER);
-        if( null == spImapUser ) {
-            throw SpamhandlerSpamExpertsExceptionCode.MISSING_CONFIG_OPTION.create(CONFIG_SP_IMAPUSER);
-        }
-        final String spImapPw = cfgsrv.getProperty(CONFIG_SP_IMAPPASSWORD);
-        if( null == spImapPw ) {
-            throw SpamhandlerSpamExpertsExceptionCode.MISSING_CONFIG_OPTION.create(CONFIG_SP_IMAPPASSWORD);
-        }
-        
-        final URLName imapURL = new URLName(spImapUrl);
         final Properties props = new Properties();
         final javax.mail.Session imapSession = javax.mail.Session.getInstance(props);
-        final IMAPStore imapStore = new IMAPStore(imapSession, imapURL);
+        final IMAPStore imapStore = new IMAPStore(imapSession, SpamExpertsConfig.getInstance().getImapUrl());
         
         try {
             if( null == messages ) {
-                throw SpamhandlerSpamExpertsExceptionCode.UNABLE_TO_GET_MAILS.create();
+                throw SpamExpertsExceptionCode.UNABLE_TO_GET_MAILS.create();
             }
-            imapStore.connect(spImapUser, spImapPw);
+            imapStore.connect(SpamExpertsConfig.getInstance().getImapUser(), SpamExpertsConfig.getInstance().getImappassword());
             IMAPFolder sf = (IMAPFolder)imapStore.getFolder(folder);
             if( ! sf.exists() ) {
-                throw SpamhandlerSpamExpertsExceptionCode.FOLDER_DOES_NOT_EXIST.create(folder);
+                throw SpamExpertsExceptionCode.FOLDER_DOES_NOT_EXIST.create(folder);
             }
             
             MimeMessage []sfmesgs = new MimeMessage[messages.length];
@@ -173,19 +143,10 @@ public class SpamExpertsSpamHandler extends SpamHandler {
         LOG.debug("handleHam");
         LOG.debug("accid: " + accountId + ", spamfullname: " + spamFullname + ", move: " + move + ", session: " + session.toString());
 
-        ConfigurationService cfgsrv = SpamExpertsServiceRegistry.getInstance().getService(ConfigurationService.class);
-        if( null == cfgsrv ) {
-            throw SpamhandlerSpamExpertsExceptionCode.CONFIGSERVICE_MISSING.create();
-        }
-        final String folder = cfgsrv.getProperty(CONFIG_SP_TRAIN_HAM_FOLDER);
-        if( null == folder ) {
-            throw SpamhandlerSpamExpertsExceptionCode.MISSING_CONFIG_OPTION.create(CONFIG_SP_TRAIN_HAM_FOLDER);
-        }
-
         // get access to internal mailstore
         final MailService mailService = SpamExpertsServiceRegistry.getInstance().getService(MailService.class);
         if (null == mailService) {
-            throw SpamhandlerSpamExpertsExceptionCode.MAILSERVICE_MISSING.create();
+            throw SpamExpertsExceptionCode.MAILSERVICE_MISSING.create();
         }
         MailAccess<?, ?> mailAccess = null;
         
@@ -194,7 +155,7 @@ public class SpamExpertsSpamHandler extends SpamHandler {
             mailAccess.connect();
             final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(spamFullname, mailIDs, new MailField[]{MailField.FULL});
 
-            copyToSpamexpertsFolder(folder, mails);
+            copyToSpamexpertsFolder(SpamExpertsConfig.getInstance().getTrainHamFolder(), mails);
             
             if (move) {
                 /*
@@ -213,19 +174,10 @@ public class SpamExpertsSpamHandler extends SpamHandler {
         LOG.debug("handleSpam");
         LOG.debug("accid: " + accountId + ", fullname: " + fullname + ", move: " + move + ", session: " + session.toString());
 
-        ConfigurationService cfgsrv = SpamExpertsServiceRegistry.getInstance().getService(ConfigurationService.class);
-        if( null == cfgsrv ) {
-            throw SpamhandlerSpamExpertsExceptionCode.CONFIGSERVICE_MISSING.create();
-        }
-        final String folder = cfgsrv.getProperty(CONFIG_SP_TRAIN_SPAM_FOLDER);
-        if( null == folder ) {
-            throw SpamhandlerSpamExpertsExceptionCode.MISSING_CONFIG_OPTION.create(CONFIG_SP_TRAIN_SPAM_FOLDER);
-        }
-
         // get access to internal mailstore
         final MailService mailService = SpamExpertsServiceRegistry.getInstance().getService(MailService.class);
         if (null == mailService) {
-            throw SpamhandlerSpamExpertsExceptionCode.MAILSERVICE_MISSING.create();
+            throw SpamExpertsExceptionCode.MAILSERVICE_MISSING.create();
         }
         MailAccess<?, ?> mailAccess = null;
         
@@ -234,7 +186,7 @@ public class SpamExpertsSpamHandler extends SpamHandler {
             mailAccess.connect();
             final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(fullname, mailIDs, new MailField[]{MailField.FULL});
 
-            copyToSpamexpertsFolder(folder, mails);
+            copyToSpamexpertsFolder(SpamExpertsConfig.getInstance().getTrainSpamFolder(), mails);
             
             if (move) {
                 /*
