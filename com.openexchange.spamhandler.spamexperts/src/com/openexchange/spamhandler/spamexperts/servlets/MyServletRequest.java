@@ -17,7 +17,6 @@ import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -25,7 +24,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.spamexperts.exceptions.SpamExpertsExceptionCode;
 import com.openexchange.spamhandler.spamexperts.management.SpamExpertsConfig;
-import com.openexchange.spamhandler.spamexperts.osgi.SpamExpertsServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /*
@@ -87,7 +85,6 @@ public final class MyServletRequest  {
 
 	private final Session sessionObj;
 	private User user;
-	private final ConfigurationService configservice;
 
 	private static final HttpClient HTTPCLIENT;
 
@@ -112,9 +109,6 @@ public final class MyServletRequest  {
 			LOG.error("", e);
 			throw e;
 		}
-
-		// init config
-		this.configservice = SpamExpertsServiceRegistry.getInstance().getService(ConfigurationService.class,true);
 	}
 
 	public Object action(final String action, final JSONObject jsonObject) throws OXException, JSONException {
