@@ -1991,45 +1991,9 @@ msgstr ""
 msgid "The user account is not activated."
 msgstr ""
 
-#. Unknown problem: "%s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/configjump/ConfigJumpExceptionMessage.java:70
-msgid "Unknown problem: \"%s\"."
-msgstr ""
-
 #. Too few (%d) login attributes.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/configjump/ConfigJumpExceptionMessage.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/configjump/ConfigJumpExceptionMessage.java:70
 msgid "Too few (%d) login attributes."
-msgstr ""
-
-#. Problem while communicating with external authorization.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/configjump/ConfigJumpExceptionMessage.java:76
-msgid "Problem while communicating with external authorization."
-msgstr ""
-
-#. Instantiating the class failed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/configjump/ConfigJumpExceptionMessage.java:79
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:76
-msgid "Instantiating the class failed."
-msgstr ""
-
-#. Class %1$s can not be found.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/configjump/ConfigJumpExceptionMessage.java:82
-msgid "Class %1$s can not be found."
-msgstr ""
-
-#. Missing property %1$s in system.properties.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/configjump/ConfigJumpExceptionMessage.java:85
-msgid "Missing property %1$s in system.properties."
-msgstr ""
-
-#. URL "%s" is malformed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/configjump/ConfigJumpExceptionMessage.java:88
-msgid "URL \"%s\" is malformed."
-msgstr ""
-
-#. Link is not implemented.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/configjump/ConfigJumpExceptionMessage.java:91
-msgid "Extras link is not implemented."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/context/ContextExceptionMessages.java:61
@@ -2491,6 +2455,11 @@ msgstr ""
 msgid ""
 "An I/O error occurred while creating the socket connection to IMAP server "
 "(%1$s): %2$s"
+msgstr ""
+
+#. Instantiating the class failed.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:76
+msgid "Instantiating the class failed."
 msgstr ""
 
 #. Missing property %1$s in system.properties.
