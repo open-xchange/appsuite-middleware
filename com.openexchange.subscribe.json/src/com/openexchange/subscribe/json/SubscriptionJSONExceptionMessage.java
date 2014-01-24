@@ -65,34 +65,6 @@ public class SubscriptionJSONExceptionMessage implements LocalizableStrings {
         super();
     }
 
-    public final static String MISSING_PARAMETER_MSG = "Missing parameter %s";
-
-    public final static String UNKNOWN_ACTION_MSG = "Unknown action: %s";
-
-    public final static String JSONEXCEPTION_MSG = "A JSON error occurred";
-
-    public final static String MISSING_FIELD_MSG = "Missing field(s): %s";
-
-    public final static String MISSING_FORM_FIELD_MSG = "Missing form field(s): %s";
-
-    public final static String THROWABLE_MSG = "An unexpected error occurred: %s";
-
-    public final static String UNKNOWN_COLUMN_MSG = "Unknown column: %s";
-
-    public final static String MISSING_PARAMETER_HELP = "";
-
-    public final static String UNKNOWN_ACTION_HELP = "";
-
-    public final static String JSONEXCEPTION_HELP = "";
-
-    public final static String MISSING_FIELD_HELP = "";
-
-    public final static String MISSING_FORM_FIELD_HELP = "";
-
-    public final static String THROWABLE_HELP = "";
-
-    public final static String UNKNOWN_COLUMN_HELP = "Please ask only for columns the server knows";
-
-	public static final String UNKNOWN_SUBSCRIPTION = "Unknown subscription";
-
+    // The message displayed if the requested subscription cannot be found from the server.
+    public static final String UNKNOWN_SUBSCRIPTION_DISPLAY = "The subscription you requested is unkonwn!";
 }
