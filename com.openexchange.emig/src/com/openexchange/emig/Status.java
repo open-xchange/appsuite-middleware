@@ -49,44 +49,41 @@
 
 package com.openexchange.emig;
 
-import com.openexchange.exception.OXException;
-
 
 /**
- * {@link EmigService} - The EMiG service.
+ * {@link Status} - Represents an EmiG status.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.2
  */
-public interface EmigService {
+public enum Status {
 
     /**
-     * Checks if EMiG is enabled for denoted user.
-     *
-     * @param userIdentifier The EMiG user identifier
-     * @return <code>true</code> if EMiG is enabled for denoted user; otherwise <code>false</code>
-     * @throws OXException If operation fails for any reason
+     * Indicates a contact/person with no EmiG information.
      */
-    boolean isEMIG_Session(String userIdentifier) throws OXException;
+    NONE(0),
+    /**
+     * <div style="color:grey"><b>grey</b></div> Indicates a non-EmiG-secured contact/person.
+     */
+    MEMBER(1),
+    /**
+     * <div style="color:green"><b>green</b></div> Indicates an EmiG-secured contact/person.
+     */
+    SECURE(2);
+
+    private int status;
+
+    private Status(final int status) {
+        this.status = status;
+    }
 
     /**
-     * Checks if transport server has EMiG capability.
+     * Gets this status' integer representation.
      *
-     * @param serverName The name of the transport server
-     * @param mailFrom The from address
-     * @param debugLoginname The login name for debugging purpose
-     * @return <code>true</code> if transport server has EMiG capability; otherwise <code>false</code>
-     * @throws OXException If operation fails for any reason
+     * @return The associated <code>int</code> value
      */
-    boolean isEMIG_MSA(String serverName, String mailFrom, String debugLoginname) throws OXException;
-
-    /**
-     * Checks EMiG capabilities for given addresses
-     *
-     * @param mailAddresses The mail addresses
-     * @return At the appropriate index either NONE, MEMBER or SECURE
-     * @throws OXException If operation fails for any reason
-     */
-    int[] isEMIG_Recipient(String[] mailAddresses) throws OXException;
+    public int getStatus() {
+        return status;
+    }
 
 }

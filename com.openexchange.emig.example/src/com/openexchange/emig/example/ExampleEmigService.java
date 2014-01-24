@@ -51,6 +51,7 @@ package com.openexchange.emig.example;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.emig.EmigService;
+import com.openexchange.emig.Status;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.HTTPClient;
 import com.openexchange.http.client.builder.HTTPResponse;
@@ -64,20 +65,20 @@ import com.openexchange.server.ServiceLookup;
  */
 public class ExampleEmigService implements EmigService {
     org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExampleEmigService.class);
-    
+
     // Access to system services. Be sure the services are also
     // declared as dependencies in #getNeededServices
     // of the activator.
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     public ExampleEmigService(ServiceLookup services) {
         super();
         this.services = services;
     }
-    
+
     @Override
     public boolean isEMIG_Session(String userIdentifier) throws OXException {
-        // We will assume that every user has access to the EMIG system. Note that access to emig 
+        // We will assume that every user has access to the EMIG system. Note that access to emig
         // can also be controlled by setting the property "com.openexchange.emig.enabled" to true or false in
         // the config cascade
         return true;
@@ -88,13 +89,13 @@ public class ExampleEmigService implements EmigService {
         // This method is supposed to check, whether the SMTP transport server can establish a secured connection for the 'mailFrom' address
         // This example will implement this in the following manner: We will contact a webserver at a configured base URL and construct a URL
         // 'http://[configuredHost]/[configuredPath]/smtpServers/[serverName]?from=[mailFrom]'
-        // and check the return code. If it is 200 (OK), then we accept the server as secure. So the trivial implementation of the 
-        // backend is an apache server with a file for each known SMTP server. 
+        // and check the return code. If it is 200 (OK), then we accept the server as secure. So the trivial implementation of the
+        // backend is an apache server with a file for each known SMTP server.
         LOG.debug("isEMIG_MSA(\"" + serverName + "\", \"" + mailFrom + "\", ","\"" + debugLoginname + "\")");
         StringBuilder b = new StringBuilder(getPrefix());
         b.append("smtpServers/").append(serverName);
         LOG.debug("Trying " + b);
-        
+
         HTTPResponse response = services.getService(HTTPClient.class).getBuilder().get().url(b.toString()).parameter("from", mailFrom).build().execute();
         LOG.debug("Status: " + response.getStatus());
         return response.getStatus() == 200;
@@ -125,18 +126,18 @@ public class ExampleEmigService implements EmigService {
         HTTPResponse response = services.getService(HTTPClient.class).getBuilder().get().url(b.toString()).build().execute();
         LOG.debug("Status: " + response.getStatus());
         if (response.getStatus() == 200) {
-            return SECURE;
+            return Status.SECURE.getStatus();
         }
-        
+
         b = new StringBuilder(getPrefix()).append("memberAddresses/").append(mailAddress);
         LOG.debug("Trying " + b);
         response = services.getService(HTTPClient.class).getBuilder().get().url(b.toString()).build().execute();
         LOG.debug("Status: " + response.getStatus());
         if (response.getStatus() == 200) {
-            return MEMBER;
+            return Status.MEMBER.getStatus();
         }
-        
-        return NONE;
+
+        return Status.NONE.getStatus();
     }
 
     private String pp(String[] mailAddresses) {
@@ -149,7 +150,7 @@ public class ExampleEmigService implements EmigService {
         b.append(']');
         return b.toString();
     }
-    
+
     private String getPrefix() {
         String property = services.getService(ConfigurationService.class).getProperty("com.openexchange.emig.example.prefix");
         if (property == null) {

@@ -57,6 +57,7 @@ import org.slf4j.Logger;
 import com.openexchange.context.ContextService;
 import com.openexchange.emig.EmigExceptionCodes;
 import com.openexchange.emig.EmigService;
+import com.openexchange.emig.Status;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -138,7 +139,7 @@ public final class MockEmigService implements EmigService {
         }
         final int[] retval = new int[length];
         for (int i = 0; i < length; i++) {
-            retval[i] = checkMailAddress(mailAddresses[i], false) ? 2 : 1;
+            retval[i] = checkMailAddress(mailAddresses[i], false) ? Status.SECURE.getStatus() : Status.MEMBER.getStatus();
         }
         return retval;
     }

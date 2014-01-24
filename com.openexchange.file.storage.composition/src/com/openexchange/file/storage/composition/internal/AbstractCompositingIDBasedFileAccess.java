@@ -287,7 +287,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         FileStorageEfficientRetrieval retrieval = (FileStorageEfficientRetrieval) fileAccess;
         // Post event
         {
-            File metaData = fileAccess.getFileMetadata(fileID.getFolderId(), fileID.toUniqueID(), version);
+            File metaData = fileAccess.getFileMetadata(fileID.getFolderId(), fileID.getFileId(), version);
             if (null != metaData) {
                 postEvent(FileStorageEventHelper.buildAccessEvent(
                     session,
@@ -339,7 +339,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         FileStorageEfficientRetrieval retrieval = (FileStorageEfficientRetrieval) fileAccess;
         // Post event
         {
-            File metaData = fileAccess.getFileMetadata(fileID.getFolderId(), fileID.toUniqueID(), version);
+            File metaData = fileAccess.getFileMetadata(fileID.getFolderId(), fileID.getFileId(), version);
             if (null != metaData) {
                 postEvent(FileStorageEventHelper.buildAccessEvent(
                     session,
@@ -387,7 +387,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
         // Post event
         {
-            File metaData = fileAccess.getFileMetadata(fileID.getFolderId(), fileID.toUniqueID(), version);
+            File metaData = fileAccess.getFileMetadata(fileID.getFolderId(), fileID.getFileId(), version);
             if (null != metaData) {
                 postEvent(FileStorageEventHelper.buildAccessEvent(
                     session,

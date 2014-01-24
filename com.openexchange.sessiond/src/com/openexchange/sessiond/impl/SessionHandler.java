@@ -592,7 +592,7 @@ public final class SessionHandler {
         if (maxSessPerClient > 0) {
             final SessionData sessionData = sessionDataRef.get();
             final SessionControl[] userSessions = null == sessionData ? new SessionControl[0] : sessionData.getUserSessions(userId, contextId);
-            int cnt = 0;
+            int cnt = 1; // We have at least one
             for (final SessionControl sessionControl : userSessions) {
                 if (client.equals(sessionControl.getSession().getClient()) && ++cnt > maxSessPerClient) {
                     throw SessionExceptionCodes.MAX_SESSION_PER_CLIENT_EXCEPTION.create(client, I(userId), I(contextId));
