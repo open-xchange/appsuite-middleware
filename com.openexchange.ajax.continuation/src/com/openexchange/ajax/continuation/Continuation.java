@@ -47,73 +47,54 @@
  *
  */
 
-package com.openexchange.ajax.container;
+package com.openexchange.ajax.continuation;
 
 import java.util.UUID;
-
+import java.util.concurrent.TimeUnit;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link Continuation} - Represents a continuative AJAX request.
+ * {@link Continuation} - Represents a continuing/background AJAX request.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Continuation {
-
-    private final UUID uuid;
-    private final int hash;
-
-    /**
-     * Initializes a new {@link Continuation}.
-     */
-    public Continuation() {
-        this(UUID.randomUUID());
-    }
-
-    /**
-     * Initializes a new {@link Continuation}.
-     */
-    public Continuation(final UUID uuid) {
-        super();
-        this.uuid = uuid;
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
-        hash = result;
-    }
+public interface Continuation<V> {
 
     /**
      * Gets the UUID.
      *
      * @return The UUID
      */
-    public UUID getUuid() {
-        return uuid;
-    }
+    UUID getUuid();
 
-    // ----------------------------------- hashCode() and equals() --------------------------------------------- //
+    /**
+     * Gets the format of this continuation's results.
+     *
+     * @return The format
+     */
+    String getFormat();
 
-    @Override
-    public int hashCode() {
-        return hash;
-    }
+    /**
+     * Gets the next available value.
+     *
+     * @param time The maximum time to wait
+     * @param unit The time unit of the {@code time} argument
+     * @return The next available value or <code>null</code>
+     * @throws OXException If awaiting next available response fails
+     * @throws InterruptedException If the current thread is interrupted
+     */
+    ContinuationResponse<V> getNextResponse(long time, TimeUnit unit) throws OXException, InterruptedException;
 
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof Continuation)) {
-            return false;
-        }
-        final Continuation other = (Continuation) obj;
-        if (uuid == null) {
-            if (other.uuid != null) {
-                return false;
-            }
-        } else if (!uuid.equals(other.uuid)) {
-            return false;
-        }
-        return true;
-    }
+    /**
+     * Gets the next available value.
+     *
+     * @param time The maximum time to wait
+     * @param unit The time unit of the {@code time} argument
+     * @param defaultValue The default response to return if no next value was available in given time span
+     * @return The next available value or given <code>defaultValue</code>
+     * @throws OXException If awaiting next available response fails
+     * @throws InterruptedException If the current thread is interrupted
+     */
+    ContinuationResponse<V> getNextResponse(long time, TimeUnit unit, V defaultResponse) throws OXException, InterruptedException;
 
 }

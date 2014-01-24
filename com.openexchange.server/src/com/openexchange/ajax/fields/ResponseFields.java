@@ -136,6 +136,11 @@ public final class ResponseFields {
     public static final String TRUNCATED = "truncated";
 
     /**
+     * Name of the JSON attribute providing the continuation UUID.
+     */
+    public static final String CONTINUATION = "continuation";
+
+    /**
      * A set of reserved identifiers.
      */
     public static final Set<String> RESERVED_IDENTIFIERS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(

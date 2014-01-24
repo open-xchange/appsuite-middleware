@@ -47,36 +47,54 @@
  *
  */
 
-package com.openexchange.ajax.writer;
+package com.openexchange.ajax.continuation;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.container.Continuation;
-
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link ContinuationWriter} - Writes the JSON representation for a {@link Continuation}.
+ * {@link Continuation} - Represents a continuing/background AJAX request.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ContinuationWriter {
+public interface Continuation<V> {
 
     /**
-     * Initializes a new {@link ContinuationWriter}.
-     */
-    private ContinuationWriter() {
-        super();
-    }
-
-    /**
-     * Writes specified {@link Continuation} instance to given JSON object.
+     * Gets the UUID.
      *
-     * @param continuation The continuation to write
-     * @param json The JOSN object to write to
-     * @throws JSONException If writing JSON fails
+     * @return The UUID
      */
-    public static void write(final Continuation continuation, final JSONObject json) throws JSONException {
-        // TODO:
-    }
+    UUID getUuid();
+
+    /**
+     * Gets the format of this continuation's results.
+     *
+     * @return The format
+     */
+    String getFormat();
+
+    /**
+     * Gets the next available value.
+     *
+     * @param time The maximum time to wait
+     * @param unit The time unit of the {@code time} argument
+     * @return The next available value or <code>null</code>
+     * @throws OXException If awaiting next available response fails
+     * @throws InterruptedException If the current thread is interrupted
+     */
+    ContinuationResponse<V> getNextResponse(long time, TimeUnit unit) throws OXException, InterruptedException;
+
+    /**
+     * Gets the next available value.
+     *
+     * @param time The maximum time to wait
+     * @param unit The time unit of the {@code time} argument
+     * @param defaultValue The default response to return if no next value was available in given time span
+     * @return The next available value or given <code>defaultValue</code>
+     * @throws OXException If awaiting next available response fails
+     * @throws InterruptedException If the current thread is interrupted
+     */
+    ContinuationResponse<V> getNextResponse(long time, TimeUnit unit, V defaultResponse) throws OXException, InterruptedException;
 
 }

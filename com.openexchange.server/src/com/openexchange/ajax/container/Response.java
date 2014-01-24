@@ -60,6 +60,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
@@ -127,7 +128,7 @@ public final class Response {
      * Signals whether the data provided by this response is not yet finished or final, but rather reflects an intermediate state and the
      * client is supposed to request again to get full results.
      */
-    private Continuation continuation;
+    private UUID continuationUuid;
 
     /**
      * This constructor parses a server response into an object.
@@ -138,7 +139,7 @@ public final class Response {
         this(DEFAULT_LOCALE);
         this.json = response;
         includeStackTraceOnError = false;
-        continuation = null;
+        continuationUuid = null;
     }
 
     /**
@@ -179,7 +180,7 @@ public final class Response {
         this.json = null;
         this.locale = locale;
         includeStackTraceOnError = false;
-        continuation = null;
+        continuationUuid = null;
     }
 
     /**
@@ -501,11 +502,11 @@ public final class Response {
      * Sets whether the data provided by this response is not yet finished or final, but rather reflects an intermediate state and the
      * client is supposed to request again to get full results.
      *
-     * @param continuation The continuative status to set
+     * @param continuation The UUID to set
      * @return A reference to this response
      */
-    public Response setContinuation(final Continuation continuation) {
-        this.continuation = continuation;
+    public Response setContinuationUUID(final UUID continuationUuid) {
+        this.continuationUuid = continuationUuid;
         return this;
     }
 
@@ -513,10 +514,10 @@ public final class Response {
      * Checks whether the data provided by this response is not yet finished or final, but rather reflects an intermediate state and the
      * client is supposed to request again to get full results.
      *
-     * @return The continuative status
+     * @return The UUID or <code>null</code>
      */
-    public Continuation getContinuation() {
-        return continuation;
+    public UUID getContinuationUUID() {
+        return continuationUuid;
     }
 
     private static Locale localeFrom(final Session session) throws OXException {

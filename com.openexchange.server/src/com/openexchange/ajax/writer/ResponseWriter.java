@@ -251,8 +251,8 @@ public final class ResponseWriter {
             json.put(TIMESTAMP, response.getTimestamp().getTime());
         }
 
-        if (null != response.getContinuation()) {
-            ContinuationWriter.write(response.getContinuation(), json);
+        if (null != response.getContinuationUUID()) {
+            json.put(CONTINUATION, response.getContinuationUUID().toString());
         }
 
         final List<OXException> warnings = response.getWarnings();
