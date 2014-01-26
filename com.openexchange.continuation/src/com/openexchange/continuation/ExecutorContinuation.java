@@ -74,6 +74,8 @@ import com.openexchange.exception.OXException;
  */
 public final class ExecutorContinuation<V> implements Continuation<Collection<V>> {
 
+    private static final long serialVersionUID = -5214485512866728446L;
+
     private static final class QueueingFuture<V> extends FutureTask<V> {
 
         private final BlockingQueue<Future<V>> queue;

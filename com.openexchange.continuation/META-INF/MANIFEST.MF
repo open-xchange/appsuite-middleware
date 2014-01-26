@@ -5,7 +5,17 @@ Bundle-SymbolicName: com.openexchange.continuation
 Bundle-Version: 7.2.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.exception,
+Import-Package: com.openexchange.caching,
+ com.openexchange.caching.events,
+ com.openexchange.exception,
  com.openexchange.i18n,
+ com.openexchange.osgi,
+ com.openexchange.server,
  com.openexchange.session,
- org.osgi.framework
+ com.openexchange.sessiond,
+ org.osgi.framework,
+ org.osgi.service.event,
+ org.osgi.util.tracker,
+ org.slf4j
+Export-Package: com.openexchange.continuation
+Bundle-Activator: com.openexchange.continuation.osgi.ContinuationActivator

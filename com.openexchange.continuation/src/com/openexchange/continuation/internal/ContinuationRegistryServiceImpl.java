@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,55 +47,65 @@
  *
  */
 
-package com.openexchange.continuation;
+package com.openexchange.continuation.internal;
 
-import java.io.Serializable;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheService;
+import com.openexchange.continuation.Continuation;
+import com.openexchange.continuation.ContinuationRegistryService;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
- * {@link Continuation} - Represents a continuing/background AJAX request.
+ * {@link ContinuationRegistryServiceImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.6.0
  */
-public interface Continuation<V> extends Serializable {
+public class ContinuationRegistryServiceImpl implements ContinuationRegistryService {
+
+    private final ServiceLookup services;
+    private final String region;
 
     /**
-     * Gets the UUID.
-     *
-     * @return The UUID
+     * Initializes a new {@link ContinuationRegistryServiceImpl}.
      */
-    UUID getUuid();
+    public ContinuationRegistryServiceImpl(final String region, final ServiceLookup services) {
+        super();
+        this.services = services;
+        this.region = region;
+    }
 
-    /**
-     * Gets the format of this continuation's results.
-     *
-     * @return The format
-     */
-    String getFormat();
+    private Cache getCache() throws OXException {
+        final CacheService cacheService = services.getOptionalService(CacheService.class);
+        if (null == cacheService) {
+            throw ServiceExceptionCode.absentService(CacheService.class);
+        }
+        return cacheService.getCache(region);
+    }
 
-    /**
-     * Gets the next available value.
-     *
-     * @param time The maximum time to wait
-     * @param unit The time unit of the {@code time} argument
-     * @return The next available value or <code>null</code>
-     * @throws OXException If awaiting next available response fails
-     * @throws InterruptedException If the current thread is interrupted
-     */
-    ContinuationResponse<V> getNextResponse(long time, TimeUnit unit) throws OXException, InterruptedException;
+    @SuppressWarnings("unchecked")
+    @Override
+    public <V> Continuation<V> getContinuation(final UUID uuid, final Session session) throws OXException {
+        if (null != uuid && null != session) {
+            final Cache cache = getCache();
+            final Object object = cache.getFromGroup(uuid, session.getUserId() + "@" + session.getContextId());
+            if (object instanceof Continuation) {
+                return (Continuation<V>) object;
+            }
+        }
+        return null;
+    }
 
-    /**
-     * Gets the next available value.
-     *
-     * @param time The maximum time to wait
-     * @param unit The time unit of the {@code time} argument
-     * @param defaultValue The default response to return if no next value was available in given time span
-     * @return The next available value or given <code>defaultValue</code>
-     * @throws OXException If awaiting next available response fails
-     * @throws InterruptedException If the current thread is interrupted
-     */
-    ContinuationResponse<V> getNextResponse(long time, TimeUnit unit, V defaultResponse) throws OXException, InterruptedException;
+    @Override
+    public <V> void putContinuation(final Continuation<V> continuation, final Session session) throws OXException {
+        if (null != continuation && null != session) {
+            final Cache cache = getCache();
+            cache.putInGroup(continuation.getUuid(), session.getUserId() + "@" + session.getContextId(), continuation, false);
+        }
+    }
 
 }
