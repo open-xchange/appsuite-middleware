@@ -56,7 +56,7 @@ import com.openexchange.i18n.LocalizableStrings;
  * {@link ContinuationExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.4.2
+ * @since 7.6.0
  */
 public final class ContinuationExceptionMessages implements LocalizableStrings {
 
@@ -66,11 +66,5 @@ public final class ContinuationExceptionMessages implements LocalizableStrings {
     private ContinuationExceptionMessages() {
         super();
     }
-
-    // The E-Mail address is invalid %1$s
-    public static final String EMAIL_PARSE_ERROR_MSG = "The E-Mail address is invalid: \"%1$s\".";
-
-    // The user identifier is invalid: "%1$s".
-    public static final String INVALID_USER_IDENTIFER_MSG = "The user identifier is invalid: \"%1$s\".";
 
 }
