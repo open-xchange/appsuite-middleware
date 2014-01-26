@@ -1,3 +1,8 @@
+* 2014-01-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30820: Enhanced HTML detector by JavaScript event handler names
+                      (as listed by http://de.selfhtml.org/javascript/sprache/eventhandler.htm )
+
 * 2014-01-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 29639: Use configured default charset to url-decode incoming requests' URIs
