@@ -49,12 +49,44 @@
 
 package com.openexchange.java;
 
+import static com.openexchange.java.Strings.isEmpty;
+import static com.openexchange.java.Strings.toLowerCase;
+import static com.openexchange.java.Strings.toUpperCase;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * {@link HTMLDetector} - Detects HTML tags in a byte sequence.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HTMLDetector {
+
+    private static final Set<String> JS_EVENT_HANDLER = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+        "onabort",
+        "onblur",
+        "onchange",
+        "onclick",
+        "ondblclick",
+        "onerror",
+        "onfocus",
+        "onkeydown",
+        "onkeypress",
+        "onkeyup",
+        "onload",
+        "onmousedown",
+        "onmousemove",
+        "onmouseout",
+        "onmouseover",
+        "onmouseup",
+        "onreset",
+        "onselect",
+        "onsubmit",
+        "onunload")));
 
     /**
      * Initializes a new {@link HTMLDetector}.
@@ -73,35 +105,98 @@ public final class HTMLDetector {
         if (sequence == null) {
             throw new NullPointerException();
         }
-        if (containsHTMLTag(sequence, "html")) {
+        final String lc = toLowerCase(sequence);
+        if ((lc.indexOf("<html>") >= 0)) {
             return true;
         }
-        if (containsHTMLTag(sequence, "head")) {
+        if ((lc.indexOf("<head>") >= 0)) {
             return true;
         }
-        if (containsHTMLTag(sequence, "body")) {
+        if ((lc.indexOf("<body>") >= 0)) {
             return true;
         }
-        if (containsHTMLTag(sequence, "script")) {
+        if ((lc.indexOf("<script>") >= 0)) {
             return true;
         }
-        if (containsIgnoreCase(sequence, "javascript")) {
+        if ((lc.indexOf("javascript") >= 0)) {
             return true;
         }
-        if (containsIgnoreCase(sequence, "<img")) {
+        if ((lc.indexOf("<img") >= 0)) {
             return true;
         }
-        if (containsIgnoreCase(sequence, "<br>")) {
+        if ((lc.indexOf("<object") >= 0)) {
             return true;
         }
-        if (containsIgnoreCase(sequence, "<p>")) {
+        if ((lc.indexOf("<embed") >= 0)) {
             return true;
         }
-        if (containsIgnoreCase(sequence, "<object")) {
+        for (final String jsEventHandler : JS_EVENT_HANDLER) {
+            if (lc.indexOf(jsEventHandler) >= 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if given String contains common HTML tags.
+     *
+     * @param sequence The String to check
+     * @param strict <code>true</code> for strict checking; otherwise <code>false</code>
+     * @return <code>true</code> if given String contains common HTML tags; otherwise <code>false</code>
+     */
+    public static boolean containsHTMLTags(final String sequence, final boolean strict) {
+        return strict ? containsHTMLTags(sequence, "<br", "<p>") : containsHTMLTags(sequence);
+    }
+
+    /**
+     * Checks if given String contains common HTML tags.
+     *
+     * @param sequence The String to check
+     * @param tags Additional tags to look for
+     * @return <code>true</code> if given String contains common HTML tags; otherwise <code>false</code>
+     */
+    public static boolean containsHTMLTags(final String sequence, final String... tags) {
+        if (sequence == null) {
+            throw new NullPointerException();
+        }
+        final String lc = toLowerCase(sequence);
+        if ((lc.indexOf("<html>") >= 0)) {
             return true;
         }
-        if (containsIgnoreCase(sequence, "<embed")) {
+        if ((lc.indexOf("<head>") >= 0)) {
             return true;
+        }
+        if ((lc.indexOf("<body>") >= 0)) {
+            return true;
+        }
+        if ((lc.indexOf("<script>") >= 0)) {
+            return true;
+        }
+        if ((lc.indexOf("javascript") >= 0)) {
+            return true;
+        }
+        if ((lc.indexOf("<img") >= 0)) {
+            return true;
+        }
+        if ((lc.indexOf("<object") >= 0)) {
+            return true;
+        }
+        if ((lc.indexOf("<embed") >= 0)) {
+            return true;
+        }
+        for (final String jsEventHandler : JS_EVENT_HANDLER) {
+            if (lc.indexOf(jsEventHandler) >= 0) {
+                return true;
+            }
+        }
+        if (null != tags) {
+            for (int i = tags.length; i-- > 0;) {
+                final String tag = tags[i];
+                if (!Strings.isEmpty(tag) && (lc.indexOf(tag) >= 0)) {
+                    return true;
+                }
+            }
         }
         return false;
     }
@@ -131,6 +226,8 @@ public final class HTMLDetector {
         return (toLowerCase(sequence).indexOf(toLowerCase(str)) >= 0);
     }
 
+    // ----------------------------------------------------------------------------------------- //
+
     /**
      * Checks if given byte sequence contains common HTML tags.
      *
@@ -159,17 +256,95 @@ public final class HTMLDetector {
         if (containsIgnoreCase(sequence, "<img")) {
             return true;
         }
-        if (containsIgnoreCase(sequence, "<br>")) {
-            return true;
-        }
-        if (containsIgnoreCase(sequence, "<p>")) {
-            return true;
-        }
         if (containsIgnoreCase(sequence, "<object")) {
             return true;
         }
         if (containsIgnoreCase(sequence, "<embed")) {
             return true;
+        }
+        for (final String jsEventHandler : JS_EVENT_HANDLER) {
+            if (containsIgnoreCase(sequence, jsEventHandler)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if given byte sequence contains common HTML tags.
+     *
+     * @param in The byte stream to check
+     * @param strict <code>true</code> for strict checking; otherwise <code>false</code>
+     * @return <code>true</code> if given byte sequence contains common HTML tags; otherwise <code>false</code>
+     * @throws IOException If reading from stream fails
+     */
+    public static boolean containsHTMLTags(final InputStream in, final boolean strict) throws IOException {
+        try {
+            final int buflen = 8192;
+            final byte[] buf = new byte[buflen];
+            boolean found = false;
+            for (int read; !found && (read = in.read(buf, 0, buflen)) > 0;) {
+                found = strict ? containsHTMLTags(buf, 0, read, "<br", "<p>") : containsHTMLTags(buf, 0, read);
+            }
+            return found;
+        } finally {
+            Streams.close(in);
+        }
+    }
+
+    /**
+     * Checks if given byte sequence contains common HTML tags.
+     *
+     * @param sequence The byte sequence to check
+     * @param strict <code>true</code> for strict checking; otherwise <code>false</code>
+     * @return <code>true</code> if given byte sequence contains common HTML tags; otherwise <code>false</code>
+     */
+    public static boolean containsHTMLTags(final byte[] sequence, final boolean strict) {
+        return strict ? containsHTMLTags(sequence, "<br", "<p>") : containsHTMLTags(sequence);
+    }
+
+    /**
+     * Checks if given byte sequence contains common HTML tags.
+     *
+     * @param sequence The byte sequence to check
+     * @param tags Additional tags to look for
+     * @return <code>true</code> if given byte sequence contains common HTML tags; otherwise <code>false</code>
+     */
+    public static boolean containsHTMLTags(final byte[] sequence, final String... tags) {
+        if (containsHTMLTags(sequence)) {
+            return true;
+        }
+        if (null != tags) {
+            for (int i = tags.length; i-- > 0;) {
+                final String tag = tags[i];
+                if (!isEmpty(tag) && containsIgnoreCase(sequence, tag)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if given byte sequence contains common HTML tags.
+     *
+     * @param sequence The byte sequence to check
+     * @param off The offset within byte array
+     * @param len The length of valid bytes starting from offset
+     * @param tags Additional tags to look for
+     * @return <code>true</code> if given byte sequence contains common HTML tags; otherwise <code>false</code>
+     */
+    public static boolean containsHTMLTags(final byte[] sequence, final int off, final int len, final String... tags) {
+        if (containsHTMLTags(sequence, off, len)) {
+            return true;
+        }
+        if (null != tags) {
+            for (int i = tags.length; i-- > 0;) {
+                final String tag = tags[i];
+                if (!isEmpty(tag) && containsIgnoreCase(sequence, off, len, tag)) {
+                    return true;
+                }
+            }
         }
         return false;
     }
@@ -214,17 +389,16 @@ public final class HTMLDetector {
         if (containsIgnoreCase(b, "<img")) {
             return true;
         }
-        if (containsIgnoreCase(b, "<br>")) {
-            return true;
-        }
-        if (containsIgnoreCase(b, "<p>")) {
-            return true;
-        }
         if (containsIgnoreCase(b, "<object")) {
             return true;
         }
         if (containsIgnoreCase(b, "<embed")) {
             return true;
+        }
+        for (final String jsEventHandler : JS_EVENT_HANDLER) {
+            if (containsIgnoreCase(b, jsEventHandler)) {
+                return true;
+            }
         }
         return false;
     }
@@ -283,6 +457,22 @@ public final class HTMLDetector {
         }
         // upper-case
         return (indexOf(sequence, Charsets.toAsciiBytes(toUpperCase(str)), 0, sequence.length) >= 0);
+    }
+
+    /**
+     * Checks if given byte sequence contains specified string.
+     *
+     * @param sequence The byte sequence to check
+     * @param str The string
+     * @return <code>true</code> if given byte sequence contains specified string; otherwise <code>false</code>
+     */
+    private static boolean containsIgnoreCase(final byte[] sequence, final int off, final int len, final String str) {
+        // lower-case
+        if (indexOf(sequence, Charsets.toAsciiBytes(toLowerCase(str)), off, len) >= 0) {
+            return true;
+        }
+        // upper-case
+        return (indexOf(sequence, Charsets.toAsciiBytes(toUpperCase(str)), off, len) >= 0);
     }
 
     /**
@@ -358,31 +548,4 @@ public final class HTMLDetector {
         return failure;
     }
 
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
-    /** ASCII-wise to upper-case */
-    private static String toUpperCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
-        }
-        return builder.toString();
-    }
 }
