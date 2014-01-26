@@ -1,10 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: The AJAX Continuation Bundle
-Bundle-SymbolicName: com.openexchange.ajax.continuation
-Bundle-Version: 7.4.2
+Bundle-Name: Open-Xchange Continuation Service Bundle
+Bundle-SymbolicName: com.openexchange.continuation
+Bundle-Version: 7.2.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
  com.openexchange.i18n,
- com.openexchange.session
+ com.openexchange.session,
+ org.osgi.framework

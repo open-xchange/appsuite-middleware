@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.continuation;
+package com.openexchange.continuation;
 
 import java.util.ArrayList;
 import java.util.Collection;

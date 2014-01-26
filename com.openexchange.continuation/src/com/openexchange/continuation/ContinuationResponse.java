@@ -47,54 +47,46 @@
  *
  */
 
-package com.openexchange.ajax.continuation;
-
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import com.openexchange.exception.OXException;
+package com.openexchange.continuation;
 
 /**
- * {@link Continuation} - Represents a continuing/background AJAX request.
+ * {@link ContinuationResponse} - A continuation response.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Continuation<V> {
+public class ContinuationResponse<V> {
+
+    private final boolean completed;
+    private final V value;
 
     /**
-     * Gets the UUID.
+     * Initializes a new {@link ContinuationResponse}.
      *
-     * @return The UUID
+     * @param value The (interim) value
+     * @param completed <code>true</code> to signal final value; else <code>false</code> to further await completion
      */
-    UUID getUuid();
+    public ContinuationResponse(V value, boolean completed) {
+        super();
+        this.value = value;
+        this.completed = completed;
+    }
 
     /**
-     * Gets the format of this continuation's results.
+     * Gets the completed flag
      *
-     * @return The format
+     * @return The completed flag
      */
-    String getFormat();
+    public boolean isCompleted() {
+        return completed;
+    }
 
     /**
-     * Gets the next available value.
+     * Gets the value
      *
-     * @param time The maximum time to wait
-     * @param unit The time unit of the {@code time} argument
-     * @return The next available value or <code>null</code>
-     * @throws OXException If awaiting next available response fails
-     * @throws InterruptedException If the current thread is interrupted
+     * @return The value
      */
-    ContinuationResponse<V> getNextResponse(long time, TimeUnit unit) throws OXException, InterruptedException;
-
-    /**
-     * Gets the next available value.
-     *
-     * @param time The maximum time to wait
-     * @param unit The time unit of the {@code time} argument
-     * @param defaultValue The default response to return if no next value was available in given time span
-     * @return The next available value or given <code>defaultValue</code>
-     * @throws OXException If awaiting next available response fails
-     * @throws InterruptedException If the current thread is interrupted
-     */
-    ContinuationResponse<V> getNextResponse(long time, TimeUnit unit, V defaultResponse) throws OXException, InterruptedException;
+    public V getValue() {
+        return value;
+    }
 
 }
