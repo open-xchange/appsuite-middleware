@@ -60,13 +60,15 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
+import com.openexchange.continuation.utils.TimeAwareBlockingQueue;
 import com.openexchange.exception.OXException;
 
 /**
  * {@link ExecutorContinuation} - A {@link Continuation} backed by an {@link Executor}.
+ * <p>
+ * Acts in favor of a <code>CompletionService</code>. Supports submitting <code>Runnable</code>s/<code>Callable</code>s.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -96,7 +98,7 @@ public final class ExecutorContinuation<V> implements Continuation<Collection<V>
 
     private final UUID uuid;
     private final Executor executor;
-    private final BlockingQueue<Future<V>> completionQueue;
+    private final TimeAwareBlockingQueue<Future<V>> completionQueue;
     private final List<Future<V>> completedFutures;
     private int count;
     private final String format;
@@ -112,7 +114,7 @@ public final class ExecutorContinuation<V> implements Continuation<Collection<V>
         this.format = null == format ? "json" : format;
         this.executor = executor;
         uuid = UUID.randomUUID();
-        completionQueue = new LinkedBlockingQueue<Future<V>>();
+        completionQueue = new TimeAwareBlockingQueue<Future<V>>();
         completedFutures = new LinkedList<Future<V>>();
         count = 0;
 
@@ -181,23 +183,13 @@ public final class ExecutorContinuation<V> implements Continuation<Collection<V>
         }
 
         // At least one completion to await
-        Future<V> f = completionQueue.poll(time, unit);
-        if (null == f) {
+        final List<Future<V>> polled = completionQueue.pollUntilElapsed(time, unit);
+        if (polled.isEmpty()) {
             // Time elapsed
             return new ContinuationResponse<Collection<V>>(defaultResponse, false);
         }
-        completedFutures.add(f);
-        completedCount++;
-
-        // Collect more if available
-        for (int i = count - completedCount; i-- > 0;) {
-            f = completionQueue.poll();
-            if (null == f) {
-                i = 0;
-            } else {
-                completedFutures.add(f);
-            }
-        }
+        completedFutures.addAll(polled);
+        completedCount+= polled.size();
 
         final List<V> retval = new ArrayList<V>(completedFutures.size());
         for (final Future<V> completedFuture : completedFutures) {
@@ -208,10 +200,10 @@ public final class ExecutorContinuation<V> implements Continuation<Collection<V>
                 if (cause instanceof OXException) {
                     throw (OXException) cause;
                 }
-                throw OXException.general("Continuation failed", cause);
+                throw ContinuationExceptionCodes.UNEXPECTED_ERROR.create(cause, cause.getMessage());
             }
         }
-        return new ContinuationResponse<Collection<V>>(prepare(retval), false);
+        return new ContinuationResponse<Collection<V>>(prepare(retval), completedCount == count);
     }
 
     /**

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,34 +49,28 @@
 
 package com.openexchange.continuation;
 
-import java.util.UUID;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link ContinuationRegistryService} - The continuation registry service.
+ * {@link ContinuationExceptionMessages} - Exception messages for {@link OXException} that needs to be translated.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.2
  */
-public interface ContinuationRegistryService {
+public final class ContinuationExceptionMessages implements LocalizableStrings {
 
     /**
-     * Gets the continuation for given UUID and session.
-     *
-     * @param uuid The UUID
-     * @param session The session
-     * @return The continuation or <code>null</code> if there is no such continuation
-     * @throws OXException If continuation cannot be returned for any reason
+     * Initializes a new {@link OXExceptionMessages}.
      */
-    <V> Continuation<V> getContinuation(UUID uuid, Session session) throws OXException;
+    private ContinuationExceptionMessages() {
+        super();
+    }
 
-    /**
-     * Puts given continuation into registry using specified session.
-     *
-     * @param continuation The continuation
-     * @param session The session
-     * @throws OXException If put into registry fails
-     */
-    <V> void putContinuation(Continuation<V> continuation, Session session) throws OXException;
+    // The E-Mail address is invalid %1$s
+    public static final String EMAIL_PARSE_ERROR_MSG = "The E-Mail address is invalid: \"%1$s\".";
+
+    // The user identifier is invalid: "%1$s".
+    public static final String INVALID_USER_IDENTIFER_MSG = "The user identifier is invalid: \"%1$s\".";
 
 }
