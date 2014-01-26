@@ -1,3 +1,8 @@
+* 2014-01-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30820: Enhanced HTML detector by JavaScript event handler names
+                      (as listed by http://de.selfhtml.org/javascript/sprache/eventhandler.htm )
+
 * 2014-01-24 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 30692: Preserve previous filename unless explicitly set when creating a new file version   
