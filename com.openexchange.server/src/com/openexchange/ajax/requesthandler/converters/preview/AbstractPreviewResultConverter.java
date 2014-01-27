@@ -505,7 +505,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
         if (null == in) {
             return true;
         }
-        final PushbackInputStream pin = new PushbackInputStream(in);
+        final PushbackInputStream pin = Streams.pushbackInputStreamFor(in);
         final int read = pin.read();
         if (read < 0) {
             return true;

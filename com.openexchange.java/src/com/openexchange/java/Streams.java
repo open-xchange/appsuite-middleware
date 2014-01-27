@@ -58,6 +58,7 @@ import java.io.Flushable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PushbackInputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Collection;
@@ -433,4 +434,15 @@ public class Streams {
             }
         }
     }
+
+    /**
+     * Creates a {@link java.io.PushbackInputStream} for given input stream.
+     *
+     * @param in The input stream to create a <code>PushbackInputStream</code> for
+     * @return A <code>PushbackInputStream</code> for given input stream
+     */
+    public static PushbackInputStream pushbackInputStreamFor(final InputStream in) {
+        return in instanceof PushbackInputStream ? (PushbackInputStream) in : new PushbackInputStream(in);
+    }
+
 }
