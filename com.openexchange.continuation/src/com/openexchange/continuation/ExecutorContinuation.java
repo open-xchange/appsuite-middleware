@@ -242,40 +242,6 @@ public class ExecutorContinuation<V> implements Continuation<Collection<V>> {
     }
 
     /**
-     * Awaits and retrieves the first response.
-     *
-     * @return The first response
-     * @throws OXException If an error occurs
-     * @throws InterruptedException If thread was interrupted
-     */
-    public synchronized ContinuationResponse<Collection<V>> getFirstResponse() throws OXException, InterruptedException {
-        int completedCount = completedFutures.size();
-        if (completedCount == count) {
-            return new ContinuationResponse<Collection<V>>(null, null, format, true);
-        }
-
-        final Future<Collection<V>> taken = completionQueue.take();
-        // Update completed information
-        completedFutures.add(taken);
-        completedCount++;
-
-        try {
-            final Collection<V> collection = taken.get();
-            final List<V> retval = new ArrayList<V>(collection.size());
-            for (final V value : collection) {
-                retval.add(value);
-            }
-            return responseFor(retval, completedCount == count);
-        } catch (final ExecutionException e) {
-            final Throwable cause = e.getCause();
-            if (cause instanceof OXException) {
-                throw (OXException) cause;
-            }
-            throw ContinuationExceptionCodes.UNEXPECTED_ERROR.create(cause, cause.getMessage());
-        }
-    }
-
-    /**
      * Yields a <code>ContinuationResponse</code> for given results; e.g. apply sorting/filtering or shrink to certain ranges.
      *
      * @param col The results
