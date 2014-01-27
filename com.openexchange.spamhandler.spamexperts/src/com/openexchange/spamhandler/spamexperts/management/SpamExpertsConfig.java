@@ -325,5 +325,11 @@ public class SpamExpertsConfig implements Initialization {
         }
         panelServlet = configService.getProperty(PROPERTY_PANEL_SERVLET);
 
+        LOG.info("Using properties: " + instance.toString());
+    }
+
+    @Override
+    public String toString() {
+        return "SpamExpertsConfig [imapUrl=" + imapUrl + ", imapUser=" + imapUser + ", trainSpamFolder=" + trainSpamFolder + ", trainHamFolder=" + trainHamFolder + ", panelAdmin=" + panelAdmin + ", panelApiUrl=" + panelApiUrl + ", panelApiAuthAttr=" + panelApiAuthAttr + ", panelWebUiUrl=" + panelWebUiUrl + ", panelServlet=" + panelServlet + "]";
     }
 }
