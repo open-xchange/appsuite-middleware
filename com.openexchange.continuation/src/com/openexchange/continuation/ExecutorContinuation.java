@@ -71,21 +71,22 @@ import com.openexchange.exception.OXException;
  * Acts in favor of a <code>CompletionService</code>. Supports submitting <code>Runnable</code>s/<code>Callable</code>s.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.6.0
  */
 public class ExecutorContinuation<V> implements Continuation<Collection<V>> {
 
     private static final long serialVersionUID = -5214485512866728446L;
 
-    private static final class QueueingFuture<V> extends FutureTask<V> {
+    private static final class QueueingFuture<R> extends FutureTask<R> {
 
-        private final BlockingQueue<Future<V>> queue;
+        private final BlockingQueue<Future<R>> queue;
 
-        QueueingFuture(final Callable<V> c, final BlockingQueue<Future<V>> queue) {
+        QueueingFuture(final Callable<R> c, final BlockingQueue<Future<R>> queue) {
             super(c);
             this.queue = queue;
         }
 
-        QueueingFuture(final Runnable t, final V r, final BlockingQueue<Future<V>> queue) {
+        QueueingFuture(final Runnable t, final R r, final BlockingQueue<Future<R>> queue) {
             super(t, r);
             this.queue = queue;
         }
@@ -105,10 +106,10 @@ public class ExecutorContinuation<V> implements Continuation<Collection<V>> {
     protected final Executor executor;
 
     /** An extended <code>LinkedBlockingQueue</code> that offers special <code>pollUntilElapsed()</code> method */
-    protected final TimeAwareBlockingQueue<Future<V>> completionQueue;
+    protected final TimeAwareBlockingQueue<Future<Collection<V>>> completionQueue;
 
     /** A list containing already completed tasks */
-    protected final List<Future<V>> completedFutures;
+    protected final List<Future<Collection<V>>> completedFutures;
 
     /** The number of submitted tasks */
     protected int count;
@@ -128,8 +129,8 @@ public class ExecutorContinuation<V> implements Continuation<Collection<V>> {
         this.format = null == format ? "json" : format;
         this.executor = executor;
         uuid = UUID.randomUUID();
-        completionQueue = new TimeAwareBlockingQueue<Future<V>>();
-        completedFutures = new LinkedList<Future<V>>();
+        completionQueue = new TimeAwareBlockingQueue<Future<Collection<V>>>();
+        completedFutures = new LinkedList<Future<Collection<V>>>();
         count = 0;
 
         final int prime = 31;
@@ -151,11 +152,11 @@ public class ExecutorContinuation<V> implements Continuation<Collection<V>> {
      * @throws RejectedExecutionException If the task cannot be scheduled for execution
      * @throws NullPointerException If the task is <code>null</code>
      */
-    public synchronized void submit(final Callable<V> task) {
+    public synchronized void submit(final Callable<Collection<V>> task) {
         if (task == null) {
             throw new NullPointerException();
         }
-        final QueueingFuture<V> f = new QueueingFuture<V>(task, completionQueue);
+        final QueueingFuture<Collection<V>> f = new QueueingFuture<Collection<V>>(task, completionQueue);
         executor.execute(f);
         count++;
     }
@@ -170,11 +171,11 @@ public class ExecutorContinuation<V> implements Continuation<Collection<V>> {
      * @throws RejectedExecutionException If the task cannot be scheduled for execution
      * @throws NullPointerException If the task is <code>null</code>
      */
-    public synchronized void submit(final Runnable task, final V result) {
+    public synchronized void submit(final Runnable task, final Collection<V> result) {
         if (task == null) {
             throw new NullPointerException();
         }
-        final QueueingFuture<V> f = new QueueingFuture<V>(task, result, completionQueue);
+        final QueueingFuture<Collection<V>> f = new QueueingFuture<Collection<V>>(task, result, completionQueue);
         executor.execute(f);
         count++;
     }
@@ -193,23 +194,26 @@ public class ExecutorContinuation<V> implements Continuation<Collection<V>> {
     public synchronized ContinuationResponse<Collection<V>> getNextResponse(final long time, final TimeUnit unit, final Collection<V> defaultResponse) throws OXException, InterruptedException {
         int completedCount = completedFutures.size();
         if (completedCount == count) {
-            return new ContinuationResponse<Collection<V>>(defaultResponse, true);
+            return new ContinuationResponse<Collection<V>>(defaultResponse, null, format, true);
         }
 
         // Await elements
-        final List<Future<V>> polled = completionQueue.pollUntilElapsed(time, unit, count - completedCount);
+        final List<Future<Collection<V>>> polled = completionQueue.pollUntilElapsed(time, unit, count - completedCount);
         if (polled.isEmpty()) {
             // Time elapsed, but no element available
-            return new ContinuationResponse<Collection<V>>(defaultResponse, false);
+            return new ContinuationResponse<Collection<V>>(defaultResponse, null, format, false);
         }
         // Update completed information
         completedFutures.addAll(polled);
         completedCount += polled.size();
 
-        final List<V> retval = new ArrayList<V>(completedFutures.size());
-        for (final Future<V> completedFuture : completedFutures) {
+        final List<V> retval = new ArrayList<V>(completedFutures.size() << 2);
+        for (final Future<Collection<V>> completedFuture : completedFutures) {
             try {
-                retval.add(completedFuture.get());
+                final Collection<V> collection = completedFuture.get();
+                for (final V value : collection) {
+                    retval.add(value);
+                }
             } catch (final ExecutionException e) {
                 final Throwable cause = e.getCause();
                 if (cause instanceof OXException) {
@@ -218,17 +222,68 @@ public class ExecutorContinuation<V> implements Continuation<Collection<V>> {
                 throw ContinuationExceptionCodes.UNEXPECTED_ERROR.create(cause, cause.getMessage());
             }
         }
-        return new ContinuationResponse<Collection<V>>(prepare(retval), completedCount == count);
+        return responseFor(retval, completedCount == count);
     }
 
     /**
-     * Prepares given results; e.g. apply sorting/filtering or shrink to certain ranges.
+     * Awaits but does not retrieve the first response.
+     *
+     * @throws InterruptedException If thread was interrupted
+     */
+    public void awaitFirstResponse() throws InterruptedException {
+        synchronized (this) {
+            final int completedCount = completedFutures.size();
+            if (completedCount == count) {
+                return;
+            }
+        }
+        // Await...
+        completionQueue.await();
+    }
+
+    /**
+     * Awaits and retrieves the first response.
+     *
+     * @return The first response
+     * @throws OXException If an error occurs
+     * @throws InterruptedException If thread was interrupted
+     */
+    public synchronized ContinuationResponse<Collection<V>> getFirstResponse() throws OXException, InterruptedException {
+        int completedCount = completedFutures.size();
+        if (completedCount == count) {
+            return new ContinuationResponse<Collection<V>>(null, null, format, true);
+        }
+
+        final Future<Collection<V>> taken = completionQueue.take();
+        // Update completed information
+        completedFutures.add(taken);
+        completedCount++;
+
+        try {
+            final Collection<V> collection = taken.get();
+            final List<V> retval = new ArrayList<V>(collection.size());
+            for (final V value : collection) {
+                retval.add(value);
+            }
+            return responseFor(retval, completedCount == count);
+        } catch (final ExecutionException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof OXException) {
+                throw (OXException) cause;
+            }
+            throw ContinuationExceptionCodes.UNEXPECTED_ERROR.create(cause, cause.getMessage());
+        }
+    }
+
+    /**
+     * Yields a <code>ContinuationResponse</code> for given results; e.g. apply sorting/filtering or shrink to certain ranges.
      *
      * @param col The results
+     * @param completed Whether continuation is completed or not
      * @return The prepared results
      */
-    protected Collection<V> prepare(final List<V> col) {
-        return col;
+    protected ContinuationResponse<Collection<V>> responseFor(final List<V> col, final boolean completed) {
+        return new ContinuationResponse<Collection<V>>(col, null, format, completed);
     }
 
     // -------------------------------------------------------------------------------------------- //

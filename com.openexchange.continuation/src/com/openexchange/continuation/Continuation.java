@@ -58,6 +58,7 @@ import com.openexchange.exception.OXException;
  * {@link Continuation} - Represents a continuing/background AJAX request.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.6.0
  */
 public interface Continuation<V> extends Serializable {
 

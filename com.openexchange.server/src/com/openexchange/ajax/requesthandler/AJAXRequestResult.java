@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.json.JSONValue;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
@@ -179,7 +180,7 @@ public class AJAXRequestResult {
         /**
          * The special result directly responded to client.
          */
-        DIRECT, 
+        DIRECT,
         /**
          * The request went to a resource that could not be found
          */
@@ -214,6 +215,12 @@ public class AJAXRequestResult {
     private @Nullable OXException exception;
 
     private long duration;
+
+    /**
+     * Signals whether the data provided by this response is not yet finished or final, but rather reflects an intermediate state and the
+     * client is supposed to request again to get full results.
+     */
+    private @Nullable UUID continuationUuid;
 
     /**
      * Initializes a new {@link AJAXRequestResult} with data and time stamp set to <code>null</code>.
@@ -276,6 +283,26 @@ public class AJAXRequestResult {
             this.resultObject = resultObject;
         }
         expires = -1;
+    }
+
+    /**
+     * Sets the continuation UUID
+     *
+     * @param continuationUuid The continuation UUID to set
+     * @return A reference to this
+     */
+    public AJAXRequestResult setContinuationUuid(final @Nullable UUID continuationUuid) {
+        this.continuationUuid = continuationUuid;
+        return this;
+    }
+
+    /**
+     * Gets the continuation UUID
+     *
+     * @return The continuation UUID or <code>null</code>
+     */
+    public @Nullable  UUID getContinuationUuid() {
+        return continuationUuid;
     }
 
     /**

@@ -110,6 +110,7 @@ public class APIResponseRenderer implements ResponseRenderer {
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
         final Boolean plainJson = (Boolean) result.getParameter(PLAIN_JSON);
         final Response response = (Response) result.getResultObject();
+        response.setContinuationUUID(result.getContinuationUuid());
         if (parseBoolParameter(INCLUDE_STACK_TRACE_ON_ERROR, request) ) {
             response.setIncludeStackTraceOnError(true);
         }

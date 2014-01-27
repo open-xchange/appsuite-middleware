@@ -57,6 +57,7 @@ import com.openexchange.session.Session;
  * {@link ContinuationRegistryService} - The continuation registry service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.6.0
  */
 public interface ContinuationRegistryService {
 
@@ -78,5 +79,14 @@ public interface ContinuationRegistryService {
      * @throws OXException If put into registry fails
      */
     <V> void putContinuation(Continuation<V> continuation, Session session) throws OXException;
+
+    /**
+     * Removes specified continuation from registry using specified session.
+     *
+     * @param uuid The UUID
+     * @param session The session
+     * @throws OXException If put into registry fails
+     */
+    void removeContinuation(UUID uuid, Session session) throws OXException;
 
 }

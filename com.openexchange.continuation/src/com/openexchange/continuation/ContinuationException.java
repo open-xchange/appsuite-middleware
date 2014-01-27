@@ -49,70 +49,76 @@
 
 package com.openexchange.continuation;
 
-import java.util.Date;
+import java.util.UUID;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link ContinuationResponse} - A continuation response.
+ * {@link ContinuationException}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.0
  */
-public class ContinuationResponse<V> {
+public final class ContinuationException extends OXException {
 
-    private final boolean completed;
-    private final String format;
-    private final Date timeStamp;
-    private final V value;
+    private static final long serialVersionUID = -454163929764879301L;
+
+    private final UUID uuid;
 
     /**
-     * Initializes a new {@link ContinuationResponse}.
+     * Initializes a new {@link ContinuationException}.
      *
-     * @param value The (interim) value
-     * @param The result's format
-     * @param completed <code>true</code> to signal final value; else <code>false</code> to further await completion
+     * @param uuid The UUID of associated continuation or <code>null</code>
      */
-    public ContinuationResponse(final V value, final Date timeStamp, final String format, final boolean completed) {
+    public ContinuationException(final UUID uuid) {
         super();
-        this.value = value;
-        this.timeStamp = timeStamp;
-        this.format = format;
-        this.completed = completed;
+        this.uuid = uuid;
     }
 
     /**
-     * Gets the completed flag
+     * Initializes a new {@link ContinuationException}.
      *
-     * @return The completed flag
+     * @param uuid The UUID of associated continuation or <code>null</code>
+     * @param cause The optional cause
      */
-    public boolean isCompleted() {
-        return completed;
+    public ContinuationException(final UUID uuid, Throwable cause) {
+        super(cause);
+        this.uuid = uuid;
     }
 
     /**
-     * Gets the format
+     * Initializes a new {@link ContinuationException}.
      *
-     * @return The format
+     * @param uuid The UUID of associated continuation or <code>null</code>
+     * @param code The error code number
+     * @param displayMessage The display message
+     * @param displayArgs The display message arguments
      */
-    public String getFormat() {
-        return format;
+    public ContinuationException(final UUID uuid, int code, String displayMessage, Object... displayArgs) {
+        super(code, displayMessage, displayArgs);
+        this.uuid = uuid;
     }
 
     /**
-     * Gets the value
+     * Initializes a new {@link ContinuationException}.
      *
-     * @return The value
+     * @param uuid The UUID of associated continuation or <code>null</code>
+     * @param code The error code number
+     * @param displayMessage The display message
+     * @param cause The optional cause
+     * @param displayArgs The display message arguments
      */
-    public V getValue() {
-        return value;
+    public ContinuationException(final UUID uuid, int code, String displayMessage, Throwable cause, Object... displayArgs) {
+        super(code, displayMessage, cause, displayArgs);
+        this.uuid = uuid;
     }
 
     /**
-     * Gets the time stamp.
+     * Gets the UUID
      *
-     * @return The time stamp or <code>null</code>
+     * @return The UUID or <code>null</code>
      */
-    public Date getTimeStamp() {
-        return timeStamp;
+    public UUID getUuid() {
+        return uuid;
     }
 
 }

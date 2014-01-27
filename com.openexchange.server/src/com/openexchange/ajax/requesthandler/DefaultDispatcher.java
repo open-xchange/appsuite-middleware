@@ -57,13 +57,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.continuation.Continuation;
+import com.openexchange.continuation.ContinuationException;
+import com.openexchange.continuation.ContinuationExceptionCodes;
+import com.openexchange.continuation.ContinuationRegistryService;
+import com.openexchange.continuation.ContinuationResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -214,6 +222,29 @@ public class DefaultDispatcher implements Dispatcher {
                     throw (OXException) cause;
                 }
                 throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } catch (final ContinuationException e) {
+                if (!ContinuationExceptionCodes.SCHEDULED_FOR_CONTINUATION.equals(e)) {
+                    throw e;
+                }
+                final UUID uuid = e.getUuid();
+                if (null == uuid) {
+                    throw e;
+                }
+                final ContinuationRegistryService continuationRegistry = ServerServiceRegistry.getInstance().getService(ContinuationRegistryService.class);
+                if (null == continuationRegistry) {
+                    throw e;
+                }
+                final Continuation<Object> continuation = continuationRegistry.getContinuation(uuid, session);
+                if (null == continuation) {
+                    throw e;
+                }
+                try {
+                    final ContinuationResponse<Object> cr = continuation.getNextResponse(0, TimeUnit.NANOSECONDS);
+                    result = new AJAXRequestResult(cr.getValue(), cr.getTimeStamp(), cr.getFormat()).setContinuationUuid(uuid);
+                } catch (final InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(ie, ie.getMessage());
+                }
             } finally {
                 modifiedRequestData.cleanUploads();
             }

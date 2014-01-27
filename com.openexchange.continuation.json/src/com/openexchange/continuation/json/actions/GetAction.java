@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,72 +47,76 @@
  *
  */
 
-package com.openexchange.continuation.internal;
+package com.openexchange.continuation.json.actions;
 
 import java.util.UUID;
-import com.openexchange.caching.Cache;
-import com.openexchange.caching.CacheService;
+import java.util.concurrent.TimeUnit;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.continuation.Continuation;
+import com.openexchange.continuation.ContinuationExceptionCodes;
 import com.openexchange.continuation.ContinuationRegistryService;
+import com.openexchange.continuation.ContinuationResponse;
+import com.openexchange.continuation.json.ContinuationRequest;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link ContinuationRegistryServiceImpl}
+ * {@link GetAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.0
  */
-public class ContinuationRegistryServiceImpl implements ContinuationRegistryService {
-
-    private final ServiceLookup services;
-    private final String region;
+public final class GetAction extends AbstractContinuationAction {
 
     /**
-     * Initializes a new {@link ContinuationRegistryServiceImpl}.
+     * Initializes a new {@link GetAction}.
+     *
+     * @param services The service look-up
      */
-    public ContinuationRegistryServiceImpl(final String region, final ServiceLookup services) {
-        super();
-        this.services = services;
-        this.region = region;
+    public GetAction(final ServiceLookup services) {
+        super(services);
     }
 
-    private Cache getCache() throws OXException {
-        final CacheService cacheService = services.getOptionalService(CacheService.class);
-        if (null == cacheService) {
-            throw ServiceExceptionCode.absentService(CacheService.class);
-        }
-        return cacheService.getCache(region);
-    }
-
-    @SuppressWarnings("unchecked")
     @Override
-    public <V> Continuation<V> getContinuation(final UUID uuid, final Session session) throws OXException {
-        if (null != uuid && null != session) {
-            final Cache cache = getCache();
-            final Object object = cache.getFromGroup(uuid, session.getUserId() + "@" + session.getContextId());
-            if (object instanceof Continuation) {
-                return (Continuation<V>) object;
+    protected AJAXRequestResult perform(final ContinuationRequest req) throws OXException, JSONException {
+        // Acquire service
+        final ContinuationRegistryService continuationRegistry = getService(ContinuationRegistryService.class);
+        if (null == continuationRegistry) {
+            throw ServiceExceptionCode.absentService(ContinuationRegistryService.class);
+        }
+
+        // Require UUID
+        final String sUUID = req.checkParameter("uuid");
+        final UUID uuid = UUIDs.fromUnformattedString(sUUID);
+
+        // Check registry
+        final Continuation<Object> continuation = continuationRegistry.getContinuation(uuid, req.getSession());
+        if (null == continuation) {
+            throw ContinuationExceptionCodes.NO_SUCH_CONTINUATION.create(sUUID);
+        }
+
+        try {
+            final ContinuationResponse<Object> cr = continuation.getNextResponse(5, TimeUnit.SECONDS);
+
+            if (null == cr.getValue()) {
+                // Continuation already consumed
+                continuationRegistry.removeContinuation(uuid, req.getSession());
+                throw ContinuationExceptionCodes.NO_SUCH_CONTINUATION.create(sUUID);
             }
-        }
-        return null;
-    }
 
-    @Override
-    public <V> void putContinuation(final Continuation<V> continuation, final Session session) throws OXException {
-        if (null != continuation && null != session) {
-            final Cache cache = getCache();
-            cache.putInGroup(continuation.getUuid(), session.getUserId() + "@" + session.getContextId(), continuation, false);
-        }
-    }
+            final boolean completed = cr.isCompleted();
+            if (completed) {
+                continuationRegistry.removeContinuation(uuid, req.getSession());
+            }
 
-    @Override
-    public void removeContinuation(final UUID uuid, final Session session) throws OXException {
-        if (null != uuid && null != session) {
-            final Cache cache = getCache();
-            cache.removeFromGroup(uuid, session.getUserId() + "@" + session.getContextId());
+            return new AJAXRequestResult(cr.getValue(), cr.getTimeStamp(), cr.getFormat()).setContinuationUuid(completed ? null : uuid);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e);
         }
     }
 

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,73 +47,81 @@
  *
  */
 
-package com.openexchange.continuation.internal;
+package com.openexchange.continuation.json.actions;
 
-import java.util.UUID;
-import com.openexchange.caching.Cache;
-import com.openexchange.caching.CacheService;
-import com.openexchange.continuation.Continuation;
-import com.openexchange.continuation.ContinuationRegistryService;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.continuation.json.ContinuationRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ContinuationRegistryServiceImpl}
+ * {@link AbstractContinuationAction} - The abstract continuation action.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.0
  */
-public class ContinuationRegistryServiceImpl implements ContinuationRegistryService {
+public abstract class AbstractContinuationAction implements AJAXActionService {
 
     private final ServiceLookup services;
-    private final String region;
 
     /**
-     * Initializes a new {@link ContinuationRegistryServiceImpl}.
+     * Initializes a new {@link AbstractContinuationAction}.
      */
-    public ContinuationRegistryServiceImpl(final String region, final ServiceLookup services) {
+    protected AbstractContinuationAction(final ServiceLookup services) {
         super();
         this.services = services;
-        this.region = region;
     }
 
-    private Cache getCache() throws OXException {
-        final CacheService cacheService = services.getOptionalService(CacheService.class);
-        if (null == cacheService) {
-            throw ServiceExceptionCode.absentService(CacheService.class);
-        }
-        return cacheService.getCache(region);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <V> Continuation<V> getContinuation(final UUID uuid, final Session session) throws OXException {
-        if (null != uuid && null != session) {
-            final Cache cache = getCache();
-            final Object object = cache.getFromGroup(uuid, session.getUserId() + "@" + session.getContextId());
-            if (object instanceof Continuation) {
-                return (Continuation<V>) object;
-            }
-        }
-        return null;
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    protected <S> S getService(final Class<? extends S> clazz) {
+        return services.getService(clazz);
     }
 
     @Override
-    public <V> void putContinuation(final Continuation<V> continuation, final Session session) throws OXException {
-        if (null != continuation && null != session) {
-            final Cache cache = getCache();
-            cache.putInGroup(continuation.getUuid(), session.getUserId() + "@" + session.getContextId(), continuation, false);
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        if (checkCapability() && !hasContinuationCapability(session)) {
+            throw OXException.noPermissionForModule("continuation");
+        }
+        try {
+            return perform(new ContinuationRequest(requestData, session));
+        } catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    @Override
-    public void removeContinuation(final UUID uuid, final Session session) throws OXException {
-        if (null != uuid && null != session) {
-            final Cache cache = getCache();
-            cache.removeFromGroup(uuid, session.getUserId() + "@" + session.getContextId());
-        }
+    private boolean hasContinuationCapability(final ServerSession session) throws OXException {
+        final CapabilityService capabilityService = getService(CapabilityService.class);
+        return (null != capabilityService && capabilityService.getCapabilities(session).contains("continuation"));
     }
+
+    /**
+     * Checks if capability should be checked prior to serving action.
+     *
+     * @return <code>true</code> to check; otherwise <code>false</code>
+     */
+    protected boolean checkCapability() {
+        return true;
+    }
+
+    /**
+     * Performs specified continuationRequest request.
+     *
+     * @param req The continuationRequest request
+     * @return The result
+     * @throws OXException If an error occurs
+     * @throws JSONException If a JSON error occurs
+     */
+    protected abstract AJAXRequestResult perform(ContinuationRequest req) throws OXException, JSONException;
 
 }

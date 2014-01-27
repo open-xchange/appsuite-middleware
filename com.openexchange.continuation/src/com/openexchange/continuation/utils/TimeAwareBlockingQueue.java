@@ -405,6 +405,21 @@ public class TimeAwareBlockingQueue<E> extends AbstractQueue<E> implements Block
         return x;
     }
 
+    public void await() throws InterruptedException {
+        if (count.get() > 0) {
+            return;
+        }
+        final ReentrantLock takeLock = this.takeLock;
+        takeLock.lock();
+        try {
+            while (null == head.next) {
+                notEmpty.await();
+            }
+        } finally {
+            takeLock.unlock();
+        }
+    }
+
     @Override
     public E poll(final long timeout, final TimeUnit unit) throws InterruptedException {
         E x = null;

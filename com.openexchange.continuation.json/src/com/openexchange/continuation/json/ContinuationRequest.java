@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,72 +47,74 @@
  *
  */
 
-package com.openexchange.continuation;
+package com.openexchange.continuation.json;
 
-import java.util.Date;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ContinuationResponse} - A continuation response.
+ * {@link ContinuationRequest} - A continuation request.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.0
  */
-public class ContinuationResponse<V> {
+public class ContinuationRequest {
 
-    private final boolean completed;
-    private final String format;
-    private final Date timeStamp;
-    private final V value;
+    private final ServerSession session;
+    private final AJAXRequestData request;
 
     /**
-     * Initializes a new {@link ContinuationResponse}.
+     * Initializes a new {@link ContinuationRequest}.
      *
-     * @param value The (interim) value
-     * @param The result's format
-     * @param completed <code>true</code> to signal final value; else <code>false</code> to further await completion
+     * @param session The session
+     * @param request The request
      */
-    public ContinuationResponse(final V value, final Date timeStamp, final String format, final boolean completed) {
+    public ContinuationRequest(final AJAXRequestData request, final ServerSession session) {
         super();
-        this.value = value;
-        this.timeStamp = timeStamp;
-        this.format = format;
-        this.completed = completed;
+        this.request = request;
+        this.session = session;
     }
 
     /**
-     * Gets the completed flag
+     * Gets the value mapped to given parameter name.
      *
-     * @return The completed flag
+     * @param name The parameter name
+     * @return The value mapped to given parameter name
+     * @throws NullPointerException If name is <code>null</code>
+     * @throws OXException If no such parameter exists
      */
-    public boolean isCompleted() {
-        return completed;
+    public String checkParameter(final String name) throws OXException {
+        return request.checkParameter(name);
     }
 
     /**
-     * Gets the format
+     * Gets the value mapped to given parameter name.
      *
-     * @return The format
+     * @param name The parameter name
+     * @return The value mapped to given parameter name or <code>null</code> if not present
+     * @throws NullPointerException If name is <code>null</code>
      */
-    public String getFormat() {
-        return format;
+    public String getParameter(final String name) {
+        return request.getParameter(name);
     }
 
     /**
-     * Gets the value
+     * Gets the request.
      *
-     * @return The value
+     * @return The request
      */
-    public V getValue() {
-        return value;
+    public AJAXRequestData getRequest() {
+        return request;
     }
 
     /**
-     * Gets the time stamp.
+     * Gets the session.
      *
-     * @return The time stamp or <code>null</code>
+     * @return The session
      */
-    public Date getTimeStamp() {
-        return timeStamp;
+    public ServerSession getSession() {
+        return session;
     }
 
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.continuation;
 
+import java.util.UUID;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
@@ -71,6 +72,15 @@ public enum ContinuationExceptionCodes implements DisplayableOXExceptionCode {
      * An I/O error occurred: %1$s
      */
     IO_ERROR("An I/O error occurred: %1$s", Category.CATEGORY_ERROR, 2),
+    /**
+     * Scheduled for continuation: %1$s
+     */
+    SCHEDULED_FOR_CONTINUATION("Scheduled for continuation: %1$s", Category.CATEGORY_ERROR, 3),
+    /**
+     * No such continuation for %1$s
+     */
+    NO_SUCH_CONTINUATION("No such continuation for %1$s", Category.CATEGORY_ERROR, 4)
+
     ;
 
     /**
@@ -79,11 +89,8 @@ public enum ContinuationExceptionCodes implements DisplayableOXExceptionCode {
     public static final String PREFIX = "CONTINUATION";
 
     private final Category category;
-
     private final int detailNumber;
-
     private final String message;
-
     private final String displayMessage;
 
     private ContinuationExceptionCodes(final String message, final Category category, final int detailNumber) {
@@ -127,13 +134,24 @@ public enum ContinuationExceptionCodes implements DisplayableOXExceptionCode {
         return OXExceptionFactory.getInstance().equals(this, e);
     }
 
+    private static final Object[] EMPTY_ARGS = new Object[0];
+
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
-        return OXExceptionFactory.getInstance().create(this, new Object[0]);
+        return create(null, null, EMPTY_ARGS);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final UUID uuid, final boolean lightWeight) {
+        return lightWeight ? create(uuid, null, EMPTY_ARGS).markLightWeight() : create(uuid, null, EMPTY_ARGS);
     }
 
     /**
@@ -143,7 +161,7 @@ public enum ContinuationExceptionCodes implements DisplayableOXExceptionCode {
      * @return The newly created {@link OXException} instance
      */
     public OXException create(final Object... args) {
-        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+        return create(null, null, args);
     }
 
     /**
@@ -154,6 +172,46 @@ public enum ContinuationExceptionCodes implements DisplayableOXExceptionCode {
      * @return The newly created {@link OXException} instance
      */
     public OXException create(final Throwable cause, final Object... args) {
-        return OXExceptionFactory.getInstance().create(this, cause, args);
+        return create(null, cause, args);
     }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    private OXException create(final UUID uuid, final Throwable cause, final Object... args) {
+        final Category cat = null == category ? getCategory() : category;
+        final OXException ret = new ContinuationException(uuid, getNumber(), getDisplayMessage(), cause, args).setLogMessage(getMessage(), args);
+        return ret.addCategory(cat).setPrefix(getPrefix());
+    }
+
+    /**
+     * Signal call has been scheduled for continuation.
+     *
+     * @param continuation The associated continuation
+     * @return The appropriate {@link OXException} instance
+     */
+    public static <V> OXException scheduledForContinuation(final Continuation<V> continuation) {
+        if (null == continuation) {
+            return null;
+        }
+        return SCHEDULED_FOR_CONTINUATION.create(continuation.getUuid(), true);
+    }
+
+    /**
+     * Signal call has been scheduled for continuation.
+     *
+     * @param uuid The associated UUID
+     * @return The appropriate {@link OXException} instance
+     */
+    public static OXException scheduledForContinuation(final UUID uuid) {
+        if (null == uuid) {
+            return null;
+        }
+        return SCHEDULED_FOR_CONTINUATION.create(uuid, true);
+    }
+
 }
