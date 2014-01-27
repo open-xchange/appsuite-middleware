@@ -1,7 +1,16 @@
+* 2014-01-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30820: Enhanced HTML detector by JavaScript event handler names
+                      (as listed by http://de.selfhtml.org/javascript/sprache/eventhandler.htm )
+
+* 2014-01-24 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30692: Preserve previous filename unless explicitly set when creating a new file version   
+
 * 2014-01-23 - lars.hoogestraat@open-xchange.com
 
  - Fix for bug 25300: Exchanged conflicting column ids in contact details
- 
+
 * 2014-01-23 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 30777: Use relative identifier when retrieving metadata from ID based file access  

@@ -964,7 +964,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 final GetSwitch get = new GetSwitch(oldDocument);
                 final SetSwitch set = new SetSwitch(document);
                 final Set<Metadata> alreadySet = new HashSet<Metadata>(Arrays.asList(modifiedCols));
-                for (final Metadata m : Arrays.asList(Metadata.DESCRIPTION_LITERAL, Metadata.TITLE_LITERAL, Metadata.URL_LITERAL)) {
+                for (final Metadata m : Arrays.asList(Metadata.DESCRIPTION_LITERAL, Metadata.TITLE_LITERAL, Metadata.FILENAME_LITERAL, Metadata.URL_LITERAL)) {
                     if (alreadySet.contains(m)) {
                         continue;
                     }

@@ -54,6 +54,10 @@ import static com.openexchange.java.Strings.toLowerCase;
 import static com.openexchange.java.Strings.toUpperCase;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * {@link HTMLDetector} - Detects HTML tags in a byte sequence.
@@ -61,6 +65,28 @@ import java.io.InputStream;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HTMLDetector {
+
+    private static final Set<String> JS_EVENT_HANDLER = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+        "onabort",
+        "onblur",
+        "onchange",
+        "onclick",
+        "ondblclick",
+        "onerror",
+        "onfocus",
+        "onkeydown",
+        "onkeypress",
+        "onkeyup",
+        "onload",
+        "onmousedown",
+        "onmousemove",
+        "onmouseout",
+        "onmouseover",
+        "onmouseup",
+        "onreset",
+        "onselect",
+        "onsubmit",
+        "onunload")));
 
     /**
      * Initializes a new {@link HTMLDetector}.
@@ -103,6 +129,11 @@ public final class HTMLDetector {
         }
         if ((lc.indexOf("<embed") >= 0)) {
             return true;
+        }
+        for (final String jsEventHandler : JS_EVENT_HANDLER) {
+            if (lc.indexOf(jsEventHandler) >= 0) {
+                return true;
+            }
         }
         return false;
     }
@@ -153,6 +184,11 @@ public final class HTMLDetector {
         }
         if ((lc.indexOf("<embed") >= 0)) {
             return true;
+        }
+        for (final String jsEventHandler : JS_EVENT_HANDLER) {
+            if (lc.indexOf(jsEventHandler) >= 0) {
+                return true;
+            }
         }
         if (null != tags) {
             for (int i = tags.length; i-- > 0;) {
@@ -225,6 +261,11 @@ public final class HTMLDetector {
         }
         if (containsIgnoreCase(sequence, "<embed")) {
             return true;
+        }
+        for (final String jsEventHandler : JS_EVENT_HANDLER) {
+            if (containsIgnoreCase(sequence, jsEventHandler)) {
+                return true;
+            }
         }
         return false;
     }
@@ -353,6 +394,11 @@ public final class HTMLDetector {
         }
         if (containsIgnoreCase(b, "<embed")) {
             return true;
+        }
+        for (final String jsEventHandler : JS_EVENT_HANDLER) {
+            if (containsIgnoreCase(b, jsEventHandler)) {
+                return true;
+            }
         }
         return false;
     }
