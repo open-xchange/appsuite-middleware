@@ -900,11 +900,6 @@ ox_add_property com.openexchange.threadpool.keepAliveThreshold 1000 /opt/open-xc
 # SoftwareChange_Request-1823
 ox_add_property com.openexchange.preview.cache.enabled true /opt/open-xchange/etc/preview.properties
 
-# SoftwareChange_Request-1832
-PFILE=/opt/open-xchange/etc/configdb.properties
-ox_set_property readProperty.5=autoReconnect false $PFILE
-ox_set_property writeProperty.5=autoReconnect false $PFILE
-
 # SoftwareChange_Request-1828
 ox_add_property com.openexchange.capability.alone false /opt/open-xchange/etc/permissions.properties
 
