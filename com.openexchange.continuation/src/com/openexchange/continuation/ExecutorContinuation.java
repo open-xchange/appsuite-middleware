@@ -97,6 +97,22 @@ public class ExecutorContinuation<V> implements Continuation<Collection<V>> {
         }
     }
 
+    /**
+     * May be passed to an instance of {@link ExecutorContinuation} to customize generating a continuation result; e.g. apply
+     * sorting/filtering or shrink to certain ranges.
+     */
+    public static interface ContinuationResponseGenerator<V> {
+
+        /**
+         * Yields a <code>ContinuationResponse</code> for given results; e.g. apply sorting/filtering or shrink to certain ranges.
+         *
+         * @param col The results
+         * @param completed Whether continuation is completed or not
+         * @return The prepared results
+         */
+        ContinuationResponse<Collection<V>> responseFor(List<V> col, boolean completed) throws OXException;
+    }
+
     // ------------------------------------------------------------------------------ //
 
     /** The UUID */
@@ -114,8 +130,8 @@ public class ExecutorContinuation<V> implements Continuation<Collection<V>> {
     /** The number of submitted tasks */
     protected int count;
 
-    /** The format; e.g. <code>"json"</code> or <code>"mail"</code> */
-    protected final String format;
+    /** The optional response generator */
+    protected final ContinuationResponseGenerator<V> responseGenerator;
 
     private final int hash;
 
@@ -124,24 +140,25 @@ public class ExecutorContinuation<V> implements Continuation<Collection<V>> {
      *
      * @param executor The executor to use
      */
-    public ExecutorContinuation(final Executor executor, final String format) {
+    public ExecutorContinuation(final Executor executor) {
+        this(executor, null);
+    }
+
+    /**
+     * Initializes a new {@link ExecutorContinuation}.
+     *
+     * @param executor The executor to use
+     * @param responseGenerator The response generator
+     */
+    public ExecutorContinuation(final Executor executor, final ContinuationResponseGenerator<V> responseGenerator) {
         super();
-        this.format = null == format ? "json" : format;
         this.executor = executor;
         uuid = UUID.randomUUID();
         completionQueue = new TimeAwareBlockingQueue<Future<Collection<V>>>();
         completedFutures = new LinkedList<Future<Collection<V>>>();
         count = 0;
-
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
-        hash = result;
-    }
-
-    @Override
-    public String getFormat() {
-        return format;
+        this.responseGenerator = responseGenerator;
+        hash = uuid.hashCode();
     }
 
     /**
@@ -194,14 +211,14 @@ public class ExecutorContinuation<V> implements Continuation<Collection<V>> {
     public synchronized ContinuationResponse<Collection<V>> getNextResponse(final long time, final TimeUnit unit, final Collection<V> defaultResponse) throws OXException, InterruptedException {
         int completedCount = completedFutures.size();
         if (completedCount == count) {
-            return new ContinuationResponse<Collection<V>>(defaultResponse, null, format, true);
+            return new ContinuationResponse<Collection<V>>(defaultResponse, null, null, true);
         }
 
         // Await elements
         final List<Future<Collection<V>>> polled = completionQueue.pollUntilElapsed(time, unit, count - completedCount);
         if (polled.isEmpty()) {
             // Time elapsed, but no element available
-            return new ContinuationResponse<Collection<V>>(defaultResponse, null, format, false);
+            return new ContinuationResponse<Collection<V>>(defaultResponse, null, null, false);
         }
         // Update completed information
         completedFutures.addAll(polled);
@@ -247,9 +264,14 @@ public class ExecutorContinuation<V> implements Continuation<Collection<V>> {
      * @param col The results
      * @param completed Whether continuation is completed or not
      * @return The prepared results
+     * @throws OXException If generating response fails
      */
-    protected ContinuationResponse<Collection<V>> responseFor(final List<V> col, final boolean completed) {
-        return new ContinuationResponse<Collection<V>>(col, null, format, completed);
+    protected ContinuationResponse<Collection<V>> responseFor(final List<V> col, final boolean completed) throws OXException {
+        final ContinuationResponseGenerator<V> responseGenerator = this.responseGenerator;
+        if (null == responseGenerator) {
+            return new ContinuationResponse<Collection<V>>(col, null, "json", completed);
+        }
+        return responseGenerator.responseFor(col, completed);
     }
 
     // -------------------------------------------------------------------------------------------- //

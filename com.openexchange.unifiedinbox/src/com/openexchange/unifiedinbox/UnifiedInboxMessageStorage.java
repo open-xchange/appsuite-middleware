@@ -69,6 +69,7 @@ import com.openexchange.continuation.ContinuationExceptionCodes;
 import com.openexchange.continuation.ContinuationRegistryService;
 import com.openexchange.continuation.ContinuationResponse;
 import com.openexchange.continuation.ExecutorContinuation;
+import com.openexchange.continuation.ExecutorContinuation.ContinuationResponseGenerator;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.FullnameArgument;
@@ -874,37 +875,40 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             // Check for continuation service
             final ContinuationRegistryService continuationRegistry = Services.optService(ContinuationRegistryService.class);
             if (false && null != continuationRegistry && !mfs.contains(MailField.FULL) && !mfs.contains(MailField.BODY)) {
-                final Locale locale = getLocale();
-                final ExecutorContinuation<MailMessage> executorContinuation = new ExecutorContinuation<MailMessage>(executor, "mail") {
+                final ExecutorContinuation<MailMessage> executorContinuation;
+                {
+                    final Locale locale = getLocale();
+                    final ContinuationResponseGenerator<MailMessage> responseGenerator = new ContinuationResponseGenerator<MailMessage>() {
 
-                    @Override
-                    protected ContinuationResponse<Collection<MailMessage>> responseFor(final List<MailMessage> messages, final boolean completed) {
-                        // Sort them
-                        final MailMessageComparator c = new MailMessageComparator(effectiveSortField, OrderDirection.DESC.equals(order), locale);
-                        Collections.sort(messages, c);
-                        // Return as array
-                        if (null == indexRange) {
-                            return new ContinuationResponse<Collection<MailMessage>>(messages, null, format, completed);
-                        }
-                        // Apply index range
-                        final int fromIndex = indexRange.start;
-                        int toIndex = indexRange.end;
-                        if (fromIndex > messages.size()) {
+                        @Override
+                        public ContinuationResponse<Collection<MailMessage>> responseFor(List<MailMessage> messages, boolean completed) throws OXException {
+                            // Sort them
+                            final MailMessageComparator c = new MailMessageComparator(effectiveSortField, OrderDirection.DESC.equals(order), locale);
+                            Collections.sort(messages, c);
+                            // Return as array
+                            if (null == indexRange) {
+                                return new ContinuationResponse<Collection<MailMessage>>(messages, null, "mail", completed);
+                            }
+                            // Apply index range
+                            final int fromIndex = indexRange.start;
+                            int toIndex = indexRange.end;
+                            if (fromIndex > messages.size()) {
+                                /*
+                                 * Return empty iterator if start is out of range
+                                 */
+                                return new ContinuationResponse<Collection<MailMessage>>(Collections.<MailMessage> emptyList(), null, "mail", completed);
+                            }
                             /*
-                             * Return empty iterator if start is out of range
+                             * Reset end index if out of range
                              */
-                            return new ContinuationResponse<Collection<MailMessage>>(Collections.<MailMessage> emptyList(), null, format, completed);
+                            if (toIndex >= messages.size()) {
+                                toIndex = messages.size();
+                            }
+                            return new ContinuationResponse<Collection<MailMessage>>(messages.subList(fromIndex, toIndex), null, "mail", completed);
                         }
-                        /*
-                         * Reset end index if out of range
-                         */
-                        if (toIndex >= messages.size()) {
-                            toIndex = messages.size();
-                        }
-                        return new ContinuationResponse<Collection<MailMessage>>(messages.subList(fromIndex, toIndex), null, format, completed);
-                    }
-
-                };
+                    };
+                    executorContinuation = new ExecutorContinuation<MailMessage>(executor, responseGenerator);
+                }
                 // Submit tasks
                 for (final MailAccount mailAccount : accounts) {
                     executorContinuation.submit(new LoggingCallable<Collection<MailMessage>>(session) {

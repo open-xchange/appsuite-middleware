@@ -70,13 +70,6 @@ public interface Continuation<V> extends Serializable {
     UUID getUuid();
 
     /**
-     * Gets the format of this continuation's results.
-     *
-     * @return The format
-     */
-    String getFormat();
-
-    /**
      * Gets the next available value.
      *
      * @param time The maximum time to wait
