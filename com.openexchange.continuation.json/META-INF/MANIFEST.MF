@@ -27,3 +27,4 @@ Import-Package: com.openexchange.ajax.requesthandler,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
+Bundle-Activator: com.openexchange.continuation.json.osgi.ContinuationJsonActivator
