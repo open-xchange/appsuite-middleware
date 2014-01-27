@@ -65,7 +65,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.unifiedinbox.UnifiedInboxAccess;
 import com.openexchange.unifiedinbox.UnifiedInboxException;
 import com.openexchange.unifiedinbox.UnifiedInboxUID;
-import com.openexchange.unifiedinbox.services.UnifiedInboxServiceRegistry;
+import com.openexchange.unifiedinbox.services.Services;
 
 /**
  * {@link UnifiedInboxUtility} - Utility methods for Unified Mail.
@@ -87,7 +87,7 @@ public final class UnifiedInboxUtility {
      * @return The default max. running millis
      */
     public static long getMaxRunningMillis() {
-        final ConfigurationService service = UnifiedInboxServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final ConfigurationService service = Services.getService(ConfigurationService.class);
         if (null == service) {
             return 60000L;
         }

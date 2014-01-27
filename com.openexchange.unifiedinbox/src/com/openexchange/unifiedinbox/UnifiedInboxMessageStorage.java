@@ -50,7 +50,6 @@
 package com.openexchange.unifiedinbox;
 
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
-import static com.openexchange.unifiedinbox.services.UnifiedInboxServiceRegistry.getServiceRegistry;
 import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.map.TIntObjectMap;
 import java.util.ArrayList;
@@ -66,6 +65,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import com.openexchange.context.ContextService;
+import com.openexchange.continuation.ContinuationExceptionCodes;
+import com.openexchange.continuation.ContinuationRegistryService;
+import com.openexchange.continuation.ContinuationResponse;
+import com.openexchange.continuation.ExecutorContinuation;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.FullnameArgument;
@@ -93,6 +96,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.unifiedinbox.copy.UnifiedInboxMessageCopier;
 import com.openexchange.unifiedinbox.dataobjects.UnifiedMailMessage;
+import com.openexchange.unifiedinbox.services.Services;
 import com.openexchange.unifiedinbox.utility.LoggingCallable;
 import com.openexchange.unifiedinbox.utility.TrackingCompletionService;
 import com.openexchange.unifiedinbox.utility.UnifiedInboxCompletionService;
@@ -133,7 +137,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         this.session = session;
         cid = session.getContextId();
         {
-            final ContextService contextService = getServiceRegistry().getService(ContextService.class, true);
+            final ContextService contextService = Services.getService(ContextService.class);
             ctx = contextService.getContext(cid);
         }
         user = session.getUserId();
@@ -152,9 +156,9 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
      * @return The session user's locale
      * @throws OXException If retrieving user's locale fails
      */
-    private Locale getLocale() throws OXException {
+    protected Locale getLocale() throws OXException {
         if (null == locale) {
-            final UserService userService = getServiceRegistry().getService(UserService.class, true);
+            final UserService userService = Services.getService(UserService.class);
             locale = userService.getUser(session.getUserId(), ctx).getLocale();
         }
         return locale;
@@ -168,7 +172,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
     }
 
     private List<MailAccount> getAccounts() throws OXException {
-        final MailAccountStorageService srv = getServiceRegistry().getService(MailAccountStorageService.class, true);
+        final MailAccountStorageService srv = Services.getService(MailAccountStorageService.class);
         final MailAccount[] tmp = srv.getUserMailAccounts(user, cid);
         final List<MailAccount> accounts = new ArrayList<MailAccount>(tmp.length);
         final int thisAccountId = access.getAccountId();
@@ -867,6 +871,98 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             final int length = accounts.size();
             final int undelegatedAccountId = access.getAccountId();
             final Executor executor = ThreadPools.getThreadPool().getExecutor();
+            // Check for continuation service
+            final ContinuationRegistryService continuationRegistry = Services.optService(ContinuationRegistryService.class);
+            if (false && null != continuationRegistry && !mfs.contains(MailField.FULL) && !mfs.contains(MailField.BODY)) {
+                final Locale locale = getLocale();
+                final ExecutorContinuation<MailMessage> executorContinuation = new ExecutorContinuation<MailMessage>(executor, "mail") {
+
+                    @Override
+                    protected ContinuationResponse<Collection<MailMessage>> responseFor(final List<MailMessage> messages, final boolean completed) {
+                        // Sort them
+                        final MailMessageComparator c = new MailMessageComparator(effectiveSortField, OrderDirection.DESC.equals(order), locale);
+                        Collections.sort(messages, c);
+                        // Return as array
+                        if (null == indexRange) {
+                            return new ContinuationResponse<Collection<MailMessage>>(messages, null, format, completed);
+                        }
+                        // Apply index range
+                        final int fromIndex = indexRange.start;
+                        int toIndex = indexRange.end;
+                        if (fromIndex > messages.size()) {
+                            /*
+                             * Return empty iterator if start is out of range
+                             */
+                            return new ContinuationResponse<Collection<MailMessage>>(Collections.<MailMessage> emptyList(), null, format, completed);
+                        }
+                        /*
+                         * Reset end index if out of range
+                         */
+                        if (toIndex >= messages.size()) {
+                            toIndex = messages.size();
+                        }
+                        return new ContinuationResponse<Collection<MailMessage>>(messages.subList(fromIndex, toIndex), null, format, completed);
+                    }
+
+                };
+                // Submit tasks
+                for (final MailAccount mailAccount : accounts) {
+                    executorContinuation.submit(new LoggingCallable<Collection<MailMessage>>(session) {
+
+                        @Override
+                        public List<MailMessage> call() {
+                            final int accountId = mailAccount.getId();
+                            MailAccess<?, ?> mailAccess = null;
+                            String fn = null;
+                            try {
+                                mailAccess = MailAccess.getInstance(getSession(), accountId);
+                                mailAccess.connect();
+                                // Get real full name
+                                fn = UnifiedInboxUtility.determineAccountFullname(mailAccess, fullName);
+                                // Check if denoted account has such a default folder
+                                if (fn == null) {
+                                    return Collections.emptyList();
+                                }
+                                // Get account's messages
+                                final MailMessage[] accountMails =
+                                    mailAccess.getMessageStorage().searchMessages(fn, null, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, checkedFields);
+                                final List<MailMessage> messages = new ArrayList<MailMessage>(accountMails.length);
+                                final UnifiedInboxUID helper = new UnifiedInboxUID();
+                                for (final MailMessage accountMail : accountMails) {
+                                    final UnifiedMailMessage umm = new UnifiedMailMessage(accountMail, undelegatedAccountId);
+                                    umm.setMailId(helper.setUID(accountId, fn, accountMail.getMailId()).toString());
+                                    umm.setFolder(fullName);
+                                    umm.setAccountId(accountId);
+                                    umm.setAccountName(mailAccount.getName());
+                                    messages.add(umm);
+                                }
+                                return messages;
+                            } catch (final OXException e) {
+                                getLogger().warn("Couldn't get messages from folder \"{}\" from server \"{}\" for login \"{}\".", (null == fn ? "<unknown>" : fn), mailAccount.getMailServer(), mailAccount.getLogin(), e);
+                                return Collections.emptyList();
+                            } catch (final RuntimeException e) {
+                                getLogger().warn("Couldn't get messages from folder \"{}\" from server \"{}\" for login \"{}\".", (null == fn ? "<unknown>" : fn), mailAccount.getMailServer(), mailAccount.getLogin(), e);
+                                return Collections.emptyList();
+                            } finally {
+                                closeSafe(mailAccess);
+                            }
+                        }
+                    });
+                }
+                // Add to registry
+                continuationRegistry.putContinuation(executorContinuation, session);
+                // Await first...
+                try {
+                    executorContinuation.awaitFirstResponse();
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw MailExceptionCode.INTERRUPT_ERROR.create(e);
+                }
+                // Signal schedule to continuation
+                throw ContinuationExceptionCodes.scheduledForContinuation(executorContinuation);
+            }
+
+            // The old way
             final TrackingCompletionService<List<MailMessage>> completionService =
                 new UnifiedInboxCompletionService<List<MailMessage>>(executor);
             for (final MailAccount mailAccount : accounts) {
@@ -901,18 +997,10 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             }
                             return messages;
                         } catch (final OXException e) {
-                            final StringBuilder tmp = new StringBuilder(128);
-                            tmp.append("Couldn't get messages from folder \"");
-                            tmp.append((null == fn ? "<unknown>" : fn)).append("\" from server \"").append(mailAccount.getMailServer());
-                            tmp.append("\" for login \"").append(mailAccount.getLogin()).append("\".");
-                            getLogger().warn(tmp.toString(), e);
+                            getLogger().warn("Couldn't get messages from folder \"{}\" from server \"{}\" for login \"{}\".", (null == fn ? "<unknown>" : fn), mailAccount.getMailServer(), mailAccount.getLogin(), e);
                             return Collections.emptyList();
                         } catch (final RuntimeException e) {
-                            final StringBuilder tmp = new StringBuilder(128);
-                            tmp.append("Couldn't get messages from folder \"");
-                            tmp.append((null == fn ? "<unknown>" : fn)).append("\" from server \"").append(mailAccount.getMailServer());
-                            tmp.append("\" for login \"").append(mailAccount.getLogin()).append("\".");
-                            getLogger().warn(tmp.toString(), e);
+                            getLogger().warn("Couldn't get messages from folder \"{}\" from server \"{}\" for login \"{}\".", (null == fn ? "<unknown>" : fn), mailAccount.getMailServer(), mailAccount.getLogin(), e);
                             return Collections.emptyList();
                         } finally {
                             closeSafe(mailAccess);
@@ -920,10 +1008,6 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                     }
                 });
             }
-            // dsd
-
-
-
             // Wait for completion of each submitted task
             try {
                 List<MailMessage> messages = new ArrayList<MailMessage>(length << 2);

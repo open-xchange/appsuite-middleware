@@ -65,7 +65,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.unifiedinbox.UnifiedInboxAccess;
 import com.openexchange.unifiedinbox.UnifiedInboxException;
-import com.openexchange.unifiedinbox.services.UnifiedInboxServiceRegistry;
+import com.openexchange.unifiedinbox.services.Services;
 import com.openexchange.unifiedinbox.utility.UnifiedInboxUtility;
 
 /**
@@ -233,8 +233,7 @@ public final class UnifiedInboxFolderConverter {
     private static boolean setMessageCounts(final int unifiedInboxAccountId, final Session session, final MailFolder tmp) throws UnifiedInboxException, OXException {
         boolean retval = false;
         {
-            final MailAccountStorageService storageService =
-                UnifiedInboxServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+            final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
             final MailAccount[] arr = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
             for (int i = 0; !retval && i < arr.length; i++) {
                 final MailAccount mailAccount = arr[i];

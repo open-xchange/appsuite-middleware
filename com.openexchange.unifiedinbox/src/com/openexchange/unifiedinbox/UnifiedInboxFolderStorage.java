@@ -87,7 +87,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.unifiedinbox.converters.UnifiedInboxFolderConverter;
-import com.openexchange.unifiedinbox.services.UnifiedInboxServiceRegistry;
+import com.openexchange.unifiedinbox.services.Services;
 import com.openexchange.unifiedinbox.utility.LoggingCallable;
 import com.openexchange.unifiedinbox.utility.TrackingCompletionService;
 import com.openexchange.unifiedinbox.utility.UnifiedInboxCompletionService;
@@ -126,7 +126,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
     }
 
     private List<MailAccount> getAccounts() throws OXException {
-        final MailAccountStorageService srv = UnifiedInboxServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+        final MailAccountStorageService srv = Services.getService(MailAccountStorageService.class);
         final MailAccount[] tmp = srv.getUserMailAccounts(session.getUserId(), session.getContextId());
         final List<MailAccount> accounts = new ArrayList<MailAccount>(tmp.length);
         final int thisAccountId = unifiedInboxId;
@@ -702,8 +702,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
         final int unifiedINBOXAccountId = unifiedInboxId;
         final MailAccount[] accounts;
         {
-            final MailAccountStorageService storageService =
-                UnifiedInboxServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+            final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
             final MailAccount[] arr = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
             final List<MailAccount> l = new ArrayList<MailAccount>(arr.length);
             for (final MailAccount mailAccount : arr) {
@@ -808,8 +807,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
     private MailFolder[] getKnownFolderSubfolders(final String parentFullname) throws OXException {
         final MailAccount[] accounts;
         {
-            final MailAccountStorageService storageService =
-                UnifiedInboxServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+            final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
             final MailAccount[] tmp = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
             final List<MailAccount> l = new ArrayList<MailAccount>(tmp.length);
             for (final MailAccount mailAccount : tmp) {
@@ -987,7 +985,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
      */
     private Locale getLocale() throws OXException {
         if (null == locale) {
-            final UserService userService = UnifiedInboxServiceRegistry.getServiceRegistry().getService(UserService.class, true);
+            final UserService userService = Services.getService(UserService.class);
             locale = userService.getUser(session.getUserId(), ctx).getLocale();
         }
         return locale;
@@ -1032,14 +1030,12 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage implement
     }
 
     private String getMailAccountName(final int accountId) throws OXException {
-        final MailAccountStorageService storageService =
-            UnifiedInboxServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+        final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
         return storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()).getName();
     }
 
     private boolean isMailAccountEnabled(final int accountId) throws OXException {
-        final MailAccountStorageService storageService =
-            UnifiedInboxServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+        final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
         return storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()).isUnifiedINBOXEnabled();
     }
 
