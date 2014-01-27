@@ -223,28 +223,7 @@ public class DefaultDispatcher implements Dispatcher {
                 }
                 throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } catch (final ContinuationException e) {
-                if (!ContinuationExceptionCodes.SCHEDULED_FOR_CONTINUATION.equals(e)) {
-                    throw e;
-                }
-                final UUID uuid = e.getUuid();
-                if (null == uuid) {
-                    throw e;
-                }
-                final ContinuationRegistryService continuationRegistry = ServerServiceRegistry.getInstance().getService(ContinuationRegistryService.class);
-                if (null == continuationRegistry) {
-                    throw e;
-                }
-                final Continuation<Object> continuation = continuationRegistry.getContinuation(uuid, session);
-                if (null == continuation) {
-                    throw e;
-                }
-                try {
-                    final ContinuationResponse<Object> cr = continuation.getNextResponse(0, TimeUnit.NANOSECONDS);
-                    result = new AJAXRequestResult(cr.getValue(), cr.getTimeStamp(), cr.getFormat()).setContinuationUuid(uuid);
-                } catch (final InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(ie, ie.getMessage());
-                }
+                result = handleContinuationException(e, session);
             } finally {
                 modifiedRequestData.cleanUploads();
             }
@@ -280,6 +259,40 @@ public class DefaultDispatcher implements Dispatcher {
         } catch (final RuntimeException e) {
             addLogProperties(requestData, true);
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Handles specified <code>ContinuationException</code> instance.
+     *
+     * @param e The exception to handle
+     * @param session The associated session
+     * @return The AJAX result
+     * @throws OXException If <code>ContinuationException</code> does not signal special error code <code>CONTINUATION-0003</code>
+     *             (Scheduled for continuation: &lt;uuid&gt;)
+     */
+    private AJAXRequestResult handleContinuationException(final ContinuationException e, final ServerSession session) throws OXException {
+        if (!ContinuationExceptionCodes.SCHEDULED_FOR_CONTINUATION.equals(e)) {
+            throw e;
+        }
+        final UUID uuid = e.getUuid();
+        if (null == uuid) {
+            throw e;
+        }
+        final ContinuationRegistryService continuationRegistry = ServerServiceRegistry.getInstance().getService(ContinuationRegistryService.class);
+        if (null == continuationRegistry) {
+            throw e;
+        }
+        final Continuation<Object> continuation = continuationRegistry.getContinuation(uuid, session);
+        if (null == continuation) {
+            throw e;
+        }
+        try {
+            final ContinuationResponse<Object> cr = continuation.getNextResponse(1000, TimeUnit.NANOSECONDS);
+            return new AJAXRequestResult(cr.getValue(), cr.getTimeStamp(), cr.getFormat()).setContinuationUuid(cr.isCompleted() ? null : uuid);
+        } catch (final InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(ie, ie.getMessage());
         }
     }
 
