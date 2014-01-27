@@ -141,11 +141,16 @@ public final class SpamExpertsServletRequest  {
 
 			String sessionid = null;
 
+			// new parameter version to optionally determine the ui version
+			String uiVersion = null;
+			try {
+			    uiVersion = (String) jsonObject.get("version");
+			} catch( JSONException e1) {};
+
 			LOG.debug("trying to create new spamexperts panel session for user {} in context {}", getCurrentUserUsername(), getCurrentUserContextID());
 			// create complete new session id
-			sessionid = createPanelSessionID();
+			sessionid = createPanelSessionID(uiVersion);
 			LOG.debug("new spamexperts panel session created for user {} in context {}", getCurrentUserUsername(), getCurrentUserContextID());
-
 
 			if(sessionid==null){
 				throw SpamExpertsExceptionCode.SPAMEXPERTS_COMMUNICATION_ERROR.create("save and cache session", "invalid data for sessionid");
@@ -183,7 +188,7 @@ public final class SpamExpertsServletRequest  {
 	private static String AUTH_ID_IMAP_LOGIN ="imaplogin";
 	private static String AUTH_ID_USERNAME ="username";
 
-	private String createPanelSessionID() throws OXException, JSONException, IOException {
+	private String createPanelSessionID(final String uiVersion) throws OXException, JSONException, IOException {
 
 		String authid = null; // FALLBACK IS MAIL
 
@@ -210,7 +215,9 @@ public final class SpamExpertsServletRequest  {
 		// call the API to retrieve the URL to access panel
         final GetMethod GET = new GetMethod(SpamExpertsConfig.getInstance().getPanelApiUrl()+authid);
         // send request
-
+        if( null != uiVersion ) {
+            GET.setQueryString("version=" + uiVersion);
+        }
         HTTPCLIENT.getState().setCredentials(
                         new AuthScope(GET.getURI().getHost(), 80, "API user authentication"),
                         new UsernamePasswordCredentials(SpamExpertsConfig.getInstance().getPanelAdmin(),
