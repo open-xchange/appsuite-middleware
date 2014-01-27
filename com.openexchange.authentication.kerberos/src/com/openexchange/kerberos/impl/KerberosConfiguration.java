@@ -55,9 +55,10 @@ import static com.openexchange.kerberos.impl.ConfigurationProperty.KRB5_CONF;
 import static com.openexchange.kerberos.impl.ConfigurationProperty.MODULE_NAME;
 import static com.openexchange.kerberos.impl.ConfigurationProperty.USER_MODULE_NAME;
 import java.io.File;
-import java.text.MessageFormat;
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 
 /**
@@ -67,7 +68,7 @@ import com.openexchange.config.ConfigurationService;
  */
 public final class KerberosConfiguration {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(KerberosConfiguration.class);
+    private static final Logger LOG = LoggerFactory.getLogger(KerberosConfiguration.class);
 
     private static String moduleName;
     private static String userModuleName;
