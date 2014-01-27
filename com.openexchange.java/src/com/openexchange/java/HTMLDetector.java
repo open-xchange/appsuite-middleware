@@ -52,6 +52,8 @@ package com.openexchange.java;
 import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.java.Strings.toLowerCase;
 import static com.openexchange.java.Strings.toUpperCase;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -271,6 +273,28 @@ public final class HTMLDetector {
     /**
      * Checks if given byte sequence contains common HTML tags.
      *
+     * @param in The byte stream to check
+     * @param strict <code>true</code> for strict checking; otherwise <code>false</code>
+     * @return <code>true</code> if given byte sequence contains common HTML tags; otherwise <code>false</code>
+     * @throws IOException If reading from stream fails
+     */
+    public static boolean containsHTMLTags(final InputStream in, final boolean strict) throws IOException {
+        try {
+            final int buflen = 8192;
+            final byte[] buf = new byte[buflen];
+            boolean found = false;
+            for (int read; !found && (read = in.read(buf, 0, buflen)) > 0;) {
+                found = strict ? containsHTMLTags(buf, 0, read, "<br", "<p>") : containsHTMLTags(buf, 0, read);
+            }
+            return found;
+        } finally {
+            Streams.close(in);
+        }
+    }
+
+    /**
+     * Checks if given byte sequence contains common HTML tags.
+     *
      * @param sequence The byte sequence to check
      * @param strict <code>true</code> for strict checking; otherwise <code>false</code>
      * @return <code>true</code> if given byte sequence contains common HTML tags; otherwise <code>false</code>
@@ -294,6 +318,30 @@ public final class HTMLDetector {
             for (int i = tags.length; i-- > 0;) {
                 final String tag = tags[i];
                 if (!isEmpty(tag) && containsIgnoreCase(sequence, tag)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if given byte sequence contains common HTML tags.
+     *
+     * @param sequence The byte sequence to check
+     * @param off The offset within byte array
+     * @param len The length of valid bytes starting from offset
+     * @param tags Additional tags to look for
+     * @return <code>true</code> if given byte sequence contains common HTML tags; otherwise <code>false</code>
+     */
+    public static boolean containsHTMLTags(final byte[] sequence, final int off, final int len, final String... tags) {
+        if (containsHTMLTags(sequence, off, len)) {
+            return true;
+        }
+        if (null != tags) {
+            for (int i = tags.length; i-- > 0;) {
+                final String tag = tags[i];
+                if (!isEmpty(tag) && containsIgnoreCase(sequence, off, len, tag)) {
                     return true;
                 }
             }
@@ -409,6 +457,22 @@ public final class HTMLDetector {
         }
         // upper-case
         return (indexOf(sequence, Charsets.toAsciiBytes(toUpperCase(str)), 0, sequence.length) >= 0);
+    }
+
+    /**
+     * Checks if given byte sequence contains specified string.
+     *
+     * @param sequence The byte sequence to check
+     * @param str The string
+     * @return <code>true</code> if given byte sequence contains specified string; otherwise <code>false</code>
+     */
+    private static boolean containsIgnoreCase(final byte[] sequence, final int off, final int len, final String str) {
+        // lower-case
+        if (indexOf(sequence, Charsets.toAsciiBytes(toLowerCase(str)), off, len) >= 0) {
+            return true;
+        }
+        // upper-case
+        return (indexOf(sequence, Charsets.toAsciiBytes(toUpperCase(str)), off, len) >= 0);
     }
 
     /**
