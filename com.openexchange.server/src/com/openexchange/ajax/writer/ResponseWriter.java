@@ -84,6 +84,7 @@ import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.exception.OXException.Truncated;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -252,7 +253,7 @@ public final class ResponseWriter {
         }
 
         if (null != response.getContinuationUUID()) {
-            json.put(CONTINUATION, response.getContinuationUUID().toString());
+            json.put(CONTINUATION, UUIDs.getUnformattedString(response.getContinuationUUID()));
         }
 
         final List<OXException> warnings = response.getWarnings();
