@@ -55,6 +55,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.continuation.Continuation;
 import com.openexchange.continuation.ContinuationRegistryService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -87,12 +88,16 @@ public class ContinuationRegistryServiceImpl implements ContinuationRegistryServ
         return cacheService.getCache(region);
     }
 
+    private String groupName(final Session session) {
+        return new StringAllocator(16).append(session.getUserId()).append('@').append(session.getContextId()).toString();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public <V> Continuation<V> getContinuation(final UUID uuid, final Session session) throws OXException {
         if (null != uuid && null != session) {
             final Cache cache = getCache();
-            final Object object = cache.getFromGroup(uuid, session.getUserId() + "@" + session.getContextId());
+            final Object object = cache.getFromGroup(uuid, groupName(session));
             if (object instanceof Continuation) {
                 return (Continuation<V>) object;
             }
@@ -104,7 +109,7 @@ public class ContinuationRegistryServiceImpl implements ContinuationRegistryServ
     public <V> void putContinuation(final Continuation<V> continuation, final Session session) throws OXException {
         if (null != continuation && null != session) {
             final Cache cache = getCache();
-            cache.putInGroup(continuation.getUuid(), session.getUserId() + "@" + session.getContextId(), continuation, false);
+            cache.putInGroup(continuation.getUuid(), groupName(session), continuation, false);
         }
     }
 
@@ -112,7 +117,7 @@ public class ContinuationRegistryServiceImpl implements ContinuationRegistryServ
     public void removeContinuation(final UUID uuid, final Session session) throws OXException {
         if (null != uuid && null != session) {
             final Cache cache = getCache();
-            cache.removeFromGroup(uuid, session.getUserId() + "@" + session.getContextId());
+            cache.removeFromGroup(uuid, groupName(session));
         }
     }
 
