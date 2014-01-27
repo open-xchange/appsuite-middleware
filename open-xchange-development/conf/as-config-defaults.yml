@@ -6,12 +6,14 @@ default:
     pageHeaderPrefix: 'OX'
     pageHeader: 'App Suite'
 
-    productName: 'Open-Xchange App Suite'
+    productName: 'OX App Suite'
     productNameMail: 'OX Mail'
 
     contact: 'Open-Xchange AG, Rollnerstr. 14, D-90408 Nürnberg, E-Mail: info@open-xchange.com'
 
     forgotPassword: false
 
-
     copyright: '(c) 2014 Open-Xchange.'
+
+    staySignedIn: true
+    

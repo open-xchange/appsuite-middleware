@@ -14,3 +14,6 @@ default:
     forgotPassword: false
 
     copyright: '(c) 2014 Open-Xchange.'
+
+    staySignedIn: true
+    
