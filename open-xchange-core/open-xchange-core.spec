@@ -897,6 +897,9 @@ ox_add_property com.openexchange.hazelcast.network.symmetricEncryption.iteration
 # SoftwareChange_Request-1786
 ox_add_property com.openexchange.threadpool.keepAliveThreshold 1000 /opt/open-xchange/etc/threadpool.properties
 
+# SoftwareChange_Request-1823
+ox_add_property com.openexchange.preview.cache.enabled true /opt/open-xchange/etc/preview.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
