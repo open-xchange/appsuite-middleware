@@ -51,6 +51,7 @@ package com.openexchange.continuation;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 
 
@@ -61,6 +62,7 @@ import org.junit.runners.Suite;
  * @since 7.6.0
  */
 @RunWith(Suite.class)
+@SuiteClasses({ ExecutorContinuationTest.class })
 public class UnitTests {
 
     /**
