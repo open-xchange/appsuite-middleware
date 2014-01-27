@@ -1,3 +1,55 @@
+* 2014-01-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30820: Enhanced HTML detector by JavaScript event handler names
+                      (as listed by http://de.selfhtml.org/javascript/sprache/eventhandler.htm )
+
+* 2014-01-24 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30692: Preserve previous filename unless explicitly set when creating a new file version   
+
+* 2014-01-23 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30777: Use relative identifier when retrieving metadata from ID based file access  
+
+* 2014-01-22 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30747: Don't preserve creation timestamp of source file when copying infostore files  
+
+* 2014-01-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 29367: Filter already contained messages from E-Mail conversation thread
+
+* 2014-01-21 - marc.arens@open-xchange.com
+
+ - Fix for bug 30737: Proper null check and test case
+
+* 2014-01-21 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 30738: Avoid NPE.
+
+* 2014-01-21 - thorben.betten@open-xchange.com
+
+ - Second fix for bug 30684: Ensure IMAP-IDLE push listener is gracefully shut-down on permanent authentication failures
+ - Fix for bug 30739: Added null guard to avoid NPE and enhanced affected routine by some logging to detect what went wrong
+ - Fix for bug 30680: Support for several bogus "Content-Disposition" header values
+
+* 2014-01-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30721: Explicitly connect when retrieving an account's root folder
+
+* 2014-01-20 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23480: Set autoReconnect for MySQL JDBC connections to false. Changed exception handling in database pooling to fall back to
+   master without throwing an exception to the calling code.
+
+* 2014-01-20 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30716: Evaluate more detailed permissions when checking if folder deletion is allowed 
+
+* 2014-01-17 - marc.arens@open-xchange.com
+
+ - Fix for bug 30540: Fix race condition in grizzly framework
+ 
 * 2014-01-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 30671: Fetch a cloned version of the CapabilitySet from "Capabilities" cache

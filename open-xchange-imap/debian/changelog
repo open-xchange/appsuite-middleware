@@ -1,3 +1,9 @@
+open-xchange-imap (7.4.2-3) stable; urgency=low
+
+  * Third release candidate for 7.4.2
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 23 Jan 2014 16:01:36 +0100
+
 open-xchange-imap (7.4.2-2) stable; urgency=low
 
   * Second release candidate for 7.4.2
@@ -15,6 +21,18 @@ open-xchange-imap (7.4.2-0) unstable; urgency=low
   * prepare for 7.4.2
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 18 Dec 2013 17:34:11 +0100
+
+open-xchange-imap (7.4.1-16) stable; urgency=low
+
+  * Build for patch 2014-01-20
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 20 Jan 2014 10:36:57 +0100
+
+open-xchange-imap (7.4.1-15) stable; urgency=low
+
+  * Build for patch 2014-01-16
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 16 Jan 2014 10:59:52 +0100
 
 open-xchange-imap (7.4.1-14) stable; urgency=low
 
@@ -105,6 +123,12 @@ open-xchange-imap (7.4.1-0) unstable; urgency=low
   * prepare for 7.4.1 release
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 20 Sep 2013 11:44:15 +0200
+
+open-xchange-imap (7.4.0-25) stable; urgency=low
+
+  * Build for patch 2013-12-17
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 10 Jan 2014 10:08:52 +0100
 
 open-xchange-imap (7.4.0-24) stable; urgency=low
 

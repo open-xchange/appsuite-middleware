@@ -504,6 +504,8 @@ public final class LoginPerformer {
             sb.append(session.getSessionID());
             sb.append(" Random:");
             sb.append(session.getRandomToken());
+            sb.append(" Transient:");
+            sb.append(session.isTransient());
         }
         LOG.info(sb.toString());
     }

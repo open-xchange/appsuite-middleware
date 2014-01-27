@@ -141,5 +141,4 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
             }
         }
     }
-
 }

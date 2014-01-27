@@ -43,7 +43,10 @@ package javax.mail.internet;
 import java.io.*;
 import java.util.*;
 import javax.mail.*;
+import javax.mail.util.LimitExceededException;
+import javax.mail.util.LimitedStringBuilder;
 import com.sun.mail.util.LineInputStream;
+import com.sun.mail.util.LineOutputStream;
 import com.sun.mail.util.PropUtil;
 
 /**
@@ -606,4 +609,24 @@ public class InternetHeaders {
     public Enumeration getNonMatchingHeaderLines(String[] names) {
 	return (new matchEnum(headers, names, false, true));
     }
+
+    @Override
+    public String toString() {
+        final Enumeration<?> hdrLines = getAllHeaderLines();
+        if (!hdrLines.hasMoreElements()) {
+            return "";
+        }
+        final LimitedStringBuilder sb = new LimitedStringBuilder(8192);
+        try {
+            sb.append(hdrLines.nextElement().toString());
+            final String crlf = "\r\n";
+            while (hdrLines.hasMoreElements()) {
+                sb.append(crlf).append(hdrLines.nextElement().toString());
+            }
+            return sb.toString();
+        } catch (final LimitExceededException e) {
+            return sb.appendDots().toString();
+        }
+    }
+
 }

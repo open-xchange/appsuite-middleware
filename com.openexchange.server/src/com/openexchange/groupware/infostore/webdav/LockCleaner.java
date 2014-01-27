@@ -107,7 +107,6 @@ public class LockCleaner implements FolderEventInterface, EventHandler {
                 // Obviously no numeric identifier; therefore not related to InfoStore file storage
                 LOG.debug("", e);
             }
-
             LOG.debug("{}", new Object() { @Override public String toString() { return FileStorageEventHelper.createDebugMessage("DeleteEvent", event);}});
         }
     }

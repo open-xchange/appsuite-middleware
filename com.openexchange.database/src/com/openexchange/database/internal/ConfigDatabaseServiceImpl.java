@@ -166,5 +166,4 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     public String getServerName() throws OXException {
         return Server.getServerName();
     }
-
 }

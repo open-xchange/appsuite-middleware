@@ -120,6 +120,28 @@ public final class HashUtility {
     }
 
     /**
+     * Gets the MD5 hash of specified string using <a href="http://www.jonelo.de/java/jacksum/index.html">Jacksum 1.7.0</a>.
+     *
+     * @param string The string to hash
+     * @param encoding The encoding; e.g <code>base64</code>, <code>hex</code>, <code>dec</code>, etc.
+     * @return The MD5 hash
+     */
+    public static String getMD5(final String string, final String encoding) {
+        try {
+            final AbstractChecksum checksum =
+                GeneralProgram.isSupportFor("1.4.2") ? new MD("MD5") : new MDgnu(jonelo.jacksum.adapt.gnu.crypto.Registry.MD5_HASH);
+            checksum.setEncoding(encoding);
+            checksum.update(string.getBytes("UTF-8"));
+            return checksum.getFormattedValue();
+        } catch (final NoSuchAlgorithmException e) {
+            org.slf4j.LoggerFactory.getLogger(HashUtility.class).error("", e);
+        } catch (final UnsupportedEncodingException e) {
+            org.slf4j.LoggerFactory.getLogger(HashUtility.class).error("", e);
+        }
+        return null;
+    }
+
+    /**
      * Gets the SHA-256 hash of specified string using <a href="http://www.jonelo.de/java/jacksum/index.html">Jacksum 1.7.0</a>.
      * <p>
      * Supported algorithms:<br>

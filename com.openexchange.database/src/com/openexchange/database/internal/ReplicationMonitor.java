@@ -138,14 +138,19 @@ public class ReplicationMonitor {
             try {
                 retval = fetch.get(pools, assign, write, false);
                 incrementFetched(assign, write);
-            } catch (PoolingException e) {
-                OXException e1 = createException(assign, write, e);
+            } catch (Exception e) {
+                final OXException e1;
+                if (e instanceof OXException) {
+                    e1 = (OXException) e;
+                } else {
+                    e1 = createException(assign, write, e);
+                }
                 // Immediately fail if connection to master is wanted or no fallback is there.
                 if (write || assign.getWritePoolId() == assign.getReadPoolId()) {
                     throw e1;
                 }
                 // Try fallback to master.
-                LOG.warn("", e1);
+                LOG.warn(e1.getMessage(), e1);
                 try {
                     retval = fetch.get(pools, assign, true, true);
                     incrementInstead();

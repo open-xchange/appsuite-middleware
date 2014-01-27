@@ -222,7 +222,7 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
              */
             FileStoragePermission sourceFolderPermission = session.getStorage().getOwnPermission(action.getVersion().getPath());
             FileStoragePermission targetFolderPermission = session.getStorage().getOwnPermission(DriveConstants.TEMP_PATH);
-            if (FileStoragePermission.CREATE_SUB_FOLDERS <= targetFolderPermission.getDeletePermission() &&
+            if (FileStoragePermission.CREATE_SUB_FOLDERS <= targetFolderPermission.getFolderPermission() &&
                 FileStoragePermission.MAX_PERMISSION <= sourceFolderPermission.getFolderPermission()) {
                 /*
                  * try to move whole directory to temp folder

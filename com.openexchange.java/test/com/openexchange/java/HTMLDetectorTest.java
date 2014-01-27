@@ -47,23 +47,46 @@
  *
  */
 
-package com.openexchange.push.imapidle.services;
+package com.openexchange.java;
 
-import com.openexchange.osgi.AbstractServiceRegistry;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import org.junit.Test;
+
 
 /**
- * {@link ImapIdleServiceRegistry} - A registry for services needed by IMAP IDLE bundle
+ * {@link HTMLDetectorTest}
  *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ImapIdleServiceRegistry extends AbstractServiceRegistry {
+public class HTMLDetectorTest {
 
-    private static final ImapIdleServiceRegistry REGISTRY = new ImapIdleServiceRegistry();
-
-    public static ImapIdleServiceRegistry getServiceRegistry() {
-        return REGISTRY;
-    }
-
-    private ImapIdleServiceRegistry() {
+    /**
+     * Initializes a new {@link HTMLDetectorTest}.
+     */
+    public HTMLDetectorTest() {
         super();
     }
+
+    @Test
+    public final void testDetectJSEventHandler() {
+        try {
+            final byte[] svgImage = ("<svg onload=\"alert(document.domain)\" xmlns=\"http://www.w3.org/2000/svg\"\n" +
+                "        xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n" +
+                "        xmlns:ev=\"http://www.w3.org/2001/xml-events\"\n" +
+                "        version=\"1.1\" baseProfile=\"full\"\n" +
+                "        width=\"700px\" height=\"400px\" viewBox=\"0 0 700 400\">\n" +
+                "    <text x=\"20\" y=\"40\">oha!</text>\n" +
+                "</svg>").getBytes();
+
+            boolean containsHTMLTags = HTMLDetector.containsHTMLTags(new ByteArrayInputStream(svgImage), false);
+
+            org.junit.Assert.assertTrue("HTMLDetector should have found \"onload\" JavaScript event handler.", containsHTMLTags);
+        } catch (IOException e) {
+            e.printStackTrace();
+            org.junit.Assert.fail(e.getMessage());
+        }
+
+    }
+
 }

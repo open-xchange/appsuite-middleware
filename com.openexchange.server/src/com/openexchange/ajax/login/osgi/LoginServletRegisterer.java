@@ -116,7 +116,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             lock.unlock();
         }
         if (needsRegistration) {
-            final Dictionary<String, String> params = new Hashtable<String, String>(16);
+            final Dictionary<String, String> params = new Hashtable<String, String>(32);
             addProperty(params, Property.UI_WEB_PATH);
             addProperty(params, Property.COOKIE_HASH);
             addProperty(params, Property.COOKIE_TTL);
@@ -125,6 +125,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             addProperty(params, Property.IP_CHECK);
             addProperty(params, Property.IP_MASK_V4);
             addProperty(params, Property.IP_MASK_V6);
+            addProperty(params, Property.IP_CHECK_WHITELIST);
             final String tmp = configService.getText("noipcheck.cnf");
             if (null != tmp) {
                 params.put(ConfigurationProperty.NO_IP_CHECK_RANGE.getPropertyName(), tmp);

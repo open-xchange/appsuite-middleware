@@ -189,11 +189,11 @@ public class PushRequest {
                 throw PushUDPExceptionCode.INVALID_TYPE.create(null, Integer.valueOf(type));
             }
         } catch (final OXException e) {
-            LOG.error("PushRequest: {}", e, e);
+            LOG.error("PushRequest", e);
         } catch (final UnknownHostException e) {
             LOG.error("PushRequest: Remote host registration failed", e);
         } catch (final Exception e) {
-            LOG.error("PushRequest: {}", e, e);
+            LOG.error("PushRequest", e);
         }
     }
 

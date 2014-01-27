@@ -49,12 +49,10 @@
 
 package com.openexchange.mail.mime;
 
-import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
 import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.mail.Part;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 
 /**
@@ -65,8 +63,6 @@ import com.openexchange.mail.MailExceptionCode;
 public final class ContentDisposition extends ParameterizedHeader {
 
     private static final long serialVersionUID = 310827213193290169L;
-
-    private static final Pattern PATTERN_CONTENT_DISP = Pattern.compile("(?:inline|attachment)", Pattern.CASE_INSENSITIVE);
 
     private static final String INLINE = Part.INLINE;
 
@@ -153,22 +149,24 @@ public final class ContentDisposition extends ParameterizedHeader {
             parameterList = new ParameterList();
             return;
         }
-        final String contentDisp = decodeMultiEncodedHeader(prepareParameterizedHeader(contentDispArg));
-        final Matcher cdMatcher = PATTERN_CONTENT_DISP.matcher(contentDisp);
-        if (!cdMatcher.find()) {
-            disposition = INLINE;
-            parameterList = new ParameterList();
-            return;
+        final String contentDisp = prepareParameterizedHeader(contentDispArg);
+        int semicolonPos = contentDisp.indexOf(';');
+        String disp = (semicolonPos < 0 ? contentDisp : contentDisp.substring(0, semicolonPos)).trim();
+        if (disp.indexOf('%') >= 0) {
+            // Possibly encoded
+            disp = decodeUrl(disp);
         }
-        if (cdMatcher.start() != 0) {
-            throw MailExceptionCode.INVALID_CONTENT_DISPOSITION.create(contentDispArg);
-        }
-        disposition = cdMatcher.group().toLowerCase(Locale.US);
+        disposition = Strings.toLowerCase(disp);
         if (paramList) {
-            try {
-                parameterList = new ParameterList(contentDisp.substring(cdMatcher.end()));
-            } catch (final RuntimeException e) {
-                throw MailExceptionCode.INVALID_CONTENT_DISPOSITION.create(e, contentDispArg);
+            if (semicolonPos >= 0) {
+                try {
+                    parameterList = semicolonPos < contentDisp.length() ? new ParameterList(contentDisp.substring(semicolonPos + 1)) : new ParameterList();
+                } catch (final RuntimeException e) {
+                    throw MailExceptionCode.INVALID_CONTENT_DISPOSITION.create(contentDispArg);
+                }
+            } else {
+                // Assume no parameters
+                parameterList = new ParameterList();
             }
         }
     }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -59,11 +59,6 @@ import com.openexchange.exception.OXException;
  * @since 7.4.2
  */
 public interface EmigService {
-    
-    public static final int NONE    =   0;
-    public static final int MEMBER  =   1; // grey
-    public static final int SECURE  =   2; // green
-    
 
     /**
      * Checks if EMiG is enabled for denoted user.

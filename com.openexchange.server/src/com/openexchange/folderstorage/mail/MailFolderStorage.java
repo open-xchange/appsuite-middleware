@@ -707,6 +707,7 @@ public final class MailFolderStorage implements FolderStorage {
         final boolean hasSubfolders;
         if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
             if (MailAccount.DEFAULT_ID == accountId) {
+                mailAccess.connect(false);
                 final MailFolder rootFolder = mailAccess.getRootFolder();
                 retval = new MailFolderImpl(rootFolder, accountId, mailAccess.getMailConfig(), storageParameters, null, mailAccess);
                 addWarnings(mailAccess, storageParameters);
