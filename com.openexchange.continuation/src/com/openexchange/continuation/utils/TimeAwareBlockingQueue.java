@@ -439,27 +439,31 @@ public class TimeAwareBlockingQueue<E> extends AbstractQueue<E> implements Block
      *
      * @param timeout How long to wait before giving up, in units of <tt>unit</tt>
      * @param unit A <tt>TimeUnit</tt> determining how to interpret the <tt>timeout</tt> parameter
+     * @param maxToAwait The max. number of elements to await
      * @return The polled elements from this queue
      * @throws InterruptedException If interrupted while waiting
      */
-    public List<E> pollUntilElapsed(final long timeout, final TimeUnit unit) throws InterruptedException {
+    public List<E> pollUntilElapsed(final long timeout, final TimeUnit unit, final int maxToAwait) throws InterruptedException {
         final List<E> retval = new LinkedList<E>();
         final AtomicInteger count = this.count;
         final ReentrantLock takeLock = this.takeLock;
         long nanos = unit.toNanos(timeout);
+        int awaits = maxToAwait;
         while (nanos > 0) {
             E x = null;
             int c = -1;
             takeLock.lockInterruptibly();
             try {
                 while (count.get() == 0) {
-                    if (nanos <= 0) {
+                    if (nanos <= 0 || awaits <= 0) {
+                        // No more time left or no more elements to expect
                         return retval;
                     }
                     nanos = notEmpty.awaitNanos(nanos);
                 }
                 x = dequeue();
                 c = count.getAndDecrement();
+                awaits--;
                 if (c > 1) {
                     notEmpty.signal();
                 }

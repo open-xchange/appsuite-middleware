@@ -72,7 +72,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ExecutorContinuation<V> implements Continuation<Collection<V>> {
+public class ExecutorContinuation<V> implements Continuation<Collection<V>> {
 
     private static final long serialVersionUID = -5214485512866728446L;
 
@@ -98,12 +98,24 @@ public final class ExecutorContinuation<V> implements Continuation<Collection<V>
 
     // ------------------------------------------------------------------------------ //
 
-    private final UUID uuid;
-    private final Executor executor;
-    private final TimeAwareBlockingQueue<Future<V>> completionQueue;
-    private final List<Future<V>> completedFutures;
-    private int count;
-    private final String format;
+    /** The UUID */
+    protected final UUID uuid;
+
+    /** The backing executor */
+    protected final Executor executor;
+
+    /** An extended <code>LinkedBlockingQueue</code> that offers special <code>pollUntilElapsed()</code> method */
+    protected final TimeAwareBlockingQueue<Future<V>> completionQueue;
+
+    /** A list containing already completed tasks */
+    protected final List<Future<V>> completedFutures;
+
+    /** The number of submitted tasks */
+    protected int count;
+
+    /** The format; e.g. <code>"json"</code> or <code>"mail"</code> */
+    protected final String format;
+
     private final int hash;
 
     /**
@@ -184,14 +196,15 @@ public final class ExecutorContinuation<V> implements Continuation<Collection<V>
             return new ContinuationResponse<Collection<V>>(defaultResponse, true);
         }
 
-        // At least one completion to await
-        final List<Future<V>> polled = completionQueue.pollUntilElapsed(time, unit);
+        // Await elements
+        final List<Future<V>> polled = completionQueue.pollUntilElapsed(time, unit, count - completedCount);
         if (polled.isEmpty()) {
-            // Time elapsed
+            // Time elapsed, but no element available
             return new ContinuationResponse<Collection<V>>(defaultResponse, false);
         }
+        // Update completed information
         completedFutures.addAll(polled);
-        completedCount+= polled.size();
+        completedCount += polled.size();
 
         final List<V> retval = new ArrayList<V>(completedFutures.size());
         for (final Future<V> completedFuture : completedFutures) {
@@ -209,7 +222,7 @@ public final class ExecutorContinuation<V> implements Continuation<Collection<V>
     }
 
     /**
-     * Prepares given results.
+     * Prepares given results; e.g. apply sorting/filtering or shrink to certain ranges.
      *
      * @param col The results
      * @return The prepared results
