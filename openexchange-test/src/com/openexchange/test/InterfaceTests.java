@@ -99,6 +99,8 @@ public final class InterfaceTests {
         tests.addTest(com.openexchange.dav.carddav.tests.CardDAVTestSuite.suite());
         tests.addTest(com.openexchange.dav.carddav.bugs.CardDAVBugSuite.suite());
 
+        tests.addTest(com.openexchange.grizzly.GrizzlyTestSuite.suite());
+
         tests.addTest(com.openexchange.webdav.xml.appointment.AppointmentWebdavSuite.suite());
         tests.addTest(com.openexchange.webdav.xml.contact.ContactWebdavSuite.suite());
         tests.addTest(com.openexchange.webdav.xml.folder.FolderWebdavSuite.suite());

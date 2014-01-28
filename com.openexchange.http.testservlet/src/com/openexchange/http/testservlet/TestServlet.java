@@ -95,10 +95,9 @@ public class TestServlet extends HttpServlet {
         /*-
          *
         try {
-            int millis = 110000;
-            System.out.println("Going asleep for " + millis + "msec...");
-            Thread.sleep(millis);
-            System.out.println("... and now continues processing.");
+           System.out.println("Going asleep...");
+           Thread.sleep(100000);
+           System.out.println("... and now continues processing.");
         } catch (final InterruptedException e) {
            e.printStackTrace();
         }
