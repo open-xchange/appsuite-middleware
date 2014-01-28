@@ -793,7 +793,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     /*
                      * Get iterator
                      */
-                    it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns, fromToIndices);
+                    it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns, fromToIndices, false);
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
                         final MailMessage mail = it.next();
@@ -3049,7 +3049,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                             }
                         } else {
                             final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
-                            it = mailInterface.getMessages(folderId, null, sortCol, orderDir, searchCols, searchPats, true, columns);
+                            it = mailInterface.getMessages(folderId, null, sortCol, orderDir, searchCols, searchPats, true, columns, false);
                             final int size = it.size();
                             for (int i = 0; i < size; i++) {
                                 final MailMessage mail = it.next();
@@ -3097,7 +3097,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         }
                     }
                     final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
-                    it = mailInterface.getMessages(folderId, null, sortCol, orderDir, SearchTermParser.parse(searchArray), true, columns);
+                    it = mailInterface.getMessages(folderId, null, sortCol, orderDir, SearchTermParser.parse(searchArray), true, columns, false);
                     final int size = it.size();
                     for (int i = 0; i < size; i++) {
                         final MailMessage mail = it.next();

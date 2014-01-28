@@ -91,7 +91,7 @@ public class ExecutorContinuationTest {
     @Test
     public void testExecutorContinuation() {
         try {
-            ExecutorContinuation<String> executorContinuation = new ExecutorContinuation<String>(Executors.newCachedThreadPool());
+            ExecutorContinuation<String> executorContinuation = ExecutorContinuation.newContinuation(Executors.newCachedThreadPool());
 
             final CountDownLatch cdl = new CountDownLatch(1);
 

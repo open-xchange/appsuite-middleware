@@ -132,6 +132,16 @@ if [ ${1:-0} -eq 2 ]; then
     ##
     ## end update from < 6.21
     ##
+    
+    # SoftwareChange_Request-1846
+    # -----------------------------------------------------------------------
+    pfile=/opt/open-xchange/etc/AdminUser.properties
+    ox_add_property SENT_MAILFOLDER_EN_GB SentMail $pfile
+    ox_add_property TRASH_MAILFOLDER_EN_GB Trash $pfile
+    ox_add_property DRAFTS_MAILFOLDER_EN_GB Drafts $pfile
+    ox_add_property SPAM_MAILFOLDER_EN_GB Spam $pfile
+    ox_add_property CONFIRMED_SPAM_MAILFOLDER_EN_GB confirmed-spam $pfile
+    ox_add_property CONFIRMED_HAM_MAILFOLDER_EN_GB confirmed-ham $pfile
 
     ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 fi
@@ -159,6 +169,8 @@ fi
 %doc com.openexchange.admin/ChangeLog
 
 %changelog
+* Wed Jan 22 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-01-22
 * Mon Jan 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-01-20
 * Thu Jan 16 2014 Marcus Klein <marcus.klein@open-xchange.com>
