@@ -1,3 +1,15 @@
+open-xchange-munin-scripts (7.4.1-18) stable; urgency=low
+
+  * Build for patch 2014-01-31
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 28 Jan 2014 15:10:27 +0100
+
+open-xchange-munin-scripts (7.4.1-17) stable; urgency=low
+
+  * Build for patch 2014-01-30
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 28 Jan 2014 10:26:15 +0100
+
 open-xchange-munin-scripts (7.4.1-16) stable; urgency=low
 
   * Build for patch 2014-01-20

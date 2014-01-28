@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-core
 BuildRequires:  java-devel >= 1.6.0
 Version:	@OXVERSION@
-%define        ox_release 16
+%define        ox_release 18
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL_2.0
@@ -56,6 +56,10 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc settin
 %doc com.openexchange.spamhandler.spamexperts/ChangeLog
 
 %changelog
+* Tue Jan 28 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-01-31
+* Tue Jan 28 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-01-30
 * Mon Jan 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-01-20
 * Thu Jan 16 2014 Marcus Klein <marcus.klein@open-xchange.com>
