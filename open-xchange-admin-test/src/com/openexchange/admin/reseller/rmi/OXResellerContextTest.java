@@ -97,12 +97,12 @@ public class OXResellerContextTest extends OXResellerAbstractTest {
     }
 
     @Before
-    public final void setupContexts() throws Exception {
+    public final void setupAdmin() throws Exception {
         oxresell.create(FooAdminUser(), DummyMasterCredentials());
     }
 
     @After
-    public final void tearDownContexts() throws Exception {
+    public final void deleteAdmin() throws Exception {
         final Credentials creds = DummyMasterCredentials();
 
         final ResellerAdmin[] adms = oxresell.list("*", creds);

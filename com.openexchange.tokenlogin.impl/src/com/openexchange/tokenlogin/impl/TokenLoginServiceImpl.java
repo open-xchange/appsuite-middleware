@@ -60,6 +60,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import org.apache.commons.lang.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
@@ -85,6 +87,8 @@ import com.openexchange.tokenlogin.TokenLoginService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class TokenLoginServiceImpl implements TokenLoginService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(TokenLoginServiceImpl.class);
 
     private volatile String hzMapName;
     private final ConcurrentMap<String, String> token2sessionId;
@@ -283,10 +287,12 @@ public class TokenLoginServiceImpl implements TokenLoginService {
                 if (null != hzMap) {
                     sessionId = hzMap.remove(token);
                 }
+                LOG.trace("Resolved token {} remotely to session {}.", token, sessionId);
                 if (null == sessionId) {
                     throw TokenLoginExceptionCodes.NO_SUCH_TOKEN.create(token);
                 }
             } else {
+                LOG.trace("Resolved token {} locally to session {}.", token, sessionId);
                 // Local HIT, remove from Hazelcast map
                 removeFromHzMap(token, false);
             }

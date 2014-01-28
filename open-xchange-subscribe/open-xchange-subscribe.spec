@@ -133,6 +133,14 @@ if [ ${1:-0} -eq 2 ]; then
         fi
     done
 
+    #SoftwareChange_Request-1800
+    pfile=/opt/open-xchange/etc/crawler.properties
+    for prop in com.openexchange.subscribe.crawler.updatepath com.openexchange.subscribe.crawler.updatedfile com.openexchange.subscribe.crawler.updateinterval com.openexchange.subscribe.crawler.enableautoupdate com.openexchange.subscribe.crawler.onlyupdatealreadyinstalled; do
+        if ox_exists_property $prop $pfile; then
+            ox_remove_property $prop $pfile
+        fi
+    done
+
     find /opt/open-xchange/etc/crawlers -name "*.yml" -print0 | while read -d $'\0' i; do
         ox_update_permissions "$i" open-xchange:root 644
     done
