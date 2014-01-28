@@ -903,6 +903,10 @@ ox_add_property com.openexchange.preview.cache.enabled true /opt/open-xchange/et
 # SoftwareChange_Request-1828
 ox_add_property com.openexchange.capability.alone false /opt/open-xchange/etc/permissions.properties
 
+# SoftwareChange_Request-1832
+ox_set_property readProperty.5 autoReconnect=false /opt/open-xchange/etc/configdb.properties
+ox_set_property writeProperty.5 autoReconnect=false /opt/open-xchange/etc/configdb.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
