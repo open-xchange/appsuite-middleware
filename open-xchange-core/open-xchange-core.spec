@@ -873,6 +873,7 @@ if [ -e /opt/open-xchange/etc/log4j.xml ]; then
 </configuration>
 EOF
     cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
+    rm -f /opt/open-xchange/etc/logback.xml.new
     MODIFIED=$(rpm --verify open-xchange-log4j | grep log4j.xml | grep 5 | wc -l)
     if [ $MODIFIED -eq 1 ]; then
         # Configuration has been modified after installation. Try to migrate.
@@ -884,6 +885,16 @@ EOF
         cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
         rm -f /opt/open-xchange/etc/logback.xml.new $TMPFILE
     fi
+else
+    cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/appender[@name=\'ASYNC\']/appender-ref -r -
+<configuration>
+    <appender name="ASYNC">
+        <appender-ref ref="FILE_COMPAT"/>
+    </appender>
+</configuration>
+EOF
+    cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
+    rm -f /opt/open-xchange/etc/logback.xml.new
 fi
 rm -f /opt/open-xchange/etc/log4j.xml
 
