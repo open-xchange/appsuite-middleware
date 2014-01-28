@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.continuation
 Bundle-Version: 7.4.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.caching,
+Import-Package: com.googlecode.concurrentlinkedhashmap,
+ com.openexchange.caching,
  com.openexchange.caching.events,
  com.openexchange.exception,
  com.openexchange.i18n,
@@ -14,6 +15,8 @@ Import-Package: com.openexchange.caching,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.sessiond,
+ javax.annotation,
+ javax.annotation.concurrent,
  org.osgi.framework,
  org.osgi.service.event,
  org.osgi.util.tracker,

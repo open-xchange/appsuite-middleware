@@ -50,6 +50,9 @@
 package com.openexchange.continuation.internal;
 
 import java.util.UUID;
+import java.util.concurrent.ConcurrentMap;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.continuation.Continuation;
@@ -88,7 +91,12 @@ public class ContinuationRegistryServiceImpl implements ContinuationRegistryServ
         return cacheService.getCache(region);
     }
 
-    private String groupName(final Session session) {
+    private ConcurrentLinkedHashMap<UUID, Continuation<?>> newUserMap() {
+        // Not more than 100 concurrent continuations per user
+        return new ConcurrentLinkedHashMap.Builder<UUID, Continuation<?>>().initialCapacity(16).maximumWeightedCapacity(100).weigher(Weighers.entrySingleton()).build();
+    }
+
+    private String cacheKey(final Session session) {
         return new StringAllocator(16).append(session.getUserId()).append('@').append(session.getContextId()).toString();
     }
 
@@ -97,9 +105,10 @@ public class ContinuationRegistryServiceImpl implements ContinuationRegistryServ
     public <V> Continuation<V> getContinuation(final UUID uuid, final Session session) throws OXException {
         if (null != uuid && null != session) {
             final Cache cache = getCache();
-            final Object object = cache.getFromGroup(uuid, groupName(session));
-            if (object instanceof Continuation) {
-                return (Continuation<V>) object;
+            final Object object = cache.get(cacheKey(session));
+            if (object instanceof ConcurrentMap) {
+                final ConcurrentMap<UUID, Continuation<?>> userMap = (ConcurrentMap<UUID, Continuation<?>>) object;
+                return (Continuation<V>) userMap.get(uuid);
             }
         }
         return null;
@@ -109,7 +118,23 @@ public class ContinuationRegistryServiceImpl implements ContinuationRegistryServ
     public <V> void putContinuation(final Continuation<V> continuation, final Session session) throws OXException {
         if (null != continuation && null != session) {
             final Cache cache = getCache();
-            cache.putInGroup(continuation.getUuid(), groupName(session), continuation, false);
+            final String cacheKey = cacheKey(session);
+            Object object = cache.get(cacheKey);
+            while (!(object instanceof ConcurrentMap)) {
+                try {
+                    final ConcurrentLinkedHashMap<UUID, Continuation<?>> newUserMap = newUserMap();
+                    cache.putSafe(cacheKey, newUserMap);
+                    object = newUserMap;
+                } catch (final OXException e) {
+                    object = cache.get(cacheKey);
+                }
+            }
+            @SuppressWarnings("unchecked")
+            final ConcurrentMap<UUID, Continuation<?>> userMap = (ConcurrentMap<UUID, Continuation<?>>) object;
+            if (null != userMap.putIfAbsent(continuation.getUuid(), continuation)) {
+                // Already present
+
+            }
         }
     }
 
@@ -117,7 +142,12 @@ public class ContinuationRegistryServiceImpl implements ContinuationRegistryServ
     public void removeContinuation(final UUID uuid, final Session session) throws OXException {
         if (null != uuid && null != session) {
             final Cache cache = getCache();
-            cache.removeFromGroup(uuid, groupName(session));
+            final Object object = cache.get(cacheKey(session));
+            if (object instanceof ConcurrentMap) {
+                @SuppressWarnings("unchecked")
+                final ConcurrentMap<UUID, Continuation<?>> userMap = (ConcurrentMap<UUID, Continuation<?>>) object;
+                userMap.remove(uuid);
+            }
         }
     }
 
