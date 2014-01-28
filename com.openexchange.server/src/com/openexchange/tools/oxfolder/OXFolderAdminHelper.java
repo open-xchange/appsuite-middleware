@@ -76,7 +76,6 @@ import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.CalendarCache;
-import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -1400,8 +1399,7 @@ public final class OXFolderAdminHelper {
         }
     }
 
-    private static final String SQL_SELECT_DISPLAY_NAME =
-        "SELECT " + Contacts.mapping[Contact.DISPLAY_NAME].getDBFieldName() + " FROM prg_contacts WHERE cid = ? AND " + Contacts.mapping[Contact.INTERNAL_USERID].getDBFieldName() + " = ?";
+    private static final String SQL_SELECT_DISPLAY_NAME = "SELECT field01 FROM prg_contacts WHERE cid = ? AND userid = ?;";
 
     /**
      * Load specified user's display name with given connection (which is possibly in non-auto-commit mode). Thus we obtain most up-to-date
