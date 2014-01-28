@@ -88,7 +88,7 @@ public final class EventDistributingMessageListener implements MessageListener<M
      * dealing with LogEntry.
      *
      * @param event to be delivered
-     * @param isAsync must be set to true for synchronous event delivery, false for asynchronous delivery.
+     * @param isAsync must be set to true for asynchronous event delivery, false for synchronous delivery.
      */
     private void dispatchEvent(final Event event, final boolean isAsync) {
         if (event == null) {
