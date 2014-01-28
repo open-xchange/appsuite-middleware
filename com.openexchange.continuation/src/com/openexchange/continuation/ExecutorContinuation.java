@@ -113,6 +113,30 @@ public class ExecutorContinuation<V> implements Continuation<Collection<V>> {
         ContinuationResponse<Collection<V>> responseFor(List<V> col, boolean completed) throws OXException;
     }
 
+    /**
+     * Creates a new <code>ExecutorContinuation</code> instance using given executor.
+     *
+     * @param executor The executor to use
+     * @return The new <code>ExecutorContinuation</code> instance
+     */
+    public static <V> ExecutorContinuation<V> newContinuation(final Executor executor) {
+        return newContinuation(executor, null);
+    }
+
+    /**
+     * Creates a new <code>ExecutorContinuation</code> instance using given executor that delegates to optional <code>responseGenerator</code>.
+     *
+     * @param executor The executor to use
+     * @param responseGenerator The optional response generator used for e.g. apply sorting/filtering or shrink to certain ranges
+     * @return The new <code>ExecutorContinuation</code> instance
+     */
+    public static <V> ExecutorContinuation<V> newContinuation(final Executor executor, final ContinuationResponseGenerator<V> responseGenerator) {
+        if (null == executor) {
+            throw new IllegalArgumentException("executor is null");
+        }
+        return new ExecutorContinuation<V>(executor, responseGenerator);
+    }
+
     // ------------------------------------------------------------------------------ //
 
     /** The UUID */
@@ -139,18 +163,9 @@ public class ExecutorContinuation<V> implements Continuation<Collection<V>> {
      * Initializes a new {@link ExecutorContinuation}.
      *
      * @param executor The executor to use
-     */
-    public ExecutorContinuation(final Executor executor) {
-        this(executor, null);
-    }
-
-    /**
-     * Initializes a new {@link ExecutorContinuation}.
-     *
-     * @param executor The executor to use
      * @param responseGenerator The response generator
      */
-    public ExecutorContinuation(final Executor executor, final ContinuationResponseGenerator<V> responseGenerator) {
+    private ExecutorContinuation(final Executor executor, final ContinuationResponseGenerator<V> responseGenerator) {
         super();
         this.executor = executor;
         uuid = UUID.randomUUID();

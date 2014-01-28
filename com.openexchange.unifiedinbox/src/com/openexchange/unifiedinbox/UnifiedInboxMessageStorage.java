@@ -907,7 +907,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             return new ContinuationResponse<Collection<MailMessage>>(messages.subList(fromIndex, toIndex), null, "mail", completed);
                         }
                     };
-                    executorContinuation = new ExecutorContinuation<MailMessage>(executor, responseGenerator);
+                    executorContinuation = ExecutorContinuation.newContinuation(executor, responseGenerator);
                 }
                 // Submit tasks
                 for (final MailAccount mailAccount : accounts) {
