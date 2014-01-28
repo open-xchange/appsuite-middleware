@@ -197,7 +197,7 @@ public class DelegatingLdapStorage extends DefaultContactStorage {
     }
 
     @Override
-    public void updateReferences(Session session, Contact contact) throws OXException {
+    public void updateReferences(Session session, Contact originalContact, Contact updatedContact) throws OXException {
         // no write access, do nothing
     }
 

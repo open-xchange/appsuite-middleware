@@ -1,3 +1,9 @@
+open-xchange-sso (7.2.2-27) stable; urgency=low
+
+  * Build for patch 2014-01-22
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 22 Jan 2014 17:04:12 +0100
+
 open-xchange-sso (7.2.2-26) stable; urgency=low
 
   * Build for patch 2013-12-23

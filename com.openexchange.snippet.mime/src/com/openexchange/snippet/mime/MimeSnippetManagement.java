@@ -57,6 +57,7 @@ import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -309,8 +310,12 @@ public final class MimeSnippetManagement implements SnippetManagement {
         try {
             final String file;
             final int creator;
+            final String displayName;
+            final String module;
+            final String type;
+            final boolean shared;
             {
-                stmt = con.prepareStatement("SELECT refId, user FROM snippet WHERE cid=? AND id=? AND refType=" + FS_TYPE);
+                stmt = con.prepareStatement("SELECT refId, user, displayName, module, type, shared FROM snippet WHERE cid=? AND id=? AND refType=" + FS_TYPE);
                 int pos = 0;
                 stmt.setInt(++pos, contextId);
                 stmt.setString(++pos, identifier);
@@ -320,6 +325,10 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 }
                 file = rs.getString(1);
                 creator = rs.getInt(2);
+                displayName = rs.getString(3);
+                module = rs.getString(4);
+                type = rs.getString(5);
+                shared = rs.getInt(6) > 0;
                 closeSQLStuff(rs, stmt);
                 rs = null;
                 stmt = null;
@@ -348,6 +357,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             } else {
                 parseSnippet(mimeMessage, mimeMessage, snippet);
             }
+            snippet.setDisplayName(displayName).setModule(module).setType(type).setShared(shared);
             return snippet;
         } catch (final SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -398,6 +408,14 @@ public final class MimeSnippetManagement implements SnippetManagement {
     }
 
     private static final Set<String> IGNORABLES = new HashSet<String>(Arrays.asList(Snippet.PROP_MISC));
+
+    private static String encode(String value) {
+        try {
+            return MimeUtility.encodeText(value, "UTF-8", "Q");
+        } catch (UnsupportedEncodingException e) {
+            return value;
+        }
+    }
 
     @Override
     public String createSnippet(final Snippet snippet) throws OXException {
@@ -528,12 +546,16 @@ public final class MimeSnippetManagement implements SnippetManagement {
         String newFile = null;
         try {
             // Obtain file identifier
+            final String displayName;
+            final String module;
+            final String type;
+            final boolean shared;
             {
                 final Connection con = databaseService.getReadOnly(contextId);
                 PreparedStatement stmt = null;
                 ResultSet rs = null;
                 try {
-                    stmt = con.prepareStatement("SELECT refId FROM snippet WHERE cid=? AND id=? AND refType=" + FS_TYPE);
+                    stmt = con.prepareStatement("SELECT refId, displayName, module, type, shared FROM snippet WHERE cid=? AND id=? AND refType=" + FS_TYPE);
                     int pos = 0;
                     stmt.setInt(++pos, contextId);
                     stmt.setString(++pos, identifier);
@@ -545,6 +567,10 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     if (null == oldFile) {
                         throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(identifier);
                     }
+                    displayName = rs.getString(2);
+                    module = rs.getString(3);
+                    type = rs.getString(4);
+                    shared = rs.getInt(5) > 0;
                 } finally {
                     closeSQLStuff(rs, stmt);
                     databaseService.backReadOnly(contextId, con);
@@ -595,9 +621,12 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 // Copy remaining to updateMessage; this action includes unnamed properties
                 @SuppressWarnings("unchecked")
                 final Enumeration<Header> nonMatchingHeaders = storageMessage.getNonMatchingHeaders(propNames.toArray(new String[0]));
+                final Set<String> propertyNames = Property.getPropertyNames();
                 while (nonMatchingHeaders.hasMoreElements()) {
                     final Header hdr = nonMatchingHeaders.nextElement();
-                    updateMessage.setHeader(hdr.getName(), hdr.getValue());
+                    if (propertyNames.contains(hdr.getName())) {
+                        updateMessage.setHeader(hdr.getName(), encode(hdr.getValue()));
+                    }
                 }
             }
             // Check for content
@@ -747,10 +776,10 @@ public final class MimeSnippetManagement implements SnippetManagement {
                             stmt.setNull(++pos, Types.INTEGER);
                         }
                     }
-                    stmt.setString(++pos, updateMessage.getHeader(Property.DISPLAY_NAME.getPropName(), null));
-                    stmt.setString(++pos, updateMessage.getHeader(Property.MODULE.getPropName(), null));
-                    stmt.setString(++pos, updateMessage.getHeader(Property.TYPE.getPropName(), null));
-                    stmt.setInt(++pos, Boolean.parseBoolean(updateMessage.getHeader(Property.SHARED.getPropName(), null)) ? 1 : 0);
+                    stmt.setString(++pos, properties.contains(Property.DISPLAY_NAME) ? getObject(snippet.getDisplayName(), displayName) : displayName);
+                    stmt.setString(++pos, properties.contains(Property.MODULE) ? getObject(snippet.getModule(), module) : module);
+                    stmt.setString(++pos, properties.contains(Property.TYPE) ? getObject(snippet.getType(), type) : type);
+                    stmt.setInt(++pos, properties.contains(Property.SHARED) ? (snippet.isShared() ? 1 : 0) : (shared ? 1 : 0));
                     stmt.setLong(++pos, System.currentTimeMillis());
                     stmt.setString(++pos, newFile);
                     stmt.executeUpdate();
@@ -811,6 +840,14 @@ public final class MimeSnippetManagement implements SnippetManagement {
         } catch (final Exception e) {
             // Ignore any regular exception
         }
+    }
+
+    private static <V> V getObject(final V o1, final V o2) {
+        return o1 == null ? (o2 == null ? o1 : o2) : o1;
+    }
+
+    private static int getInt(final int i1, final int i2) {
+        return i1 > 0 ? i1 : (i2 > 0 ? i2 : i1);
     }
 
     @Override
