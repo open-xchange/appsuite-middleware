@@ -67,7 +67,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ReentrantLockPool<T> implements Pool<T>, Runnable {
 
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReentrantLockPool.class);
+    static final Logger LOG = LoggerFactory.getLogger(ReentrantLockPool.class);
 
     private final int minIdle;
     private final int maxIdle;
@@ -240,13 +240,13 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                     if (other != null && thread.equals(other.getThread())) {
                         if (LOG.isDebugEnabled()) {
                             PoolingException e = new PoolingException("Found thread using two objects. First get.");
-                            if (null != other.getTrace()) {
-                                e.setStackTrace(other.getTrace());
+                            StackTraceElement[] trace = other.getTrace();
+                            if (null != trace) {
+                                e.setStackTrace(trace);
                             }
-                            LOG.debug("", e);
+                            LOG.debug(e.getMessage(), e);
                             e = new PoolingException("Found thread using two objects. Second get.");
-                            e.fillInStackTrace();
-                            LOG.debug("", e);
+                            LOG.debug(e.getMessage(), e);
                         }
                     }
                 }
@@ -268,7 +268,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                             final PoolingException warn = new PoolingException("Thread " + threadName
                                 + " is sent to sleep until an object in the pool is available. " + data.numActive()
                                 + " objects are already in use.");
-                            LOG.warn("", warn);
+                            LOG.warn(warn.getMessage(), warn);
                         }
                         final long sleepStartTime = System.currentTimeMillis();
                         boolean timedOut = false;
@@ -285,8 +285,8 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                         }
                         if (writeWarning) {
                             final PoolingException warn = new PoolingException("Thread " + threadName + " slept for "
-                                + (System.currentTimeMillis() - sleepStartTime) + "ms.");
-                            LOG.warn("", warn);
+                                + getWaitTime(sleepStartTime) + "ms.");
+                            LOG.warn(warn.getMessage(), warn);
                         }
                         if (timedOut) {
                             idleAvailable.signal();
@@ -496,7 +496,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                 ReentrantLockPool.this.run();
                 thread.setName(origName);
             } catch (final Exception e) {
-                LOG.error("", e);
+                LOG.error(e.getMessage(), e);
             }
         }
     };
@@ -621,7 +621,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             if (testThreads && null != metaData.getTrace()) {
                 e.setStackTrace(metaData.getTrace());
             }
-            LOG.error("", e);
+            LOG.error(e.getMessage(), e);
         }
         try {
             ensureMinIdle();
