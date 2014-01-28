@@ -1,3 +1,7 @@
+* 2014-01-28 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 30609: Rename XING.yml to xing.yml to restore previous deleted file
+
 * 2014-01-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 30418: Added EN_GB section for standard mail folder names in AdminUser.properties
