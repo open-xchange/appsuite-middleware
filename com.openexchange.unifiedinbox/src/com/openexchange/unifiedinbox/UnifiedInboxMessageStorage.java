@@ -874,7 +874,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             final Executor executor = ThreadPools.getThreadPool().getExecutor();
             // Check for continuation service
             final ContinuationRegistryService continuationRegistry = Services.optService(ContinuationRegistryService.class);
-            if (false && null != continuationRegistry && !mfs.contains(MailField.FULL) && !mfs.contains(MailField.BODY)) {
+            if (null != continuationRegistry && mfs.contains(MailField.SUPPORTS_CONTINUATION) && !mfs.contains(MailField.FULL) && !mfs.contains(MailField.BODY)) {
                 final ExecutorContinuation<MailMessage> executorContinuation;
                 {
                     final Locale locale = getLocale();

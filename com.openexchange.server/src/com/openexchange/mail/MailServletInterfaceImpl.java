@@ -768,8 +768,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public SearchIterator<MailMessage> getAllMessages(final String folder, final int sortCol, final int order, final int[] fields, final int[] fromToIndices) throws OXException {
-        return getMessages(folder, fromToIndices, sortCol, order, null, null, false, fields);
+    public SearchIterator<MailMessage> getAllMessages(final String folder, final int sortCol, final int order, final int[] fields, final int[] fromToIndices, final boolean supportsContinuation) throws OXException {
+        return getMessages(folder, fromToIndices, sortCol, order, null, null, false, fields, supportsContinuation);
     }
 
     private static final MailMessageComparator COMPARATOR_DESC = new MailMessageComparator(MailSortField.RECEIVED_DATE, true, null);
@@ -1727,21 +1727,21 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public SearchIterator<MailMessage> getMessages(final String folder, final int[] fromToIndices, final int sortCol, final int order, final com.openexchange.search.SearchTerm<?> searchTerm, final boolean linkSearchTermsWithOR, final int[] fields) throws OXException {
-        return getMessagesInternal(prepareMailFolderParam(folder), SearchTermMapper.map(searchTerm), fromToIndices, sortCol, order, fields);
+    public SearchIterator<MailMessage> getMessages(final String folder, final int[] fromToIndices, final int sortCol, final int order, final com.openexchange.search.SearchTerm<?> searchTerm, final boolean linkSearchTermsWithOR, final int[] fields, final boolean supportsContinuation) throws OXException {
+        return getMessagesInternal(prepareMailFolderParam(folder), SearchTermMapper.map(searchTerm), fromToIndices, sortCol, order, fields, supportsContinuation);
     }
 
     @Override
-    public SearchIterator<MailMessage> getMessages(final String folder, final int[] fromToIndices, final int sortCol, final int order, final int[] searchCols, final String[] searchPatterns, final boolean linkSearchTermsWithOR, final int[] fields) throws OXException {
+    public SearchIterator<MailMessage> getMessages(final String folder, final int[] fromToIndices, final int sortCol, final int order, final int[] searchCols, final String[] searchPatterns, final boolean linkSearchTermsWithOR, final int[] fields, final boolean supportsContinuation) throws OXException {
         checkPatternLength(searchPatterns);
         final SearchTerm<?> searchTerm = (searchCols == null) || (searchCols.length == 0) ? null : SearchUtility.parseFields(
             searchCols,
             searchPatterns,
             linkSearchTermsWithOR);
-        return getMessagesInternal(prepareMailFolderParam(folder), searchTerm, fromToIndices, sortCol, order, fields);
+        return getMessagesInternal(prepareMailFolderParam(folder), searchTerm, fromToIndices, sortCol, order, fields, supportsContinuation);
     }
 
-    private SearchIterator<MailMessage> getMessagesInternal(final FullnameArgument argument, final SearchTerm<?> searchTerm, final int[] fromToIndices, final int sortCol, final int order, final int[] fields) throws OXException {
+    private SearchIterator<MailMessage> getMessagesInternal(final FullnameArgument argument, final SearchTerm<?> searchTerm, final int[] fromToIndices, final int sortCol, final int order, final int[] fields, final boolean supportsContinuation) throws OXException {
         /*
          * Identify and sort messages according to search term and sort criteria while only fetching their IDs
          */
@@ -1762,7 +1762,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             return SearchIteratorAdapter.<MailMessage> emptyIterator();
         }
         final boolean cachable = (mails.length < mailAccess.getMailConfig().getMailProperties().getMailFetchLimit());
-        final MailField[] useFields;
+        MailField[] useFields;
         final boolean onlyFolderAndID;
         if (cachable) {
             /*
@@ -1773,6 +1773,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         } else {
             useFields = MailField.getFields(fields);
             onlyFolderAndID = onlyFolderAndID(useFields);
+        }
+        if (supportsContinuation) {
+            final MailFields mfs = new MailFields(useFields);
+            if (!mfs.contains(MailField.SUPPORTS_CONTINUATION)) {
+                mfs.add(MailField.SUPPORTS_CONTINUATION);
+                useFields = mfs.toArray();
+            }
         }
         /*-
          * More than ID and folder requested?
