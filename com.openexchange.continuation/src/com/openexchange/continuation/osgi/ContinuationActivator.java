@@ -147,7 +147,7 @@ public final class ContinuationActivator extends HousekeepingActivator {
                             final CacheService cacheService = getService(CacheService.class);
                             if (null != service && null != cacheService && service.getAnyActiveSessionForUser(session.getUserId(), session.getContextId()) == null) {
                                 final Cache cache = cacheService.getCache(regionName);
-                                cache.invalidateGroup(new StringAllocator(16).append(session.getUserId()).append('@').append(session.getContextId()).toString());
+                                cache.remove(new StringAllocator(16).append(session.getUserId()).append('@').append(session.getContextId()).toString());
                             }
                         } catch (final Exception e) {
                             // Failed handling session
