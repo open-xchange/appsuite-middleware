@@ -300,6 +300,8 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
 
     @Test
     public void testRestrictionsToContext() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException, NoSuchContextException, DatabaseUpdateException, OXResellerException {
+        final Credentials masterCreds = DummyMasterCredentials();
+        oxresell.create(TestAdminUser(), masterCreds);
         restrictionContexts = new Stack<Context>();
         for (final Credentials creds : new Credentials[] { DummyMasterCredentials(), TestUserCredentials() }) {
 
