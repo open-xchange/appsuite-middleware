@@ -257,24 +257,10 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
             if (peerMap == null) {
                 peerMap = new ConcurrentHashMap<String, AtomicLong>();
                 ConcurrentHashMap<String, AtomicLong> otherPeerMap = peerMapPerID.putIfAbsent(stanza.getSequencePrincipal(), peerMap);
-//                removal of synthetic IDs(GDs)
-                if (otherPeerMap == null) {
-                    stanza.getSequencePrincipal().on(ID.Events.DISPOSE, new IDEventHandler() {
-
-                        @Override
-                        public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-                            if(LOG.isDebugEnabled()) {
-                                LOG.debug("Removing SequencePrincipal from peerMapPerID lookup table: " + id);
-                            }
-                            peerMapPerID.remove(id);
-                        }
-
-                    });
-                } else {
+                if(otherPeerMap != null) {
                     LOG.debug("Found other peerMap for SequencePrincipal: {} with value {}", stanza.getSequencePrincipal(), otherPeerMap);
                     peerMap = otherPeerMap;
                 }
-                //---
             }
             AtomicLong nextNumber = peerMap.get(receiver.getUuid());
             if (nextNumber == null) {

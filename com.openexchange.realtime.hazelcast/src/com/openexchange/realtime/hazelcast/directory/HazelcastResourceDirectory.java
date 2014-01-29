@@ -67,6 +67,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.ConcurrentSet;
 import com.openexchange.management.ManagementAware;
 import com.openexchange.management.ManagementObject;
+import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.directory.DefaultResourceDirectory;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.hazelcast.Services;
@@ -87,7 +88,7 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class HazelcastResourceDirectory extends DefaultResourceDirectory implements ManagementAware<HazelcastResourceDirectoryMBean> {
+public class HazelcastResourceDirectory extends DefaultResourceDirectory implements ManagementAware<HazelcastResourceDirectoryMBean>, RealtimeJanitor {
 
     /** The logger */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastResourceDirectory.class);
@@ -355,7 +356,6 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
     protected HazelcastResource doSet(ID id, Resource resource, boolean overwrite) throws OXException {
         HazelcastResource hazelcastResource = new HazelcastResource(resource);
         id.on(ID.Events.REFRESH, TOUCH_ID);
-        id.on(ID.Events.DISPOSE, CLEAN_UP);
 
         MultiMap<String, String> idMapping = getIDMapping();
         IMap<String, Map<String, Serializable>> allResources = getResourceMapping();
@@ -529,25 +529,6 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
     }
 
     /**
-     * Remove the entries we track for this id from the IDMapping and the ResourceMapping
-     */
-    private final IDEventHandler CLEAN_UP = new IDEventHandler() {
-
-        @Override
-        public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-            if (source != HazelcastResourceDirectory.this) {
-                try {
-                    IDMap<Resource> removed = removeWithoutDisposeEvent(id);
-                    LOG.debug("Removed: {}", removed.entrySet());
-                } catch (OXException e) {
-                    LOG.error("", e);
-                }
-            }
-        }
-
-    };
-
-    /**
      * Touch the infos we track for a given ID so they don't get automatically removed by Hazelcast's eviction policy as long as it's in
      * active use.
      */
@@ -579,5 +560,16 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
         }
 
     };
+
+    @Override
+    public void cleanupForId(ID id) {
+        LOG.debug("Cleanup for ID: {}", id);
+        try {
+            IDMap<Resource> removed = remove(id);
+            LOG.debug("Removed: {}", removed.entrySet());
+        } catch (OXException e) {
+            LOG.error("", e);
+        }
+    }
 
 }

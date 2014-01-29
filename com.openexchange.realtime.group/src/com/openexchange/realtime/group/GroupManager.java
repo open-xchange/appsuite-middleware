@@ -87,7 +87,7 @@ public class GroupManager implements RealtimeJanitor {
         clientMap = Multimaps.synchronizedMultimap(HashMultimap.<ID, ID> create());
         RealtimeJanitors.getInstance().addJanitor(this);
     }
-    
+
     /**
      * Adds a client <-> group mapping to this manager
      * 

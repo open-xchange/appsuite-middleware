@@ -132,32 +132,6 @@ public class GroupDispatcher implements ComponentHandle {
         this.groupId = id;
         this.handler = handler;
         final AtomicReference<Set<ID>> idsRef = this.idsRef;
-        id.on(ID.Events.DISPOSE, new IDEventHandler() {
-
-            @Override
-            public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-                try {
-                    if (!isDisposed) {
-                        isDisposed = true;
-                     // Find any valid member identifier
-                        ID memberId = null;
-                        if (properties != null) {
-                            memberId = (ID) properties.get("id");
-                        }
-                        if (null == memberId) {
-                            final Set<ID> ids = idsRef.get();
-                            memberId = ids.isEmpty() ? null : ids.iterator().next();
-                        }
-                        if (memberId == null) {
-                            memberId = id;
-                        }
-                        onDispose(memberId != null ? memberId : id);
-                    }
-                } catch (OXException e) {
-                    LOG.error("", e);
-                }
-            }
-        });
     }
 
     /**
@@ -361,12 +335,12 @@ public class GroupDispatcher implements ComponentHandle {
             properties.put("id", id);
             onDispose(id);
             isDisposed = true;
-            boolean disposed = groupId.dispose(this, properties);
+            boolean isDisposable = groupId.isDisposable();
             /*
              * If nobody vetoed the disposal of this GroupDispatcher we have to issue a cluster wide cleanup to remove entries from
              * StanzaSequenceGate instances
              */
-            if(disposed) {
+            if(isDisposable) {
                 GlobalRealtimeCleanup globalRealtimeCleanup = GroupServiceRegistry.getInstance().getService(GlobalRealtimeCleanup.class);
                 if(globalRealtimeCleanup == null) {
                     LOG.error("Unable to initiate global cleanup for {} cleanup", id, ServiceExceptionCode.serviceUnavailable(GlobalRealtimeCleanup.class));
@@ -534,6 +508,25 @@ public class GroupDispatcher implements ComponentHandle {
         goodbye.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
                         new PayloadElement("Goodbye", "json", "group", "message")).build()));
         return goodbye;
+    }
+
+    @Override
+    public void dispose() {
+        try {
+          if (!isDisposed) {
+              isDisposed = true;
+           // Find any valid member identifier
+              ID memberId = null;
+              final Set<ID> ids = idsRef.get();
+              memberId = ids.isEmpty() ? null : ids.iterator().next();
+              if (memberId == null) {
+                  memberId = groupId;
+              }
+              onDispose(memberId);
+          }
+      } catch (OXException e) {
+          LOG.error("", e);
+      }
     }
 
 }

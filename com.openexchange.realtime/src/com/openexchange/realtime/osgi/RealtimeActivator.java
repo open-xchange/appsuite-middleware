@@ -60,6 +60,7 @@ import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.Component;
 import com.openexchange.realtime.RealtimeConfig;
+import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
 import com.openexchange.realtime.cleanup.LocalRealtimeCleanupImpl;
 import com.openexchange.realtime.management.ManagementHouseKeeper;
@@ -100,7 +101,25 @@ public class RealtimeActivator extends HousekeepingActivator {
 
         managementHouseKeeper.addManagementObject(realtimeConfig.getManagementObject());
 
-        synth = new SyntheticChannel(this);
+        //Add the node-wide cleanup service and start tracking Janitors 
+        LocalRealtimeCleanupImpl localRealtimeCleanup = new LocalRealtimeCleanupImpl(context);
+        rememberTracker(localRealtimeCleanup);
+        registerService(LocalRealtimeCleanup.class, localRealtimeCleanup);
+        //And track the cluster wide cleanup
+        track(GlobalRealtimeCleanup.class, new SimpleRegistryListener<GlobalRealtimeCleanup>() {
+
+            @Override
+            public void added(ServiceReference<GlobalRealtimeCleanup> ref, GlobalRealtimeCleanup service) {
+                SyntheticChannel.GLOBAL_CLEANUP_REF.set(service);
+            }
+
+            @Override
+            public void removed(ServiceReference<GlobalRealtimeCleanup> ref, GlobalRealtimeCleanup service) {
+                SyntheticChannel.GLOBAL_CLEANUP_REF.set(null);
+            }
+        });
+        
+        synth = new SyntheticChannel(this, localRealtimeCleanup);
 
         TimerService timerService = getService(TimerService.class);
         timerService.scheduleAtFixedRate(synth, 0, 1, TimeUnit.MINUTES);
@@ -127,11 +146,6 @@ public class RealtimeActivator extends HousekeepingActivator {
         registerService(PayloadTreeConverter.class, converter);
 
         registerService(Channel.class, new DevNullChannel());
-
-        //Add the node-wide cleanup service and start tracking Janitors 
-        LocalRealtimeCleanupImpl localRealtimeCleanup = new LocalRealtimeCleanupImpl(context);
-        rememberTracker(localRealtimeCleanup);
-        registerService(LocalRealtimeCleanup.class, localRealtimeCleanup);
 
         //Expose all ManagementObjects for this bundle
         managementHouseKeeper.exposeManagementObjects();

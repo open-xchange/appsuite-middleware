@@ -68,7 +68,6 @@ import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.management.StanzaSequenceGateMBean;
 import com.openexchange.realtime.management.StanzaSequenceGateManagement;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.packet.Stanza;
 
 /**
@@ -185,19 +184,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
             if (threshold == null) {
                 threshold = new AtomicLong(0);
                 AtomicLong meantime = sequenceNumbers.putIfAbsent(stanza.getSequencePrincipal(), threshold);
-                /*
-                 * Add eventhandler to clean up the traces we left in the gate when the the principal receives the dispose event, e.g when
-                 * all members left the GroupDispatcher(SequencePrincipal)
-                 */
-                if (meantime == null) {
-                    stanza.getSequencePrincipal().on(ID.Events.DISPOSE, new IDEventHandler() {
-
-                        @Override
-                        public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-                            freeResourcesFor(id);
-                        }
-                    });
-                } else {
+                if(meantime != null) {
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("Found another number: " + meantime + "in the meantime for the SequencePrincipal: " + stanza.getSequencePrincipal());
                     }
