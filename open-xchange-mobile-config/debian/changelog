@@ -1,3 +1,15 @@
+open-xchange-mobile-config (7.4.1-19) stable; urgency=low
+
+  * Build for patch 2014-01-30
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Wed, 29 Jan 2014 11:05:18 +0100
+
+open-xchange-mobile-config (7.4.1-18) stable; urgency=low
+
+  * Build for patch 2014-01-31
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Tue, 28 Jan 2014 15:10:26 +0100
+
 open-xchange-mobile-config (7.4.1-17) stable; urgency=low
 
   * Build for patch 2014-01-30

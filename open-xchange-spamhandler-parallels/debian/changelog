@@ -1,3 +1,15 @@
+open-xchange-spamhandler-parallels (7.4.1-19) stable; urgency=low
+
+  * Build for patch 2014-01-30
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 29 Jan 2014 11:05:52 +0100
+
+open-xchange-spamhandler-parallels (7.4.1-18) stable; urgency=low
+
+  * Build for patch 2014-01-31
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 28 Jan 2014 15:11:00 +0100
+
 open-xchange-spamhandler-parallels (7.4.1-17) stable; urgency=low
 
   * Build for patch 2014-01-30
