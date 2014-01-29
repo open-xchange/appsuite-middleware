@@ -336,6 +336,9 @@ public final class DatabaseFolderConverter {
                 // "Collected addresses" folder
                 retval = new LocalizedDatabaseFolder(fo);
                 retval.setName(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
+                retval.setDefault(true);
+                retval.setCacheable(true);
+                retval.setGlobal(false);
             } else if (folderId == getPublishedMailAttachmentsFolder(session)) {
                 retval = new LocalizedDatabaseFolder(fo);
                 retval.setName(FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME);

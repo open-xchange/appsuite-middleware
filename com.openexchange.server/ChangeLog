@@ -5,7 +5,7 @@
 
 * 2014-01-29 - thorben.betten@open-xchange.com
 
- - Fix for bug 30626: Update folder by reading from master, not from slave database
+ - Fix for bug 30626: Signal special "Collected addresses" folder as a default folder
 
 * 2014-01-28 - jan.bauerdick@open-xchange.com
 
