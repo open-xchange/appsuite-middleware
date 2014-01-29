@@ -1,3 +1,7 @@
+* 2014-01-29 - marcus.klein@open-xchange.com
+
+ - Fix for bug 30862: Added packaging for Finnish language.
+
 * 2014-01-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 30820: Enhanced HTML detector by JavaScript event handler names

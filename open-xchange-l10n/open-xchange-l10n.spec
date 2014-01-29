@@ -170,6 +170,19 @@ Authors:
 
 #-------------------------------------------------------------------------------------
 
+%package fi-fi
+Group:      Applications/Productivity
+Summary:    Package containing Open-Xchange backend localization for fi_FI
+
+%description fi-fi
+Package containing Open-Xchange backend localization for fi_FI
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
 %package fr-ca
 Group:      Applications/Productivity
 Summary:    Package containing Open-Xchange backend localization for fr_CA
@@ -545,7 +558,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-for LANG in ca_ES cs_CZ da_DK de_CH de_DE el_GR en_US es_ES es_MX eu_ES fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nl_NL pl_PL pt_BR pt_PT ro_RO ru_RU sk_SK sv_SE tr_TR zh_CN zh_TW en_GB; do \
+for LANG in ca_ES cs_CZ da_DK de_CH de_DE el_GR en_US es_ES es_MX eu_ES fi_FI fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nl_NL pl_PL pt_BR pt_PT ro_RO ru_RU sk_SK sv_SE tr_TR zh_CN zh_TW en_GB; do \
     PACKAGE_EXTENSION=$(echo ${LANG} | tr '[:upper:]_' '[:lower:]-'); \
     ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -Dlanguage=${LANG} -f build/build.xml clean build; \
 done
@@ -600,6 +613,11 @@ done
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*eu_ES*
+
+%files fi-fi
+%defattr(-,root,root)
+%dir /opt/open-xchange/i18n/
+/opt/open-xchange/i18n/*fi_FI*
 
 %files fr-ca
 %defattr(-,root,root)
