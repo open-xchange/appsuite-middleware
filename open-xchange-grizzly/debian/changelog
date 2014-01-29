@@ -1,3 +1,15 @@
+open-xchange-grizzly (7.4.0-27) stable; urgency=low
+
+  * Build for patch 2014-01-30
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Tue, 28 Jan 2014 12:10:59 +0100
+
+open-xchange-grizzly (7.4.0-26) stable; urgency=low
+
+  * Build for patch 2013-12-17
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Fri, 24 Jan 2014 14:57:00 +0100
+
 open-xchange-grizzly (7.4.0-25) stable; urgency=low
 
   * Build for patch 2013-12-17
