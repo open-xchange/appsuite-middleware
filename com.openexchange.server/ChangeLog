@@ -1,5 +1,6 @@
 * 2014-01-29 - tobias.friedrich@open-xchange.com
 
+ - Fix for bug 30384: Don't distribute non-common events, don't distribute events received via external mail notification   
  - Fix for bug 28479: Invalidate folder cache on subscription status changes   
 
 * 2014-01-29 - thorben.betten@open-xchange.com
