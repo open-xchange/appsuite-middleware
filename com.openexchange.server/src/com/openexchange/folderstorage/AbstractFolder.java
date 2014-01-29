@@ -52,6 +52,7 @@ package com.openexchange.folderstorage;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -443,6 +444,21 @@ public abstract class AbstractFolder implements Folder, Serializable {
     @Override
     public void setSupportedCapabilities(final Set<String> capabilities) {
         this.supportedCapabilities = capabilities;
+    }
+
+    /**
+     * Adds specified capability identifier.
+     *
+     * @param capability The capability identifier to add
+     */
+    public void addSupportedCapabilities(final String capability) {
+        if (null == capability) {
+            return;
+        }
+        if (null == this.supportedCapabilities) {
+            this.supportedCapabilities = new LinkedHashSet<String>(8);
+        }
+        this.supportedCapabilities.add(capability);
     }
 
 }
