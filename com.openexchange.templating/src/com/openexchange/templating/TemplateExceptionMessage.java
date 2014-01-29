@@ -61,31 +61,11 @@ public class TemplateExceptionMessage implements LocalizableStrings {
     /**
      * Initializes a new {@link TemplateExceptionMessage}.
      */
-    public TemplateExceptionMessage() {
+    private TemplateExceptionMessage() {
         super();
     }
-
-    public final static String IOException_HELP = "Verify file system and templates.";
-
-    public final static String IOException_MSG = "An I/O error occurred.";
-
-    public final static String UnderlyingException_HELP = "Please correct the template";
-
-    public final static String UnderlyingException_MSG = "The underlying templating system threw an exception: %1$s";
-
-    public final static String TemplateNotFound_HELP = "Please use an existing template";
-
-    public final static String TemplateNotFound_MSG = "The template %1$s does not exist.";
-
-    public final static String SQLException_HELP = "An underlying system threw an SQL exception";
-
-    public final static String SQLException_MSG = "Please try again later.";
-
-    public static final String AccessDenied_HELP = "File access is denied due to operating system's permissions.";
-
+    
     public static final String AccessDenied_MSG = "File access denied.";
-
-    public static final String TemplateNotWhitelisted_HELP = "This template was not whitelisted in 'com.openexchange.templating.templateWhitelist'.";
 
     public static final String TemplateNotWhitelisted_MSG = "This template was not whitelisted,";
 }
