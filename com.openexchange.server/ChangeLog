@@ -1,3 +1,7 @@
+* 2014-01-29 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30384: Don't distribute non-common events, don't distribute events received via external mail notification
+   
 * 2014-01-29 - marcus.klein@open-xchange.com
 
  - Fix for bug 30862: Added packaging for Finnish language.
