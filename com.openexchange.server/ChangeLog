@@ -1,3 +1,7 @@
+* 2014-01-29 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 28479: Invalidate folder cache on subscription status changes   
+
 * 2014-01-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 30626: Update folder by reading from master, not from slave database
