@@ -58,6 +58,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc imapau
 %doc com.openexchange.authentication.imap/ChangeLog
 
 %changelog
+* Tue Jan 28 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-01-30
 * Wed Jan 22 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-01-22
 * Mon Jan 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
