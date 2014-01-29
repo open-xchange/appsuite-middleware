@@ -270,7 +270,7 @@ public class OXResellerInterfaceTest extends OXResellerAbstractTest {
     public void testGetDataWithRestrictions() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, InvalidCredentialsException, StorageException, PoolException, SQLException, OXResellerException {
         final Credentials creds = DummyMasterCredentials();
         final ResellerAdmin adm = TestAdminUser(TESTRESTRICTIONUSER, "Test Restriction User");
-
+        adm.setRestrictions(new Restriction[] { MaxContextRestriction(), MaxContextQuotaRestriction() });
         oxresell.create(adm, creds);
 
         final ResellerAdmin dbadm = oxresell.getData(adm, creds);
