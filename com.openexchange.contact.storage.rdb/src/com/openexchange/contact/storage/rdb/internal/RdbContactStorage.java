@@ -971,3 +971,4 @@ public class RdbContactStorage extends DefaultContactStorage {
     }
 
 }
+
