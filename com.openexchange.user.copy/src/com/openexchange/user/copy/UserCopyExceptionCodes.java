@@ -111,14 +111,17 @@ public enum UserCopyExceptionCodes implements DisplayableOXExceptionCode {
         this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }
 
+    @Override
     public Category getCategory() {
         return category;
     }
 
+    @Override
     public String getDisplayMessage() {
         return displayMessage;
     }
@@ -131,14 +134,17 @@ public enum UserCopyExceptionCodes implements DisplayableOXExceptionCode {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 
+    @Override
     public boolean equals(final OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
     }
 
+    @Override
     public int getNumber() {
         return number;
     }
 
+    @Override
     public String getPrefix() {
         return "UCP";
     }
