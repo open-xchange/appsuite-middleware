@@ -51,6 +51,8 @@ GLOBIGNORE='*'
 /opt/open-xchange/sbin/*
 
 %changelog
+* Tue Jan 28 2014 Karsten Will <karsten.will@open-xchange.com>
+Build for patch 2014-01-30
 * Thu Jan 23 2014 Karsten Will <karsten.will@open-xchange.com>
 Third release candidate for 7.4.2
 * Mon Jan 20 2014 Karsten Will <karsten.will@open-xchange.com>
