@@ -6,6 +6,7 @@
 * 2014-01-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 30626: Signal special "Collected addresses" folder as a default folder
+ - Fix for bug 29350: Hide "Global address book" folder if associated "gab" capability is not granted
 
 * 2014-01-28 - jan.bauerdick@open-xchange.com
 

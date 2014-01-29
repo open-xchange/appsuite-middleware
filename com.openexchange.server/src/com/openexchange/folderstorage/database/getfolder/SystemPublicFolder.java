@@ -56,6 +56,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.database.DatabaseFolder;
@@ -67,6 +68,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
@@ -129,7 +131,10 @@ public final class SystemPublicFolder {
             /*
              * Add global address book and subfolders
              */
-            subfolderIds.add(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+            final CapabilityService capsService = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
+            if (null == capsService || capsService.getCapabilities(user.getId(), ctx.getContextId()).contains("gab")) {
+                subfolderIds.add(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+            }
             for (final FolderObject folderObject : q) {
                 subfolderIds.add(folderObject.getObjectID());
             }
@@ -210,7 +215,10 @@ public final class SystemPublicFolder {
             /*
              * Add global address book and subfolders
              */
-            subfolderIds.add(toArray(String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME)));
+            final CapabilityService capsService = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
+            if (null == capsService || capsService.getCapabilities(user.getId(), ctx.getContextId()).contains("gab")) {
+                subfolderIds.add(toArray(String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME)));
+            }
             for (final FolderObject folderObject : q) {
                 subfolderIds.add(toArray(String.valueOf(folderObject.getObjectID()), folderObject.getFolderName()));
             }
