@@ -59,14 +59,9 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class TextXtractExceptionMessages implements LocalizableStrings {
 
-    public static final String ERROR_MSG = "An error occurred: %1$s";
-
     public static final String TRUNCATED_MSG = "The following field(s) are too long: %1$s";
 
     public static final String UNABLE_TO_CHANGE_DATA_MSG = "Unable to change data. (%1$s)";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
 
     /**
      * Prevent instantiation.
