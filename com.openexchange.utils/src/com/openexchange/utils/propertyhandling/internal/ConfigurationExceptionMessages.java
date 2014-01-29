@@ -59,9 +59,6 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class ConfigurationExceptionMessages implements LocalizableStrings {
 
-    // No configuration service found
-    public static final String NO_CONFIGURATION_SERVICE_FOUND_MSG = "No configuration service found.";
-
     // The value given in the property %1$s is no integer value
     public static final String NO_INTEGER_VALUE_MSG = "The value given in the property %1$s is no integer value.";
 
