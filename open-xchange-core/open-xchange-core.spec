@@ -959,6 +959,8 @@ exit 0
 %changelog
 * Tue Jan 28 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-01-30
+* Fri Jan 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-17
 * Thu Jan 23 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Third release candidate for 7.4.2
 * Mon Jan 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
@@ -969,6 +971,8 @@ Build for patch 2014-01-16
 Build for patch 2014-01-14
 * Fri Jan 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 7.4.2
+* Fri Jan 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-17
 * Fri Jan 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-12-17
 * Fri Jan 03 2014 Marcus Klein <marcus.klein@open-xchange.com>
