@@ -63,6 +63,8 @@ import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
 
@@ -203,26 +205,36 @@ public final class ImageUtility {
                 /*
                  * Compose relative URL
                  */
-                prefix = "";
-                {
-                    final String ajpRoute = LogProperties.getLogProperty(LogProperties.Name.AJP_HTTP_SESSION);
-                    route = null == ajpRoute ? LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_HTTP_SESSION) : ajpRoute;
+                final String optImageHost = imageLocation.getOptImageHost();
+                if (Strings.isEmpty(optImageHost)) {
+                    prefix = "";
+                } else {
+                    final String tmp = Strings.toLowerCase(optImageHost);
+                    prefix = tmp.startsWith("http") ? optImageHost : new StringAllocator(32).append("http://").append(optImageHost).toString();
                 }
+                final String ajpRoute = LogProperties.getLogProperty(LogProperties.Name.AJP_HTTP_SESSION);
+                route = null == ajpRoute ? LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_HTTP_SESSION) : ajpRoute;
             } else {
                 /*
                  * Compose absolute URL if a relative one is not preferred
                  */
-                if (preferRelativeUrl) {
-                    prefix = "";
-                } else {
-                    sb.append(hostData.isSecure() ? "https://" : "http://");
-                    sb.append(hostData.getHost());
-                    final int port = hostData.getPort();
-                    if ((hostData.isSecure() && port != 443) || (!hostData.isSecure() && port != 80)) {
-                        sb.append(':').append(port);
+                final String optImageHost = imageLocation.getOptImageHost();
+                if (Strings.isEmpty(optImageHost)) {
+                    if (preferRelativeUrl) {
+                        prefix = "";
+                    } else {
+                        sb.append(hostData.isSecure() ? "https://" : "http://");
+                        sb.append(hostData.getHost());
+                        final int port = hostData.getPort();
+                        if ((hostData.isSecure() && port != 443) || (!hostData.isSecure() && port != 80)) {
+                            sb.append(':').append(port);
+                        }
+                        prefix = sb.toString();
+                        sb.setLength(0);
                     }
-                    prefix = sb.toString();
-                    sb.setLength(0);
+                } else {
+                    final String tmp = Strings.toLowerCase(optImageHost);
+                    prefix = tmp.startsWith("http") ? optImageHost : new StringAllocator(32).append("http://").append(optImageHost).toString();
                 }
                 route = hostData.getRoute();
             }
@@ -230,7 +242,7 @@ public final class ImageUtility {
         /*
          * Compose URL parameters
          */
-        sb.append(prefix);
+        sb.append(prefix.endsWith("/") ? prefix.substring(0, prefix.length() - 1) : prefix);
         sb.append(DefaultDispatcherPrefixService.getInstance().getPrefix());
         sb.append(ImageDataSource.ALIAS_APPENDIX);
         final String alias = imageDataSource.getAlias();

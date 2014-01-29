@@ -845,6 +845,26 @@ public final class HtmlProcessing {
 
     private static final String EVENT_RESTRICTIONS = "\" onmousedown=\"return false;\" oncontextmenu=\"return false;\"";
 
+    private static volatile String imageHost;
+    private static String imageHost() {
+        String tmp = imageHost;
+        if (null == tmp) {
+            synchronized (HtmlProcessing.class) {
+                tmp = imageHost;
+                if (null == tmp) {
+                    final ConfigurationService cs = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == cs) {
+                        // No ConfigurationService available at the moment
+                        return "";
+                    }
+                    tmp = cs.getProperty("com.openexchange.mail.imageHost", "");
+                    imageHost = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
+
     private static String filterBackgroundInlineImages(final String content, final Session session, final MailPath msgUID) {
         String reval = content;
         try {
@@ -870,7 +890,7 @@ public final class HtmlProcessing {
                     final String imageURL;
                     {
                         final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
-                        final ImageLocation imageLocation = new ImageLocation.Builder(cid).folder(prepareFullname(msgUID.getAccountId(), msgUID.getFolder())).id(msgUID.getMailID()).build();
+                        final ImageLocation imageLocation = new ImageLocation.Builder(cid).folder(prepareFullname(msgUID.getAccountId(), msgUID.getFolder())).id(msgUID.getMailID()).optImageHost(imageHost()).build();
                         imageURL = imgSource.generateUrl(imageLocation, session);
                     }
                     linkBuilder.setLength(0);
@@ -930,7 +950,7 @@ public final class HtmlProcessing {
                             final String imageURL;
                             {
                                 final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
-                                final ImageLocation imageLocation = new ImageLocation.Builder(filename).folder(prepareFullname(msgUID.getAccountId(), msgUID.getFolder())).id(msgUID.getMailID()).build();
+                                final ImageLocation imageLocation = new ImageLocation.Builder(filename).folder(prepareFullname(msgUID.getAccountId(), msgUID.getFolder())).id(msgUID.getMailID()).optImageHost(imageHost()).build();
                                 imageURL = imgSource.generateUrl(imageLocation, session);
                             }
                             linkBuilder.setLength(0);
@@ -988,7 +1008,7 @@ public final class HtmlProcessing {
                         }
                     }
                     // Build image location
-                    final ImageLocation imageLocation = new ImageLocation.Builder(cid).folder(prepareFullname(msgUID.getAccountId(), msgUID.getFolder())).id(mailId).build();
+                    final ImageLocation imageLocation = new ImageLocation.Builder(cid).folder(prepareFullname(msgUID.getAccountId(), msgUID.getFolder())).id(mailId).optImageHost(imageHost()).build();
                     imageURL = imgSource.generateUrl(imageLocation, session);
                 }
                 linkBuilder.setLength(0);
