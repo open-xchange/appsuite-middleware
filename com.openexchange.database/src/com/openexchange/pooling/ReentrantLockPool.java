@@ -385,6 +385,8 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             StackTraceElement[] trace = pooled.getTrace();
             if (null != trace) {
                 e.setStackTrace(trace);
+            } else {
+                e.setStackTrace(thread.getStackTrace());
             }
             log.debug(e.getMessage(), e);
         }
