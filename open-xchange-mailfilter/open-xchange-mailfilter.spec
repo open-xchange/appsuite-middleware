@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 27
+%define        ox_release 28
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -65,6 +65,8 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/mailfilter.properties
 
 %changelog
+* Mon Jan 27 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-01-30
 * Wed Jan 22 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-01-22
 * Thu Dec 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
