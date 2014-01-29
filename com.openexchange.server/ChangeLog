@@ -1,3 +1,8 @@
+* 2014-01-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30820: Enhanced HTML detector by JavaScript event handler names
+                      (as listed by http://de.selfhtml.org/javascript/sprache/eventhandler.htm )
+
 * 2014-01-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 30439: Try to recover from "NO Unknown namespace" IMAP error on standard folder check
