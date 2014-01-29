@@ -50,6 +50,7 @@
 package com.openexchange.logging.mbean;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -79,6 +80,8 @@ import com.openexchange.management.MBeanMethodAnnotation;
 public class LogbackConfiguration extends StandardMBean implements LogbackConfigurationMBean {
 
     private static final Logger LOG = LoggerFactory.getLogger(LogbackConfiguration.class);
+
+    private static final String WHITELIST_PROPERTY = "com.openexchange.logging.filter.loggerWhitelist";
 
     // -------------------------------------------------------------------------------------------- //
 
@@ -146,23 +149,20 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     @Override
     public void filterContext(int contextID) {
         LOG.debug("New context filter created for context with ID \"{}\" and policy \"ACCEPT\"", Integer.valueOf(contextID));
-
         createExtendedMDCFilter(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID), FilterReply.ACCEPT);
     }
 
     @Override
     public void filterUser(int userID, int contextID) {
         LOG.debug("New user filter created for user with ID \"{}\", context with ID \"{}\" and policy \"ACCEPT\"", Integer.valueOf(userID), Integer.valueOf(contextID));
-
         StringBuilder builder = new StringBuilder(2048).append(createKey(Name.SESSION_USER_ID.getName(), Integer.toString(userID)));
         builder.append(":").append(createKey(Name.SESSION_CONTEXT_ID.getName(), (Integer.toString(contextID))));
         String key = builder.toString();
         builder = null;
 
-        ExtendedMDCFilter filter = new ExtendedMDCFilter();
+        ExtendedMDCFilter filter = new ExtendedMDCFilter(getLoggerWhitelist());
         filter.addTuple(Name.SESSION_USER_ID.getName(), Integer.toString(userID));
         filter.addTuple(Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextID));
-        filter.setOnMatch(FilterReply.ACCEPT);
         filter.setName(key);
 
         if (!turboFilterCache.putIfAbsent(key, filter)) {
@@ -317,9 +317,8 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     private final void createExtendedMDCFilter(String key, String value, FilterReply onMatch) {
         String sKey = createKey(key, value);
 
-        ExtendedMDCFilter filter = new ExtendedMDCFilter();
+        ExtendedMDCFilter filter = new ExtendedMDCFilter(getLoggerWhitelist());
         filter.addTuple(key, value);
-        filter.setOnMatch(onMatch);
         filter.setName(sKey);
 
         if (!turboFilterCache.putIfAbsent(sKey, filter)) {
@@ -353,6 +352,21 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
        StringBuilder builder = new StringBuilder();
        builder.append("Logger: ").append(logger.getName()).append(", Level: ").append(logger.getLevel());
        return builder.toString();
+    }
+
+    private Set<String> getLoggerWhitelist() {
+        String whitelist = loggerContext.getProperty(WHITELIST_PROPERTY);
+        if (whitelist == null) {
+            return Collections.emptySet();
+        }
+
+        Set<String> resultSet = new HashSet<String>();
+        String[] split = whitelist.split("\\s*,\\s*");
+        for (String str : split) {
+            resultSet.add(str.trim());
+        }
+
+        return resultSet;
     }
 
 }

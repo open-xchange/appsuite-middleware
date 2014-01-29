@@ -1,8 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<configuration scan="true" scanPeriod="30 seconds" debug="false">
+<configuration>
 
     <!-- Uncomment to enable JMX default configurator -->
     <!-- jmxConfigurator /-->
+
+    <!--
+    It is possible to activate extended filters to log events for specific contexts, users or sessions on
+    all log levels. Use the command line tool '/opt/open-xchange/sbin/logconf' to enable these filters at
+    runtime. To avoid flooding your logs with large amounts of useless events, the loggers that are allowed
+    to bypass the globally configured log levels are whitelist-based. The whitelist can be configured in the
+    'value'-attribute below as a comma-separated list. It works hierarchical, i.e. the value 'com.openexchanges'
+    allows all loggers below (e.g. 'com.openexchange.some.Logger').
+    -->
+    <property scope="context" name="com.openexchange.logging.filter.loggerWhitelist" value="com.openexchange" />
 
     <!--
     Propagates changes made to the level of any logback-classic logger onto the java.util.logging framework. 
@@ -36,14 +46,14 @@
             <maxFileSize>2MB</maxFileSize>
         </triggeringPolicy>
         <encoder class="com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder">
-            <pattern>%d{"MMM dd, yyyy H:m:s a"} %class %method%n%level: %message%n%lmdc%exception{full}%n</pattern>
+            <pattern>%d{"MMM dd, yyyy H:mm:ss a"} %class.%method\(%class{0}.java:%line\)%n%level: %message%n%lmdc%exception{full}</pattern>
         </encoder>
     </appender>
 
     <appender name="SYSLOG" class="ch.qos.logback.classic.net.SyslogAppender">
         <syslogHost>localhost</syslogHost>
         <facility>local2</facility>
-        <suffixPattern>%d open-xchange %-5p [%c][%t]: %C,%M %m%n</suffixPattern>
+        <suffixPattern>%date open-xchange %-5level [%logger][%thread]: %class.%method\(%class{0}.java:%line\)%n%lmdc %n %message%n</suffixPattern>
     </appender>
 
     <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
@@ -61,7 +71,7 @@
     Important note:
     The following option ensures, that all login relevant information is logged correctly. Such information is essential to detect
     and to address session issues, potentially caused by 3rd parties.
-    
+
     Open-Xchange strongly suggests NOT to modify the configuration for the classes 'com.openexchange.login.internal.LoginPerformer'
     and 'com.openexchange.sessiond.impl.SessionHandler' to coarser logging settings (like WARN, ERROR and OFF). If you do so
     the Open-Xchange server will revert your change and set the log level for these classes to INFO. Finer settings (like TRACE, DEBUG 

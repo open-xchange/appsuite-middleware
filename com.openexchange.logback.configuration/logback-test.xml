@@ -8,6 +8,16 @@
     <!-- jmxConfigurator /-->
 
     <!--
+    It is possible to activate extended filters to log events for specific contexts, users or sessions on
+    all log levels. Use the command line tool '/opt/open-xchange/sbin/logconf' to enable these filters at
+    runtime. To avoid flooding your logs with large amounts of useless events, the loggers that are allowed
+    to bypass the globally configured log levels are whitelist-based. The whitelist can be configured in the
+    'value'-attribute below as a comma-separated list. It works hierarchical, i.e. the value 'com.openexchanges'
+    allows all loggers below (e.g. 'com.openexchange.some.Logger').
+    -->
+    <property scope="context" name="com.openexchange.logging.filter.loggerWhitelist" value="com.openexchange" />
+
+    <!--
     Propagates changes made to the level of any logback-classic logger onto the java.util.logging framework. 
     If this listener will be deleted, ox backend will add it programmatically.
     -->

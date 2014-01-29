@@ -125,15 +125,13 @@ public class TaskMgmtTest extends AbstractRMITest {
         final int jobId = ci.moveContextDatabase(context, client_db, superAdminCredentials);
 
         ti.getTaskResults(context, cred, jobId);
-    }
 
-    @Test
-    public void testGetJobList() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, InvalidCredentialsException, StorageException, Exception {
-        final Credentials cred = DummyCredentials();
-
-        ci.moveContextDatabase(context, client_db, superAdminCredentials);
-
-        System.out.println(ti.getJobList(context, cred));
+        ti.deleteJob(context, cred, jobId);
+        int counter = 0;
+        while (counter < 60 && ti.getJobList(context, cred).length() > 0) {
+            Thread.sleep(1000);
+            counter++;
+        }
     }
 
 }

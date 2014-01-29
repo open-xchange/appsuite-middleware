@@ -134,7 +134,7 @@ public final class MailNotifyPushListener implements PushListener {
 
     @Override
     public void notifyNewMail() throws OXException {
-        PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(ACCOUNT_ID, "INBOX"), session);
+        PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(ACCOUNT_ID, "INBOX"), session, false);
     }
 
     /**

@@ -333,8 +333,12 @@ public final class DatabaseFolderConverter {
                     retval = new DatabaseFolder(fo);
                 }
             } else if (folderId == getContactCollectorFolder(session, con)) {
+                // "Collected addresses" folder
                 retval = new LocalizedDatabaseFolder(fo);
                 retval.setName(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
+                retval.setDefault(true);
+                retval.setCacheable(true);
+                retval.setGlobal(false);
             } else if (folderId == getPublishedMailAttachmentsFolder(session)) {
                 retval = new LocalizedDatabaseFolder(fo);
                 retval.setName(FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME);

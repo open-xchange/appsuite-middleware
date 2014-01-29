@@ -52,6 +52,7 @@ package com.openexchange.logging;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.logging.mbean.ExtendedMDCFilterTest;
 import com.openexchange.logging.osgi.ActivatorTest;
 import com.openexchange.logging.osgi.ExceptionCategoryFilterRegistererTest;
 
@@ -64,7 +65,8 @@ import com.openexchange.logging.osgi.ExceptionCategoryFilterRegistererTest;
 @RunWith(Suite.class)
 @SuiteClasses({
  ActivatorTest.class,
- ExceptionCategoryFilterRegistererTest.class
+ ExceptionCategoryFilterRegistererTest.class,
+ ExtendedMDCFilterTest.class
 })
 public class UnitTests {
 

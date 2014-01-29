@@ -206,7 +206,9 @@ public class XMLModifierCLT {
             }
             if (!found) {
                 Node imported = document.importNode(toReplace, true);
-                origList.item(0).getParentNode().appendChild(imported);
+                if (origList.getLength() > 0) {
+                    origList.item(0).getParentNode().appendChild(imported);
+                }
             }
         }
     }
