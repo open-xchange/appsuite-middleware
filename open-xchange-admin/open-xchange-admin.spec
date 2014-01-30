@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 2
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -142,6 +142,21 @@ if [ ${1:-0} -eq 2 ]; then
     ox_add_property SPAM_MAILFOLDER_EN_GB Spam $pfile
     ox_add_property CONFIRMED_SPAM_MAILFOLDER_EN_GB confirmed-spam $pfile
     ox_add_property CONFIRMED_HAM_MAILFOLDER_EN_GB confirmed-ham $pfile
+    
+    # SoftwareChange_Request-1831
+    # -----------------------------------------------------------------------
+    pfile=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
+    
+	if grep -E "projects" $pfile > /dev/null; then
+	   ptmp=${pfile}.$$
+	   
+	   sed -e 's;projects *,;;g' -e 's;, *projects;;g' $pfile > $ptmp
+	
+	   if [ -s $ptmp ]; then
+	      cp $ptmp $pfile
+	   fi
+	   rm -f $ptmp
+	fi 
 
     ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 fi
