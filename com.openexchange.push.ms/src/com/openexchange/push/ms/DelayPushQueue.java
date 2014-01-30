@@ -103,8 +103,12 @@ public class DelayPushQueue implements Runnable {
      *
      * @param pushMsObject the pushMsObject to add
      */
-    public void add(final PushMsObject pushMsObject) {
-        delayQueue.offerIfAbsentElseReschedule(new DelayedPushMsObject(pushMsObject, delayDuration, maxDelayDuration));
+    public void add(final PushMsObject pushMsObject, final boolean immediate) {
+        if (immediate) {
+            delayQueue.offerIfAbsentElseReschedule(new DelayedPushMsObject(pushMsObject, 0, 0));
+        } else {
+            delayQueue.offerIfAbsentElseReschedule(new DelayedPushMsObject(pushMsObject, delayDuration, maxDelayDuration));
+        }
     }
 
     /**
