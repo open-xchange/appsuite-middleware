@@ -63,6 +63,7 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.exceptions.TaskManagerException;
 import com.openexchange.admin.user.copy.rmi.TestTool;
 
 public class TaskMgmtTest extends AbstractRMITest {
@@ -125,13 +126,18 @@ public class TaskMgmtTest extends AbstractRMITest {
         final int jobId = ci.moveContextDatabase(context, client_db, superAdminCredentials);
 
         ti.getTaskResults(context, cred, jobId);
-
-        ti.deleteJob(context, cred, jobId);
         int counter = 0;
-        while (counter < 60 && ti.getJobList(context, cred).length() > 0) {
-            Thread.sleep(1000);
+        boolean running = true;
+        while (running && counter < 180) {
+            try {
+                ti.deleteJob(context, cred, jobId);
+                running = false;
+                System.out.println("Task moveContextDatabase finished");
+            } catch (TaskManagerException e) {
+                Thread.sleep(1000);
+            }
             counter++;
         }
+        System.out.println("Task moveContextDatabase counter: " + counter);
     }
-
 }

@@ -49,11 +49,13 @@
 
 package com.openexchange.file.storage;
 
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Set;
 import org.osgi.service.event.Event;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.session.Session;
 
 /**
@@ -235,7 +237,7 @@ public class FileStorageEventHelper {
     }
 
     public static String createDebugMessage(final String eventName, final Event event) {
-        final StringBuilder sb = new StringBuilder("Received ");
+        final StringAllocator sb = new StringAllocator("Received ");
         sb.append(eventName);
         sb.append(": ");
         sb.append(event.toString());
@@ -244,9 +246,12 @@ public class FileStorageEventHelper {
             sb.append("\n    ");
             sb.append(key);
             sb.append(": ");
-            sb.append(value.toString());
+            if (FileStorageEventConstants.FOLDER_PATH.equals(key) && Object[].class.isInstance(value)) {
+                sb.append(Arrays.toString((Object[]) value));
+            } else {
+                sb.append(value);
+            }
         }
-
         return sb.toString();
     }
 
