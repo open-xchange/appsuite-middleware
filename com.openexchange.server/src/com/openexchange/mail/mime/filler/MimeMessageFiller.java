@@ -1814,7 +1814,7 @@ public class MimeMessageFiller {
                         try {
                             imageProvider = new ImageDataImageProvider(dataSource, imageLocation, session);
                         } catch (final OXException e) {
-                            if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e) || isFolderNotFound(e)) {
+                            if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e) || MailExceptionCode.ATTACHMENT_NOT_FOUND.equals(e) || isFolderNotFound(e)) {
                                 m.appendLiteralReplacement(sb, blankSrc(imageTag));
                                 continue;
                             }
@@ -2067,12 +2067,22 @@ public class MimeMessageFiller {
             super();
             this.data = imageData.getData(InputStream.class, imageData.generateDataArgumentsFrom(imageLocation), session);
             final DataProperties dataProperties = data.getDataProperties();
-            final String contentType = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
-            if (null != contentType && toLowerCase(contentType).indexOf("image/") < 0) {
-                throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(imageLocation.getImageId(), imageLocation.getId(), imageLocation.getFolder());
+            fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
+            String contentType = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
+            if (null != contentType) {
+                final String lcct = toLowerCase(contentType).trim();
+                final String defaultContentType = "application/octet-stream";
+                if (!lcct.startsWith("image/") && !lcct.startsWith(defaultContentType)) {
+                    throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(imageLocation.getImageId(), imageLocation.getId(), imageLocation.getFolder());
+                }
+                if (lcct.startsWith(defaultContentType) && !Strings.isEmpty(fileName)) {
+                    final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
+                    if (!defaultContentType.equals(contentTypeByFileName)) {
+                        contentType = contentTypeByFileName + (lcct.length() > defaultContentType.length() ? lcct.substring(defaultContentType.length()) : "");
+                    }
+                }
             }
             this.contentType = contentType;
-            fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
         }
 
         @Override
