@@ -146,10 +146,10 @@ public final class JerichoParser {
     private volatile Integer maxLength;
     private int maxLength() {
         Integer i = maxLength;
-        if (null == maxLength) {
+        if (null == i) {
             synchronized (this) {
                 i = maxLength;
-                if (null == maxLength) {
+                if (null == i) {
                     // Default is 1MB
                     final ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class);
                     final int defaultMaxLength = 1048576;
