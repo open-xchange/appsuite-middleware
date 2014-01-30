@@ -156,7 +156,11 @@ public final class JerichoParser {
                     if (null == service) {
                         return defaultMaxLength;
                     }
-                    i = Integer.valueOf(service.getIntProperty("com.openexchange.html.maxLength", defaultMaxLength));
+                    int prop = service.getIntProperty("com.openexchange.html.maxLength", defaultMaxLength);
+                    if (prop <= 0) {
+                        prop = Integer.MAX_VALUE;
+                    }
+                    i = Integer.valueOf(prop);
                     maxLength = i;
                 }
             }
