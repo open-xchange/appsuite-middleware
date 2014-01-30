@@ -221,20 +221,12 @@ public class Activator implements BundleActivator {
 
         for (final String className : new String[] { LOGIN_PERFORMER, SESSION_HANDLER }) {
             ch.qos.logback.classic.Logger lLogger = loggerContext.getLogger(className);
+
             if (lLogger != null) {
                 Level level = lLogger.getLevel();
-                boolean changed = false;
-                if (level == null) {
-                    lLogger.setLevel(Level.INFO);
-                    changed = true;
-                } else {
-                    if (level.isGreaterOrEqual(Level.WARN)) {
-                        lLogger.setLevel(Level.INFO);
-                        changed = true;
-                    }
-                }
 
-                if (changed) {
+                if (level == null || level.isGreaterOrEqual(Level.WARN)) {
+                    lLogger.setLevel(Level.INFO);
                     LOGGER.info(
                         "Configured log level {} for class {} is too coarse. It is changed to INFO!",
                         level,
