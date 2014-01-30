@@ -49,49 +49,31 @@
 
 package com.openexchange.mobilenotifier;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
-
 /**
- * {@link MobileNotifierService} - The Mobilenotifier service.
+ * {@link NotifyItem} - Represents a notify item
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
- * @since 7.6.0
  */
-public interface MobileNotifierService {
-    /**
-     * Get the provider name(s)
-     * 
-     * @return String the name the providers
-     */
-    String getProviderName();
-    /**
-     * Checks if a provider is enabled by a user
-     * 
-     * @param session
-     * @return
-     */
-    boolean isEnabled(int uid, int cid);
-    /**
-     * Gets the Items
-     * 
-     * @param session - The session
-     * @return map
-     * @throws OXException
-     * @TODO: maybe change to return type map
-     */
-    List<NotifyItem> getItems(int uid, int cid) throws OXException;
-    /**
-     * Reads a template from the disk
-     * 
-     * @return NotifyTemplate - The template
-     * @throws OXException
-     */
-    NotifyTemplate getTemplate() throws OXException;
-    /**
-     * Writes changes to the template
-     * 
-     * @throws OXException
-     */
-    void putTemplate() throws OXException;
+public class NotifyItem {
+
+    private String key;
+
+    private String value;
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
 }

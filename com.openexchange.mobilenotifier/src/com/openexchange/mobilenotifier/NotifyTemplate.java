@@ -49,49 +49,39 @@
 
 package com.openexchange.mobilenotifier;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
-
 /**
- * {@link MobileNotifierService} - The Mobilenotifier service.
+ * {@link NotifyTemplate} - Represents a template
  * 
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
- * @since 7.6.0
+ * @author <a href="mailto:Lars.Hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public interface MobileNotifierService {
-    /**
-     * Get the provider name(s)
-     * 
-     * @return String the name the providers
-     */
-    String getProviderName();
-    /**
-     * Checks if a provider is enabled by a user
-     * 
-     * @param session
-     * @return
-     */
-    boolean isEnabled(int uid, int cid);
-    /**
-     * Gets the Items
-     * 
-     * @param session - The session
-     * @return map
-     * @throws OXException
-     * @TODO: maybe change to return type map
-     */
-    List<NotifyItem> getItems(int uid, int cid) throws OXException;
-    /**
-     * Reads a template from the disk
-     * 
-     * @return NotifyTemplate - The template
-     * @throws OXException
-     */
-    NotifyTemplate getTemplate() throws OXException;
-    /**
-     * Writes changes to the template
-     * 
-     * @throws OXException
-     */
-    void putTemplate() throws OXException;
+public class NotifyTemplate {
+    private String frontendAppName;
+
+    private String template;
+
+    private boolean slow;
+
+    public String getTemplate() {
+        return template;
+    }
+
+    public boolean isSlow() {
+        return slow;
+    }
+
+    public String getFrontendAppName() {
+        return frontendAppName;
+    }
+
+    public void setFrontendAppName(String frontendAppName) {
+        this.frontendAppName = frontendAppName;
+    }
+
+    public void setTemplate(String template) {
+        this.template = template;
+    }
+
+    public void setSlow(boolean slow) {
+        this.slow = slow;
+    }
 }
