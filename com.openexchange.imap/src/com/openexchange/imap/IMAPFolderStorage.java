@@ -2195,9 +2195,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
                 prefix = namespaces[0];
             } catch (final MessagingException e) {
-                /*
-                 * NAMESPACE command failed for any reason
-                 */
+                LOG.error("NAMESPACE command failed for any reason", e);
                 return prefixByInferiors;
             }
             final boolean isEmpty = prefix.length() == 0;
