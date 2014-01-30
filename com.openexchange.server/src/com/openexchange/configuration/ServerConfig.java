@@ -150,7 +150,7 @@ public final class ServerConfig {
                 LOG.info("Temporary upload directory created");
             }
         } catch (final Exception e) {
-            LOG.error("Temporary upload directory could NOT be properly created");
+            LOG.error("Temporary upload directory could NOT be properly created", e);
         }
         // MAX_FILE_UPLOAD_SIZE
         try {

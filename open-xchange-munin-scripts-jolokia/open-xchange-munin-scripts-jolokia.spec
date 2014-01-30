@@ -68,6 +68,8 @@ exit 0
 
 %changelog
 * Tue Jan 28 2014 Felix Marx <felix.marx@open-xchange.com>
+Build for patch 2014-01-31
+* Tue Jan 28 2014 Felix Marx <felix.marx@open-xchange.com>
 Build for patch 2014-01-30
 * Fri Jan 24 2014 Felix Marx <felix.marx@open-xchange.com>
 Build for patch 2013-12-17

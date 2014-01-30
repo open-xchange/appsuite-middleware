@@ -125,6 +125,8 @@ fi
 
 %changelog
 * Tue Jan 28 2014 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2014-01-31
+* Tue Jan 28 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2014-01-30
 * Mon Jan 27 2014 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2014-01-30
