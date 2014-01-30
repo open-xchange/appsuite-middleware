@@ -17,6 +17,7 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange backend administration extension
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
+Requires:      sed
 Provides:      open-xchange-admin-plugin-hosting = %{version}
 Obsoletes:     open-xchange-admin-plugin-hosting < %{version}
 Provides:      open-xchange-admin-lib = %{version}
