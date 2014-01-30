@@ -133,6 +133,17 @@ public class ActivatorTest {
     }
 
     @Test
+    public void testOverrideLoggerLevels_configuredLevelNull_setNewLogLevel() {
+        Mockito.when(logger.getLevel()).thenReturn(null);
+
+        activator.overrideLoggerLevels(loggerContext);
+
+        Mockito.verify(logger, Mockito.atLeast(1)).setLevel(Level.INFO);
+        Mockito.verify(loggerContext, Mockito.atLeast(1)).getLogger(Matchers.anyString());
+        Mockito.verify(activatorLogger, Mockito.never()).warn(Matchers.anyString());
+    }
+
+    @Test
     public void testOverrideLoggerLevels_configuredLevelOFFTooCoarse_setNewLogLevel() {
         Mockito.when(logger.getLevel()).thenReturn(Level.OFF);
 

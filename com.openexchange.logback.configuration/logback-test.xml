@@ -76,4 +76,7 @@
     <!-- Log access to UI files -->
     <!-- <logger name="com.openexchange.appsuite" level="DEBUG"/> -->
 
+    <!-- Set this to DEBUG to log spreadsheet operations more in detail -->
+    <!-- <logger name="com.openexchange.office.calcengine.client.impl.CalcEngineJob" level="DEBUG"/> -->
+
 </configuration>

@@ -673,6 +673,7 @@ public class IMAPDefaultFolderChecker {
                         try {
                             if (!f.exists()) {
                                 IMAPCommandsCollection.createFolder(f, sep, type, false);
+                                LOG.info("Created new standard {} folder (full-name={}, prefix={}) for login {} (account={}) on IMAP server {} (user={}, context={})", getFallbackName(index), f.getFullName(), detectedPrefix, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
                             }
                             modified.set(true);
                         } catch (final MessagingException e) {
@@ -754,6 +755,7 @@ public class IMAPDefaultFolderChecker {
                  */
                 try {
                     IMAPCommandsCollection.createFolder(f, sep, type, false);
+                    LOG.info("Created new standard {} folder (full-name={}, prefix={}) for login {} (account={}) on IMAP server {} (user={}, context={})", getFallbackName(index), f.getFullName(), detectedPrefix, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
                     modified.set(true);
                 } catch (final MessagingException e) {
                     if (isOverQuotaException(e)) {
