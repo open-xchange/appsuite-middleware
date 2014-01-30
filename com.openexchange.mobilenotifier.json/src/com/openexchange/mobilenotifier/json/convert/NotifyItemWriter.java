@@ -47,67 +47,57 @@
  *
  */
 
-package com.openexchange.mobilenotifier.json.actions;
+package com.openexchange.mobilenotifier.json.convert;
 
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.mobilenotifier.MobileNotifierService;
-import com.openexchange.mobilenotifier.json.MobileNotifierRequest;
-import com.openexchange.mobilenotifier.json.convert.NotifyItemWriter;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.mobilenotifier.NotifyItem;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link GetAction}
+ * {@link NotifyItemWriter} - Converts a list of notification items to a JSON structure.
  * 
- * @author <a href="mailto:Lars.Hoogestraat@open-xchange.com">Lars Hoogestraat</a>
- * @since 7.6.0
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-@Action(method = RequestMethod.GET, name = "get", description = "Get a notifaction item", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "provider", description = "The requested providers.") }, responseDescription = "An JSON object describing an notification item for one or multiple providers.")
-public class GetAction extends AbstractMobileNotifierAction {
+public class NotifyItemWriter {
 
+    private NotifyItemWriter() {
+        super();
+    }
     /**
-     * Initializes a new {@link GetAction}.
+     * Writes the JSON structure of NotifyItems
      * 
-     * @param services The service look-up
+     * @param service - The service
+     * @param session - The session
+     * @return JSONObject - Returns the JSON structure
+     * @throws JSONException
+     * @throws OXException
      */
-    public GetAction(final ServiceLookup services) {
-        super(services);
+    public static JSONObject write(final MobileNotifierService service, ServerSession session) throws JSONException, OXException {
+        final JSONObject providerObject = new JSONObject();
+        final JSONArray itemArray = new JSONArray();
+        final JSONObject itemObject = new JSONObject();
+
+        final int userId = session.getUserId();
+        final int contextId = session.getContextId();
+
+        itemArray.put(transformListToJSONObject(service.getItems(userId, contextId)));
+        itemObject.put("items", itemArray);
+
+        providerObject.put(service.getProviderName(), itemObject);
+
+        return providerObject;
     }
 
-    @Override
-    protected AJAXRequestResult perform(MobileNotifierRequest req) throws OXException, JSONException {
-        final String param = req.checkParameter("provider");
-
-        final MobileNotifierService mobileNotifierService = getService(MobileNotifierService.class);
-        if (null == mobileNotifierService) {
-            throw ServiceExceptionCode.absentService(MobileNotifierService.class);
+    private static JSONObject transformListToJSONObject(List<NotifyItem> items) throws JSONException {
+        final JSONObject jsonObject = new JSONObject();
+        for (NotifyItem item : items) {
+            jsonObject.put(item.getKey(), item.getValue());
         }
-
-        final ServerSession session = req.getSession();
-
-        /*
-         * Writes a JSON provider structure
-         */
-        final JSONObject providerObject = new JSONObject();
-        final JSONArray providers = new JSONArray();
-
-        // TODO: iterate over existing and enabled services.
-        // atm just for testing the json structure
-        for (int i = 0; i < 3; i++) {
-            providers.put(NotifyItemWriter.write(mobileNotifierService, session));
-        }
-
-        providerObject.put("provider", providers);
-        return new AJAXRequestResult(providerObject);
+        return jsonObject;
     }
 }
