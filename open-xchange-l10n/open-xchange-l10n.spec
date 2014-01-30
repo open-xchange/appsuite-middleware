@@ -705,6 +705,8 @@ done
 
 %changelog
 * Tue Jan 28 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-01-31
+* Tue Jan 28 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-01-30
 * Mon Jan 27 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-01-30
