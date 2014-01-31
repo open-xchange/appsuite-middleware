@@ -16,6 +16,10 @@
  - Fix for bug 30626: Signal special "Collected addresses" folder as a default folder
  - Fix for bug 29350: Hide "Global address book" folder if associated "gab" capability is not granted
 
+* 2014-01-29 - marcus.klein@open-xchange.com
+
+ - Fix for bug 30862: Added packaging for Finnish language.
+
 * 2014-01-28 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 30609: Rename XING.yml to xing.yml to restore previous deleted file
