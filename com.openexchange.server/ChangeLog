@@ -1,7 +1,11 @@
+* 2014-01-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30895: Do not stick to have "image/*" Content-Type, but accept default Content-Type "application/octet-stream", too
+
 * 2014-01-30 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 30852: Check permissions of all subfolders recursively prior accepting client deletion 
-   
+
 * 2014-01-29 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 30384: Don't distribute non-common events, don't distribute events received via external mail notification   
