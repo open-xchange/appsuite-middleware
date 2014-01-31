@@ -853,7 +853,7 @@ public final class CacheFolderStorage implements FolderStorage {
                 try {
                     final Folder parentFolder = loadFolder(realTreeId, parentId, StorageType.WORKING, true, storageParameters);
                     if (parentFolder.isCacheable()) {
-                        putFolder(parentFolder, treeId, storageParameters, true);
+                        putFolder(parentFolder, realTreeId, storageParameters, true);
                     }
                 } catch (final Exception e) {
                     // Ignore
@@ -1400,7 +1400,7 @@ public final class CacheFolderStorage implements FolderStorage {
             /*
              * Put updated folder
              */
-            final Folder updatedFolder = loadFolder(realTreeId, newFolderId, StorageType.WORKING, true, storageParameters);
+            final Folder updatedFolder = loadFolder(treeId, newFolderId, StorageType.WORKING, true, storageParameters);
             {
                 final int contextId = storageParameters.getContextId();
                 final FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
