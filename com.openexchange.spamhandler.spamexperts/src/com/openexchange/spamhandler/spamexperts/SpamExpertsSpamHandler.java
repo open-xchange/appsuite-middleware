@@ -141,7 +141,7 @@ public class SpamExpertsSpamHandler extends SpamHandler {
     @Override
     public void handleHam(int accountId, String spamFullname, String[] mailIDs, boolean move, Session session) throws OXException {
         LOG.debug("handleHam");
-        LOG.debug("accid: " + accountId + ", spamfullname: " + spamFullname + ", move: " + move + ", session: " + session.toString());
+        LOG.debug("accid: {}, spamfullname: {}, move: {}, session: {}", accountId, spamFullname, move, session.toString());
 
         // get access to internal mailstore
         final MailService mailService = SpamExpertsServiceRegistry.getInstance().getService(MailService.class);
@@ -172,7 +172,7 @@ public class SpamExpertsSpamHandler extends SpamHandler {
 
     public void handleSpam(final int accountId, final String fullname, final String[] mailIDs, final boolean move, final Session session) throws OXException {
         LOG.debug("handleSpam");
-        LOG.debug("accid: " + accountId + ", fullname: " + fullname + ", move: " + move + ", session: " + session.toString());
+        LOG.debug("accid: {}, fullname: {}, move: {}, session: {}", accountId, fullname, move, session.toString());
 
         // get access to internal mailstore
         final MailService mailService = SpamExpertsServiceRegistry.getInstance().getService(MailService.class);
