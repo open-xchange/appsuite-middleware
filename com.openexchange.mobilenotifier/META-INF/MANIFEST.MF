@@ -8,5 +8,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
  com.openexchange.i18n,
  com.openexchange.log,
+ org.osgi.framework,
+ org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.mobilenotifier
+Bundle-Activator: com.openexchange.mobilenotifier.osgi.MobileNotifierActivator

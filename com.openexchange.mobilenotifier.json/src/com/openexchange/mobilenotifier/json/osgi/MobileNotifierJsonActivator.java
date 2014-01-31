@@ -50,7 +50,7 @@
 package com.openexchange.mobilenotifier.json.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.mobilenotifier.MobileNotifierService;
+import com.openexchange.mobilenotifier.MobileNotifierServiceRegistry;
 import com.openexchange.mobilenotifier.json.MobileNotifierActionFactory;
 
 /**
@@ -69,7 +69,7 @@ public class MobileNotifierJsonActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MobileNotifierService.class };
+        return new Class<?>[] { MobileNotifierServiceRegistry.class };
     }
 
     @Override

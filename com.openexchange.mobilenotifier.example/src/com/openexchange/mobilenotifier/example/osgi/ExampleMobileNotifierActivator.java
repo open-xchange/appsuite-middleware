@@ -54,6 +54,11 @@ import com.openexchange.mobilenotifier.example.ExampleCalendarMobileNotifierServ
 import com.openexchange.mobilenotifier.example.ExampleMailMobileNotifierService;
 import com.openexchange.osgi.HousekeepingActivator;
 
+/**
+ * {@link ExampleMobileNotifierActivator}
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ */
 public class ExampleMobileNotifierActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
@@ -63,5 +68,6 @@ public class ExampleMobileNotifierActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         registerService(MobileNotifierService.class, new ExampleMailMobileNotifierService());
+        registerService(MobileNotifierService.class, new ExampleCalendarMobileNotifierService());
     }
 }

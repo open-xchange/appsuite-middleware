@@ -47,62 +47,80 @@
  *
  */
 
-package com.openexchange.mobilenotifier.example;
+package com.openexchange.mobilenotifier.osgi;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.exception.OXException;
+import com.openexchange.mobilenotifier.MobileNotifierExceptionCodes;
 import com.openexchange.mobilenotifier.MobileNotifierService;
-import com.openexchange.mobilenotifier.NotifyItem;
-import com.openexchange.mobilenotifier.NotifyTemplate;
+import com.openexchange.mobilenotifier.MobileNotifierServiceRegistry;
 
 /**
- * {@link ExampleMailMobileNotifierService} - Example mail implementation of a mobile notifier service
+ * {@link MobileNotifierServiceRegistryImpl}
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class ExampleMailMobileNotifierService implements MobileNotifierService {
+public class MobileNotifierServiceRegistryImpl extends ServiceTracker<MobileNotifierService, MobileNotifierService> implements MobileNotifierServiceRegistry {
 
-    public ExampleMailMobileNotifierService() {
-        super();
+    final ConcurrentMap<String, MobileNotifierService> map;
+    /**
+     * Initializes a new {@link OSGiMetaDataRegistry}.
+     */
+    public MobileNotifierServiceRegistryImpl(BundleContext context) {
+        super(context, MobileNotifierService.class, null);
+        map = new ConcurrentHashMap<String, MobileNotifierService>();
     }
 
     @Override
-    public String getProviderName() {
-        return "mail";
+    public MobileNotifierService getService(String provider) throws OXException {
+        final MobileNotifierService service = map.get(provider);
+        if (null == service) {
+            throw MobileNotifierExceptionCodes.UNKNOWN_SERVICE.create(provider);
+        }
+
+        return service;
     }
 
     @Override
-    public boolean isEnabled(int uid, int cid) {
-        return true;
+    public List<MobileNotifierService> getAllServices() throws OXException {
+        return new ArrayList<MobileNotifierService>(map.values());
     }
 
     @Override
-    public List<NotifyItem> getItems(int uid, int cid) throws OXException {
-        // TODO clarification: How to get the key items? (via read on templates?)
-        List<NotifyItem> list = new ArrayList<NotifyItem>();
-        NotifyItem ni = new NotifyItem();
-        ni.setKey("{{subject}}");
-        ni.setValue("This is a subject");
-        list.add(ni);
-        ni = new NotifyItem();
-        ni.setKey("{{receiveDate}}");
-        ni.setValue("12.04.2013 - 12:45:00");
-        list.add(ni);
-        ni = new NotifyItem();
-        ni.setKey("{{userId}}");
-        ni.setValue("1");
-        list.add(ni);
-        return list;
-    }
-
-    @Override
-    public NotifyTemplate getTemplate() throws OXException {
-        // read on template
+    public MobileNotifierService addingService(final ServiceReference<MobileNotifierService> reference) {
+        final MobileNotifierService service = context.getService(reference);
+        {
+            final MobileNotifierService addMe = service;
+            if (null == map.putIfAbsent(addMe.getProviderName(), addMe)) {
+                return service;
+            }
+            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MobileNotifierServiceRegistry.class);
+            logger.warn(
+                "MobileNotifier service could not be added to registry. Another service meta data is already registered with identifier: {}",
+                addMe.getProviderName());
+        }
+        /*
+         * Adding to registry failed
+         */
+        context.ungetService(reference);
         return null;
     }
-
+    
     @Override
-    public void putTemplate() throws OXException {
+    public void removedService(final ServiceReference<MobileNotifierService> reference, final MobileNotifierService service) {
+        if (null != service) {
+            try {
+                final MobileNotifierService removeMe = service;
+                map.remove(removeMe.getProviderName());
+            } finally {
+                context.ungetService(reference);
+            }
+        }
     }
 }

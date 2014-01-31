@@ -49,6 +49,11 @@
 
 package com.openexchange.mobilenotifier.example;
 
+/**
+ * {@link AbstractMobileNotifierService}
+ * 
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ */
 public abstract class AbstractMobileNotifierService {
 
     private final String TEMPLATEPATH = System.getProperty("openexchange.propdir") + "/templates";

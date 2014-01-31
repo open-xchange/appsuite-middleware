@@ -47,55 +47,53 @@
  *
  */
 
-package com.openexchange.mobilenotifier;
+package com.openexchange.mobilenotifier.osgi;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.mobilenotifier.MobileNotifierServiceRegistry;
 
 /**
- * {@link MobileNotifierService} - The Mobilenotifier service.
+ * {@link MobileNotifierActivator}
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
- * @since 7.6.0
  */
-public interface MobileNotifierService {
-    /**
-     * Get the provider name
-     * 
-     * @return String the name the providers
-     */
-    String getProviderName();
+public class MobileNotifierActivator implements BundleActivator {
 
-    /**
-     * Checks if a provider is enabled by a user
-     * 
-     * @param session
-     * @return True if a provider is enabled otherwise false
-     */
-    boolean isEnabled(int uid, int cid);
+    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobileNotifierActivator.class);
+    private MobileNotifierServiceRegistryImpl registryImpl;
 
-    /**
-     * Gets the Items
-     * 
-     * @param session - The session
-     * @return map
-     * @throws OXException
-     * @TODO: maybe change to return type map
-     */
-    List<NotifyItem> getItems(int uid, int cid) throws OXException;
+    private ServiceRegistration<MobileNotifierServiceRegistry> registeredService;
 
-    /**
-     * Reads a template from the disk
-     * 
-     * @return NotifyTemplate - The template
-     * @throws OXException
-     */
-    NotifyTemplate getTemplate() throws OXException;
+    @Override
+    public void start(BundleContext context) throws Exception {
+        try {
+            LOG.info("starting bundle: com.openxchange.mobilenotifier");
+            this.registryImpl = new MobileNotifierServiceRegistryImpl(context);
+            this.registryImpl.open();
+            registeredService = context.registerService(MobileNotifierServiceRegistry.class, registryImpl, null);
+        } catch (Exception e) {
+            LOG.error("starting bundle \"com.openxchange.mobilenotifier\" failed: ", e);
+            throw e;
+        }
+    }
 
-    /**
-     * Writes changes to the template
-     * 
-     * @throws OXException
-     */
-    void putTemplate() throws OXException;
+    @Override
+    public void stop(BundleContext context) throws Exception {
+        try {
+            LOG.info("stopping bundle: com.openxchange.mobilenotifier");
+            if (registeredService != null) {
+                registeredService.unregister();
+                registeredService = null;
+            }
+            if (registryImpl != null) {
+                this.registryImpl.close();
+                this.registryImpl = null;
+            }
+        } catch (Exception e) {
+            LOG.error("stopping bundle: \"com.openxchange.mobilenotifier\"", e);
+            throw e;
+        }
+    }
 }

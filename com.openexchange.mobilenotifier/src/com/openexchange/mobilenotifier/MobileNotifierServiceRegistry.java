@@ -53,49 +53,26 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link MobileNotifierService} - The Mobilenotifier service.
+ * {@link MobileNotifierServiceRegistry}
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
- * @since 7.6.0
  */
-public interface MobileNotifierService {
-    /**
-     * Get the provider name
-     * 
-     * @return String the name the providers
-     */
-    String getProviderName();
+public interface MobileNotifierServiceRegistry {
 
     /**
-     * Checks if a provider is enabled by a user
+     * Gets a specific mobile notifier service by a provider
      * 
-     * @param session
-     * @return True if a provider is enabled otherwise false
-     */
-    boolean isEnabled(int uid, int cid);
-
-    /**
-     * Gets the Items
-     * 
-     * @param session - The session
-     * @return map
-     * @throws OXException
-     * @TODO: maybe change to return type map
-     */
-    List<NotifyItem> getItems(int uid, int cid) throws OXException;
-
-    /**
-     * Reads a template from the disk
-     * 
-     * @return NotifyTemplate - The template
+     * @param provider - Identifies the service
+     * @return A MobileNotifierService
      * @throws OXException
      */
-    NotifyTemplate getTemplate() throws OXException;
+    MobileNotifierService getService(String provider) throws OXException;
 
     /**
-     * Writes changes to the template
+     * Gets all mobile notifier services
      * 
+     * @return List of MobileNotifierService
      * @throws OXException
      */
-    void putTemplate() throws OXException;
+    List<MobileNotifierService> getAllServices() throws OXException;
 }

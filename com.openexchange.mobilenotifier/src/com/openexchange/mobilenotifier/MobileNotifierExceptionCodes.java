@@ -65,7 +65,11 @@ public enum MobileNotifierExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * A JSON error occurred: %1$s
      */
-    JSON_ERROR("A JSON error occurred: %1$s", Category.CATEGORY_ERROR, 1);
+    JSON_ERROR("A JSON error occurred: %1$s", Category.CATEGORY_ERROR, 1),
+    /**
+     * Could not find service for provider %1$s
+     */
+    UNKNOWN_SERVICE("Could not find service for provider %1$s", Category.CATEGORY_ERROR, 2);
     /**
      * The prefix constant.
      */
