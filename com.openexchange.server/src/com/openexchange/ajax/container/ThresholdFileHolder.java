@@ -392,7 +392,7 @@ public final class ThresholdFileHolder implements IFileHolder {
             return new ThresholdFileHolder();
         }
 
-        // Check internal buffer
+        // Check internal buffer vs temp. file
         final ByteArrayOutputStream buf = this.buf;
         if (null != buf) {
             copy.buf = new UnsynchronizedByteArrayOutputStream(buf);
@@ -400,6 +400,7 @@ public final class ThresholdFileHolder implements IFileHolder {
             try {
                 final File newTempFile = TmpFileFileHolder.newTempFile();
                 copyFile(tempFile, newTempFile);
+                copy.tempFile = newTempFile;
             } catch (final IOException e) {
                 throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
