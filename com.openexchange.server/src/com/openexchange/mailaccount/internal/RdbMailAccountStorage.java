@@ -56,6 +56,8 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.net.InetAddress;
@@ -522,12 +524,17 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     @Override
     public void clearFullNamesForMailAccount(final int id, final int user, final int cid) throws OXException {
+        clearFullNamesForMailAccount(id, null, user, cid);
+    }
+
+    @Override
+    public void clearFullNamesForMailAccount(final int id, final int[] indexes, final int user, final int cid) throws OXException {
         final Connection con = Database.get(cid, true);
         boolean rollback = false;
         try {
             con.setAutoCommit(false);
             rollback = true;
-            clearFullNamesForMailAccount(id, user, cid, con);
+            clearFullNamesForMailAccount(id, indexes, user, cid, con);
             con.commit();
             rollback = false;
         } catch (final SQLException e) {
@@ -543,6 +550,18 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
+    private static final TIntObjectMap<String> INDEX_2_COL;
+    static {
+        final TIntObjectMap<String> map = new TIntObjectHashMap<String>(8);
+        map.put(StorageUtility.INDEX_CONFIRMED_HAM, "confirmed_ham_fullname");
+        map.put(StorageUtility.INDEX_CONFIRMED_SPAM, "confirmed_spam_fullname");
+        map.put(StorageUtility.INDEX_DRAFTS, "drafts_fullname");
+        map.put(StorageUtility.INDEX_SENT, "sent_fullname");
+        map.put(StorageUtility.INDEX_SPAM, "spam_fullname");
+        map.put(StorageUtility.INDEX_TRASH, "trash_fullname");
+        INDEX_2_COL = map;
+    }
+
     /**
      * Clears full names for specified mail account.
      *
@@ -552,24 +571,51 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
      * @param con The connection to use
      * @throws OXException If invalidation fails
      */
-    public void clearFullNamesForMailAccount(final int id, final int user, final int cid, final Connection con) throws OXException {
+    public void clearFullNamesForMailAccount(final int id, final int[] indexes, final int user, final int cid, final Connection con) throws OXException {
         if (null == con) {
-            clearFullNamesForMailAccount(id, user, cid);
+            clearFullNamesForMailAccount(id, indexes, user, cid);
             return;
         }
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("UPDATE user_mail_account SET trash_fullname=?, sent_fullname=?, drafts_fullname=?, spam_fullname=?, confirmed_spam_fullname=?, confirmed_ham_fullname=? WHERE cid=? AND id=? AND user=?");
-            int num = 1;
-            stmt.setString(num++, "");
-            stmt.setString(num++, "");
-            stmt.setString(num++, "");
-            stmt.setString(num++, "");
-            stmt.setString(num++, "");
-            stmt.setString(num++, "");
-            stmt.setLong(num++, cid);
-            stmt.setLong(num++, id);
-            stmt.setLong(num++, user);
+            if (null == indexes || indexes.length == 0) {
+                stmt = con.prepareStatement("UPDATE user_mail_account SET trash_fullname=?, sent_fullname=?, drafts_fullname=?, spam_fullname=?, confirmed_spam_fullname=?, confirmed_ham_fullname=? WHERE cid=? AND id=? AND user=?");
+                int num = 1;
+                stmt.setString(num++, "");
+                stmt.setString(num++, "");
+                stmt.setString(num++, "");
+                stmt.setString(num++, "");
+                stmt.setString(num++, "");
+                stmt.setString(num++, "");
+                stmt.setLong(num++, cid);
+                stmt.setLong(num++, id);
+                stmt.setLong(num++, user);
+            } else {
+                StringAllocator stmtBuilder = new StringAllocator(512).append("UPDATE user_mail_account SET ");
+                int finds = 0;
+                for (final int index : indexes) {
+                    final String col = INDEX_2_COL.get(index);
+                    if (null != col) {
+                        finds++;
+                        stmtBuilder.append(col).append("=?,");
+                    }
+                }
+                if (finds <= 0) {
+                    // Nothing to do
+                    return;
+                }
+                stmtBuilder.deleteLastChar();
+                stmtBuilder.append(" WHERE cid=? AND id=? AND user=?");
+                stmt = con.prepareStatement(stmtBuilder.toString());
+                stmtBuilder = null;
+                int num = 1;
+                for (int i = finds; i-- > 0;) {
+                    stmt.setString(num++, "");
+                }
+                stmt.setLong(num++, cid);
+                stmt.setLong(num++, id);
+                stmt.setLong(num++, user);
+            }
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());

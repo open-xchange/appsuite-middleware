@@ -573,6 +573,27 @@ public class MimeMailException extends OXException {
     }
 
     /**
+     * Checks for possible already-exists error.
+     */
+    public static boolean isAlreadyExistsException(final MessagingException e) {
+        if (null == e) {
+            return false;
+        }
+        return isAlreadyExistsException(e.getMessage());
+    }
+
+    /**
+     * Checks for possible already-exists error.
+     */
+    public static boolean isAlreadyExistsException(final String msg) {
+        if (null == msg) {
+            return false;
+        }
+        final String m = toLowerCase(msg);
+        return (m.indexOf("alreadyexists") >= 0);
+    }
+
+    /**
      * Checks for possible over-quota error.
      */
     public static boolean isOverQuotaException(final MessagingException e) {

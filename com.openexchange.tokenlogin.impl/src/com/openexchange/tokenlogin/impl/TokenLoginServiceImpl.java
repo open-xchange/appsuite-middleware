@@ -208,24 +208,26 @@ public class TokenLoginServiceImpl implements TokenLoginService {
     private IMap<String, String> hzMap() {
         final String hzMapName = this.hzMapName;
         if (null == hzMapName) {
+            LOG.trace("Name of Hazelcast map is missing for token login service.");
             return null;
         }
         final HazelcastInstance hazelcastInstance = Services.getService(HazelcastInstance.class);
         if (hazelcastInstance == null || !hazelcastInstance.getLifecycleService().isRunning()) {
+            LOG.trace("Hazelcast instance is not available or running.");
             return null;
         }
         return hazelcastInstance.getMap(hzMapName);
     }
 
-    private void removeFromHzMap(final String token, final boolean async) {
+    private String removeFromHzMap(String token) {
         final IMap<String, String> hzMap = hzMap();
-        if (null != hzMap) {
-            if (async) {
-                hzMap.removeAsync(token);
-            } else {
-                hzMap.remove(token);
-            }
+        String retval = null;
+        if (null == hzMap) {
+            LOG.trace("Hazelcast map for remote token logins is not available.");
+        } else {
+            retval = hzMap.remove(token);
         }
+        return retval;
     }
 
     private void putToHzMap(final String token, final String sessionId) {
@@ -277,7 +279,6 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         }
         // Get session identifier
         String sessionId;
-
         lock.lock();
         try {
             sessionId = token2sessionId.remove(token);
@@ -288,20 +289,23 @@ public class TokenLoginServiceImpl implements TokenLoginService {
                     sessionId = hzMap.remove(token);
                 }
                 LOG.trace("Resolved token {} remotely to session {}.", token, sessionId);
-                if (null == sessionId) {
-                    throw TokenLoginExceptionCodes.NO_SUCH_TOKEN.create(token);
-                }
             } else {
-                LOG.trace("Resolved token {} locally to session {}.", token, sessionId);
                 // Local HIT, remove from Hazelcast map
-                removeFromHzMap(token, false);
+                LOG.trace("Resolved token {} locally to session {}.", token, sessionId);
+                if (null != removeFromHzMap(token)) {
+                    LOG.trace("Successfully removed token {} from remote map.", token);
+                } else {
+                    LOG.trace("Failed to removed token {} from remote map.", token);
+                }
+            }
+            if (null == sessionId) {
+                throw TokenLoginExceptionCodes.NO_SUCH_TOKEN.create(token);
             }
             // Remove from other mapping, too
             sessionId2token.remove(sessionId);
         } finally {
             lock.unlock();
         }
-
         // Create duplicate session
         final Session session = sessiondService.getSession(sessionId);
         if (null == session) {
@@ -333,7 +337,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         final String token = sessionId2token.remove(session.getSessionID());
         if (null != token) {
             token2sessionId.remove(token);
-            removeFromHzMap(token, true);
+            removeFromHzMap(token);
         }
     }
 }

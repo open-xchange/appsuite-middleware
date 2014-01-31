@@ -90,6 +90,36 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
     }
 
     /**
+     * Creates a new byte array output stream, containing given bytes.
+     *
+     * @param bytes The initial bytes.
+     * @exception IllegalArgumentException If bytes is null
+     */
+    public UnsynchronizedByteArrayOutputStream(final byte[] bytes) {
+        super(0);
+        if (null == bytes) {
+            throw new IllegalArgumentException("bytes is null.");
+        }
+        buf = bytes;
+        count = bytes.length;
+    }
+
+    /**
+     * Creates a new byte array output stream, containing given bytes.
+     *
+     * @param bytes The initial bytes.
+     * @exception IllegalArgumentException If bytes is null
+     */
+    public UnsynchronizedByteArrayOutputStream(final ByteArrayOutputStream bytes) {
+        super(0);
+        if (null == bytes) {
+            throw new IllegalArgumentException("bytes is null.");
+        }
+        buf = bytes instanceof UnsynchronizedByteArrayOutputStream ? ((UnsynchronizedByteArrayOutputStream) bytes).buf : bytes.toByteArray();
+        count = buf.length;
+    }
+
+    /**
      * Gets the string value for valid bytes.
      *
      * @param charset The charset

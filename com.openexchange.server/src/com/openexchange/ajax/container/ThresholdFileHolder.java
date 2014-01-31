@@ -57,8 +57,10 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.channels.FileChannel;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -371,6 +373,43 @@ public final class ThresholdFileHolder implements IFileHolder {
     }
 
     /**
+     * Creates a copy of this file holder.
+     *
+     * @return A copy
+     * @throws OXException If returning a copy fails
+     */
+    public ThresholdFileHolder copy() throws OXException {
+        final ThresholdFileHolder copy = new ThresholdFileHolder();
+        copy.count = count;
+        copy.contentType = contentType;
+        copy.delivery = delivery;
+        copy.disposition = disposition;
+        copy.name = name;
+
+        // Check if content is available
+        if (count <= 0) {
+            // No content to make a copy of
+            return new ThresholdFileHolder();
+        }
+
+        // Check internal buffer vs temp. file
+        final ByteArrayOutputStream buf = this.buf;
+        if (null != buf) {
+            copy.buf = new UnsynchronizedByteArrayOutputStream(buf);
+        } else if (null != tempFile) {
+            try {
+                final File newTempFile = TmpFileFileHolder.newTempFile();
+                copyFile(tempFile, newTempFile);
+                copy.tempFile = newTempFile;
+            } catch (final IOException e) {
+                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            }
+        }
+
+        return copy;
+    }
+
+    /**
      * Gets the input stream for this file holder's content.
      * <p>
      * Closing the stream will also {@link #close() close} this file holder.
@@ -528,6 +567,20 @@ public final class ThresholdFileHolder implements IFileHolder {
             } finally {
                 fileHolder.close();
             }
+        }
+    }
+
+    private static void copyFile(final File in, final File out) throws IOException {
+        FileChannel inChannel = null;
+        FileChannel outChannel = null;
+        try {
+            inChannel = new FileInputStream(in).getChannel();
+            outChannel = new FileOutputStream(out).getChannel();
+            inChannel.transferTo(0, inChannel.size(), outChannel);
+        } catch (final IOException e) {
+            throw e;
+        } finally {
+            Streams.close(inChannel, outChannel);
         }
     }
 
