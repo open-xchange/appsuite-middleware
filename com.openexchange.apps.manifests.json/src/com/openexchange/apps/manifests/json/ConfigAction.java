@@ -100,7 +100,7 @@ public class ConfigAction implements AJAXActionService {
         this.registry = registry;
 
         computedValues = new ComputedServerConfigValueService[]{
-            new Manifests(services, manifests), new Capabilities(services),
+            new Manifests(services, manifests, registry), new Capabilities(services),
             new Hosts(),
             new ServerVersion(),
             new Languages(services),

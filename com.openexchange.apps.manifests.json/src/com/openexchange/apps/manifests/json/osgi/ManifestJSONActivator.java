@@ -58,6 +58,7 @@ import org.json.JSONArray;
 import org.osgi.framework.BundleContext;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.apps.manifests.ComputedServerConfigValueService;
+import com.openexchange.apps.manifests.ManifestContributor;
 import com.openexchange.apps.manifests.ServerConfigMatcherService;
 import com.openexchange.apps.manifests.json.ManifestActionFactory;
 import com.openexchange.apps.manifests.json.values.UIVersion;
@@ -115,7 +116,13 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
             context,
             ComputedServerConfigValueService.class);
         rememberTracker(computedValueTracker);
-
+        
+        final NearRegistryServiceTracker<ManifestContributor> manifestContributorTracker = new NearRegistryServiceTracker<ManifestContributor>(
+            context,
+            ManifestContributor.class
+        );
+        rememberTracker(manifestContributorTracker);
+        
         registerModule(new ManifestActionFactory(this, readManifests(), new ServerConfigServicesLookup() {
 
             @Override
@@ -126,6 +133,10 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
             @Override
             public List<ComputedServerConfigValueService> getComputed() {
                 return Collections.unmodifiableList(computedValueTracker.getServiceList());
+            }
+            
+            public List<ManifestContributor> getContributors() {
+                return Collections.unmodifiableList(manifestContributorTracker.getServiceList());
             }
         }), "apps/manifests");
 

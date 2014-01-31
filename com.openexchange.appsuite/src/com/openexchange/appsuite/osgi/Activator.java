@@ -55,9 +55,14 @@ import org.osgi.framework.BundleException;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.appsuite.AppsLoadServlet;
+import com.openexchange.appsuite.FileContribution;
+import com.openexchange.appsuite.FileContributor;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.exception.OXException;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.NearRegistryServiceTracker;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link Activator} - The activator for <code>"com.openexchange.appsuite"</code> bundle.
@@ -97,5 +102,29 @@ public class Activator extends HousekeepingActivator {
             sb.append(app.getPath());
         }
         logger.info("Servlet path \"apps/load\" successfully registered with \"apps\"={} and \"zoneinfo\"={}", sb.substring(1), zoneinfo.getPath());
+        
+        final NearRegistryServiceTracker<FileContributor> contributorTracker = new NearRegistryServiceTracker<FileContributor>(context, FileContributor.class);
+        rememberTracker(contributorTracker);
+        
+        openTrackers();
+        
+        AppsLoadServlet.contributors = new FileContributor() {
+            
+            @Override
+            public FileContribution getData(ServerSession session, String moduleName) throws OXException {
+                for(FileContributor contributor: contributorTracker.getServiceList()) {
+                    FileContribution contribution = null;
+                    try {
+                        contribution = contributor.getData(session, moduleName);                        
+                    } catch (OXException x) {
+                        
+                    }
+                    if (contribution != null) {
+                        return contribution;
+                    }
+                }
+                return null;
+            }
+        };
     }
 }

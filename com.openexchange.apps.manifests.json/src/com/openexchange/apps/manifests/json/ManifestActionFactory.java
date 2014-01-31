@@ -70,7 +70,7 @@ public class ManifestActionFactory implements AJAXActionServiceFactory {
 
     public ManifestActionFactory(ServiceLookup services, JSONArray manifests, ServerConfigServicesLookup registry) {
         super();
-        all = new AllAction(services, manifests);
+        all = new AllAction(services, manifests, registry);
         config = new ConfigAction(services, manifests, registry);
     }
 

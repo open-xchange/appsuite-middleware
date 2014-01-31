@@ -58,6 +58,8 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.apps.manifests.ManifestContributor;
+import com.openexchange.apps.manifests.json.osgi.ServerConfigServicesLookup;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
@@ -73,23 +75,42 @@ import com.openexchange.tools.session.ServerSession;
  */
 @DispatcherNotes(noSession = true)
 public class AllAction implements AJAXActionService {
-
+    
     private final JSONArray manifests;
     private final ServiceLookup services;
+    private ServerConfigServicesLookup registry;
 
-    public AllAction(ServiceLookup services, JSONArray manifests) {
+    public AllAction(ServiceLookup services, JSONArray manifests, ServerConfigServicesLookup registry) {
         super();
         this.manifests = manifests;
         this.services = services;
+        this.registry = registry;
     }
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        return new AJAXRequestResult(getManifests(session, manifests, services), "json");
+        return new AJAXRequestResult(getManifests(session, manifests, services, registry), "json");
     }
 
-    public static JSONArray getManifests(ServerSession session, JSONArray manifests, ServiceLookup services) throws OXException {
+    public static JSONArray getManifests(ServerSession session, JSONArray manifests, ServiceLookup services, ServerConfigServicesLookup registry) throws OXException {
+        manifests = new JSONArray(manifests);
+
         JSONArray result = new JSONArray();
+        for(ManifestContributor contributors: registry.getContributors()) {
+            try {
+                JSONArray additionalManifests = contributors.getAdditionalManifests(session);
+                for(int i = 0, size = additionalManifests.length(); i < size; i++) {
+                    manifests.put(additionalManifests.get(i));
+                }
+            } catch (OXException x) {
+                // TODO: Logging
+                x.printStackTrace();
+            } catch (JSONException x) {
+                // TODO: Logging
+                x.printStackTrace();
+            }
+        }
+        
         try {
             if (session.isAnonymous()) {
                 // Deliver no apps and only plugins with the namespace 'signin'

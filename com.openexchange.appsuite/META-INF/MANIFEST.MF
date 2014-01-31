@@ -19,6 +19,7 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.mail.mime,
  com.openexchange.osgi,
  com.openexchange.server,
+ com.openexchange.session,
  com.openexchange.tools.session,
  javax.servlet,
  javax.servlet.http,
@@ -26,6 +27,8 @@ Import-Package: com.openexchange.ajax,
  org.json,
  org.osgi.framework,
  org.osgi.service.http,
+ org.osgi.util.tracker,
  org.slf4j
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: com.openexchange.appsuite.osgi.Activator
+Export-Package: com.openexchange.appsuite

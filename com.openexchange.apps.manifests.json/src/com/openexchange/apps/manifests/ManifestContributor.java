@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,23 +47,18 @@
  *
  */
 
-package com.openexchange.apps.manifests.json.osgi;
+package com.openexchange.apps.manifests;
 
-import java.util.List;
-import com.openexchange.apps.manifests.ComputedServerConfigValueService;
-import com.openexchange.apps.manifests.ManifestContributor;
-import com.openexchange.apps.manifests.ServerConfigMatcherService;
+import org.json.JSONArray;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link ServerConfigServicesLookup}
+ * {@link ManifestContributor}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface ServerConfigServicesLookup {
-
-    public List<ComputedServerConfigValueService> getComputed();
-
-    public List<ServerConfigMatcherService> getMatchers();
-    
-    public List<ManifestContributor> getContributors();
+public interface ManifestContributor {
+    public JSONArray getAdditionalManifests(ServerSession session) throws OXException;
 }
