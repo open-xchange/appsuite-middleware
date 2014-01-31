@@ -56,6 +56,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.dispatch.StanzaSender;
 import com.openexchange.realtime.exception.RealtimeException;
@@ -178,6 +179,10 @@ public class RTJSONHandler implements StanzaSender {
 
     public JSONProtocolHandler getProtocolHandler() {
         return protocolHandler;
+    }
+
+    public RealtimeJanitor getGate() {
+        return gate;
     }
 
 }
