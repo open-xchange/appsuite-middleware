@@ -112,7 +112,6 @@ public class IMAPDefaultFolderChecker {
     protected final Context ctx;
     protected final IMAPAccess imapAccess;
     protected final IMAPConfig imapConfig;
-    protected boolean retry;
 
     /**
      * Initializes a new {@link IMAPDefaultFolderChecker}.
@@ -125,7 +124,6 @@ public class IMAPDefaultFolderChecker {
      */
     public IMAPDefaultFolderChecker(final int accountId, final Session session, final Context ctx, final IMAPStore imapStore, final IMAPAccess imapAccess) {
         super();
-        retry = true;
         this.accountId = accountId;
         this.session = session;
         this.imapStore = imapStore;
