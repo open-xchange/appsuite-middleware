@@ -173,6 +173,11 @@ final class SanitizingStorageService implements MailAccountStorageService {
     }
 
     @Override
+    public void clearFullNamesForMailAccount(final int id, final int[] indexes, final int user, final int cid) throws OXException {
+        storageService.clearFullNamesForMailAccount(id, indexes, user, cid);
+    }
+
+    @Override
     public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid) throws OXException {
         storageService.deleteMailAccount(id, properties, user, cid);
     }

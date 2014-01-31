@@ -301,6 +301,15 @@ public final class StringAllocator extends AbstractStringAllocator implements ja
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
     @Override
+    public StringAllocator deleteLastChar() {
+        super.deleteLastChar();
+        return this;
+    }
+
+    /**
+     * @throws StringIndexOutOfBoundsException {@inheritDoc}
+     */
+    @Override
     public StringAllocator replace(final int start, final int end, final String str) {
         super.replace(start, end, str);
         return this;

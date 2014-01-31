@@ -156,6 +156,12 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
+    public void clearFullNamesForMailAccount(final int id, final int[] indexes, final int user, final int cid) throws OXException {
+        delegate.clearFullNamesForMailAccount(id, indexes, user, cid);
+        invalidateMailAccount(id, user, cid);
+    }
+
+    @Override
     public void deleteMailAccount(final int id, final Map<String, Object> properties, final int user, final int cid, final boolean deletePrimary, final Connection con) throws OXException {
         delegate.deleteMailAccount(id, properties, user, cid, deletePrimary, con);
         invalidateMailAccount(id, user, cid);
