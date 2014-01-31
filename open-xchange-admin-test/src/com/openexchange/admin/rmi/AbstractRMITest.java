@@ -213,6 +213,10 @@ public abstract class AbstractRMITest extends AbstractTest {
         return (OXUtilInterface) Naming.lookup(getRMIHostUrl() + OXUtilInterface.RMI_NAME);
     }
 
+    public OXTaskMgmtInterface getTaskInterface() throws MalformedURLException, RemoteException, NotBoundException {
+        return (OXTaskMgmtInterface) Naming.lookup(getRMIHostUrl() + OXTaskMgmtInterface.RMI_NAME);
+    }
+
     /**
      * Initializes a new {@link AbstractRMITest}.
      */

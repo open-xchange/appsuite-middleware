@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 2
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -164,6 +164,19 @@ Obsoletes:      open-xchange-lang-community-eu-es < %{version}
 %description eu-es
 Package containing Open-Xchange backend localization for eu_ES
 This localization package are driven by the community.
+
+Authors:
+--------
+    Open-Xchange
+
+#-------------------------------------------------------------------------------------
+
+%package fi-fi
+Group:      Applications/Productivity
+Summary:    Package containing Open-Xchange backend localization for fi_FI
+
+%description fi-fi
+Package containing Open-Xchange backend localization for fi_FI
 
 Authors:
 --------
@@ -546,7 +559,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-for LANG in ca_ES cs_CZ da_DK de_CH de_DE el_GR en_US es_ES es_MX eu_ES fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nl_NL pl_PL pt_BR pt_PT ro_RO ru_RU sk_SK sv_SE tr_TR zh_CN zh_TW en_GB; do \
+for LANG in ca_ES cs_CZ da_DK de_CH de_DE el_GR en_US es_ES es_MX eu_ES fi_FI fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nl_NL pl_PL pt_BR pt_PT ro_RO ru_RU sk_SK sv_SE tr_TR zh_CN zh_TW en_GB; do \
     PACKAGE_EXTENSION=$(echo ${LANG} | tr '[:upper:]_' '[:lower:]-'); \
     ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -Dlanguage=${LANG} -f build/build.xml clean build; \
 done
@@ -602,6 +615,11 @@ done
 %defattr(-,root,root)
 %dir /opt/open-xchange/i18n/
 /opt/open-xchange/i18n/*eu_ES*
+
+%files fi-fi
+%defattr(-,root,root)
+%dir /opt/open-xchange/i18n/
+/opt/open-xchange/i18n/*fi_FI*
 
 %files fr-ca
 %defattr(-,root,root)
@@ -704,6 +722,20 @@ done
 /opt/open-xchange/i18n/*en_GB*
 
 %changelog
+* Wed Jan 29 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-01-30
+* Tue Jan 28 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-01-31
+* Tue Jan 28 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-01-30
+* Mon Jan 27 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-01-30
+* Fri Jan 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-17
+* Thu Jan 23 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 7.4.2
+* Wed Jan 22 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-01-22
 * Mon Jan 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-01-20
 * Thu Jan 16 2014 Marcus Klein <marcus.klein@open-xchange.com>
@@ -714,14 +746,14 @@ Build for patch 2014-01-14
 Second release candidate for 7.4.2
 * Fri Jan 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-12-17
+* Fri Jan 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-17
 * Fri Jan 03 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-01-06
 * Mon Dec 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-12-09
 * Mon Dec 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 7.4.2
-* Thu Dec 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2013-12-23
 * Thu Dec 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-12-23
 * Thu Dec 19 2013 Marcus Klein <marcus.klein@open-xchange.com>

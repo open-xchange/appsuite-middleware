@@ -47,29 +47,46 @@
  *
  */
 
-package com.openexchange.logging;
+package com.openexchange.java;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.logging.mbean.ExtendedMDCFilterTest;
-import com.openexchange.logging.osgi.ActivatorTest;
-import com.openexchange.logging.osgi.ExceptionCategoryFilterRegistererTest;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import org.junit.Test;
+
 
 /**
- * Unit tests for the bundle com.openexchange.logging
+ * {@link HTMLDetectorTest}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.4.2
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
- ActivatorTest.class,
- ExceptionCategoryFilterRegistererTest.class,
- ExtendedMDCFilterTest.class
-})
-public class UnitTests {
+public class HTMLDetectorTest {
 
-    public UnitTests() {
+    /**
+     * Initializes a new {@link HTMLDetectorTest}.
+     */
+    public HTMLDetectorTest() {
+        super();
     }
+
+    @Test
+    public final void testDetectJSEventHandler() {
+        try {
+            final byte[] svgImage = ("<svg onload=\"alert(document.domain)\" xmlns=\"http://www.w3.org/2000/svg\"\n" +
+                "        xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n" +
+                "        xmlns:ev=\"http://www.w3.org/2001/xml-events\"\n" +
+                "        version=\"1.1\" baseProfile=\"full\"\n" +
+                "        width=\"700px\" height=\"400px\" viewBox=\"0 0 700 400\">\n" +
+                "    <text x=\"20\" y=\"40\">oha!</text>\n" +
+                "</svg>").getBytes();
+
+            boolean containsHTMLTags = HTMLDetector.containsHTMLTags(new ByteArrayInputStream(svgImage), false);
+
+            org.junit.Assert.assertTrue("HTMLDetector should have found \"onload\" JavaScript event handler.", containsHTMLTags);
+        } catch (IOException e) {
+            e.printStackTrace();
+            org.junit.Assert.fail(e.getMessage());
+        }
+
+    }
+
 }

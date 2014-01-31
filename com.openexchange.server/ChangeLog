@@ -1,3 +1,46 @@
+* 2014-01-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30895: Do not stick to have "image/*" Content-Type, but accept default Content-Type "application/octet-stream", too
+
+* 2014-01-30 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30852: Check permissions of all subfolders recursively prior accepting client deletion 
+
+* 2014-01-29 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30384: Don't distribute non-common events, don't distribute events received via external mail notification   
+ - Fix for bug 28479: Invalidate folder cache on subscription status changes   
+
+* 2014-01-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30626: Signal special "Collected addresses" folder as a default folder
+ - Fix for bug 29350: Hide "Global address book" folder if associated "gab" capability is not granted
+
+* 2014-01-29 - marcus.klein@open-xchange.com
+
+ - Fix for bug 30862: Added packaging for Finnish language.
+
+* 2014-01-28 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 30609: Rename XING.yml to xing.yml to restore previous deleted file
+
+* 2014-01-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30418: Added EN_GB section for standard mail folder names in AdminUser.properties
+
+* 2014-01-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30820: Enhanced HTML detector by JavaScript event handler names
+                      (as listed by http://de.selfhtml.org/javascript/sprache/eventhandler.htm )
+
+* 2014-01-24 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30692: Preserve previous filename unless explicitly set when creating a new file version   
+
+* 2014-01-23 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30777: Use relative identifier when retrieving metadata from ID based file access  
+
 * 2014-01-22 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 30747: Don't preserve creation timestamp of source file when copying infostore files  
@@ -1377,6 +1420,10 @@
  - Fix for bug 26681: Repair broken state in HazelcastResourceDirectory
  - Fix for bug 26470: Repair broken state in HazelcastResourceDirectory
 
+* 2013-07-01 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 27300: Pass down changed folder ID when updating referenced distribution list members
+   
 * 2013-06-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 27292: Check for proper field name on color label update

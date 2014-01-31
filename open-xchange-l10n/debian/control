@@ -71,6 +71,11 @@ Conflicts: open-xchange-lang-community-eu-es (<< 6.21.0-0)
 Description: Package containing Open-Xchange backend localization for eu_ES
  This localization package are driven by the community.
 
+Package: open-xchange-l10n-fi-fi
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
+Description: Package containing Open-Xchange backend localization for fi_FI
+
 Package: open-xchange-l10n-fr-ca
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)

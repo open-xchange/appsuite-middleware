@@ -1,3 +1,9 @@
+open-xchange-admin-contextrestore (7.4.2-3) stable; urgency=low
+
+  * Third release candidate for 7.4.2
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Thu, 23 Jan 2014 16:00:28 +0100
+
 open-xchange-admin-contextrestore (7.4.2-2) stable; urgency=low
 
   * Second release candidate for 7.4.2
@@ -15,6 +21,24 @@ open-xchange-admin-contextrestore (7.4.2-0) unstable; urgency=low
   * prepare for 7.4.2
 
  -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Wed, 18 Dec 2013 17:33:27 +0100
+
+open-xchange-admin-contextrestore (7.4.1-19) stable; urgency=low
+
+  * Build for patch 2014-01-30
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Wed, 29 Jan 2014 11:04:03 +0100
+
+open-xchange-admin-contextrestore (7.4.1-18) stable; urgency=low
+
+  * Build for patch 2014-01-31
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Tue, 28 Jan 2014 15:09:10 +0100
+
+open-xchange-admin-contextrestore (7.4.1-17) stable; urgency=low
+
+  * Build for patch 2014-01-30
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Tue, 28 Jan 2014 10:24:48 +0100
 
 open-xchange-admin-contextrestore (7.4.1-16) stable; urgency=low
 
@@ -117,6 +141,18 @@ open-xchange-admin-contextrestore (7.4.1-0) unstable; urgency=low
   * prepare for 7.4.1 release
 
  -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Fri, 20 Sep 2013 11:43:24 +0200
+
+open-xchange-admin-contextrestore (7.4.0-27) stable; urgency=low
+
+  * Build for patch 2014-01-30
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Tue, 28 Jan 2014 12:10:04 +0100
+
+open-xchange-admin-contextrestore (7.4.0-26) stable; urgency=low
+
+  * Build for patch 2013-12-17
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Fri, 24 Jan 2014 14:56:06 +0100
 
 open-xchange-admin-contextrestore (7.4.0-25) stable; urgency=low
 
@@ -279,6 +315,18 @@ open-xchange-admin-contextrestore (7.4.0-0) unstable; urgency=low
   * prepare for 7.4.0
 
  -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Tue, 16 Jul 2013 15:15:10 +0200
+
+open-xchange-admin-contextrestore (7.2.2-28) stable; urgency=low
+
+  * Build for patch 2014-01-30
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Mon, 27 Jan 2014 17:09:40 +0100
+
+open-xchange-admin-contextrestore (7.2.2-27) stable; urgency=low
+
+  * Build for patch 2014-01-22
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Wed, 22 Jan 2014 17:02:14 +0100
 
 open-xchange-admin-contextrestore (7.2.2-26) stable; urgency=low
 

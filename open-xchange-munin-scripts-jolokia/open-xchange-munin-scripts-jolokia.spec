@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: java-devel >= 1.6.0
 Version:	   @OXVERSION@
-%define        ox_release 2
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GNU General Public License (GPL)
@@ -67,6 +67,16 @@ exit 0
 %config(noreplace) /etc/munin/plugin-conf.d/*
 
 %changelog
+* Wed Jan 29 2014 Felix Marx <felix.marx@open-xchange.com>
+Build for patch 2014-01-30
+* Tue Jan 28 2014 Felix Marx <felix.marx@open-xchange.com>
+Build for patch 2014-01-31
+* Tue Jan 28 2014 Felix Marx <felix.marx@open-xchange.com>
+Build for patch 2014-01-30
+* Fri Jan 24 2014 Felix Marx <felix.marx@open-xchange.com>
+Build for patch 2013-12-17
+* Thu Jan 23 2014 Felix Marx <felix.marx@open-xchange.com>
+Third release candidate for 7.4.2
 * Mon Jan 20 2014 Felix Marx <felix.marx@open-xchange.com>
 Build for patch 2014-01-20
 * Thu Jan 16 2014 Felix Marx <felix.marx@open-xchange.com>
@@ -77,14 +87,14 @@ Build for patch 2014-01-14
 Second release candidate for 7.4.2
 * Fri Jan 10 2014 Felix Marx <felix.marx@open-xchange.com>
 Build for patch 2013-12-17
+* Fri Jan 10 2014 Felix Marx <felix.marx@open-xchange.com>
+Build for patch 2013-12-17
 * Fri Jan 03 2014 Felix Marx <felix.marx@open-xchange.com>
 Build for patch 2014-01-06
 * Mon Dec 23 2013 Felix Marx <felix.marx@open-xchange.com>
 Build for patch 2013-12-09
 * Mon Dec 23 2013 Felix Marx <felix.marx@open-xchange.com>
 First release candidate for 7.4.2
-* Thu Dec 19 2013 Felix Marx <felix.marx@open-xchange.com>
-Build for patch 2013-12-23
 * Thu Dec 19 2013 Felix Marx <felix.marx@open-xchange.com>
 Build for patch 2013-12-23
 * Thu Dec 19 2013 Felix Marx <felix.marx@open-xchange.com>

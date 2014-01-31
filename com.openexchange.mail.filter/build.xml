@@ -18,7 +18,13 @@
         <include name="javacc.jar"/>
     </fileset>
 
-    <target name="prepare">
+	<condition property="com.openexchange.mail.filter.needs-code-generation">
+        <not>
+            <available file="${mainSrcDir}/${jSievePrefix}/jsieve/parser/generated" type="dir" />
+        </not>
+	</condition>
+	
+    <target name="prepare" if="com.openexchange.mail.filter.needs-code-generation">
         <!-- This target generated parts of the code out of the grammar file vor jjtree -->
         <mkdir dir="${mainSrcDir}/${jSievePrefix}/jsieve/parser/generated"/>
         <java classname="jjtree" fork="yes" failonerror="true">

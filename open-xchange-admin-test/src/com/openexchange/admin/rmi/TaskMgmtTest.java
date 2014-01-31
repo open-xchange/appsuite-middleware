@@ -46,43 +46,98 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.rmi;
 
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
-
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Database;
+import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.exceptions.TaskManagerException;
+import com.openexchange.admin.user.copy.rmi.TestTool;
 
-public class TaskMgmtTest extends AbstractTest {
+public class TaskMgmtTest extends AbstractRMITest {
+
+    private User admin;
+
+    private OXContextInterface ci;
+
+    private Context context;
+
+    private String db_name;
+
+    private Database client_db;
+
+    private OXUtilInterface oxu;
+
+    private OXTaskMgmtInterface ti;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+
+        admin = newUser("oxadmin", "secret", "Admin User", "Admin", "User", "oxadmin@example.com");
+        ci = getContextInterface();
+        oxu = getUtilInterface();
+        ti = getTaskInterface();
+    }
+
+    @Before
+    public final void setupContexts() throws Exception {
+        context = TestTool.createContext(ci, "TaskMgmtCtx_", admin, "all", superAdminCredentials);
+        db_name = "db_" + System.currentTimeMillis();
+        client_db = UtilTest.getTestDatabaseObject("localhost", db_name);
+        if (null == client_db) {
+            throw new NullPointerException("Database object is null");
+        }
+        client_db.setId(oxu.registerDatabase(client_db, superAdminCredentials).getId());
+    }
+
+    @After
+    public final void tearDownContexts() throws Exception {
+        try {
+            if (ci != null && context != null && superAdminCredentials != null) {
+                ci.delete(context, superAdminCredentials);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (client_db != null) {
+            oxu.unregisterDatabase(new Database(client_db.getId()), superAdminCredentials);
+        }
+        db_name = null;
+        client_db = null;
+    }
 
     @Test
     public void testGetTaskResultsContextCredentialsInt() throws MalformedURLException, RemoteException, NotBoundException, Exception {
-        final OXTaskMgmtInterface oxtask = getTaskClient();
         final Credentials cred = DummyCredentials();
-        final Context ctx = getTestContextObject(1, 50);
 
-        oxtask.getTaskResults(ctx, cred, 1);
+        final int jobId = ci.moveContextDatabase(context, client_db, superAdminCredentials);
+
+        ti.getTaskResults(context, cred, jobId);
+        int counter = 0;
+        boolean running = true;
+        while (running && counter < 180) {
+            try {
+                ti.deleteJob(context, cred, jobId);
+                running = false;
+                System.out.println("Task moveContextDatabase finished");
+            } catch (TaskManagerException e) {
+                Thread.sleep(1000);
+            }
+            counter++;
+        }
+        System.out.println("Task moveContextDatabase counter: " + counter);
     }
-
-    @Test
-    public void testGetJobList() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, InvalidCredentialsException, StorageException, Exception {
-        final OXTaskMgmtInterface oxtask = getTaskClient();
-        final Credentials cred = DummyCredentials();
-        final Context ctx = getTestContextObject(1, 50);
-        
-        System.out.println(oxtask.getJobList(ctx, cred));
-    }
-
-    private OXTaskMgmtInterface getTaskClient() throws MalformedURLException, RemoteException, NotBoundException {
-        return (OXTaskMgmtInterface) Naming.lookup(getRMIHostUrl()+ OXTaskMgmtInterface.RMI_NAME);
-    }
-
 }

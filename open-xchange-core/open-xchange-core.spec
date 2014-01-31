@@ -9,7 +9,7 @@ BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 2
+%define        ox_release 3
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -873,6 +873,7 @@ if [ -e /opt/open-xchange/etc/log4j.xml ]; then
 </configuration>
 EOF
     cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
+    rm -f /opt/open-xchange/etc/logback.xml.new
     MODIFIED=$(rpm --verify open-xchange-log4j | grep log4j.xml | grep 5 | wc -l)
     if [ $MODIFIED -eq 1 ]; then
         # Configuration has been modified after installation. Try to migrate.
@@ -884,6 +885,16 @@ EOF
         cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
         rm -f /opt/open-xchange/etc/logback.xml.new $TMPFILE
     fi
+else
+    cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/appender[@name=\'ASYNC\']/appender-ref -r -
+<configuration>
+    <appender name="ASYNC">
+        <appender-ref ref="FILE_COMPAT"/>
+    </appender>
+</configuration>
+EOF
+    cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
+    rm -f /opt/open-xchange/etc/logback.xml.new
 fi
 rm -f /opt/open-xchange/etc/log4j.xml
 
@@ -896,6 +907,16 @@ ox_add_property com.openexchange.hazelcast.network.symmetricEncryption.iteration
 
 # SoftwareChange_Request-1786
 ox_add_property com.openexchange.threadpool.keepAliveThreshold 1000 /opt/open-xchange/etc/threadpool.properties
+
+# SoftwareChange_Request-1823
+ox_add_property com.openexchange.preview.cache.enabled true /opt/open-xchange/etc/preview.properties
+
+# SoftwareChange_Request-1828
+ox_add_property com.openexchange.capability.alone false /opt/open-xchange/etc/permissions.properties
+
+# SoftwareChange_Request-1832
+ox_set_property readProperty.5 autoReconnect=false /opt/open-xchange/etc/configdb.properties
+ox_set_property writeProperty.5 autoReconnect=false /opt/open-xchange/etc/configdb.properties
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
@@ -936,6 +957,20 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Wed Jan 29 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-01-30
+* Tue Jan 28 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-01-31
+* Tue Jan 28 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-01-30
+* Mon Jan 27 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-01-30
+* Fri Jan 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-17
+* Thu Jan 23 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 7.4.2
+* Wed Jan 22 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-01-22
 * Mon Jan 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-01-20
 * Thu Jan 16 2014 Marcus Klein <marcus.klein@open-xchange.com>
@@ -946,14 +981,14 @@ Build for patch 2014-01-14
 Second release candidate for 7.4.2
 * Fri Jan 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-12-17
+* Fri Jan 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-17
 * Fri Jan 03 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-01-06
 * Mon Dec 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-12-09
 * Mon Dec 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 7.4.2
-* Thu Dec 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2013-12-23
 * Thu Dec 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-12-23
 * Thu Dec 19 2013 Marcus Klein <marcus.klein@open-xchange.com>

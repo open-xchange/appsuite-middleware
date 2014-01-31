@@ -578,3 +578,4 @@ public class LdapContactStorage extends DefaultContactStorage {
     }
 
 }
+

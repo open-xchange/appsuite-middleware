@@ -67,6 +67,8 @@ public class UnitTests {
     public static Test suite() {
         final TestSuite tests = new TestSuite();
         tests.addTest(new JUnit4TestAdapter(AutoboxingTest.class));
+        tests.addTest(new JUnit4TestAdapter(com.openexchange.java.HTMLDetectorTest.class));
         return tests;
     }
+
 }

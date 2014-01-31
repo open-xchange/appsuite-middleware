@@ -224,7 +224,8 @@ public class Activator implements BundleActivator {
 
             if (lLogger != null) {
                 Level level = lLogger.getLevel();
-                if (level.isGreaterOrEqual(Level.WARN)) {
+
+                if (level == null || level.isGreaterOrEqual(Level.WARN)) {
                     lLogger.setLevel(Level.INFO);
                     LOGGER.info(
                         "Configured log level {} for class {} is too coarse. It is changed to INFO!",

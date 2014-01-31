@@ -84,6 +84,7 @@ import com.openexchange.caldav.query.FilterAnalyzerBuilder;
 import com.openexchange.caldav.reports.FilteringResource;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
@@ -203,8 +204,21 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
             }
             if (hasChanged) {
                 UserizedFolder folder = getFolder();
-                folder.setPermissions(updatedPermissions.toArray(new Permission[updatedPermissions.size()]));
-                factory.getFolderService().updateFolder(folder, folder.getLastModifiedUTC(), factory.getSession(), null);
+                AbstractFolder updatedFolder = new AbstractFolder() {
+
+                    private static final long serialVersionUID = -367640273380922433L;
+
+                    @Override
+                    public boolean isGlobalID() {
+                        return false;
+                    }
+                };
+                updatedFolder.setID(folder.getID());
+                updatedFolder.setTreeID(folder.getTreeID());
+                updatedFolder.setType(folder.getType());
+                updatedFolder.setParentID(folder.getParentID());
+                updatedFolder.setPermissions(updatedPermissions.toArray(new Permission[updatedPermissions.size()]));
+                factory.getFolderService().updateFolder(updatedFolder, folder.getLastModifiedUTC(), factory.getSession(), null);
             }
         } catch (JDOMException e) {
             throw WebdavProtocolException.generalError(e, getUrl(), HttpServletResponse.SC_BAD_REQUEST);

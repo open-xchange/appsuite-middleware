@@ -67,30 +67,42 @@ import ch.qos.logback.core.spi.FilterReply;
  */
 public class ExtendedMDCFilter extends TurboFilter {
 
+    private final Set<String> whitelist;
     private final Set<Tuple> tuples;
-    private FilterReply onMatch;
 
     /**
      * Initializes a new {@link ExtendedMDCFilter}.
      */
-    public ExtendedMDCFilter() {
+    public ExtendedMDCFilter(Set<String> whitelist) {
         super();
+        this.whitelist = whitelist;
         tuples = new HashSet<Tuple>();
     }
 
     @Override
     public FilterReply decide(Marker marker, Logger logger, Level level, String format, Object[] params, Throwable th) {
-
-        for(Tuple t : tuples) {
-            String v = MDC.get(t.getKey());
-            if (v == null) {
-                return FilterReply.NEUTRAL;
-            } else if (!v.equals(t.getValue())) {
-                return FilterReply.NEUTRAL;
+        boolean check = false;
+        for (String allowedLogger : whitelist) {
+            if (logger.getName().startsWith(allowedLogger)) {
+                check = true;
+                break;
             }
         }
 
-        return onMatch;
+        if (check) {
+            for(Tuple t : tuples) {
+                String v = MDC.get(t.getKey());
+                if (v == null) {
+                    return FilterReply.NEUTRAL;
+                } else if (!v.equals(t.getValue())) {
+                    return FilterReply.NEUTRAL;
+                }
+            }
+
+            return FilterReply.ACCEPT;
+        }
+
+        return FilterReply.NEUTRAL;
     }
 
     /**
@@ -101,15 +113,6 @@ public class ExtendedMDCFilter extends TurboFilter {
      */
     public void addTuple(String k, String v) {
         tuples.add(new Tuple(k,v));
-    }
-
-    /**
-     * Sets on match rule
-     *
-     * @param fr The filter reply
-     */
-    public final void setOnMatch(FilterReply fr) {
-        onMatch = fr;
     }
 
     /**

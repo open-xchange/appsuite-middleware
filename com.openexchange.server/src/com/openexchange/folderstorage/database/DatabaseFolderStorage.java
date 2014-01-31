@@ -78,6 +78,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
 import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -125,6 +126,7 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderBatchLoader;
@@ -1123,10 +1125,13 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                     /*
                      * Add global address book manually
                      */
-                    final FolderObject gab = getFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID, ctx, con);
-                    if (gab.isVisible(userId, userPermissionBits)) {
-                        gab.setFolderName(StringHelper.valueOf(user.getLocale()).getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME));
-                        list.add(gab);
+                    final CapabilityService capsService = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
+                    if (null == capsService || capsService.getCapabilities(user.getId(), ctx.getContextId()).contains("gab")) {
+                        final FolderObject gab = getFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID, ctx, con);
+                        if (gab.isVisible(userId, userPermissionBits)) {
+                            gab.setFolderName(StringHelper.valueOf(user.getLocale()).getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME));
+                            list.add(gab);
+                        }
                     }
                 } catch (final RuntimeException e) {
                     throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
