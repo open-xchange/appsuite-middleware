@@ -55,7 +55,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
-import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.java.util.TimeZones;
 
 /**
@@ -68,6 +67,10 @@ public class TestTask extends Task {
     public static final int DATES = 1;
     public static final int RECURRENCES = 2;
 
+    final Calendar calendar = Calendar.getInstance(TimeZones.UTC);
+
+    private Date date = null;
+
     public TimeZone getTimezone() {
         return timezone;
     }
@@ -77,17 +80,17 @@ public class TestTask extends Task {
     }
 
     public Calendar getCalendar(){
-        return TimeTools.createCalendar(timezone);
-    }
-
-    public Calendar getCalendar(Date date){
-        Calendar calendar = getCalendar();
-        calendar.setTime(date);
         return calendar;
     }
 
     public TestTask(){
         super();
+
+        calendar.clear();
+        calendar.set(Calendar.DAY_OF_MONTH, 11);
+        calendar.set(Calendar.MONTH, 2);
+        calendar.set(Calendar.YEAR, 1982);
+        this.date = calendar.getTime();
     }
 
     public TestTask checkConsistencyOf(int... switches){
@@ -96,7 +99,7 @@ public class TestTask extends Task {
             case DATES:
                 //appointments without start dates do not work
                 if( ! containsStartDate() ) {
-                    setStartDate(new Date());
+                    setStartDate(this.date);
                 }
                 //appointments without end dates do not work
                 if( containsStartDate() && ! containsEndDate() ) {
@@ -112,15 +115,15 @@ public class TestTask extends Task {
 
             case RECURRENCES:
                 if( containsRecurrenceType()
-                || containsDays()
-                || containsDayInMonth()
-                || containsInterval()
-                ){
+                    || containsDays()
+                    || containsDayInMonth()
+                    || containsInterval()
+                    ){
                     //if there is a recurrence, but no interval is set, set it to 1
                     if( ! containsInterval() )
-                     {
+                    {
                         setInterval(1);
-                    //if there is no start date, set it to the start of the recurrence
+                        //if there is no start date, set it to the start of the recurrence
                     }
 
                 }
@@ -175,7 +178,7 @@ public class TestTask extends Task {
 
     public TestTask startsThisWeek(int dayOfWeek) {
         if (!containsStartDate()) {
-            setStartDate(new Date());
+            setStartDate(this.date);
         }
         setStartDate(setWeekDay(getStartDate(), dayOfWeek));
         return this;
@@ -183,7 +186,7 @@ public class TestTask extends Task {
 
     public TestTask startsThisMonth(int dayOfMonth) {
         if (!containsStartDate()) {
-            setStartDate(new Date());
+            setStartDate(this.date);
         }
         setStartDate(setMonthDay(getStartDate(), dayOfMonth));
         return this;
@@ -191,7 +194,7 @@ public class TestTask extends Task {
 
     public TestTask startsWeekOfMonth(int week) {
         if (!containsStartDate()) {
-            setStartDate(new Date());
+            setStartDate(this.date);
         }
         setStartDate(setWeekOfMonth(getStartDate(), week));
         return this;
@@ -199,7 +202,7 @@ public class TestTask extends Task {
 
     public TestTask startsWeekOfMonthOnDay(int week, int dayOfWeek) {
         if (!containsStartDate()) {
-            setStartDate(new Date());
+            setStartDate(this.date);
         }
         Calendar cal = new GregorianCalendar(TimeZones.UTC);
         cal.setTime(getStartDate());
@@ -221,13 +224,13 @@ public class TestTask extends Task {
 
     public TestTask endsThisWeek(int dayOfWeek) {
         if (!containsEndDate()) {
-            setEndDate(new Date());
+            setEndDate(this.date);
         }
         setEndDate(setWeekDay(getEndDate(), dayOfWeek));
         return this;
     }
     public TestTask startsToday(){
-        this.setStartDate(new Date());
+        this.setStartDate(this.date);
         return this;
     }
 
@@ -238,7 +241,7 @@ public class TestTask extends Task {
      */
     public TestTask startsTheFollowingDay(){
         if (!containsStartDate()) {
-            setStartDate(new Date());
+            setStartDate(this.date);
         }
         setStartDate(shiftDateByDays(getStartDate(), 1));
         return this;
@@ -246,7 +249,7 @@ public class TestTask extends Task {
 
     public TestTask endsTheFollowingDay(){
         if(! containsEndDate() ) {
-            setEndDate( new Date() );
+            setEndDate(this.date);
         }
         setEndDate( shiftDateByDays(getEndDate(), 1));
         return this;
@@ -254,7 +257,7 @@ public class TestTask extends Task {
 
     public TestTask startsTheDayBefore(){
         if(! containsStartDate() ) {
-            setStartDate( new Date() );
+            setStartDate(this.date);
         }
         setStartDate( shiftDateByDays(getStartDate(), -1));
         return this;
@@ -262,7 +265,7 @@ public class TestTask extends Task {
 
     public TestTask endsTheDayBefore(){
         if(! containsEndDate() ) {
-            setEndDate( new Date() );
+            setEndDate(this.date);
         }
         setEndDate( shiftDateByDays(getEndDate(), -1));
         return this;
@@ -288,7 +291,7 @@ public class TestTask extends Task {
      */
     public TestTask startsTomorrow(){
         if (!containsStartDate()) {
-            setStartDate(new Date());
+            setStartDate(this.date);
         }
         setStartDate(setDayToToday(getStartDate()));
         return startsTheFollowingDay();
@@ -296,7 +299,7 @@ public class TestTask extends Task {
 
     public TestTask endsTomorrow(){
         if(! containsEndDate() ) {
-            setEndDate( new Date() );
+            setEndDate(this.date);
         }
         setEndDate( setDayToToday( getEndDate() ) );
         return endsTheFollowingDay();
@@ -304,7 +307,7 @@ public class TestTask extends Task {
 
     public TestTask startsYesterday(){
         if(! containsStartDate() ) {
-            setStartDate( new Date() );
+            setStartDate(this.date);
         }
         setStartDate( setDayToToday( getStartDate() ) );
         return startsTheDayBefore();
@@ -312,7 +315,7 @@ public class TestTask extends Task {
 
     public TestTask endsYesterday(){
         if(! containsEndDate() ) {
-            setEndDate( new Date() );
+            setEndDate(this.date);
         }
         setEndDate( setDayToToday( getEndDate() ) );
         return endsTheDayBefore();
@@ -329,7 +332,7 @@ public class TestTask extends Task {
 
     public TestTask startsAt(int hourOfTheDay) {
         if (!containsStartDate()) {
-            setStartDate(new Date());
+            setStartDate(this.date);
         }
         setStartDate(dateAtHours(getStartDate(), hourOfTheDay));
         return this;
@@ -337,7 +340,7 @@ public class TestTask extends Task {
 
     public TestTask endsAt(int hourOfTheDay) {
         if (!containsEndDate()) {
-            setEndDate(new Date());
+            setEndDate(this.date);
         }
         setEndDate(dateAtHours(getEndDate(), hourOfTheDay));
         return this;
@@ -374,7 +377,7 @@ public class TestTask extends Task {
     //set recurrence
     public TestTask everyDay() {
         if(! containsStartDate()){
-            setStartDate(new Date());
+            setStartDate(this.date);
         }
         setInterval(1);
         return this;
@@ -382,9 +385,9 @@ public class TestTask extends Task {
 
     public TestTask everyWeek(){
         if (!containsStartDate()) {
-            setStartDate(new Date());
+            setStartDate(this.date);
         }
-        Calendar cal = getCalendar(getStartDate());
+        Calendar cal = getCalendar();
         int dayOfTheWeek = cal2OXDay(cal.get(Calendar.DAY_OF_WEEK));
         return everyWeekOn(dayOfTheWeek);
     }
@@ -416,7 +419,7 @@ public class TestTask extends Task {
     public TestTask everyWeekOn(int... days) {
         //TODO should really start on next day in dayOfTheWeek
         if (!containsStartDate()) {
-            setStartDate(new Date());
+            setStartDate(this.date);
         }
         int daysOfTheWeek = 0;
         for (int day : days) {
