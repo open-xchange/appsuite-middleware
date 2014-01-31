@@ -52,12 +52,14 @@ package com.openexchange.mobilenotifier.json.actions;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.mobilenotifier.MobileNotifierService;
+import com.openexchange.mobilenotifier.MobileNotifierServiceRegistry;
 import com.openexchange.mobilenotifier.json.MobileNotifierRequest;
 import com.openexchange.mobilenotifier.json.convert.NotifyItemWriter;
 import com.openexchange.server.ServiceExceptionCode;
@@ -86,28 +88,28 @@ public class GetAction extends AbstractMobileNotifierAction {
 
     @Override
     protected AJAXRequestResult perform(MobileNotifierRequest req) throws OXException, JSONException {
-        final String param = req.checkParameter("provider");
+        String[] providers = req.getParameterAsStringArray("provider");
 
-        final MobileNotifierService mobileNotifierService = getService(MobileNotifierService.class);
-        if (null == mobileNotifierService) {
-            throw ServiceExceptionCode.absentService(MobileNotifierService.class);
+        final MobileNotifierServiceRegistry mobileNotifierServiceRegistry = getService(MobileNotifierServiceRegistry.class);
+        if (null == mobileNotifierServiceRegistry) {
+            throw ServiceExceptionCode.absentService(MobileNotifierServiceRegistry.class);
         }
-
         final ServerSession session = req.getSession();
 
         /*
          * Writes a JSON provider structure
          */
-        final JSONObject providerObject = new JSONObject();
-        final JSONArray providers = new JSONArray();
+        final JSONObject providerJsonObject = new JSONObject();
+        final JSONArray providerJsonArray = new JSONArray();
+        mobileNotifierServiceRegistry.getAllServices();
 
-        // TODO: iterate over existing and enabled services.
-        // atm just for testing the json structure
-        for (int i = 0; i < 3; i++) {
-            providers.put(NotifyItemWriter.write(mobileNotifierService, session));
+        for (String provider : providers) {
+            MobileNotifierService service = mobileNotifierServiceRegistry.getService(provider);
+            providerJsonArray.put(NotifyItemWriter.write(service, session));
         }
 
-        providerObject.put("provider", providers);
-        return new AJAXRequestResult(providerObject);
+        providerJsonObject.put("provider", providerJsonArray);
+
+        return new AJAXRequestResult(providerJsonObject);
     }
 }
