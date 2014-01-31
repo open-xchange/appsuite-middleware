@@ -68,7 +68,7 @@ public class ExampleCalendarMobileNotifierService implements MobileNotifierServi
 
     @Override
     public String getProviderName() {
-        return "appointment";
+        return MobileNotifierProviders.APPOINTMENT.getProviderName();
     }
 
     @Override
@@ -88,10 +88,13 @@ public class ExampleCalendarMobileNotifierService implements MobileNotifierServi
 
     @Override
     public NotifyTemplate getTemplate() throws OXException {
+        String fileName = MobileNotifierProviders.APPOINTMENT.getFileName();
+        String frontendName = MobileNotifierProviders.APPOINTMENT.getFrontendName();
+
         NotifyTemplate nt = new NotifyTemplate();
-        nt.setHtmlTemplate(MobileNotifierFileUtil.getTeamplateFileContent("Appointment.tmpl"));
+        nt.setHtmlTemplate(MobileNotifierFileUtil.getTeamplateFileContent(fileName));
         nt.setSlow(true);
-        nt.setFrontendAppName("io.ox/calendar");
+        nt.setFrontendAppName(frontendName);
         return nt;
     }
 

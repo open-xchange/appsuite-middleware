@@ -47,52 +47,46 @@
  *
  */
 
-package com.openexchange.mobilenotifier.json.convert;
+package com.openexchange.mobilenotifier.example;
 
 
 /**
- * {@link MobileNotifyField}
+ * {@link MobileNotifierProviders}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public enum MobileNotifyField {
+public enum MobileNotifierProviders {
     /**
-     * The template field
+     * Enum field for mail provider
      */
-    TEMPLATE("template"),
-
-    /**
-     * The slow field
-     */
-    SLOW("slow"),
-
-    /**
-     * The frontendApp field
-     */
-    FRONTENDAPP("frontendApp"),
-
-    /**
-     * The items field
-     */
-    ITEMS("items"),
+    MAIL("mail", "io.ox/mail", "Mail.tmpl"),
     
     /**
-     * The provider field
+     * Enum field for appointment provider
      */
-    PROVIDER("provider");
+    APPOINTMENT("appointment", "io.ox/appointment", "Appointment.tmpl");
 
-    private final String name;
+    private final String providerName;
 
-    private MobileNotifyField(final String name) {
-        this.name = name;
+    private final String frontendName;
+
+    private final String fileName;
+
+    private MobileNotifierProviders(final String providerName, final String frontendName, final String fileName) {
+        this.providerName = providerName;
+        this.frontendName = frontendName;
+        this.fileName = fileName;
     }
 
-    /**
-     * Gets the name
-     * 
-     * @return The name
-     */
-    public String getName() {
-        return name;
+    public String getProviderName() {
+        return providerName;
+    }
+
+    public String getFrontendName() {
+        return frontendName;
+    }
+
+    public String getFileName() {
+        return fileName;
     }
 }

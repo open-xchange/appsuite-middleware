@@ -69,7 +69,7 @@ public class ExampleMailMobileNotifierService implements MobileNotifierService {
 
     @Override
     public String getProviderName() {
-        return "mail";
+        return MobileNotifierProviders.MAIL.getProviderName();
     }
 
     @Override
@@ -97,9 +97,11 @@ public class ExampleMailMobileNotifierService implements MobileNotifierService {
 
     @Override
     public NotifyTemplate getTemplate() throws OXException {
+        String fileName = MobileNotifierProviders.MAIL.getFileName();
+        String frontendName = MobileNotifierProviders.MAIL.getFrontendName();
         NotifyTemplate nt = new NotifyTemplate();
-        nt.setHtmlTemplate(MobileNotifierFileUtil.getTeamplateFileContent("Mail.tmpl"));
-        nt.setFrontendAppName("io.ox/mail");
+        nt.setHtmlTemplate(MobileNotifierFileUtil.getTeamplateFileContent(fileName));
+        nt.setFrontendAppName(frontendName);
         nt.setSlow(false);
         return nt;
     }
