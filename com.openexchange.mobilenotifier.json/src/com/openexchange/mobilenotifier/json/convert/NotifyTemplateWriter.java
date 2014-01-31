@@ -47,15 +47,49 @@
  *
  */
 
-package com.openexchange.mobilenotifier.example;
+package com.openexchange.mobilenotifier.json.convert;
+
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.mobilenotifier.MobileNotifierService;
+import com.openexchange.mobilenotifier.NotifyItem;
+import com.openexchange.mobilenotifier.NotifyTemplate;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AbstractMobileNotifierService}
+ * {@link NotifyTemplateWriter} - Converts a list of notification items to a JSON structure.
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public abstract class AbstractMobileNotifierService {
+public class NotifyTemplateWriter {
 
-    private final String TEMPLATEPATH = System.getProperty("openexchange.propdir") + "/templates";
+    private NotifyTemplateWriter() {
+        super();
+    }
+    
+    /**
+     * Writes the JSON structure of NotifyTemplates
+     * 
+     * @param service - The service
+     * @param session - The session
+     * @return JSONObject - Returns the JSON structure
+     * @throws JSONException
+     * @throws OXException
+     */
+    public static JSONObject write(final MobileNotifierService service, ServerSession session) throws JSONException, OXException {
+        final JSONObject providerObject = new JSONObject();
+        final JSONObject attributes = new JSONObject();
+        final NotifyTemplate nt = service.getTemplate();
 
+        attributes.put(MobileNotifyField.TEMPLATE.getName(), nt.getHtmlTemplate());
+        attributes.put(MobileNotifyField.SLOW.getName(), nt.isSlow());
+        attributes.put(MobileNotifyField.FRONTENDAPP.getName(), nt.getFrontendAppName());
+
+        providerObject.put(service.getProviderName(), attributes);
+
+        return providerObject;
+    }
 }

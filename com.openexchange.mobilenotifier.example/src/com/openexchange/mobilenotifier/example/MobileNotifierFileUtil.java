@@ -47,55 +47,85 @@
  *
  */
 
-package com.openexchange.mobilenotifier;
+package com.openexchange.mobilenotifier.example;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
- * {@link MobileNotifierService} - The Mobilenotifier service.
+ * {@link MobileNotifierFileUtil} - Util for file handling
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
- * @since 7.6.0
  */
-public interface MobileNotifierService {
-    /**
-     * Get the provider name
-     * 
-     * @return String the name the providers
-     */
-    String getProviderName();
+public abstract class MobileNotifierFileUtil {
 
-    /**
-     * Checks if a provider is enabled by a user
-     * 
-     * @param session
-     * @return True if a provider is enabled otherwise false
-     */
-    boolean isEnabled(int uid, int cid);
+    private static final String TEMPLATEPATH = System.getProperty("openexchange.propdir") + "/templates/";
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobileNotifierFileUtil.class);
+    
     /**
-     * Gets the Items
+     * Gets a template file from the hard disk - TODO: needs refactoring (error handling)
      * 
-     * @param session - The session
-     * @return map
-     * @throws OXException
-     * @TODO: maybe change to return type map
+     * @param templateFileName - The file name of the template
+     * @return String - The content of the file
      */
-    List<NotifyItem> getItems(int uid, int cid) throws OXException;
+    public static String getTeamplateFileContent(final String templateFileName) {
+        final File file = new File(TEMPLATEPATH + templateFileName);
 
-    /**
-     * Gets a template
-     * 
-     * @return NotifyTemplate - The template
-     * @throws OXException
-     */
-    NotifyTemplate getTemplate() throws OXException;
+        if (!isFileReadable(file)) {
+            LOG.error("Can not read file: {}", file.toString());
+        }
 
-    /**
-     * Writes changes to a template
-     * 
-     * @throws OXException
-     */
-    void putTemplate() throws OXException;
+        String html = "";
+        FileReader fr = null;
+        BufferedReader br = null;
+        try {
+            String line = "";
+            fr = new FileReader(file);
+            br = new BufferedReader(fr);
+
+            while ((line = br.readLine()) != null) {
+                html += line.trim();
+            }
+        } catch (FileNotFoundException e) {
+            LOG.error("Could not found file: {} ", file.toString());
+        } catch (IOException e) {
+            LOG.error(" ", e);
+        } finally {
+            if (fr != null) {
+                closeFileReader(fr);
+            }
+            if (br != null) {
+                closeBufferedReader(br);
+            }
+        }
+
+        return html;
+    }
+
+    private static boolean isFileReadable(File file) {
+        if (file.isFile() && file.canRead()) {
+            return true;
+        }
+        return false;
+    }
+
+    private static void closeBufferedReader(BufferedReader br) {
+        try {
+            br.close();
+        } catch (IOException e) {
+            LOG.error(" ", e);
+        }
+    }
+
+    private static void closeFileReader(FileReader br) {
+        try {
+            br.close();
+        } catch (IOException e) {
+            LOG.error(" ", e);
+        }
+    }
 }

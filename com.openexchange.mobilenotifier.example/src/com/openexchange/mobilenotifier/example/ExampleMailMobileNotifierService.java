@@ -79,7 +79,6 @@ public class ExampleMailMobileNotifierService implements MobileNotifierService {
 
     @Override
     public List<NotifyItem> getItems(int uid, int cid) throws OXException {
-        // TODO clarification: How to get the key items? (via read on templates?)
         List<NotifyItem> list = new ArrayList<NotifyItem>();
         NotifyItem ni = new NotifyItem();
         ni.setKey("{{subject}}");
@@ -98,8 +97,11 @@ public class ExampleMailMobileNotifierService implements MobileNotifierService {
 
     @Override
     public NotifyTemplate getTemplate() throws OXException {
-        // read on template
-        return null;
+        NotifyTemplate nt = new NotifyTemplate();
+        nt.setHtmlTemplate(MobileNotifierFileUtil.getTeamplateFileContent("Mail.tmpl"));
+        nt.setFrontendAppName("io.ox/mail");
+        nt.setSlow(false);
+        return nt;
     }
 
     @Override

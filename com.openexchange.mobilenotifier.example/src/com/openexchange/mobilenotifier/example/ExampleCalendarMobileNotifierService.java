@@ -88,7 +88,11 @@ public class ExampleCalendarMobileNotifierService implements MobileNotifierServi
 
     @Override
     public NotifyTemplate getTemplate() throws OXException {
-        return null;
+        NotifyTemplate nt = new NotifyTemplate();
+        nt.setHtmlTemplate(MobileNotifierFileUtil.getTeamplateFileContent("Appointment.tmpl"));
+        nt.setSlow(true);
+        nt.setFrontendAppName("io.ox/calendar");
+        return nt;
     }
 
     @Override

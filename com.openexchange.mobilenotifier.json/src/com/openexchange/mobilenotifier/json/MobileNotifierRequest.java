@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link MobileNotifierRequest} - A MobileNotifier request.
+ * {@link MobileNotifierRequest} - A Mobilenotifier request.
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
@@ -63,6 +63,7 @@ public class MobileNotifierRequest {
     private final ServerSession session;
 
     private final AJAXRequestData request;
+
     /**
      * Initializes a new {@link MobileNotifierRequest}.
      * 
@@ -74,6 +75,7 @@ public class MobileNotifierRequest {
         this.request = request;
         this.session = session;
     }
+
     /**
      * Gets the value mapped to given parameter name.
      * 

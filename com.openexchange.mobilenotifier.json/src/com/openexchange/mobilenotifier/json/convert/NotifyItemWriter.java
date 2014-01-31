@@ -86,7 +86,7 @@ public class NotifyItemWriter {
         final int contextId = session.getContextId();
 
         itemArray.put(transformListToJSONObject(service.getItems(userId, contextId)));
-        itemObject.put("items", itemArray);
+        itemObject.put(MobileNotifyField.ITEMS.getName(), itemArray);
 
         providerObject.put(service.getProviderName(), itemObject);
 

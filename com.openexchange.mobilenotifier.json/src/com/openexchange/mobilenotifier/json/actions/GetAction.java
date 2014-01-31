@@ -61,6 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mobilenotifier.MobileNotifierService;
 import com.openexchange.mobilenotifier.MobileNotifierServiceRegistry;
 import com.openexchange.mobilenotifier.json.MobileNotifierRequest;
+import com.openexchange.mobilenotifier.json.convert.MobileNotifyField;
 import com.openexchange.mobilenotifier.json.convert.NotifyItemWriter;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -90,8 +91,8 @@ public class GetAction extends AbstractMobileNotifierAction {
     protected AJAXRequestResult perform(MobileNotifierRequest req) throws OXException, JSONException {
         String[] providers = req.getParameterAsStringArray("provider");
 
-        final MobileNotifierServiceRegistry mobileNotifierServiceRegistry = getService(MobileNotifierServiceRegistry.class);
-        if (null == mobileNotifierServiceRegistry) {
+        final MobileNotifierServiceRegistry mobileNotifierRegistry = getService(MobileNotifierServiceRegistry.class);
+        if (null == mobileNotifierRegistry) {
             throw ServiceExceptionCode.absentService(MobileNotifierServiceRegistry.class);
         }
         final ServerSession session = req.getSession();
@@ -101,14 +102,14 @@ public class GetAction extends AbstractMobileNotifierAction {
          */
         final JSONObject providerJsonObject = new JSONObject();
         final JSONArray providerJsonArray = new JSONArray();
-        mobileNotifierServiceRegistry.getAllServices();
+        mobileNotifierRegistry.getAllServices();
 
         for (String provider : providers) {
-            MobileNotifierService service = mobileNotifierServiceRegistry.getService(provider);
+            MobileNotifierService service = mobileNotifierRegistry.getService(provider);
             providerJsonArray.put(NotifyItemWriter.write(service, session));
         }
 
-        providerJsonObject.put("provider", providerJsonArray);
+        providerJsonObject.put(MobileNotifyField.PROVIDER.getName(), providerJsonArray);
 
         return new AJAXRequestResult(providerJsonObject);
     }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,44 +47,52 @@
  *
  */
 
-package com.openexchange.mobilenotifier;
+package com.openexchange.mobilenotifier.json.convert;
 
-import java.util.List;
-import javax.xml.transform.Templates;
 
 /**
- * {@link NotifyTemplate} - Represents a template
- * 
- * @author <a href="mailto:Lars.Hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * {@link MobileNotifyField}
+ *
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class NotifyTemplate {
-    private String frontendAppName;
+public enum MobileNotifyField {
+    /**
+     * Template
+     */
+    TEMPLATE("template"),
 
-    private String htmlTemplate;
+    /**
+     * slow
+     */
+    SLOW("slow"),
 
-    private boolean slow;
+    /**
+     * frontendApp
+     */
+    FRONTENDAPP("frontendApp"),
 
-    public boolean isSlow() {
-        return slow;
+    /**
+     * items
+     */
+    ITEMS("items"),
+    
+    /**
+     * provider
+     */
+    PROVIDER("provider");
+
+    private final String name;
+
+    private MobileNotifyField(final String name) {
+        this.name = name;
     }
 
-    public String getFrontendAppName() {
-        return frontendAppName;
-    }
-
-    public void setFrontendAppName(String frontendAppName) {
-        this.frontendAppName = frontendAppName;
-    }
-
-    public String getHtmlTemplate() {
-        return htmlTemplate;
-    }
-
-    public void setHtmlTemplate(String htmlTemplate) {
-        this.htmlTemplate = htmlTemplate;
-    }
-
-    public void setSlow(boolean slow) {
-        this.slow = slow;
+    /**
+     * Gets the name
+     * 
+     * @return The name
+     */
+    public String getName() {
+        return name;
     }
 }

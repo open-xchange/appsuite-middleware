@@ -49,11 +49,20 @@
 
 package com.openexchange.mobilenotifier.json.actions;
 
+import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.mobilenotifier.MobileNotifierService;
+import com.openexchange.mobilenotifier.MobileNotifierServiceRegistry;
 import com.openexchange.mobilenotifier.json.MobileNotifierRequest;
+import com.openexchange.mobilenotifier.json.convert.MobileNotifyField;
+import com.openexchange.mobilenotifier.json.convert.NotifyTemplateWriter;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ConfigGetAction}
@@ -74,7 +83,37 @@ public class ConfigGetAction extends AbstractMobileNotifierAction {
 
     @Override
     protected AJAXRequestResult perform(MobileNotifierRequest req) throws OXException, JSONException {
-        // TODO Auto-generated method stub
-        return null;
+        // optional parameter provider
+        String[] providers = null;
+
+        if (req.getParameter("provider") != null) {
+            providers = req.getParameterAsStringArray("provider");
+        }
+
+        final MobileNotifierServiceRegistry mobileNotifierRegistry = getService(MobileNotifierServiceRegistry.class);
+        if (null == mobileNotifierRegistry) {
+            throw ServiceExceptionCode.absentService(MobileNotifierServiceRegistry.class);
+        }
+        final ServerSession session = req.getSession();
+
+        JSONArray providerJsonArray = new JSONArray();
+        final JSONObject providerJsonObject = new JSONObject();
+
+        if (providers == null) {
+            // Get all Services
+            List<MobileNotifierService> notifierServices = mobileNotifierRegistry.getAllServices();
+            for (MobileNotifierService notifierService : notifierServices) {
+                providerJsonArray.put(NotifyTemplateWriter.write(notifierService, session));
+            }
+        } else {
+            // Get service(s) by parameter provider
+            for (String provider : providers) {
+                MobileNotifierService notifyService = mobileNotifierRegistry.getService(provider);
+                providerJsonArray.put(NotifyTemplateWriter.write(notifyService, session));
+            }
+        }
+
+        providerJsonObject.put(MobileNotifyField.PROVIDER.getName(), providerJsonArray);
+        return new AJAXRequestResult(providerJsonObject);
     }
 }
