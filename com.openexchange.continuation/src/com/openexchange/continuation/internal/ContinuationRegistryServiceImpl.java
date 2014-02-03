@@ -118,22 +118,27 @@ public class ContinuationRegistryServiceImpl implements ContinuationRegistryServ
     @Override
     public <V> void putContinuation(final Continuation<V> continuation, final Session session) throws OXException {
         if (null != continuation && null != session) {
+            Object object;
+
             final Cache cache = getCache();
-            final String cacheKey = cacheKey(session);
-            Object object = cache.get(cacheKey);
-            while (!(object instanceof com.google.common.cache.Cache)) {
-                try {
-                    final com.google.common.cache.Cache<UUID, Continuation<?>> newUserCache = newUserCache();
-                    cache.putSafe(cacheKey, (Serializable) newUserCache);
-                    object = newUserCache;
-                } catch (final OXException e) {
-                    if (!CacheExceptionCode.FAILED_SAFE_PUT.equals(e)) {
-                        throw e;
+            synchronized (cache) {
+                final String cacheKey = cacheKey(session);
+                object = cache.get(cacheKey);
+                while (!(object instanceof com.google.common.cache.Cache)) {
+                    try {
+                        final com.google.common.cache.Cache<UUID, Continuation<?>> newUserCache = newUserCache();
+                        cache.putSafe(cacheKey, (Serializable) newUserCache);
+                        object = newUserCache;
+                    } catch (final OXException e) {
+                        if (!CacheExceptionCode.FAILED_SAFE_PUT.equals(e)) {
+                            throw e;
+                        }
+                        // An object bound to given key already exists
+                        object = cache.get(cacheKey);
                     }
-                    // An object bound to given key already exists
-                    object = cache.get(cacheKey);
                 }
             }
+
             @SuppressWarnings("unchecked")
             final com.google.common.cache.Cache<UUID, Continuation<?>> userCache = (com.google.common.cache.Cache<UUID, Continuation<?>>) object;
             if (null != userCache.asMap().putIfAbsent(continuation.getUuid(), continuation)) {
@@ -147,11 +152,17 @@ public class ContinuationRegistryServiceImpl implements ContinuationRegistryServ
     public void removeContinuation(final UUID uuid, final Session session) throws OXException {
         if (null != uuid && null != session) {
             final Cache cache = getCache();
-            final Object object = cache.get(cacheKey(session));
-            if (object instanceof com.google.common.cache.Cache) {
-                @SuppressWarnings("unchecked")
-                final com.google.common.cache.Cache<UUID, Continuation<?>> userCache = (com.google.common.cache.Cache<UUID, Continuation<?>>) object;
-                userCache.invalidate(uuid);
+            synchronized (cache) {
+                final String key = cacheKey(session);
+                final Object object = cache.get(key);
+                if (object instanceof com.google.common.cache.Cache) {
+                    @SuppressWarnings("unchecked") final com.google.common.cache.Cache<UUID, Continuation<?>> userCache = (com.google.common.cache.Cache<UUID, Continuation<?>>) object;
+                    userCache.invalidate(uuid);
+
+                    if (userCache.asMap().isEmpty()) {
+                        cache.remove(key);
+                    }
+                }
             }
         }
     }
