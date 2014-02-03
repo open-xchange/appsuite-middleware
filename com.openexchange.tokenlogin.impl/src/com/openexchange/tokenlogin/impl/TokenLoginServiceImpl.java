@@ -156,7 +156,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         }
     }
 
-    private void parseParameter(final String param, final Map<String, Object> params) {
+    private static void parseParameter(final String param, final Map<String, Object> params) {
         if (!Strings.isEmpty(param)) {
             final int pos = param.indexOf('=');
             if (pos < 0) {
@@ -206,8 +206,8 @@ public class TokenLoginServiceImpl implements TokenLoginService {
      * Gets the Hazelcast 'token2sessionId' map or <code>null</code> if unavailable.
      */
     private IMap<String, String> hzMap() {
-        final String hzMapName = this.hzMapName;
-        if (null == hzMapName) {
+        final String mapName = this.hzMapName;
+        if (null == mapName) {
             LOG.trace("Name of Hazelcast map is missing for token login service.");
             return null;
         }
@@ -216,7 +216,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
             LOG.trace("Hazelcast instance is not available or running.");
             return null;
         }
-        return hazelcastInstance.getMap(hzMapName);
+        return hazelcastInstance.getMap(mapName);
     }
 
     private String removeFromHzMap(String token) {
@@ -232,13 +232,17 @@ public class TokenLoginServiceImpl implements TokenLoginService {
 
     private void putToHzMap(final String token, final String sessionId) {
         final IMap<String, String> hzMap = hzMap();
-        if (null != hzMap) {
-            hzMap.putAsync(token, sessionId);
+        if (null == hzMap) {
+            LOG.trace("Hazelcast map for remote token logins is not available.");
+        } else {
+            // This MUST be synchronous! Otherwise it may be possible to use a token twice, once from local map and once from remote map
+            // because remote remove happens before asynchronous put.
+            hzMap.put(token, sessionId);
         }
     }
 
     @Override
-    public String acquireToken(final Session session) throws OXException {
+    public String acquireToken(final Session session) {
         Validate.notNull(session);
 
         // Only one token per session
@@ -283,19 +287,19 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         try {
             sessionId = token2sessionId.remove(token);
             if (null == sessionId) {
-                // Local MISS, look up in Hazelcast map
+                // Local MISS, look up in remote map
                 final IMap<String, String> hzMap = hzMap();
                 if (null != hzMap) {
                     sessionId = hzMap.remove(token);
                 }
                 LOG.trace("Resolved token {} remotely to session {}.", token, sessionId);
             } else {
-                // Local HIT, remove from Hazelcast map
+                // Local HIT, remove from remote map
                 LOG.trace("Resolved token {} locally to session {}.", token, sessionId);
-                if (null != removeFromHzMap(token)) {
-                    LOG.trace("Successfully removed token {} from remote map.", token);
-                } else {
+                if (null == removeFromHzMap(token)) {
                     LOG.trace("Failed to removed token {} from remote map.", token);
+                } else {
+                    LOG.trace("Successfully removed token {} from remote map.", token);
                 }
             }
             if (null == sessionId) {
