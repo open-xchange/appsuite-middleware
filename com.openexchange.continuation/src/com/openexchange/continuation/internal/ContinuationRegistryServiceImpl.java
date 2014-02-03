@@ -49,10 +49,11 @@
 
 package com.openexchange.continuation.internal;
 
+import java.io.Serializable;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-import com.googlecode.concurrentlinkedhashmap.Weighers;
+import java.util.concurrent.TimeUnit;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.continuation.Continuation;
@@ -91,9 +92,9 @@ public class ContinuationRegistryServiceImpl implements ContinuationRegistryServ
         return cacheService.getCache(region);
     }
 
-    private ConcurrentLinkedHashMap<UUID, Continuation<?>> newUserMap() {
+    private com.google.common.cache.Cache<UUID, Continuation<?>> newUserCache() {
         // Not more than 100 concurrent continuations per user
-        return new ConcurrentLinkedHashMap.Builder<UUID, Continuation<?>>().initialCapacity(16).maximumWeightedCapacity(100).weigher(Weighers.entrySingleton()).build();
+        return CacheBuilder.newBuilder().initialCapacity(16).expireAfterAccess(5, TimeUnit.MINUTES).maximumSize(100).build();
     }
 
     private String cacheKey(final Session session) {
@@ -122,16 +123,16 @@ public class ContinuationRegistryServiceImpl implements ContinuationRegistryServ
             Object object = cache.get(cacheKey);
             while (!(object instanceof ConcurrentMap)) {
                 try {
-                    final ConcurrentLinkedHashMap<UUID, Continuation<?>> newUserMap = newUserMap();
-                    cache.putSafe(cacheKey, newUserMap);
-                    object = newUserMap;
+                    final com.google.common.cache.Cache<UUID, Continuation<?>> newUserCache = newUserCache();
+                    cache.putSafe(cacheKey, (Serializable) newUserCache);
+                    object = newUserCache;
                 } catch (final OXException e) {
                     object = cache.get(cacheKey);
                 }
             }
             @SuppressWarnings("unchecked")
-            final ConcurrentMap<UUID, Continuation<?>> userMap = (ConcurrentMap<UUID, Continuation<?>>) object;
-            if (null != userMap.putIfAbsent(continuation.getUuid(), continuation)) {
+            final com.google.common.cache.Cache<UUID, Continuation<?>> userCache = (com.google.common.cache.Cache<UUID, Continuation<?>>) object;
+            if (null != userCache.asMap().putIfAbsent(continuation.getUuid(), continuation)) {
                 // Already present
 
             }
