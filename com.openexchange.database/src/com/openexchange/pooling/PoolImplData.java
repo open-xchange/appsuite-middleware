@@ -52,6 +52,7 @@
 package com.openexchange.pooling;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -197,5 +198,9 @@ class PoolImplData<T> {
 
     void removeByThread(final PooledData<T> toCheck) {
         activeByThread.remove(toCheck.getThread());
+    }
+
+    Collection<PooledData<T>> getActive() {
+        return new ArrayList<PooledData<T>>(active.values());
     }
 }
