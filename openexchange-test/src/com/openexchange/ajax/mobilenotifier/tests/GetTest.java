@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,54 +47,41 @@
  *
  */
 
-package com.openexchange.mobilenotifier.example;
+package com.openexchange.ajax.mobilenotifier.tests;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.xml.sax.SAXException;
+import com.openexchange.ajax.mobilenotifier.actions.GetMobileNotifierRequest;
+import com.openexchange.ajax.mobilenotifier.actions.GetMobileNotifierResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.mobilenotifier.MobileNotifierService;
-import com.openexchange.mobilenotifier.NotifyItem;
-import com.openexchange.mobilenotifier.NotifyTemplate;
+
+
 
 /**
- * {@link ExampleMailMobileNotifierService} - Example mail implementation of a mobile notifier service
- * 
+ * {@link GetTest}
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class ExampleMailMobileNotifierService implements MobileNotifierService {
-
-    public ExampleMailMobileNotifierService() {
-        super();
+public class GetTest extends AbstractMobileNotifierTest {
+    /**
+     * Initializes a new {@link GetTest}.
+     * 
+     * @param name
+     */
+    public GetTest(String name) {
+        super(name);
     }
 
-    @Override
-    public String getProviderName() {
-        return MobileNotifierProviders.MAIL.getProviderName();
+    public void testNotifyItemResponse() throws OXException, IOException, SAXException, JSONException {
+        GetMobileNotifierRequest req = new GetMobileNotifierRequest("appointment");
+        GetMobileNotifierResponse res = getClient().execute(req);
+
+        JSONObject json = (JSONObject) res.getData();
+        JSONArray jsa = (JSONArray) json.get("provider");
+        jsa.get(0);
     }
 
-    @Override
-    public boolean isEnabled(int uid, int cid) {
-        return true;
-    }
-
-    @Override
-    public List<NotifyItem> getItems(int uid, int cid) throws OXException {
-        List<NotifyItem> list = new ArrayList<NotifyItem>();
-        list.add(new NotifyItem("{{subject}}", "This is a subject"));
-        list.add(new NotifyItem("{{receiveDate}}", "12.04.2013 - 12:45:00"));
-        list.add(new NotifyItem("{{userId}}", "1"));
-        return list;
-    }
-
-    @Override
-    public NotifyTemplate getTemplate() throws OXException {
-        final String fileName = MobileNotifierProviders.MAIL.getFileName();
-        final String frontendName = MobileNotifierProviders.MAIL.getFrontendName();
-        final String htmlTemplate = MobileNotifierFileUtil.getTeamplateFileContent(fileName);
-        return new NotifyTemplate(frontendName, htmlTemplate, false);
-    }
-
-    @Override
-    public void putTemplate() throws OXException {
-    }
 }

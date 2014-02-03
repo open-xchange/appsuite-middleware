@@ -78,9 +78,8 @@ public interface MobileNotifierService {
      * Gets the Items
      * 
      * @param session - The session
-     * @return map
+     * @return list - List of NotifyItems
      * @throws OXException
-     * @TODO: maybe change to return type map
      */
     List<NotifyItem> getItems(int uid, int cid) throws OXException;
 

@@ -49,17 +49,17 @@
 
 package com.openexchange.mobilenotifier.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.mobilenotifier.MobileNotifierServiceRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link MobileNotifierActivator}
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class MobileNotifierActivator implements BundleActivator {
+public class MobileNotifierActivator extends HousekeepingActivator {
 
     private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobileNotifierActivator.class);
     private MobileNotifierServiceRegistryImpl registryImpl;
@@ -67,7 +67,7 @@ public class MobileNotifierActivator implements BundleActivator {
     private ServiceRegistration<MobileNotifierServiceRegistry> registeredService;
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    protected void startBundle() throws Exception {
         try {
             LOG.info("starting bundle: com.openxchange.mobilenotifier");
             this.registryImpl = new MobileNotifierServiceRegistryImpl(context);
@@ -80,7 +80,12 @@ public class MobileNotifierActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { ConfigViewFactory.class };
+    }
+
+    @Override
+    public void stopBundle() throws Exception {
         try {
             LOG.info("stopping bundle: com.openxchange.mobilenotifier");
             if (registeredService != null) {

@@ -47,54 +47,36 @@
  *
  */
 
-package com.openexchange.mobilenotifier.example;
+package com.openexchange.ajax.mobilenotifier.actions;
 
-import java.util.ArrayList;
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.mobilenotifier.MobileNotifierService;
-import com.openexchange.mobilenotifier.NotifyItem;
-import com.openexchange.mobilenotifier.NotifyTemplate;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 
 /**
- * {@link ExampleMailMobileNotifierService} - Example mail implementation of a mobile notifier service
+ * {@link AbstractPublicationRequest}
  * 
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class ExampleMailMobileNotifierService implements MobileNotifierService {
+public abstract class AbstractMobileNotifierRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
-    public ExampleMailMobileNotifierService() {
-        super();
+    private boolean failOnError;
+
+    @Override
+    public String getServletPath() {
+        return "/ajax/mobilenotifier";
     }
 
     @Override
-    public String getProviderName() {
-        return MobileNotifierProviders.MAIL.getProviderName();
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
-    @Override
-    public boolean isEnabled(int uid, int cid) {
-        return true;
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
     }
 
-    @Override
-    public List<NotifyItem> getItems(int uid, int cid) throws OXException {
-        List<NotifyItem> list = new ArrayList<NotifyItem>();
-        list.add(new NotifyItem("{{subject}}", "This is a subject"));
-        list.add(new NotifyItem("{{receiveDate}}", "12.04.2013 - 12:45:00"));
-        list.add(new NotifyItem("{{userId}}", "1"));
-        return list;
-    }
-
-    @Override
-    public NotifyTemplate getTemplate() throws OXException {
-        final String fileName = MobileNotifierProviders.MAIL.getFileName();
-        final String frontendName = MobileNotifierProviders.MAIL.getFrontendName();
-        final String htmlTemplate = MobileNotifierFileUtil.getTeamplateFileContent(fileName);
-        return new NotifyTemplate(frontendName, htmlTemplate, false);
-    }
-
-    @Override
-    public void putTemplate() throws OXException {
+    public boolean isFailOnError() {
+        return failOnError;
     }
 }

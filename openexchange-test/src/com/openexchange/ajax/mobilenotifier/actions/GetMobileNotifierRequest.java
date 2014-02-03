@@ -47,57 +47,62 @@
  *
  */
 
-package com.openexchange.mobilenotifier.json.convert;
+package com.openexchange.ajax.mobilenotifier.actions;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Converter;
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import net.fortuna.ical4j.model.ParameterList;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.AJAXRequest.Parameter;
+import com.openexchange.ajax.publish.actions.GetPublicationResponse;
+import com.openexchange.ajax.user.actions.GetResponse;
 
 /**
- * {@link _NotifyItemJsonConverter}
- * 
+ * {@link GetMobileNotifierRequest}
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class _NotifyItemJsonConverter implements ResultConverter {
+public class GetMobileNotifierRequest extends AbstractMobileNotifierRequest<GetMobileNotifierResponse> {
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.requesthandler.ResultConverter#getInputFormat()
-     */
-    @Override
-    public String getInputFormat() {
-        return "mobilenotifier";
+    final String provider;
+
+    
+    public GetMobileNotifierRequest(final String provider) {
+        this.provider = provider;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.requesthandler.ResultConverter#getOutputFormat()
-     */
     @Override
-    public String getOutputFormat() {
-        return "json";
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.GET;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.requesthandler.ResultConverter#getQuality()
-     */
     @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        final List<Parameter> parameterList = new ArrayList<Parameter>();
+        parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
+        parameterList.add(new Parameter("provider", String.valueOf(provider)));
+
+        return parameterList.toArray(new Parameter[parameterList.size()]);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.requesthandler.ResultConverter#convert(com.openexchange.ajax.requesthandler.AJAXRequestData,
-     * com.openexchange.ajax.requesthandler.AJAXRequestResult, com.openexchange.tools.session.ServerSession,
-     * com.openexchange.ajax.requesthandler.Converter)
-     */
     @Override
-    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+    public AbstractAJAXParser<? extends GetMobileNotifierResponse> getParser() {
+        return new AbstractAJAXParser<GetMobileNotifierResponse>(isFailOnError()) {
 
+            @Override
+            protected GetMobileNotifierResponse createResponse(final Response response) throws JSONException {
+                return new GetMobileNotifierResponse(response);
+            }
+        };
     }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
+    }
+
 }

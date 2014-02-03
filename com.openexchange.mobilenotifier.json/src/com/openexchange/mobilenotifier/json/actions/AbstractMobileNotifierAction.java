@@ -67,6 +67,7 @@ import com.openexchange.tools.session.ServerSession;
 public abstract class AbstractMobileNotifierAction implements AJAXActionService {
 
     private final ServiceLookup services;
+
     /**
      * Initializes a new {@link AbstractMobileNotifierAction}.
      */
@@ -74,6 +75,7 @@ public abstract class AbstractMobileNotifierAction implements AJAXActionService 
         super();
         this.services = services;
     }
+
     /**
      * Gets the service of specified type
      * 
@@ -92,6 +94,7 @@ public abstract class AbstractMobileNotifierAction implements AJAXActionService 
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
+
     /**
      * Performs specified MobileNotifierRequest request.
      * 

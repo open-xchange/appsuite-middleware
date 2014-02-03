@@ -49,13 +49,10 @@
 
 package com.openexchange.mobilenotifier.json.convert;
 
-import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.mobilenotifier.MobileNotifierService;
-import com.openexchange.mobilenotifier.NotifyItem;
 import com.openexchange.mobilenotifier.NotifyTemplate;
 import com.openexchange.tools.session.ServerSession;
 

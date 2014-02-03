@@ -54,6 +54,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mobilenotifier.MobileNotifierExceptionCodes;
 
 /**
  * {@link MobileNotifierFileUtil} - Util for file handling
@@ -65,14 +67,13 @@ public abstract class MobileNotifierFileUtil {
     private static final String TEMPLATEPATH = System.getProperty("openexchange.propdir") + "/templates/";
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobileNotifierFileUtil.class);
-    
     /**
-     * Gets a template file from the hard disk - TODO: needs refactoring (error handling)
+     * Gets a template file from the hard disk
      * 
      * @param templateFileName - The file name of the template
      * @return String - The content of the file
      */
-    public static String getTeamplateFileContent(final String templateFileName) {
+    public static String getTeamplateFileContent(final String templateFileName) throws OXException {
         final File file = new File(TEMPLATEPATH + templateFileName);
 
         if (!isFileReadable(file)) {
@@ -92,8 +93,10 @@ public abstract class MobileNotifierFileUtil {
             }
         } catch (FileNotFoundException e) {
             LOG.error("Could not found file: {} ", file.toString());
+            throw MobileNotifierExceptionCodes.IO_ERROR.create();
         } catch (IOException e) {
             LOG.error(" ", e);
+            throw MobileNotifierExceptionCodes.IO_ERROR.create();
         } finally {
             if (fr != null) {
                 closeFileReader(fr);
@@ -106,26 +109,27 @@ public abstract class MobileNotifierFileUtil {
         return html;
     }
 
-    private static boolean isFileReadable(File file) {
+    private static boolean isFileReadable(File file) throws OXException {
         if (file.isFile() && file.canRead()) {
             return true;
         }
-        return false;
+        throw MobileNotifierExceptionCodes.IO_ERROR.create();
     }
 
-    private static void closeBufferedReader(BufferedReader br) {
+    private static void closeBufferedReader(BufferedReader br) throws OXException {
         try {
             br.close();
         } catch (IOException e) {
             LOG.error(" ", e);
+            throw MobileNotifierExceptionCodes.IO_ERROR.create();
         }
     }
 
-    private static void closeFileReader(FileReader br) {
+    private static void closeFileReader(FileReader br) throws OXException {
         try {
             br.close();
         } catch (IOException e) {
-            LOG.error(" ", e);
+            throw MobileNotifierExceptionCodes.IO_ERROR.create();
         }
     }
 }

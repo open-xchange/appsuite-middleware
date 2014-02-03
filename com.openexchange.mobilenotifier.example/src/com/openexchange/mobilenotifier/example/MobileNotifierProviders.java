@@ -56,11 +56,12 @@ package com.openexchange.mobilenotifier.example;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public enum MobileNotifierProviders {
+
     /**
      * Enum field for mail provider
      */
     MAIL("mail", "io.ox/mail", "Mail.tmpl"),
-    
+
     /**
      * Enum field for appointment provider
      */

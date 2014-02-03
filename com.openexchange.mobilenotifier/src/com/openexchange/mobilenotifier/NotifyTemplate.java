@@ -49,8 +49,6 @@
 
 package com.openexchange.mobilenotifier;
 
-import java.util.List;
-import javax.xml.transform.Templates;
 
 /**
  * {@link NotifyTemplate} - Represents a template
@@ -64,27 +62,22 @@ public class NotifyTemplate {
 
     private boolean slow;
 
-    public boolean isSlow() {
-        return slow;
+    public NotifyTemplate(String frontendAppName, String htmlTemplate, boolean slow) {
+        this.frontendAppName = frontendAppName;
+        this.htmlTemplate = htmlTemplate;
+        this.slow = slow;
     }
 
     public String getFrontendAppName() {
         return frontendAppName;
     }
 
-    public void setFrontendAppName(String frontendAppName) {
-        this.frontendAppName = frontendAppName;
-    }
-
     public String getHtmlTemplate() {
         return htmlTemplate;
     }
 
-    public void setHtmlTemplate(String htmlTemplate) {
-        this.htmlTemplate = htmlTemplate;
+    public boolean isSlow() {
+        return slow;
     }
 
-    public void setSlow(boolean slow) {
-        this.slow = slow;
-    }
 }

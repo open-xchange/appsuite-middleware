@@ -52,7 +52,6 @@ package com.openexchange.mobilenotifier.json.actions;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -75,7 +74,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 @Action(method = RequestMethod.GET, name = "get", description = "Get a notifaction item", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "provider", description = "The requested providers.") }, responseDescription = "An JSON object describing an notification item for one or multiple providers.")
+    @Parameter(name = "provider", description = "The requested providers.") }, responseDescription = "An JSON object describing an notification template for one or multiple providers.")
 public class GetAction extends AbstractMobileNotifierAction {
 
     /**
@@ -98,7 +97,7 @@ public class GetAction extends AbstractMobileNotifierAction {
         final ServerSession session = req.getSession();
 
         /*
-         * Writes a JSON provider structure
+         * Writes a JSON notify item structure
          */
         final JSONObject providerJsonObject = new JSONObject();
         final JSONArray providerJsonArray = new JSONArray();

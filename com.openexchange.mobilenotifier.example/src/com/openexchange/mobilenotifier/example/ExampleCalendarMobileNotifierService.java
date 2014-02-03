@@ -79,23 +79,18 @@ public class ExampleCalendarMobileNotifierService implements MobileNotifierServi
     @Override
     public List<NotifyItem> getItems(int uid, int cid) throws OXException {
         List<NotifyItem> list = new ArrayList<NotifyItem>();
-        NotifyItem ni = new NotifyItem();
-        ni.setKey("{{title}}");
-        ni.setValue("This is a test title");
+        NotifyItem ni = new NotifyItem("{{title}}", "This is a test title");
         list.add(ni);
         return list;
     }
 
     @Override
     public NotifyTemplate getTemplate() throws OXException {
-        String fileName = MobileNotifierProviders.APPOINTMENT.getFileName();
-        String frontendName = MobileNotifierProviders.APPOINTMENT.getFrontendName();
+        final String fileName = MobileNotifierProviders.APPOINTMENT.getFileName();
+        final String frontendName = MobileNotifierProviders.APPOINTMENT.getFrontendName();
+        final String htmlTemplate = MobileNotifierFileUtil.getTeamplateFileContent(fileName);
 
-        NotifyTemplate nt = new NotifyTemplate();
-        nt.setHtmlTemplate(MobileNotifierFileUtil.getTeamplateFileContent(fileName));
-        nt.setSlow(true);
-        nt.setFrontendAppName(frontendName);
-        return nt;
+        return new NotifyTemplate(frontendName, htmlTemplate, true);
     }
 
     @Override

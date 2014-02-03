@@ -54,6 +54,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.mobilenotifier.MobileNotifierService;
 import com.openexchange.mobilenotifier.MobileNotifierServiceRegistry;
@@ -70,6 +73,9 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:Lars.Hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @since 7.6.0
  */
+@Action(method = RequestMethod.GET, name = "get", description = "Gets a notifaction template", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "provider", optional = true, description = "The requested providers if this parameter is missing all templates will be returned.") }, responseDescription = "An JSON object describing an notification item for one or multiple providers.")
 public class ConfigGetAction extends AbstractMobileNotifierAction {
 
     /**
