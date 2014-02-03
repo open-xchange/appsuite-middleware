@@ -114,6 +114,20 @@ public enum CacheExceptionCode implements DisplayableOXExceptionCode {
     UNSUPPORTED_OPERATION("Method not supported.", MESSAGE, Category.CATEGORY_ERROR, 13)
     ;
 
+    /** The cache exception prefix */
+    private static final String PREFIX = "CAC";
+
+    /**
+     * Gets the prefix for cache exception.
+     *
+     * @return The <code>"CAC"</code> prefix
+     */
+    public static String prefix() {
+        return PREFIX;
+    }
+
+    // ------------------------------------------------------------------------------------- //
+
     private final String message;
 
     private final String displayMessage;
@@ -131,7 +145,7 @@ public enum CacheExceptionCode implements DisplayableOXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "CAC";
+        return PREFIX;
     }
 
     @Override
