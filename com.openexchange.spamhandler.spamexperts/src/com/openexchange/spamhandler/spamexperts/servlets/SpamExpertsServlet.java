@@ -1,4 +1,4 @@
-package com.openexchange.spamhandler.spamexperts.impl;
+package com.openexchange.spamhandler.spamexperts.servlets;
 
 /*
  *
@@ -75,15 +75,15 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
  *
  */
-public final class MyServlet extends DataServlet {
+public final class SpamExpertsServlet extends DataServlet {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = -8914926421736440078L;
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MyServlet.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamExpertsServlet.class);
 
-	public MyServlet() {
+	public SpamExpertsServlet() {
 		super();
 	}
 
@@ -114,7 +114,7 @@ public final class MyServlet extends DataServlet {
 				return;
 			}
 			final Context ctx = ContextStorage.getInstance().getContext(session);
-			final MyServletRequest proRequest = new MyServletRequest(session, ctx);
+			final SpamExpertsServletRequest proRequest = new SpamExpertsServletRequest(session, ctx);
 			final Object responseObj = proRequest.action(action, jsonObj);
 			response.setData(responseObj);
 

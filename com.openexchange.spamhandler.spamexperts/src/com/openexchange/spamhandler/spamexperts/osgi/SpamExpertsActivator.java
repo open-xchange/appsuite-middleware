@@ -49,52 +49,60 @@
 
 package com.openexchange.spamhandler.spamexperts.osgi;
 
-import static com.openexchange.spamhandler.spamexperts.osgi.MyServiceRegistry.getServiceRegistry;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.exception.OXException;
+import com.openexchange.mail.service.MailService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.spamhandler.SpamHandler;
+import com.openexchange.spamhandler.spamexperts.SpamExpertsSpamHandler;
+import com.openexchange.spamhandler.spamexperts.management.SpamExpertsConfig;
 import com.openexchange.tools.servlet.http.HTTPServletRegistration;
 import com.openexchange.user.UserService;
 
-public class MyActivator extends HousekeepingActivator {
+public class SpamExpertsActivator extends HousekeepingActivator {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MyActivator.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamExpertsActivator.class);
 
 	private HTTPServletRegistration servletRegistration;
 
-	public MyActivator() {
+	private static final Class<?>[] NEEDED_SERVICES = { UserService.class,DatabaseService.class,ContextService.class,ConfigurationService.class,HttpService.class,MailService.class};
+	    
+    private final Dictionary<String, String> dictionary;
+
+	public SpamExpertsActivator() {
 		super();
+        dictionary = new Hashtable<String, String>();
+        dictionary.put("name", SpamExpertsSpamHandler.getInstance().getSpamHandlerName());
 	}
 
 	@Override
 	protected Class<?>[] getNeededServices() {
-		return new Class<?>[] { UserService.class,DatabaseService.class,ContextService.class,ConfigurationService.class,HttpService.class};
+		return NEEDED_SERVICES;
 	}
 
 	@Override
 	protected void handleAvailability(final Class<?> clazz) {
 		LOG.warn("Absent service: {}", clazz.getName());
-		getServiceRegistry().addService(clazz, getService(clazz));
+        SpamExpertsServiceRegistry.getInstance().addService(clazz, getService(clazz));
 	}
 
 	@Override
 	protected void handleUnavailability(final Class<?> clazz) {
 		LOG.info("Re-available service: {}", clazz.getName());
-		getServiceRegistry().removeService(clazz);
-
+        SpamExpertsServiceRegistry.getInstance().removeService(clazz);
 	}
 
 	@Override
 	protected void startBundle() throws Exception {
+        LOG.info("starting bundle: \"com.openexchange.spamhandler.spamexperts\"");
 
-		// try to load all the needed services like config service and hostnameservice
 		try {
 			{
-				final ServiceRegistry registry = getServiceRegistry();
+                final SpamExpertsServiceRegistry registry = SpamExpertsServiceRegistry.getInstance();
 				registry.clearRegistry();
 				final Class<?>[] classes = getNeededServices();
 				for (int i = 0; i < classes.length; i++) {
@@ -105,10 +113,9 @@ public class MyActivator extends HousekeepingActivator {
 				}
 			}
 
-
-			// register the http info/sso servlet
-			servletRegistration = new HTTPServletRegistration(context, new com.openexchange.spamhandler.spamexperts.impl.MyServlet(), getFromConfig("com.openexchange.custom.spamexperts.panel_servlet"));
-
+			SpamExpertsConfig.getInstance().start();
+			registerService(SpamHandler.class, SpamExpertsSpamHandler.getInstance(), dictionary);
+			servletRegistration = new HTTPServletRegistration(context, new com.openexchange.spamhandler.spamexperts.servlets.SpamExpertsServlet(), SpamExpertsConfig.getInstance().getPanelServlet());
 
 		} catch (final Throwable t) {
 			LOG.error("", t);
@@ -117,20 +124,14 @@ public class MyActivator extends HousekeepingActivator {
 
 	}
 
-	private String getFromConfig(final String key) throws OXException {
-        final ConfigurationService configservice = MyServiceRegistry.getServiceRegistry().getService(ConfigurationService.class,true);
-        return configservice.getProperty(key);
-    }
-
 	@Override
 	protected void stopBundle() throws Exception {
 		try {
-			// stop info/sso servlet
 			if(servletRegistration != null) {
 			    servletRegistration.unregister();
 			    servletRegistration = null;
 			}
-			getServiceRegistry().clearRegistry();
+			SpamExpertsServiceRegistry.getInstance().clearRegistry();
 		} catch (final Throwable t) {
 			LOG.error("", t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
