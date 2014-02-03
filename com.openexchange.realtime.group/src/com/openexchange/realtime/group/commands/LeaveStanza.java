@@ -69,7 +69,6 @@ public class LeaveStanza extends Message {
      * Initializes a new {@link LeaveStanza}.
      * @param from The sender
      * @param to The recipient
-     * @param enabled true if the client should start injecting tracing ids into it's stanzas, false if it should stop
      */
     public LeaveStanza(ID from, ID to) {
         super();
