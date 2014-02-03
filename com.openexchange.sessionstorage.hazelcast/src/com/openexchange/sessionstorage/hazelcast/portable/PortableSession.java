@@ -66,8 +66,8 @@ import com.openexchange.sessionstorage.StoredSession;
  */
 public class PortableSession extends StoredSession implements CustomPortable {
 
-    /** The unique Hazelcast ID of the {@link PortableSession} */
-    public static final int ID = 1;
+    /** The unique portable class ID of the {@link PortableSession} */
+    public static final int CLASS_ID = 1;
 
     private static final long serialVersionUID = -2346327568417617677L;
 
@@ -94,7 +94,7 @@ public class PortableSession extends StoredSession implements CustomPortable {
 
     @Override
     public int getClassId() {
-        return ID;
+        return CLASS_ID;
     }
 
     @Override

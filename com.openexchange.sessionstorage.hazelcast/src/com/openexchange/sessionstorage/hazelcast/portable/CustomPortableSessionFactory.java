@@ -66,7 +66,7 @@ public class CustomPortableSessionFactory implements CustomPortableFactory {
 
     @Override
     public int getClassId() {
-        return PortableSession.ID;
+        return PortableSession.CLASS_ID;
     }
 
 }
