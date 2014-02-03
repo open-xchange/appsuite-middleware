@@ -221,9 +221,12 @@ public class ExecutorContinuation<V> implements Continuation<Collection<V>> {
             return;
         }
 
+        // Stop execution of running/pending ones
         for (final Future<Collection<V>> future : completionQueue) {
             future.cancel(mayInterruptIfRunning);
         }
+        // Clear completed ones
+        completedFutures.clear();
 
         canceled = true;
     }

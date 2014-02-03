@@ -52,7 +52,10 @@ package com.openexchange.continuation.internal;
 import java.io.Serializable;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheService;
@@ -72,8 +75,12 @@ import com.openexchange.session.Session;
  */
 public class ContinuationRegistryServiceImpl implements ContinuationRegistryService {
 
+    /** The logger constant */
+    static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ContinuationRegistryServiceImpl.class);
+
     private final ServiceLookup services;
     private final String region;
+    private final RemovalListener<UUID, Continuation<?>> removalListener;
 
     /**
      * Initializes a new {@link ContinuationRegistryServiceImpl}.
@@ -82,6 +89,21 @@ public class ContinuationRegistryServiceImpl implements ContinuationRegistryServ
         super();
         this.services = services;
         this.region = region;
+
+        this.removalListener = new RemovalListener<UUID, Continuation<?>>() {
+
+            @Override
+            public void onRemoval(final RemovalNotification<UUID, Continuation<?>> notification) {
+                final Continuation<?> continuation = notification.getValue();
+                if (null != continuation) {
+                    try {
+                        continuation.cancel(true);
+                    } catch (final Exception x) {
+                        LOGGER.warn("Failed to cancel continuation {}", continuation.getUuid());
+                    }
+                }
+            }
+        };
     }
 
     private Cache getCache() throws OXException {
@@ -93,8 +115,8 @@ public class ContinuationRegistryServiceImpl implements ContinuationRegistryServ
     }
 
     private com.google.common.cache.Cache<UUID, Continuation<?>> newUserCache() {
-        // Not more than 100 concurrent continuations per user
-        return CacheBuilder.newBuilder().initialCapacity(16).expireAfterAccess(5, TimeUnit.MINUTES).maximumSize(100).build();
+        // Not more than 100 concurrent continuations per user, each with 5 minutes expiry
+        return CacheBuilder.newBuilder().initialCapacity(16).expireAfterAccess(5, TimeUnit.MINUTES).maximumSize(100).removalListener(removalListener).build();
     }
 
     private String cacheKey(final Session session) {
