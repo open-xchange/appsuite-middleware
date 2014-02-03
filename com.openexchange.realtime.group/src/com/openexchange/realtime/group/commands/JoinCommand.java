@@ -53,6 +53,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.GroupCommand;
 import com.openexchange.realtime.group.GroupDispatcher;
+import com.openexchange.realtime.group.osgi.GroupServiceRegistry;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.ActionHandler;
@@ -72,7 +73,7 @@ public class JoinCommand implements GroupCommand {
     public void perform(final Stanza stanza, final GroupDispatcher groupDispatcher) throws OXException {
         if (isSynchronous(stanza)) {
             if (shouldExecuteAsynchronously(groupDispatcher)) {
-                GroupDispatcher.SERVICE_REF.get().getService(ThreadPoolService.class).submit(new AbstractTask<Void>() {
+                GroupServiceRegistry.getInstance().getService(ThreadPoolService.class).submit(new AbstractTask<Void>() {
 
                     @Override
                     public Void call() throws Exception {
@@ -94,7 +95,7 @@ public class JoinCommand implements GroupCommand {
         welcomeMessage.setFrom(groupDispatcher.getId());
         welcomeMessage.setTo(stanza.getFrom());
          
-        GroupDispatcher.SERVICE_REF.get().getService(MessageDispatcher.class).send(welcomeMessage);
+        GroupServiceRegistry.getInstance().getService(MessageDispatcher.class).send(welcomeMessage);
     }
 
     private boolean isSynchronous(Stanza stanza) {

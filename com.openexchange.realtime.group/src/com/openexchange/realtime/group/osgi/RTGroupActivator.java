@@ -53,9 +53,11 @@ import org.osgi.framework.BundleActivator;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
+import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.GroupCommand;
 import com.openexchange.realtime.group.GroupDispatcher;
+import com.openexchange.realtime.group.GroupManager;
 import com.openexchange.realtime.group.conversion.GroupCommand2JSON;
 import com.openexchange.realtime.group.conversion.JSON2GroupCommand;
 import com.openexchange.realtime.payload.converter.PayloadTreeConverter;
@@ -65,6 +67,8 @@ import com.openexchange.threadpool.ThreadPoolService;
 
 public class RTGroupActivator extends HousekeepingActivator implements BundleActivator {
 
+    private GroupManager groupManager;
+    
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[]{MessageDispatcher.class, PayloadTreeConverter.class, ThreadPoolService.class, GlobalRealtimeCleanup.class};
@@ -72,10 +76,11 @@ public class RTGroupActivator extends HousekeepingActivator implements BundleAct
 
     @Override
     protected void startBundle() throws Exception {
-        GroupDispatcher.SERVICE_REF.set(this);
-
+        GroupServiceRegistry.SERVICES.set(this);
+        groupManager = new GroupManager();
+        GroupDispatcher.GROUPMANAGER_REF.set(groupManager);
+        registerService(RealtimeJanitor.class, groupManager);
         getService(PayloadTreeConverter.class).declarePreferredFormat(new ElementPath("group", "command"), GroupCommand.class.getName());
-
         registerService(SimplePayloadConverter.class, new GroupCommand2JSON());
         registerService(SimplePayloadConverter.class, new JSON2GroupCommand());
 
@@ -84,7 +89,8 @@ public class RTGroupActivator extends HousekeepingActivator implements BundleAct
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
-        GroupDispatcher.SERVICE_REF.set(null);
+        GroupServiceRegistry.SERVICES.set(null);
+        GroupDispatcher.GROUPMANAGER_REF.set(null);
     }
 
 }

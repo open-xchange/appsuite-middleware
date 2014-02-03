@@ -62,6 +62,7 @@ import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
+import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
@@ -127,7 +128,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         managementHouseKeeper.addManagementObject(directory.getManagementObject());
         
         GlobalMessageDispatcherImpl globalDispatcher = new GlobalMessageDispatcherImpl(directory);
-        GlobalRealtimeCleanup globalCleanup = new GlobalRealtimeCleanupImpl();
+        GlobalRealtimeCleanup globalCleanup = new GlobalRealtimeCleanupImpl(directory);
         
         track(Channel.class, new SimpleRegistryListener<Channel>() {
 
@@ -145,6 +146,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         openTrackers();
         registerService(ResourceDirectory.class, directory, null);
         registerService(MessageDispatcher.class, globalDispatcher);
+        registerService(RealtimeJanitor.class, globalDispatcher);
         registerService(StanzaStorage.class, new HazelcastStanzaStorage());
         registerService(Channel.class, globalDispatcher.getChannel());
         registerService(GlobalRealtimeCleanup.class, globalCleanup);

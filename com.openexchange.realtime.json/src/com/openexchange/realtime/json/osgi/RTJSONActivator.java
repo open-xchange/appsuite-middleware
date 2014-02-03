@@ -58,6 +58,7 @@ import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.management.ManagementService;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
+import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.exception.RealtimeException;
@@ -107,6 +108,7 @@ public class RTJSONActivator extends AJAXModuleActivator {
 
         handler = new RTJSONHandler();
         registerService(Channel.class, new JSONChannel(handler));
+        registerService(RealtimeJanitor.class, handler.getGate());
 
         /*
          * Register the package specific payload converters. The SimpleConverterActivator listens for registrations of new

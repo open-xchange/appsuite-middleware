@@ -49,6 +49,10 @@
 
 package com.openexchange.realtime.cleanup;
 
+import java.util.Collection;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.packet.ID;
+
 
 /**
  * {@link GlobalRealtimeCleanup} - A central service that can be used for cluster-wide cleanup tasks of realtime components. The realtime
@@ -59,5 +63,25 @@ package com.openexchange.realtime.cleanup;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public interface GlobalRealtimeCleanup extends RealtimeCleanup {
+
+    /**
+     * Removes all available ResourceDirectory entries for the supplied ID. If the ID is in general form, all matching entries are removed
+     * from the directory. If the ID denotes a concrete resource, i.e. it's resource-part is set, only one entry is removed if found.
+     * 
+     * @param id The ID to remove from the directory
+     * @return The id's that were removed or an empty Collection
+     * @throws OXException
+     */
+    public Collection<ID> removeFromResourceDirectory(ID id) throws OXException;
+
+    /**
+     * Removes all available ResourceDirectory entries for the supplied IDs. For each ID, if it is in general form, all matching entries are
+     * removed from the directory. If an ID denotes a concrete resource, i.e. it's resource-part is set, only one entry is removed if found.
+     *
+     * @param ids The IDs to remove from the directory
+     * @return The id's that were removed or an empty Collection
+     * @throws OXException
+     */
+    public Collection<ID> removeFromResourceDirectory(Collection<ID> ids) throws OXException;
 
 }

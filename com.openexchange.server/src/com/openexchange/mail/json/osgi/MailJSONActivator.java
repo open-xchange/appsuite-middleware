@@ -49,16 +49,24 @@
 
 package com.openexchange.mail.json.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXResultDecorator;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.ContactStorage;
@@ -75,11 +83,14 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.json.converters.MailJSONConverter;
+import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link MailJSONActivator} - The activator for mail module.
@@ -111,6 +122,63 @@ public final class MailJSONActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         final ServiceLookup serviceLookup = new ExceptionOnAbsenceServiceLookup(this);
         SERVICES.set(serviceLookup);
+
+        final BundleContext context = this.context;
+
+        // Tracker for CapabilityService that declares "publish_mail_attachments" capability
+        track(CapabilityService.class, new ServiceTrackerCustomizer<CapabilityService, CapabilityService>() {
+
+            private volatile ServiceRegistration<CapabilityChecker> serviceRegistration;
+
+            @Override
+            public CapabilityService addingService(final ServiceReference<CapabilityService> reference) {
+                final CapabilityService service = context.getService(reference);
+                final String sCapability = "publish_mail_attachments";
+
+                // Register CapabilityChecker for "publish_mail_attachments"
+                final Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+                properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
+                final CapabilityChecker capabilityChecker = new CapabilityChecker() {
+
+                    @Override
+                    public boolean isEnabled(final String capability, final Session ses) throws OXException {
+                        if (sCapability.equals(capability)) {
+                            final ServerSession session = ServerSessionAdapter.valueOf(ses);
+                            if (session.isAnonymous()) {
+                                return false;
+                            }
+                            return TransportProperties.getInstance().isPublishOnExceededQuota();
+                        }
+
+                        return true;
+                    }
+                };
+                serviceRegistration = context.registerService(CapabilityChecker.class, capabilityChecker, properties);
+
+                // Declare "publish_mail_attachments" capability
+                service.declareCapability(sCapability);
+
+                // Return tracked service
+                return service;
+            }
+
+            @Override
+            public void modifiedService(final ServiceReference<CapabilityService> reference, final CapabilityService service) {
+                // Ignore
+            }
+
+            @Override
+            public void removedService(final ServiceReference<CapabilityService> reference, final CapabilityService service) {
+                final ServiceRegistration<CapabilityChecker> serviceRegistration = this.serviceRegistration;
+                if (null != serviceRegistration) {
+                    serviceRegistration.unregister();
+                    this.serviceRegistration = null;
+                }
+                context.ungetService(reference);
+            }
+        });
+        openTrackers();
+
         registerModule(new MailActionFactory(serviceLookup), "mail");
         final MailConverter converter = MailConverter.getInstance();
         registerService(ResultConverter.class, converter);
@@ -177,7 +245,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                             session, createContactSearchObject(from[0]), fields, new SortOptions(ContactField.FOLDER_ID, Order.ASCENDING));
                         if (null != searchIterator) {
                             while (null == imageURL && searchIterator.hasNext()) {
-                                Contact contact = searchIterator.next();
+                                final Contact contact = searchIterator.next();
                                 imageURL = getImageURL(session, contact);
                             }
                         }
@@ -190,7 +258,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                      * convert to JSON, decorate with image URL
                      */
                     converter.convert2JSON(requestData, result, session);
-                    JSONArray fromImageURLs = new JSONArray();
+                    final JSONArray fromImageURLs = new JSONArray();
                     if (null != imageURL) {
                         fromImageURLs.put(imageURL);
                     }
@@ -208,26 +276,26 @@ public final class MailJSONActivator extends AJAXModuleActivator {
          * @param contact The contact to generate the image URL for
          * @return The image URL, or <code>null</code> if not available or something went wrong
          */
-        private String getImageURL(ServerSession session, Contact contact) {
+        private String getImageURL(final ServerSession session, final Contact contact) {
             if (0 < contact.getNumberOfImages() || contact.containsImage1() && null != contact.getImage1()) {
-                String timestamp = null != contact.getLastModified() ? String.valueOf(contact.getLastModified().getTime()) : null;
+                final String timestamp = null != contact.getLastModified() ? String.valueOf(contact.getLastModified().getTime()) : null;
                 try {
                     if (FolderObject.SYSTEM_LDAP_FOLDER_ID == contact.getParentFolderID() && contact.containsInternalUserId()) {
                         /*
                          * prefer user contact image url
                          */
-                        ImageLocation imageLocation = new ImageLocation.Builder().id(
+                        final ImageLocation imageLocation = new ImageLocation.Builder().id(
                             String.valueOf(contact.getInternalUserId())).timestamp(timestamp).build();
                         return UserImageDataSource.getInstance().generateUrl(imageLocation, session);
                     } else {
                         /*
                          * use default contact image data source
                          */
-                        ImageLocation imageLocation = new ImageLocation.Builder().folder(String.valueOf(contact.getParentFolderID()))
+                        final ImageLocation imageLocation = new ImageLocation.Builder().folder(String.valueOf(contact.getParentFolderID()))
                             .id(String.valueOf(contact.getObjectID())).timestamp(timestamp).build();
                         return ContactImageDataSource.getInstance().generateUrl(imageLocation, session);
                     }
-                } catch (OXException e) {
+                } catch (final OXException e) {
                     LOG.warn("Error generating contact image URL", e);
                 }
             }

@@ -372,6 +372,43 @@ public final class ThreadPools {
     }
 
     /**
+     * Gets the result from passed {@link Future} instance.
+     *
+     * @param f The future
+     * @return The future's result
+     * @throws OXException If an error occurs
+     */
+    public static <V> V getFrom(final Future<V> f) throws OXException {
+        return getFrom(f, DEFAULT_EXCEPTION_FACTORY);
+    }
+
+    /**
+     * Gets the result from passed {@link Future} instance.
+     *
+     * @param f The future
+     * @param factory The exception factory to launder possible exceptions
+     * @return The future's result
+     * @throws E If an error occurs
+     */
+    public static <V, E extends Exception> V getFrom(final Future<V> f, final ExpectedExceptionFactory<E> factory) throws E {
+        if (null == f) {
+            return null;
+        }
+        ExpectedExceptionFactory<E> fac = factory;
+        if (null == fac) {
+            fac = (ExpectedExceptionFactory<E>) DEFAULT_EXCEPTION_FACTORY;
+        }
+        try {
+            return f.get();
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw factory.newUnexpectedError(e);
+        } catch (final ExecutionException e) {
+            throw launderThrowable(e, factory.getType());
+        }
+    }
+
+    /**
      * Returns a {@link Task} object that, when called, runs the given task and returns the given result. This can be useful when applying
      * methods requiring a <tt>Task</tt> to an otherwise resultless action.
      *

@@ -81,4 +81,5 @@ public class AuthenticationFailedException extends MessagingException {
     public AuthenticationFailedException(String message, Exception e) {
 	super(message, e);
     }
+
 }

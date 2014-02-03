@@ -47,25 +47,34 @@
  *
  */
 
-package com.openexchange.realtime.cleanup;
+package com.openexchange.realtime.group.commands;
 
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Message;
+import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.payload.PayloadTreeNode;
 
 /**
- * {@link RealtimeJanitor} - A service that can be instructed to execute different housekeeping and cleanup tasks. The service should be
- * implemented by realtime components that keep a local state so that a node-wide cleanup an be initiated by the
- * {@link LocalRealtimeCleanup} service that just collects all {@link RealtimeJanitor}s from the service registry (see OSGI whiteboard
- * pattern).
- * 
+ * {@link LeaveStanza} - Message containing a {@link LeaveCommand} wich can be send to a group to signal a leaving client.
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface RealtimeJanitor {
+
+public class LeaveStanza extends Message {
+
+    private static final long serialVersionUID = -5652689517169221820L;
 
     /**
-     * Clean up states that were kept for the given id.
      * 
-     * @param id
+     * Initializes a new {@link LeaveStanza}.
+     * @param from The sender
+     * @param to The recipient
      */
-    void cleanupForId(ID id);
+    public LeaveStanza(ID from, ID to) {
+        super();
+        setTo(to);
+        setFrom(from);
+        addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload("leave", "json", "group", "command").build()));
+    }
 
 }
