@@ -58,17 +58,8 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class XingSubscribeExceptionMessages implements LocalizableStrings {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
     // A XING error occurred: %1$s
     public static final String XING_ERROR_MSG = "A XING error occurred: %1$s";
-
-    // Invalid XING URL: %1$s
-    public static final String INVALID_DROPBOX_URL_MSG = "Invalid XING URL: %1$s";
-
-    // XING URL does not denote a directory: %1$s
-    public static final String NOT_A_FOLDER_MSG = "XING URL does not denote a directory: %1$s";
 
     // The XING resource does not exist: %1$s
     public static final String NOT_FOUND_MSG = "The XING resource does not exist: %1$s";
@@ -79,14 +70,8 @@ public final class XingSubscribeExceptionMessages implements LocalizableStrings 
     // Delete denied for XING resource: %1$s
     public static final String DELETE_DENIED_MSG = "Delete denied for XING resource: %1$s";
 
-    // XING URL does not denote a file: %1$s
-    public static final String NOT_A_FILE_MSG = "XING URL does not denote a file: %1$s";
-
     // Missing file name.
     public static final String MISSING_FILE_NAME_MSG = "Missing file name.";
-
-    // Versioning not supported by XING file storage.
-    public static final String VERSIONING_NOT_SUPPORTED_MSG = "Versioning not supported by XING file storage.";
 
     // Missing configuration for account "%1$s".
     public static final String MISSING_CONFIG_MSG = "Missing configuration for account \"%1$s\".";

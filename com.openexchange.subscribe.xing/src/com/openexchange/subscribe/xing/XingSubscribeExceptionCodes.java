@@ -50,65 +50,68 @@
 package com.openexchange.subscribe.xing;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link XingSubscribeExceptionCodes} - Enumeration of all errors.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum XingSubscribeExceptionCodes implements OXExceptionCode {
+public enum XingSubscribeExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(XingSubscribeExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An error occurred: %1$s", Category.CATEGORY_ERROR, 1, null),
     /**
      * A XING error occurred: %1$s
      */
-    XING_ERROR(XingSubscribeExceptionMessages.XING_ERROR_MSG, Category.CATEGORY_ERROR, 2),
+    XING_ERROR("A XING error occurred: %1$s", Category.CATEGORY_ERROR, 2, XingSubscribeExceptionMessages.XING_ERROR_MSG),
     /**
      * Invalid XING URL: %1$s
      */
-    INVALID_DROPBOX_URL(XingSubscribeExceptionMessages.INVALID_DROPBOX_URL_MSG, Category.CATEGORY_ERROR, 3),
+    INVALID_XING_URL("Invalid XING URL: %1$s", Category.CATEGORY_ERROR, 3, null),
     /**
      * XING URL does not denote a directory: %1$s
      */
-    NOT_A_FOLDER(XingSubscribeExceptionMessages.NOT_A_FOLDER_MSG, Category.CATEGORY_ERROR, 4),
+    NOT_A_FOLDER("XING URL does not denote a directory: %1$s", Category.CATEGORY_ERROR, 4, null),
     /**
      * The XING resource does not exist: %1$s
      */
-    NOT_FOUND(XingSubscribeExceptionMessages.NOT_FOUND_MSG, Category.CATEGORY_ERROR, 5),
+    NOT_FOUND("The XING resource does not exist: %1$s", Category.CATEGORY_ERROR, 5, XingSubscribeExceptionMessages.NOT_FOUND_MSG),
     /**
      * Update denied for XING resource: %1$s
      */
-    UPDATE_DENIED(XingSubscribeExceptionMessages.UPDATE_DENIED_MSG, Category.CATEGORY_ERROR, 6),
+    UPDATE_DENIED("Update denied for XING resource: %1$s", Category.CATEGORY_ERROR, 6, XingSubscribeExceptionMessages.UPDATE_DENIED_MSG),
     /**
      * Delete denied for XING resource: %1$s
      */
-    DELETE_DENIED(XingSubscribeExceptionMessages.DELETE_DENIED_MSG, Category.CATEGORY_ERROR, 7),
+    DELETE_DENIED("Delete denied for XING resource: %1$s", Category.CATEGORY_ERROR, 7, XingSubscribeExceptionMessages.DELETE_DENIED_MSG),
     /**
      * XING URL does not denote a file: %1$s
      */
-    NOT_A_FILE(XingSubscribeExceptionMessages.NOT_A_FILE_MSG, Category.CATEGORY_ERROR, 8),
+    NOT_A_FILE("XING URL does not denote a file: %1$s", Category.CATEGORY_ERROR, 8, null),
     /**
      * Missing file name.
      */
-    MISSING_FILE_NAME(XingSubscribeExceptionMessages.MISSING_FILE_NAME_MSG, Category.CATEGORY_ERROR, 12),
+    MISSING_FILE_NAME("Missing file name.", Category.CATEGORY_ERROR, 12, XingSubscribeExceptionMessages.MISSING_FILE_NAME_MSG),
     /**
      * Versioning not supported by XING file storage.
      */
-    VERSIONING_NOT_SUPPORTED(XingSubscribeExceptionMessages.VERSIONING_NOT_SUPPORTED_MSG, Category.CATEGORY_ERROR, 13),
+    VERSIONING_NOT_SUPPORTED("Versioning not supported by XING file storage.", Category.CATEGORY_ERROR, 13, null),
     /**
      * Missing configuration for account "%1$s".
      */
-    MISSING_CONFIG(XingSubscribeExceptionMessages.MISSING_CONFIG_MSG, Category.CATEGORY_CONFIGURATION, 14),
+    MISSING_CONFIG("Missing configuration for account \"%1$s\".", Category.CATEGORY_CONFIGURATION, 14,
+        XingSubscribeExceptionMessages.MISSING_CONFIG_MSG),
     /**
      * Bad or expired access token. Need to re-authenticate user.
      */
-    UNLINKED_ERROR(XingSubscribeExceptionMessages.UNLINKED_ERROR_MSG, Category.CATEGORY_CONFIGURATION, 15),
+    UNLINKED_ERROR("Bad or expired access token. Need to re-authenticate user.", Category.CATEGORY_CONFIGURATION, 15,
+        XingSubscribeExceptionMessages.UNLINKED_ERROR_MSG),
 
     ;
 
@@ -117,11 +120,14 @@ public enum XingSubscribeExceptionCodes implements OXExceptionCode {
     private final int detailNumber;
 
     private final String message;
+    
+    private String displayMessage;
 
-    private XingSubscribeExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private XingSubscribeExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -138,10 +144,15 @@ public enum XingSubscribeExceptionCodes implements OXExceptionCode {
     public int getNumber() {
         return detailNumber;
     }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
+    }
 
     @Override
     public String getPrefix() {
-        return "DROPBOX";
+        return "XING";
     }
 
     @Override
