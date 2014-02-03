@@ -508,8 +508,10 @@ public class IMAPDefaultFolderChecker {
                     if (isAlreadyExistsException(e)) {
                         // Grab the first in sight
                         closeSafe(f);
-                        f = (IMAPFolder) candidates.get(0);
-                        desiredFullName = f.getFullName();
+                        if (!candidates.isEmpty()) {
+                            f = (IMAPFolder) candidates.get(0);
+                            desiredFullName = f.getFullName();
+                        }
                         checkSubscriptionStatus(subscribe, f, modified);
                         return desiredFullName;
                     }
