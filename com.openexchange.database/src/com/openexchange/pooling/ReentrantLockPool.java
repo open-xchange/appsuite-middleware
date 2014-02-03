@@ -57,6 +57,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+import org.slf4j.Logger;
 
 /**
  * Implementation of the object pool.
@@ -372,7 +373,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     }
 
     private static <T> void logThreads(Collection<PooledData<T>> active) {
-        Log log = com.openexchange.log.Log.loggerFor(ReentrantLockPool.class.getName() + ".logThreads");
+        final Logger log = org.slf4j.LoggerFactory.getLogger(ReentrantLockPool.class.getName() + ".logThreads");
         if (!log.isDebugEnabled()) {
             return;
         }
