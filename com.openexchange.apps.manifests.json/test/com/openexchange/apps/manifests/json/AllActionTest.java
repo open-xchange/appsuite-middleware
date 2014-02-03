@@ -74,7 +74,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * Unit tests for {@link AllAction}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
@@ -85,19 +85,19 @@ public class AllActionTest {
      * Mock for the service lookup
      */
     @Mock
-    private AJAXModuleActivator serviceLookup = null;
+    private final AJAXModuleActivator serviceLookup = null;
 
     /**
      * Mock for the ServerSession
      */
     @Mock
-    private ServerSession serverSession = null;
+    private final ServerSession serverSession = null;
 
     /**
      * Mock for the CapabilityService
      */
     @Mock
-    private CapabilityService capabilityService = null;
+    private final CapabilityService capabilityService = null;
 
     private ServerConfigServicesLookup serverConfigServicesLookup;
 
@@ -113,19 +113,19 @@ public class AllActionTest {
         Mockito.when(serviceLookup.getService(CapabilityService.class)).thenReturn(this.capabilityService);
         Mockito.when(this.capabilityService.getCapabilities(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyBoolean())).thenReturn(
             new CapabilitySet(0));
-        
+
         serverConfigServicesLookup = new ServerConfigServicesLookup() {
-            
+
             @Override
             public List<ServerConfigMatcherService> getMatchers() {
                 return Collections.emptyList();
             }
-            
+
             @Override
             public List<ManifestContributor> getContributors() {
                 return Collections.emptyList();
             }
-            
+
             @Override
             public List<ComputedServerConfigValueService> getComputed() {
                 return Collections.emptyList();
