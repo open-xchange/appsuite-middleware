@@ -1,3 +1,15 @@
+open-xchange-sessionstorage-hazelcast (7.4.1-20) stable; urgency=low
+
+  * Build for patch 2014-02-03
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 30 Jan 2014 12:20:38 +0100
+
+open-xchange-sessionstorage-hazelcast (7.4.1-19) stable; urgency=low
+
+  * Build for patch 2014-01-30
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 29 Jan 2014 11:05:44 +0100
+
 open-xchange-sessionstorage-hazelcast (7.4.1-18) stable; urgency=low
 
   * Build for patch 2014-01-31

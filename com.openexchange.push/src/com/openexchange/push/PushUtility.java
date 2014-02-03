@@ -88,9 +88,27 @@ public final class PushUtility {
      *
      * @param folder The folder identifier; including account information
      * @param session The session providing needed user data
+     *
      * @throws OXException If posting event fails
      */
     public static void triggerOSGiEvent(final String folder, final Session session) throws OXException {
+        triggerOSGiEvent(folder, session, true);
+    }
+
+    /**
+     * Triggers the OSGi event system and posts a new event for new mails in given folder.
+     *
+     * @param folder The folder identifier; including account information
+     * @param session The session providing needed user data
+     * @param distributeRemotely <code>true</code> to add {@link CommonEvent} properties for remote distribution, <code>false</code>,
+     *                           otherwise
+     *
+     * @throws OXException If posting event fails
+     */
+    public static void triggerOSGiEvent(final String folder, final Session session, boolean distributeRemotely) throws OXException {
+        if (null == folder || null == session) {
+            return;
+        }
         try {
             final EventAdmin eventAdmin = ServiceRegistry.getInstance().getService(EventAdmin.class, true);
             final int contextId = session.getContextId();
@@ -106,7 +124,7 @@ public final class PushUtility {
             /*
              * Add common event to properties for remote distribution via UDP-push
              */
-            {
+            if (distributeRemotely) {
                 final EventFactoryService eventFactoryService = ServiceRegistry.getInstance().getService(EventFactoryService.class, true);
                 final CommonEvent commonEvent =
                     eventFactoryService.newCommonEvent(
