@@ -52,6 +52,8 @@ package com.openexchange.realtime.json.impl;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
+import com.openexchange.realtime.json.osgi.JSONServiceRegistry;
 import com.openexchange.realtime.json.protocol.RTClientState;
 import com.openexchange.realtime.json.protocol.StanzaTransmitter;
 import com.openexchange.realtime.packet.ID;
@@ -130,6 +132,8 @@ public class StateManager {
         for (RTClientState state : new ArrayList<RTClientState>(states.values())) {
             if (state.isTimedOut(timestamp)) {
                 LOG.debug("State for id {} is timed out. Last seen: {}", state.getId(), state.getLastSeen());
+                GlobalRealtimeCleanup globalRealtimeCleanup = JSONServiceRegistry.getInstance().getService(GlobalRealtimeCleanup.class);
+                globalRealtimeCleanup.cleanForId(state.getId());
                 state.getId().dispose(this, null);
             } else {
                 state.getId().trigger(ID.Events.REFRESH, this);

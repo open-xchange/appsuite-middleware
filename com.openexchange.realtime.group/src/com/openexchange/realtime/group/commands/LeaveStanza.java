@@ -47,42 +47,35 @@
  *
  */
 
-package com.openexchange.realtime.hazelcast.cleanup;
+package com.openexchange.realtime.group.commands;
 
-import java.io.Serializable;
-import java.util.concurrent.Callable;
-import org.apache.commons.lang.Validate;
-import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
-import com.openexchange.realtime.hazelcast.Services;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Message;
+import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.payload.PayloadTreeNode;
 
 /**
- * {@link CleanupDispatcher} - Issues a cleanup on the LocalRealtimeCleanup service.
- * 
+ * {@link LeaveStanza} - Message containing a {@link LeaveCommand} wich can be send to a group to signal a leaving client.
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class CleanupDispatcher implements Callable<Void>, Serializable {
 
-    private static final long serialVersionUID = 2669822501149210448L;
+public class LeaveStanza extends Message {
 
-    private final ID id;
+    private static final long serialVersionUID = -5652689517169221820L;
 
     /**
-     * Initializes a new {@link CleanupDispatcher}.
      * 
-     * @param id The ID to clean up for.
-     * @param cleanupScopes The scopes to clean up on the remote machines. 
+     * Initializes a new {@link LeaveStanza}.
+     * @param from The sender
+     * @param to The recipient
+     * @param enabled true if the client should start injecting tracing ids into it's stanzas, false if it should stop
      */
-    public CleanupDispatcher(ID id) {
-        Validate.notNull(id, "Mandatory parameter id is missing.");
-        this.id = id;
-    }
-
-    @Override
-    public Void call() throws Exception {
-        LocalRealtimeCleanup localRealtimeCleanup = Services.getService(LocalRealtimeCleanup.class);
-        localRealtimeCleanup.cleanForId(id);
-        return null;
+    public LeaveStanza(ID from, ID to) {
+        super();
+        setTo(to);
+        setFrom(from);
+        addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload("leave", "json", "group", "command").build()));
     }
 
 }

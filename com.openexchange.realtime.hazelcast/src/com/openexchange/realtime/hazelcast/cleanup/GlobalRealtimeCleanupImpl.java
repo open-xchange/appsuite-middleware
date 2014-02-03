@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.hazelcast.cleanup;
 
+import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
@@ -56,9 +57,10 @@ import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
 import com.hazelcast.core.MultiTask;
-import com.openexchange.realtime.cleanup.CleanupScope;
+import com.openexchange.exception.OXException;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
+import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
 import com.openexchange.realtime.packet.ID;
 
 /**
@@ -69,24 +71,49 @@ import com.openexchange.realtime.packet.ID;
 public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup {
 
     private static final Logger LOG = LoggerFactory.getLogger(GlobalRealtimeCleanupImpl.class);
+    private final HazelcastResourceDirectory hazelcastResourceDirectory;
+
+    /**
+     * Initializes a new {@link GlobalRealtimeCleanupImpl}.
+     * @param hazelcastResourceDirectory
+     */
+    public GlobalRealtimeCleanupImpl(HazelcastResourceDirectory hazelcastResourceDirectory) {
+        super();
+        this.hazelcastResourceDirectory = hazelcastResourceDirectory;
+    }
 
     @Override
-    public void cleanForId(ID id, CleanupScope... cleanupScopes) {
+    public void cleanForId(ID id) {
+        LOG.debug("Starting global realtime cleanup for ID: {}", id);
+        try {
+            Collection<ID> removeFromResourceDirectory = removeFromResourceDirectory(id);
+            if(removeFromResourceDirectory.isEmpty()) {
+                LOG.debug("Unable to remove {} from ResourceDirectory.", id);
+            }
+        } catch (OXException oxe) {
+            LOG.error("Unable to remove {} from ResourceDirectory.", id, oxe);
+        }
+
         HazelcastInstance hazelcastInstance;
         try {
             hazelcastInstance = HazelcastAccess.getHazelcastInstance();
             ExecutorService executorService = hazelcastInstance.getExecutorService();
             Set<Member> clusterMembers = hazelcastInstance.getCluster().getMembers();
-            MultiTask<Void> cleanUpTask = new MultiTask<Void>(new CleanupDispatcher(id, cleanupScopes), clusterMembers);
+            MultiTask<Void> cleanUpTask = new MultiTask<Void>(new CleanupDispatcher(id), clusterMembers);
             executorService.execute(cleanUpTask);
         } catch (Exception e) {
-            LOG.error("", e);
+            LOG.error("Unable to cleanup for {}.", id, e);
         }
     }
 
     @Override
-    public void cleanSequenceNumbersForId(ID id) {
-        cleanForId(id, CleanupScope.STANZASEQUENCE);
+    public Collection<ID> removeFromResourceDirectory(ID id) throws OXException {
+        return hazelcastResourceDirectory.remove(id).keySet();
+    }
+    
+    @Override
+    public Collection<ID> removeFromResourceDirectory(Collection<ID> ids) throws OXException {
+        return hazelcastResourceDirectory.remove(ids).keySet();
     }
 
 }

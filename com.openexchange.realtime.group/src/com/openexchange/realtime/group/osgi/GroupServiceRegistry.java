@@ -47,14 +47,43 @@
  *
  */
 
-package com.openexchange.realtime.cleanup;
+package com.openexchange.realtime.group.osgi;
 
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link CleanupScope} - Enumeration of different cleanup scopes.
+ * {@link GroupServiceRegistry} - Singleton that acts as central accesspoint for classes of the bundle.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public enum CleanupScope {
-    STANZASEQUENCE
+public class GroupServiceRegistry implements ServiceLookup {
+
+    private static final GroupServiceRegistry INSTANCE = new GroupServiceRegistry();
+    public static AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Encapsulated constructor.
+     */
+    private GroupServiceRegistry() {
+    }
+
+    /**
+     * Get the Registry singleton.
+     *
+     * @return the Registry singleton
+     */
+    public static GroupServiceRegistry getInstance() {
+        return INSTANCE;
+    }
+
+    @Override
+    public <S> S getService(Class<? extends S> clazz) {
+        return SERVICES.get().getService(clazz);
+    }
+
+    @Override
+    public <S> S getOptionalService(Class<? extends S> clazz) {
+        return SERVICES.get().getOptionalService(clazz);
+    }
 }

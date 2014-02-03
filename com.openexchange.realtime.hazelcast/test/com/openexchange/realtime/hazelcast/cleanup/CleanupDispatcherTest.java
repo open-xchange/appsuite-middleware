@@ -51,7 +51,6 @@ package com.openexchange.realtime.hazelcast.cleanup;
 
 import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
-import com.openexchange.realtime.cleanup.CleanupScope;
 import com.openexchange.realtime.packet.ID;
 
 
@@ -64,19 +63,13 @@ public class CleanupDispatcherTest {
 
     @Test(expected=IllegalArgumentException.class)
     public void testCleanupDispatcherNullId() {
-        CleanupDispatcher cleanupDispatcher = new CleanupDispatcher(null, null);
+        CleanupDispatcher cleanupDispatcher = new CleanupDispatcher(null);
     }
 
-    @Test(expected=IllegalArgumentException.class)
-    public void testCleanupDispatcherNullScope() {
-        ID marens = new ID("ox", "marc.arens", "premium", "uniqueResource");
-        CleanupDispatcher cleanupDispatcher = new CleanupDispatcher(marens, null);
-    }
-    
-    @Test(expected=IllegalArgumentException.class)
+    @Test
     public void testCleanupDispatcher() {
         ID marens = new ID("ox", "marc.arens", "premium", "uniqueResource");
-        CleanupDispatcher cleanupDispatcher = new CleanupDispatcher(marens, CleanupScope.STANZASEQUENCE);
+        CleanupDispatcher cleanupDispatcher = new CleanupDispatcher(marens);
         assertNotNull(cleanupDispatcher);
     }
 
