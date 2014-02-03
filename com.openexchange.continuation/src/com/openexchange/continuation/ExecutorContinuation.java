@@ -157,6 +157,9 @@ public class ExecutorContinuation<V> implements Continuation<Collection<V>> {
     /** The optional response generator */
     protected final ContinuationResponseGenerator<V> responseGenerator;
 
+    /** Signals whether this continuation has been canceled */
+    protected boolean canceled;
+
     private final int hash;
 
     /**
@@ -213,6 +216,19 @@ public class ExecutorContinuation<V> implements Continuation<Collection<V>> {
     }
 
     @Override
+    public synchronized void cancel(final boolean mayInterruptIfRunning) {
+        if (canceled) {
+            return;
+        }
+
+        for (final Future<Collection<V>> future : completionQueue) {
+            future.cancel(mayInterruptIfRunning);
+        }
+
+        canceled = true;
+    }
+
+    @Override
     public UUID getUuid() {
         return uuid;
     }
@@ -224,6 +240,10 @@ public class ExecutorContinuation<V> implements Continuation<Collection<V>> {
 
     @Override
     public synchronized ContinuationResponse<Collection<V>> getNextResponse(final long time, final TimeUnit unit, final Collection<V> defaultResponse) throws OXException, InterruptedException {
+        if (canceled) {
+            throw ContinuationExceptionCodes.CONTINUATION_CANCELED.create(uuid);
+        }
+
         int completedCount = completedFutures.size();
         if (completedCount == count) {
             return new ContinuationResponse<Collection<V>>(defaultResponse, null, null, true);
@@ -260,10 +280,15 @@ public class ExecutorContinuation<V> implements Continuation<Collection<V>> {
     /**
      * Awaits but does not retrieve the first response.
      *
+     * @throws OXException If this continuation has been canceled
      * @throws InterruptedException If thread was interrupted
      */
-    public void awaitFirstResponse() throws InterruptedException {
+    public void awaitFirstResponse() throws OXException, InterruptedException {
         synchronized (this) {
+            if (canceled) {
+                throw ContinuationExceptionCodes.CONTINUATION_CANCELED.create(uuid);
+            }
+
             final int completedCount = completedFutures.size();
             if (completedCount == count) {
                 return;

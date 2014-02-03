@@ -70,6 +70,19 @@ public interface Continuation<V> extends Serializable {
     UUID getUuid();
 
     /**
+     * Attempts to cancel execution of this continuation.
+     * <p>
+     * This attempt will fail if the continuation has already completed, has already been cancelled, or could not be cancelled for some
+     * other reason. If successful, and this continuation has not started when <tt>cancel</tt> is called, this continuation should never
+     * run. If the continuation has already started, then the <tt>mayInterruptIfRunning</tt> parameter determines whether the thread
+     * executing this task should be interrupted in an attempt to stop the task.
+     *
+     * @param mayInterruptIfRunning <tt>true</tt> if the thread executing this continuation should be interrupted; otherwise, in-progress
+     *            continuations are allowed to complete
+     */
+    void cancel(boolean mayInterruptIfRunning);
+
+    /**
      * Gets the next available value.
      *
      * @param time The maximum time to wait
