@@ -67,6 +67,8 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.log.LogFactory;
+import com.openexchange.ms.Topic;
 
 /**
  * {@link PushMsHandler} - Listens for locally distributed OSGi events notifying about changes.
@@ -149,11 +151,30 @@ public class PushMsHandler implements EventHandler {
             }
             break;
         default:
+<<<<<<< HEAD
             LOG.warn("Got event with unimplemented module: {}", module);
         }
     }
 
     private void publish(final int folderId, final int[] users, final int module, final Context ctx, final long timestamp, final Event e, final boolean immediate) {
+=======
+            LOG.warn("Got event with unimplemented module: " + module);
+        }
+    }
+
+    private void publish(final int folderId, final int[] users, final int module, final Context ctx, final long timestamp, final Event e) {
+        if (users == null) {
+            return;
+        }
+        try {
+            publishTopic.publish(newPushMsObject(folderId, users, module, ctx, timestamp, e).writePojo());
+        } catch (final RuntimeException ex) {
+            LOG.error(ex.getMessage(), ex);
+        }
+    }
+
+    private void publishDelayed(final int folderId, final int[] users, final int module, final Context ctx, final long timestamp, final Event e) {
+>>>>>>> hotfix-1850
         if (users == null) {
             return;
         }
