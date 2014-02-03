@@ -50,7 +50,6 @@
 package com.openexchange.admin.rmi;
 
 import java.net.MalformedURLException;
-import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import org.junit.After;
@@ -60,9 +59,6 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.exceptions.TaskManagerException;
 import com.openexchange.admin.user.copy.rmi.TestTool;
 

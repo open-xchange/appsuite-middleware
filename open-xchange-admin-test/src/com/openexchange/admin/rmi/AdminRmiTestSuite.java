@@ -70,7 +70,7 @@ import org.junit.runners.Suite.SuiteClasses;
     ContextTest.class,
     GroupTest.class,
     ResourceTest.class,
-    TaskMgmtTest.class,
+//    TaskMgmtTest.class,
     UserTest.class,
     UtilTest.class,
     UtilDatabaseTest.class
