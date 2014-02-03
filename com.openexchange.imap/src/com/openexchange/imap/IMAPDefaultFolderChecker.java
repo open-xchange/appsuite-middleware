@@ -459,10 +459,10 @@ public class IMAPDefaultFolderChecker {
                     LOG.info("Standard {} folder set to \"{}\" for account {} (user={}, context={})", getFallbackName(index), fullName, Integer.valueOf(accountId), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
                     return fullName;
                 }
-                LOG.warn("Standard {} folder \"{}\" is NOT supposed to be created within personal namespace \"{}\" for account {} (user={}, context={})", getFallbackName(index), desiredFullName, namespace, Integer.valueOf(accountId), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                LOG.warn("Standard {} folder \"{}\" is NOT supposed to be created within personal namespace \"\" for account {} (user={}, context={})", getFallbackName(index), desiredFullName, Integer.valueOf(accountId), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
             }
         } else {
-            if (!desiredFullName.startsWith(namespace) || (desiredFullName.indexOf(sep, namespace.length()) > 0)) {
+            if (!isFullNameLocatedInNamespace(desiredFullName, namespace, sep)) {
                 // Standard folder is NOT supposed to be created within personal namespace
                 final IMAPFolder probableCandidate = lookupFolder(getNamespaceFolder(namespace, sep), f.getName());
                 if (null != probableCandidate) {
@@ -512,8 +512,10 @@ public class IMAPDefaultFolderChecker {
                         return desiredFullName;
                     }
                     // Check for possibly wrong namespace
-                    if (!Strings.isEmpty(namespace) && !desiredFullName.startsWith(namespace)) {
-                        final String checkedFullName = doCheckFullNameFor(index, "", namespace + desiredFullName, sep, type, subscribe, namespace, modified);
+                    if (!Strings.isEmpty(namespace) && !isFullNameLocatedInNamespace(desiredFullName, namespace, sep)) {
+                        final int sepPos = desiredFullName.lastIndexOf(sep);
+                        final String name = sepPos > 0 ? desiredFullName.substring(sepPos + 1) : desiredFullName;
+                        final String checkedFullName = doCheckFullNameFor(index, "", namespace + name, sep, type, subscribe, namespace, modified);
                         clearAllAccountFullNames();
                         return checkedFullName;
                     }
@@ -529,6 +531,26 @@ public class IMAPDefaultFolderChecker {
         }
         checkSubscriptionStatus(subscribe, f,  modified);
         return desiredFullName;
+    }
+
+    /**
+     * Checks if given full name indicates to be located in specified namespace.
+     * <p>
+     * <table>
+     *  <tr><td align="right"><code>"INBOX/"</code></td><td>--&gt; <code>"INBOX/Trash"</code>, but not <code>"Trash"</code> and not <code>"INBOX/foobar/Trash"</code></td></tr>
+     *  <tr><td align="right"><code>""</code></td><td>--&gt; <code>"Trash"</code>, but not <code>"INBOX/Trash"</code></td></tr>
+     * </table>
+     *
+     * @param fullName The full name to check
+     * @param namespace The namespace location
+     * @param sep The separator character
+     * @return <code>true</code> if given full name is located in name-space; otherwise <code>false</code>
+     */
+    protected boolean isFullNameLocatedInNamespace(final String fullName, final String namespace, final char sep) {
+        if (isEmpty(namespace)) {
+            return fullName.indexOf(sep) < 0;
+        }
+        return (fullName.startsWith(namespace) && (fullName.indexOf(sep, namespace.length()) < 0));
     }
 
     /**

@@ -79,24 +79,35 @@ public final class StorageUtility {
     /*
      * Public constants
      */
+
+    /** The index for standard drafts folder */
     public static final int INDEX_DRAFTS = 0;
 
+    /** The index for standard sent folder */
     public static final int INDEX_SENT = 1;
 
+    /** The index for standard spam folder */
     public static final int INDEX_SPAM = 2;
 
+    /** The index for standard trash folder */
     public static final int INDEX_TRASH = 3;
 
+    /** The index for standard confirmed-spam folder */
     public static final int INDEX_CONFIRMED_SPAM = 4;
 
+    /** The index for standard confirmed-ham folder */
     public static final int INDEX_CONFIRMED_HAM = 5;
 
+    /** The index for standard INBOX folder */
     public static final int INDEX_INBOX = 6;
 
+    /** Signals to perform a hard delete */
     public static final int MAIL_PARAM_HARD_DELETE = 1;
 
+    /** Unlimted quota */
     public static final int UNLIMITED_QUOTA = -1;
 
+    /** An empty <code>javax.mail.Message</code> array */
     public static final Message[] EMPTY_MSGS = new Message[0];
 
     /**
