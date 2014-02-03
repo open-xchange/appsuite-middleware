@@ -51,7 +51,6 @@ package com.openexchange.service.indexing.impl.internal.nonclustered;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.concurrent.Callable;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -70,13 +69,13 @@ import com.openexchange.service.indexing.impl.internal.Services;
 import com.openexchange.service.indexing.impl.internal.Tools;
 
 /**
- * {@link ScheduleJobCallable}
+ * {@link ScheduleJobRunnable}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ScheduleJobCallable implements Callable<Object>, Serializable {
+public class ScheduleJobRunnable implements Runnable, Serializable {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ScheduleJobCallable.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ScheduleJobRunnable.class);
 
     private static final long serialVersionUID = 5900667348491833307L;
 
@@ -88,7 +87,7 @@ public class ScheduleJobCallable implements Callable<Object>, Serializable {
 
     private final int priority;
 
-    public ScheduleJobCallable(JobInfo jobInfo, Date startDate, long interval, int priority) {
+    public ScheduleJobRunnable(JobInfo jobInfo, Date startDate, long interval, int priority) {
         super();
         this.jobInfo = jobInfo;
         this.startDate = startDate;
@@ -97,9 +96,8 @@ public class ScheduleJobCallable implements Callable<Object>, Serializable {
     }
 
     @Override
-    public Object call() throws Exception {
+    public void run() {
         LOG.debug("Scheduling job: {}.", jobInfo);
-
         try {
             JobDataMap jobData = new JobDataMap();
             jobData.put(JobConstants.JOB_INFO, jobInfo);
@@ -154,7 +152,6 @@ public class ScheduleJobCallable implements Callable<Object>, Serializable {
         } catch (Throwable t) {
             LOG.error("", t);
         }
-        return null;
     }
 
     private String generateTriggerName(JobInfo info, Date startDate, long repeatInterval) {

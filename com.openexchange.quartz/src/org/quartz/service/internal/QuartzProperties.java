@@ -59,10 +59,6 @@ public class QuartzProperties {
 
     public static final String START_LOCAL_SCHEDULER = "com.openexchange.quartz.startLocalScheduler";
 
-    public static final String START_CLUSTERED_SCHEDULER = "com.openexchange.quartz.startClusteredScheduler";
-
     public static final String LOCAL_THREADS = "com.openexchange.quartz.localThreads";
-
-    public static final String CLUSTERED_THREADS = "com.openexchange.quartz.clusteredThreads";
 
 }

@@ -64,7 +64,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link MockServiceLookup}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class MockServiceLookup implements ServiceLookup {
@@ -94,7 +94,7 @@ public class MockServiceLookup implements ServiceLookup {
 
     private HazelcastInstance getHazelcast() {
         if (hazelcast == null) {
-            hazelcast = Hazelcast.getDefaultInstance();
+            hazelcast = Hazelcast.newHazelcastInstance();
         }
 
         return hazelcast;

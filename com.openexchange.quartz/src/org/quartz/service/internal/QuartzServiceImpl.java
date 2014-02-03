@@ -71,21 +71,23 @@ public final class QuartzServiceImpl implements QuartzService {
 
     private final Map<String, Scheduler> namedSchedulers = new HashMap<String, Scheduler>();
 
+    private final ConfigurationService config;
+
     private Scheduler defaultScheduler = null;
 
 
     /**
      * Initializes a new {@link QuartzServiceImpl}.
      */
-    public QuartzServiceImpl() {
+    public QuartzServiceImpl(final ConfigurationService config) {
         super();
+        this.config = config;
     }
 
     @Override
     public Scheduler getDefaultScheduler() throws OXException {
         synchronized (namedSchedulers) {
             if (defaultScheduler == null) {
-                ConfigurationService config = Services.getService(ConfigurationService.class);
                 boolean startLocalScheduler = config.getBoolProperty(QuartzProperties.START_LOCAL_SCHEDULER, true);
                 int localThreads = config.getIntProperty(QuartzProperties.LOCAL_THREADS, 3);
 
@@ -157,24 +159,6 @@ public final class QuartzServiceImpl implements QuartzService {
             return scheduler;
         }
     }
-
-//    @Override
-//    public void releaseClusteredScheduler(String name) {
-//        if (name == null) {
-//            return;
-//        }
-//
-//        synchronized (namedSchedulers) {
-//            try {
-//                Scheduler scheduler = namedSchedulers.remove(name);
-//                if (scheduler != null && scheduler.isStarted()) {
-//                    scheduler.shutdown(true);
-//                }
-//            } catch (SchedulerException e) {
-//                LOG.warn("Could not stop clustered scheduler '{}'.", name, e);
-//            }
-//        }
-//    }
 
     public void shutdown() {
         synchronized (namedSchedulers) {

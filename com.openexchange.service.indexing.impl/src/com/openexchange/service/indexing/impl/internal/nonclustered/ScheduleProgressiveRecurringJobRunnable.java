@@ -50,79 +50,76 @@
 package com.openexchange.service.indexing.impl.internal.nonclustered;
 
 import java.io.Serializable;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import org.quartz.JobKey;
+import java.util.Date;
+import org.quartz.JobBuilder;
+import org.quartz.JobDetail;
 import org.quartz.Scheduler;
-import org.quartz.Trigger;
-import org.quartz.impl.matchers.GroupMatcher;
+import org.quartz.SchedulerException;
+import org.quartz.SimpleScheduleBuilder;
+import org.quartz.SimpleTrigger;
+import org.quartz.TriggerBuilder;
 import org.quartz.service.QuartzService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.service.indexing.JobInfo;
 import com.openexchange.service.indexing.impl.internal.SchedulerConfig;
 import com.openexchange.service.indexing.impl.internal.Services;
 import com.openexchange.service.indexing.impl.internal.Tools;
 
-
 /**
- * {@link UnscheduleAllJobsCallable}
+ * {@link ScheduleProgressiveRecurringJobRunnable}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class UnscheduleAllJobsCallable implements Callable<Object>, Serializable {
+public class ScheduleProgressiveRecurringJobRunnable implements Runnable, Serializable {
 
-    private static final long serialVersionUID = -3020268885605197578L;
+    private static final Logger LOG = LoggerFactory.getLogger(ScheduleProgressiveRecurringJobRunnable.class);
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UnscheduleAllJobsCallable.class);
+    private static final long serialVersionUID = 7614918425842919875L;
 
-    private final int contextId;
+    private final JobInfo jobInfo;
 
-    private final int userId;
+    private final int priority;
 
-    public UnscheduleAllJobsCallable(int contextId, int userId) {
-        super();
-        this.contextId = contextId;
-        this.userId = userId;
+    /**
+     * Initializes a new {@link ScheduleProgressiveRecurringJobRunnable}.
+     * @param jobInfo
+     * @param trigger
+     */
+    public ScheduleProgressiveRecurringJobRunnable(JobInfo jobInfo, int priority) {
+        this.jobInfo = jobInfo;
+        this.priority = priority;
     }
 
     @Override
-    public Object call() throws Exception {
+    public void run() {
+        JobDetail jobDetail = JobBuilder.newJob(ProgressiveRecurringJob.class)
+            .withIdentity(Tools.generateJobKey(jobInfo, null))
+            .build();
+
+        String triggerName = jobInfo.toUniqueId() + "/withProgressiveInterval";
+        SimpleTrigger newTrigger = TriggerBuilder.newTrigger()
+            .forJob(jobDetail.getKey())
+            .withIdentity(triggerName, Tools.generateTriggerGroup(jobInfo.contextId, jobInfo.userId))
+            .startAt(new Date())
+            .withPriority(priority)
+            .withSchedule(SimpleScheduleBuilder.simpleSchedule().withMisfireHandlingInstructionFireNow())
+            .build();
+
+        QuartzService quartzService = Services.getService(QuartzService.class);
         try {
-            QuartzService quartzService = Services.getService(QuartzService.class);
             Scheduler scheduler = quartzService.getScheduler(SchedulerConfig.getSchedulerName(), SchedulerConfig.start(), SchedulerConfig.getThreadCount());
-            if (contextId > 0 && userId > 0) {
-                if (userId > 0) {
-                    String jobGroup = Tools.generateJobGroup(contextId, userId);
-                    Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(jobGroup));
-                    int count = 0;
-                    for (JobKey jobKey : jobKeys) {
-                        List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
-                        count += triggers.size();
-                        for (Trigger trigger : triggers) {
-                            scheduler.unscheduleJob(trigger.getKey());
-                        }
-                    }
-
-                    LOG.debug("Unscheduled {} triggers for {} jobs for user {} in context {}.", count, jobKeys.size(), userId, contextId);
-                } else {
-                    String jobGroup = Tools.generateJobGroup(contextId);
-                    Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupStartsWith(jobGroup));
-                    int count = 0;
-                    for (JobKey jobKey : jobKeys) {
-                        List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
-                        count += triggers.size();
-                        for (Trigger trigger : triggers) {
-                            scheduler.unscheduleJob(trigger.getKey());
-                        }
-                    }
-
-                    LOG.debug("Unscheduled {} triggers for {} jobs for user {} in context {}.", count, jobKeys.size(), userId, contextId);
-                }
+            scheduler.addJob(jobDetail, true);
+            if (scheduler.checkExists(newTrigger.getKey())) {
+                scheduler.rescheduleJob(newTrigger.getKey(), newTrigger);
+            } else {
+                scheduler.scheduleJob(newTrigger);
             }
-        } catch (Throwable t) {
-            LOG.error("", t);
+        } catch (SchedulerException e) {
+            LOG.error("Could not schedule job.", e);
+        } catch (OXException e) {
+            LOG.error("Could not schedule job.", e);
         }
-
-        return null;
     }
-
 }

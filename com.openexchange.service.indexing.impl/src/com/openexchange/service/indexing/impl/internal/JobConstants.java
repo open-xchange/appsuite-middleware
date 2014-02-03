@@ -58,11 +58,13 @@ package com.openexchange.service.indexing.impl.internal;
 public class JobConstants {
 
     public static final String JOB_INFO = "jobInfo";
-    
+
     public static final String START_DATE = "startDate";
-    
+
     public static final String PRIORITY = "priority";
-    
+
     public static final String INTERVAL = "interval";
+
+    public static final String HZ_EXECUTOR = "com.openexchange.service.indexing.impl";
 
 }
