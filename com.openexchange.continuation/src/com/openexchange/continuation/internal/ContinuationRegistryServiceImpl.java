@@ -55,6 +55,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheService;
 import com.openexchange.continuation.Continuation;
 import com.openexchange.continuation.ContinuationRegistryService;
@@ -127,6 +128,10 @@ public class ContinuationRegistryServiceImpl implements ContinuationRegistryServ
                     cache.putSafe(cacheKey, (Serializable) newUserCache);
                     object = newUserCache;
                 } catch (final OXException e) {
+                    if (!CacheExceptionCode.FAILED_SAFE_PUT.equals(e)) {
+                        throw e;
+                    }
+                    // An object bound to given key already exists
                     object = cache.get(cacheKey);
                 }
             }
