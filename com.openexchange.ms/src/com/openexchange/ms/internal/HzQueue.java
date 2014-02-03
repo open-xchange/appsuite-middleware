@@ -80,7 +80,7 @@ public final class HzQueue<E> implements Queue<E> {
     private final IQueue<Map<String, Object>> hzQueue;
     private final String senderId;
     private final String name;
-    private final ConcurrentMap<MessageListener<E>, com.hazelcast.core.ItemListener<Map<String, Object>>> registeredListeners;
+    private final ConcurrentMap<MessageListener<E>, String> registeredListeners;
 
     /**
      * Initializes a new {@link HzQueue}.
@@ -90,7 +90,7 @@ public final class HzQueue<E> implements Queue<E> {
         this.name = name;
         senderId = UUIDs.getUnformattedString(UUID.randomUUID());
         this.hzQueue = hz.getQueue(name);
-        registeredListeners = new ConcurrentHashMap<MessageListener<E>, com.hazelcast.core.ItemListener<Map<String, Object>>>(8);
+        registeredListeners = new ConcurrentHashMap<MessageListener<E>, String>(8);
     }
 
     @Override
@@ -106,16 +106,15 @@ public final class HzQueue<E> implements Queue<E> {
     @Override
     public void addMessageListener(final MessageListener<E> listener) {
         final HzMessageListener<E> hzListener = new HzMessageListener<E>(listener, senderId);
-        hzQueue.addItemListener(hzListener, true);
-        registeredListeners.put(listener, hzListener);
+        registeredListeners.put(listener, hzQueue.addItemListener(hzListener, true));
     }
 
     @Override
     public void removeMessageListener(final MessageListener<E> listener) {
-        final com.hazelcast.core.ItemListener<Map<String, Object>> hzListener = registeredListeners.remove(listener);
-        if (null != hzListener) {
+        String regID = registeredListeners.remove(listener);
+        if (null != regID) {
             try {
-                hzQueue.removeItemListener(hzListener);
+                hzQueue.removeItemListener(regID);
             } catch (final RuntimeException e) {
                 // Removing message listener failed
                 LOG.warn("Couldn't remove message listener from Hazelcast queue \"{}\".", name, e);

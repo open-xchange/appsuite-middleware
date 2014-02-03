@@ -49,18 +49,18 @@
 
 package com.openexchange.realtime.hazelcast.directory.mock;
 
-import java.io.DataInput;
-import java.io.DataOutput;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.UUID;
 import com.hazelcast.core.Member;
+import com.hazelcast.nio.ObjectDataInput;
+import com.hazelcast.nio.ObjectDataOutput;
 
 /**
  * {@link HazelcastMemberMock} - Simple mock to use for testing withoug OSGi environment.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class HazelcastMemberMock implements Member {
@@ -79,11 +79,11 @@ public class HazelcastMemberMock implements Member {
     }
 
     @Override
-    public void writeData(DataOutput out) throws IOException {
+    public void writeData(ObjectDataOutput out) throws IOException {
     }
 
     @Override
-    public void readData(DataInput in) throws IOException {
+    public void readData(ObjectDataInput in) throws IOException {
     }
 
     @Override
@@ -92,31 +92,8 @@ public class HazelcastMemberMock implements Member {
     }
 
     @Override
-    @Deprecated
-    public int getPort() {
-        return localInetSocketAddress.getPort();
-    }
-
-    @Override
-    @Deprecated
-    public InetAddress getInetAddress() {
-        return localInetAddress;
-    }
-
-    @Override
     public InetSocketAddress getInetSocketAddress() {
         return localInetSocketAddress;
-    }
-
-    @Override
-    @Deprecated
-    public boolean isSuperClient() {
-        return false;
-    }
-
-    @Override
-    public boolean isLiteMember() {
-        return false;
     }
 
     @Override

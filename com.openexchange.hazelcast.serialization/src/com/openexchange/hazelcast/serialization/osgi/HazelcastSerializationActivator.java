@@ -47,45 +47,73 @@
  *
  */
 
-package com.openexchange.sessionstorage.hazelcast;
 
-import java.util.Map.Entry;
-import com.hazelcast.query.Predicate;
-import com.openexchange.session.Session;
-import com.openexchange.sessionstorage.hazelcast.portable.PortableSession;
+package com.openexchange.hazelcast.serialization.osgi;
+
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.hazelcast.serialization.CustomPortableFactory;
+import com.openexchange.hazelcast.serialization.DynamicPortableFactory;
+import com.openexchange.hazelcast.serialization.internal.DynamicPortableFactoryImpl;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link AltIdPredicate}
+ * {@link HazelcastSerializationActivator}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class AltIdPredicate implements Predicate<String, PortableSession> {
+public class HazelcastSerializationActivator extends HousekeepingActivator {
 
-    private static final long serialVersionUID = -3741029445819911943L;
-
-    private String altId;
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastSerializationActivator.class);
 
     /**
-     * Initializes a new {@link AltIdPredicate}.
-     *
-     * @param altId The alternative ID to match
+     * Initializes a new {@link HazelcastActivator}.
      */
-    public AltIdPredicate(String altId) {
-        super();
-        this.altId = altId;
-    }
-
-    /**
-     * Initializes a new {@link AltIdPredicate}.
-     */
-    public AltIdPredicate() {
+    public HazelcastSerializationActivator() {
         super();
     }
 
     @Override
-    public boolean apply(Entry<String, PortableSession> mapEntry) {
-        return null != mapEntry && null != mapEntry.getValue() && null != altId &&
-            altId.equals(mapEntry.getValue().getParameter(Session.PARAM_ALTERNATIVE_ID));
+    protected Class<?>[] getNeededServices() {
+        return new Class[0];
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        /*
+         * create & register dynamic factory
+         */
+        final DynamicPortableFactoryImpl dynamicFactory = new DynamicPortableFactoryImpl();
+        registerService(DynamicPortableFactory.class, dynamicFactory);
+        /*
+         * track generic portable factories
+         */
+        track(CustomPortableFactory.class, new ServiceTrackerCustomizer<CustomPortableFactory, CustomPortableFactory>() {
+
+            @Override
+            public CustomPortableFactory addingService(ServiceReference<CustomPortableFactory> reference) {
+                final CustomPortableFactory factory = context.getService(reference);
+                dynamicFactory.register(factory);
+                return factory;
+            }
+
+            @Override
+            public void modifiedService(ServiceReference<CustomPortableFactory> reference, CustomPortableFactory service) {
+                // Ignore
+            }
+
+            @Override
+            public void removedService(ServiceReference<CustomPortableFactory> reference, CustomPortableFactory service) {
+                dynamicFactory.unregister(service);
+                context.ungetService(reference);
+            }
+        });
+        openTrackers();
+    }
+
+    @Override
+    public void stopBundle() throws Exception {
+        super.stopBundle();
     }
 
 }

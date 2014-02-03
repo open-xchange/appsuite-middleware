@@ -47,45 +47,19 @@
  *
  */
 
-package com.openexchange.sessionstorage.hazelcast;
 
-import java.util.Map.Entry;
-import com.hazelcast.query.Predicate;
-import com.openexchange.session.Session;
-import com.openexchange.sessionstorage.hazelcast.portable.PortableSession;
+package com.openexchange.hazelcast.serialization;
+
+import com.hazelcast.nio.serialization.PortableFactory;
 
 /**
- * {@link AltIdPredicate}
+ * {@link DynamicPortableFactory}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class AltIdPredicate implements Predicate<String, PortableSession> {
+public interface DynamicPortableFactory extends PortableFactory {
 
-    private static final long serialVersionUID = -3741029445819911943L;
-
-    private String altId;
-
-    /**
-     * Initializes a new {@link AltIdPredicate}.
-     *
-     * @param altId The alternative ID to match
-     */
-    public AltIdPredicate(String altId) {
-        super();
-        this.altId = altId;
-    }
-
-    /**
-     * Initializes a new {@link AltIdPredicate}.
-     */
-    public AltIdPredicate() {
-        super();
-    }
-
-    @Override
-    public boolean apply(Entry<String, PortableSession> mapEntry) {
-        return null != mapEntry && null != mapEntry.getValue() && null != altId &&
-            altId.equals(mapEntry.getValue().getParameter(Session.PARAM_ALTERNATIVE_ID));
-    }
+    /** The static identifier of the dynamic portable factory */
+    static final int FACTORY_ID = 873;
 
 }

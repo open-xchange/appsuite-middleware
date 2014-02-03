@@ -8,11 +8,7 @@ Bundle-Version: 7.4.2
 Bundle-Activator: com.openexchange.ms.osgi.MsActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.hazelcast.config,
- com.hazelcast.core,
- com.hazelcast.monitor,
- com.hazelcast.nio,
- com.hazelcast.query,
+Import-Package: com.hazelcast.core,
  com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.groupware,

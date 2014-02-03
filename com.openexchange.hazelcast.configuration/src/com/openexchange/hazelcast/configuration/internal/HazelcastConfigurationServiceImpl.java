@@ -72,12 +72,13 @@ import com.hazelcast.config.QueueConfig;
 import com.hazelcast.config.SemaphoreConfig;
 import com.hazelcast.config.SymmetricEncryptionConfig;
 import com.hazelcast.config.TopicConfig;
-import com.hazelcast.impl.GroupProperties;
+import com.hazelcast.instance.GroupProperties;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.WildcardNamePropertyFilter;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
+import com.openexchange.hazelcast.serialization.DynamicPortableFactory;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.strings.StringParser;
@@ -278,13 +279,13 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             System.setProperty(GroupProperties.PROP_LOGGING_TYPE, "none");
             config.setProperty(GroupProperties.PROP_LOGGING_TYPE, "none");
         }
-        config.setProperty(GroupProperties.PROP_MAX_OPERATION_TIMEOUT,
-            configService.getProperty("com.openexchange.hazelcast.maxOperationTimeout", "5000"));
+//        config.setProperty(GroupProperties.PROP_MAX_OPERATION_TIMEOUT,
+//            configService.getProperty("com.openexchange.hazelcast.maxOperationTimeout", "5000"));
         config.setProperty(GroupProperties.PROP_ENABLE_JMX, configService.getProperty("com.openexchange.hazelcast.jmx", "true"));
         config.setProperty(GroupProperties.PROP_ENABLE_JMX_DETAILED,
-            configService.getProperty("com.openexchange.hazelcast.jmxDetailed", "false"));
-        config.setProperty(GroupProperties.PROP_REDO_GIVE_UP_THRESHOLD,
-            configService.getProperty("com.openexchange.hazelcast.redo.giveupThreshold", "10"));
+            configService.getProperty("com.openexchange.hazelcast.jmxDetailed", "true"));
+//        config.setProperty(GroupProperties.PROP_REDO_GIVE_UP_THRESHOLD,
+//            configService.getProperty("com.openexchange.hazelcast.redo.giveupThreshold", "10"));
         config.setProperty(GroupProperties.PROP_MEMCACHE_ENABLED,
             configService.getProperty("com.openexchange.hazelcast.memcache.enabled", "false"));
         config.setProperty(GroupProperties.PROP_REST_ENABLED,
@@ -305,6 +306,16 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
          * Data structure configs
          */
         applyDataStructures(config, listPropertyFiles());
+        /*
+         * register serialization factory
+         */
+        try {
+            config.getSerializationConfig().addPortableFactory(DynamicPortableFactory.FACTORY_ID,
+                Services.getService(DynamicPortableFactory.class, true));
+        } catch (Throwable e) {
+            System.out.println(e);
+            e.printStackTrace();
+        }
 
         return this.config;
     }

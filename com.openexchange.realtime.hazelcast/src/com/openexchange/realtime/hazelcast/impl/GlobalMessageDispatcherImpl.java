@@ -61,12 +61,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import com.hazelcast.core.DistributedTask;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
@@ -177,20 +176,19 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJ
             exceptions.putAll(sent);
         }
         // Sent to remote receivers
-        ExecutorService executorService = hazelcastInstance.getExecutorService();
-        List<FutureTask<Map<ID, OXException>>> futures = new ArrayList<FutureTask<Map<ID, OXException>>>();
+        IExecutorService executorService = hazelcastInstance.getExecutorService("default");
+        List<Future<Map<ID, OXException>>> futures = new ArrayList<Future<Map<ID, OXException>>>();
         for (Member receiver : targets.keySet()) {
             Set<ID> ids = targets.get(receiver);
             LOG.debug("Sending to '{}' @ {}", stanza.getTo(), receiver);
             stanza.trace("Sending to '" + stanza.getTo() + "' @ " + receiver);
             ensureSequence(stanza, receiver);
-            FutureTask<Map<ID, OXException>> task = new DistributedTask<Map<ID, OXException>>(new StanzaDispatcher(stanza, ids) , receiver);
-            executorService.execute(task);
+            Future<Map<ID, OXException>> task = executorService.submitToMember(new StanzaDispatcher(stanza, ids), receiver);
             futures.add(task);
         }
         // Await completion of send requests and extract their exceptions (if any)
 
-        for (FutureTask<Map<ID, OXException>> future : futures) {
+        for (Future<Map<ID, OXException>> future : futures) {
             try {
                 exceptions.putAll(future.get());
             } catch (InterruptedException e) {

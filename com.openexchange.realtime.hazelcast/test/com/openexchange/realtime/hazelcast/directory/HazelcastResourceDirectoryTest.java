@@ -49,6 +49,9 @@
 
 package com.openexchange.realtime.hazelcast.directory;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -64,12 +67,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.EntryListener;
@@ -106,7 +108,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        HazelcastInstance hazelcast = Hazelcast.getDefaultInstance();
+        HazelcastInstance hazelcast = Hazelcast.newHazelcastInstance();
         HazelcastAccess.setHazelcastInstance(hazelcast);
         MapConfig config = new MapConfig(RESOURCE_MAP_NAME);
         config.setMaxIdleSeconds(1);
@@ -166,7 +168,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
             public void entryAdded(EntryEvent<String, Map<String, Serializable>> event) {}
         };
 
-        getResourceMapping().addEntryListener(listener, false);
+        String listenerID = getResourceMapping().addEntryListener(listener, false);
         try {
             ID concreteId = generateId();
             Resource resource = generateResource(concreteId);
@@ -177,7 +179,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
             Assert.assertEquals("Resource directory not empty", 0, getResourceMapping().size());
             Assert.assertEquals("ID map not empty", 0, getIDMapping().size());
         } finally {
-            getResourceMapping().removeEntryListener(listener);
+            getResourceMapping().removeEntryListener(listenerID);
         }
     }
 

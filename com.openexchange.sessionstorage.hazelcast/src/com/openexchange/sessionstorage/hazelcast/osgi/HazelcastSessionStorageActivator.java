@@ -66,12 +66,14 @@ import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
+import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.Services;
+import com.openexchange.sessionstorage.hazelcast.portable.CustomPortableSessionFactory;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -95,10 +97,16 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
         Services.setServiceLookup(this);
         final HazelcastConfigurationService configService = getService(HazelcastConfigurationService.class);
         final boolean enabled = configService.isEnabled();
-        if (false == enabled) {
+        if (false == enabled || true) {
             LOG.warn("com.openexchange.sessionstorage.hazelcast will be disabled due to disabled Hazelcast services");
         } else {
-            // Track HazelcastInstance
+            /*
+             * create & register portable session factory
+             */
+            registerService(CustomPortableFactory.class, new CustomPortableSessionFactory());
+            /*
+             * start session storage lifecycle to hazelcast instance
+             */
             final BundleContext context = this.context;
             track(HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
 

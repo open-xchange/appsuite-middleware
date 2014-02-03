@@ -47,45 +47,33 @@
  *
  */
 
-package com.openexchange.sessionstorage.hazelcast;
 
-import java.util.Map.Entry;
-import com.hazelcast.query.Predicate;
-import com.openexchange.session.Session;
-import com.openexchange.sessionstorage.hazelcast.portable.PortableSession;
+package com.openexchange.hazelcast.serialization;
+
+import com.hazelcast.nio.serialization.Portable;
 
 /**
- * {@link AltIdPredicate}
+ * {@link CustomPortableFactory}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class AltIdPredicate implements Predicate<String, PortableSession> {
-
-    private static final long serialVersionUID = -3741029445819911943L;
-
-    private String altId;
+public interface CustomPortableFactory {
 
     /**
-     * Initializes a new {@link AltIdPredicate}.
+     * Creates a new {@link Portable} instance.
      *
-     * @param altId The alternative ID to match
+     * @return The new Portable instance
      */
-    public AltIdPredicate(String altId) {
-        super();
-        this.altId = altId;
-    }
+    Portable create();
 
     /**
-     * Initializes a new {@link AltIdPredicate}.
+     * Gets the unique class ID of the {@link Portable} this factory produces. <p/>
+     *
+     * Make sure to return the same ID as in {@link CustomPortable#getClassId()} of the corresponding {@link CustomPortable}
+     * implementation.
+     *
+     * @return The class ID.
      */
-    public AltIdPredicate() {
-        super();
-    }
-
-    @Override
-    public boolean apply(Entry<String, PortableSession> mapEntry) {
-        return null != mapEntry && null != mapEntry.getValue() && null != altId &&
-            altId.equals(mapEntry.getValue().getParameter(Session.PARAM_ALTERNATIVE_ID));
-    }
+    int getClassId();
 
 }

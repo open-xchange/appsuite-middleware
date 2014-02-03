@@ -8,10 +8,12 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-BuddyPolicy: registered
 Import-Package: com.hazelcast.config,
- com.hazelcast.impl,
+ com.hazelcast.instance,
+ com.hazelcast.nio.serialization,
  com.openexchange.config,
  com.openexchange.configuration,
  com.openexchange.exception,
+ com.openexchange.hazelcast.serialization,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,

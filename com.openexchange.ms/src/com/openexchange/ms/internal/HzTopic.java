@@ -83,7 +83,7 @@ public final class HzTopic<E> implements Topic<E> {
     private final ITopic<Map<String, Object>> hzTopic;
     private final String senderId;
     private final String name;
-    private final ConcurrentMap<MessageListener<E>, com.hazelcast.core.MessageListener<Map<String, Object>>> registeredListeners;
+    private final ConcurrentMap<MessageListener<E>, String> registeredListeners;
     private final HzDelayQueue<HzDelayed<E>> publishQueue;
     private final ScheduledTimerTask timerTask;
 
@@ -95,7 +95,7 @@ public final class HzTopic<E> implements Topic<E> {
         this.name = name;
         senderId = UUIDs.getUnformattedString(UUID.randomUUID());
         this.hzTopic = hz.getTopic(name);
-        registeredListeners = new ConcurrentHashMap<MessageListener<E>, com.hazelcast.core.MessageListener<Map<String, Object>>>(8);
+        registeredListeners = new ConcurrentHashMap<MessageListener<E>, String>(8);
         publishQueue = new HzDelayQueue<HzDelayed<E>>();
         // Timer task
         final TimerService timerService = Services.getService(TimerService.class);
@@ -136,16 +136,15 @@ public final class HzTopic<E> implements Topic<E> {
     @Override
     public void addMessageListener(final MessageListener<E> listener) {
         final HzMessageListener<E> hzListener = new HzMessageListener<E>(listener, senderId);
-        hzTopic.addMessageListener(hzListener);
-        registeredListeners.put(listener, hzListener);
+        registeredListeners.put(listener, hzTopic.addMessageListener(hzListener));
     }
 
     @Override
     public void removeMessageListener(final MessageListener<E> listener) {
-        final com.hazelcast.core.MessageListener<Map<String, Object>> hzListener = registeredListeners.remove(listener);
-        if (null != hzListener) {
+        String regID = registeredListeners.remove(listener);
+        if (null != regID) {
             try {
-                hzTopic.removeMessageListener(hzListener);
+                hzTopic.removeMessageListener(regID);
             } catch (final RuntimeException e) {
                 // Removing message listener failed
                 LOG.warn("Couldn't remove message listener from Hazelcast topic \"{}\".", name, e);

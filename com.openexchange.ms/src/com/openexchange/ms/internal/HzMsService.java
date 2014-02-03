@@ -55,7 +55,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
-import com.hazelcast.core.DistributedTask;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.ms.Member;
 import com.openexchange.ms.Message;
@@ -66,7 +65,7 @@ import com.openexchange.ms.Topic;
 
 /**
  * {@link HzMsService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HzMsService implements MsService {
@@ -119,7 +118,8 @@ public final class HzMsService implements MsService {
             // No such member
             return;
         }
-        hz.getExecutorService().submit(new DistributedTask<Void>(new MessageAppender(message), hzMember));
+        hz.getExecutorService("default").submitToMember(new MessageAppender(message), hzMember);
+//        hz.getExecutorService().submit(new DistributedTask<Void>(new MessageAppender(message), hzMember));
     }
 
     @SuppressWarnings("unchecked")
