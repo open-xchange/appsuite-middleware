@@ -67,8 +67,6 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.log.LogFactory;
-import com.openexchange.ms.Topic;
 
 /**
  * {@link PushMsHandler} - Listens for locally distributed OSGi events notifying about changes.
