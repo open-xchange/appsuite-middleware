@@ -66,4 +66,14 @@ public class AuthenticationFailedException extends MessagingException {
     public AuthenticationFailedException(String message) {
 	super(message);
     }
+
+    /**
+     * Constructor
+     * @param message The detailed error message
+     * @param e The embedded exception
+     */
+    public AuthenticationFailedException(String message, Exception e) {
+        super(message, e);
+    }
+
 }
