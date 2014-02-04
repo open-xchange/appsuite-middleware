@@ -49,7 +49,11 @@
 
 package com.openexchange.mobilenotifier;
 
-
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.mobilenotifier.osgi.Services;
 
 /**
  * {@link AbstractMobileNotifierService}
@@ -58,7 +62,15 @@ package com.openexchange.mobilenotifier;
  */
 public abstract class AbstractMobileNotifierService implements MobileNotifierService {
     @Override
-    public boolean isEnabled(int uid, int cid) {
-        return false;
+    public boolean isEnabled(int uid, int cid) throws OXException {
+        ConfigView view = Services.getService(ConfigViewFactory.class).getView(uid, cid);
+        ComposedConfigProperty<Boolean> property;
+
+        property = view.property("com.openxchange.mobilenotifier.enabled", Boolean.class);
+
+        if (!property.isDefined()) {
+            return true;
+        }
+        return property.get().booleanValue();
     }
 }

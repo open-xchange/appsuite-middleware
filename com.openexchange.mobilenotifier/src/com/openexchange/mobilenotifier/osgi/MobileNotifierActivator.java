@@ -69,6 +69,7 @@ public class MobileNotifierActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         try {
+            Services.setServiceLookup(this);
             LOG.info("starting bundle: com.openxchange.mobilenotifier");
             this.registryImpl = new MobileNotifierServiceRegistryImpl(context);
             this.registryImpl.open();

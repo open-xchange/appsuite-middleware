@@ -52,7 +52,7 @@ package com.openexchange.mobilenotifier.example;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.mobilenotifier.MobileNotifierService;
+import com.openexchange.mobilenotifier.AbstractMobileNotifierService;
 import com.openexchange.mobilenotifier.NotifyItem;
 import com.openexchange.mobilenotifier.NotifyTemplate;
 
@@ -61,7 +61,7 @@ import com.openexchange.mobilenotifier.NotifyTemplate;
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class ExampleMailMobileNotifierService implements MobileNotifierService {
+public class ExampleMailMobileNotifierService extends AbstractMobileNotifierService {
 
     public ExampleMailMobileNotifierService() {
         super();
@@ -73,12 +73,7 @@ public class ExampleMailMobileNotifierService implements MobileNotifierService {
     }
 
     @Override
-    public boolean isEnabled(int uid, int cid) {
-        return true;
-    }
-
-    @Override
-    public List<NotifyItem> getItems(int uid, int cid) throws OXException {
+    public List<NotifyItem> getItems() throws OXException {
         List<NotifyItem> list = new ArrayList<NotifyItem>();
         list.add(new NotifyItem("{{subject}}", "This is a subject"));
         list.add(new NotifyItem("{{receiveDate}}", "12.04.2013 - 12:45:00"));

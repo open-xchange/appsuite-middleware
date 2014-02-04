@@ -47,23 +47,57 @@
  *
  */
 
-package com.openexchange.ajax.mobilenotifier.tests;
+package com.openexchange.mobilenotifier.osgi;
 
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link AbstractMobileNotifierTest}
- *
+ * {@link Services} - The static service lookup.
+ * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class AbstractMobileNotifierTest extends AbstractAJAXSession {
+public final class Services {
 
-    /**
-     * Initializes a new {@link AbstractMobileNotifierTest}.
-     * 
-     * @param name
-     */
-    protected AbstractMobileNotifierTest(String name) {
-        super(name);
-    }
+   /**
+    * Initializes a new {@link Services}.
+    */
+   private Services() {
+       super();
+   }
+
+   private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+   /**
+    * Sets the service lookup.
+    *
+    * @param serviceLookup The service lookup or <code>null</code>
+    */
+   public static void setServiceLookup(final ServiceLookup serviceLookup) {
+       REF.set(serviceLookup);
+   }
+
+   /**
+    * Gets the service lookup.
+    *
+    * @return The service lookup or <code>null</code>
+    */
+   public static ServiceLookup getServiceLookup() {
+       return REF.get();
+   }
+
+   /**
+    * Gets the service of specified type
+    *
+    * @param clazz The service's class
+    * @return The service
+    * @throws IllegalStateException If an error occurs while returning the demanded service
+    */
+   public static <S extends Object> S getService(final Class<? extends S> clazz) {
+       final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+       if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.mobilenotifier\" not started?");
+       }
+       return serviceLookup.getService(clazz);
+   }
 }

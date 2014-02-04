@@ -95,17 +95,18 @@ public class GetAction extends AbstractMobileNotifierAction {
             throw ServiceExceptionCode.absentService(MobileNotifierServiceRegistry.class);
         }
         final ServerSession session = req.getSession();
-
+        int uid = session.getUserId();
+        int cid = session.getContextId();
         /*
          * Writes a JSON notify item structure
          */
         final JSONObject providerJsonObject = new JSONObject();
         final JSONArray providerJsonArray = new JSONArray();
-        mobileNotifierRegistry.getAllServices();
+        mobileNotifierRegistry.getAllServices(uid, cid);
 
         for (String provider : providers) {
-            MobileNotifierService service = mobileNotifierRegistry.getService(provider);
-            providerJsonArray.put(NotifyItemWriter.write(service, session));
+            MobileNotifierService service = mobileNotifierRegistry.getService(provider, uid, cid);
+            providerJsonArray.put(NotifyItemWriter.write(service));
         }
 
         providerJsonObject.put(MobileNotifyField.PROVIDER.getName(), providerJsonArray);

@@ -66,7 +66,7 @@ public interface MobileNotifierServiceRegistry {
      * @return A MobileNotifierService
      * @throws OXException
      */
-    MobileNotifierService getService(String provider) throws OXException;
+    MobileNotifierService getService(String provider, int uid, int cid) throws OXException;
 
     /**
      * Gets all mobile notifier services
@@ -74,5 +74,5 @@ public interface MobileNotifierServiceRegistry {
      * @return List of MobileNotifierService
      * @throws OXException
      */
-    List<MobileNotifierService> getAllServices() throws OXException;
+    List<MobileNotifierService> getAllServices(int uid, int cid) throws OXException;
 }

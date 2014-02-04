@@ -71,8 +71,9 @@ public interface MobileNotifierService {
      * 
      * @param session
      * @return True if a provider is enabled otherwise false
+     * @throws OXException
      */
-    boolean isEnabled(int uid, int cid);
+    boolean isEnabled(int uid, int cid) throws OXException;
 
     /**
      * Gets the Items
@@ -81,7 +82,7 @@ public interface MobileNotifierService {
      * @return list - List of NotifyItems
      * @throws OXException
      */
-    List<NotifyItem> getItems(int uid, int cid) throws OXException;
+    List<NotifyItem> getItems() throws OXException;
 
     /**
      * Gets a template

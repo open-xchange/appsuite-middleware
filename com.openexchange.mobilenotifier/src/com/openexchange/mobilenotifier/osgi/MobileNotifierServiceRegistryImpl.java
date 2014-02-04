@@ -70,7 +70,7 @@ public class MobileNotifierServiceRegistryImpl extends ServiceTracker<MobileNoti
 
     final ConcurrentMap<String, MobileNotifierService> map;
     /**
-     * Initializes a new {@link OSGiMetaDataRegistry}.
+     * Initializes a new {@link MobileNotifierServiceRegistryImpl}.
      */
     public MobileNotifierServiceRegistryImpl(BundleContext context) {
         super(context, MobileNotifierService.class, null);
@@ -78,9 +78,11 @@ public class MobileNotifierServiceRegistryImpl extends ServiceTracker<MobileNoti
     }
 
     @Override
-    public MobileNotifierService getService(String provider) throws OXException {
+    public MobileNotifierService getService(String provider, int uid, int cid) throws OXException {
         final MobileNotifierService service = map.get(provider);
         if (null == service) {
+            throw MobileNotifierExceptionCodes.UNKNOWN_SERVICE.create(provider);
+        } else if (!service.isEnabled(uid, cid)) {
             throw MobileNotifierExceptionCodes.UNKNOWN_SERVICE.create(provider);
         }
 
@@ -88,8 +90,16 @@ public class MobileNotifierServiceRegistryImpl extends ServiceTracker<MobileNoti
     }
 
     @Override
-    public List<MobileNotifierService> getAllServices() throws OXException {
-        return new ArrayList<MobileNotifierService>(map.values());
+    public List<MobileNotifierService> getAllServices(int uid, int cid) throws OXException {
+        final java.util.List<MobileNotifierService> service = new ArrayList<MobileNotifierService>(map.values().size());
+        for (final MobileNotifierService mobileNotifier : map.values()) {
+            if (mobileNotifier.isEnabled(uid, cid)) {
+                service.add(mobileNotifier);
+            } else {
+                throw MobileNotifierExceptionCodes.UNKNOWN_SERVICE.create(mobileNotifier.getProviderName());
+            }
+        }
+        return service;
     }
 
     @Override

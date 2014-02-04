@@ -50,6 +50,8 @@
 package com.openexchange.ajax.mobilenotifier.tests;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -57,8 +59,7 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.mobilenotifier.actions.GetMobileNotifierRequest;
 import com.openexchange.ajax.mobilenotifier.actions.GetMobileNotifierResponse;
 import com.openexchange.exception.OXException;
-
-
+import com.openexchange.mobilenotifier.NotifyItem;
 
 /**
  * {@link GetTest}
@@ -75,13 +76,49 @@ public class GetTest extends AbstractMobileNotifierTest {
         super(name);
     }
 
-    public void testNotifyItemResponse() throws OXException, IOException, SAXException, JSONException {
-        GetMobileNotifierRequest req = new GetMobileNotifierRequest("appointment");
+    public void testMobileNotifierJSONResponse() throws OXException, IOException, JSONException {
+        List<String> providerValue = new ArrayList<String>();
+        providerValue.add("mail");
+        providerValue.add("appointment");
+
+        GetMobileNotifierRequest req = new GetMobileNotifierRequest(providerValue);
         GetMobileNotifierResponse res = getClient().execute(req);
 
-        JSONObject json = (JSONObject) res.getData();
-        JSONArray jsa = (JSONArray) json.get("provider");
-        jsa.get(0);
+        assertNotNull(res.getData());
+        JSONObject notifyItemJson = (JSONObject) res.getData();
+
+        assertNotNull("could not find element \"provider\" in json structure", notifyItemJson.get("provider"));
+        JSONArray providersJSON = (JSONArray) notifyItemJson.get("provider");
+
+        assertEquals(
+            "size of provider parameter value not identical to size of json provider structure",
+            providerValue.size(),
+            providersJSON.length());
+
+        for (int i = 0; i < providersJSON.length(); i++) {
+            assertNotNull(providersJSON.get(i));
+            JSONObject provider = (JSONObject) providersJSON.get(i);
+
+            assertNotNull(provider.get(providerValue.get(i)));
+            JSONObject providerJSON = (JSONObject) provider.get(providerValue.get(i));
+
+            assertNotNull(providerJSON.get("items"));
+            JSONArray items = (JSONArray) providerJSON.get("items");
+
+            // TODO
+            assertNotNull(items.get(0));
+            items.getJSONObject(0);
+        }
+    }
+
+    public void testShouldGetExceptionOnUndefinedProvider() throws OXException, IOException, JSONException {
+        List<String> providerValue = new ArrayList<String>();
+        providerValue.add("mehl");
+
+        GetMobileNotifierRequest req = new GetMobileNotifierRequest(providerValue);
+        GetMobileNotifierResponse res = getClient().execute(req);
+
+        assertNotNull("Exception not thrown" + res.getException());
     }
 
 }

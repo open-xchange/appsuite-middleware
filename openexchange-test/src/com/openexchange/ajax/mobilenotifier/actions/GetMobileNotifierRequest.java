@@ -68,10 +68,9 @@ import com.openexchange.ajax.user.actions.GetResponse;
  */
 public class GetMobileNotifierRequest extends AbstractMobileNotifierRequest<GetMobileNotifierResponse> {
 
-    final String provider;
+    private final List<String> provider;
 
-    
-    public GetMobileNotifierRequest(final String provider) {
+    public GetMobileNotifierRequest(final List<String> provider) {
         this.provider = provider;
     }
 
@@ -82,10 +81,11 @@ public class GetMobileNotifierRequest extends AbstractMobileNotifierRequest<GetM
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        String[] providerArr = provider.toArray(new String[provider.size()]);
+
         final List<Parameter> parameterList = new ArrayList<Parameter>();
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
-        parameterList.add(new Parameter("provider", String.valueOf(provider)));
-
+        parameterList.add(new Parameter("provider", providerArr));
         return parameterList.toArray(new Parameter[parameterList.size()]);
     }
 

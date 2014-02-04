@@ -77,15 +77,12 @@ public class NotifyItemWriter {
      * @throws JSONException
      * @throws OXException
      */
-    public static JSONObject write(final MobileNotifierService service, ServerSession session) throws JSONException, OXException {
+    public static JSONObject write(final MobileNotifierService service) throws JSONException, OXException {
         final JSONObject providerObject = new JSONObject();
         final JSONArray itemArray = new JSONArray();
         final JSONObject itemObject = new JSONObject();
 
-        final int userId = session.getUserId();
-        final int contextId = session.getContextId();
-
-        itemArray.put(transformListToJSONObject(service.getItems(userId, contextId)));
+        itemArray.put(transformListToJSONObject(service.getItems()));
         itemObject.put(MobileNotifyField.ITEMS.getName(), itemArray);
 
         providerObject.put(service.getProviderName(), itemObject);

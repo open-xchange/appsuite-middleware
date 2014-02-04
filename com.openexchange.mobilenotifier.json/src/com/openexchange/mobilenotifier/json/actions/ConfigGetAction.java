@@ -101,21 +101,23 @@ public class ConfigGetAction extends AbstractMobileNotifierAction {
             throw ServiceExceptionCode.absentService(MobileNotifierServiceRegistry.class);
         }
         final ServerSession session = req.getSession();
+        int uid = session.getUserId();
+        int cid = session.getContextId();
 
         JSONArray providerJsonArray = new JSONArray();
         final JSONObject providerJsonObject = new JSONObject();
 
         if (providers == null) {
             // Get all Services
-            List<MobileNotifierService> notifierServices = mobileNotifierRegistry.getAllServices();
+            List<MobileNotifierService> notifierServices = mobileNotifierRegistry.getAllServices(uid, cid);
             for (MobileNotifierService notifierService : notifierServices) {
-                providerJsonArray.put(NotifyTemplateWriter.write(notifierService, session));
+                providerJsonArray.put(NotifyTemplateWriter.write(notifierService));
             }
         } else {
             // Get service(s) by parameter provider
             for (String provider : providers) {
-                MobileNotifierService notifyService = mobileNotifierRegistry.getService(provider);
-                providerJsonArray.put(NotifyTemplateWriter.write(notifyService, session));
+                MobileNotifierService notifyService = mobileNotifierRegistry.getService(provider, uid, cid);
+                providerJsonArray.put(NotifyTemplateWriter.write(notifyService));
             }
         }
 

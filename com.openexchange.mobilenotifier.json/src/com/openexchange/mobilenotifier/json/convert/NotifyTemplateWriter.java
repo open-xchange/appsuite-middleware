@@ -76,7 +76,7 @@ public class NotifyTemplateWriter {
      * @throws JSONException
      * @throws OXException
      */
-    public static JSONObject write(final MobileNotifierService service, ServerSession session) throws JSONException, OXException {
+    public static JSONObject write(final MobileNotifierService service) throws JSONException, OXException {
         final JSONObject providerObject = new JSONObject();
         final JSONObject attributes = new JSONObject();
         final NotifyTemplate nt = service.getTemplate();
