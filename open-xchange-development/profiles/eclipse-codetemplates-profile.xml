@@ -61,6 +61,7 @@
  * {@link ${type_name}}
  *
  * @author &lt;a href="mailto:firstname.lastname@open-xchange.com"&gt;Firstname Lastname&lt;/a&gt;
+ * @since v7.6.0
  * ${tags}
  */</template><template autoinsert="true" context="fieldcomment_context" deleted="false" description="Comment for fields" enabled="true" id="org.eclipse.jdt.ui.text.codetemplates.fieldcomment" name="fieldcomment">/**
  * 
