@@ -52,6 +52,7 @@ package com.openexchange.groupware.update.tasks;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.update.Tools.createIndex;
+import static com.openexchange.tools.update.Tools.dropIndex;
 import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -65,16 +66,18 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * {@link CalendarAddUIDIndexTask} - Adds (cid,uid) index to calendar tables if missing.
+ * {@link UserAddMailIndexTask} -Adds/corrects user mail index:
+ * <p>
+ * <i>INDEX (mail)</i> -&gt; <i>INDEX (cid, mail(255))</i>.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CalendarAddUIDIndexTask extends UpdateTaskAdapter {
+public final class UserAddMailIndexTask extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link CalendarAddUIDIndexTask}.
+     * Initializes a new {@link UserAddMailIndexTask}.
      */
-    public CalendarAddUIDIndexTask() {
+    public UserAddMailIndexTask() {
         super();
     }
 
@@ -99,12 +102,12 @@ public final class CalendarAddUIDIndexTask extends UpdateTaskAdapter {
         try {
             con.setAutoCommit(false);
             rollback = true;
-            final String[] tables = new String[] {"prg_dates", "del_dates"};
-            createCalendarIndex(con, tables);
+            final String[] tables = new String[] { "user" };
+            createMailIndex(con, tables);
             con.commit();
             rollback = false;
         } catch (final SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+            throw createSQLError(e);
         } catch (final RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
@@ -116,20 +119,28 @@ public final class CalendarAddUIDIndexTask extends UpdateTaskAdapter {
         }
     }
 
-    private void createCalendarIndex(final Connection con, final String[] tables) {
-        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CalendarAddUIDIndexTask.class);
-        final String name = "uidIndex";
+    private void createMailIndex(final Connection con, final String[] tables) throws OXException {
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserAddMailIndexTask.class);
+        final String name = "mailIndex";
         for (final String table : tables) {
             try {
-                final String indexName = existsIndex(con, table, new String[] { "cid", "uid" });
+                // Check for old index
+                String indexName = existsIndex(con, table, new String[] { "mail" });
+                if (null != indexName) {
+                    dropIndex(con, table, indexName);
+                }
+
+                // Check for new index
+                indexName = existsIndex(con, table, new String[] { "cid", "mail" });
                 if (null == indexName) {
-                    log.info("Creating new index named \"{}\" with columns (cid,uid) on table {}.", name, table);
-                    createIndex(con, table, name, new String[] { "cid", "`uid`(255)" }, false);
+                    log.info("Creating new index named \"{}\" with columns (cid, mail) on table {}.", name, table);
+                    createIndex(con, table, name, new String[] { "cid", "`mail`(255)" }, false);
                 } else {
-                    log.info("New index named \"{}\" with columns (cid,uid) already exists on table {}.", indexName, table);
+                    log.info("New index named \"{}\" with columns (cid, mail) already exists on table {}.", indexName, table);
                 }
             } catch (final SQLException e) {
                 log.error("Problem adding index \"{}\" on table {}.", name, table, e);
+                throw createSQLError(e);
             }
         }
     }
