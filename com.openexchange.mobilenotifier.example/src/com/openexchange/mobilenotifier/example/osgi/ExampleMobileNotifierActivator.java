@@ -50,7 +50,7 @@
 package com.openexchange.mobilenotifier.example.osgi;
 
 import com.openexchange.mobilenotifier.MobileNotifierService;
-import com.openexchange.mobilenotifier.example.ExampleCalendarMobileNotifierService;
+import com.openexchange.mobilenotifier.example.ExampleAppointmentMobileNotifierService;
 import com.openexchange.mobilenotifier.example.ExampleMailMobileNotifierService;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -68,6 +68,6 @@ public class ExampleMobileNotifierActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         registerService(MobileNotifierService.class, new ExampleMailMobileNotifierService());
-        registerService(MobileNotifierService.class, new ExampleCalendarMobileNotifierService());
+        registerService(MobileNotifierService.class, new ExampleAppointmentMobileNotifierService());
     }
 }

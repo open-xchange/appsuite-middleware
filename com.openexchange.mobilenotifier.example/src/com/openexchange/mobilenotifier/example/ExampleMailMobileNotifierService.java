@@ -77,7 +77,7 @@ public class ExampleMailMobileNotifierService extends AbstractMobileNotifierServ
         List<NotifyItem> list = new ArrayList<NotifyItem>();
         list.add(new NotifyItem("{{subject}}", "This is a subject"));
         list.add(new NotifyItem("{{receiveDate}}", "12.04.2013 - 12:45:00"));
-        list.add(new NotifyItem("{{userId}}", "1"));
+        list.add(new NotifyItem("{{teaser}}", "A small teaser..."));
         return list;
     }
 

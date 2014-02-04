@@ -57,12 +57,12 @@ import com.openexchange.mobilenotifier.NotifyItem;
 import com.openexchange.mobilenotifier.NotifyTemplate;
 
 /**
- * {@link ExampleCalendarMobileNotifierService} - Example calendar implementation of a mobile notifier service
+ * {@link ExampleAppointmentMobileNotifierService} - Example calendar implementation of a mobile notifier service
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class ExampleCalendarMobileNotifierService extends AbstractMobileNotifierService {
-    public ExampleCalendarMobileNotifierService() {
+public class ExampleAppointmentMobileNotifierService extends AbstractMobileNotifierService {
+    public ExampleAppointmentMobileNotifierService() {
         super();
     }
 
@@ -75,6 +75,8 @@ public class ExampleCalendarMobileNotifierService extends AbstractMobileNotifier
     public List<NotifyItem> getItems() throws OXException {
         List<NotifyItem> list = new ArrayList<NotifyItem>();
         list.add(new NotifyItem("{{title}}", "This is a test title"));
+        list.add(new NotifyItem("{{location}}", "This is a test location"));
+        list.add(new NotifyItem("{{description}}", "This is a test description"));
         return list;
     }
 
