@@ -54,6 +54,7 @@ package com.openexchange.find;
  * {@link Module}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since 7.6.0
  */
 public enum Module {
 

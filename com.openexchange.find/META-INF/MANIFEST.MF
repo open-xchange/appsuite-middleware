@@ -9,6 +9,5 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
  com.openexchange.session,
  org.osgi.framework
-Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.find,
  com.openexchange.find.spi

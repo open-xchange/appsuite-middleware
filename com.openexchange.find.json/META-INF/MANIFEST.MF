@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: com.openexchange.find.json
 Bundle-SymbolicName: com.openexchange.find.json
 Bundle-Version: 7.4.2
-Bundle-Activator: com.openexchange.find.json.osgi.Activator
+Bundle-Activator: com.openexchange.find.json.osgi.FindJsonActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax.requesthandler,
@@ -18,4 +18,3 @@ Import-Package: com.openexchange.ajax.requesthandler,
  org.json,
  org.osgi.framework,
  org.slf4j
-Bundle-ActivationPolicy: lazy

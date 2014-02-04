@@ -62,6 +62,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link AbstractFindAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since 7.6.0
  */
 public abstract class AbstractFindAction implements AJAXActionService {
 

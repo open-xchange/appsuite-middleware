@@ -55,11 +55,12 @@ import com.openexchange.find.json.FindActionFactory;
 
 /**
  *
- * {@link Activator}
+ * {@link FindJsonActivator}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since 7.6.0
  */
-public class Activator extends AJAXModuleActivator {
+public class FindJsonActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {

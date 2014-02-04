@@ -55,6 +55,7 @@ import java.util.List;
  * {@link ModuleConfig}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since 7.6.0
  */
 public class ModuleConfig {
 

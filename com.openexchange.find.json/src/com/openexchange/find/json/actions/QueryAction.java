@@ -59,6 +59,7 @@ import com.openexchange.find.json.FindRequest;
  * {@link QueryAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since 7.6.0
  */
 public class QueryAction extends AbstractFindAction {
 

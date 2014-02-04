@@ -58,6 +58,7 @@ import com.openexchange.session.Session;
  * {@link SearchService}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since 7.6.0
  */
 public interface SearchService {
 

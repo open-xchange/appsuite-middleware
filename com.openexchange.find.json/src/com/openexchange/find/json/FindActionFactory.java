@@ -67,6 +67,7 @@ import com.openexchange.find.json.actions.QueryAction;
  * {@link FindActionFactory}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since 7.6.0
  */
 public class FindActionFactory implements AJAXActionServiceFactory {
 

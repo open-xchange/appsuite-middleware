@@ -53,6 +53,7 @@ package com.openexchange.find;
  * {@link FacetValue}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since 7.6.0
  */
 public class FacetValue {
 
