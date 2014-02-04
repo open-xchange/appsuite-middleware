@@ -139,6 +139,6 @@ public class ManifestJSONActivatorTest {
     public void testStartBundle_EverythingFine_AllTrackersRegistered() throws Exception {
         this.manifestJSONActivator.startBundle();
 
-        ServiceMockActivatorAsserter.verifyAllServiceTrackersRegistered(this.manifestJSONActivator, 3);
+        ServiceMockActivatorAsserter.verifyAllServiceTrackersRegistered(this.manifestJSONActivator, 4);
     }
 }
