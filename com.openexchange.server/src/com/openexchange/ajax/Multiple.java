@@ -207,17 +207,7 @@ public class Multiple extends SessionServlet {
                 int concurrentTasksCount = 0;
                 // Build-up mapping & schedule for either serial or concurrent execution
                 final ConcurrentTIntObjectHashMap<JsonInOut> mapping = new ConcurrentTIntObjectHashMap<JsonInOut>(length);
-                if (1 == length) {
-                    final int pos = 0;
-                    final JSONObject dataObject = dataArray.getJSONObject(pos);
-                    final JsonInOut jsonInOut = new JsonInOut(pos, dataObject);
-                    mapping.put(pos, jsonInOut);
-                    if (!dataObject.hasAndNotNull(MODULE)) {
-                        throw AjaxExceptionCodes.MISSING_PARAMETER.create(MODULE);
-                    }
-                    serialTasks = new ArrayList<JsonInOut>(1);
-                    serialTasks.add(jsonInOut);
-                } else {
+                if (length > 1) {
                     for (int pos = 0; pos < length; pos++) {
                         final JSONObject dataObject = dataArray.getJSONObject(pos);
                         final JsonInOut jsonInOut = new JsonInOut(pos, dataObject);
@@ -245,6 +235,16 @@ public class Multiple extends SessionServlet {
                             concurrentTasksCount++;
                         }
                     }
+                } else {
+                    final int pos = 0;
+                    final JSONObject dataObject = dataArray.getJSONObject(pos);
+                    final JsonInOut jsonInOut = new JsonInOut(pos, dataObject);
+                    mapping.put(pos, jsonInOut);
+                    if (!dataObject.hasAndNotNull(MODULE)) {
+                        throw AjaxExceptionCodes.MISSING_PARAMETER.create(MODULE);
+                    }
+                    serialTasks = new ArrayList<JsonInOut>(1);
+                    serialTasks.add(jsonInOut);
                 }
                 if (null != serialTasks) {
                     final int size = serialTasks.size();
