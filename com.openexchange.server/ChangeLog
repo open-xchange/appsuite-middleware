@@ -1,3 +1,7 @@
+* 2014-02-04 - marcus.klein@open-xchange.com
+
+ - Fix for bug 30255: Closing database connections if database pool does not control them anymore.
+
 * 2014-01-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 30895: Do not stick to have "image/*" Content-Type, but accept default Content-Type "application/octet-stream", too

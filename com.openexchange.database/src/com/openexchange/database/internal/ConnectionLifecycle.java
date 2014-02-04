@@ -144,12 +144,9 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
 
     @Override
     public void destroy(final Connection obj) {
-        try {
-            obj.close();
-        } catch (final SQLException e) {
-            ConnectionPool.LOG.debug("Problem while closing connection.", e);
-        }
+        DBUtils.close(obj);
     }
+
     private static void addTrace(final OXException dbe,
         final PooledData<Connection> data) {
         if (null != data.getTrace()) {

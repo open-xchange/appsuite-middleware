@@ -50,6 +50,7 @@
 package com.openexchange.database.internal;
 
 import static com.openexchange.database.internal.DBUtils.closeSQLStuff;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -95,7 +96,7 @@ public final class Server {
                 if (-1 == serverId) {
                     throw DBPoolingExceptionCodes.NOT_RESOLVED_SERVER.create(getServerName());
                 }
-                LOG.trace("Got server id: {}", serverId);
+                LOG.trace("Got server id: {}", I(serverId));
             }
         }
         return serverId;

@@ -67,8 +67,7 @@ public interface Pool<T> {
     /**
      * Returns a pooled object back to the pool.
      * @param pooled object to return.
-     * @throws PoolingException if the returned object does not belong to this
-     * pool.
+     * @throws PoolingException if the returned object does not belong to this pool or the given object is <code>null</code>.
      */
     void back(T pooled) throws PoolingException;
 

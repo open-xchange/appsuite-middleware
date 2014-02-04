@@ -182,7 +182,7 @@ public class ReplicationMonitor {
             throw createException(assign, write, null);
         }
         if (!write && assign.isTransactionInitialized() && !isUpToDate(assign.getTransaction(), clientTransaction)) {
-            LOG.debug("Slave {} is not actual. Using master {} instead.", assign.getReadPoolId(), assign.getWritePoolId());
+            LOG.debug("Slave {} is not actual. Using master {} instead.", I(assign.getReadPoolId()), I(assign.getWritePoolId()));
             final Connection toReturn = retval;
             try {
                 retval = fetch.get(pools, assign, true, true);
@@ -253,9 +253,10 @@ public class ReplicationMonitor {
         } else {
             try {
                 pool.back(con);
-            } catch (final PoolingException e) {
-                final OXException e1 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
-                LOG.error("", e1);
+            } catch (PoolingException e) {
+                DBUtils.close(con);
+                OXException e1 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
+                LOG.error(e1.getMessage(), e1);
             }
         }
     }
@@ -303,7 +304,7 @@ public class ReplicationMonitor {
             if (result.next()) {
                 assign.setTransaction(result.getLong(1));
             } else {
-                LOG.error("Updating transaction for replication monitor failed for context {}.", contextId);
+                LOG.error("Updating transaction for replication monitor failed for context {}.", I(contextId));
             }
         } finally {
             closeSQLStuff(result, stmt);

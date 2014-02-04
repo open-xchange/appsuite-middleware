@@ -212,8 +212,9 @@ public final class DatabaseServiceImpl implements DatabaseService {
         } catch (final SQLException e) {
             try {
                 pools.getPool(poolId).back(con);
-            } catch (final PoolingException e1) {
-                LOG.error("", e1);
+            } catch (PoolingException e1) {
+                DBUtils.close(con);
+                LOG.error(e1.getMessage(), e1);
             }
             throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
         }
@@ -235,8 +236,9 @@ public final class DatabaseServiceImpl implements DatabaseService {
         } catch (final SQLException e) {
             try {
                 pools.getPool(poolId).back(con);
-            } catch (final PoolingException e1) {
-                LOG.error("", e1);
+            } catch (PoolingException e1) {
+                DBUtils.close(con);
+                LOG.error(e1.getMessage(), e1);
             }
             throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
         }
@@ -287,11 +289,12 @@ public final class DatabaseServiceImpl implements DatabaseService {
     public void back(final int poolId, final Connection con) {
         try {
             pools.getPool(poolId).back(con);
-        } catch (final PoolingException e) {
-            final OXException e2 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
-            LOG.error("", e2);
-        } catch (final OXException e) {
-            LOG.error("", e);
+        } catch (PoolingException e) {
+            DBUtils.close(con);
+            OXException e2 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
+            LOG.error(e2.getMessage(), e2);
+        } catch (OXException e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
