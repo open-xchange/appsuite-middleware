@@ -29,7 +29,7 @@ Import-Package: com.amazonaws,
  com.openexchange.osgi,
  com.openexchange.tools.encoding,
  com.openexchange.tools.file.external,
- javax.servlet.http;version="2.5.0",
+ javax.servlet.http,
  org.apache.commons.logging,
  org.osgi.framework,
  org.slf4j
