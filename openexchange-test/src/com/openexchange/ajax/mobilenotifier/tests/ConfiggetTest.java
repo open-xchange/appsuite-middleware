@@ -51,26 +51,29 @@ package com.openexchange.ajax.mobilenotifier.tests;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.mobilenotifier.actions.GetMobileNotifierRequest;
-import com.openexchange.ajax.mobilenotifier.actions.GetMobileNotifierResponse;
+import com.openexchange.ajax.mobilenotifier.actions.ConfiggetMobileNotifierRequest;
+import com.openexchange.ajax.mobilenotifier.actions.ConfiggetMobileNotifierResponse;
 import com.openexchange.exception.OXException;
 
+
 /**
- * {@link GetTest}
+ * {@link ConfiggetTest}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetTest extends AbstractMobileNotifierTest {
+public class ConfiggetTest extends AbstractMobileNotifierTest {
+
     /**
-     * Initializes a new {@link GetTest}.
+     * Initializes a new {@link ConfiggetTest}.
      * 
      * @param name
      */
-    public GetTest(String name) {
+    public ConfiggetTest(String name) {
         super(name);
     }
 
@@ -79,14 +82,14 @@ public class GetTest extends AbstractMobileNotifierTest {
         providerValue.add("mail");
         providerValue.add("appointment");
 
-        GetMobileNotifierRequest req = new GetMobileNotifierRequest(providerValue);
-        GetMobileNotifierResponse res = getClient().execute(req);
+        ConfiggetMobileNotifierRequest req = new ConfiggetMobileNotifierRequest(providerValue);
+        ConfiggetMobileNotifierResponse res = getClient().execute(req);
 
         assertNotNull(res.getData());
-        JSONObject notifyItemJson = (JSONObject) res.getData();
-
-        assertNotNull("could not find element \"provider\" in json structure", notifyItemJson.get("provider"));
-        JSONArray providersArray = (JSONArray) notifyItemJson.get("provider");
+        JSONObject notifyTemplateJSON = (JSONObject) res.getData();
+        
+        assertNotNull("could not find element \"provider\" in json structure", notifyTemplateJSON.get("provider"));
+        JSONArray providersArray = (JSONArray) notifyTemplateJSON.get("provider");
 
         assertEquals(
             "size of provider parameter value not identical to size of json provider structure",
@@ -94,26 +97,47 @@ public class GetTest extends AbstractMobileNotifierTest {
             providersArray.length());
 
         for (int i = 0; i < providersArray.length(); i++) {
-            assertNotNull("Could not find any providers", providersArray.get(i));
+            assertNotNull(providersArray.get(i));
             JSONObject providerObject = (JSONObject) providersArray.get(i);
-
-            assertNotNull("Could not find provider", providerObject.get(providerValue.get(i)));
-            JSONObject providerJSON = (JSONObject) providerObject.get(providerValue.get(i));
-
-            assertNotNull("could not find element \"items\"", providerJSON.get("items"));
-            JSONArray itemsArray = (JSONArray) providerJSON.get("items");
-
-            assertNotNull(itemsArray.get(0));
+            
+            JSONObject attributesObject = (JSONObject) providerObject.get(providerValue.get(i));
+            assertNotNull(attributesObject.get("template"));
+            assertNotNull(attributesObject.get("frontendApp"));
+            assertNotNull(attributesObject.get("slow"));
         }
     }
 
-    public void testShouldGetExceptionIfUnknownProvider() throws OXException, IOException, JSONException {
+    public void testMobileNotifierJSONResponseWithoutProvider() throws OXException, IOException, JSONException {
+        ConfiggetMobileNotifierRequest req = new ConfiggetMobileNotifierRequest();
+        ConfiggetMobileNotifierResponse res = getClient().execute(req);
+
+        assertNotNull(res.getData());
+        JSONObject notifyTemplateJSON = (JSONObject) res.getData();
+
+        assertNotNull("could not find element \"provider\" in json structure", notifyTemplateJSON.get("provider"));
+        JSONArray providersArray = (JSONArray) notifyTemplateJSON.get("provider");
+
+        for (int i = 0; i < providersArray.length(); i++) {
+            assertNotNull(providersArray.get(i));
+            JSONObject providerObject = (JSONObject) providersArray.get(i);
+            Iterator<?> keys = providerObject.keys();
+            while (keys.hasNext()) {
+                String key = (String) keys.next();
+                JSONObject attributesObject = (JSONObject) providerObject.get(key);
+                assertNotNull("could not find attribute template", attributesObject.get("template"));
+                assertNotNull("could not find attribute frontendApp", attributesObject.get("frontendApp"));
+                assertNotNull("could not find attribute slow", attributesObject.get("slow"));
+            }
+        }
+    }
+
+    public void testShouldThrowExceptionIfUnknownProvider() throws OXException, IOException, JSONException {
         List<String> providerValue = new ArrayList<String>();
         providerValue.add("mehl");
 
-        GetMobileNotifierRequest req = new GetMobileNotifierRequest(providerValue);
-        GetMobileNotifierResponse res = getClient().execute(req);
+        ConfiggetMobileNotifierRequest req = new ConfiggetMobileNotifierRequest(providerValue);
+        ConfiggetMobileNotifierResponse res = getClient().execute(req);
 
-        assertNotNull("Exception not thrown" + res.getException());
+        assertNotNull(res.getException());
     }
 }

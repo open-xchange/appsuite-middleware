@@ -47,25 +47,19 @@
  *
  */
 
-package com.openexchange.ajax.mobilenotifier;
+package com.openexchange.ajax.mobilenotifier.actions;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.ajax.mobilenotifier.tests.ConfiggetTest;
-import com.openexchange.ajax.mobilenotifier.tests.GetTest;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 
 /**
- * {@link MobileNotifierTestSuite}
+ * {@link ConfiggetMobileNotifierResponse}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class MobileNotifierTestSuite {
-
-    public static Test suite() {
-        final TestSuite tests = new TestSuite("com.openexchange.ajax.mobilenotifier.MobileNotifierTestSuite");
-        tests.addTestSuite(GetTest.class);
-        tests.addTestSuite(ConfiggetTest.class);
-        return tests;
+public class ConfiggetMobileNotifierResponse extends AbstractAJAXResponse {
+    public ConfiggetMobileNotifierResponse(Response response) {
+        super(response);
     }
 }
