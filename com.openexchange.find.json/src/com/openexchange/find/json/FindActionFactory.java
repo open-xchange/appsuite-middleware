@@ -47,29 +47,47 @@
  *
  */
 
-package com.openexchange.find.json.osgi;
+package com.openexchange.find.json;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.find.SearchService;
-import com.openexchange.find.json.FindActionFactory;
+import com.openexchange.find.json.actions.AbstractFindAction;
+import com.openexchange.find.json.actions.AutocompleteAction;
+import com.openexchange.find.json.actions.ConfigAction;
+import com.openexchange.find.json.actions.QueryAction;
 
 /**
  *
- * {@link Activator}
+ * {@link FindActionFactory}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class Activator extends AJAXModuleActivator {
+public class FindActionFactory implements AJAXActionServiceFactory {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SearchService.class };
+    private final Map<String, AbstractFindAction> actions;
+
+    public FindActionFactory(SearchService searchService) {
+        super();
+        actions = new HashMap<String, AbstractFindAction>(3);
+        actions.put("config", new ConfigAction(searchService));
+        actions.put("autocomplete", new AutocompleteAction(searchService));
+        actions.put("query", new QueryAction(searchService));
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerModule(new FindActionFactory(getService(SearchService.class)), "find");
+    public AJAXActionService createActionService(String action) throws OXException {
+        return actions.get(action);
+    }
 
+    @Override
+    public Collection<?> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
 }

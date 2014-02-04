@@ -46,30 +46,33 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-
-package com.openexchange.find.json.osgi;
-
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.find.SearchService;
-import com.openexchange.find.json.FindActionFactory;
+package com.openexchange.find;
 
 /**
  *
- * {@link Activator}
+ * {@link MandatoryFilter}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class Activator extends AJAXModuleActivator {
+public class MandatoryFilter {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SearchService.class };
+    private final Facet facet;
+
+    private final FacetValue defaultValue;
+
+
+    public MandatoryFilter(Facet facet, FacetValue defaultValue) {
+        super();
+        this.facet = facet;
+        this.defaultValue = defaultValue;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerModule(new FindActionFactory(getService(SearchService.class)), "find");
+    public Facet getFacet() {
+        return facet;
+    }
 
+    public FacetValue getDefaultValue() {
+        return defaultValue;
     }
 
 }

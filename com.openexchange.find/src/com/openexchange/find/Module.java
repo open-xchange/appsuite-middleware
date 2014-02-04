@@ -57,6 +57,10 @@ package com.openexchange.find;
  */
 public enum Module {
 
-    MAIL
+    MAIL,
+    CONTACTS,
+    CALENDAR,
+    TASKS,
+    DRIVE
 
 }

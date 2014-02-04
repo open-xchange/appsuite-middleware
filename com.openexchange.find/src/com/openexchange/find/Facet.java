@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -46,42 +46,35 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.find;
 
-package com.openexchange.find.json;
-
-import java.util.HashMap;
-import java.util.Map;
-
+import java.util.List;
 
 /**
- * {@link Module}
+ *
+ * {@link Facet}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public enum Module {
-
-    MAIL("mail");
-
-    private static final Map<String, Module> modulesByName = new HashMap<String, Module>();
-
-    static {
-        for (Module m : Module.values()) {
-            modulesByName.put(m.getName(), m);
-        }
-    }
+public class Facet {
 
     private final String name;
 
-    private Module(String name) {
+    private final List<FacetValue> values;
+
+
+    public Facet(String name, List<FacetValue> values) {
+        super();
         this.name = name;
+        this.values = values;
     }
 
     public String getName() {
         return name;
     }
 
-    public static Module getForName(String name) {
-        return modulesByName.get(name);
+    public List<FacetValue> getValues() {
+        return values;
     }
 
 }

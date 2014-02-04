@@ -46,30 +46,25 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.find;
 
-package com.openexchange.find.json.osgi;
+import java.util.Map;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.find.SearchService;
-import com.openexchange.find.json.FindActionFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  *
- * {@link Activator}
+ * {@link SearchService}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class Activator extends AJAXModuleActivator {
+public interface SearchService {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SearchService.class };
-    }
+    Map<Module, ModuleConfig> getConfiguration(Session session) throws OXException;
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerModule(new FindActionFactory(getService(SearchService.class)), "find");
+    AutocompleteResult autocomplete(Session session, Module module, AutocompleteRequest autocompleteRequest) throws OXException;
 
-    }
+    SearchResult search(Session session, Module module, SearchRequest searchRequest) throws OXException;
 
 }

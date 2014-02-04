@@ -46,30 +46,46 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.find;
 
-package com.openexchange.find.json.osgi;
-
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.find.SearchService;
-import com.openexchange.find.json.FindActionFactory;
+import java.util.List;
 
 /**
  *
- * {@link Activator}
+ * {@link SearchResult}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class Activator extends AJAXModuleActivator {
+public class SearchResult {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SearchService.class };
+    private final int numFound;
+
+    private final int start;
+
+    private final List<Document> documents;
+
+
+    public SearchResult(int numFound, int start, List<Document> documents) {
+        super();
+        this.numFound = numFound;
+        this.start = start;
+        this.documents = documents;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerModule(new FindActionFactory(getService(SearchService.class)), "find");
+    public int getNumFound() {
+        return numFound;
+    }
 
+    public int getStart() {
+        return start;
+    }
+
+    public int getSize() {
+        return documents.size();
+    }
+
+    public List<Document> getDocuments() {
+        return documents;
     }
 
 }

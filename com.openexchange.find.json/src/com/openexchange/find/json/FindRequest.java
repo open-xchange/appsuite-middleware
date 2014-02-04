@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,8 +51,10 @@ package com.openexchange.find.json;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.find.Module;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -67,6 +69,16 @@ public class FindRequest {
     private static final String PARAM_MODULE = "module";
 
     private static final String PARAM_PREFIX = "prefix";
+
+    private static final String MODULE_MAIL = "mail";
+
+    private static final String MODULE_CONTACTS = "contacts";
+
+    private static final String MODULE_CALENDAR = "calendar";
+
+    private static final String MODULE_TASKS = "tasks";
+
+    private static final String MODULE_DRIVE = "drive";
 
     private final AJAXRequestData request;
 
@@ -93,7 +105,7 @@ public class FindRequest {
             return null;
         }
 
-        return Module.getForName(module);
+        return getModuleForName(module);
     }
 
     public Module requireModule() throws OXException {
@@ -102,7 +114,7 @@ public class FindRequest {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAM_MODULE);
         }
 
-        Module module = Module.getForName(moduleValue);
+        Module module = getModuleForName(moduleValue);
         if (module == null) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(PARAM_MODULE, moduleValue);
         }
@@ -138,6 +150,22 @@ public class FindRequest {
 
     public <T> T getParameter(String name, Class<T> coerceTo) throws OXException {
         return request.getParameter(name, coerceTo);
+    }
+
+    private Module getModuleForName(String module) {
+        if (MODULE_MAIL.equals(module)) {
+            return Module.MAIL;
+        } else if (MODULE_CONTACTS.equals(module)) {
+            return Module.CONTACTS;
+        } else if (MODULE_CALENDAR.equals(module)) {
+            return Module.CALENDAR;
+        } else if (MODULE_TASKS.equals(module)) {
+            return Module.TASKS;
+        } else if (MODULE_DRIVE.equals(module)) {
+            return Module.DRIVE;
+        }
+
+        return null;
     }
 
 }

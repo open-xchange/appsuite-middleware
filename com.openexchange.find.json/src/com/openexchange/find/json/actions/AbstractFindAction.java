@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,6 +53,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.find.SearchService;
 import com.openexchange.find.json.FindRequest;
 import com.openexchange.tools.session.ServerSession;
 
@@ -63,10 +64,22 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public abstract class AbstractFindAction implements AJAXActionService {
+
+    private final SearchService searchService;
+
+    protected AbstractFindAction(SearchService searchService) {
+        super();
+        this.searchService = searchService;
+    }
+
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         FindRequest searchRequest = new FindRequest(requestData, session);
         return doPerform(searchRequest);
+    }
+
+    protected SearchService getSearchService() {
+        return searchService;
     }
 
     protected abstract AJAXRequestResult doPerform(FindRequest request) throws OXException;
