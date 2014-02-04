@@ -85,166 +85,6 @@ msgstr ""
 msgid "No Kerberos delegation ticket found in session %1$s."
 msgstr ""
 
-#. Access denied.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:65
-msgid "Access denied."
-msgstr ""
-
-#. There is a problem with your AWS account that prevents the operation from completing successfully.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:68
-msgid ""
-"There is a problem with your AWS account that prevents the operation from "
-"completing successfully."
-msgstr ""
-
-#. The e-mail address you provided is associated with more than one account
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:71
-msgid ""
-"The e-mail address you provided is associated with more than one account"
-msgstr ""
-
-#. The requested bucket name is not available. The bucket namespace is shared by all users of the system. Please select a different name and try again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:74
-msgid ""
-"The requested bucket name is not available. The bucket namespace is shared "
-"by all users of the system. Please select a different name and try again."
-msgstr ""
-
-#. Your previous request to create the named bucket succeeded and you already own it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:77
-msgid ""
-"Your previous request to create the named bucket succeeded and you already "
-"own it."
-msgstr ""
-
-#. The bucket you tried to delete is not empty.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:80
-msgid "The bucket you tried to delete is not empty."
-msgstr ""
-
-#. This request does not support credentials.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:83
-msgid "This request does not support credentials."
-msgstr ""
-
-#. Cross location logging not allowed. Buckets in one geographic location cannot log information to a bucket in another location.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:86
-msgid ""
-"Cross location logging not allowed. Buckets in one geographic location "
-"cannot log information to a bucket in another location."
-msgstr ""
-
-#. Your proposed upload is smaller than the minimum allowed object size.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:89
-msgid "Your proposed upload is smaller than the minimum allowed object size."
-msgstr ""
-
-#. Your proposed upload exceeds the maximum allowed object size.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:92
-msgid "Your proposed upload exceeds the maximum allowed object size."
-msgstr ""
-
-#. The provided token has expired.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:95
-msgid "The provided token has expired."
-msgstr ""
-
-#. The AWS Access Key Id you provided does not exist in our records.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:98
-msgid "The AWS Access Key Id you provided does not exist in our records."
-msgstr ""
-
-#. The specified bucket is not valid.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:101
-msgid "The specified bucket is not valid."
-msgstr ""
-
-#. All access to this object has been disabled.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:104
-msgid "All access to this object has been disabled."
-msgstr ""
-
-#. The provided security credentials are not valid.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:107
-msgid "The provided security credentials are not valid."
-msgstr ""
-
-#. The provided token is malformed or otherwise invalid.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:110
-msgid "The provided token is malformed or otherwise invalid."
-msgstr ""
-
-#. Couldn't parse the specified URI.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:113
-msgid "Couldn't parse the specified URI."
-msgstr ""
-
-#. Your key is too long.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:116
-msgid "Your key is too long."
-msgstr ""
-
-#. Your request was too big.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:119
-msgid "Your request was too big."
-msgstr ""
-
-#. The specified method is not allowed against this resource.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:122
-msgid "The specified method is not allowed against this resource."
-msgstr ""
-
-#. The specified bucket does not exist.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:125
-msgid "The specified bucket does not exist."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:127
-msgid "The specified key does not exist."
-msgstr ""
-
-#. Your account is not signed up for the Amazon S3 service.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:130
-msgid "Your account is not signed up for the Amazon S3 service."
-msgstr ""
-
-#. A conflicting conditional operation is currently in progress against this resource. Please try again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:133
-msgid ""
-"A conflicting conditional operation is currently in progress against this "
-"resource. Please try again."
-msgstr ""
-
-#. At least one of the preconditions you specified did not hold.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:136
-msgid "At least one of the preconditions you specified did not hold."
-msgstr ""
-
-#. Temporary redirect.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:139
-msgid "Temporary redirect."
-msgstr ""
-
-#. Object restore is already in progress.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:142
-msgid "Object restore is already in progress."
-msgstr ""
-
-#. You are being redirected to the bucket while DNS updates.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:145
-msgid "You are being redirected to the bucket while DNS updates."
-msgstr ""
-
-#. The provided token must be refreshed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:148
-msgid "The provided token must be refreshed."
-msgstr ""
-
-#. The e-mail address you provided does not match any account on record.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:151
-msgid "The e-mail address you provided does not match any account on record."
-msgstr ""
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:92
 msgid "Calendar"
@@ -1879,6 +1719,166 @@ msgstr ""
 #. Invalid URL \"%1$s\". Please correct the value and try again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:79
 msgid "Invalid URL \"%1$s\". Please correct the value and try again."
+msgstr ""
+
+#. Access denied.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
+msgid "Access denied."
+msgstr ""
+
+#. There is a problem with your AWS account that prevents the operation from completing successfully.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:68
+msgid ""
+"There is a problem with your AWS account that prevents the operation from "
+"completing successfully."
+msgstr ""
+
+#. The e-mail address you provided is associated with more than one account
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:71
+msgid ""
+"The e-mail address you provided is associated with more than one account"
+msgstr ""
+
+#. The requested bucket name is not available. The bucket namespace is shared by all users of the system. Please select a different name and try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:74
+msgid ""
+"The requested bucket name is not available. The bucket namespace is shared "
+"by all users of the system. Please select a different name and try again."
+msgstr ""
+
+#. Your previous request to create the named bucket succeeded and you already own it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:77
+msgid ""
+"Your previous request to create the named bucket succeeded and you already "
+"own it."
+msgstr ""
+
+#. The bucket you tried to delete is not empty.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:80
+msgid "The bucket you tried to delete is not empty."
+msgstr ""
+
+#. This request does not support credentials.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:83
+msgid "This request does not support credentials."
+msgstr ""
+
+#. Cross location logging not allowed. Buckets in one geographic location cannot log information to a bucket in another location.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:86
+msgid ""
+"Cross location logging not allowed. Buckets in one geographic location "
+"cannot log information to a bucket in another location."
+msgstr ""
+
+#. Your proposed upload is smaller than the minimum allowed object size.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:89
+msgid "Your proposed upload is smaller than the minimum allowed object size."
+msgstr ""
+
+#. Your proposed upload exceeds the maximum allowed object size.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:92
+msgid "Your proposed upload exceeds the maximum allowed object size."
+msgstr ""
+
+#. The provided token has expired.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:95
+msgid "The provided token has expired."
+msgstr ""
+
+#. The AWS Access Key Id you provided does not exist in our records.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:98
+msgid "The AWS Access Key Id you provided does not exist in our records."
+msgstr ""
+
+#. The specified bucket is not valid.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:101
+msgid "The specified bucket is not valid."
+msgstr ""
+
+#. All access to this object has been disabled.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:104
+msgid "All access to this object has been disabled."
+msgstr ""
+
+#. The provided security credentials are not valid.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:107
+msgid "The provided security credentials are not valid."
+msgstr ""
+
+#. The provided token is malformed or otherwise invalid.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:110
+msgid "The provided token is malformed or otherwise invalid."
+msgstr ""
+
+#. Couldn't parse the specified URI.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:113
+msgid "Couldn't parse the specified URI."
+msgstr ""
+
+#. Your key is too long.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:116
+msgid "Your key is too long."
+msgstr ""
+
+#. Your request was too big.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:119
+msgid "Your request was too big."
+msgstr ""
+
+#. The specified method is not allowed against this resource.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:122
+msgid "The specified method is not allowed against this resource."
+msgstr ""
+
+#. The specified bucket does not exist.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:125
+msgid "The specified bucket does not exist."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:127
+msgid "The specified key does not exist."
+msgstr ""
+
+#. Your account is not signed up for the Amazon S3 service.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:130
+msgid "Your account is not signed up for the Amazon S3 service."
+msgstr ""
+
+#. A conflicting conditional operation is currently in progress against this resource. Please try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:133
+msgid ""
+"A conflicting conditional operation is currently in progress against this "
+"resource. Please try again."
+msgstr ""
+
+#. At least one of the preconditions you specified did not hold.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:136
+msgid "At least one of the preconditions you specified did not hold."
+msgstr ""
+
+#. Temporary redirect.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:139
+msgid "Temporary redirect."
+msgstr ""
+
+#. Object restore is already in progress.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:142
+msgid "Object restore is already in progress."
+msgstr ""
+
+#. You are being redirected to the bucket while DNS updates.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:145
+msgid "You are being redirected to the bucket while DNS updates."
+msgstr ""
+
+#. The provided token must be refreshed.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:148
+msgid "The provided token must be refreshed."
+msgstr ""
+
+#. The e-mail address you provided does not match any account on record.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:151
+msgid "The e-mail address you provided does not match any account on record."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.freebusy/src/com/openexchange/freebusy/FreeBusyExceptionMessages.java:63

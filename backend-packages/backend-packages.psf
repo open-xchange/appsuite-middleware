@@ -11,8 +11,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin-reseller"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin-soap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin-soap-reseller"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin-soap-usercopy"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin-user-copy"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin-soap-usercopy"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-ajp"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-appsuite-backend"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-audit"/>
@@ -30,6 +30,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-dataretention-csv"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-dataretrieval"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-dav"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-grizzly"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-drive"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-drive-comet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-eas-provisioning"/>
@@ -37,11 +38,12 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-eas-provisioning-sms"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-emig"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-emig-mock"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-filestore-s3"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-file-distribution"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-file-storage-cifs"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-freebusy"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-grizzly"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-gui-help-plugin"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-oauth"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-halo"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-hostname-config-cascade"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-hostname-ldap"/>
@@ -56,7 +58,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-mobile-config"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-munin-scripts"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-munin-scripts-jolokia"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-oauth"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-parallels"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-passwordchange-database"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-passwordchange-script"/>
@@ -74,8 +75,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-soap-cxf"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamhandler-cloudmark"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamhandler-default"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamhandler-parallels"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamhandler-spamassassin"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamhandler-parallels"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamhandler-spamexperts"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamsettings-generic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-sso"/>

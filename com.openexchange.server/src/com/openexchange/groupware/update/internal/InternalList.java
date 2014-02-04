@@ -716,6 +716,9 @@ public final class InternalList {
         // Performs several adjustments to DB schema to get aligned to clean v7.4.1 installation
         list.add(new com.openexchange.groupware.update.tasks.DropFKTaskv2());
 
+        // Adds/corrects user mail index: INDEX (mail) -> INDEX (cid, mail(255))
+        list.add(new com.openexchange.groupware.update.tasks.UserAddMailIndexTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 }

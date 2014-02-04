@@ -60,7 +60,7 @@ import com.openexchange.groupware.update.FullPrimaryKeySupportService;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
-    
+
     private static final String groupsTableName = "groups";
     private static final String delGroupsTableName = "del_groups";
     private static final String userTableName = "user";
@@ -70,7 +70,7 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
     private static final String userAttributeTableName = "user_attribute";
     private static final String resourceTableName = "resource";
     private static final String delResourceTableName = "del_resource";
-    
+
     private static final String createGroupsTable = "CREATE TABLE groups ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "id INT4 UNSIGNED NOT NULL,"
@@ -80,7 +80,7 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
        + "gidNumber INT4 UNSIGNED NOT NULL,"
        + "PRIMARY KEY (cid, id)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createDelGroupsTable = "CREATE TABLE del_groups ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "id INT4 UNSIGNED NOT NULL,"
@@ -90,7 +90,7 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
        + "gidNumber INT4 UNSIGNED NOT NULL,"
        + "PRIMARY KEY (cid, id)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createUserTable = "CREATE TABLE user ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "id INT4 UNSIGNED NOT NULL,"
@@ -111,9 +111,9 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
        + "homeDirectory VARCHAR(128) NOT NULL,"
        + "loginShell VARCHAR(128) NOT NULL,"
        + "PRIMARY KEY (cid, id),"
-       + "INDEX (mail)"
+       + "INDEX (cid, mail(255))"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createDelUserTable = "CREATE TABLE del_user ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "id INT4 UNSIGNED NOT NULL,"
@@ -135,7 +135,7 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
        + "loginShell VARCHAR(128) NOT NULL DEFAULT '',"
        + "PRIMARY KEY (cid, id)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createGroupsMemberTable = "CREATE TABLE groups_member ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "id INT4 UNSIGNED NOT NULL,"
@@ -144,7 +144,7 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
        + "FOREIGN KEY (cid, id) REFERENCES groups(cid, id),"
        + "FOREIGN KEY (cid, member) REFERENCES user(cid, id)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createLogin2UserTable = "CREATE TABLE login2user ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "id INT4 UNSIGNED NOT NULL,"
@@ -152,7 +152,7 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
        + "PRIMARY KEY (cid, uid),"
        + "FOREIGN KEY (cid, id) REFERENCES user(cid, id)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createUserAttributeTable = "CREATE TABLE user_attribute ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "id INT4 UNSIGNED NOT NULL,"
@@ -162,7 +162,7 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
        + "INDEX (cid,name,value(20)),"
        + "FOREIGN KEY (cid, id) REFERENCES user(cid, id)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createUserAttributeTablePrimaryKey = "CREATE TABLE user_attribute ("
         + "cid INT4 UNSIGNED NOT NULL,"
         + "id INT4 UNSIGNED NOT NULL,"
@@ -173,7 +173,7 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
         + "INDEX (cid,name,value(20)),"
         + "FOREIGN KEY (cid, id) REFERENCES user(cid, id)"
       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createResourceTable = "CREATE TABLE resource ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "id INT4 UNSIGNED NOT NULL,"
@@ -185,7 +185,7 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
        + "lastModified INT8 NOT NULL,"
        + "PRIMARY KEY (cid, id)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     private static final String createDelResourceTable = "CREATE TABLE del_resource ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "id INT4 UNSIGNED NOT NULL,"

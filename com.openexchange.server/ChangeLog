@@ -2,6 +2,10 @@
 
  - Fix for bug 30255: Closing database connections if database pool does not control them anymore.
 
+* 2014-02-04 - dennis.sieben@open-xchange.com
+
+ - SCR1860: added a new mail filter action command for pgp_encrypt extension
+
 * 2014-01-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 30895: Do not stick to have "image/*" Content-Type, but accept default Content-Type "application/octet-stream", too
