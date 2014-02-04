@@ -71,12 +71,11 @@ public class GetPublicationTest extends AbstractPublicationTest {
         super(name);
     }
 
-    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, SAXException, JSONException{
+    public void testShouldNotFindNonExistingPublication() throws OXException, IOException, JSONException {
         GetPublicationRequest req = new GetPublicationRequest(Integer.MAX_VALUE);
 
         GetPublicationResponse res = getClient().execute(req);
         OXException exception = res.getException();
         assertNotNull("Should contain an exception" , exception);
     }
-
 }

@@ -64,7 +64,7 @@ import com.openexchange.mobilenotifier.MobileNotifierExceptionCodes;
  */
 public abstract class MobileNotifierFileUtil {
 
-    private static final String TEMPLATEPATH = System.getProperty("openexchange.propdir") + "/templates/";
+    private static final String TEMPLATEPATH = System.getProperty("openexchange.propdir") + "/templates/examples/";
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobileNotifierFileUtil.class);
     /**
@@ -75,11 +75,6 @@ public abstract class MobileNotifierFileUtil {
      */
     public static String getTeamplateFileContent(final String templateFileName) throws OXException {
         final File file = new File(TEMPLATEPATH + templateFileName);
-
-        if (!isFileReadable(file)) {
-            LOG.error("Can not read file: {}", file.toString());
-        }
-
         String html = "";
         FileReader fr = null;
         BufferedReader br = null;
@@ -107,13 +102,6 @@ public abstract class MobileNotifierFileUtil {
         }
 
         return html;
-    }
-
-    private static boolean isFileReadable(File file) throws OXException {
-        if (file.isFile() && file.canRead()) {
-            return true;
-        }
-        throw MobileNotifierExceptionCodes.IO_ERROR.create();
     }
 
     private static void closeBufferedReader(BufferedReader br) throws OXException {

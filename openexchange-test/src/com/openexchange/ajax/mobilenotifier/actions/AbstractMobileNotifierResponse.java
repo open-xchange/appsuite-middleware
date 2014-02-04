@@ -67,5 +67,4 @@ public abstract class AbstractMobileNotifierResponse extends AbstractAJAXRespons
     protected AbstractMobileNotifierResponse(Response response) {
         super(response);
     }
-
 }

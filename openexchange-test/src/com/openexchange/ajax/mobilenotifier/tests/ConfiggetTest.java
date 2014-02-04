@@ -92,7 +92,7 @@ public class ConfiggetTest extends AbstractMobileNotifierTest {
         JSONArray providersArray = (JSONArray) notifyTemplateJSON.get("provider");
 
         assertEquals(
-            "size of provider parameter value not identical to size of json provider structure",
+            "size of provider parameter values not identical to size of json provider structure",
             providerValue.size(),
             providersArray.length());
 
@@ -101,9 +101,9 @@ public class ConfiggetTest extends AbstractMobileNotifierTest {
             JSONObject providerObject = (JSONObject) providersArray.get(i);
             
             JSONObject attributesObject = (JSONObject) providerObject.get(providerValue.get(i));
-            assertNotNull(attributesObject.get("template"));
-            assertNotNull(attributesObject.get("frontendApp"));
-            assertNotNull(attributesObject.get("slow"));
+            assertNotNull("could not find attribute template", attributesObject.get("template"));
+            assertNotNull("could not find attribute frontendApp",attributesObject.get("frontendApp"));
+            assertNotNull("could not find attribute slow", attributesObject.get("slow"));
         }
     }
 

@@ -58,6 +58,8 @@ import org.json.JSONObject;
 import com.openexchange.ajax.mobilenotifier.actions.GetMobileNotifierRequest;
 import com.openexchange.ajax.mobilenotifier.actions.GetMobileNotifierResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.mobilenotifier.MobileNotifierService;
+import com.openexchange.mobilenotifier.MobileNotifierServiceRegistry;
 
 /**
  * {@link GetTest}
@@ -89,20 +91,17 @@ public class GetTest extends AbstractMobileNotifierTest {
         JSONArray providersArray = (JSONArray) notifyItemJson.get("provider");
 
         assertEquals(
-            "size of provider parameter value not identical to size of json provider structure",
+            "size of provider parameter values not identical to size of json provider structure",
             providerValue.size(),
             providersArray.length());
 
         for (int i = 0; i < providersArray.length(); i++) {
-            assertNotNull("Could not find any providers", providersArray.get(i));
+            assertNotNull("could not find any providers", providersArray.get(i));
             JSONObject providerObject = (JSONObject) providersArray.get(i);
-
-            assertNotNull("Could not find provider", providerObject.get(providerValue.get(i)));
+            assertNotNull("could not find provider", providerObject.get(providerValue.get(i)));
             JSONObject providerJSON = (JSONObject) providerObject.get(providerValue.get(i));
-
             assertNotNull("could not find element \"items\"", providerJSON.get("items"));
             JSONArray itemsArray = (JSONArray) providerJSON.get("items");
-
             assertNotNull(itemsArray.get(0));
         }
     }
@@ -114,6 +113,6 @@ public class GetTest extends AbstractMobileNotifierTest {
         GetMobileNotifierRequest req = new GetMobileNotifierRequest(providerValue);
         GetMobileNotifierResponse res = getClient().execute(req);
 
-        assertNotNull("Exception not thrown" + res.getException());
+        assertNotNull("exception not thrown" + res.getException());
     }
 }
