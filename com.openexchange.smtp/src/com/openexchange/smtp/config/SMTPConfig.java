@@ -49,6 +49,7 @@
 
 package com.openexchange.smtp.config;
 
+import static com.openexchange.java.Strings.isEmpty;
 import java.net.URI;
 import java.net.URISyntaxException;
 import javax.mail.internet.idn.IDNA;
@@ -166,8 +167,14 @@ public final class SMTPConfig extends TransportConfig {
     @Override
     protected boolean doCustomParsing(MailAccount account, Session session) throws OXException {
         if (!account.isDefaultAccount()) {
-            login = account.getTransportLogin();
-            password = MailPasswordUtil.decrypt(account.getTransportPassword(), session, account.getId(), login, account.getTransportServer());
+            {
+                final String transportLogin = account.getTransportLogin();
+                login = isEmpty(transportLogin) ? account.getLogin() : transportLogin;
+            }
+            {
+                final String transportPassword = account.getTransportPassword();
+                password = MailPasswordUtil.decrypt(isEmpty(transportPassword) ? account.getPassword() : transportPassword, session, account.getId(), login, account.getTransportServer());
+            }
             return true;
         }
         return false;
