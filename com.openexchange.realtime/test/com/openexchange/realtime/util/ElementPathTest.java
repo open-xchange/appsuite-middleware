@@ -61,8 +61,12 @@ import org.junit.Test;
 public class ElementPathTest {
 
     @Test(expected = IllegalArgumentException.class)
-    public void testBadElementPathString() {
+    public void testBadElementPathString1() {
         new ElementPath(".Element");
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testBadElementPathString2() {
         new ElementPath("path.");
     }
 
