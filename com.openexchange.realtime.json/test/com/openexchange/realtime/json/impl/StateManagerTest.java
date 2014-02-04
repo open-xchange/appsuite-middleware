@@ -57,6 +57,8 @@ import org.junit.Test;
 import com.openexchange.realtime.json.impl.RTClientStateImpl;
 import com.openexchange.realtime.json.impl.StateEntry;
 import com.openexchange.realtime.json.impl.StateManager;
+import com.openexchange.realtime.json.mock.JSONServiceRegistryMock;
+import com.openexchange.realtime.json.osgi.JSONServiceRegistry;
 import com.openexchange.realtime.json.protocol.StanzaTransmitter;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IDEventHandler;
@@ -124,6 +126,8 @@ public class StateManagerTest {
         entry4.state.getId().on(ID.Events.DISPOSE, new DisposeHandler(disposed, 4));
         entry5.state.getId().on(ID.Events.DISPOSE, new DisposeHandler(disposed, 5));
         
+        //set serviceLookup Mock so we can call timeOutStaleStates that would call GlobalCleanup
+        JSONServiceRegistry.SERVICES.set(new JSONServiceRegistryMock());
         stateManager.timeOutStaleStates(1800001);
         
         assertEquals(2, disposed.size());

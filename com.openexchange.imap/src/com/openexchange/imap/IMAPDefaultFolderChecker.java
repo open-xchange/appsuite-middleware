@@ -506,8 +506,10 @@ public class IMAPDefaultFolderChecker {
                     if (isAlreadyExistsException(e)) {
                         // Grab the first in sight
                         closeSafe(f);
-                        f = (IMAPFolder) candidates.get(0);
-                        desiredFullName = f.getFullName();
+                        if (!candidates.isEmpty()) {
+                            f = (IMAPFolder) candidates.get(0);
+                            desiredFullName = f.getFullName();
+                        }
                         checkSubscriptionStatus(subscribe, f, modified);
                         return desiredFullName;
                     }
@@ -537,8 +539,8 @@ public class IMAPDefaultFolderChecker {
      * Checks if given full name indicates to be located in specified namespace.
      * <p>
      * <table>
-     *  <tr><td align="right"><code>"INBOX/"</code></td><td>--&gt; <code>"INBOX/Trash"</code>, but not <code>"Trash"</code> and not <code>"INBOX/foobar/Trash"</code></td></tr>
-     *  <tr><td align="right"><code>""</code></td><td>--&gt; <code>"Trash"</code>, but not <code>"INBOX/Trash"</code></td></tr>
+     *  <tr><td align="center">&bull;</td><td align="right"><code>"INBOX/"</code></td><td>--&gt; <code>"INBOX/Trash"</code>, but not <code>"Trash"</code> and not <code>"INBOX/foobar/Trash"</code></td></tr>
+     *  <tr><td align="center">&bull;</td><td align="right"><code>""</code></td><td>--&gt; <code>"Trash"</code>, but not <code>"INBOX/Trash"</code></td></tr>
      * </table>
      *
      * @param fullName The full name to check

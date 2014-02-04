@@ -194,6 +194,12 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                 }
             }
 
+            // Check result
+            if (null == previewDocument) {
+                // No thumbnail available
+                throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create(new NullPointerException("previewDocument is null"), new Object[0]);
+            }
+
             // Check thumbnail stream
             requestData.setFormat("file");
             InputStream thumbnail = previewDocument.getThumbnail();
