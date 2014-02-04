@@ -58,15 +58,6 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class IndexedSearchExceptionMessages implements LocalizableStrings {
 
-    // An unexpected error occurred: %1$s
-    public static final String UNEXPECTED_ERROR = "An unexpected error occurred: %1$s";
-
-    // A JSON error occurred: %1$s
-    public static final String JSON_ERROR = "A JSON error occurred: %1$s";
-
-    // Index-based search is not supported for module: %1$s
-    public static final String MODULE_NOT_SUPPORTED = "Index-based search is not supported for module: %1$s";
-
     // There is no search handler for field %1$s.
     public static final String UNKNOWN_HANDLER = "There is no search handler for field %1$s.";
 
