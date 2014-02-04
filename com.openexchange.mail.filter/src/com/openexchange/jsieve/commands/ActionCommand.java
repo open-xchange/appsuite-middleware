@@ -81,7 +81,8 @@ public class ActionCommand extends ControlOrActionCommand {
         STOP("stop", 0, new Hashtable<String, Integer>(), "stop", Collections.<String> emptyList()),
         VACATION("vacation", 1, vacationtags(), "vacation", Collections.singletonList("vacation")),
         ENOTIFY("notify", 1, enotifytags(), "notify", Collections.singletonList("enotify")),
-        ADDFLAG("addflag", 1, new Hashtable<String, Integer>(), "addflags", java.util.Arrays.asList("imapflags", "imap4flags"));
+        ADDFLAG("addflag", 1, new Hashtable<String, Integer>(), "addflags", java.util.Arrays.asList("imapflags", "imap4flags")),
+        PGP_ENCRYPT("pgp_encrypt", 0, pgp_encrypt_tags(), "pgp", java.util.Arrays.asList("vnd.dovecot.pgp-encrypt"));
 
         private static Hashtable<String, Integer> vacationtags() {
             final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
@@ -111,6 +112,12 @@ public class ActionCommand extends ControlOrActionCommand {
              *
              */
             retval.put(":message", Integer.valueOf(1));
+            return retval;
+        }
+
+        private static Hashtable<String, Integer> pgp_encrypt_tags() {
+            final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
+            retval.put(":keys", Integer.valueOf(1));
             return retval;
         }
 

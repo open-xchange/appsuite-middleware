@@ -72,6 +72,7 @@ import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.AddFlagsActionFields
 import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.EnotifyActionFields;
 import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.GeneralFields;
 import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.MoveActionFields;
+import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.PGPEncryptActionFields;
 import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.RedirectActionFields;
 import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.RejectActionFields;
 import com.openexchange.mailfilter.ajax.json.Rule2JSON2Rule.VacationActionFields;
@@ -189,6 +190,14 @@ final class ActionCommandMapper implements Mapper<Rule> {
             final ArrayList<Object> arrayList = new ArrayList<Object>();
             arrayList.add(Rule2JSON2Rule.JSONArrayToStringList(array));
             return new ActionCommand(ActionCommand.Commands.ADDFLAG, arrayList);
+        } else if (ActionCommand.Commands.PGP_ENCRYPT.getJsonname().equals(id)) {
+            final ArrayList<Object> arrayList = new ArrayList<Object>();
+            final JSONArray keys = object.optJSONArray(PGPEncryptActionFields.KEYS.getFieldname());
+            if (null != keys) {
+                arrayList.add(Rule2JSON2Rule.createTagArg(PGPEncryptActionFields.KEYS));
+                arrayList.add(Rule2JSON2Rule.JSONArrayToStringList(keys));
+            }
+            return new ActionCommand(ActionCommand.Commands.PGP_ENCRYPT, arrayList);
         } else {
             throw new JSONException("Unknown action command while creating object: " + id);
         }
@@ -304,6 +313,13 @@ final class ActionCommandMapper implements Mapper<Rule> {
             } else if (ActionCommand.Commands.ADDFLAG.equals(actionCommand.getCommand())) {
                 tmp.put(GeneralFields.ID, ActionCommand.Commands.ADDFLAG.getJsonname());
                 tmp.put(AddFlagsActionFields.FLAGS, (List<String>) arguments.get(0));
+            } else if (ActionCommand.Commands.PGP_ENCRYPT.equals(actionCommand.getCommand())) {
+                tmp.put(GeneralFields.ID, ActionCommand.Commands.PGP_ENCRYPT.getJsonname());
+                final Hashtable<String, List<String>> tagarguments = actionCommand.getTagarguments();
+                final List<String> keys = tagarguments.get(PGPEncryptActionFields.KEYS.getTagname());
+                if (null != keys) {
+                    tmp.put(PGPEncryptActionFields.KEYS.getFieldname(), keys);
+                }
             }
         }
     }
