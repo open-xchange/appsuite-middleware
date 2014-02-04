@@ -303,9 +303,12 @@ public class IMAPDefaultFolderChecker {
                 } else {
                     if (fullName.indexOf(sep) > 0 || !fullName.equals(names[i])) {
                         // E.g. name=Sent, but fullName=INBOX/Sent or fullName=Zent
-                        LOG.warn("Found invalid full name in settings of account {}. Should be \"{}\", but is \"{}\" (user={}, context={})", Integer.valueOf(accountId), namespace + names[i], fullName, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                        final String expectedFullName = namespace + names[i];
+                        if (expectedFullName.equals(fullName)) {
+                            LOG.warn("Found invalid full name in settings of account {}. Should be \"{}\", but is \"{}\" (user={}, context={})", Integer.valueOf(accountId), expectedFullName, fullName, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                            indexes.add(i);
+                        }
                         fullNames[i] = null;
-                        indexes.add(i);
                     }
                 }
             }
