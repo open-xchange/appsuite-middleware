@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,76 +47,14 @@
  *
  */
 
-package com.openexchange.threadpool.internal;
+package com.openexchange.marker;
 
-import com.openexchange.marker.OXThreadMarker;
-import com.openexchange.threadpool.ThreadRenamer;
 
 /**
- * {@link CustomThread} - Enhances {@link Thread} class by a setter/getter method for a thread's original name.
+ * {@link OXThreadMarker} - The interface to mark such <code>Thread</code>s that are spawned by Open-Xchange Server's thread pool.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CustomThread extends Thread implements ThreadRenamer, OXThreadMarker {
-
-    private volatile String originalName;
-    private volatile String appendix;
-    private volatile boolean changed;
-
-    /**
-     * Initializes a new {@link CustomThread}.
-     *
-     * @param target The object whose run method is called
-     * @param name The name of the new thread which is also used as original name
-     */
-    public CustomThread(final Runnable target, final String name) {
-        super(target, name);
-        applyName(name);
-    }
-
-    private void applyName(final String name) {
-        originalName = name;
-        final int pos = originalName.indexOf('-');
-        if (pos > 0) {
-            appendix = name.substring(pos);
-        } else {
-            appendix = null;
-        }
-    }
-
-    /**
-     * Gets the original name.
-     *
-     * @return The original name
-     */
-    public String getOriginalName() {
-        return originalName;
-    }
-
-    /**
-     * Restores the original name.
-     */
-    public void restoreName() {
-        if (!changed) {
-            return;
-        }
-        setName(originalName);
-    }
-
-    @Override
-    public void rename(final String newName) {
-        setName(newName);
-        changed = true;
-    }
-
-    @Override
-    public void renamePrefix(final String newPrefix) {
-        if (null == appendix) {
-            setName(newPrefix);
-        } else {
-            setName(new com.openexchange.java.StringAllocator(16).append(newPrefix).append(appendix).toString());
-        }
-        changed = true;
-    }
-
+public interface OXThreadMarker {
+    // Empty
 }
