@@ -59,10 +59,14 @@ import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
+import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.ms.MsEventConstants;
 import com.openexchange.ms.MsService;
+import com.openexchange.ms.PortableMsService;
 import com.openexchange.ms.internal.HzMsService;
 import com.openexchange.ms.internal.Services;
+import com.openexchange.ms.internal.portable.PortableHzMsService;
+import com.openexchange.ms.internal.portable.PortableMessageFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
 
@@ -93,6 +97,7 @@ public class MsActivator extends HousekeepingActivator {
         if (enabled) {
             final BundleContext context = this.context;
             final AtomicReference<MsService> msServiceRef = new AtomicReference<MsService>();
+            final AtomicReference<PortableMsService> portableMsServiceRef = new AtomicReference<PortableMsService>();
             track(HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
 
                 @Override
@@ -105,6 +110,10 @@ public class MsActivator extends HousekeepingActivator {
                     final HzMsService msService = new HzMsService(hz);
                     if (msServiceRef.compareAndSet(null, msService)) {
                         registerService(MsService.class, msService);
+                        PortableMsService portableMsService = new PortableHzMsService(hz);
+                        portableMsServiceRef.set(portableMsService);
+                        registerService(PortableMsService.class, portableMsService);
+                        registerService(CustomPortableFactory.class, new PortableMessageFactory());
                         registerEventHandler(msService);
                         return hz;
                     }
@@ -124,6 +133,7 @@ public class MsActivator extends HousekeepingActivator {
                         if (null != msService) {
                             unregisterServices();
                             msServiceRef.set(null);
+                            portableMsServiceRef.set(null);
                         }
                         context.ungetService(reference);
                     }

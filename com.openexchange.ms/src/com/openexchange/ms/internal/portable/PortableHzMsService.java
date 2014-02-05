@@ -47,99 +47,42 @@
  *
  */
 
-package com.openexchange.ms.internal;
+package com.openexchange.ms.internal.portable;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.ms.Member;
-import com.openexchange.ms.Message;
-import com.openexchange.ms.MessageInbox;
-import com.openexchange.ms.MsService;
-import com.openexchange.ms.Queue;
+import com.hazelcast.nio.serialization.Portable;
+import com.openexchange.ms.PortableMsService;
 import com.openexchange.ms.Topic;
 
 /**
- * {@link HzMsService}
+ * {@link PortableHzMsService}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class HzMsService implements MsService {
+public final class PortableHzMsService implements PortableMsService {
 
     private final HazelcastInstance hz;
-    private final ConcurrentMap<String, Queue<?>> queues;
     private final ConcurrentMap<String, Topic<?>> topics;
-    private final MessageInboxImpl messageInbox;
 
     /**
-     * Initializes a new {@link HzMsService}.
+     * Initializes a new {@link PortableHzMsService}.
+     *
+     * @param hz The underlying hazelcast instance
      */
-    public HzMsService(final HazelcastInstance hz) {
+    public PortableHzMsService(HazelcastInstance hz) {
         super();
-        messageInbox = MessageInboxImpl.getInstance();
         this.hz = hz;
-        queues = new NonBlockingHashMap<String, Queue<?>>(8);
         topics = new NonBlockingHashMap<String, Topic<?>>(16);
     }
 
     @Override
-    public Set<Member> getMembers() {
-        final Set<com.hazelcast.core.Member> hzMembers = hz.getCluster().getMembers();
-        final Set<Member> set = new HashSet<Member>(hzMembers.size());
-        for (final com.hazelcast.core.Member hzMember : hzMembers) {
-            set.add(new HzMember(hzMember));
-        }
-        return set;
-    }
-
-    @Override
-    public MessageInbox getMessageInbox() {
-        return messageInbox;
-    }
-
-    @Override
-    public void directMessage(final Message<?> message, final Member member) {
-        com.hazelcast.core.Member hzMember = null;
-        // Look-up by UUID
-        {
-            final String uuid = member.getUuid();
-            for (final com.hazelcast.core.Member cur : hz.getCluster().getMembers()) {
-                if (uuid.equals(cur.getUuid())) {
-                    hzMember = cur;
-                    break;
-                }
-            }
-        }
-        if (null == hzMember) {
-            // No such member
-            return;
-        }
-        hz.getExecutorService("default").submitToMember(new MessageAppender(message), hzMember);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <E> Queue<E> getQueue(final String name) {
-        Queue<E> queue = (Queue<E>) queues.get(name);
-        if (null == queue) {
-            final HzQueue<E> hzQueue = new HzQueue<E>(name, hz);
-            queue = (Queue<E>) queues.putIfAbsent(name, hzQueue);
-            if (null == queue) {
-                queue = hzQueue;
-            }
-        }
-        return queue;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <E> Topic<E> getTopic(final String name) {
-        Topic<E> topic = (Topic<E>) topics.get(name);
+    public <P extends Portable> Topic<P> getTopic(final String name) {
+        Topic<P> topic = (Topic<P>) topics.get(name);
         if (null == topic) {
-            final HzTopic<E> hzTopic = new HzTopic<E>(name, hz);
-            topic = (Topic<E>) topics.putIfAbsent(name, hzTopic);
+            PortableHzTopic<P> hzTopic = new PortableHzTopic<P>(name, hz);
+            topic = (Topic<P>) topics.putIfAbsent(name, hzTopic);
             if (null == topic) {
                 topic = hzTopic;
             }

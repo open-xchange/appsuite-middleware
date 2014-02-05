@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,26 +47,46 @@
  *
  */
 
-package com.openexchange.sessionstorage.hazelcast.portable;
+package com.openexchange.ms.internal.portable;
 
-import com.openexchange.hazelcast.serialization.CustomPortable;
-import com.openexchange.hazelcast.serialization.CustomPortableFactory;
+import java.util.List;
+import com.hazelcast.nio.serialization.Portable;
+import com.openexchange.ms.Message;
+import com.openexchange.ms.MessageListener;
 
 /**
- * {@link CustomPortableSessionFactory}
+ * {@link PortableHzMessageListener}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class CustomPortableSessionFactory implements CustomPortableFactory {
+public class PortableHzMessageListener<P extends Portable> implements com.hazelcast.core.MessageListener<PortableMessage<P>> {
 
-    @Override
-    public CustomPortable create() {
-        return new PortableSession();
+    private final MessageListener<P> listener;
+    private final String senderID;
+
+    /**
+     * Initializes a new {@link PortableHzMessageListener}.
+     *
+     * @param listener The parent message listener
+     * @param senderID The listener's sender ID
+     */
+    protected PortableHzMessageListener(MessageListener<P> listener, String senderID) {
+        super();
+        this.listener = listener;
+        this.senderID = senderID;
     }
 
     @Override
-    public int getClassId() {
-        return PortableSession.CLASS_ID;
+    public void onMessage(com.hazelcast.core.Message<PortableMessage<P>> message) {
+        PortableMessage<P> messageData = message.getMessageObject();
+        List<P> messagePayload = messageData.getMessagePayload();
+        if (null != messagePayload && 0 < messagePayload.size()) {
+            String name = message.getSource().toString();
+            String senderID = messageData.getSenderID();
+            for (P payload : messagePayload) {
+                listener.onMessage(new Message<P>(name, senderID, payload, !this.senderID.equals(senderID)));
+            }
+        }
     }
 
 }

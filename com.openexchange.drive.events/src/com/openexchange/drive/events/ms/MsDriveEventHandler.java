@@ -49,8 +49,6 @@
 
 package com.openexchange.drive.events.ms;
 
-import java.io.Serializable;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
@@ -59,6 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.ms.Message;
 import com.openexchange.ms.MessageListener;
 import com.openexchange.ms.MsService;
+import com.openexchange.ms.PortableMsService;
 import com.openexchange.ms.Topic;
 import com.openexchange.server.ServiceExceptionCode;
 
@@ -67,11 +66,11 @@ import com.openexchange.server.ServiceExceptionCode;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class MsDriveEventHandler implements DriveEventPublisher, MessageListener<Map<String, Serializable>> {
+public final class MsDriveEventHandler implements DriveEventPublisher, MessageListener<PortableDriveEvent> {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MsDriveEventHandler.class);
     private static final String TOPIC_NAME = "driveEvents-0";
-    private static final AtomicReference<MsService> MS_REFERENCE = new AtomicReference<MsService>();
+    private static final AtomicReference<PortableMsService> MS_REFERENCE = new AtomicReference<PortableMsService>();
 
     private final DriveEventServiceImpl driveEventService;
     private final String senderId;
@@ -81,7 +80,7 @@ public final class MsDriveEventHandler implements DriveEventPublisher, MessageLi
      *
      * @param service The {@link MsService}
      */
-    public static void setMsService(final MsService service) {
+    public static void setMsService(final PortableMsService service) {
         MS_REFERENCE.set(service);
     }
 
@@ -94,7 +93,7 @@ public final class MsDriveEventHandler implements DriveEventPublisher, MessageLi
         super();
         this.driveEventService = driveEventService;
         driveEventService.registerPublisher(this);
-        Topic<Map<String, Serializable>> topic = getTopic();
+        Topic<PortableDriveEvent> topic = getTopic();
         this.senderId = topic.getSenderId();
         topic.addMessageListener(this);
     }
@@ -113,7 +112,7 @@ public final class MsDriveEventHandler implements DriveEventPublisher, MessageLi
         if (null != event && false == event.isRemote()) {
             LOG.debug("publishing drive event: {} [{}]", event, senderId);
             try {
-                getTopic().publish(DriveEventWrapper.wrap(event));
+                getTopic().publish(PortableDriveEvent.wrap(event));
             } catch (OXException e) {
                 LOG.warn("Error publishing drive event", e);
             }
@@ -121,12 +120,12 @@ public final class MsDriveEventHandler implements DriveEventPublisher, MessageLi
     }
 
     @Override
-    public void onMessage(Message<Map<String, Serializable>> message) {
+    public void onMessage(Message<PortableDriveEvent> message) {
         if (null != message && message.isRemote()) {
-            Map<String, Serializable> driveEvent = message.getMessageObject();
+            PortableDriveEvent driveEvent = message.getMessageObject();
             if (null != driveEvent) {
                 LOG.debug("onMessage: {} [{}]", message.getMessageObject(), message.getSenderId());
-                driveEventService.notifyPublishers(DriveEventWrapper.unwrap(driveEvent));
+                driveEventService.notifyPublishers(PortableDriveEvent.unwrap(driveEvent));
             } else {
                 LOG.warn("Discarding empty drive event message.");
             }
@@ -138,10 +137,10 @@ public final class MsDriveEventHandler implements DriveEventPublisher, MessageLi
         return true;
     }
 
-    private Topic<Map<String, Serializable>> getTopic() throws OXException {
-        MsService msService = MS_REFERENCE.get();
+    private Topic<PortableDriveEvent> getTopic() throws OXException {
+        PortableMsService msService = MS_REFERENCE.get();
         if (null == msService) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MsService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(PortableMsService.class.getName());
         }
         return msService.getTopic(TOPIC_NAME);
     }

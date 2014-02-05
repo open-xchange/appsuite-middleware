@@ -73,7 +73,7 @@ import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.Services;
-import com.openexchange.sessionstorage.hazelcast.portable.CustomPortableSessionFactory;
+import com.openexchange.sessionstorage.hazelcast.portable.PortableSessionFactory;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -103,7 +103,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
             /*
              * create & register portable session factory
              */
-            registerService(CustomPortableFactory.class, new CustomPortableSessionFactory());
+            registerService(CustomPortableFactory.class, new PortableSessionFactory());
             /*
              * start session storage lifecycle to hazelcast instance
              */
