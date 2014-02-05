@@ -497,6 +497,16 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      */
     RESEND_DENIED("Re-sending message denied because message is not located in %1$s folder.", MailExceptionStrings.RESEND_DENIED_MSG,
         CATEGORY_USER_INPUT, 89),
+    /**
+     * Ping to server %1$s failed for login %2$s with reason: %3$s
+     */
+    PING_FAILED("Ping to server %1$s failed for login %2$s with reason: %3$s", MailExceptionStrings.PING_FAILED_MSG,
+        CATEGORY_WARNING, 90),
+    /**
+     * Ping to server %1$s failed with login %2$s due to invalid credentials.
+     */
+    PING_FAILED_AUTH("Ping to server %1$s failed with login %2$s due to invalid credentials.", MailExceptionStrings.PING_FAILED_AUTH_MSG,
+        CATEGORY_WARNING, 91),
     ;
 
     private static String PREFIX = "MSG";

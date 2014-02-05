@@ -560,7 +560,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 } catch (final MessagingException e) {
                     // Ignore
                 }
+            } catch (final AuthenticationFailedException e) {
+                warnings.add(MailExceptionCode.PING_FAILED_AUTH.create(e, config.getServer(), config.getLogin()));
+                throw MimeMailException.handleMessagingException(e, config, session);
             } catch (final MessagingException e) {
+                warnings.add(MailExceptionCode.PING_FAILED.create(e, config.getServer(), config.getLogin(), e.getMessage()));
                 throw MimeMailException.handleMessagingException(e, config, session);
             } finally {
                 if (null != imapStore) {

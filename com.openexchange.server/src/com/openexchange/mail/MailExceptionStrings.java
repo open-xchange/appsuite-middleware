@@ -171,4 +171,8 @@ public final class MailExceptionStrings implements LocalizableStrings {
 
     public static final String RESEND_DENIED_MSG = "Re-sending message denied because message is not located in \"%1$s\" folder.";
 
+    public static final String PING_FAILED_MSG = "Validation of server %1$s failed with reason: %3$s";
+
+    public static final String PING_FAILED_AUTH_MSG = "Validation of server %1$s failed due to invalid credentials";
+
 }
