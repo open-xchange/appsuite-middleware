@@ -67,11 +67,6 @@ public enum MobileNotifyField {
     SLOW("slow"),
 
     /**
-     * The frontendApp field
-     */
-    FRONTENDAPP("frontendApp"),
-
-    /**
      * The items field
      */
     ITEMS("items"),
@@ -84,7 +79,12 @@ public enum MobileNotifyField {
     /**
      * The title field
      */
-    TITLE("title");
+    TITLE("title"),
+    
+    /**
+     * The title field
+     */
+    INDEX("index");
 
     private final String name;
 

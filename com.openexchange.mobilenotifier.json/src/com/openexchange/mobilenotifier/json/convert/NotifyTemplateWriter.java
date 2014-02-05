@@ -82,6 +82,7 @@ public class NotifyTemplateWriter {
         attributes.put(MobileNotifyField.TITLE.getName(), nt.getTitle());
         attributes.put(MobileNotifyField.TEMPLATE.getName(), nt.getHtmlTemplate());
         attributes.put(MobileNotifyField.SLOW.getName(), nt.isSlow());
+        attributes.put(MobileNotifyField.INDEX.getName(), nt.getIndex());
 
         return attributes;
     }
