@@ -55,6 +55,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mobilenotifier.MobileNotifierExceptionCodes;
 
 /**
@@ -75,17 +77,17 @@ public abstract class MobileNotifierFileUtil {
      */
     public static String getTeamplateFileContent(final String templateFileName) throws OXException {
         final File file = new File(TEMPLATEPATH + templateFileName);
-        String html = "";
-        FileReader fr = null;
         BufferedReader br = null;
         try {
-            String line = "";
-            fr = new FileReader(file);
-            br = new BufferedReader(fr);
+            br = new BufferedReader(new FileReader(file));
 
+            StringAllocator sb = new StringAllocator(65532);
+            String sep = System.getProperty("line.separator");
+            String line;
             while ((line = br.readLine()) != null) {
-                html += line.trim();
+                sb.append(line).append(sep);
             }
+            return sb.toString();
         } catch (FileNotFoundException e) {
             LOG.error("Could not found file: {} ", file.toString());
             throw MobileNotifierExceptionCodes.IO_ERROR.create();
@@ -93,31 +95,8 @@ public abstract class MobileNotifierFileUtil {
             LOG.error(" ", e);
             throw MobileNotifierExceptionCodes.IO_ERROR.create();
         } finally {
-            if (fr != null) {
-                closeFileReader(fr);
-            }
-            if (br != null) {
-                closeBufferedReader(br);
-            }
-        }
-
-        return html;
-    }
-
-    private static void closeBufferedReader(BufferedReader br) throws OXException {
-        try {
-            br.close();
-        } catch (IOException e) {
-            LOG.error(" ", e);
-            throw MobileNotifierExceptionCodes.IO_ERROR.create();
+            Streams.close(br);
         }
     }
 
-    private static void closeFileReader(FileReader br) throws OXException {
-        try {
-            br.close();
-        } catch (IOException e) {
-            throw MobileNotifierExceptionCodes.IO_ERROR.create();
-        }
-    }
 }

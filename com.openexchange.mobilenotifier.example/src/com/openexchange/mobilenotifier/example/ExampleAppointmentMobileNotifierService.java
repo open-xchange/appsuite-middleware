@@ -50,7 +50,9 @@
 package com.openexchange.mobilenotifier.example;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.mobilenotifier.AbstractMobileNotifierService;
 import com.openexchange.mobilenotifier.NotifyItem;
@@ -71,13 +73,14 @@ public class ExampleAppointmentMobileNotifierService extends AbstractMobileNotif
         return MobileNotifierProviders.APPOINTMENT.getProviderName();
     }
 
+    
     @Override
-    public List<NotifyItem> getItems() throws OXException {
-        List<NotifyItem> list = new ArrayList<NotifyItem>();
-        list.add(new NotifyItem("{{title}}", "This is a test title"));
-        list.add(new NotifyItem("{{location}}", "This is a test location"));
-        list.add(new NotifyItem("{{description}}", "This is a test description"));
-        return list;
+    public Map<String, NotifyItem> getItems() throws OXException {
+        Map<String, NotifyItem> map = new HashMap<String, NotifyItem>();
+        map.put("{{title}}", new NotifyItem("{{title}}", "This is a test title"));
+        map.put("{{location}}", new NotifyItem("{{location}}", "This is a test location"));
+        map.put("{{description}}", new NotifyItem("{{description}}", "This is a test description"));
+        return map;
     }
 
     @Override

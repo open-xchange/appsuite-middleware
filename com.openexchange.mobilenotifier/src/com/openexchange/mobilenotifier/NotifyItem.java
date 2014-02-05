@@ -58,9 +58,9 @@ public class NotifyItem {
 
     private String key;
 
-    private String value;
+    private Object value;
 
-    public NotifyItem(String key, String value) {
+    public NotifyItem(String key, Object value) {
         this.key = key;
         this.value = value;
     }
@@ -69,7 +69,13 @@ public class NotifyItem {
         return key;
     }
 
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
+
+    @Override
+    public String toString() {
+        return value.toString();
+    }
+
 }

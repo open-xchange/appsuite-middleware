@@ -49,7 +49,6 @@
 
 package com.openexchange.mobilenotifier;
 
-
 /**
  * {@link NotifyTemplate} - Represents a template
  * 
@@ -62,7 +61,7 @@ public class NotifyTemplate {
 
     private boolean slow;
 
-    public NotifyTemplate(String frontendAppName, String htmlTemplate, boolean slow) {
+    public NotifyTemplate(final String frontendAppName, final String htmlTemplate, final boolean slow) {
         this.frontendAppName = frontendAppName;
         this.htmlTemplate = htmlTemplate;
         this.slow = slow;

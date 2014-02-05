@@ -49,14 +49,15 @@
 
 package com.openexchange.mobilenotifier.json.convert;
 
-import java.util.List;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.mobilenotifier.MobileNotifierService;
 import com.openexchange.mobilenotifier.NotifyItem;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link NotifyItemWriter} - Converts a list of notification items to a JSON structure.
@@ -82,7 +83,7 @@ public class NotifyItemWriter {
         final JSONArray itemArray = new JSONArray();
         final JSONObject itemObject = new JSONObject();
 
-        itemArray.put(transformListToJSONObject(service.getItems()));
+        itemArray.put(transformMapToJSONObject(service.getItems()));
         itemObject.put(MobileNotifyField.ITEMS.getName(), itemArray);
 
         providerObject.put(service.getProviderName(), itemObject);
@@ -90,10 +91,14 @@ public class NotifyItemWriter {
         return providerObject;
     }
 
-    private static JSONObject transformListToJSONObject(List<NotifyItem> items) throws JSONException {
+    private static JSONObject transformMapToJSONObject(Map<String, NotifyItem> items) throws JSONException {
         final JSONObject jsonObject = new JSONObject();
-        for (NotifyItem item : items) {
-            jsonObject.put(item.getKey(), item.getValue());
+        // TODO: NULL check?!
+        Iterator<Entry<String, NotifyItem>> iter = items.entrySet().iterator();
+
+        while (iter.hasNext()) {
+            Entry<String, NotifyItem> next = iter.next();
+            jsonObject.put(next.getKey(), next.getValue());
         }
         return jsonObject;
     }

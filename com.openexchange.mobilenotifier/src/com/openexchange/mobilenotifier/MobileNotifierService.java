@@ -49,7 +49,7 @@
 
 package com.openexchange.mobilenotifier;
 
-import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 
 /**
@@ -82,7 +82,7 @@ public interface MobileNotifierService {
      * @return list - List of NotifyItems
      * @throws OXException
      */
-    List<NotifyItem> getItems() throws OXException;
+    Map<String, NotifyItem> getItems() throws OXException;
 
     /**
      * Gets a template

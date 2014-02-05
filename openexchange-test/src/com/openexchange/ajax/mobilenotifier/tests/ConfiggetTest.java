@@ -53,13 +53,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.hamcrest.core.IsNot;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jsoup.select.Evaluator.IsEmpty;
+import org.junit.Assert;
 import com.openexchange.ajax.mobilenotifier.actions.ConfiggetMobileNotifierRequest;
 import com.openexchange.ajax.mobilenotifier.actions.ConfiggetMobileNotifierResponse;
 import com.openexchange.exception.OXException;
-
 
 /**
  * {@link ConfiggetTest}
@@ -102,6 +104,7 @@ public class ConfiggetTest extends AbstractMobileNotifierTest {
             
             JSONObject attributesObject = (JSONObject) providerObject.get(providerValue.get(i));
             assertNotNull("could not find attribute template", attributesObject.get("template"));
+            // Assert.assertThat(attributesObject.getString("template"), attributesObject.getString("template")));
             assertNotNull("could not find attribute frontendApp",attributesObject.get("frontendApp"));
             assertNotNull("could not find attribute slow", attributesObject.get("slow"));
         }
@@ -125,6 +128,7 @@ public class ConfiggetTest extends AbstractMobileNotifierTest {
                 String key = (String) keys.next();
                 JSONObject attributesObject = (JSONObject) providerObject.get(key);
                 assertNotNull("could not find attribute template", attributesObject.get("template"));
+                // Assert.assertThat("Not filled: ", attributesObject.get(0), );
                 assertNotNull("could not find attribute frontendApp", attributesObject.get("frontendApp"));
                 assertNotNull("could not find attribute slow", attributesObject.get("slow"));
             }

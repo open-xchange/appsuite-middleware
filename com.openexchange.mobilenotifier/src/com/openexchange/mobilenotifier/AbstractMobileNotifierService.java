@@ -62,15 +62,25 @@ import com.openexchange.mobilenotifier.osgi.Services;
  */
 public abstract class AbstractMobileNotifierService implements MobileNotifierService {
     @Override
-    public boolean isEnabled(int uid, int cid) throws OXException {
-        ConfigView view = Services.getService(ConfigViewFactory.class).getView(uid, cid);
+    public final boolean isEnabled(int uid, int cid) throws OXException {
+        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = configViewFactory.getView(uid, cid);
         ComposedConfigProperty<Boolean> property;
 
         property = view.property("com.openxchange.mobilenotifier.enabled", Boolean.class);
 
         if (!property.isDefined()) {
-            return true;
+            return isEnabledCustom(uid, cid) ? true : false;
         }
         return property.get().booleanValue();
+    }
+
+    /**
+     * Can be used to implement a custom enabled method by a provider
+     * 
+     * @return
+     */
+    protected boolean isEnabledCustom(int uid, int cid) {
+        return true;
     }
 }

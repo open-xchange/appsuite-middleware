@@ -58,8 +58,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.mobilenotifier.actions.GetMobileNotifierRequest;
 import com.openexchange.ajax.mobilenotifier.actions.GetMobileNotifierResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.mobilenotifier.MobileNotifierService;
-import com.openexchange.mobilenotifier.MobileNotifierServiceRegistry;
 
 /**
  * {@link GetTest}

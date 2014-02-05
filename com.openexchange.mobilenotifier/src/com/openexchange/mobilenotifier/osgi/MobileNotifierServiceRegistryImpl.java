@@ -121,7 +121,7 @@ public class MobileNotifierServiceRegistryImpl extends ServiceTracker<MobileNoti
         context.ungetService(reference);
         return null;
     }
-    
+
     @Override
     public void removedService(final ServiceReference<MobileNotifierService> reference, final MobileNotifierService service) {
         if (null != service) {
