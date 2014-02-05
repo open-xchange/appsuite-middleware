@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,28 +47,74 @@
  *
  */
 
-package com.openexchange.rdiff;
+package com.openexchange.continuation.internal;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.UUID;
+import com.google.common.cache.Cache;
+import com.openexchange.caching.CacheElement;
+import com.openexchange.caching.ElementEvent;
+import com.openexchange.caching.ElementEventHandler;
+import com.openexchange.continuation.Continuation;
 
 /**
- * {@link RdiffExceptionMessages} - Exception messages for {@link OXException} that must be translated.
+ * {@link ContinuationCacheElementEventHandler} - Closes elapsed {@link com.google.common.cache.Cache} instances.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class RdiffExceptionMessages implements LocalizableStrings {
+public final class ContinuationCacheElementEventHandler implements ElementEventHandler {
 
-    // An error occurred: %1$s
-    public static final String ERROR_MSG = "An error occurred: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
+    private static final long serialVersionUID = -7746076251235016407L;
 
     /**
-     * Prevent instantiation.
+     * Initializes a new {@link ContinuationCacheElementEventHandler}.
      */
-    private RdiffExceptionMessages() {
+    public ContinuationCacheElementEventHandler() {
         super();
     }
+
+    private void doHandleElementEvent(final ElementEvent event) {
+        final CacheElement cacheElem = (CacheElement) event.getSource();
+        ((Cache<UUID, Continuation<?>>) cacheElem.getVal()).invalidateAll(); // Notification send to associated RemovalListener
+    }
+
+    @Override
+    public void handleElementEvent(final ElementEvent event) {
+        doHandleElementEvent(event);
+    }
+
+    @Override
+    public void onExceededIdletimeBackground(final ElementEvent event) {
+        doHandleElementEvent(event);
+    }
+
+    @Override
+    public void onExceededIdletimeOnRequest(final ElementEvent event) {
+        doHandleElementEvent(event);
+    }
+
+    @Override
+    public void onExceededMaxlifeBackground(final ElementEvent event) {
+        doHandleElementEvent(event);
+    }
+
+    @Override
+    public void onExceededMaxlifeOnRequest(final ElementEvent event) {
+        doHandleElementEvent(event);
+    }
+
+    @Override
+    public void onSpooledDiskAvailable(final ElementEvent event) {
+        doHandleElementEvent(event);
+    }
+
+    @Override
+    public void onSpooledDiskNotAvailable(final ElementEvent event) {
+        doHandleElementEvent(event);
+    }
+
+    @Override
+    public void onSpooledNotAllowed(final ElementEvent event) {
+        doHandleElementEvent(event);
+    }
+
 }

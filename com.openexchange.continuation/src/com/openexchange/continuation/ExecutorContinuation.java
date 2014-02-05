@@ -217,7 +217,8 @@ public class ExecutorContinuation<V> implements Continuation<Collection<V>> {
 
     @Override
     public synchronized void cancel(final boolean mayInterruptIfRunning) {
-        if (canceled) {
+        if (canceled || (completedFutures.size() == count)) {
+            // Already canceled or completed
             return;
         }
 

@@ -117,7 +117,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
 
     public final static String INVALID_FOLDER_NAME_EMPTY_MSG = "Mail folder cannot be created/renamed. Empty folder name.";
 
-    public final static String INVALID_FOLDER_NAME_MSG = "Invalid folder name.";
+    public final static String INVALID_FOLDER_NAME_MSG = "Invalid folder name. Please avoid the following characters: %2$s";
 
     public final static String DUPLICATE_FOLDER_MSG = "A folder named \"%1$s\" already exists.";
 

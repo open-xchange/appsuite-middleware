@@ -2622,7 +2622,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final int length = name.length();
         for (int i = 0; i < length; i++) {
             if (INVALID.indexOf(name.charAt(i)) >= 0) {
-                throw MailExceptionCode.INVALID_FOLDER_NAME2.create(name);
+                throw MailExceptionCode.INVALID_FOLDER_NAME2.create(name, INVALID);
             }
         }
     }

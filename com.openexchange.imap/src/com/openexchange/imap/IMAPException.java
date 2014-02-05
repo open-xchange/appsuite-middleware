@@ -162,7 +162,7 @@ public final class IMAPException extends OXException {
          */
         FOLDER_DOES_NOT_HOLD_FOLDERS(IMAPCode.FOLDER_DOES_NOT_HOLD_FOLDERS),
         /**
-         * Invalid folder name: "%1$s"
+         * Invalid folder name: "%1$s". Please avoid the following characters: %2$s
          */
         INVALID_FOLDER_NAME(IMAPCode.INVALID_FOLDER_NAME),
         /**
@@ -726,7 +726,7 @@ public final class IMAPException extends OXException {
          */
         FOLDER_DOES_NOT_HOLD_FOLDERS_EXT(FOLDER_DOES_NOT_HOLD_FOLDERS_EXT_MSG, FOLDER_DOES_NOT_HOLD_FOLDERS),
         /**
-         * Invalid folder name: "%1$s"
+         * Invalid folder name: "%1$s". Please avoid the following characters: %2$s
          */
         INVALID_FOLDER_NAME(MailExceptionCode.INVALID_FOLDER_NAME, null),
         /**

@@ -47,76 +47,43 @@
  *
  */
 
-package com.openexchange.threadpool.internal;
+package com.openexchange.logging.mbean;
 
+import org.slf4j.MDC;
+import org.slf4j.Marker;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.core.spi.FilterReply;
 import com.openexchange.marker.OXThreadMarker;
-import com.openexchange.threadpool.ThreadRenamer;
+
 
 /**
- * {@link CustomThread} - Enhances {@link Thread} class by a setter/getter method for a thread's original name.
+ * {@link MDCEnablerTurboFilter} - Checks if logging thread shall be MDC-aware or not.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.4.2
  */
-public final class CustomThread extends Thread implements ThreadRenamer, OXThreadMarker {
-
-    private volatile String originalName;
-    private volatile String appendix;
-    private volatile boolean changed;
+public class MDCEnablerTurboFilter extends ExtendedTurboFilter {
 
     /**
-     * Initializes a new {@link CustomThread}.
-     *
-     * @param target The object whose run method is called
-     * @param name The name of the new thread which is also used as original name
+     * Initializes a new {@link MDCEnablerTurboFilter}.
      */
-    public CustomThread(final Runnable target, final String name) {
-        super(target, name);
-        applyName(name);
-    }
-
-    private void applyName(final String name) {
-        originalName = name;
-        final int pos = originalName.indexOf('-');
-        if (pos > 0) {
-            appendix = name.substring(pos);
-        } else {
-            appendix = null;
-        }
-    }
-
-    /**
-     * Gets the original name.
-     *
-     * @return The original name
-     */
-    public String getOriginalName() {
-        return originalName;
-    }
-
-    /**
-     * Restores the original name.
-     */
-    public void restoreName() {
-        if (!changed) {
-            return;
-        }
-        setName(originalName);
+    public MDCEnablerTurboFilter() {
+        super();
     }
 
     @Override
-    public void rename(final String newName) {
-        setName(newName);
-        changed = true;
+    public int getRanking() {
+        // Ensure examination is performed at first
+        return 100;
     }
 
     @Override
-    public void renamePrefix(final String newPrefix) {
-        if (null == appendix) {
-            setName(newPrefix);
-        } else {
-            setName(new com.openexchange.java.StringAllocator(16).append(newPrefix).append(appendix).toString());
+    public FilterReply decide(final Marker marker, final Logger logger, final Level level, final String format, final Object[] params, final Throwable t) {
+        if (!(Thread.currentThread() instanceof OXThreadMarker)) {
+            MDC.clear();
         }
-        changed = true;
+        return FilterReply.NEUTRAL;
     }
 
 }
