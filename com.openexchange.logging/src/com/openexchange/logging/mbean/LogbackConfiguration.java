@@ -119,6 +119,7 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         final TurboFilterCache turboFilterCache = new TurboFilterCache();
         this.turboFilterCache = turboFilterCache;
         rankingAwareTurboFilterList.addTurboFilter(turboFilterCache);
+        rankingAwareTurboFilterList.addTurboFilter(new MDCEnablerTurboFilter());
 
         configurator.setContext(loggerContext);
 

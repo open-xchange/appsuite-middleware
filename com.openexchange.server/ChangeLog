@@ -1,3 +1,7 @@
+* 2014-02-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 30977: Only keep MDC map for threads created by Open-Xchange application
+
 * 2014-02-04 - dennis.sieben@open-xchange.com
 
  - SCR1860: added a new mail filter action command for pgp_encrypt extension
