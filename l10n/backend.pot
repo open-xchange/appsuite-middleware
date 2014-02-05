@@ -1876,6 +1876,13 @@ msgstr ""
 msgid "The e-mail address you provided does not match any account on record."
 msgstr ""
 
+#. The service you requested is currently not available. Please try again later.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index/src/com/openexchange/index/IndexExceptionMessages.java:73
+msgid ""
+"The service you requested is currently not available. Please try again later."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.freebusy/src/com/openexchange/freebusy/FreeBusyExceptionMessages.java:63
 msgid "No free/busy providers available"
 msgstr ""
@@ -2512,12 +2519,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index/src/com/openexchange/index/IndexExceptionMessages.java:70
 msgid ""
 "You do not have the appropriate permissions to search within this module."
-msgstr ""
-
-#. The service you requested is currently not available. Please try again later.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index/src/com/openexchange/index/IndexExceptionMessages.java:73
-msgid ""
-"The service you requested is currently not available. Please try again later."
 msgstr ""
 
 #. There is no search handler for field %1$s.
