@@ -46,47 +46,25 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.find.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.find.SearchService;
-import com.openexchange.find.internal.SearchServiceImpl;
-import com.openexchange.find.spi.ModuleSearchDriver;
+package com.openexchange.find;
+
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link Activator}
+ * {@link FindExceptionMessages}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since 7.6.0
+ * @since v7.6.0
  */
-public class Activator implements BundleActivator {
+public class FindExceptionMessages implements LocalizableStrings {
 
-    private SearchServiceImpl searchService;
-    private ServiceTracker<ModuleSearchDriver, ModuleSearchDriver> driverTracker;
-    private ServiceRegistration<SearchService> registration;
-
-    public void start(BundleContext context) throws Exception {
-        searchService = new SearchServiceImpl(context);
-        driverTracker = new ServiceTracker<ModuleSearchDriver, ModuleSearchDriver>(context, ModuleSearchDriver.class, searchService);
-        driverTracker.open();
-
-        registration = context.registerService(SearchService.class, searchService, null);
+    private FindExceptionMessages() {
+        super();
     }
 
-    public void stop(BundleContext context) throws Exception {
-        searchService = null;
-        if (registration != null) {
-            registration.unregister();
-            registration = null;
-        }
-
-        if (driverTracker != null) {
-            driverTracker.close();
-            driverTracker = null;
-        }
-    }
+    // The service you requested is currently not available. Please try again later.
+    public static final String SERVICE_NOT_AVAILABLE = "The service you requested is currently not available. Please try again later.";
 
 }

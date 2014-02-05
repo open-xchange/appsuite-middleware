@@ -68,7 +68,7 @@ public interface ModuleSearchDriver {
 
     Module getModule();
 
-    boolean isValidFor(Session session);
+    boolean isValidFor(Session session) throws OXException;
 
     ModuleConfig getConfiguration() throws OXException;
 
