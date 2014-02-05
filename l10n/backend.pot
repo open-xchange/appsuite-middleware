@@ -1620,8 +1620,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.loxandra/src/com/openexchange/loxandra/LoxandraExceptionMessages.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.message.timeline/src/com/openexchange/message/timeline/MessageTimelineExceptionMessages.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rdiff/src/com/openexchange/rdiff/RdiffExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:124
 msgid "An error occurred: %1$s"
 msgstr ""
@@ -2330,9 +2328,7 @@ msgstr ""
 msgid "Parsing thread-sort string failed: %1$s."
 msgstr ""
 
-#. A SQL error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:152
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:75
 msgid "A SQL error occurred: %1$s"
 msgstr ""
 
@@ -2539,8 +2535,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.loxandra/src/com/openexchange/loxandra/LoxandraExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:92
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.message.timeline/src/com/openexchange/message/timeline/MessageTimelineExceptionMessages.java:66
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:66
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rdiff/src/com/openexchange/rdiff/RdiffExceptionMessages.java:66
 msgid "An I/O error occurred: %1$s"
 msgstr ""
 
@@ -2569,7 +2563,6 @@ msgstr ""
 
 #. A JSON error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:71
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:69
 msgid "A JSON error occurred: %1$s"
 msgstr ""
 
@@ -2723,63 +2716,48 @@ msgstr ""
 msgid "Account not found with identifier %1$s for user %2$s"
 msgstr ""
 
-#. Unknown OAuth service meta data: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:72
-msgid "Unknown OAuth service meta data: %1$s"
-msgstr ""
-
 #. Account not found with identifier %1$s for user %2$s in context %3$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:78
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:63
 msgid "Account not found with identifier %1$s for user %2$s in context %3$s."
 msgstr ""
 
-#. Unsupported OAuth service: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:81
-msgid "Unsupported OAuth service: %1$s"
-msgstr ""
-
 #. Missing argument: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:66
 msgid "Missing argument: %1$s"
 msgstr ""
 
 #. Your '%1$s' password changed. You have to authorize the server to use your account with the new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:87
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:69
 msgid ""
 "Your '%1$s' password changed. You have to authorize the server to use your "
 "account with the new password. To do so, go to Configuration -> My Social "
 "Configuration -> Accounts. Then try again."
 msgstr ""
 
-#. An OAuth error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:90
-msgid "An OAuth error occurred: %1$s"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:71
 msgid "The address %1$s is not white-listed as for the %2$s OAuth API"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:73
 msgid "The request sent was missing its body"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:96
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:75
 msgid "The account is invalid, please recreate it."
 msgstr ""
 
 #. Please provide a display name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:99
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:78
 msgid "Please provide a display name."
 msgstr ""
 
 #. The associated OAuth provider denied the request: %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:102
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:81
 msgid "The associated OAuth provider denied the request: %1$s."
 msgstr ""
 
 #. The OAuth authentication process has been canceled.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:105
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:84
 msgid "The OAuth authentication process has been canceled."
 msgstr ""
 
@@ -3308,111 +3286,6 @@ msgstr ""
 msgid ""
 "The published document has been deleted in the meantime and therefore is no "
 "longer available."
-msgstr ""
-
-#. *
-#. * Push UDP Exception.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:71
-msgid "Push UDP Exception."
-msgstr ""
-
-#. *
-#. * Missing Push UDP configuration.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:76
-msgid "Missing Push UDP configuration."
-msgstr ""
-
-#. *
-#. * User ID is not a number: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:81
-msgid "User ID is not a number: %1$s."
-msgstr ""
-
-#. *
-#. * Context ID is not a number: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:86
-msgid "Context ID is not a number: %1$s."
-msgstr ""
-
-#. *
-#. * Magic bytes are not a number: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:91
-msgid "Magic bytes are not a number: %1$s."
-msgstr ""
-
-#. *
-#. * Invalid Magic bytes: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:96
-msgid "Invalid Magic bytes: %1$s."
-msgstr ""
-
-#. *
-#. * Folder ID is not a number: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:101
-msgid "Folder ID is not a number: %1$s."
-msgstr ""
-
-#. *
-#. * Module is not a number: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:106
-msgid "Module is not a number: %1$s."
-msgstr ""
-
-#. *
-#. * Port is not a number: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:111
-msgid "Port is not a number: %1$s."
-msgstr ""
-
-#. *
-#. * Request type is not a number: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:116
-msgid "Request type is not a number: %1$s."
-msgstr ""
-
-#. *
-#. * Length is not a number: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:121
-msgid "Length is not a number: %1$s."
-msgstr ""
-
-#. *
-#. * Invalid user IDs: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:126
-msgid "Invalid user IDs: %1$s."
-msgstr ""
-
-#. *
-#. * Unknown request type: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:131
-msgid "Unknown request type: %1$s."
-msgstr ""
-
-#. *
-#. * Missing payload in datagram package.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:136
-msgid "Missing payload in datagram package."
-msgstr ""
-
-#. *
-#. * No UDP channel is configured.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:141
-msgid "No UDP channel is configured."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:62
@@ -6143,7 +6016,7 @@ msgid "Mail folder cannot be created/renamed. Empty folder name."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:120
-msgid "Invalid folder name."
+msgid "Invalid folder name. Please avoid the following characters: %2$s"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:122
