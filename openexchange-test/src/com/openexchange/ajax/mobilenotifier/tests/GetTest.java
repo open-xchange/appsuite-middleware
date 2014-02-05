@@ -86,18 +86,16 @@ public class GetTest extends AbstractMobileNotifierTest {
         JSONObject notifyItemJson = (JSONObject) res.getData();
 
         assertNotNull("could not find element \"provider\" in json structure", notifyItemJson.get("provider"));
-        JSONArray providersArray = (JSONArray) notifyItemJson.get("provider");
+        JSONObject providersObject = (JSONObject) notifyItemJson.get("provider");
 
         assertEquals(
             "size of provider parameter values not identical to size of json provider structure",
             providerValue.size(),
-            providersArray.length());
+            providersObject.length());
 
-        for (int i = 0; i < providersArray.length(); i++) {
-            assertNotNull("could not find any providers", providersArray.get(i));
-            JSONObject providerObject = (JSONObject) providersArray.get(i);
-            assertNotNull("could not find provider", providerObject.get(providerValue.get(i)));
-            JSONObject providerJSON = (JSONObject) providerObject.get(providerValue.get(i));
+        for (int i = 0; i < providersObject.length(); i++) {
+            assertNotNull("could not find provider", providersObject.get(providerValue.get(i)));
+            JSONObject providerJSON = (JSONObject) providersObject.get(providerValue.get(i));
             assertNotNull("could not find element \"items\"", providerJSON.get("items"));
             JSONArray itemsArray = (JSONArray) providerJSON.get("items");
             assertNotNull(itemsArray.get(0));
@@ -107,10 +105,8 @@ public class GetTest extends AbstractMobileNotifierTest {
     public void testShouldGetExceptionIfUnknownProvider() throws OXException, IOException, JSONException {
         List<String> providerValue = new ArrayList<String>();
         providerValue.add("mehl");
-
         GetMobileNotifierRequest req = new GetMobileNotifierRequest(providerValue);
         GetMobileNotifierResponse res = getClient().execute(req);
-
         assertNotNull("exception not thrown" + res.getException());
     }
 }

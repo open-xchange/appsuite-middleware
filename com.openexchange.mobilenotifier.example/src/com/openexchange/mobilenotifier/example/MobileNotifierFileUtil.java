@@ -99,4 +99,8 @@ public abstract class MobileNotifierFileUtil {
         }
     }
 
+    public static void writeTemplateFileContent(final String templateFileName) throws OXException {
+
+    }
+
 }

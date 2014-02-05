@@ -104,24 +104,24 @@ public class ConfigGetAction extends AbstractMobileNotifierAction {
         int uid = session.getUserId();
         int cid = session.getContextId();
 
-        JSONArray providerJsonArray = new JSONArray();
         final JSONObject providerJsonObject = new JSONObject();
+        final JSONObject providerJsonAttributes = new JSONObject();
 
         if (providers == null) {
             // Get all Services
             List<MobileNotifierService> notifierServices = mobileNotifierRegistry.getAllServices(uid, cid);
             for (MobileNotifierService notifierService : notifierServices) {
-                providerJsonArray.put(NotifyTemplateWriter.write(notifierService));
+                providerJsonAttributes.put(notifierService.getFrontendName(), NotifyTemplateWriter.write(notifierService));
             }
         } else {
             // Get service(s) by parameter provider
             for (String provider : providers) {
-                MobileNotifierService notifyService = mobileNotifierRegistry.getService(provider, uid, cid);
-                providerJsonArray.put(NotifyTemplateWriter.write(notifyService));
+                MobileNotifierService notifierService = mobileNotifierRegistry.getService(provider, uid, cid);
+                providerJsonAttributes.put(notifierService.getFrontendName(), NotifyTemplateWriter.write(notifierService));
             }
         }
 
-        providerJsonObject.put(MobileNotifyField.PROVIDER.getName(), providerJsonArray);
+        providerJsonObject.put(MobileNotifyField.PROVIDER.getName(), providerJsonAttributes);
         return new AJAXRequestResult(providerJsonObject);
     }
 }

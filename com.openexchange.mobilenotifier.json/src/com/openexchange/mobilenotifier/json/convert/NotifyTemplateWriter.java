@@ -54,7 +54,6 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.mobilenotifier.MobileNotifierService;
 import com.openexchange.mobilenotifier.NotifyTemplate;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link NotifyTemplateWriter} - Converts a list of notification items to a JSON structure.
@@ -77,16 +76,13 @@ public class NotifyTemplateWriter {
      * @throws OXException
      */
     public static JSONObject write(final MobileNotifierService service) throws JSONException, OXException {
-        final JSONObject providerObject = new JSONObject();
         final JSONObject attributes = new JSONObject();
         final NotifyTemplate nt = service.getTemplate();
 
+        attributes.put(MobileNotifyField.TITLE.getName(), nt.getTitle());
         attributes.put(MobileNotifyField.TEMPLATE.getName(), nt.getHtmlTemplate());
         attributes.put(MobileNotifyField.SLOW.getName(), nt.isSlow());
-        attributes.put(MobileNotifyField.FRONTENDAPP.getName(), nt.getFrontendAppName());
 
-        providerObject.put(service.getProviderName(), attributes);
-
-        return providerObject;
+        return attributes;
     }
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,54 +47,13 @@
  *
  */
 
-package com.openexchange.mobilenotifier.example;
-
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.mobilenotifier.AbstractMobileNotifierService;
-import com.openexchange.mobilenotifier.NotifyItem;
-import com.openexchange.mobilenotifier.NotifyTemplate;
+package com.openexchange.mobilenotifier.json.convert;
 
 /**
- * {@link ExampleAppointmentMobileNotifierService} - Example calendar implementation of a mobile notifier service
- * 
+ * {@link NotifyTemplateParser}
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class ExampleAppointmentMobileNotifierService extends AbstractMobileNotifierService {
-    public ExampleAppointmentMobileNotifierService() {
-        super();
-    }
+public class NotifyTemplateParser {
 
-    @Override
-    public String getProviderName() {
-        return MobileNotifierProviders.APPOINTMENT.getProviderName();
-    }
-
-    @Override
-    public String getFrontendName() {
-        return MobileNotifierProviders.APPOINTMENT.getFrontendName();
-    }
-    
-    @Override
-    public Map<String, NotifyItem> getItems() throws OXException {
-        Map<String, NotifyItem> map = new HashMap<String, NotifyItem>();
-        map.put("title", new NotifyItem("title", "This is a test title"));
-        map.put("location", new NotifyItem("location", "This is a test location"));
-        map.put("description", new NotifyItem("description", "This is a test description"));
-        return map;
-    }
-
-    @Override
-    public NotifyTemplate getTemplate() throws OXException {
-        final String fileName = MobileNotifierProviders.APPOINTMENT.getFileName();
-        final String htmlTemplate = MobileNotifierFileUtil.getTeamplateFileContent(fileName);
-        final String title = MobileNotifierProviders.APPOINTMENT.getTitle();
-        int index = 2;
-        return new NotifyTemplate(title, htmlTemplate, true, index);
-    }
-
-    @Override
-    public void putTemplate() throws OXException {
-    }
 }

@@ -60,12 +60,12 @@ public enum MobileNotifierProviders {
     /**
      * Enum field for mail provider
      */
-    MAIL("mail", "io.ox/mail", "Mail.tmpl"),
+    MAIL("mail", "io.ox/mail", "Mail", "Mail.tmpl"),
 
     /**
      * Enum field for appointment provider
      */
-    APPOINTMENT("appointment", "io.ox/appointment", "Appointment.tmpl");
+    APPOINTMENT("appointment", "io.ox/appointment", "Appointments", "Appointment.tmpl");
 
     private final String providerName;
 
@@ -73,9 +73,12 @@ public enum MobileNotifierProviders {
 
     private final String fileName;
 
-    private MobileNotifierProviders(final String providerName, final String frontendName, final String fileName) {
+    private final String title;
+
+    private MobileNotifierProviders(final String providerName, final String frontendName, final String title, final String fileName) {
         this.providerName = providerName;
         this.frontendName = frontendName;
+        this.title = title;
         this.fileName = fileName;
     }
 
@@ -89,5 +92,9 @@ public enum MobileNotifierProviders {
 
     public String getFileName() {
         return fileName;
+    }
+
+    public String getTitle() {
+        return title;
     }
 }

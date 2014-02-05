@@ -79,21 +79,18 @@ public class NotifyItemWriter {
      * @throws OXException
      */
     public static JSONObject write(final MobileNotifierService service) throws JSONException, OXException {
-        final JSONObject providerObject = new JSONObject();
         final JSONArray itemArray = new JSONArray();
         final JSONObject itemObject = new JSONObject();
 
         itemArray.put(transformMapToJSONObject(service.getItems()));
+
         itemObject.put(MobileNotifyField.ITEMS.getName(), itemArray);
 
-        providerObject.put(service.getProviderName(), itemObject);
-
-        return providerObject;
+        return itemObject;
     }
 
     private static JSONObject transformMapToJSONObject(Map<String, NotifyItem> items) throws JSONException {
         final JSONObject jsonObject = new JSONObject();
-        // TODO: NULL check?!
         Iterator<Entry<String, NotifyItem>> iter = items.entrySet().iterator();
 
         while (iter.hasNext()) {

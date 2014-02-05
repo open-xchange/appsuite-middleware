@@ -49,11 +49,23 @@
 
 package com.openexchange.mobilenotifier.json.actions;
 
+import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.mobilenotifier.MobileNotifierService;
+import com.openexchange.mobilenotifier.MobileNotifierServiceRegistry;
 import com.openexchange.mobilenotifier.json.MobileNotifierRequest;
+import com.openexchange.mobilenotifier.json.convert.MobileNotifyField;
+import com.openexchange.mobilenotifier.json.convert.NotifyTemplateWriter;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ConfigPutAction}
@@ -61,6 +73,10 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:Lars.Hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @since 7.6.0
  */
+// TODO
+@Action(method = RequestMethod.PUT, name = "configput", description = "Change a template", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "provider", optional = true, description = "The provider identifier.") }, requestBody = "A JSON object providing the ", responseDescription = "The boolean value \"true\" if successful.")
 public class ConfigPutAction extends AbstractMobileNotifierAction {
 
     /**
@@ -74,8 +90,37 @@ public class ConfigPutAction extends AbstractMobileNotifierAction {
 
     @Override
     protected AJAXRequestResult perform(MobileNotifierRequest req) throws OXException, JSONException {
-        // TODO Auto-generated method stub
-        return null;
-    }
+        // req.getRequest().getData();
+        // // optional parameter provider
+        // String[] providers = null;
+        //
+        // if (req.getParameter("provider") != null) {
+        // providers = req.getParameterAsStringArray("provider");
+        // }
+        //
+        // final MobileNotifierServiceRegistry mobileNotifierRegistry = getService(MobileNotifierServiceRegistry.class);
+        // if (null == mobileNotifierRegistry) {
+        // throw ServiceExceptionCode.absentService(MobileNotifierServiceRegistry.class);
+        // }
+        // final ServerSession session = req.getSession();
+        // int uid = session.getUserId();
+        // int cid = session.getContextId();
+        //
+        // if (providers == null) {
+        // // Get all Services
+        // List<MobileNotifierService> notifierServices = mobileNotifierRegistry.getAllServices(uid, cid);
+        // for (MobileNotifierService notifierService : notifierServices) {
+        // // TODO
+        // }
+        // } else {
+        // // Get service(s) by parameter provider
+        // for (String provider : providers) {
+        // MobileNotifierService notifyService = mobileNotifierRegistry.getService(provider, uid, cid);
+        // // TODO
+        // }
+        // }
 
+
+        return new AJAXRequestResult(Boolean.TRUE);
+    }
 }

@@ -55,28 +55,35 @@ package com.openexchange.mobilenotifier;
  * @author <a href="mailto:Lars.Hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class NotifyTemplate {
-    private String frontendAppName;
+    private String title;
 
     private String htmlTemplate;
 
     private boolean slow;
 
-    public NotifyTemplate(final String frontendAppName, final String htmlTemplate, final boolean slow) {
-        this.frontendAppName = frontendAppName;
+    private int index;
+
+    public NotifyTemplate(final String title, final String htmlTemplate, final boolean slow, final int index) {
+        this.title = title;
         this.htmlTemplate = htmlTemplate;
         this.slow = slow;
-    }
-
-    public String getFrontendAppName() {
-        return frontendAppName;
+        this.index = index;
     }
 
     public String getHtmlTemplate() {
         return htmlTemplate;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
     public boolean isSlow() {
         return slow;
+    }
+
+    public int getIndex() {
+        return index;
     }
 
 }

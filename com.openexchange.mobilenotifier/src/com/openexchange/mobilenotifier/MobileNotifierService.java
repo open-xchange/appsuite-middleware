@@ -67,6 +67,13 @@ public interface MobileNotifierService {
     String getProviderName();
 
     /**
+     * Get the frontend application name
+     * 
+     * @return String the name the providers
+     */
+    String getFrontendName();
+
+    /**
      * Checks if a provider is enabled by a user
      * 
      * @param session

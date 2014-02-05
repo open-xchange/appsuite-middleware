@@ -100,17 +100,15 @@ public class GetAction extends AbstractMobileNotifierAction {
         /*
          * Writes a JSON notify item structure
          */
-        final JSONObject providerJsonObject = new JSONObject();
-        final JSONArray providerJsonArray = new JSONArray();
-        mobileNotifierRegistry.getAllServices(uid, cid);
+        final JSONObject itemJsonObject = new JSONObject();
+        final JSONObject providerObject = new JSONObject();
 
+        mobileNotifierRegistry.getAllServices(uid, cid);
         for (String provider : providers) {
             MobileNotifierService service = mobileNotifierRegistry.getService(provider, uid, cid);
-            providerJsonArray.put(NotifyItemWriter.write(service));
+            itemJsonObject.put(service.getFrontendName(), NotifyItemWriter.write(service));
         }
-
-        providerJsonObject.put(MobileNotifyField.PROVIDER.getName(), providerJsonArray);
-
-        return new AJAXRequestResult(providerJsonObject);
+        providerObject.put(MobileNotifyField.PROVIDER.getName(), itemJsonObject);
+        return new AJAXRequestResult(providerObject);
     }
 }

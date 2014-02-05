@@ -79,7 +79,12 @@ public enum MobileNotifyField {
     /**
      * The provider field
      */
-    PROVIDER("provider");
+    PROVIDER("provider"),
+    
+    /**
+     * The title field
+     */
+    TITLE("title");
 
     private final String name;
 

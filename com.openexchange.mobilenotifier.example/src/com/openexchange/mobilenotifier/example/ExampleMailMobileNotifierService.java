@@ -49,9 +49,7 @@
 
 package com.openexchange.mobilenotifier.example;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.mobilenotifier.AbstractMobileNotifierService;
@@ -75,23 +73,30 @@ public class ExampleMailMobileNotifierService extends AbstractMobileNotifierServ
     }
 
     @Override
+    public String getFrontendName() {
+        return MobileNotifierProviders.MAIL.getFrontendName();
+    }
+
+    @Override
     public Map<String, NotifyItem> getItems() throws OXException {
         Map<String, NotifyItem> map = new HashMap<String, NotifyItem>();
-        map.put("{{subject}}", new NotifyItem("{{subject}}", true));
-        map.put("{{receiveDate}}", new NotifyItem("{{receiveDate}}", "12.04.2013 - 12:45:00"));
-        map.put("{{teaser}}", new NotifyItem("{{teaser}}", "A small teaser..."));
+        map.put("sender", new NotifyItem("sender", "heinrich@example.com"));
+        map.put("subject", new NotifyItem("subject", true));
+        map.put("receivedDate", new NotifyItem("receivedDate", "12.04.2013 - 12:45:00"));
         return map;
     }
 
     @Override
     public NotifyTemplate getTemplate() throws OXException {
         final String fileName = MobileNotifierProviders.MAIL.getFileName();
-        final String frontendName = MobileNotifierProviders.MAIL.getFrontendName();
         final String htmlTemplate = MobileNotifierFileUtil.getTeamplateFileContent(fileName);
-        return new NotifyTemplate(frontendName, htmlTemplate, false);
+        final String title = MobileNotifierProviders.MAIL.getTitle();
+        int index = 1;
+        return new NotifyTemplate(title, htmlTemplate, false, index);
     }
 
     @Override
     public void putTemplate() throws OXException {
+
     }
 }
