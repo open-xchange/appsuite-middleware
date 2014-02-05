@@ -59,6 +59,7 @@ import com.google.common.cache.RemovalNotification;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.ElementAttributes;
 import com.openexchange.continuation.Continuation;
 import com.openexchange.continuation.ContinuationRegistryService;
 import com.openexchange.exception.OXException;
@@ -78,14 +79,18 @@ public class ContinuationRegistryServiceImpl implements ContinuationRegistryServ
     /** The logger constant */
     static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ContinuationRegistryServiceImpl.class);
 
+    // ------------------------------------------------------------------------------------------------------ //
+
     private final ServiceLookup services;
     private final String region;
     private final RemovalListener<UUID, Continuation<?>> removalListener;
 
     /**
      * Initializes a new {@link ContinuationRegistryServiceImpl}.
+     *
+     * @throws OXException If cache service is not available
      */
-    public ContinuationRegistryServiceImpl(final String region, final ServiceLookup services) {
+    public ContinuationRegistryServiceImpl(final String region, final ServiceLookup services) throws OXException {
         super();
         this.services = services;
         this.region = region;
@@ -104,6 +109,16 @@ public class ContinuationRegistryServiceImpl implements ContinuationRegistryServ
                 }
             }
         };
+
+        // Register cache event handler
+        final CacheService cacheService = services.getOptionalService(CacheService.class);
+        if (null == cacheService) {
+            throw ServiceExceptionCode.absentService(CacheService.class);
+        }
+        final Cache cache = cacheService.getCache(region);
+        final ElementAttributes attributes = cache.getDefaultElementAttributes();
+        attributes.addElementEventHandler(new ContinuationCacheElementEventHandler());
+        cache.setDefaultElementAttributes(attributes);
     }
 
     private Cache getCache() throws OXException {
