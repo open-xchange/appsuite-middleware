@@ -61,6 +61,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
@@ -143,14 +144,28 @@ public class MailAccountParser extends DataParser {
      * @throws OXException If parsing fails
      */
     public Set<Attribute> parse(final MailAccountDescription account, final JSONObject json, final Collection<OXException> warnings) throws OXException {
+        return parse(account, json, warnings, false);
+    }
+
+    /**
+     * Parses the attributes from the JSON and writes them into the account object.
+     *
+     * @param account Any attributes will be stored in this account object.
+     * @param json A JSON object containing a reminder.
+     * @param warnings A collection to add possible warnings to
+     * @param asNewAccount <code>true</code> to parse in fashion of a new account; otherwise <code>false</code>
+     * @throws OXException If parsing fails.
+     * @throws OXException If parsing fails
+     */
+    public Set<Attribute> parse(final MailAccountDescription account, final JSONObject json, final Collection<OXException> warnings, final boolean asNewAccount) throws OXException {
         try {
-            return parseElementAccount(account, json, warnings);
+            return parseElementAccount(account, json, warnings, asNewAccount);
         } catch (final JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json.toString());
         }
     }
 
-    protected Set<Attribute> parseElementAccount(final MailAccountDescription account, final JSONObject json, final Collection<OXException> warnings) throws JSONException, OXException {
+    protected Set<Attribute> parseElementAccount(final MailAccountDescription account, final JSONObject json, final Collection<OXException> warnings, final boolean asNewAccount) throws JSONException, OXException {
         final Set<Attribute> attributes = new HashSet<Attribute>();
         if (json.has(MailAccountFields.ID)) {
             account.setId(parseInt(json, MailAccountFields.ID));
@@ -209,7 +224,7 @@ public class MailAccountParser extends DataParser {
         // Check port for standards
         checkMailPort(account, warnings);
         checkTransportPort(account, warnings);
-        // Conitinue parsing
+        // Continue parsing
         if (json.has(MailAccountFields.TRANSPORT_LOGIN)) {
             account.setTransportLogin(parseString(json, MailAccountFields.TRANSPORT_LOGIN));
             attributes.add(Attribute.TRANSPORT_LOGIN_LITERAL);
@@ -217,6 +232,29 @@ public class MailAccountParser extends DataParser {
         if (json.has(MailAccountFields.TRANSPORT_PASSWORD)) {
             account.setTransportPassword(parseString(json, MailAccountFields.TRANSPORT_PASSWORD));
             attributes.add(Attribute.TRANSPORT_PASSWORD_LITERAL);
+        }
+        // Special handling for a new account
+        if (asNewAccount) {
+            if (json.hasAndNotNull("transport_credentials")) {
+                final boolean transportCredentials = json.optBoolean("transport_credentials", true);
+                if (!transportCredentials) {
+                    // JSON field "transport_credentials" explicitly set to "false"
+                    if (isEmpty(account.getTransportLogin())) {
+                        final String login = account.getLogin();
+                        if (!isEmpty(login)) {
+                            account.setTransportLogin(login);
+                            attributes.add(Attribute.TRANSPORT_LOGIN_LITERAL);
+                        }
+                    }
+                    if (isEmpty(account.getTransportPassword())) {
+                        final String pw = account.getPassword();
+                        if (!isEmpty(pw)) {
+                            account.setTransportPassword(pw);
+                            attributes.add(Attribute.TRANSPORT_PASSWORD_LITERAL);
+                        }
+                    }
+                }
+            }
         }
         if (json.has(MailAccountFields.NAME)) {
             account.setName(parseString(json, MailAccountFields.NAME));
@@ -247,35 +285,56 @@ public class MailAccountParser extends DataParser {
             final String string = parseString(json, MailAccountFields.TRASH);
             account.setTrash(null == string ? string : string.trim());
             attributes.add(Attribute.TRASH_LITERAL);
+        } else if (asNewAccount) {
+            account.setTrash(MailStrings.TRASH);
+            attributes.add(Attribute.TRASH_LITERAL);
         }
         if (json.has(MailAccountFields.ARCHIVE)) {
             final String string = parseString(json, MailAccountFields.ARCHIVE);
             account.setTrash(null == string ? string : string.trim());
+            attributes.add(Attribute.ARCHIVE_LITERAL);
+        } else if (asNewAccount) {
+            account.setArchive(MailStrings.ARCHIVE);
             attributes.add(Attribute.ARCHIVE_LITERAL);
         }
         if (json.has(MailAccountFields.SENT)) {
             final String string = parseString(json, MailAccountFields.SENT);
             account.setSent(null == string ? string : string.trim());
             attributes.add(Attribute.SENT_LITERAL);
+        } else if (asNewAccount) {
+            account.setSent(MailStrings.SENT_ALT);
+            attributes.add(Attribute.SENT_LITERAL);
         }
         if (json.has(MailAccountFields.DRAFTS)) {
             final String string = parseString(json, MailAccountFields.DRAFTS);
             account.setDrafts(null == string ? string : string.trim());
+            attributes.add(Attribute.DRAFTS_LITERAL);
+        } else if (asNewAccount) {
+            account.setDrafts(MailStrings.DRAFTS);
             attributes.add(Attribute.DRAFTS_LITERAL);
         }
         if (json.has(MailAccountFields.SPAM)) {
             final String string = parseString(json, MailAccountFields.SPAM);
             account.setSpam(null == string ? string : string.trim());
             attributes.add(Attribute.SPAM_LITERAL);
+        } else if (asNewAccount) {
+            account.setSpam(MailStrings.SPAM);
+            attributes.add(Attribute.SPAM_LITERAL);
         }
         if (json.has(MailAccountFields.CONFIRMED_SPAM)) {
             final String string = parseString(json, MailAccountFields.CONFIRMED_SPAM);
             account.setConfirmedSpam(null == string ? string : string.trim());
             attributes.add(Attribute.CONFIRMED_SPAM_LITERAL);
+        } else if (asNewAccount) {
+            account.setConfirmedSpam(MailStrings.CONFIRMED_SPAM_ALT);
+            attributes.add(Attribute.CONFIRMED_SPAM_LITERAL);
         }
         if (json.has(MailAccountFields.CONFIRMED_HAM)) {
             final String string = parseString(json, MailAccountFields.CONFIRMED_HAM);
             account.setConfirmedHam(null == string ? string : string.trim());
+            attributes.add(Attribute.CONFIRMED_HAM_LITERAL);
+        } else if (asNewAccount) {
+            account.setConfirmedHam(MailStrings.CONFIRMED_HAM_ALT);
             attributes.add(Attribute.CONFIRMED_HAM_LITERAL);
         }
         if (json.has(MailAccountFields.UNIFIED_INBOX_ENABLED)) {

@@ -1,3 +1,7 @@
+* 2014-02-05 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 30984: registeredServiceImplementations counter must be increased even if the service implementation doesn't require other services
+
 * 2014-02-05 - thorben.betten@open-xchange.com
 
  - Fix for bug 30977: Only keep MDC map for threads created by Open-Xchange application

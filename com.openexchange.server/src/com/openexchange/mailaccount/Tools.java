@@ -246,7 +246,7 @@ public final class Tools {
                 mad.setConfirmedHamFullname((tmp = new StringBuilder(prefix)).append(name).toString());
                 attributes.add(Attribute.CONFIRMED_HAM_FULLNAME_LITERAL);
             }
-            // Confirmed-Ham
+            // Confirmed-Spam
             fullName = account.getConfirmedSpamFullname();
             if (null == fullName) {
                 if (null == prefix) {
@@ -289,7 +289,7 @@ public final class Tools {
                     }
                     name = getName(StorageUtility.INDEX_DRAFTS, primaryAccount);
                 }
-                if ("Drafts".equals(name) && account.getMailServer().endsWith("yahoo.com")) {
+                if ("Drafts".equalsIgnoreCase(name) && account.getMailServer().endsWith("yahoo.com")) {
                     name = "Draft";
                     mad.setDrafts(name);
                     attributes.add(Attribute.DRAFTS_LITERAL);
@@ -317,7 +317,7 @@ public final class Tools {
                     }
                     name = getName(StorageUtility.INDEX_SENT, primaryAccount);
                 }
-                if ("Sent Items".equals(name) && account.getMailServer().endsWith("yahoo.com")) {
+                if ("Sent Items".equalsIgnoreCase(name) && account.getMailServer().endsWith("yahoo.com")) {
                     name = "Sent";
                     mad.setSent(name);
                     attributes.add(Attribute.SENT_LITERAL);
@@ -345,7 +345,7 @@ public final class Tools {
                     }
                     name = getName(StorageUtility.INDEX_SPAM, primaryAccount);
                 }
-                if ("Spam".equals(name) && account.getMailServer().endsWith("yahoo.com")) {
+                if ("Spam".equalsIgnoreCase(name) && account.getMailServer().endsWith("yahoo.com")) {
                     name = "Bulk Mail";
                     mad.setDrafts(name);
                     attributes.add(Attribute.DRAFTS_LITERAL);
