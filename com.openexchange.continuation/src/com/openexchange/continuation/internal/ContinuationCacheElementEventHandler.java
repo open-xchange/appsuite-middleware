@@ -72,52 +72,49 @@ public final class ContinuationCacheElementEventHandler implements ElementEventH
         super();
     }
 
-    @Override
-    public void handleElementEvent(final ElementEvent event) {
+    private void doHandleElementEvent(final ElementEvent event) {
         final CacheElement cacheElem = (CacheElement) event.getSource();
         ((Cache<UUID, Continuation<?>>) cacheElem.getVal()).invalidateAll(); // Notification send to associated RemovalListener
+    }
+
+    @Override
+    public void handleElementEvent(final ElementEvent event) {
+        doHandleElementEvent(event);
     }
 
     @Override
     public void onExceededIdletimeBackground(final ElementEvent event) {
-        final CacheElement cacheElem = (CacheElement) event.getSource();
-        ((Cache<UUID, Continuation<?>>) cacheElem.getVal()).invalidateAll(); // Notification send to associated RemovalListener
+        doHandleElementEvent(event);
     }
 
     @Override
     public void onExceededIdletimeOnRequest(final ElementEvent event) {
-        final CacheElement cacheElem = (CacheElement) event.getSource();
-        ((Cache<UUID, Continuation<?>>) cacheElem.getVal()).invalidateAll(); // Notification send to associated RemovalListener
+        doHandleElementEvent(event);
     }
 
     @Override
     public void onExceededMaxlifeBackground(final ElementEvent event) {
-        final CacheElement cacheElem = (CacheElement) event.getSource();
-        ((Cache<UUID, Continuation<?>>) cacheElem.getVal()).invalidateAll(); // Notification send to associated RemovalListener
+        doHandleElementEvent(event);
     }
 
     @Override
     public void onExceededMaxlifeOnRequest(final ElementEvent event) {
-        final CacheElement cacheElem = (CacheElement) event.getSource();
-        ((Cache<UUID, Continuation<?>>) cacheElem.getVal()).invalidateAll(); // Notification send to associated RemovalListener
+        doHandleElementEvent(event);
     }
 
     @Override
     public void onSpooledDiskAvailable(final ElementEvent event) {
-        final CacheElement cacheElem = (CacheElement) event.getSource();
-        ((Cache<UUID, Continuation<?>>) cacheElem.getVal()).invalidateAll(); // Notification send to associated RemovalListener
+        doHandleElementEvent(event);
     }
 
     @Override
     public void onSpooledDiskNotAvailable(final ElementEvent event) {
-        final CacheElement cacheElem = (CacheElement) event.getSource();
-        ((Cache<UUID, Continuation<?>>) cacheElem.getVal()).invalidateAll(); // Notification send to associated RemovalListener
+        doHandleElementEvent(event);
     }
 
     @Override
     public void onSpooledNotAllowed(final ElementEvent event) {
-        final CacheElement cacheElem = (CacheElement) event.getSource();
-        ((Cache<UUID, Continuation<?>>) cacheElem.getVal()).invalidateAll(); // Notification send to associated RemovalListener
+        doHandleElementEvent(event);
     }
 
 }
