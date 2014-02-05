@@ -1,15 +1,26 @@
 package org.jolokia.http;
 
-import java.io.*;
-import java.util.*;
-
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import javax.management.RuntimeMBeanException;
-import javax.servlet.*;
-import javax.servlet.http.*;
-
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.jolokia.backend.BackendManager;
-import org.jolokia.config.*;
-import org.jolokia.restrictor.*;
+import org.jolokia.config.ConfigExtractor;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
+import org.jolokia.restrictor.AllowAllRestrictor;
+import org.jolokia.restrictor.DenyAllRestrictor;
+import org.jolokia.restrictor.Restrictor;
+import org.jolokia.restrictor.RestrictorFactory;
 import org.jolokia.util.LogHandler;
 import org.json.simple.JSONAware;
 
@@ -53,9 +64,6 @@ public class AgentServlet extends HttpServlet {
     // Backend dispatcher
     private BackendManager backendManager;
 
-    // Used for logging
-    private LogHandler logHandler;
-
     // Request handler for parsing request parameters and building up a response
     private HttpRequestHandler requestHandler;
 
@@ -64,6 +72,9 @@ public class AgentServlet extends HttpServlet {
     
     // Mime type used for returning the answer
     private String configMimeType;
+
+    // Internal Ox Logging
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AgentServlet.class);
 
     /**
      * No argument constructor, used e.g. by an servlet
@@ -84,15 +95,6 @@ public class AgentServlet extends HttpServlet {
     }
 
     /**
-     * Get the installed log handler
-     *
-     * @return loghandler used for logging.
-     */
-    protected LogHandler getLogHandler() {
-        return logHandler;
-    }
-
-    /**
      * Create a restrictor restrictor to use. By default, a policy file
      * is looked up (with the URL given by the init parameter {@link ConfigKey#POLICY_LOCATION}
      * or "/jolokia-access.xml" by default) and if not found an {@link AllowAllRestrictor} is
@@ -103,19 +105,17 @@ public class AgentServlet extends HttpServlet {
      * @return the restrictor to use.
      */
     protected Restrictor createRestrictor(String pLocation) {
-        LogHandler log = getLogHandler();
         try {
             Restrictor newRestrictor = RestrictorFactory.lookupPolicyRestrictor(pLocation);
             if (newRestrictor != null) {
-                log.info("Using access restrictor " + pLocation);
+                LOG.info("Using access restrictor {}", pLocation);
                 return newRestrictor;
             } else {
-                log.info("No access restrictor found at " + pLocation + ", access to all MBeans is allowed");
+                LOG.info("No access restrictor found at {}, access to all MBeans is allowed", pLocation);
                 return new AllowAllRestrictor();
             }
         } catch (IOException e) {
-            log.error("Error while accessing access restrictor at " + pLocation +
-                              ". Denying all access to MBeans for security reasons. Exception: " + e, e);
+            LOG.error("Error while accessing access restrictor at {}. Denying all access to MBeans for security reasons. Exception: {}", pLocation, e, e);
             return new DenyAllRestrictor();
         }
     }
@@ -130,9 +130,6 @@ public class AgentServlet extends HttpServlet {
     public void init(ServletConfig pServletConfig) throws ServletException {
         super.init(pServletConfig);
 
-        // Create a log handler early in the lifecycle, but not too early
-        logHandler = createLogHandler(pServletConfig);
-
         // Different HTTP request handlers
         httpGetHandler = newGetHttpRequestHandler();
         httpPostHandler = newPostHttpRequestHandler();
@@ -141,39 +138,11 @@ public class AgentServlet extends HttpServlet {
         if (restrictor == null) {
             restrictor = createRestrictor(config.get(ConfigKey.POLICY_LOCATION));
         } else {
-            logHandler.info("Using custom access restriction provided by " + restrictor);
+            LOG.info("Using custom access restriction provided by {}", restrictor);
         }
         configMimeType = config.get(ConfigKey.MIME_TYPE);
-        backendManager = new BackendManager(config,logHandler, restrictor);
-        requestHandler = new HttpRequestHandler(config,backendManager,logHandler);
-    }
-
-
-    /**
-     * Create a log handler using this servlet's logging facility for logging. This method can be overridden
-     * to provide a custom log handler. This method is called before {@link #createRestrictor(String)} so the log handler
-     * can already be used when building up the restrictor.
-     *
-     * @return a default log handler
-     * @param pServletConfig servlet config from where to get information to build up the log handler
-     */
-    protected LogHandler createLogHandler(ServletConfig pServletConfig) {
-        return new LogHandler() {
-            /** {@inheritDoc} */
-            public void debug(String message) {
-                log(message);
-            }
-
-            /** {@inheritDoc} */
-            public void info(String message) {
-                log(message);
-            }
-
-            /** {@inheritDoc} */
-            public void error(String message, Throwable t) {
-                log(message,t);
-            }
-        };
+        backendManager = new BackendManager(config, restrictor);
+        requestHandler = new HttpRequestHandler(config,backendManager);
     }
 
     /** {@inheritDoc} */
