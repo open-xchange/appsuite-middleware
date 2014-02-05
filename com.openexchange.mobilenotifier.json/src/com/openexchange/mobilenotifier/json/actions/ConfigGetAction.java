@@ -100,28 +100,29 @@ public class ConfigGetAction extends AbstractMobileNotifierAction {
         if (null == mobileNotifierRegistry) {
             throw ServiceExceptionCode.absentService(MobileNotifierServiceRegistry.class);
         }
+
         final ServerSession session = req.getSession();
         int uid = session.getUserId();
         int cid = session.getContextId();
 
-        final JSONObject providerJsonObject = new JSONObject();
-        final JSONObject providerJsonAttributes = new JSONObject();
+        final JSONObject providerJSONObject = new JSONObject();
+        final JSONObject attributesJSONObject = new JSONObject();
 
         if (providers == null) {
             // Get all Services
             List<MobileNotifierService> notifierServices = mobileNotifierRegistry.getAllServices(uid, cid);
             for (MobileNotifierService notifierService : notifierServices) {
-                providerJsonAttributes.put(notifierService.getFrontendName(), NotifyTemplateWriter.write(notifierService));
+                attributesJSONObject.put(notifierService.getFrontendName(), NotifyTemplateWriter.write(notifierService));
             }
         } else {
             // Get service(s) by parameter provider
             for (String provider : providers) {
                 MobileNotifierService notifierService = mobileNotifierRegistry.getService(provider, uid, cid);
-                providerJsonAttributes.put(notifierService.getFrontendName(), NotifyTemplateWriter.write(notifierService));
+                attributesJSONObject.put(notifierService.getFrontendName(), NotifyTemplateWriter.write(notifierService));
             }
         }
 
-        providerJsonObject.put(MobileNotifyField.PROVIDER.getName(), providerJsonAttributes);
-        return new AJAXRequestResult(providerJsonObject);
+        providerJSONObject.put(MobileNotifyField.PROVIDER.getName(), attributesJSONObject);
+        return new AJAXRequestResult(providerJSONObject);
     }
 }

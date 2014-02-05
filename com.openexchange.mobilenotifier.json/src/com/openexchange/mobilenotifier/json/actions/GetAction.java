@@ -94,6 +94,7 @@ public class GetAction extends AbstractMobileNotifierAction {
         if (null == mobileNotifierRegistry) {
             throw ServiceExceptionCode.absentService(MobileNotifierServiceRegistry.class);
         }
+
         final ServerSession session = req.getSession();
         int uid = session.getUserId();
         int cid = session.getContextId();
@@ -105,8 +106,8 @@ public class GetAction extends AbstractMobileNotifierAction {
 
         mobileNotifierRegistry.getAllServices(uid, cid);
         for (String provider : providers) {
-            MobileNotifierService service = mobileNotifierRegistry.getService(provider, uid, cid);
-            itemJsonObject.put(service.getFrontendName(), NotifyItemWriter.write(service));
+            MobileNotifierService notifierService = mobileNotifierRegistry.getService(provider, uid, cid);
+            itemJsonObject.put(notifierService.getFrontendName(), NotifyItemWriter.write(notifierService));
         }
         providerObject.put(MobileNotifyField.PROVIDER.getName(), itemJsonObject);
         return new AJAXRequestResult(providerObject);

@@ -91,7 +91,13 @@ public class ExampleAppointmentMobileNotifierService extends AbstractMobileNotif
         final String htmlTemplate = MobileNotifierFileUtil.getTeamplateFileContent(fileName);
         final String title = MobileNotifierProviders.APPOINTMENT.getTitle();
         int index = 2;
-        return new NotifyTemplate(title, htmlTemplate, true, index);
+        // additional attribute
+        Map<String, Object> attributes = new HashMap<String, Object>();
+        attributes.put("attribute", "a value");
+        attributes.put("isAnotherAttribute", new Boolean(true));
+        NotifyTemplate nt = new NotifyTemplate(title, htmlTemplate, true, index);
+        nt.setAttributes(attributes);
+        return nt;
     }
 
     @Override

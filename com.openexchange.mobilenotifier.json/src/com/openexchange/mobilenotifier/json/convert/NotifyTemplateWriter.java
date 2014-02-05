@@ -49,6 +49,8 @@
 
 package com.openexchange.mobilenotifier.json.convert;
 
+import java.util.Iterator;
+import java.util.Map.Entry;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
@@ -65,7 +67,7 @@ public class NotifyTemplateWriter {
     private NotifyTemplateWriter() {
         super();
     }
-    
+
     /**
      * Writes the JSON structure of NotifyTemplates
      * 
@@ -84,6 +86,12 @@ public class NotifyTemplateWriter {
         attributes.put(MobileNotifyField.SLOW.getName(), nt.isSlow());
         attributes.put(MobileNotifyField.INDEX.getName(), nt.getIndex());
 
+        // writes additional attributes
+        Iterator<Entry<String, Object>> iter = nt.getAttributes().entrySet().iterator();
+        while (iter.hasNext()) {
+            Entry<String, Object> additionalAttribute = iter.next();
+            attributes.put(additionalAttribute.getKey(), additionalAttribute.getValue());
+        }
         return attributes;
     }
 }

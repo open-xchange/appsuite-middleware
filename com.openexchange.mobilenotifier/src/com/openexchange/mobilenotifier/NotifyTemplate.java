@@ -49,6 +49,9 @@
 
 package com.openexchange.mobilenotifier;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * {@link NotifyTemplate} - Represents a template
  * 
@@ -62,6 +65,9 @@ public class NotifyTemplate {
     private boolean slow;
 
     private int index;
+
+    private Map<String, Object> attributes = new HashMap<String, Object>();
+
 
     public NotifyTemplate(final String title, final String htmlTemplate, final boolean slow, final int index) {
         this.title = title;
@@ -86,4 +92,11 @@ public class NotifyTemplate {
         return index;
     }
 
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, Object> attributes) {
+        this.attributes = attributes;
+    }
 }
