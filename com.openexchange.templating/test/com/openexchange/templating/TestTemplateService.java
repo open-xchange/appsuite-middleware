@@ -80,6 +80,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  * 
  * This test will not work if started from the MainTestSuite as the folder test-resources is not found
+ * TODO fix this in the future
  */
 public class TestTemplateService extends TestCase {
 
