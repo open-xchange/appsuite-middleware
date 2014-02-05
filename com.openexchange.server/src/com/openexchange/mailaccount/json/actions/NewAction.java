@@ -113,7 +113,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
 
         final MailAccountDescription accountDescription = new MailAccountDescription();
         final List<OXException> warnings = new LinkedList<OXException>();
-        MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
+        MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings, true);
 
         checkNeededFields(accountDescription);
 
