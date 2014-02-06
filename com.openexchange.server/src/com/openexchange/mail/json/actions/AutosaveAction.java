@@ -51,7 +51,6 @@ package com.openexchange.mail.json.actions;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -65,7 +64,6 @@ import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.HashUtility;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -99,20 +97,6 @@ public final class AutosaveAction extends AbstractMailAction {
             final List<OXException> warnings = new ArrayList<OXException>();
             {
                 final JSONObject jsonMailObj = (JSONObject) req.getRequest().requireData();
-                /*
-                 * Monitor
-                 */
-                String sha256 = null;
-                {
-                    final JSONArray jAttachments = jsonMailObj.optJSONArray(ATTACHMENTS);
-                    if (null != jAttachments) {
-                        final JSONObject jAttachment = jAttachments.optJSONObject(0);
-                        if (null != jAttachment) {
-                            final String sContent = jAttachment.optString(CONTENT, null);
-                            sha256 = null == sContent ? null : HashUtility.getSha256(sContent, "hex");
-                        }
-                    }
-                }
                 /*
                  * Parse with default account's transport provider
                  */
