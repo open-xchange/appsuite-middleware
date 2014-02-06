@@ -102,5 +102,7 @@ public class ExampleAppointmentMobileNotifierService extends AbstractMobileNotif
 
     @Override
     public void putTemplate(NotifyTemplate notifyTemplate) throws OXException {
+        MobileNotifierFileUtil.safelyWriteTemplateFileContent(MobileNotifierProviders.APPOINTMENT.getFileName(),
+            "<div class=\"appointment-listitem\"> <div class=\"sender\"><%= title %></div><div class=\"date\"><%= location %></div><div class=\"subject\"><%= description %></div></div>");
     }
 }

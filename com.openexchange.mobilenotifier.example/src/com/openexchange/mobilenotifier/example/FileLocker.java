@@ -49,25 +49,54 @@
 
 package com.openexchange.mobilenotifier.example;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import com.openexchange.java.Streams;
 
 /**
  * {@link FileLocker}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
+
+// TODO!
 public class FileLocker {
 
-    private boolean lockActive;
+    private final File fileName;
 
-    private String fileName;
+    private final File lockFile;
 
-    public FileLocker(String fileName) {
-        this.lockActive = false;
-        this.fileName = fileName;
-
+    public FileLocker(final String fileName) {
+        this.fileName = new File(fileName);
+        this.lockFile = new File(fileName + ".lock");
     }
 
-    public boolean lockFile() {
+    public void writeChangesSafely(String content) throws IOException {
+        try {
+            if (lockFile()) {
+                BufferedWriter isw = new BufferedWriter(new FileWriter(fileName));
+                isw.write(content);
+                Streams.close(isw);
+            } else {
+                // File already locked
+            }
+        } finally {
+            unlockFile();
+        }
+    }
+
+    private synchronized boolean lockFile() throws IOException {
+        if (lockFile.createNewFile()) {
+            return true;
+        }
         return false;
+    }
+
+    private synchronized void unlockFile() {
+        if (lockFile.exists()) {
+            lockFile.delete();
+        }
     }
 }

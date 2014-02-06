@@ -49,6 +49,7 @@
 
 package com.openexchange.mobilenotifier.json.actions;
 
+import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -99,15 +100,16 @@ public class ConfigPutAction extends AbstractMobileNotifierAction {
         // TODO: Mapping from frotendName to providerName
 
         JSONObject jsonObject = (JSONObject) req.getRequest().requireData();
-
-        NotifyTemplate parsedNotifyTemplate = NotifyTemplateParser.parseJSON(jsonObject);
         
         // parsedNotifyTemplate.getHtmlTemplate();
+        // NotifyTemplate parsedNotifyTemplate = NotifyTemplateParser.parseJSON(jsonObject);
 
-        // // Get service(s) by parameter provider
-        // for (String provider : providers) {
-        // MobileNotifierService notifyService = mobileNotifierRegistry.getService(provider, uid, cid);
-        // }
+        // dummy - testing put template
+        NotifyTemplate parsedNotifyTemplate = new NotifyTemplate();
+        List<MobileNotifierService> notifyServices = mobileNotifierRegistry.getAllServices(uid, cid);
+        for (MobileNotifierService notifyService : notifyServices) {
+            notifyService.putTemplate(parsedNotifyTemplate);
+        }
 
         return new AJAXRequestResult(Boolean.TRUE);
     }

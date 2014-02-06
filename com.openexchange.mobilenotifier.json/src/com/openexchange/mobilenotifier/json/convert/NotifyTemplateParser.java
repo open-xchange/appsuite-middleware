@@ -75,7 +75,6 @@ public class NotifyTemplateParser {
      */
     public static NotifyTemplate parseJSON(JSONObject json) throws OXException, JSONException {
         NotifyTemplate notifyTemplate = new NotifyTemplate();
-        json.getJSONObject("provider");
 
         return null;
 

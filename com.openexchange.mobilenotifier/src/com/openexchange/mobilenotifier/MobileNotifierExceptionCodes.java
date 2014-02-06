@@ -73,7 +73,7 @@ public enum MobileNotifierExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Could not find service for provider %1$s
      */
-    IO_ERROR("An I/O error occured", Category.CATEGORY_ERROR, 3);
+    IO_ERROR("An I/O error occured  %1$s", Category.CATEGORY_ERROR, 3);
     /**
      * The prefix constant.
      */
