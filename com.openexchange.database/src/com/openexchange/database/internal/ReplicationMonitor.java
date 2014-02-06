@@ -254,6 +254,7 @@ public class ReplicationMonitor {
             try {
                 pool.back(con);
             } catch (final PoolingException e) {
+                DBUtils.close(con);
                 final OXException e1 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
                 LOG.error("", e1);
             }
