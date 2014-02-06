@@ -78,7 +78,7 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
     public XingOAuthServiceMetaData(final ConfigurationService configService) {
         super();
         id = "com.openexchange.oauth.xing";
-        displayName = "XING";
+        displayName = "XING OAuth";
 
         final String apiKey = configService.getProperty("com.openexchange.oauth.xing.apiKey");
         if (Strings.isEmpty(apiKey)) {

@@ -113,7 +113,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
         this.services = services;
 
         final SubscriptionSource source = new SubscriptionSource();
-        source.setDisplayName("XING");
+        source.setDisplayName("XING OAuth");
         source.setFolderModule(FolderObject.CONTACT);
         source.setId("com.openexchange.subscribe.xing");
         source.setSubscribeService(this);
