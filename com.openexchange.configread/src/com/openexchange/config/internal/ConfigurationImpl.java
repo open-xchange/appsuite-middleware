@@ -73,6 +73,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
 import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.PropertyListener;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.WildcardFilter;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
 import com.openexchange.exception.OXException;
@@ -87,6 +88,8 @@ import com.openexchange.java.Strings;
 public final class ConfigurationImpl implements ConfigurationService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigurationImpl.class);
+
+    private Map<String, Reloadable> reloadableServices;
 
     private static final class PropertyFileFilter implements FileFilter {
 
@@ -164,15 +167,21 @@ public final class ConfigurationImpl implements ConfigurationService {
      */
     public ConfigurationImpl(final String[] directories) {
         super();
-        if (null == directories || directories.length == 0) {
-            throw new IllegalArgumentException("Missing configuration directory path.");
-        }
+        reloadableServices = new ConcurrentHashMap<String, Reloadable>();
         propertiesByFile = new HashMap<String, Properties>(256);
         texts = new ConcurrentHashMap<String, String>(1024);
         properties = new HashMap<String, String>(2048);
         propertiesFiles = new HashMap<String, String>(2048);
         yamlFiles = new HashMap<String, Object>(64);
         yamlPaths = new HashMap<String, String>(64);
+        dirs = new File[directories.length];
+        loadConfiguration(directories);
+    }
+
+    private void loadConfiguration(String[] directories) {
+        if (null == directories || directories.length == 0) {
+            throw new IllegalArgumentException("Missing configuration directory path.");
+        }
         // First filter+processor pair
         final FileFilter fileFilter = new PropertyFileFilter();
         final FileProcessor processor = new FileProcessor() {
@@ -212,7 +221,6 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
 
         };
-        final File[] dirs = new File[directories.length];
         for (int i = 0; i < directories.length; i++) {
             if (null == directories[i]) {
                 throw new IllegalArgumentException("Given configuration directory path is null.");
@@ -229,7 +237,6 @@ public final class ConfigurationImpl implements ConfigurationService {
             // Process: Second round
             processDirectory(dir, fileFilter2, processor2);
         }
-        this.dirs = dirs;
     }
 
     private synchronized void processDirectory(final File dir, final FileFilter fileFilter, final FileProcessor processor) {
@@ -696,6 +703,32 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
         }
         return retval;
+    }
+
+    @Override
+    public void reloadConfiguration() {
+        loadConfiguration(getDirectories());
+        for (Reloadable service : reloadableServices.values()) {
+            service.reloadConfiguration();
+        }
+    }
+
+    @Override
+    public void addReloadable(Reloadable service) {
+        if (null != service) {
+            reloadableServices.put(service.getClass().getName(), service);
+        } else {
+            LOG.warn("Tried to add null to reloadable services");
+        }
+    }
+
+    @Override
+    public void removeReloadable(Reloadable service) {
+        if (null != service) {
+            reloadableServices.remove(service.getClass().getName());
+        } else {
+            LOG.warn("Tried to remove null from reloadable services");
+        }
     }
 
 }

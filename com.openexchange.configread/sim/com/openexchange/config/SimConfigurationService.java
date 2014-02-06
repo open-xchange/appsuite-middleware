@@ -205,4 +205,19 @@ public class SimConfigurationService implements ConfigurationService {
     public List<String> getProperty(String name, String defaultValue, PropertyListener listener, String separator) {
         return Collections.emptyList();
     }
+
+    @Override
+    public void reloadConfiguration() {
+        // nothing to do
+    }
+
+    @Override
+    public void addReloadable(Reloadable service) {
+        // nothing to do
+    }
+
+    @Override
+    public void removeReloadable(Reloadable service) {
+        // nothing to do
+    }
 }

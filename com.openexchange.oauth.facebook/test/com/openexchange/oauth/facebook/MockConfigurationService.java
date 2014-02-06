@@ -59,6 +59,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
 import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.PropertyListener;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 
 
@@ -239,6 +240,21 @@ public class MockConfigurationService implements ConfigurationService {
     @Override
     public List<String> getProperty(String name, String defaultValue, PropertyListener listener, String separator) {
         return Collections.emptyList();
+    }
+
+    @Override
+    public void reloadConfiguration() {
+        // nothing to do
+    }
+
+    @Override
+    public void addReloadable(Reloadable service) {
+        // nothing to do
+    }
+
+    @Override
+    public void removeReloadable(Reloadable service) {
+        // nothing to do
     }
 
 }

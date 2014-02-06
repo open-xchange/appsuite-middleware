@@ -55,10 +55,12 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ManagedService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.internal.ConfigProviderServiceImpl;
 import com.openexchange.config.internal.ConfigurationImpl;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
+import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -112,8 +114,12 @@ public final class ConfigActivator extends HousekeepingActivator {
 
             if (!found) {
                 rememberTracker(new ManagedServiceTracker(context, configService));
-                openTrackers();
             }
+
+            // Track all reloadable services
+            track(Reloadable.class, new ReloadableServiceTracker(context, configService));
+            track(ManagementService.class, new ManagementServiceTracker(context, configService));
+            openTrackers();
         } catch (final Throwable t) {
             LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
