@@ -54,6 +54,7 @@ import java.net.URL;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.XingApi;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
@@ -65,9 +66,10 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware {
+public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware, Reloadable {
 
     private final String domain;
+    private ConfigurationService configService;
 
     /**
      * Initializes a new {@link XingOAuthServiceMetaData}.
@@ -77,6 +79,7 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
      */
     public XingOAuthServiceMetaData(final ConfigurationService configService) {
         super();
+        this.configService = configService;
         id = "com.openexchange.oauth.xing";
         displayName = "XING OAuth";
 
@@ -198,6 +201,21 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
         }
         return builder.toString();
+    }
+
+    @Override
+    public void reloadConfiguration() {
+        final String apiKey = configService.getProperty("com.openexchange.oauth.xing.apiKey");
+        if (Strings.isEmpty(apiKey)) {
+            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.apiKey");
+        }
+        this.apiKey = apiKey;
+
+        final String apiSecret = configService.getProperty("com.openexchange.oauth.xing.apiSecret");
+        if (Strings.isEmpty(apiSecret)) {
+            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.apiSecret");
+        }
+        this.apiSecret = apiSecret;
     }
 
 }
