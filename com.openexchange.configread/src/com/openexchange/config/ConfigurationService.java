@@ -306,9 +306,20 @@ public interface ConfigurationService {
      */
     int getIntProperty(String name, int defaultValue, PropertyListener propertyListener);
 
+    /**
+     * Reload the configuration from openexchange.propdir
+     */
     void reloadConfiguration();
 
+    /**
+     * Add service to a list of services which can reload their configuration without restart
+     * @param service The service to add
+     */
     void addReloadable(Reloadable service);
 
+    /**
+     * Remove service from a list of services which can reload their configuration without restart
+     * @param service The service to remove
+     */
     void removeReloadable(Reloadable service);
 }
