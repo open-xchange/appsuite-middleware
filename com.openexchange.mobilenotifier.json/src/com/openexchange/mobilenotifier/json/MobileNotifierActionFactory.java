@@ -63,11 +63,11 @@ import com.openexchange.mobilenotifier.json.actions.GetAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link MobileNotifierActionFactory} - The Mobilenotifier action factory.
+ * {@link MobileNotifierActionFactory} - The mobile notifier action factory.
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-@Module(name = "mobilenotifier", description = "Provides access to Mobilenotifier module.")
+@Module(name = "mobilenotifier", description = "Provides access to mobile notifier module.")
 public class MobileNotifierActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AbstractMobileNotifierAction> actions;

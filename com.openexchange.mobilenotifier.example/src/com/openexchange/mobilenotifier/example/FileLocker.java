@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,58 +47,27 @@
  *
  */
 
-package com.openexchange.mobilenotifier.json.convert;
+package com.openexchange.mobilenotifier.example;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.exception.OXException;
-import com.openexchange.mobilenotifier.MobileNotifierService;
-import com.openexchange.mobilenotifier.NotifyItem;
 
 /**
- * {@link NotifyItemWriter} - Converts a list of notification items to a JSON structure.
- * 
+ * {@link FileLocker}
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class NotifyItemWriter {
+public class FileLocker {
 
-    private NotifyItemWriter() {
-        super();
-    }
-    /**
-     * Writes the JSON structure of NotifyItems
-     * 
-     * @param service - The service
-     * @param session - The session
-     * @return JSONObject - Returns the JSON structure
-     * @throws JSONException
-     * @throws OXException
-     */
-    public static JSONObject write(final MobileNotifierService service) throws JSONException, OXException {
-        final JSONArray itemArray = new JSONArray();
-        final JSONObject itemObject = new JSONObject();
+    private boolean lockActive;
 
-        itemArray.put(transformMapToJSONObject(service.getItems()));
+    private String fileName;
 
-        itemObject.put(MobileNotifyField.ITEMS, itemArray);
+    public FileLocker(String fileName) {
+        this.lockActive = false;
+        this.fileName = fileName;
 
-        return itemObject;
     }
 
-    private static JSONObject transformMapToJSONObject(Map<String, NotifyItem> items) throws JSONException {
-        final JSONObject jsonObject = new JSONObject();
-        Iterator<Entry<String, NotifyItem>> iter = items.entrySet().iterator();
-
-        while (iter.hasNext()) {
-            Entry<String, NotifyItem> next = iter.next();
-            final String key = next.getValue().getKey();
-            final Object value = next.getValue().getValue();
-            jsonObject.put(key, value);
-        }
-        return jsonObject;
+    public boolean lockFile() {
+        return false;
     }
 }

@@ -56,7 +56,7 @@ import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
 /**
- * {@link MobileNotifierExceptionCodes} - Error codes for Mobilenotifier module.
+ * {@link MobileNotifierExceptionCodes} - Error codes for mobile notifier module.
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @since 7.6.0

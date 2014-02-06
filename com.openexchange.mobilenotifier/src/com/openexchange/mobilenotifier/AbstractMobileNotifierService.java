@@ -78,7 +78,7 @@ public abstract class AbstractMobileNotifierService implements MobileNotifierSer
     /**
      * Can be used to implement a custom enabled method by a provider
      * 
-     * @return
+     * @return boolean
      */
     protected boolean isEnabledCustom(int uid, int cid) {
         return true;

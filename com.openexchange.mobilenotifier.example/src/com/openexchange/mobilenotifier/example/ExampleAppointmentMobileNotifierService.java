@@ -101,6 +101,6 @@ public class ExampleAppointmentMobileNotifierService extends AbstractMobileNotif
     }
 
     @Override
-    public void putTemplate() throws OXException {
+    public void putTemplate(NotifyTemplate notifyTemplate) throws OXException {
     }
 }

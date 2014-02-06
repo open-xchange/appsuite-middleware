@@ -50,7 +50,6 @@
 package com.openexchange.mobilenotifier.json.actions;
 
 import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -122,7 +121,7 @@ public class ConfigGetAction extends AbstractMobileNotifierAction {
             }
         }
 
-        providerJSONObject.put(MobileNotifyField.PROVIDER.getName(), attributesJSONObject);
+        providerJSONObject.put(MobileNotifyField.PROVIDER, attributesJSONObject);
         return new AJAXRequestResult(providerJSONObject);
     }
 }

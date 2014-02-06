@@ -55,49 +55,11 @@ package com.openexchange.mobilenotifier.json.convert;
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public enum MobileNotifyField {
-    /**
-     * The template field
-     */
-    TEMPLATE("template"),
-
-    /**
-     * The slow field
-     */
-    SLOW("slow"),
-
-    /**
-     * The items field
-     */
-    ITEMS("items"),
-    
-    /**
-     * The provider field
-     */
-    PROVIDER("provider"),
-    
-    /**
-     * The title field
-     */
-    TITLE("title"),
-    
-    /**
-     * The title field
-     */
-    INDEX("index");
-
-    private final String name;
-
-    private MobileNotifyField(final String name) {
-        this.name = name;
-    }
-
-    /**
-     * Gets the name
-     * 
-     * @return The name
-     */
-    public String getName() {
-        return name;
-    }
+public final class MobileNotifyField {
+    public static final String TEMPLATE = "template";
+    public static final String SLOW = "slow";
+    public static final String ITEMS= "items";
+    public static final String PROVIDER = "provider";
+    public static final String TITLE = "title";
+    public static final String INDEX = "index";
 }

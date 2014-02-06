@@ -109,7 +109,7 @@ public class GetAction extends AbstractMobileNotifierAction {
             MobileNotifierService notifierService = mobileNotifierRegistry.getService(provider, uid, cid);
             itemJsonObject.put(notifierService.getFrontendName(), NotifyItemWriter.write(notifierService));
         }
-        providerObject.put(MobileNotifyField.PROVIDER.getName(), itemJsonObject);
+        providerObject.put(MobileNotifyField.PROVIDER, itemJsonObject);
         return new AJAXRequestResult(providerObject);
     }
 }

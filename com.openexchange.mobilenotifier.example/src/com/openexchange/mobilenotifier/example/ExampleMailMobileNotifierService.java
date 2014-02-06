@@ -92,11 +92,12 @@ public class ExampleMailMobileNotifierService extends AbstractMobileNotifierServ
         final String htmlTemplate = MobileNotifierFileUtil.getTeamplateFileContent(fileName);
         final String title = MobileNotifierProviders.MAIL.getTitle();
         int index = 1;
+
         return new NotifyTemplate(title, htmlTemplate, false, index);
     }
 
     @Override
-    public void putTemplate() throws OXException {
+    public void putTemplate(NotifyTemplate notifyTemplate) throws OXException {
 
     }
 }

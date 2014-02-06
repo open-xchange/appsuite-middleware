@@ -60,7 +60,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AbstractMobileNotifierAction} - The abstract Mobilenotifier action.
+ * {@link AbstractMobileNotifierAction} - The abstract mobile notifier action.
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */

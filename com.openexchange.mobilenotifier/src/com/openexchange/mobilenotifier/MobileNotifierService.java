@@ -49,11 +49,12 @@
 
 package com.openexchange.mobilenotifier;
 
+import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link MobileNotifierService} - The Mobilenotifier service.
+ * {@link MobileNotifierService} - The mobile notifier service.
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @since 7.6.0
@@ -69,7 +70,7 @@ public interface MobileNotifierService {
     /**
      * Get the frontend application name
      * 
-     * @return String the name the providers
+     * @return String the name the frontend application
      */
     String getFrontendName();
 
@@ -104,5 +105,5 @@ public interface MobileNotifierService {
      * 
      * @throws OXException
      */
-    void putTemplate() throws OXException;
+    void putTemplate(NotifyTemplate notifyTemplate) throws OXException;
 }

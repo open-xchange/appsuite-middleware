@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link MobileNotifierRequest} - A Mobilenotifier request.
+ * {@link MobileNotifierRequest} - A mobile notifier request.
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */

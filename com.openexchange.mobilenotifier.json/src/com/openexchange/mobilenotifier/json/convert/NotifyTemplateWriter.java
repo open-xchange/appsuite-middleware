@@ -81,10 +81,10 @@ public class NotifyTemplateWriter {
         final JSONObject attributes = new JSONObject();
         final NotifyTemplate nt = service.getTemplate();
 
-        attributes.put(MobileNotifyField.TITLE.getName(), nt.getTitle());
-        attributes.put(MobileNotifyField.TEMPLATE.getName(), nt.getHtmlTemplate());
-        attributes.put(MobileNotifyField.SLOW.getName(), nt.isSlow());
-        attributes.put(MobileNotifyField.INDEX.getName(), nt.getIndex());
+        attributes.put(MobileNotifyField.TITLE, nt.getTitle());
+        attributes.put(MobileNotifyField.TEMPLATE, nt.getHtmlTemplate());
+        attributes.put(MobileNotifyField.SLOW, nt.isSlow());
+        attributes.put(MobileNotifyField.INDEX, nt.getIndex());
 
         // writes additional attributes
         Iterator<Entry<String, Object>> iter = nt.getAttributes().entrySet().iterator();

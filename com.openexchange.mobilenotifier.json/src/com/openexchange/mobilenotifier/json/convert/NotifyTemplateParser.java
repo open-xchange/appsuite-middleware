@@ -49,6 +49,11 @@
 
 package com.openexchange.mobilenotifier.json.convert;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.mobilenotifier.NotifyTemplate;
+
 /**
  * {@link NotifyTemplateParser}
  *
@@ -56,4 +61,23 @@ package com.openexchange.mobilenotifier.json.convert;
  */
 public class NotifyTemplateParser {
 
+    private NotifyTemplateParser() {
+        super();
+    }
+
+    /**
+     * Parses a notify template from a JSONObject
+     * 
+     * @param json - the json object which should be parsed
+     * @return parsed notify template
+     * @throws OXException
+     * @throws JSONException
+     */
+    public static NotifyTemplate parseJSON(JSONObject json) throws OXException, JSONException {
+        NotifyTemplate notifyTemplate = new NotifyTemplate();
+        json.getJSONObject("provider");
+
+        return null;
+
+    }
 }
