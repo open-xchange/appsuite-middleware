@@ -108,7 +108,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     static CacheKey newCacheKey(final CacheService cacheService, final int id, final int user, final int cid) {
-        return cacheService.newCacheKey(cid, Integer.valueOf(id), Integer.valueOf(user));
+        return cacheService.newCacheKey(cid, String.valueOf(id), String.valueOf(user));
     }
 
     @Override

@@ -53,6 +53,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import com.hazelcast.nio.ObjectDataInput;
+import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.nio.serialization.Portable;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
@@ -107,46 +109,46 @@ public class PortableMessage<P extends Portable> extends AbstractCustomPortable 
 
     @Override
     public void writePortable(PortableWriter writer) throws IOException {
-        writer.writeUTF("s", senderID);
-        if (null == messagePayload) {
-            writer.writeInt("l", 0);
-        } else {
-            int length = messagePayload.size();
-            writer.writeInt("l", length);
-            if (0 < length) {
-                Portable[] pa = new Portable[length];
-                for (int i = 0; i < pa.length; i++) {
-                    pa[i] = messagePayload.get(i);
-                }
-                writer.writePortableArray("p", pa);
+        ObjectDataOutput out = writer.getRawDataOutput();
+        out.writeUTF(senderID);
+        boolean hasPayload = null != messagePayload;
+        out.writeBoolean(hasPayload);
+        if (hasPayload) {
+            out.writeInt(messagePayload.size());
+            for (int i = 0; i < messagePayload.size(); i++) {
+                out.writeObject(messagePayload.get(i));
             }
-//            for (P data : messagePayload) {
-//                data.writePortable(writer);
-//            }
-//            for (int i = 0; i < length; i++) {
-//                writer.writePortable("l" + i, messagePayload.get(i));
-//            }
         }
     }
 
     @Override
     public void readPortable(PortableReader reader) throws IOException {
-        senderID = reader.readUTF("s");
-        int length = reader.readInt("l");
-        if (0 < length) {
-            messagePayload = new ArrayList<P>(length);
-            Portable[] portables = reader.readPortableArray("p");
-            for (int i = 0; i < portables.length; i++) {
-                messagePayload.add((P) portables[i]);
-//                messagePayload.add(reader.<P>readPortable("l" + i));
+        ObjectDataInput in = reader.getRawDataInput();
+        senderID = in.readUTF();
+        boolean hasPayload = in.readBoolean();
+        if (hasPayload) {
+            int size = in.readInt();
+            messagePayload = new ArrayList<P>(size);
+            for (int i = 0; i < size; i++) {
+                messagePayload.add(in.<P>readObject());
             }
         }
     }
 
+    /**
+     * Gets the payload of the message.
+     *
+     * @return The message payload
+     */
     public List<P> getMessagePayload() {
         return messagePayload;
     }
 
+    /**
+     * Gets the sender ID.
+     *
+     * @return The sender ID
+     */
     public String getSenderID() {
         return senderID;
     }

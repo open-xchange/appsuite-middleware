@@ -362,7 +362,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 jcs.removeFromGroup(userid, ctx.getId().toString());
 
                 jcs = cacheService.getCache("MailAccount");
-                jcs.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.valueOf(0), userid));
+                jcs.remove(cacheService.newCacheKey(ctx.getId().intValue(), String.valueOf(0), String.valueOf(userid)));
                 jcs.invalidateGroup(ctx.getId().toString());
             } catch (final OXException e) {
                 log.error("", e);
@@ -824,7 +824,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         if (null != cacheService) {
             try {
                 final Cache mailAccountCache = cacheService.getCache("MailAccount");
-                mailAccountCache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.valueOf(0), usr.getId()));
+                mailAccountCache.remove(cacheService.newCacheKey(ctx.getId().intValue(), String.valueOf(0), String.valueOf(usr.getId())));
                 mailAccountCache.invalidateGroup(ctx.getId().toString());
 
                 final Cache globalFolderCache = cacheService.getCache("GlobalFolderCache");

@@ -61,13 +61,13 @@ public interface CacheKey extends Serializable {
      *
      * @return The context ID
      */
-    public int getContextId();
+    int getContextId();
 
     /**
-     * Gets the serializable key objects
+     * Gets the key objects
      *
-     * @return The serializable key objects
+     * @return The key objects
      */
-    public Serializable[] getKeys();
+    String[] getKeys();
 
 }

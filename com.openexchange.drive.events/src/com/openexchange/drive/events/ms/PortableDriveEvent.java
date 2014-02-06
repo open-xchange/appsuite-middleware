@@ -128,4 +128,46 @@ public class PortableDriveEvent extends AbstractCustomPortable {
         return new DriveEventImpl(portableEvent.contextID, portableEvent.folderIDs, true, portableEvent.pushToken);
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + contextID;
+        result = prime * result + ((folderIDs == null) ? 0 : folderIDs.hashCode());
+        result = prime * result + ((pushToken == null) ? 0 : pushToken.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof PortableDriveEvent)) {
+            return false;
+        }
+        PortableDriveEvent other = (PortableDriveEvent) obj;
+        if (contextID != other.contextID) {
+            return false;
+        }
+        if (folderIDs == null) {
+            if (other.folderIDs != null) {
+                return false;
+            }
+        } else if (!folderIDs.equals(other.folderIDs)) {
+            return false;
+        }
+        if (pushToken == null) {
+            if (other.pushToken != null) {
+                return false;
+            }
+        } else if (!pushToken.equals(other.pushToken)) {
+            return false;
+        }
+        return true;
+    }
+
 }

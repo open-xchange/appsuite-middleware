@@ -447,7 +447,7 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
     }
 
     @Override
-    public CacheKey newCacheKey(final int contextId, final Serializable... objs) {
+    public CacheKey newCacheKey(final int contextId, final String... objs) {
         return new CacheKeyImpl(contextId, objs);
     }
 

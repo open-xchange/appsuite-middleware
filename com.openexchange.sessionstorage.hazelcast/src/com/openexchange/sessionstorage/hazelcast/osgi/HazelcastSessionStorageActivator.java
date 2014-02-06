@@ -97,7 +97,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
         Services.setServiceLookup(this);
         final HazelcastConfigurationService configService = getService(HazelcastConfigurationService.class);
         final boolean enabled = configService.isEnabled();
-        if (false == enabled || true) {
+        if (false == enabled) {
             LOG.warn("com.openexchange.sessionstorage.hazelcast will be disabled due to disabled Hazelcast services");
         } else {
             /*

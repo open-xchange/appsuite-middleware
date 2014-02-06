@@ -193,7 +193,8 @@ public class HazelcastSessionStorageService implements SessionStorageService {
          * search sessions by context- and user-ID
          */
         IMap<String, PortableSession> sessions = sessions();
-        Set<String> sessionIDs = sessions.keySet(new SqlPredicate("contextId = " + contextId + " AND userId = " + userId));
+        Set<String> sessionIDs = sessions.keySet(new SqlPredicate(
+            PortableSession.PARAMETER_CONTEXT_ID + " = " + contextId + " AND " + PortableSession.PARAMETER_USER_ID + " = " + userId));
         if (null == sessionIDs || 0 == sessionIDs.size()) {
             return new Session[0];
         }
@@ -233,7 +234,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
          * search sessions by context ID
          */
         IMap<String, PortableSession> sessions = sessions();
-        Set<String> sessionIDs = sessions.keySet(new SqlPredicate("contextId = " + contextId));
+        Set<String> sessionIDs = sessions.keySet(new SqlPredicate(PortableSession.PARAMETER_CONTEXT_ID + " = " + contextId));
         if (null == sessionIDs || 0 == sessionIDs.size()) {
             return;
         }
@@ -266,7 +267,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     @Override
     public boolean hasForContext(final int contextId) throws OXException {
         try {
-            Session session = findSession(new SqlPredicate("contextId = " + contextId));
+            Session session = findSession(new SqlPredicate(PortableSession.PARAMETER_CONTEXT_ID + " = " + contextId));
             if (null != session && session.getContextId() == contextId) {
                 return true;
             }
@@ -284,8 +285,8 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         /*
          * find sessions by context- and user-ID
          */
-        Collection<PortableSession> sessions = sessions().values(
-            new SqlPredicate("contextId = " + contextId + " AND userId = " + userId));
+        Collection<PortableSession> sessions = sessions().values(new SqlPredicate(
+            PortableSession.PARAMETER_CONTEXT_ID + " = " + contextId + " AND " + PortableSession.PARAMETER_USER_ID + " = " + userId));
         return null != sessions ? sessions.toArray(new Session[sessions.size()]) : new Session[0];
     }
 
@@ -294,7 +295,8 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         /*
          * find session by context- and user-ID
          */
-        return findSession(new SqlPredicate("contextId = " + contextId + " AND userId = " + userId));
+        return findSession(new SqlPredicate(
+            PortableSession.PARAMETER_CONTEXT_ID + " = " + contextId + " AND " + PortableSession.PARAMETER_USER_ID + " = " + userId));
     }
 
     @Override
@@ -331,7 +333,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     public Session getSessionByRandomToken(final String randomToken, final String newIP) throws OXException {
         try {
             if (null != randomToken) {
-                PortableSession session = findSession(new SqlPredicate("randomToken = '" + randomToken + "'"));
+                PortableSession session = findSession(new SqlPredicate(PortableSession.PARAMETER_RANDOM_TOKEN + " = '" + randomToken + "'"));
                 if (null != session && randomToken.equals(session.getRandomToken())) {
                     if (false == session.getLocalIp().equals(newIP)) {
                         session.setLocalIp(newIP);
@@ -361,7 +363,8 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             if (null == altId) {
                 throw new NullPointerException("altId is null.");
             }
-            Session session = findSession(new AltIdPredicate(altId));
+//            Session session = findSession(new AltIdPredicate(altId));
+            Session session = findSession(new SqlPredicate(PortableSession.PARAMETER_ALT_ID + " = '" + altId + "'"));
             if (null != session && altId.equals(session.getParameter(Session.PARAM_ALTERNATIVE_ID))) {
                 return session;
             }
@@ -456,7 +459,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     public void checkAuthId(final String login, final String authId) throws OXException {
         if (null != authId) {
             try {
-                Session session = findSession(new SqlPredicate("authId = '" + authId + "'"));
+                Session session = findSession(new SqlPredicate(PortableSession.PARAMETER_AUTH_ID + " = '" + authId + "'"));
                 if (null != session && authId.equals(session.getAuthId())) {
                     throw SessionStorageExceptionCodes.DUPLICATE_AUTHID.create(session.getLogin(), login);
                 }
@@ -473,7 +476,8 @@ public class HazelcastSessionStorageService implements SessionStorageService {
          * search sessions by context- and user-ID
          */
         IMap<String, PortableSession> sessions = sessions();
-        Set<String> sessionIDs = sessions.keySet(new SqlPredicate("contextId = " + contextId + " AND userId = " + userId));
+        Set<String> sessionIDs = sessions.keySet(new SqlPredicate(
+            PortableSession.PARAMETER_CONTEXT_ID + " = " + contextId + " AND " + PortableSession.PARAMETER_USER_ID + " = " + userId));
         return null != sessionIDs ? sessionIDs.size() : 0;
     }
 

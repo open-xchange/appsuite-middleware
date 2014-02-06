@@ -53,6 +53,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import com.hazelcast.nio.ObjectDataInput;
+import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.CustomPortable;
@@ -68,6 +70,21 @@ public class PortableSession extends StoredSession implements CustomPortable {
 
     /** The unique portable class ID of the {@link PortableSession} */
     public static final int CLASS_ID = 1;
+
+    public static final String PARAMETER_LOGIN_NAME = "loginName";
+    public static final String PARAMETER_PASSWORD = "password";
+    public static final String PARAMETER_CONTEXT_ID = "contextId";
+    public static final String PARAMETER_USER_ID = "userId";
+    public static final String PARAMETER_SESSION_ID = "sessionId";
+    public static final String PARAMETER_SECRET = "secret";
+    public static final String PARAMETER_LOGIN = "login";
+    public static final String PARAMETER_RANDOM_TOKEN = "randomToken";
+    public static final String PARAMETER_LOCAL_IP = "localIp";
+    public static final String PARAMETER_AUTH_ID = "authId";
+    public static final String PARAMETER_HASH = "hash";
+    public static final String PARAMETER_CLIENT = "client";
+    public static final String PARAMETER_USER_LOGIN = "userLogin";
+    public static final String PARAMETER_ALT_ID = "altId";
 
     private static final long serialVersionUID = -2346327568417617677L;
 
@@ -102,36 +119,34 @@ public class PortableSession extends StoredSession implements CustomPortable {
         /*
          * basic properties
          */
-        writer.writeUTF("loginName", loginName);
-        writer.writeUTF("password", password);
-        writer.writeInt("contextId", contextId);
-        writer.writeInt("userId", userId);
-        writer.writeUTF("sessionId", sessionId);
-        writer.writeUTF("secret", secret);
-        writer.writeUTF("login", login);
-        writer.writeUTF("randomToken", randomToken);
-        writer.writeUTF("localIp", localIp);
-        writer.writeUTF("authId", authId);
-        writer.writeUTF("hash", hash);
-        writer.writeUTF("client", client);
-        writer.writeUTF("userLogin", userLogin);
+        writer.writeUTF(PARAMETER_LOGIN_NAME, loginName);
+        writer.writeUTF(PARAMETER_PASSWORD, password);
+        writer.writeInt(PARAMETER_CONTEXT_ID, contextId);
+        writer.writeInt(PARAMETER_USER_ID, userId);
+        writer.writeUTF(PARAMETER_SESSION_ID, sessionId);
+        writer.writeUTF(PARAMETER_SECRET, secret);
+        writer.writeUTF(PARAMETER_LOGIN, login);
+        writer.writeUTF(PARAMETER_RANDOM_TOKEN, randomToken);
+        writer.writeUTF(PARAMETER_LOCAL_IP, localIp);
+        writer.writeUTF(PARAMETER_AUTH_ID, authId);
+        writer.writeUTF(PARAMETER_HASH, hash);
+        writer.writeUTF(PARAMETER_CLIENT, client);
+        writer.writeUTF(PARAMETER_USER_LOGIN, userLogin);
         /*
          * special handling for parameters map
          */
-        Object alternativeID = parameters.get(PARAM_ALTERNATIVE_ID);
-        writer.writeUTF("alternativeID", null != alternativeID && String.class.isInstance(alternativeID) ? (String)alternativeID : null);
+        Object altId = parameters.get(PARAM_ALTERNATIVE_ID);
+        writer.writeUTF(PARAMETER_ALT_ID, null != altId && String.class.isInstance(altId) ? (String)altId : null);
         Object capabilitiesValue = parameters.get(PARAM_CAPABILITIES);
-        if (null != capabilitiesValue && java.util.Collection.class.isInstance(capabilitiesValue)) {
+        boolean hasCapabilities = null != capabilitiesValue && java.util.Collection.class.isInstance(capabilitiesValue);
+        writer.writeBoolean("hasCapabilities", hasCapabilities);
+        if (hasCapabilities) {
             Collection<?> capabilities = (Collection<?>)capabilitiesValue;
-            int size = capabilities.size();
-            writer.writeInt("capabilitiesSize", size);
-            int i = 0;
+            ObjectDataOutput out = writer.getRawDataOutput();
+            out.writeInt(capabilities.size());
             for (Object capability : capabilities) {
-                writer.writeUTF("capability" + String.valueOf(++i),
-                    null != capability && String.class.isInstance(capability) ? (String)capability : null);
+                out.writeUTF(null != capability && String.class.isInstance(capability) ? (String)capability : null);
             }
-        } else {
-            writer.writeInt("capabilitiesSize", 0);
         }
     }
 
@@ -140,31 +155,33 @@ public class PortableSession extends StoredSession implements CustomPortable {
         /*
          * basic properties
          */
-        loginName = reader.readUTF("loginName");
-        password = reader.readUTF("password");
-        contextId = reader.readInt("contextId");
-        userId = reader.readInt("userId");
-        sessionId = reader.readUTF("sessionId");
-        secret = reader.readUTF("secret");
-        login = reader.readUTF("login");
-        randomToken = reader.readUTF("randomToken");
-        localIp = reader.readUTF("localIp");
-        authId = reader.readUTF("authId");
-        hash = reader.readUTF("hash");
-        client = reader.readUTF("client");
-        userLogin = reader.readUTF("userLogin");
+        loginName = reader.readUTF(PARAMETER_LOGIN_NAME);
+        password = reader.readUTF(PARAMETER_PASSWORD);
+        contextId = reader.readInt(PARAMETER_CONTEXT_ID);
+        userId = reader.readInt(PARAMETER_USER_ID);
+        sessionId = reader.readUTF(PARAMETER_SESSION_ID);
+        secret = reader.readUTF(PARAMETER_SECRET);
+        login = reader.readUTF(PARAMETER_LOGIN);
+        randomToken = reader.readUTF(PARAMETER_RANDOM_TOKEN);
+        localIp = reader.readUTF(PARAMETER_LOCAL_IP);
+        authId = reader.readUTF(PARAMETER_AUTH_ID);
+        hash = reader.readUTF(PARAMETER_HASH);
+        client = reader.readUTF(PARAMETER_CLIENT);
+        userLogin = reader.readUTF(PARAMETER_USER_LOGIN);
         /*
          * special handling for parameters map
          */
-        String alternativeID = reader.readUTF("alternativeID");
-        if (null != alternativeID) {
-            parameters.put(PARAM_ALTERNATIVE_ID, alternativeID);
+        String altId = reader.readUTF(PARAMETER_ALT_ID);
+        if (null != altId) {
+            parameters.put(PARAM_ALTERNATIVE_ID, altId);
         }
-        int capabilitiesSize = reader.readInt("capabilitiesSize");
-        if (0 < capabilitiesSize) {
-            List<String> capabilities = new ArrayList<String>();
-            for (int i = 0; i < capabilitiesSize; i++) {
-                capabilities.add(reader.readUTF("capabilitiy" + String.valueOf(i)));
+        boolean hasCapabilities = reader.readBoolean("hasCapabilities");
+        if (hasCapabilities) {
+            ObjectDataInput in = reader.getRawDataInput();
+            int size = in.readInt();
+            List<String> capabilities = new ArrayList<String>(size);
+            for (int i = 0; i < size; i++) {
+                capabilities.add(in.readUTF());
             }
             parameters.put(PARAM_CAPABILITIES, capabilities);
         }

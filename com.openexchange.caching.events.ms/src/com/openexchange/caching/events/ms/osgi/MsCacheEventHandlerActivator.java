@@ -57,8 +57,11 @@ import com.openexchange.caching.CacheKeyService;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.ms.internal.CacheEventWrapper;
 import com.openexchange.caching.events.ms.internal.MsCacheEventHandler;
+import com.openexchange.caching.events.ms.internal.PortableCacheEvent;
+import com.openexchange.caching.events.ms.internal.PortableCacheEventFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.ms.MsService;
+import com.openexchange.hazelcast.serialization.CustomPortableFactory;
+import com.openexchange.ms.PortableMsService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -85,15 +88,16 @@ public final class MsCacheEventHandlerActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: {}", context.getBundle().getSymbolicName());
+        registerService(CustomPortableFactory.class, new PortableCacheEventFactory());
         final BundleContext context = this.context;
         final CacheEventService cacheEventService = getService(CacheEventService.class);
-        track(MsService.class, new ServiceTrackerCustomizer<MsService, MsService>() {
+        track(PortableMsService.class, new ServiceTrackerCustomizer<PortableMsService, PortableMsService>() {
 
             private volatile MsCacheEventHandler eventHandler;
 
             @Override
-            public MsService addingService(ServiceReference<MsService> reference) {
-                MsService messagingService = context.getService(reference);
+            public PortableMsService addingService(ServiceReference<PortableMsService> reference) {
+                PortableMsService messagingService = context.getService(reference);
                 MsCacheEventHandler.setMsService(messagingService);
                 LOG.debug("Initializing messaging service cache event handler");
                 try {
@@ -106,12 +110,12 @@ public final class MsCacheEventHandlerActivator extends HousekeepingActivator {
             }
 
             @Override
-            public void modifiedService(ServiceReference<MsService> reference, MsService service) {
+            public void modifiedService(ServiceReference<PortableMsService> reference, PortableMsService service) {
                 // Ignored
             }
 
             @Override
-            public void removedService(ServiceReference<MsService> reference, MsService service) {
+            public void removedService(ServiceReference<PortableMsService> reference, PortableMsService service) {
                 LOG.debug("Stopping messaging service cache event handler");
                 MsCacheEventHandler eventHandler = this.eventHandler;
                 if (null != eventHandler) {
@@ -126,6 +130,7 @@ public final class MsCacheEventHandlerActivator extends HousekeepingActivator {
             @Override
             public CacheKeyService addingService(ServiceReference<CacheKeyService> reference) {
                 CacheKeyService cacheKeyService = context.getService(reference);
+                PortableCacheEvent.setCacheKeyService(cacheKeyService);
                 CacheEventWrapper.setCacheKeyService(cacheKeyService);
                 return cacheKeyService;
             }
@@ -137,6 +142,7 @@ public final class MsCacheEventHandlerActivator extends HousekeepingActivator {
 
             @Override
             public void removedService(ServiceReference<CacheKeyService> reference, CacheKeyService service) {
+                PortableCacheEvent.setCacheKeyService(null);
                 CacheEventWrapper.setCacheKeyService(null);
             }
         });

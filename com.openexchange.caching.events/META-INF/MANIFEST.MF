@@ -16,5 +16,3 @@ Import-Package: com.openexchange.exception,
  org.slf4j
 Bundle-Activator: com.openexchange.caching.events.osgi.CacheEventServiceActivator
 Export-Package: com.openexchange.caching.events
-Require-Bundle: com.hazelcast;resolution:=optional
-Eclipse-RegisterBuddy: com.hazelcast

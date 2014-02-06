@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.userconfiguration;
 
-import static com.openexchange.java.Autoboxing.B;
-import static com.openexchange.java.Autoboxing.I;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
@@ -148,7 +146,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     private static final CacheKey getKey(Cache cache, Context ctx, int userId, boolean extendedPermissions) {
-        return cache.newCacheKey(ctx.getContextId(), I(userId), B(extendedPermissions));
+        return cache.newCacheKey(ctx.getContextId(), String.valueOf(userId), String.valueOf(extendedPermissions));
     }
 
     /**

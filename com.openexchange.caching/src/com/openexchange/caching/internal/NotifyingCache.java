@@ -276,7 +276,7 @@ public class NotifyingCache extends AbstractCache implements CacheListener {
     }
 
     @Override
-    public CacheKey newCacheKey(int contextId, Serializable... objs) {
+    public CacheKey newCacheKey(int contextId, String... objs) {
         return delegate.newCacheKey(contextId, objs);
     }
 

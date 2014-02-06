@@ -384,16 +384,4 @@ public final class CalendarVolatileCache {
         return null == cache ? null : cache.newCacheKey(cacheType.getNum(), int2);
     }
 
-    /**
-     * New cache key.
-     *
-     * @param cacheType The cache type
-     * @param objs Arbitrary further keys
-     * @return The cache key or <code>null</code>
-     */
-    public CacheKey newCacheKey(final CacheType cacheType, final Serializable... objs) {
-        final Cache cache = this.cache;
-        return null == cache ? null : cache.newCacheKey(cacheType.getNum(), objs);
-    }
-
 }

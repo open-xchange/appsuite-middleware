@@ -381,10 +381,10 @@ public interface Cache {
      * This is a convenience method that delegates to {@link CacheService#newCacheKey(int, Serializable)}.
      *
      * @param contextId The context ID
-     * @param objs The serializable objects for the key
+     * @param objs The objects for the key
      * @return new instance of {@link CacheKey}
      */
-    public CacheKey newCacheKey(int contextId, Serializable... objs);
+    public CacheKey newCacheKey(int contextId, String... objs);
 
     /**
      * Gets the set of keys of objects currently in the group.
