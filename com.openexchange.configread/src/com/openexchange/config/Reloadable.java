@@ -51,7 +51,7 @@ package com.openexchange.config;
 
 
 /**
- * {@link Reloadable} - Marks services that configuration is reloadable without restart.
+ * {@link Reloadable} - Marks services which configuration is reloadable without restart.
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since 7.6.0
