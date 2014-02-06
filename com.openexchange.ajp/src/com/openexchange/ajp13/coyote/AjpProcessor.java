@@ -1697,7 +1697,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             if (servlet == null) {
                 servlet = new HttpErrorServlet("No servlet bound to path/alias: " + AJPv13Utility.urlEncode(reqURI, defaultCharEnc));
             }
+        } else {
+            final String defaultCharEnc = AJPv13Config.getServerProperty(Property.DefaultEncoding);
+            reqURI = AJPv13Utility.decodeUrl(reqURI, defaultCharEnc);
         }
+        path = null; // Not used anymore
         this.servlet = servlet;
         // servletId = pathStorage.length() > 0 ? pathStorage.toString() : null;
         if (servletId.length() > 0) {
