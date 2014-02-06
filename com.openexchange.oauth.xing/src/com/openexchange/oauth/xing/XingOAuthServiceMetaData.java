@@ -69,7 +69,6 @@ import com.openexchange.session.Session;
 public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware, Reloadable {
 
     private final String domain;
-    private ConfigurationService configService;
 
     /**
      * Initializes a new {@link XingOAuthServiceMetaData}.
@@ -79,7 +78,6 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
      */
     public XingOAuthServiceMetaData(final ConfigurationService configService) {
         super();
-        this.configService = configService;
         id = "com.openexchange.oauth.xing";
         displayName = "XING OAuth";
 
@@ -204,7 +202,7 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
     }
 
     @Override
-    public void reloadConfiguration() {
+    public void reloadConfiguration(ConfigurationService configService) {
         final String apiKey = configService.getProperty("com.openexchange.oauth.xing.apiKey");
         if (Strings.isEmpty(apiKey)) {
             throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.apiKey");
