@@ -52,8 +52,8 @@ package com.openexchange.config.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.internal.ConfigurationImpl;
 
 
 /**
@@ -66,10 +66,10 @@ public class ReloadableServiceTracker implements ServiceTrackerCustomizer<Reload
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReloadableServiceTracker.class);
 
-    private ConfigurationService configService;
-    private BundleContext context;
+    private final ConfigurationImpl configService;
+    private final BundleContext context;
 
-    public ReloadableServiceTracker(BundleContext context, ConfigurationService configService) {
+    public ReloadableServiceTracker(BundleContext context, ConfigurationImpl configService) {
         this.context = context;
         this.configService = configService;
     }

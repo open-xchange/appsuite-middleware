@@ -90,7 +90,7 @@ public final class ConfigActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: com.openexchange.configread");
         try {
-            final ConfigurationService configService = new ConfigurationImpl();
+            final ConfigurationImpl configService = new ConfigurationImpl();
             registerService(ConfigurationService.class, configService, null);
 
             {

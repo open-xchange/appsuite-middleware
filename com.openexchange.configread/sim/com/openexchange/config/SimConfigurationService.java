@@ -206,18 +206,4 @@ public class SimConfigurationService implements ConfigurationService {
         return Collections.emptyList();
     }
 
-    @Override
-    public void reloadConfiguration() {
-        // nothing to do
-    }
-
-    @Override
-    public void addReloadable(Reloadable service) {
-        // nothing to do
-    }
-
-    @Override
-    public void removeReloadable(Reloadable service) {
-        // nothing to do
-    }
 }

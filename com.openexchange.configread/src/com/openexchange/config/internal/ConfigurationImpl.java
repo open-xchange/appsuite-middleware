@@ -68,6 +68,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.ho.yaml.Yaml;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
@@ -89,7 +90,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigurationImpl.class);
 
-    private Map<String, Reloadable> reloadableServices;
+    private final ConcurrentMap<String, Reloadable> reloadableServices;
 
     private static final class PropertyFileFilter implements FileFilter {
 
@@ -167,7 +168,7 @@ public final class ConfigurationImpl implements ConfigurationService {
      */
     public ConfigurationImpl(final String[] directories) {
         super();
-        reloadableServices = new ConcurrentHashMap<String, Reloadable>();
+        reloadableServices = new ConcurrentHashMap<String, Reloadable>(128);
         propertiesByFile = new HashMap<String, Properties>(256);
         texts = new ConcurrentHashMap<String, String>(1024);
         properties = new HashMap<String, String>(2048);
@@ -705,7 +706,9 @@ public final class ConfigurationImpl implements ConfigurationService {
         return retval;
     }
 
-    @Override
+    /**
+     * Propagates the reloaded configuration among registered listeners.
+     */
     public void reloadConfiguration() {
         loadConfiguration(getDirectories());
         for (Reloadable service : reloadableServices.values()) {
@@ -713,16 +716,14 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
     }
 
-    @Override
-    public void addReloadable(Reloadable service) {
+    public boolean addReloadable(Reloadable service) {
         if (null != service) {
-            reloadableServices.put(service.getClass().getName(), service);
-        } else {
-            LOG.warn("Tried to add null to reloadable services");
+            return null == reloadableServices.putIfAbsent(service.getClass().getName(), service);
         }
+        LOG.warn("Tried to add null to reloadable services");
+        return false;
     }
 
-    @Override
     public void removeReloadable(Reloadable service) {
         if (null != service) {
             reloadableServices.remove(service.getClass().getName());

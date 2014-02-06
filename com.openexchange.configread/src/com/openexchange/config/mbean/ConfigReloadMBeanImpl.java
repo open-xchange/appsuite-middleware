@@ -51,7 +51,7 @@ package com.openexchange.config.mbean;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.internal.ConfigurationImpl;
 
 
 /**
@@ -62,14 +62,14 @@ import com.openexchange.config.ConfigurationService;
  */
 public class ConfigReloadMBeanImpl extends StandardMBean implements ConfigReloadMBean {
 
-    private ConfigurationService configService;
+    private final ConfigurationImpl configService;
 
     /**
      * Initializes a new {@link ConfigReloadMBeanImpl}.
      * @param mbeanInterface
      * @throws NotCompliantMBeanException
      */
-    public ConfigReloadMBeanImpl(Class<?> mbeanInterface, ConfigurationService configService) throws NotCompliantMBeanException {
+    public ConfigReloadMBeanImpl(Class<?> mbeanInterface, ConfigurationImpl configService) throws NotCompliantMBeanException {
         super(mbeanInterface);
         this.configService = configService;
     }

@@ -54,7 +54,7 @@ import javax.management.ObjectName;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.internal.ConfigurationImpl;
 import com.openexchange.config.mbean.ConfigReloadMBean;
 import com.openexchange.config.mbean.ConfigReloadMBeanImpl;
 import com.openexchange.exception.OXException;
@@ -73,9 +73,9 @@ public class ManagementServiceTracker implements ServiceTrackerCustomizer<Manage
 
     private ObjectName objectName;
 
-    private ConfigurationService configService;
+    private final ConfigurationImpl configService;
 
-    ManagementServiceTracker(final BundleContext context, ConfigurationService configService) {
+    ManagementServiceTracker(final BundleContext context, ConfigurationImpl configService) {
         super();
         this.context = context;
         this.configService = configService;
