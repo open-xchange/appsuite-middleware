@@ -1,3 +1,7 @@
+* 2014-02-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31010: More robust writing of JSON data BLOB to database
+
 * 2014-02-06 - dennis.sieben@open-xchange.com
 
  - Fix for bug 31003: Empty JSON arrays handed over to this extension now result in an exception
