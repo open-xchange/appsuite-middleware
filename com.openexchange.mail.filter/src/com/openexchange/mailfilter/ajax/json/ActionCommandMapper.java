@@ -194,6 +194,9 @@ final class ActionCommandMapper implements Mapper<Rule> {
             final ArrayList<Object> arrayList = new ArrayList<Object>();
             final JSONArray keys = object.optJSONArray(PGPEncryptActionFields.KEYS.getFieldname());
             if (null != keys) {
+                if (0 == keys.length()) {
+                    throw new JSONException("Empty string-arrays are not allowed in sieve.");
+                }
                 arrayList.add(Rule2JSON2Rule.createTagArg(PGPEncryptActionFields.KEYS));
                 arrayList.add(Rule2JSON2Rule.JSONArrayToStringList(keys));
             }
