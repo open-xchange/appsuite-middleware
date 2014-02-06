@@ -61,6 +61,6 @@ public interface Reloadable {
     /**
      * Reload service's configuration
      */
-    public void reloadConfiguration();
+    public void reloadConfiguration(ConfigurationService configService);
 
 }

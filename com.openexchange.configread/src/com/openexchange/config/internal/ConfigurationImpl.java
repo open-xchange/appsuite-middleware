@@ -146,13 +146,13 @@ public final class ConfigurationImpl implements ConfigurationService {
      * Maps objects to yaml filename, with a path
      */
 
-     final Map<String, Object> yamlFiles;
+    final Map<String, Object> yamlFiles;
 
     /**
      * Maps filenames to whole file paths for yaml lookup
      */
 
-     final Map<String, String> yamlPaths;
+    final Map<String, String> yamlPaths;
 
     /**
      * Initializes a new configuration. The properties directory is determined by system property "<code>openexchange.propdir</code>"
@@ -251,9 +251,8 @@ public final class ConfigurationImpl implements ConfigurationService {
                 processDirectory(file, fileFilter, processor);
             } else {
                 /**
-                 * Preparations for US: 55795476 Change configuration values without restarting the systems
-                 * final FileWatcher fileWatcher = FileWatcher.getFileWatcher(file); fileWatcher.addFileListener(new
-                 * ProcessingFileListener(file, processor));
+                 * Preparations for US: 55795476 Change configuration values without restarting the systems final FileWatcher fileWatcher =
+                 * FileWatcher.getFileWatcher(file); fileWatcher.addFileListener(new ProcessingFileListener(file, processor));
                  */
                 processor.processFile(file);
             }
@@ -325,7 +324,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     @Override
     public String getProperty(final String name, final PropertyListener listener) {
-        if(watchProperty(name, listener)) {
+        if (watchProperty(name, listener)) {
             return properties.get(name);
         }
         return null;
@@ -333,7 +332,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     @Override
     public String getProperty(final String name, final String defaultValue, final PropertyListener listener) {
-        if(watchProperty(name, listener)) {
+        if (watchProperty(name, listener)) {
             return properties.get(name);
         }
         return defaultValue;
@@ -347,7 +346,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     @Override
     public List<String> getProperty(String name, String defaultValue, PropertyListener propertyListener, String separator) {
-        if(watchProperty(name, propertyListener)) {
+        if (watchProperty(name, propertyListener)) {
             return getProperty(name, defaultValue, separator);
         }
         return Strings.splitAndTrim(defaultValue, separator);
@@ -472,7 +471,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     @Override
     public boolean getBoolProperty(final String name, final boolean defaultValue, final PropertyListener propertyListener) {
-        if(watchProperty(name, propertyListener)) {
+        if (watchProperty(name, propertyListener)) {
             return getBoolProperty(name, defaultValue);
         }
         return defaultValue;
@@ -491,13 +490,13 @@ public final class ConfigurationImpl implements ConfigurationService {
         return defaultValue;
     }
 
-  @Override
-  public int getIntProperty(final String name, final int defaultValue, final PropertyListener propertyListener) {
-      if(watchProperty(name, propertyListener)) {
-          return getIntProperty(name, defaultValue);
-      }
-      return defaultValue;
-  }
+    @Override
+    public int getIntProperty(final String name, final int defaultValue, final PropertyListener propertyListener) {
+        if (watchProperty(name, propertyListener)) {
+            return getIntProperty(name, defaultValue);
+        }
+        return defaultValue;
+    }
 
     @Override
     public Iterator<String> propertyNames() {
@@ -676,10 +675,10 @@ public final class ConfigurationImpl implements ConfigurationService {
     public Object getYaml(final String filename) {
         String path = yamlPaths.get(filename);
         if (path == null) {
-            path = yamlPaths.get(filename+".yml");
+            path = yamlPaths.get(filename + ".yml");
         }
         if (path == null) {
-            path = yamlPaths.get(filename+".yaml");
+            path = yamlPaths.get(filename + ".yaml");
         }
         if (path == null) {
             return null;
@@ -687,7 +686,6 @@ public final class ConfigurationImpl implements ConfigurationService {
 
         return yamlFiles.get(path);
     }
-
 
     @Override
     public Map<String, Object> getYamlInFolder(final String folderName) {
@@ -712,7 +710,11 @@ public final class ConfigurationImpl implements ConfigurationService {
     public void reloadConfiguration() {
         loadConfiguration(getDirectories());
         for (Reloadable service : reloadableServices.values()) {
-            service.reloadConfiguration();
+            try {
+                service.reloadConfiguration(this);
+            } catch (Exception e) {
+                LOG.warn("Failed to handle reloaded configuration to {}.", service.getClass().getName(), e);
+            }
         }
     }
 
