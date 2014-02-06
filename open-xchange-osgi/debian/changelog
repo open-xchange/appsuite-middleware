@@ -1,3 +1,9 @@
+open-xchange-osgi (7.4.1-21) stable; urgency=low
+
+  * Build for patch 2014-02-11
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 06 Feb 2014 11:55:57 +0100
+
 open-xchange-osgi (7.4.1-20) stable; urgency=low
 
   * Build for patch 2014-02-03
