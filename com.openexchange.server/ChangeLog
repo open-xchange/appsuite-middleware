@@ -1,3 +1,7 @@
+* 2014-02-06 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 31003: Empty JSON arrays handed over to this extension now result in an exception
+
 * 2014-02-05 - dennis.sieben@open-xchange.com
 
  - Fix for bug 30984: registeredServiceImplementations counter must be increased even if the service implementation doesn't require other services

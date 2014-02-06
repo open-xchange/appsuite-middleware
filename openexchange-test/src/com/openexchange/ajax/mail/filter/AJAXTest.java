@@ -5,10 +5,10 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import junit.framework.Assert;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Assert;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
@@ -147,6 +147,19 @@ public abstract class AJAXTest {
         }
     }
 
+    
+    @Test
+    public void MailfilternewPGPTestZero() throws MalformedURLException, IOException, SAXException, JSONException {
+        final WebconversationAndSessionID login = login();
+        try {
+            final String test = "{\"rulename\":\"Inbox encryption\",\"active\":false,\"flags\":[],\"test\":{\"id\":\"true\"},\"actioncmds\":[{\"id\":\"pgp\",\"keys\":[]}]}";
+            final String newid = mailfilternew(login, getHostname(), getUsername(), test, "Empty string-arrays are not allowed in sieve.");
+            System.out.println("Rule created with newid: " + newid);
+        } finally {
+            logout(login);
+        }
+    }
+    
     @Test
     public void MailfilternewPGPTest() throws MalformedURLException, IOException, SAXException, JSONException {
         final WebconversationAndSessionID login = login();
@@ -401,7 +414,7 @@ public abstract class AJAXTest {
         final WebconversationAndSessionID login = login();
         try {
             final String test = "{\"active\":true,\"position\":0,\"flags\":[],\"actioncmds\":[{\"into\":\"INBOX/Spam\",\"id\":\"move\"},{\"id\":\"stop\"}],\"id\":0,\"test\":{\"tests\":[{\"values\":[\"zitate.at\"],\"comparison\":\"user\",\"id\":\"address\"},{\"headers\":[\"subject\"],\"values\":[\"Zitat des Tages\"],\"comparison\":\"contains\",\"id\":\"header\"}],\"id\":\"allof\"},\"rulename\":\"\"}";
-            mailfilternew(login, getHostname(), getUsername(), test, "headers");
+            mailfilternew(login, getHostname(), getUsername(), test, "Exception while parsing JSON: \"Error while reading TestCommand address: JSONObject[\"headers\"] not found.\".");
         } finally {
             logout(login);
         }
@@ -592,8 +605,8 @@ public abstract class AJAXTest {
             throw e;
         }
         if (null != errorfound) {
-            assertTrue("No error params", json.has("error_params"));
-            assertTrue("The given error string: " + errorfound + " was not found in the error params", json.optString("error_params").contains(errorfound));
+            assertTrue("No error desc", json.has("error_desc"));
+            assertTrue("The given error string: " + errorfound + " was not found in the error desc", json.optString("error_desc").contains(errorfound));
             return null;
         } else {
             assertFalse(String.format(json.optString("error"), json.opt("error_params")), json.has("error"));
