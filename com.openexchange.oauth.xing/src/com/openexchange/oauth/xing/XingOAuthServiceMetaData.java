@@ -108,12 +108,35 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
         try {
             final URL url = new URL(callbackUrl);
             final String host = url.getHost();
-            if (domain.equals(host)) {
-                return callbackUrl;
-            }
             final StringAllocator sb = new StringAllocator(callbackUrl.length());
-            final String protocol = toLowerCase(url.getProtocol());
-            sb.append(protocol).append("://");
+
+            // Cut off trailing slash character
+            String domain = this.domain;
+            if (domain.endsWith("/")) {
+                domain = domain.substring(0, domain.length() - 1);
+            }
+
+            // Determine & append protocol
+            final String protocol;
+            if (domain.startsWith("http://")) {
+                if (domain.substring(7).equals(host)) {
+                    return callbackUrl;
+                }
+                protocol = "http";
+            } else if (domain.startsWith("https://")) {
+                if (domain.substring(8).equals(host)) {
+                    return callbackUrl;
+                }
+                protocol = "https";
+            } else {
+                if (domain.equals(host)) {
+                    return callbackUrl;
+                }
+                protocol = toLowerCase(url.getProtocol());
+                sb.append(protocol).append("://");
+            }
+
+            // Append domain & rest of call-back URL
             sb.append(domain);
             final int port = url.getPort();
             if (port >= 0) {
