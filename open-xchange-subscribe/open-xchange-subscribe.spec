@@ -141,6 +141,9 @@ if [ ${1:-0} -eq 2 ]; then
         fi
     done
 
+    #SoftwareChange_Request-1847
+    ox_move_config_file /opt/open-xchange/etc/crawlers /opt/open-xchange/etc/crawlers XING.yml xing.yml
+
     find /opt/open-xchange/etc/crawlers -name "*.yml" -print0 | while read -d $'\0' i; do
         ox_update_permissions "$i" open-xchange:root 644
     done
