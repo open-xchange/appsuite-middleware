@@ -94,6 +94,10 @@ public final class PropertyWatcher implements FileListener {
         WATCHER_MAP.remove(name);
     }
 
+    public static Map<String, PropertyWatcher> getAllWatchers() {
+        return WATCHER_MAP;
+    }
+
     /**
      * Adds a new property watcher bound to given property name. If a previous property watcher has already been bound to specified property
      * name, the existing one is returned and no new watcher is created.
@@ -202,6 +206,10 @@ public final class PropertyWatcher implements FileListener {
         } finally {
             Streams.close(fis);
         }
+    }
+
+    public String getValue() {
+        return value;
     }
 
     @Override

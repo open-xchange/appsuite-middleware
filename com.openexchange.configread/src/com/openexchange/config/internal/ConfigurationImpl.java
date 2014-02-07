@@ -712,6 +712,13 @@ public final class ConfigurationImpl implements ConfigurationService {
      * Propagates the reloaded configuration among registered listeners.
      */
     public void reloadConfiguration() {
+        properties.clear();
+        propertiesByFile.clear();
+        propertiesFiles.clear();
+        texts.clear();
+        yamlFiles.clear();
+        yamlPaths.clear();
+        Map<String, PropertyWatcher> watchers = PropertyWatcher.getAllWatchers();
         loadConfiguration(getDirectories());
         ConfigProviderServiceImpl configProvider = this.configProviderServiceImpl;
         if (configProvider != null) {
@@ -722,6 +729,12 @@ public final class ConfigurationImpl implements ConfigurationService {
                 service.reloadConfiguration(this);
             } catch (Exception e) {
                 LOG.warn("Failed to handle reloaded configuration to {}.", service.getClass().getName(), e);
+            }
+        }
+        for (String watcherName : watchers.keySet()) {
+            PropertyWatcher watcher = watchers.get(watcherName);
+            if (!properties.containsKey(watcher.getValue())) {
+                PropertyWatcher.removePropertWatcher(watcherName);
             }
         }
     }
