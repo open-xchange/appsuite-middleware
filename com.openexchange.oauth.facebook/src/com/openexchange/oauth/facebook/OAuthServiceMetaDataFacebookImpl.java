@@ -291,8 +291,6 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
 
         this.apiKey = apiKey;
         this.apiSecret = secretKey;
-
-//        super.
     }
 
 }
