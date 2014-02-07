@@ -18,14 +18,16 @@ package org.jolokia.detector;
 
 import java.net.URL;
 import java.util.Map;
-
-import javax.management.*;
-
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
 import org.jolokia.backend.executor.MBeanServerExecutor;
+import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
 import org.jolokia.request.JmxRequest;
-import org.jolokia.config.ConfigKey;
-import org.jolokia.util.LogHandler;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -51,6 +53,8 @@ public class ServerHandle {
 
     // vendor name
     private String vendor;
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServerHandle.class);
 
     /**
      * Constructor
@@ -139,7 +143,7 @@ public class ServerHandle {
      * @param pConfig agent configuration
      * @param pLoghandler logger to use for logging any error.
      */
-    public void postDetect(MBeanServerExecutor pServerManager, Configuration pConfig, LogHandler pLoghandler) {
+    public void postDetect(MBeanServerExecutor pServerManager, Configuration pConfig) {
         // Do nothing
     }
 
@@ -215,14 +219,14 @@ public class ServerHandle {
      * @param pLogHandler a log handler for putting out error messages
      * @return the detector specific configuration
      */
-    protected JSONObject getDetectorOptions(Configuration pConfig, LogHandler pLogHandler) {
+    protected JSONObject getDetectorOptions(Configuration pConfig) {
         String optionString = pConfig.get(ConfigKey.DETECTOR_OPTIONS);
         if (optionString != null) {
             try {
                 JSONObject opts = (JSONObject) new JSONParser().parse(optionString);
                 return (JSONObject) opts.get(getProduct());
             } catch (Exception e) {
-                pLogHandler.error("Could not parse options '" + optionString + "' as JSON object: " + e,e);
+                LOG.error("Could not parse options '{}' as JSON object: {}", optionString, e,e);
             }
         }
         return null;

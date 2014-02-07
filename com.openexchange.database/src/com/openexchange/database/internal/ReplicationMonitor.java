@@ -253,10 +253,10 @@ public class ReplicationMonitor {
         } else {
             try {
                 pool.back(con);
-            } catch (PoolingException e) {
+            } catch (final PoolingException e) {
                 DBUtils.close(con);
-                OXException e1 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
-                LOG.error(e1.getMessage(), e1);
+                final OXException e1 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
+                LOG.error("", e1);
             }
         }
     }
