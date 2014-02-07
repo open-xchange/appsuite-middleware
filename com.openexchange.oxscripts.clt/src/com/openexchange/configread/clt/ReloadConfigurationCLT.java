@@ -49,29 +49,13 @@
 
 package com.openexchange.configread.clt;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.HashMap;
-import java.util.Map;
-import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import javax.management.ReflectionException;
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
-import javax.management.remote.JMXConnectorServer;
-import javax.management.remote.JMXServiceURL;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
+import com.openexchange.auth.mbean.AuthenticatorMBean;
+import com.openexchange.cli.AbstractMBeanCLI;
 import com.openexchange.config.mbean.ConfigReloadMBean;
-import com.openexchange.java.Streams;
-import com.openexchange.management.console.JMXAuthenticatorImpl;
 
 /**
  * {@link ReloadConfigurationCLT}
@@ -79,7 +63,7 @@ import com.openexchange.management.console.JMXAuthenticatorImpl;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since 7.6.0
  */
-public class ReloadConfigurationCLT {
+public class ReloadConfigurationCLT extends AbstractMBeanCLI<Void> {
 
     /**
      * Initializes a new {@link ReloadConfigurationCLT}.
@@ -92,124 +76,44 @@ public class ReloadConfigurationCLT {
      * @param args
      */
     public static void main(String[] args) {
-        final CommandLineParser parser = new PosixParser();
-        try {
-            final CommandLine cmd = parser.parse(toolkitOptions, args);
-            if (cmd.hasOption('h')) {
-                printHelp();
-                System.exit(0);
-            }
-            int port = 9999;
-            if (cmd.hasOption('p')) {
-                final String val = cmd.getOptionValue('p');
-                if (null != val) {
-                    try {
-                        port = Integer.parseInt(val.trim());
-                    } catch (final NumberFormatException e) {
-                        System.err.println(new StringBuilder("Port parameter is not a number: ").append(val).toString());
-                        printHelp();
-                        System.exit(3);
-                    }
-                    if (port < 1 || port > 65535) {
-                        System.err.println(new StringBuilder("Port parameter is out of range: ").append(val).append(
-                            ". Valid range is from 1 to 65535.").toString());
-                        printHelp();
-                        System.exit(3);
-                    }
-                }
-            }
-            String jmxLogin = null;
-            if (cmd.hasOption('l')) {
-                jmxLogin = cmd.getOptionValue('l');
-            }
-            String jmxPassword = null;
-            if (cmd.hasOption('s')) {
-                jmxPassword = cmd.getOptionValue('s');
-            }
-
-            final Map<String, Object> environment;
-            if (jmxLogin == null || jmxPassword == null) {
-                environment = null;
-            } else {
-                environment = new HashMap<String, Object>(1);
-                environment.put(JMXConnectorServer.AUTHENTICATOR, new JMXAuthenticatorImpl(jmxLogin, jmxPassword));
-            }
-
-            final JMXServiceURL url = new JMXServiceURL(new StringBuilder("service:jmx:rmi:///jndi/rmi://localhost:").append(port).append(
-                "/server").toString());
-            final JMXConnector jmxConnector = JMXConnectorFactory.connect(url, environment);
-            try {
-                final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
-                mbsc.invoke(getObjectName(ConfigReloadMBean.class.getName(), ConfigReloadMBean.DOMAIN), "reloadConfiguration", null, null);
-                System.exit(0);
-            } finally {
-                Streams.close(jmxConnector);
-            }
-        } catch (final MalformedObjectNameException e) {
-            // Cannot occur
-            System.err.println("Invalid MBean name: " + e.getMessage());
-            System.exit(3);
-        } catch (final ParseException e) {
-            System.err.println("Unable to parse command line: " + e.getMessage());
-            printHelp();
-        } catch (final MalformedURLException e) {
-            System.err.println("URL to connect to server is invalid: " + e.getMessage());
-            System.exit(3);
-        } catch (final IOException e) {
-            System.err.println("Unable to communicate with the server: " + e.getMessage());
-            System.exit(3);
-        } catch (final InstanceNotFoundException e) {
-            System.err.println("Instance is not available: " + e.getMessage());
-            System.exit(3);
-        } catch (final MBeanException e) {
-            final Throwable t = e.getCause();
-            final String message;
-            if (null == t) {
-                message = e.getMessage();
-            } else {
-                message = t.getMessage();
-            }
-            System.err.println(null == message ? "Unexpected error." : "Unexpected error: " + message);
-            System.exit(3);
-        } catch (final ReflectionException e) {
-            System.err.println("Problem with reflective type handling: " + e.getMessage());
-            System.exit(3);
-        } catch (final RuntimeException e) {
-            System.err.println("Problem in runtime: " + e.getMessage());
-            printHelp();
-            System.exit(3);
-        }
+        new ReloadConfigurationCLT().execute(args);
     }
 
-    /**
-     * Creates an appropriate instance of {@link ObjectName} from specified class name and domain name.
-     *
-     * @param className The class name to use as object name
-     * @param domain The domain name
-     * @return An appropriate instance of {@link ObjectName}
-     * @throws MalformedObjectNameException If instantiation of {@link ObjectName} fails
-     */
-    private static ObjectName getObjectName(final String className, final String domain) throws MalformedObjectNameException {
-        final int pos = className.lastIndexOf('.');
-        return new ObjectName(domain, "name", pos == -1 ? className : className.substring(pos + 1));
+    @Override
+    protected void checkOptions(CommandLine cmd) {
+        // no more to check
     }
 
-    private static final Options toolkitOptions;
-
-    static {
-        toolkitOptions = new Options();
-        toolkitOptions.addOption("h", "help", false, "Prints a help text");
-
-        toolkitOptions.addOption("n", "name", true, "The optional bundle's symbolic name");
-
-        toolkitOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
-        toolkitOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
-        toolkitOptions.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
+    @Override
+    protected boolean requiresAdministrativePermission() {
+        return true;
     }
 
-    private static void printHelp() {
-        final HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp("reloadconfiguration", toolkitOptions);
+    @Override
+    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
+        authenticator.doAuthentication(login, password);
+    }
+
+    @Override
+    protected String getFooter() {
+        return null;
+    }
+
+    @Override
+    protected String getName() {
+        return "reloadconfiguration";
+    }
+
+    @Override
+    protected void addOptions(Options options) {
+        // no more to add
+    }
+
+    @Override
+    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
+        mbsc.invoke(getObjectName(ConfigReloadMBean.class.getName(), ConfigReloadMBean.DOMAIN), "reloadConfiguration", null, null);
+        System.out.println("Configuration reloaded.");
+        return null;
     }
 
 }
