@@ -50,6 +50,7 @@
 package com.openexchange.admin.console;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
@@ -75,6 +76,7 @@ import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeDataSupport;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.java.StringAllocator;
 
 /**
  * Implements the CLT showruntimestats.
@@ -521,19 +523,20 @@ public class StatisticTools extends AbstractJMXTools {
         return sb.toString();
     }
 
-    static String showClusterData(final MBeanServerConnection mbc) throws MalformedObjectNameException, NullPointerException, IOException, InstanceNotFoundException, IntrospectionException, ReflectionException, AttributeNotFoundException, MBeanException {
+    static String showClusterData(MBeanServerConnection mbc) throws MalformedObjectNameException, NullPointerException, IOException, InstanceNotFoundException, IntrospectionException, ReflectionException, AttributeNotFoundException, MBeanException {
         // general info
-        StringBuilder sb = new StringBuilder();
-        for (final String type : new String[] { "Cluster", "Statistics", "Member" }) {
-            for (final ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=" + type + ",*"), null)) {
-                final ObjectName objectName = mbean.getObjectName();
-                final MBeanInfo beanInfo = mbc.getMBeanInfo(objectName);
-                for (final MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
-                    if ("Cluster".equals(type) && "Config".equals(attributeInfo.getName())) {
-                        final String value = mbc.getAttribute(mbean.getObjectName(), attributeInfo.getName()).toString();
-                        for (final String keyword : new String[] {
+        StringAllocator sb = new StringAllocator();
+        for (String type : new String[] { "HazelcastInstance", "HazelcastInstance.Node",
+            "HazelcastInstance.ClientEngine", "HazelcastInstance.ConnectionManager" }) {
+            for (ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=" + type + ",*"), null)) {
+                ObjectName objectName = mbean.getObjectName();
+                MBeanInfo beanInfo = mbc.getMBeanInfo(objectName);
+                for (MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
+                    if ("HazelcastInstance".equals(type) && "config".equals(attributeInfo.getName())) {
+                        String value = mbc.getAttribute(mbean.getObjectName(), attributeInfo.getName()).toString();
+                        for (String keyword : new String[] {
                             "groupConfig=", "properties=", "interfaces=", "tcpIpConfig=", "multicastConfig=" }) {
-                            final int startIdx = value.indexOf(keyword);
+                            int startIdx = value.indexOf(keyword);
                             if (-1 < startIdx && startIdx + keyword.length() < value.length()) {
                                 sb.append(objectName);
                                 sb.append(',');
@@ -561,18 +564,18 @@ public class StatisticTools extends AbstractJMXTools {
             }
         }
         // maps
-        for (final String type : new String[] { "Map", "MultiMap", "Topic", "Queue" }) {
-            for (final ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=" + type + ",Cluster=*,name=*"), null)) {
-                final ObjectName objectName = mbean.getObjectName();
-                final MBeanInfo beanInfo = mbc.getMBeanInfo(objectName);
-                for (final MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
+        for (String type : new String[] { "IMap", "IMultiMap", "ITopic", "IQueue" }) {
+            for (ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=" + type + ",instance=*,name=*"), null)) {
+                ObjectName objectName = mbean.getObjectName();
+                MBeanInfo beanInfo = mbc.getMBeanInfo(objectName);
+                for (MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
                     sb.append(objectName);
                     sb.append(',');
                     sb.append(attributeInfo.getName());
                     sb.append(" = ");
                     try {
                         sb.append(mbc.getAttribute(objectName, attributeInfo.getName()));
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         sb.append('[');
                         sb.append(e.getMessage());
                         sb.append(']');
