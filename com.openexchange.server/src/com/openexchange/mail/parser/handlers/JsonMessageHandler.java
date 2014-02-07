@@ -432,6 +432,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     @Override
     public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws OXException {
+        return handleAttachment0(part, isInline, null, baseContentType, fileName, id);
+    }
+
+    private boolean handleAttachment0(final MailPart part, final boolean isInline, final String disposition, final String baseContentType, final String fileName, final String id) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject(8);
             /*
@@ -472,7 +476,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             /*
              * Disposition
              */
-            jsonObject.put(DISPOSITION, Part.ATTACHMENT);
+            jsonObject.put(DISPOSITION, null == disposition ? Part.ATTACHMENT : disposition);
             /*
              * Content-ID
              */
@@ -707,7 +711,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 }
             }
         }
-        return handleAttachment(part, isInline, baseContentType, fileName, id);
+        return handleAttachment0(part, isInline, isInline ? Part.INLINE : Part.ATTACHMENT, baseContentType, fileName, id);
     }
 
     @Override
