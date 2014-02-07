@@ -151,8 +151,12 @@ public final class ConfigurationImpl implements ConfigurationService {
     /**
      * Maps filenames to whole file paths for yaml lookup
      */
-
     final Map<String, String> yamlPaths;
+
+    /**
+     * The <code>ConfigProviderServiceImpl</code> reference.
+     */
+    private volatile ConfigProviderServiceImpl configProviderServiceImpl;
 
     /**
      * Initializes a new configuration. The properties directory is determined by system property "<code>openexchange.propdir</code>"
@@ -709,6 +713,10 @@ public final class ConfigurationImpl implements ConfigurationService {
      */
     public void reloadConfiguration() {
         loadConfiguration(getDirectories());
+        ConfigProviderServiceImpl configProvider = this.configProviderServiceImpl;
+        if (configProvider != null) {
+            configProvider.invalidate();
+        }
         for (Reloadable service : reloadableServices.values()) {
             try {
                 service.reloadConfiguration(this);
@@ -732,6 +740,15 @@ public final class ConfigurationImpl implements ConfigurationService {
         } else {
             LOG.warn("Tried to remove null from reloadable services");
         }
+    }
+
+    /**
+     * Sets associated <code>ConfigProviderServiceImpl</code> instance
+     *
+     * @param configProviderServiceImpl The instance
+     */
+    public void setConfigProviderServiceImpl(ConfigProviderServiceImpl configProviderServiceImpl) {
+        this.configProviderServiceImpl = configProviderServiceImpl;
     }
 
 }

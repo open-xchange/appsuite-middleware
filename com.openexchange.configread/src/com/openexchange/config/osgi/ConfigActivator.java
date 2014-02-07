@@ -96,7 +96,9 @@ public final class ConfigActivator extends HousekeepingActivator {
             {
                 final Hashtable<String, Object> properties = new Hashtable<String, Object>(2);
                 properties.put("scope", "server");
-                registerService(ConfigProviderService.class, new ConfigProviderServiceImpl(configService), properties);
+                ConfigProviderServiceImpl configProviderServiceImpl = new ConfigProviderServiceImpl(configService);
+                configService.setConfigProviderServiceImpl(configProviderServiceImpl);
+                registerService(ConfigProviderService.class, configProviderServiceImpl, properties);
             }
 
             // Web Console stuff

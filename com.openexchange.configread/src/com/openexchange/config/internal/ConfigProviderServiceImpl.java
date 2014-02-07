@@ -141,7 +141,7 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
         }
 
     }
-    
+
     private void initStructuredObjects(final ConfigurationService config) throws OXException {
         Map<String, Object> yamlInFolder = config.getYamlInFolder(SETTINGS);
         for(Object yamlContent: yamlInFolder.values()) {
@@ -219,6 +219,13 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Invalidates cached properties.
+     */
+    public void invalidate() {
+        properties.clear();
     }
 
 }
