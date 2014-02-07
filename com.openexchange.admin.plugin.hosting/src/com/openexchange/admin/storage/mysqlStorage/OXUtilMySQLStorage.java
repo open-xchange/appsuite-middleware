@@ -657,7 +657,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         return stores.toArray(new Filestore[stores.size()]);
     }
 
-    private static List<Integer> listFilestoreIds(final String pattern) throws StorageException {
+    private static List<Integer> listAllFilestoreIds() throws StorageException {
         final Connection con;
         try {
             con = cache.getConnectionForConfigDB();
@@ -668,8 +668,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         ResultSet result = null;
         final List<Integer> ids = new ArrayList<Integer>();
         try {
-            stmt = con.prepareStatement("SELECT id FROM filestore WHERE uri LIKE ?");
-            stmt.setString(1, pattern.replace('*', '%'));
+            stmt = con.prepareStatement("SELECT id FROM filestore");
             result = stmt.executeQuery();
             while (result.next()) {
                 ids.add(I(result.getInt(1)));
@@ -891,7 +890,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     @Override
     public Filestore findFilestoreForContext() throws StorageException {
-        for (final int id : listFilestoreIds("*")) {
+        for (final int id : listAllFilestoreIds()) {
             final Filestore filestore = getFilestore(id, false);
             // This is the special value for not adding contexts to this filestore.
             if (isContextLimitReached(filestore)) {
