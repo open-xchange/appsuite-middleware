@@ -28,6 +28,14 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
 	print "a.draw AREA\n";
 	print "b.label Perm Gen\n";
 	print "b.draw STACK\n";
+	print "c.label class storage\n";
+	print "c.draw AREA\n";
+	print "d.label JIT code cache\n";
+	print "d.draw STACK\n";
+	print "e.label JIT data cache\n";
+	print "e.draw STACK\n";
+	print "f.label miscellaneous non-heap storage\n";
+	print "f.draw STACK\n";
 	exit 0
 }
 									
@@ -48,6 +56,34 @@ while (<SHOWRUNTIME>)
 		s/].*//;
 		$val=$_+0;
 		print "b.value $val\n";
+		next;
+	}
+	if ( $_ =~ /class storage,type=MemoryPool,Usage /) {
+		s/.*\=//; 
+		s/].*//;
+		$val=$_+0;
+		print "c.value $val\n";
+		next;
+	}
+	if ( $_ =~ /JIT code cache,type=MemoryPool,Usage /) {
+		s/.*\=//; 
+		s/].*//;
+		$val=$_+0;
+		print "d.value $val\n";
+		next;
+	}
+	if ( $_ =~ /JIT data cache,type=MemoryPool,Usage /) {
+		s/.*\=//; 
+		s/].*//;
+		$val=$_+0;
+		print "e.value $val\n";
+		next;
+	}
+	if ( $_ =~ /miscellaneous non-heap storage,type=MemoryPool,Usage /) {
+		s/.*\=//; 
+		s/].*//;
+		$val=$_+0;
+		print "f.value $val\n";
 		next;
 	}
 }
