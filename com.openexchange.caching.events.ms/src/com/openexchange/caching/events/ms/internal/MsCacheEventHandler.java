@@ -133,7 +133,6 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
         if (null != message && message.isRemote()) {
             PortableCacheEvent cacheEvent = message.getMessageObject();
             if (null != cacheEvent) {
-                System.out.println("Re-publishing remotely received cache event locally: " + PortableCacheEvent.unwrap(cacheEvent));
                 LOG.debug("Re-publishing remotely received cache event locally: {} [{}]", message.getMessageObject(), message.getSenderId());
                 cacheEvents.notify(this, PortableCacheEvent.unwrap(cacheEvent), true);
             } else {
