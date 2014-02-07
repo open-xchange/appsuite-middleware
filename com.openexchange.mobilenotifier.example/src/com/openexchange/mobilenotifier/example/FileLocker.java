@@ -53,7 +53,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.mobilenotifier.MobileNotifierExceptionCodes;
 
 /**
  * {@link FileLocker}
@@ -73,21 +75,21 @@ public class FileLocker {
         this.lockFile = new File(fileName + ".lock");
     }
 
-    public void writeChangesSafely(String content) throws IOException {
+    public void writeChanges(String content) throws IOException, OXException {
         try {
-            if (lockFile()) {
+            if (isLocked()) {
                 BufferedWriter isw = new BufferedWriter(new FileWriter(fileName));
                 isw.write(content);
                 Streams.close(isw);
             } else {
-                // File already locked
+                throw MobileNotifierExceptionCodes.ALREADY_LOCKED.create();
             }
         } finally {
             unlockFile();
         }
     }
 
-    private synchronized boolean lockFile() throws IOException {
+    private synchronized boolean isLocked() throws IOException {
         if (lockFile.createNewFile()) {
             return true;
         }

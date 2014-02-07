@@ -49,7 +49,6 @@
 
 package com.openexchange.mobilenotifier;
 
-import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 

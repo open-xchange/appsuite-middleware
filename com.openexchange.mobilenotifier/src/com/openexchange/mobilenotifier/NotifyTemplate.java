@@ -83,32 +83,16 @@ public class NotifyTemplate {
         return htmlTemplate;
     }
 
-    public void setHtmlTemplate(String htmlTemplate) {
-        this.htmlTemplate = htmlTemplate;
-    }
-
     public String getTitle() {
         return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
     }
 
     public boolean isSlow() {
         return slow;
     }
 
-    public void setSlow(boolean slow) {
-        this.slow = slow;
-    }
-
     public int getIndex() {
         return index;
-    }
-
-    public void setIndex(int index) {
-        this.index = index;
     }
 
     public Map<String, Object> getAttributes() {

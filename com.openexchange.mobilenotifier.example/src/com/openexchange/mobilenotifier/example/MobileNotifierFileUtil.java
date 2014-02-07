@@ -50,11 +50,9 @@
 package com.openexchange.mobilenotifier.example;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
@@ -101,10 +99,10 @@ public abstract class MobileNotifierFileUtil {
         }
     }
 
-    public static void safelyWriteTemplateFileContent(final String templateFileName, String content) throws OXException {
+    public static void writeTemplateFileContent(final String templateFileName, String content) throws OXException {
         FileLocker fl = new FileLocker(TEMPLATEPATH + templateFileName);
         try {
-            fl.writeChangesSafely(content);
+            fl.writeChanges(content);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
             throw MobileNotifierExceptionCodes.IO_ERROR.create(e, e.getMessage());

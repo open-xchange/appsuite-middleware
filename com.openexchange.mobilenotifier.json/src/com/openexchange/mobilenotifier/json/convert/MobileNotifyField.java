@@ -58,7 +58,7 @@ package com.openexchange.mobilenotifier.json.convert;
 public final class MobileNotifyField {
     public static final String TEMPLATE = "template";
     public static final String SLOW = "slow";
-    public static final String ITEMS= "items";
+    public static final String ITEMS = "items";
     public static final String PROVIDER = "provider";
     public static final String TITLE = "title";
     public static final String INDEX = "index";

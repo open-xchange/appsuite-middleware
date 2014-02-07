@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,59 +47,33 @@
  *
  */
 
-package com.openexchange.mobilenotifier.example;
+package com.openexchange.mobilenotifier.json.convert;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.mobilenotifier.AbstractMobileNotifierService;
-import com.openexchange.mobilenotifier.NotifyItem;
-import com.openexchange.mobilenotifier.NotifyTemplate;
 
 /**
- * {@link ExampleMailMobileNotifierService} - Example mail implementation of a mobile notifier service
- * 
+ * {@link ParsedNotifyTemplate}
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class ExampleMailMobileNotifierService extends AbstractMobileNotifierService {
+public class ParsedNotifyTemplate {
 
-    public ExampleMailMobileNotifierService() {
-        super();
-    }
+    private String frontendName;
 
-    @Override
-    public String getProviderName() {
-        return MobileNotifierProviders.MAIL.getProviderName();
-    }
+    private String htmlTemplate;
 
-    @Override
     public String getFrontendName() {
-        return MobileNotifierProviders.MAIL.getFrontendName();
+        return frontendName;
     }
 
-    @Override
-    public Map<String, NotifyItem> getItems() throws OXException {
-        Map<String, NotifyItem> map = new HashMap<String, NotifyItem>();
-        map.put("sender", new NotifyItem("sender", "heinrich@example.com"));
-        map.put("subject", new NotifyItem("subject", true));
-        map.put("receivedDate", new NotifyItem("receivedDate", "12.04.2013 - 12:45:00"));
-        return map;
+    public void setFrontendName(String frontendName) {
+        this.frontendName = frontendName;
     }
 
-    @Override
-    public NotifyTemplate getTemplate() throws OXException {
-        final String fileName = MobileNotifierProviders.MAIL.getFileName();
-        final String htmlTemplate = MobileNotifierFileUtil.getTeamplateFileContent(fileName);
-        final String title = MobileNotifierProviders.MAIL.getTitle();
-        int index = 1;
-
-        return new NotifyTemplate(title, htmlTemplate, false, index);
+    public String getHtmlTemplate() {
+        return htmlTemplate;
     }
 
-    @Override
-    public void putTemplate(NotifyTemplate notifyTemplate) throws OXException {
-        MobileNotifierFileUtil.writeTemplateFileContent(
-            MobileNotifierProviders.MAIL.getFileName(),
-            "<div class=\"mail-listitem\"><div class=\"sender\"><%= sender %></div><div class=\"date\"><%= receivedDate %></div><div class=\"subject\"><%= subject %></div></div>");
+    public void setHtmlTemplate(String htmlTemplate) {
+        this.htmlTemplate = htmlTemplate;
     }
 }

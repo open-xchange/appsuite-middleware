@@ -96,7 +96,7 @@ public class MobileNotifierServiceRegistryImpl extends ServiceTracker<MobileNoti
             if (mobileNotifier.isEnabled(uid, cid)) {
                 service.add(mobileNotifier);
             } else {
-                throw MobileNotifierExceptionCodes.UNKNOWN_SERVICE.create(mobileNotifier.getProviderName());
+                throw MobileNotifierExceptionCodes.UNKNOWN_SERVICE.create(mobileNotifier.getFrontendName());
             }
         }
         return service;
@@ -107,13 +107,13 @@ public class MobileNotifierServiceRegistryImpl extends ServiceTracker<MobileNoti
         final MobileNotifierService service = context.getService(reference);
         {
             final MobileNotifierService addMe = service;
-            if (null == map.putIfAbsent(addMe.getProviderName(), addMe)) {
+            if (null == map.putIfAbsent(addMe.getFrontendName(), addMe)) {
                 return service;
             }
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MobileNotifierServiceRegistry.class);
             logger.warn(
                 "MobileNotifier service could not be added to registry. Another service meta data is already registered with identifier: {}",
-                addMe.getProviderName());
+                addMe.getFrontendName());
         }
         /*
          * Adding to registry failed
@@ -127,7 +127,7 @@ public class MobileNotifierServiceRegistryImpl extends ServiceTracker<MobileNoti
         if (null != service) {
             try {
                 final MobileNotifierService removeMe = service;
-                map.remove(removeMe.getProviderName());
+                map.remove(removeMe.getFrontendName());
             } finally {
                 context.ungetService(reference);
             }

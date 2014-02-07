@@ -50,6 +50,7 @@
 package com.openexchange.mobilenotifier.json.actions;
 
 import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -61,7 +62,6 @@ import com.openexchange.mobilenotifier.MobileNotifierService;
 import com.openexchange.mobilenotifier.MobileNotifierServiceRegistry;
 import com.openexchange.mobilenotifier.NotifyTemplate;
 import com.openexchange.mobilenotifier.json.MobileNotifierRequest;
-import com.openexchange.mobilenotifier.json.convert.NotifyTemplateParser;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -96,21 +96,18 @@ public class ConfigPutAction extends AbstractMobileNotifierAction {
         final ServerSession session = req.getSession();
         int uid = session.getUserId();
         int cid = session.getContextId();
-        
-        // TODO: Mapping from frotendName to providerName
 
         JSONObject jsonObject = (JSONObject) req.getRequest().requireData();
-        
-        // parsedNotifyTemplate.getHtmlTemplate();
-        // NotifyTemplate parsedNotifyTemplate = NotifyTemplateParser.parseJSON(jsonObject);
+
+        // JSONArray jso = (JSONArray) jsonObject.get("provider");
+        // List<ParsedNotifyTemplate> parsedNotifyTemplate = NotifyTemplateParser.parseJSON(jso);
 
         // dummy - testing put template
-        NotifyTemplate parsedNotifyTemplate = new NotifyTemplate();
+        NotifyTemplate notifyTemplate = new NotifyTemplate();
         List<MobileNotifierService> notifyServices = mobileNotifierRegistry.getAllServices(uid, cid);
         for (MobileNotifierService notifyService : notifyServices) {
-            notifyService.putTemplate(parsedNotifyTemplate);
+            notifyService.putTemplate(notifyTemplate);
         }
-
         return new AJAXRequestResult(Boolean.TRUE);
     }
 }

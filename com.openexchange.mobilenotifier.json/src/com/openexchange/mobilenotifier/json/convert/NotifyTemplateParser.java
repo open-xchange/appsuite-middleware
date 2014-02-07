@@ -49,18 +49,21 @@
 
 package com.openexchange.mobilenotifier.json.convert;
 
+import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.mobilenotifier.NotifyTemplate;
 
 /**
- * {@link NotifyTemplateParser}
- *
+ * {@link NotifyTemplateParser} - Parse a notify template
+ * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class NotifyTemplateParser {
 
+    /**
+     * Initializes a new {@link NotifyTemplateParser}.
+     */
     private NotifyTemplateParser() {
         super();
     }
@@ -73,10 +76,15 @@ public class NotifyTemplateParser {
      * @throws OXException
      * @throws JSONException
      */
-    public static NotifyTemplate parseJSON(JSONObject json) throws OXException, JSONException {
-        NotifyTemplate notifyTemplate = new NotifyTemplate();
+    public static List<ParsedNotifyTemplate> parseJSON(JSONObject json) throws OXException, JSONException {
+        // json object
+        if (json.hasAndNotNull(MobileNotifyField.PROVIDER)) {
 
+        }
+        if (json.hasAndNotNull(MobileNotifyField.TEMPLATE)) {
+
+        }
+        json.toArray();
         return null;
-
     }
 }

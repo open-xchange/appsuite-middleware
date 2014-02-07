@@ -65,7 +65,7 @@ public enum MobileNotifierProviders {
     /**
      * Enum field for appointment provider
      */
-    APPOINTMENT("appointment", "io.ox/appointment", "Appointments", "Appointment.tmpl");
+    APPOINTMENT("appointment", "io.ox/calendar", "Appointments", "Appointment.tmpl");
 
     private final String providerName;
 
