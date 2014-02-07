@@ -891,12 +891,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     @Override
     public Filestore findFilestoreForContext() throws StorageException {
-        final List<Integer> ids = listFilestoreIds("*");
-        final List<Filestore> filestores = new ArrayList<Filestore>();
-        for (final int id : ids) {
-            filestores.add(getFilestore(id, false));
-        }
-        for (final Filestore filestore : filestores) {
+        for (final int id : listFilestoreIds("*")) {
+            final Filestore filestore = getFilestore(id, false);
             // This is the special value for not adding contexts to this filestore.
             if (isContextLimitReached(filestore)) {
                 continue;
