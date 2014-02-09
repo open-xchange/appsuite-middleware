@@ -62,10 +62,12 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.config.IMAPProperties;
+import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.notify.IMAPNotifierRegistryService;
 import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
 import com.openexchange.imap.services.Services;
@@ -155,6 +157,7 @@ public final class IMAPActivator extends HousekeepingActivator {
              * Register login handler
              */
             registerService(LoginHandlerService.class, new ThreadableLoginHandler(this));
+            registerService(Reloadable.class, IMAPReloadable.getInstance());
             /*
              * Register event handler
              */

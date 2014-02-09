@@ -71,6 +71,7 @@ import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.acl.ACLExtensionInit;
@@ -79,6 +80,7 @@ import com.openexchange.imap.cache.ListLsubEntry;
 import com.openexchange.imap.cache.MBoxEnabledCache;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.config.IMAPSessionProperties;
 import com.openexchange.imap.config.MailAccountIMAPProperties;
 import com.openexchange.imap.converters.IMAPFolderConverter;
@@ -250,6 +252,19 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * A simple cache for max. count values per server.
      */
     private static volatile ConcurrentMap<String, Integer> maxCountCache;
+
+    static {
+        IMAPReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(final ConfigurationService configService) {
+                final ConcurrentMap<String, Integer> m = maxCountCache;
+                if (null != m) {
+                    m.clear();
+                }
+            }
+        });
+    }
 
     /**
      * Initializes a new {@link IMAPAccess IMAP access} for default IMAP account.

@@ -75,6 +75,7 @@ import javax.mail.ReadOnlyFolderException;
 import javax.mail.StoreClosedException;
 import javax.mail.search.FlagTerm;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -93,6 +94,7 @@ import com.openexchange.imap.cache.UserFlagsCache;
 import com.openexchange.imap.command.CopyIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.converters.IMAPFolderConverter;
 import com.openexchange.imap.dataobjects.IMAPMailFolder;
 import com.openexchange.imap.entity2acl.Entity2ACL;
@@ -154,6 +156,17 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
         }
         return tmp.intValue();
+    }
+
+    static {
+        IMAPReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(final ConfigurationService configService) {
+                maxMailboxNameLength = null;
+                invalidChars = null;
+            }
+        });
     }
 
     private static final String STR_INBOX = "INBOX";

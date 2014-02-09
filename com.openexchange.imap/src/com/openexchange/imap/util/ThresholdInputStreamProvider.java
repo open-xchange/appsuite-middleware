@@ -58,7 +58,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
+import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.services.Services;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
@@ -364,7 +366,6 @@ public final class ThresholdInputStreamProvider implements Closeable, InputStrea
     } // End of class TransferringOutStream
 
     private static volatile File uploadDirectory;
-
     private static File uploadDirectory() {
         File tmp = uploadDirectory;
         if (null == tmp) {
@@ -378,6 +379,16 @@ public final class ThresholdInputStreamProvider implements Closeable, InputStrea
             }
         }
         return tmp;
+    }
+
+    static {
+        IMAPReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(final ConfigurationService configService) {
+                uploadDirectory = null;
+            }
+        });
     }
 
     /**
