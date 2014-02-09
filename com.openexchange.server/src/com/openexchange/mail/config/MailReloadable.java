@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.imap.config;
+package com.openexchange.mail.config;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -57,23 +57,23 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link IMAPReloadable} - Collects reloadables for IMAP bundle.
+ * {@link MailReloadable} - Collects reloadables for mail module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.0
  */
-public final class IMAPReloadable implements Reloadable {
+public final class MailReloadable implements Reloadable {
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(IMAPReloadable.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MailReloadable.class);
 
-    private static final IMAPReloadable INSTANCE = new IMAPReloadable();
+    private static final MailReloadable INSTANCE = new MailReloadable();
 
     /**
      * Gets the instance.
      *
      * @return The instance
      */
-    public static IMAPReloadable getInstance() {
+    public static MailReloadable getInstance() {
         return INSTANCE;
     }
 
@@ -82,9 +82,9 @@ public final class IMAPReloadable implements Reloadable {
     private final List<Reloadable> reloadables;
 
     /**
-     * Initializes a new {@link IMAPReloadable}.
+     * Initializes a new {@link MailReloadable}.
      */
-    private IMAPReloadable() {
+    private MailReloadable() {
         super();
         reloadables = new CopyOnWriteArrayList<Reloadable>();
     }
@@ -101,10 +101,10 @@ public final class IMAPReloadable implements Reloadable {
     @Override
     public void reloadConfiguration(final ConfigurationService configService) {
         try {
-            final IMAPProperties imapProperties = IMAPProperties.getInstance();
-            if (null != imapProperties) {
-                imapProperties.resetProperties();
-                imapProperties.loadProperties();
+            final MailProperties mailProperties = MailProperties.getInstance();
+            if (null != mailProperties) {
+                mailProperties.resetProperties();
+                mailProperties.loadProperties();
             }
         } catch (final OXException e) {
             // TODO Auto-generated catch block

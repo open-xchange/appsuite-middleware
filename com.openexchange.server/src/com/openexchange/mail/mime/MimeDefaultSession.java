@@ -50,7 +50,10 @@
 package com.openexchange.mail.mime;
 
 import java.util.Properties;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.config.MailReloadable;
 
 /**
  * {@link MimeDefaultSession} - Provides access to default instance of {@link javax.mail.Session}
@@ -91,6 +94,17 @@ public final class MimeDefaultSession {
             }
         }
         return tmp;
+    }
+
+    static {
+        MailReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                instance = null;
+                properties = null;
+            }
+        });
     }
 
     /**

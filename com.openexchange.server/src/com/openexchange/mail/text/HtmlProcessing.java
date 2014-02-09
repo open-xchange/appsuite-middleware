@@ -76,6 +76,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
@@ -85,6 +86,7 @@ import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.conversion.InlineImageDataSource;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.ContentType;
@@ -265,6 +267,17 @@ public final class HtmlProcessing {
             }
         }
         return useSanitize.booleanValue();
+    }
+
+    static {
+        MailReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                useSanitize = null;
+                imageHost = null;
+            }
+        });
     }
 
     /**

@@ -66,8 +66,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -98,6 +100,17 @@ public final class MimeType2ExtMap {
      */
     private MimeType2ExtMap() {
         super();
+    }
+
+    static {
+        MailReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                reset();
+                init();
+            }
+        });
     }
 
     /**
