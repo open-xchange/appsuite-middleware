@@ -49,8 +49,12 @@
 
 package com.openexchange.find.json.actions;
 
+import java.util.Map;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.find.Module;
+import com.openexchange.find.ModuleConfig;
 import com.openexchange.find.SearchService;
 import com.openexchange.find.json.FindRequest;
 
@@ -69,7 +73,9 @@ public class ConfigAction extends AbstractFindAction {
 
     @Override
     protected AJAXRequestResult doPerform(FindRequest request) throws OXException {
-        return null;
+        SearchService searchService = getSearchService();
+        Map<Module, ModuleConfig> configuration = searchService.getConfiguration(request.getServerSession());
+        return new AJAXRequestResult(configuration, "com.openexchange.find.ModuleConfig");
     }
 
 }

@@ -49,12 +49,15 @@
 
 package com.openexchange.find.json.actions;
 
+import org.json.JSONException;
+
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.SearchService;
 import com.openexchange.find.json.FindRequest;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -76,13 +79,17 @@ public abstract class AbstractFindAction implements AJAXActionService {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         FindRequest searchRequest = new FindRequest(requestData, session);
-        return doPerform(searchRequest);
+        try {
+            return doPerform(searchRequest);
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        }
     }
 
     protected SearchService getSearchService() {
         return searchService;
     }
 
-    protected abstract AJAXRequestResult doPerform(FindRequest request) throws OXException;
+    protected abstract AJAXRequestResult doPerform(FindRequest request) throws OXException, JSONException;
 
 }

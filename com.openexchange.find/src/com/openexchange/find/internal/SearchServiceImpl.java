@@ -56,10 +56,12 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
@@ -70,7 +72,7 @@ import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.SearchService;
 import com.openexchange.find.spi.ModuleSearchDriver;
-import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -92,12 +94,12 @@ public class SearchServiceImpl implements SearchService, ServiceTrackerCustomize
     }
 
     @Override
-    public Map<Module, ModuleConfig> getConfiguration(Session session) throws OXException {
+    public Map<Module, ModuleConfig> getConfiguration(ServerSession session) throws OXException {
         Map<Module, ModuleConfig> configs = new HashMap<Module, ModuleConfig>(driversByModule.size());
         for (Module module : driversByModule.keySet()) {
             ModuleSearchDriver driver = determineDriver(session, module);
             if (driver != null) {
-                configs.put(module, driver.getConfiguration());
+                configs.put(module, driver.getConfiguration(session));
             }
         }
 
@@ -105,18 +107,18 @@ public class SearchServiceImpl implements SearchService, ServiceTrackerCustomize
     }
 
     @Override
-    public AutocompleteResult autocomplete(Session session, Module module, AutocompleteRequest autocompleteRequest) throws OXException {
+    public AutocompleteResult autocomplete(ServerSession session, Module module, AutocompleteRequest autocompleteRequest) throws OXException {
         ModuleSearchDriver driver = requireDriver(session, module);
         return driver.autocomplete(session, autocompleteRequest);
     }
 
     @Override
-    public SearchResult search(Session session, Module module, SearchRequest searchRequest) throws OXException {
+    public SearchResult search(ServerSession session, Module module, SearchRequest searchRequest) throws OXException {
         ModuleSearchDriver driver = requireDriver(session, module);
         return driver.search(session, searchRequest);
     }
 
-    private ModuleSearchDriver requireDriver(Session session, Module module) throws OXException {
+    private ModuleSearchDriver requireDriver(ServerSession session, Module module) throws OXException {
         ModuleSearchDriver determined = determineDriver(session, module);
         if (determined == null) {
             throw FindExceptionCode.MISSING_DRIVER.create(module.name(), session.getUserId(), session.getContextId());
@@ -125,7 +127,7 @@ public class SearchServiceImpl implements SearchService, ServiceTrackerCustomize
         return determined;
     }
 
-    private ModuleSearchDriver determineDriver(Session session, Module module) throws OXException {
+    private ModuleSearchDriver determineDriver(ServerSession session, Module module) throws OXException {
         ModuleSearchDriver determined = null;
         SortedSet<ComparableDriver> drivers = driversByModule.get(module);
         if (drivers != null) {

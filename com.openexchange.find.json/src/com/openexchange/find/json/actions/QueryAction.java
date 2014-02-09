@@ -49,8 +49,17 @@
 
 package com.openexchange.find.json.actions;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.json.JSONException;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.find.Filter;
+import com.openexchange.find.Module;
+import com.openexchange.find.SearchRequest;
+import com.openexchange.find.SearchResult;
 import com.openexchange.find.SearchService;
 import com.openexchange.find.json.FindRequest;
 
@@ -68,8 +77,13 @@ public class QueryAction extends AbstractFindAction {
     }
 
     @Override
-    protected AJAXRequestResult doPerform(FindRequest request) throws OXException {
-        return null;
+    protected AJAXRequestResult doPerform(FindRequest request) throws OXException, JSONException {
+        SearchService searchService = getSearchService();
+        List<String> queries = Collections.emptyList();
+        List<Filter> filters = Collections.singletonList(new Filter(Collections.singleton("folder"), "default0/INBOX"));
+        SearchRequest searchRequest = new SearchRequest(0, 10, queries, filters);
+        SearchResult result = searchService.search(request.getServerSession(), Module.MAIL, searchRequest);
+        return new AJAXRequestResult(result, "com.openexchange.find.SearchResult");
     }
 
 }

@@ -51,6 +51,9 @@ package com.openexchange.find.json.actions;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.find.AutocompleteRequest;
+import com.openexchange.find.AutocompleteResult;
+import com.openexchange.find.Module;
 import com.openexchange.find.SearchService;
 import com.openexchange.find.json.FindRequest;
 
@@ -70,7 +73,9 @@ public class AutocompleteAction extends AbstractFindAction {
     @Override
     protected AJAXRequestResult doPerform(FindRequest request) throws OXException {
         String prefix = request.requirePrefix();
-        return null;
+        SearchService searchService = getSearchService();
+        AutocompleteResult result = searchService.autocomplete(request.getServerSession(), Module.MAIL, new AutocompleteRequest(prefix));
+        return new AJAXRequestResult(result, "com.openexchange.find.AutocompleteResult");
     }
 
 }

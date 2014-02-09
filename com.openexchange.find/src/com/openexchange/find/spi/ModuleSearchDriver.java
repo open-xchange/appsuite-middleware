@@ -55,7 +55,7 @@ import com.openexchange.find.Module;
 import com.openexchange.find.ModuleConfig;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
-import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  *
@@ -68,12 +68,12 @@ public interface ModuleSearchDriver {
 
     Module getModule();
 
-    boolean isValidFor(Session session) throws OXException;
+    boolean isValidFor(ServerSession session) throws OXException;
 
-    ModuleConfig getConfiguration() throws OXException;
+    ModuleConfig getConfiguration(ServerSession session) throws OXException;
 
-    AutocompleteResult autocomplete(Session session, AutocompleteRequest autocompleteRequest) throws OXException;
+    AutocompleteResult autocomplete(ServerSession session, AutocompleteRequest autocompleteRequest) throws OXException;
 
-    SearchResult search(Session session, SearchRequest searchRequest) throws OXException;
+    SearchResult search(ServerSession session, SearchRequest searchRequest) throws OXException;
 
 }

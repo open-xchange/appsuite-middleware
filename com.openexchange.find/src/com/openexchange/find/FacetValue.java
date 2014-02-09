@@ -57,6 +57,8 @@ package com.openexchange.find;
  */
 public class FacetValue {
 
+    public static final String NO_NAME = null;
+
     private final String name;
 
     private final int count;

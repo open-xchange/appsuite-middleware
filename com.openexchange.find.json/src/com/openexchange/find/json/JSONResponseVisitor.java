@@ -46,33 +46,77 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.find.json;
 
-package com.openexchange.find.json.osgi;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.find.SearchService;
-import com.openexchange.find.json.FindActionFactory;
-import com.openexchange.find.json.converters.SearchResultConverter;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import com.openexchange.exception.OXException;
+import com.openexchange.find.DocumentVisitor;
+import com.openexchange.find.mail.MailDocument;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailListField;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.json.writer.MessageWriter;
+import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
+import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- *
- * {@link FindJsonActivator}
+ * {@link JSONResponseVisitor}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.0
  */
-public class FindJsonActivator extends AJAXModuleActivator {
+public class JSONResponseVisitor implements DocumentVisitor {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SearchService.class };
+    private static final MailFieldWriter[] WRITERS;
+    static {
+        MailListField[] listFields = new MailListField[MailField.FIELDS_LOW_COST.length];
+        for (int i = 0; i < MailField.FIELDS_LOW_COST.length; i++) {
+            MailField mailField = MailField.FIELDS_LOW_COST[i];
+            listFields[i] = mailField.getListField();
+        }
+        WRITERS = MessageWriter.getMailFieldWriter(listFields);
+    }
+
+    private final ServerSession session;
+
+    private final List<OXException> errors;
+
+    private final JSONArray json;
+
+    public JSONResponseVisitor(final ServerSession session) {
+        super();
+        this.session = session;
+        errors = new ArrayList<OXException>();
+        json = new JSONArray();
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerService(ResultConverter.class, new SearchResultConverter());
-        registerModule(new FindActionFactory(getService(SearchService.class)), "find");
+    public void visit(MailDocument mailDocument) {
+        MailMessage mailMessage = mailDocument.getMailMessage();
+        try {
+            JSONObject jsonMessage = new JSONObject();
+            for (MailFieldWriter writer : WRITERS) {
+                writer.writeField(jsonMessage, mailMessage, 0, true, mailMessage.getAccountId(), session.getUserId(), session.getContextId(), TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()));
+            }
+
+            json.put(jsonMessage);
+        } catch (OXException e) {
+            errors.add(e);
+        }
+    }
+
+    public JSONArray getJSONArray() {
+        return json;
+    }
+
+    public List<OXException> getErrors() {
+        return errors;
     }
 
 }

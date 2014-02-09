@@ -46,33 +46,69 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.find.json.converters;
 
-package com.openexchange.find.json.osgi;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.find.SearchService;
-import com.openexchange.find.json.FindActionFactory;
-import com.openexchange.find.json.converters.SearchResultConverter;
+import com.openexchange.exception.OXException;
+import com.openexchange.find.Document;
+import com.openexchange.find.SearchResult;
+import com.openexchange.find.json.JSONResponseVisitor;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- *
- * {@link FindJsonActivator}
+ * {@link SearchResultConverter}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.0
  */
-public class FindJsonActivator extends AJAXModuleActivator {
+public class SearchResultConverter implements ResultConverter {
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SearchService.class };
+    public String getInputFormat() {
+        return "com.openexchange.find.SearchResult";
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerService(ResultConverter.class, new SearchResultConverter());
-        registerModule(new FindActionFactory(getService(SearchService.class)), "find");
+    public String getOutputFormat() {
+        return "json";
+    }
+
+    @Override
+    public Quality getQuality() {
+        return Quality.GOOD;
+    }
+
+    @Override
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        Object resultObject = result.getResultObject();
+        if (resultObject instanceof SearchResult) {
+            SearchResult searchResult = (SearchResult) resultObject;
+            JSONObject json = new JSONObject();
+            try {
+                json.put("numFound", searchResult.getNumFound());
+                json.put("from", searchResult.getStart());
+                json.put("size", searchResult.getSize());
+
+                JSONResponseVisitor visitor = new JSONResponseVisitor(session);
+                for (Document document : searchResult.getDocuments()) {
+                    document.accept(visitor);
+                }
+                JSONArray jsonDocuments = visitor.getJSONArray();
+                // TODO: handle possible exceptions from visitor.getErrors()
+                json.put("results", jsonDocuments);
+                result.setResultObject(json, "json");
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+            }
+        }
     }
 
 }

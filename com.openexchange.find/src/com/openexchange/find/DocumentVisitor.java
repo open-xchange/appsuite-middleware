@@ -46,33 +46,18 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.find;
 
-package com.openexchange.find.json.osgi;
-
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.find.SearchService;
-import com.openexchange.find.json.FindActionFactory;
-import com.openexchange.find.json.converters.SearchResultConverter;
+import com.openexchange.find.mail.MailDocument;
 
 /**
- *
- * {@link FindJsonActivator}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since 7.6.0
- */
-public class FindJsonActivator extends AJAXModuleActivator {
+* {@link DocumentVisitor}
+*
+* @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+* @since 7.6.0
+*/
+public interface DocumentVisitor {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SearchService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(ResultConverter.class, new SearchResultConverter());
-        registerModule(new FindActionFactory(getService(SearchService.class)), "find");
-    }
+    void visit(MailDocument mailDocument);
 
 }

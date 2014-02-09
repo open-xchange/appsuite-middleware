@@ -51,7 +51,7 @@ package com.openexchange.find;
 import java.util.Map;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  *
@@ -62,10 +62,10 @@ import com.openexchange.session.Session;
  */
 public interface SearchService {
 
-    Map<Module, ModuleConfig> getConfiguration(Session session) throws OXException;
+    Map<Module, ModuleConfig> getConfiguration(ServerSession session) throws OXException;
 
-    AutocompleteResult autocomplete(Session session, Module module, AutocompleteRequest autocompleteRequest) throws OXException;
+    AutocompleteResult autocomplete(ServerSession session, Module module, AutocompleteRequest autocompleteRequest) throws OXException;
 
-    SearchResult search(Session session, Module module, SearchRequest searchRequest) throws OXException;
+    SearchResult search(ServerSession session, Module module, SearchRequest searchRequest) throws OXException;
 
 }
