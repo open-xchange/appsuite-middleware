@@ -50,8 +50,10 @@
 package com.openexchange.twitter.osgi;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.twitter.TwitterService;
+import com.openexchange.twitter.internal.TwitterConfiguration;
 import com.openexchange.twitter.internal.TwitterServiceImpl;
 
 /**
@@ -82,6 +84,7 @@ public final class TwitterActivator extends HousekeepingActivator {
              * Register
              */
             registerService(TwitterService.class, new TwitterServiceImpl());
+            registerService(Reloadable.class, TwitterConfiguration.getInstance());
         } catch (final Exception e) {
             log.error("Failed start-up of bundle com.openexchange.twitter", e);
             throw e;

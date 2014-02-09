@@ -75,27 +75,27 @@ public class ReloadableServiceTracker implements ServiceTrackerCustomizer<Reload
     }
 
     @Override
-    public Reloadable addingService(ServiceReference<Reloadable> arg0) {
-        Reloadable service = context.getService(arg0);
+    public Reloadable addingService(ServiceReference<Reloadable> serviceRef) {
+        Reloadable service = context.getService(serviceRef);
         if (configService.addReloadable(service)) {
             LOG.debug("Reloadable service added: " + service.getClass().getName());
             return service;
         }
         // Already present
-        context.ungetService(arg0);
+        context.ungetService(serviceRef);
         return null;
     }
 
     @Override
-    public void modifiedService(ServiceReference<Reloadable> arg0, Reloadable arg1) {
+    public void modifiedService(ServiceReference<Reloadable> serviceRef, Reloadable reloadable) {
         // nothing to do
     }
 
     @Override
-    public void removedService(ServiceReference<Reloadable> arg0, Reloadable arg1) {
-        configService.removeReloadable(arg1);
-        LOG.debug("Reloadable service removed: " + arg1.getClass().getName());
-        context.ungetService(arg0);
+    public void removedService(ServiceReference<Reloadable> serviceRef, Reloadable reloadable) {
+        configService.removeReloadable(reloadable);
+        LOG.debug("Reloadable service removed: " + reloadable.getClass().getName());
+        context.ungetService(serviceRef);
     }
 
 }

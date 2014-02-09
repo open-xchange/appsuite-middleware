@@ -120,8 +120,8 @@ public final class TwitterServiceImpl implements TwitterService {
         /*
          * Insert the appropriate consumer key and consumer secret here
          */
-        final String consumerKey = TwitterConfiguration.getConsumerKey();
-        final String consumerSecret = TwitterConfiguration.getConsumerSecret();
+        final String consumerKey = TwitterConfiguration.getInstance().getConsumerKey();
+        final String consumerSecret = TwitterConfiguration.getInstance().getConsumerSecret();
         if (null == consumerKey || null == consumerSecret) {
             throw TwitterExceptionCodes.MISSING_CONSUMER_KEY_SECRET.create(new Object[0]);
         }
@@ -143,8 +143,8 @@ public final class TwitterServiceImpl implements TwitterService {
             /*
              * Obtain request token
              */
-            final String consumerKey = TwitterConfiguration.getConsumerKey();
-            final String consumerSecret = TwitterConfiguration.getConsumerSecret();
+            final String consumerKey = TwitterConfiguration.getInstance().getConsumerKey();
+            final String consumerSecret = TwitterConfiguration.getInstance().getConsumerSecret();
             if (null == consumerKey || null == consumerSecret) {
                 throw TwitterExceptionCodes.MISSING_CONSUMER_KEY_SECRET.create(new Object[0]);
             }

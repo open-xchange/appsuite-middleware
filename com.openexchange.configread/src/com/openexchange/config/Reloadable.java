@@ -51,16 +51,21 @@ package com.openexchange.config;
 
 
 /**
- * {@link Reloadable} - Marks services which configuration is reloadable without restart.
+ * {@link Reloadable} - Marks services that perform necessary actions in order to apply (possibly) new configuration.
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added some JavaDoc
  * @since 7.6.0
  */
 public interface Reloadable {
 
     /**
-     * Reload service's configuration
+     * Signals that the configuration has been reloaded.
+     * <p>
+     * This {@link Reloadable} instance should perform necessary actions in order to apply (possibly) new configuration.
+     *
+     * @param configService The configuration service providing newly initialized properties
      */
-    public void reloadConfiguration(ConfigurationService configService);
+    void reloadConfiguration(ConfigurationService configService);
 
 }

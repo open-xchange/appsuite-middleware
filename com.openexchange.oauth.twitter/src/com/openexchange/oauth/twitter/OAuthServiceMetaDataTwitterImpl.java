@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth.twitter;
 
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 
@@ -57,7 +59,7 @@ import com.openexchange.oauth.AbstractOAuthServiceMetaData;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OAuthServiceMetaDataTwitterImpl extends AbstractOAuthServiceMetaData {
+public class OAuthServiceMetaDataTwitterImpl extends AbstractOAuthServiceMetaData implements Reloadable {
 
     public OAuthServiceMetaDataTwitterImpl() {
         super();
@@ -94,5 +96,11 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractOAuthServiceMetaDat
 	public API getAPI() {
 		return API.TWITTER;
 	}
+
+    @Override
+    public void reloadConfiguration(final ConfigurationService configService) {
+        // Nothing to do since AbstractOAuthServiceMetaData is initialized with property names;
+        // Values are read on demand
+    }
 
 }

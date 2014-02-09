@@ -129,12 +129,11 @@ public final class PropertyWatcher implements FileListener {
         return watcher;
     }
 
+    // -------------------------------------------------------------------------------------------------- //
+
     private final Map<Class<? extends PropertyListener>, PropertyListener> listeners;
-
     private final boolean caseInsensitive;
-
     private final String name;
-
     private String value;
 
     /**
@@ -218,10 +217,20 @@ public final class PropertyWatcher implements FileListener {
         }
     }
 
+    /**
+     * Gets the name of the property being watched.
+     *
+     * @return The property name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Gets the current value of the property being watched.
+     *
+     * @return The property value
+     */
     public String getValue() {
         return value;
     }

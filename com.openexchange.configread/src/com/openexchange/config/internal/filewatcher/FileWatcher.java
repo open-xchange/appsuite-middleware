@@ -151,7 +151,7 @@ public final class FileWatcher {
         }
     }
 
-    // ------------------------------------------------------------------------------------- //
+    // -------------------------------------------------------------------------------------------------- //
 
     final File file;
 
@@ -182,6 +182,9 @@ public final class FileWatcher {
      * @param listener The listener to add
      */
     public void addFileListener(final FileListener listener) {
+        if (null == listener) {
+            return;
+        }
         listeners.add(listener);
     }
 
@@ -191,6 +194,9 @@ public final class FileWatcher {
      * @param listener The listener to remove
      */
     public void removeFileListener(final FileListener listener) {
+        if (null == listener) {
+            return;
+        }
         final boolean removed = listeners.remove(listener);
         if (removed && listeners.isEmpty()) {
             stopFileWatcher();

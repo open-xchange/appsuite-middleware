@@ -88,6 +88,9 @@ import com.openexchange.java.Strings;
  */
 public final class ConfigurationImpl implements ConfigurationService {
 
+    /**
+     * The logger constant.
+     */
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigurationImpl.class);
 
     private final ConcurrentMap<String, Reloadable> reloadableServices;
@@ -362,7 +365,11 @@ public final class ConfigurationImpl implements ConfigurationService {
         if (pw != null) {
             pw.removePropertyListener(listener);
             if (pw.isEmpty()) {
-                PropertyWatcher.removePropertWatcher(name);
+                final PropertyWatcher removedWatcher = PropertyWatcher.removePropertWatcher(name);
+                final FileWatcher fileWatcher = FileWatcher.optFileWatcher(new File(propertiesFiles.get(name)));
+                if (null != fileWatcher) {
+                    fileWatcher.removeFileListener(removedWatcher);
+                }
             }
         }
     }
@@ -713,7 +720,7 @@ public final class ConfigurationImpl implements ConfigurationService {
      */
     public void reloadConfiguration() {
         // Copy current content to get associated files on check for expired PropertyWatchers
-        final Map<String, String> propertiesFilesCopy = new HashMap<String, String>(propertiesFiles);
+        // final Map<String, String> propertiesFilesCopy = new HashMap<String, String>(propertiesFiles);
 
         // Clear maps
         properties.clear();
@@ -724,7 +731,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         yamlPaths.clear();
 
         // (Re-)load configuration
-        final Map<String, PropertyWatcher> watchers = PropertyWatcher.getAllWatchers();
+        // final Map<String, PropertyWatcher> watchers = PropertyWatcher.getAllWatchers();
         loadConfiguration(getDirectories());
         final ConfigProviderServiceImpl configProvider = this.configProviderServiceImpl;
         if (configProvider != null) {
@@ -741,6 +748,8 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
 
         // Check for expired PropertyWatchers
+        /*-
+         *
         for (final PropertyWatcher watcher : watchers.values()) {
             final String propertyName = watcher.getName();
             if (!properties.containsKey(propertyName)) {
@@ -749,9 +758,10 @@ public final class ConfigurationImpl implements ConfigurationService {
                 if (null != fileWatcher) {
                     fileWatcher.removeFileListener(removedWatcher);
                 }
-
             }
         }
+         *
+         */
     }
 
     public boolean addReloadable(Reloadable service) {
