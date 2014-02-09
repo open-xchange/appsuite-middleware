@@ -89,11 +89,21 @@ public final class PropertyWatcher implements FileListener {
      * Removes an existing property watcher bound to given property name
      *
      * @param name The property name
+     * @return The removed property watcher
      */
-    public static void removePropertWatcher(final String name) {
-        WATCHER_MAP.remove(name);
+    public static PropertyWatcher removePropertWatcher(final String name) {
+        final PropertyWatcher removed = WATCHER_MAP.remove(name);
+        if (null != removed) {
+            removed.listeners.clear();
+        }
+        return removed;
     }
 
+    /**
+     * Gets all watchers.
+     *
+     * @return The watchers map
+     */
     public static Map<String, PropertyWatcher> getAllWatchers() {
         return WATCHER_MAP;
     }
@@ -206,6 +216,10 @@ public final class PropertyWatcher implements FileListener {
         } finally {
             Streams.close(fis);
         }
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getValue() {

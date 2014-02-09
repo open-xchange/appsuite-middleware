@@ -712,29 +712,44 @@ public final class ConfigurationImpl implements ConfigurationService {
      * Propagates the reloaded configuration among registered listeners.
      */
     public void reloadConfiguration() {
+        // Copy current content to get associated files on check for expired PropertyWatchers
+        final Map<String, String> propertiesFilesCopy = new HashMap<String, String>(propertiesFiles);
+
+        // Clear maps
         properties.clear();
         propertiesByFile.clear();
         propertiesFiles.clear();
         texts.clear();
         yamlFiles.clear();
         yamlPaths.clear();
-        Map<String, PropertyWatcher> watchers = PropertyWatcher.getAllWatchers();
+
+        // (Re-)load configuration
+        final Map<String, PropertyWatcher> watchers = PropertyWatcher.getAllWatchers();
         loadConfiguration(getDirectories());
-        ConfigProviderServiceImpl configProvider = this.configProviderServiceImpl;
+        final ConfigProviderServiceImpl configProvider = this.configProviderServiceImpl;
         if (configProvider != null) {
             configProvider.invalidate();
         }
-        for (Reloadable service : reloadableServices.values()) {
+
+        // Propagate reloaded configuration among Reloadables
+        for (final Reloadable service : reloadableServices.values()) {
             try {
                 service.reloadConfiguration(this);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.warn("Failed to handle reloaded configuration to {}.", service.getClass().getName(), e);
             }
         }
-        for (String watcherName : watchers.keySet()) {
-            PropertyWatcher watcher = watchers.get(watcherName);
-            if (!properties.containsKey(watcher.getValue())) {
-                PropertyWatcher.removePropertWatcher(watcherName);
+
+        // Check for expired PropertyWatchers
+        for (final PropertyWatcher watcher : watchers.values()) {
+            final String propertyName = watcher.getName();
+            if (!properties.containsKey(propertyName)) {
+                final PropertyWatcher removedWatcher = PropertyWatcher.removePropertWatcher(propertyName);
+                final FileWatcher fileWatcher = FileWatcher.optFileWatcher(new File(propertiesFilesCopy.get(propertyName)));
+                if (null != fileWatcher) {
+                    fileWatcher.removeFileListener(removedWatcher);
+                }
+
             }
         }
     }
