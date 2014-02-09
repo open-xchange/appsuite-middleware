@@ -145,16 +145,4 @@ final class DBUtils {
         }
     }
 
-    static void close(Connection con) {
-        if (null == con) {
-            return;
-        }
-        try {
-            if (!con.isClosed()) {
-                con.close();
-            }
-        } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
-        }
-    }
 }
