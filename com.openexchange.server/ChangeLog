@@ -1,3 +1,7 @@
+* 2014-02-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31039: Perform a move to trash through a RENAME command on associated IMAP folder
+
 * 2014-02-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 31010: More robust writing of JSON data BLOB to database
