@@ -52,6 +52,7 @@ package com.openexchange.ajax.mobilenotifier;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import com.openexchange.ajax.mobilenotifier.tests.ConfiggetTest;
+import com.openexchange.ajax.mobilenotifier.tests.ConfigputTest;
 import com.openexchange.ajax.mobilenotifier.tests.GetTest;
 
 
@@ -66,6 +67,7 @@ public class MobileNotifierTestSuite {
         final TestSuite tests = new TestSuite("com.openexchange.ajax.mobilenotifier.MobileNotifierTestSuite");
         tests.addTestSuite(GetTest.class);
         tests.addTestSuite(ConfiggetTest.class);
+        tests.addTestSuite(ConfigputTest.class);
         return tests;
     }
 }

@@ -87,7 +87,7 @@ public class ConfiggetTest extends AbstractMobileNotifierTest {
 
         assertNotNull(res.getData());
         JSONObject notifyTemplateJSON = (JSONObject) res.getData();
-        
+
         assertNotNull("could not find element \"provider\" in json structure", notifyTemplateJSON.get("provider"));
         JSONObject providersArray = (JSONObject) notifyTemplateJSON.get("provider");
 
@@ -99,7 +99,7 @@ public class ConfiggetTest extends AbstractMobileNotifierTest {
         for (int i = 0; i < providersArray.length(); i++) {
             assertNotNull(providersArray.get(providerValue.get(i)));
             JSONObject providerObject = (JSONObject) providersArray.get(providerValue.get(i));
-            
+
             assertNotNull("could not find attribute template", providerObject.get("template"));
             Assert.assertTrue("value of attribute template is empty ", providerObject.getString("template").length() > 0);
             assertNotNull("could not find attribute slow", providerObject.get("slow"));
@@ -111,13 +111,13 @@ public class ConfiggetTest extends AbstractMobileNotifierTest {
         ConfiggetMobileNotifierRequest req = new ConfiggetMobileNotifierRequest();
         ConfiggetMobileNotifierResponse res = getClient().execute(req);
 
-        // assertNotNull(res.getData());
-        // JSONObject notifyTemplateJSON = (JSONObject) res.getData();
-        //
-        // assertNotNull("could not find element \"provider\" in json structure", notifyTemplateJSON.get("provider"));
-        // JSONObject providersObject = (JSONObject) notifyTemplateJSON.get("provider");
+        assertNotNull(res.getData());
+        JSONObject notifyTemplateJSON = (JSONObject) res.getData();
 
+        assertNotNull("could not find element \"provider\" in json structure", notifyTemplateJSON.get("provider"));
+        JSONObject providersObject = (JSONObject) notifyTemplateJSON.get("provider");
 
+        // TODO
     }
 
     public void testShouldThrowExceptionIfUnknownProvider() throws OXException, IOException, JSONException {

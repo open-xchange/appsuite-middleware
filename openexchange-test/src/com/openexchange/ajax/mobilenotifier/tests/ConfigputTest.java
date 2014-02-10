@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,30 @@
  *
  */
 
-package com.openexchange.mobilenotifier.example;
+package com.openexchange.ajax.mobilenotifier.tests;
 
-import java.util.ArrayList;
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.mobilenotifier.AbstractMobileNotifierService;
-import com.openexchange.mobilenotifier.NotifyItem;
-import com.openexchange.mobilenotifier.NotifyTemplate;
 
 /**
- * {@link ExampleMailMobileNotifierService} - Example mail implementation of a mobile notifier service
- * 
+ * {@link ConfigputTest}
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class ExampleMailMobileNotifierService extends AbstractMobileNotifierService {
+public class ConfigputTest extends AbstractMobileNotifierTest {
 
-    public ExampleMailMobileNotifierService() {
-        super();
+    /**
+     * Initializes a new {@link ConfigputTest}.
+     * 
+     * @param name
+     */
+    public ConfigputTest(String name) {
+        super(name);
     }
 
-    @Override
-    public String getProviderName() {
-        return MobileNotifierProviders.MAIL.getProviderName();
+    public void testMobileNotifierPutAction() {
+        // TODO
     }
 
-    @Override
-    public String getFrontendName() {
-        return MobileNotifierProviders.MAIL.getFrontendName();
-    }
+    public void shouldThrowExceptionOnWrongJSONBodyMobileNotifierPutAction() {
 
-    @Override
-    public List<NotifyItem> getItems() throws OXException {
-        List<NotifyItem> list = new ArrayList<NotifyItem>();
-        list.add(new NotifyItem("sender", "heinrich@example.com"));
-        list.add(new NotifyItem("subject", true));
-        list.add(new NotifyItem("receivedDate", "12.04.2013 - 12:45:00"));
-        return list;
-    }
-
-    @Override
-    public NotifyTemplate getTemplate() throws OXException {
-        final String fileName = MobileNotifierProviders.MAIL.getFileName();
-        final String htmlTemplate = MobileNotifierFileUtil.getTeamplateFileContent(fileName);
-        final String title = MobileNotifierProviders.MAIL.getTitle();
-        int index = 1;
-
-        return new NotifyTemplate(title, htmlTemplate, false, index);
-    }
-
-    @Override
-    public void putTemplate(String changedTemplate) throws OXException {
-        MobileNotifierFileUtil.writeTemplateFileContent(MobileNotifierProviders.MAIL.getFileName(), changedTemplate);
     }
 }

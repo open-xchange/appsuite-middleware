@@ -59,7 +59,7 @@ import com.openexchange.mobilenotifier.MobileNotifierExceptionCodes;
 
 /**
  * {@link FileLocker}
- *
+ * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 
@@ -76,29 +76,34 @@ public class FileLocker {
     }
 
     public void writeChanges(String content) throws IOException, OXException {
-        try {
-            if (isLocked()) {
+        if (isLocked()) {
+            try {
                 final BufferedWriter isw = new BufferedWriter(new FileWriter(fileName));
                 isw.write(content);
                 Streams.close(isw);
-            } else {
-                throw MobileNotifierExceptionCodes.ALREADY_LOCKED.create();
+            } finally {
+                unlockFile();
             }
-        } finally {
-            unlockFile();
+        } else {
+            throw MobileNotifierExceptionCodes.ALREADY_LOCKED.create();
+        }
+
+    }
+
+    private boolean isLocked() throws IOException {
+        synchronized (this) {
+            if (lockFile.createNewFile()) {
+                return true;
+            }
+            return false;
         }
     }
 
-    private synchronized boolean isLocked() throws IOException {
-        if (lockFile.createNewFile()) {
-            return true;
-        }
-        return false;
-    }
-
-    private synchronized void unlockFile() {
-        if (lockFile.exists()) {
-            lockFile.delete();
+    private void unlockFile() {
+        synchronized (this) {
+            if (lockFile.exists()) {
+                lockFile.delete();
+            }
         }
     }
 }

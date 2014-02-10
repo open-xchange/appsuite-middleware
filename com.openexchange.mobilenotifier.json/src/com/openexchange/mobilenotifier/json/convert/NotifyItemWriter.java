@@ -49,9 +49,7 @@
 
 package com.openexchange.mobilenotifier.json.convert;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -82,21 +80,18 @@ public class NotifyItemWriter {
         final JSONArray itemsArray = new JSONArray();
         final JSONObject itemsJSON = new JSONObject();
 
-        itemsArray.put(transformMapToJSONObject(service.getItems()));
+        itemsArray.put(transformListToJSONObject(service.getItems()));
         itemsJSON.put(MobileNotifyField.ITEMS, itemsArray);
         return itemsJSON;
     }
 
-    private static JSONObject transformMapToJSONObject(Map<String, NotifyItem> items) throws JSONException {
+    private static JSONObject transformListToJSONObject(List<NotifyItem> items) throws JSONException {
         final JSONObject itemJSON = new JSONObject();
-        final Iterator<Entry<String, NotifyItem>> iter = items.entrySet().iterator();
 
-        while (iter.hasNext()) {
-            final Entry<String, NotifyItem> next = iter.next();
-            final String key = next.getValue().getKey();
-            final Object value = next.getValue().getValue();
-            itemJSON.put(key, value);
+        for (NotifyItem item : items) {
+            itemJSON.put(item.getKey(), item.getValue());
         }
+
         return itemJSON;
     }
 }
