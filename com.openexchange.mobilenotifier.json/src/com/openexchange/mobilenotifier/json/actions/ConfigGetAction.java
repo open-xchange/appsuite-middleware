@@ -89,10 +89,11 @@ public class ConfigGetAction extends AbstractMobileNotifierAction {
     @Override
     protected AJAXRequestResult perform(MobileNotifierRequest req) throws OXException, JSONException {
         // optional parameter provider
+        String param = req.getParameter("provider");
         String[] providers = null;
 
-        if (req.getParameter("provider") != null) {
-            providers = req.getParameterAsStringArray("provider");
+        if (param != null) {
+            providers = req.getParameterAsStringArray(param);
         }
 
         final MobileNotifierServiceRegistry mobileNotifierRegistry = getService(MobileNotifierServiceRegistry.class);
