@@ -719,6 +719,8 @@ public final class ConfigurationImpl implements ConfigurationService {
      * Propagates the reloaded configuration among registered listeners.
      */
     public void reloadConfiguration() {
+
+        LOG.info("Reloading configuration");
         // Copy current content to get associated files on check for expired PropertyWatchers
         // final Map<String, String> propertiesFilesCopy = new HashMap<String, String>(propertiesFiles);
 
