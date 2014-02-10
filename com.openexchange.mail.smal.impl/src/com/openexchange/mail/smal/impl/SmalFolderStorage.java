@@ -61,6 +61,7 @@ import com.openexchange.mail.Quota.Type;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageDelegator;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
+import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -74,7 +75,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SmalFolderStorage extends AbstractSMALStorage implements IMailFolderStorage, IMailFolderStorageEnhanced, IMailFolderStorageDelegator {
+public final class SmalFolderStorage extends AbstractSMALStorage implements IMailFolderStorage, IMailFolderStorageEnhanced2, IMailFolderStorageDelegator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SmalFolderStorage.class);
 
@@ -352,4 +353,38 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
             null,
             FIELDS_ID).length;
     }
+
+    @Override
+    public int[] getTotalAndUnreadCounter(String fullName) throws OXException {
+        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess = smalMailAccess.getDelegateMailAccess();
+        final IMailFolderStorage folderStorage = delegateMailAccess.getFolderStorage();
+        if (folderStorage instanceof IMailFolderStorageEnhanced2) {
+            return ((IMailFolderStorageEnhanced2) folderStorage).getTotalAndUnreadCounter(ensureFullName(fullName));
+        }
+        if (folderStorage instanceof IMailFolderStorageEnhanced) {
+            final IMailFolderStorageEnhanced storageEnhanced = (IMailFolderStorageEnhanced) folderStorage;
+            final String ensuredFullName = ensureFullName(fullName);
+            final int total = storageEnhanced.getTotalCounter(ensuredFullName);
+            final int unread = storageEnhanced.getUnreadCounter(ensuredFullName);
+            return new int[] { total, unread };
+        }
+
+        final int total = delegateMailAccess.getMessageStorage().searchMessages(
+            ensureFullName(fullName),
+            IndexRange.NULL,
+            MailSortField.RECEIVED_DATE,
+            OrderDirection.ASC,
+            null,
+            FIELDS_ID).length;
+
+        final int unread = delegateMailAccess.getMessageStorage().getUnreadMessages(
+            ensureFullName(fullName),
+            MailSortField.RECEIVED_DATE,
+            OrderDirection.DESC,
+            FIELDS_ID,
+            -1).length;
+
+        return new int[] { total, unread };
+    }
+
 }

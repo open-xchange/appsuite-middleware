@@ -331,7 +331,7 @@ public final class ListLsubCache {
                  * Return
                  */
                 ListLsubEntry entry = collection.getList(fullName);
-                if (null != entry && (entry.canOpen() || entry.isNamespace())) {
+                if (null != entry/* && (entry.canOpen() || entry.isNamespace())*/) {
                     return entry;
                 }
                 /*
