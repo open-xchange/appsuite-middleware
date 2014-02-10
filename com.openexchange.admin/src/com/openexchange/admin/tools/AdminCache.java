@@ -710,4 +710,8 @@ public class AdminCache {
         }
         return isWhitespace;
     }
+
+    public void reloadMasterCredentials(ConfigurationService configService) throws OXGenericException {
+        readMasterCredentials(configService);
+    }
 }

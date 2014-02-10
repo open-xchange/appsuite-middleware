@@ -72,6 +72,7 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
@@ -168,7 +169,9 @@ public class Activator extends HousekeepingActivator {
         registerService(CreateTableService.class, new CreateIcalVcardTables());
 
         // Register authenticator
-        registerService(Authenticator.class, new AuthenticatorImpl());
+        AuthenticatorImpl authenticator = new AuthenticatorImpl();
+        registerService(Authenticator.class, authenticator);
+        registerService(Reloadable.class, authenticator);
     }
 
     /**
