@@ -51,6 +51,8 @@ package com.openexchange.oauth.linkedin;
 
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.LinkedInApi;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
@@ -61,7 +63,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware {
+public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware, Reloadable {
 
     private final ServiceLookup services;
 
@@ -110,6 +112,22 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaDa
     @Override
     public Class<? extends Api> getScribeService() {
         return LinkedInApi.class;
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        String apiKey = configService.getProperty(apiKeyName);
+        String secretKey = configService.getProperty(apiSecretName);
+
+        if (apiKey.isEmpty()) {
+            throw new IllegalStateException("Missing following property in configuration: " + apiKeyName);
+        }
+        if (secretKey.isEmpty()) {
+            throw new IllegalStateException("Missing following property in configuration: " + apiSecretName);
+        }
+
+        this.apiKey = apiKey;
+        this.apiSecret = secretKey;
     }
 
 }
