@@ -74,4 +74,17 @@ public interface HazelcastConfigurationService  {
      */
     Config getConfig() throws OXException;
 
+    /**
+     * Gets the actual name of a distributed map based on the supplied prefix. <p/>
+     *
+     * To support some kind of versioning, map names may be defined with an index suffix in configuration files, such as
+     * <code>mymap-5</code>. This method browses the known map configurations for the full name of the map as registered in hazelcast
+     * based on the supplied prefix, which would be <code>mymap-</code> in the above example.
+     *
+     * @param namePrefix The name prefix, e.g. <code>mymap-</code>
+     * @return The full name of the map, e.g. <code>mymap-5</code>
+     * @throws OXException If no matching map configuration was found
+     */
+    String dicoverMapName(String namePrefix) throws OXException;
+
 }

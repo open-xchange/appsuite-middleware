@@ -123,6 +123,23 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         return config;
     }
 
+    @Override
+    public String dicoverMapName(String namePrefix) throws OXException {
+        Map<String, MapConfig> mapConfigs = getConfig().getMapConfigs();
+        if (null != mapConfigs && 0 < mapConfigs.size()) {
+            for (String mapName : mapConfigs.keySet()) {
+                if (mapName.startsWith(namePrefix)) {
+                    LOG.info("Using distributed map '{}'.", mapName);
+                    return mapName;
+                }
+            }
+        }
+        OXException exception = ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(
+            "No distributed map matching prefix '" + namePrefix + "'  found in hazelcast configuration");
+        LOG.warn("", exception);
+        throw exception;
+    }
+
     /**
      * Loads and configures the hazelcast configuration.
      *
@@ -268,13 +285,12 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         String loggingType = configService.getBoolProperty("com.openexchange.hazelcast.logging.enabled", true) ? "sl4fj" : "none";
         System.setProperty(GroupProperties.PROP_LOGGING_TYPE, loggingType);
         config.setProperty(GroupProperties.PROP_LOGGING_TYPE, loggingType);
-//        config.setProperty(GroupProperties.PROP_MAX_OPERATION_TIMEOUT,
-//            configService.getProperty("com.openexchange.hazelcast.maxOperationTimeout", "5000"));
+        config.setProperty(GroupProperties.PROP_VERSION_CHECK_ENABLED, "false");
+        config.setProperty(GroupProperties.PROP_OPERATION_CALL_TIMEOUT_MILLIS,
+            configService.getProperty("com.openexchange.hazelcast.maxOperationTimeout", "5000"));
         config.setProperty(GroupProperties.PROP_ENABLE_JMX, configService.getProperty("com.openexchange.hazelcast.jmx", "true"));
         config.setProperty(GroupProperties.PROP_ENABLE_JMX_DETAILED,
             configService.getProperty("com.openexchange.hazelcast.jmxDetailed", "true"));
-//        config.setProperty(GroupProperties.PROP_REDO_GIVE_UP_THRESHOLD,
-//            configService.getProperty("com.openexchange.hazelcast.redo.giveupThreshold", "10"));
         config.setProperty(GroupProperties.PROP_MEMCACHE_ENABLED,
             configService.getProperty("com.openexchange.hazelcast.memcache.enabled", "false"));
         config.setProperty(GroupProperties.PROP_REST_ENABLED,
