@@ -1,3 +1,9 @@
+open-xchange-spamhandler-spamexperts (7.4.2-6) stable; urgency=low
+
+  * Sixth release candidate for 7.4.2
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 07 Feb 2014 13:41:30 +0100
+
 open-xchange-spamhandler-spamexperts (7.4.2-5) stable; urgency=low
 
   * Fifth release candidate for 7.4.2
