@@ -144,5 +144,4 @@ final class DBUtils {
             LOG.error(e.getMessage(), e);
         }
     }
-
 }

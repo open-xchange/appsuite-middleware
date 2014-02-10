@@ -421,6 +421,8 @@ Authors:
 %changelog
 * Thu Feb 06 2014 Carsten Hoeger <choeger@open-xchange.com>
 Fifth release candidate for 7.4.2
+* Thu Feb 06 2014 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2014-02-11
 * Tue Feb 04 2014 Carsten Hoeger <choeger@open-xchange.com>
 Fourth release candidate for 7.4.2
 * Thu Jan 30 2014 Carsten Hoeger <choeger@open-xchange.com>
