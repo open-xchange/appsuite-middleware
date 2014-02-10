@@ -54,6 +54,7 @@ import java.io.File;
 import java.util.Properties;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
@@ -62,7 +63,7 @@ import com.openexchange.java.Strings;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ServerConfig {
+public final class ServerConfig implements Reloadable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServerConfig.class);
 
@@ -72,51 +73,56 @@ public final class ServerConfig {
     private static final ServerConfig SINGLETON = new ServerConfig();
 
     /**
+     * Gets the instance.
+     *
+     * @return The instance
+     */
+    public static ServerConfig getInstance() {
+        return SINGLETON;
+    }
+
+    /**
      * Name of the properties file.
      */
     private static final String FILENAME = "server.properties";
 
-    private final Properties props = new Properties();
+    // ------------------------------------------------------------------------------ //
 
+    private final Properties props;
     private String uploadDirectory = "/tmp/";
-
     private int maxFileUploadSize = 10000;
-
     private int maxUploadIdleTimeMillis = 300000;
-
     private boolean prefetchEnabled;
-
     private String defaultEncoding;
-
     private int jmxPort;
-
     private String jmxBindAddress;
-
     private Boolean checkIP;
-
     private String ipMaskV4;
-
     private String ipMaskV6;
-
     private final ClientWhitelist clientWhitelist;
-
     private String uiWebPath;
-
     private int cookieTTL;
-
     private boolean cookieHttpOnly;
-
     private int maxBodySize;
-
     private int defaultMaxConcurrentAJAXRequests;
 
     private ServerConfig() {
         super();
+        props = new Properties();
         clientWhitelist = new ClientWhitelist();
     }
 
-    public static ServerConfig getInstance() {
-        return SINGLETON;
+    @Override
+    public void reloadConfiguration(final ConfigurationService configService) {
+        final Properties newProps = configService.getFile(FILENAME);
+        this.props.clear();
+        if (null == newProps) {
+            LOG.info("Configuration file {} is missing. Using defaults.", FILENAME);
+        } else {
+            this.props.putAll(newProps);
+            LOG.info("Read configuration file {}.", FILENAME);
+        }
+        reinit();
     }
 
     public void initialize(final ConfigurationService confService) {

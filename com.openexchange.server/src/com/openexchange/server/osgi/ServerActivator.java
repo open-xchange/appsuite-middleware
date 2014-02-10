@@ -89,9 +89,12 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.charset.CustomCharsetProvider;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.client.ConfigJump;
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.SystemConfig;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.context.ContextService;
 import com.openexchange.conversion.ConversionService;
@@ -567,6 +570,8 @@ public final class ServerActivator extends HousekeepingActivator {
         }
         openTrackers();
         // Register server's services
+        registerService(Reloadable.class, ServerConfig.getInstance());
+        registerService(Reloadable.class, SystemConfig.getInstance());
         registerService(CharsetProvider.class, new CustomCharsetProvider());
         final GroupService groupService = new GroupServiceImpl();
         registerService(GroupService.class, groupService);
