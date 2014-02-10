@@ -173,7 +173,7 @@ public final class FileStoreResourceCacheImpl extends AbstractResourceCache {
             metadata.setUserId(userId);
             metadata.setResourceId(id);
             metadata.setFileName(optName);
-            metadata.setFileType(optType);
+            metadata.setFileType(prepareFileType(optType, 32));
             metadata.setSize(bytes.length);
             metadata.setCreatedAt(System.currentTimeMillis());
             metadata.setRefId(refId);
