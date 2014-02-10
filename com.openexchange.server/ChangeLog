@@ -1,3 +1,7 @@
+* 2014-02-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31039: Perform a move to trash through a RENAME command on associated IMAP folder
+
 * 2014-02-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 31021: Avoid needless examinations of all file stores to find a suitable one on context creation attempt

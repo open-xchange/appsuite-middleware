@@ -71,7 +71,6 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Quota;
 import javax.mail.Quota.Resource;
-import javax.mail.ReadOnlyFolderException;
 import javax.mail.StoreClosedException;
 import javax.mail.search.FlagTerm;
 import com.openexchange.config.ConfigurationService;
@@ -2490,8 +2489,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         return moveFolder(toMove, destFolder, newFolder, checkForDuplicate);
     }
 
-    private static final String[] ARGS_ALL = { "1:*" };
-
     private IMAPFolder moveFolder(final IMAPFolder toMove, final IMAPFolder destFolder, final IMAPFolder newFolder, final boolean checkForDuplicate) throws MessagingException, OXException {
         final String destFullName = destFolder.getFullName();
         if ((destFolder.getType() & Folder.HOLDS_FOLDERS) == 0) {
@@ -2536,89 +2533,25 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             throw IMAPException.create(IMAPException.Code.DUPLICATE_FOLDER, imapConfig, session, getNameOf(newFolder));
         }
         /*
-         * Create new folder. NOTE: It's not possible to create a folder only with type set to HOLDS_FOLDERS, cause created folder is
-         * selectable anyway and therefore does not hold flag \NoSelect.
+         * Perform RENAME
          */
-        final String newFullname = newFolder.getFullName();
-        if (!newFolder.create(toMoveType)) {
+        final boolean subscribed = toMove.isSubscribed();
+        if (!toMove.renameTo(newFolder)) {
             throw IMAPException.create(
                 IMAPException.Code.FOLDER_CREATION_FAILED,
                 imapConfig,
                 session,
-                newFullname,
+                newFolder.getFullName(),
                 destFolder instanceof DefaultFolder ? DEFAULT_FOLDER_ID : destFullName);
         }
         /*
          * Apply original subscription status
          */
-        newFolder.setSubscribed(toMove.isSubscribed());
-        if (imapConfig.isSupportsACLs()) {
-            /*
-             * Copy ACLs
-             */
-            try {
-                newFolder.open(Folder.READ_WRITE);
-                try {
-                    /*
-                     * Copy ACLs
-                     */
-                    for (final ACL acl : toMove.getACL()) {
-                        try {
-                            newFolder.addACL(acl);
-                        } catch (final MessagingException e) {
-                            final Exception next = e.getNextException();
-                            if (!(next instanceof CommandFailedException)) {
-                                throw e;
-                            }
-                            final com.openexchange.java.StringAllocator tmp = new com.openexchange.java.StringAllocator(128);
-                            tmp.append("\"SETACL ").append(acl.getName()).append(' ').append(acl.getRights()).append("\" failed.");
-                            tmp.append(" ACL could not be applied to from source folder '");
-                            tmp.append(moveFullname).append("' to target folder '");
-                            tmp.append(newFullname).append("': ").append(next.getMessage());
-                            LOG.warn(tmp.toString());
-                        }
-                    }
-                } finally {
-                    closeSafe(newFolder);
-                }
-            } catch (final ReadOnlyFolderException e) {
-                throw IMAPException.create(IMAPException.Code.NO_WRITE_ACCESS, e, newFullname);
-            }
-        }
-        if ((toMoveType & Folder.HOLDS_MESSAGES) > 0) {
-            /*
-             * Copy messages
-             */
-            if (!toMove.isOpen()) {
-                toMove.open(Folder.READ_ONLY);
-            }
-            final long[] uids;
-            try {
-                final int messageCount = toMove.getMessageCount();
-                if (messageCount <= 0) {
-                    uids = new long[0];
-                } else {
-                    uids = IMAPCommandsCollection.seqNums2UID(toMove, (1 == messageCount ? new String[] { "1" } : ARGS_ALL), messageCount);
-                }
-            } finally {
-                closeSafe(toMove);
-            }
-            imapAccess.getMessageStorage().copyMessagesLong(moveFullname, newFullname, uids, true);
-        }
+        newFolder.setSubscribed(subscribed);
         /*
-         * Iterate subfolders
-         */
-        final Folder[] subFolders = toMove.list();
-        for (int i = 0; i < subFolders.length; i++) {
-            moveFolder((IMAPFolder) subFolders[i], newFolder, subFolders[i].getName(), false);
-        }
-        /*
-         * Delete old folder
+         * Delete/unsubscribe old folder
          */
         IMAPCommandsCollection.forceSetSubscribed(imapStore, moveFullname, false);
-        if (!toMove.delete(true)) {
-            LOG.warn("", IMAPException.create(IMAPException.Code.DELETE_FAILED, moveFullname));
-        }
         /*
          * Notify message storage
          */
@@ -2628,8 +2561,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
          */
         FolderCache.removeCachedFolder(moveFullname, session, accountId);
         // ListLsubCache.clearCache(accountId, session);
-        RightsCache.removeCachedRights(toMove, session, accountId);
-        UserFlagsCache.removeUserFlags(toMove, session, accountId);
+        RightsCache.removeCachedRights(moveFullname, session, accountId);
+        UserFlagsCache.removeUserFlags(moveFullname, session, accountId);
         if (IMAPSessionStorageAccess.isEnabled()) {
             IMAPSessionStorageAccess.removeDeletedFolder(accountId, session, moveFullname);
         }
