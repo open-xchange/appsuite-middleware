@@ -362,7 +362,12 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         // Since not cached we can obtain total/unread counter here
         if (!cache) {
             final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
-            if (folderStorage instanceof IMailFolderStorageEnhanced) {
+            if (folderStorage instanceof IMailFolderStorageEnhanced2) {
+                final IMailFolderStorageEnhanced2 storageEnhanced2 = (IMailFolderStorageEnhanced2) folderStorage;
+                final int[] tu = storageEnhanced2.getTotalAndUnreadCounter(ensureFullName(fullName));
+                m_total = null == tu ? -1 : tu[0];
+                m_unread = null == tu ? -1 : tu[1];
+            } else if (folderStorage instanceof IMailFolderStorageEnhanced) {
                 final IMailFolderStorageEnhanced storageEnhanced = (IMailFolderStorageEnhanced) folderStorage;
                 m_total = storageEnhanced.getTotalCounter(ensureFullName(fullName));
                 m_unread = storageEnhanced.getUnreadCounter(ensureFullName(fullName));
@@ -555,7 +560,12 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         }
         final String ensuredFullName = ensureFullName(fullName);
         int unread, total;
-        if (folderStorage instanceof IMailFolderStorageEnhanced) {
+        if (folderStorage instanceof IMailFolderStorageEnhanced2) {
+            final IMailFolderStorageEnhanced2 storageEnhanced2 = (IMailFolderStorageEnhanced2) folderStorage;
+            final int[] tu = storageEnhanced2.getTotalAndUnreadCounter(ensureFullName(fullName));
+            total = null == tu ? -1 : tu[0];
+            unread = null == tu ? -1 : tu[1];
+        } else if (folderStorage instanceof IMailFolderStorageEnhanced) {
             final IMailFolderStorageEnhanced storageEnhanced = (IMailFolderStorageEnhanced) folderStorage;
             unread = storageEnhanced.getUnreadCounter(ensuredFullName);
             total = storageEnhanced.getTotalCounter(ensuredFullName);
