@@ -49,7 +49,12 @@
 
 package com.openexchange.mobilenotifier.json.convert;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
@@ -69,7 +74,7 @@ public class NotifyTemplateParser {
     }
 
     /**
-     * Parses a notify template from a JSONObject
+     * Parse a notify template from a JSONObject
      * 
      * @param json - the json object which should be parsed
      * @return parsed notify template
@@ -77,14 +82,21 @@ public class NotifyTemplateParser {
      * @throws JSONException
      */
     public static List<ParsedNotifyTemplate> parseJSON(JSONObject json) throws OXException, JSONException {
-        // json object
+        final List<ParsedNotifyTemplate> parsedNotifiyTemplates = new ArrayList<ParsedNotifyTemplate>();
         if (json.hasAndNotNull(MobileNotifyField.PROVIDER)) {
-
+            final JSONObject providerJSON = (JSONObject) json.get(MobileNotifyField.PROVIDER);
+            final Iterator<Entry<String, Object>> iter = providerJSON.entrySet().iterator();
+            while (iter.hasNext()) {
+                final Entry<String, Object> notifyTemplate = iter.next();
+                final ParsedNotifyTemplate parsedTemplate = new ParsedNotifyTemplate();
+                parsedTemplate.setFrontendName(notifyTemplate.getKey());
+                final JSONObject templateJSON = (JSONObject) notifyTemplate.getValue();
+                if (templateJSON.hasAndNotNull(MobileNotifyField.TEMPLATE)) {
+                    parsedTemplate.setHtmlTemplate(templateJSON.getString(MobileNotifyField.TEMPLATE));
+                }
+                parsedNotifiyTemplates.add(parsedTemplate);
+            }
         }
-        if (json.hasAndNotNull(MobileNotifyField.TEMPLATE)) {
-
-        }
-        json.toArray();
-        return null;
+        return parsedNotifiyTemplates;
     }
 }

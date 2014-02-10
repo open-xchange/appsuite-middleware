@@ -79,26 +79,24 @@ public class NotifyItemWriter {
      * @throws OXException
      */
     public static JSONObject write(final MobileNotifierService service) throws JSONException, OXException {
-        final JSONArray itemArray = new JSONArray();
-        final JSONObject itemObject = new JSONObject();
+        final JSONArray itemsArray = new JSONArray();
+        final JSONObject itemsJSON = new JSONObject();
 
-        itemArray.put(transformMapToJSONObject(service.getItems()));
-
-        itemObject.put(MobileNotifyField.ITEMS, itemArray);
-
-        return itemObject;
+        itemsArray.put(transformMapToJSONObject(service.getItems()));
+        itemsJSON.put(MobileNotifyField.ITEMS, itemsArray);
+        return itemsJSON;
     }
 
     private static JSONObject transformMapToJSONObject(Map<String, NotifyItem> items) throws JSONException {
-        final JSONObject jsonObject = new JSONObject();
-        Iterator<Entry<String, NotifyItem>> iter = items.entrySet().iterator();
+        final JSONObject itemJSON = new JSONObject();
+        final Iterator<Entry<String, NotifyItem>> iter = items.entrySet().iterator();
 
         while (iter.hasNext()) {
-            Entry<String, NotifyItem> next = iter.next();
+            final Entry<String, NotifyItem> next = iter.next();
             final String key = next.getValue().getKey();
             final Object value = next.getValue().getValue();
-            jsonObject.put(key, value);
+            itemJSON.put(key, value);
         }
-        return jsonObject;
+        return itemJSON;
     }
 }

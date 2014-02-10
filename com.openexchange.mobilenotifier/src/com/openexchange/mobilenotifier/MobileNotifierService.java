@@ -104,5 +104,5 @@ public interface MobileNotifierService {
      * 
      * @throws OXException
      */
-    void putTemplate(NotifyTemplate notifyTemplate) throws OXException;
+    void putTemplate(String changedTemplate) throws OXException;
 }

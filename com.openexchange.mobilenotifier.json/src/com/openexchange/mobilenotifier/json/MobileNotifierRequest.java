@@ -108,8 +108,7 @@ public class MobileNotifierRequest {
      * @throws OXException If no such parameter exists
      */
     public String[] getParameterAsStringArray(final String name) throws OXException {
-        String value = checkParameter(name);
-        String[] values = value.split(",");
+        String[] values = name.split(",");
 
         for (int i = 0; i < values.length; i++) {
             values[i] = values[i].trim();

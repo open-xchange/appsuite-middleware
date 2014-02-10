@@ -49,7 +49,6 @@
 
 package com.openexchange.mobilenotifier.json.actions;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -88,7 +87,8 @@ public class GetAction extends AbstractMobileNotifierAction {
 
     @Override
     protected AJAXRequestResult perform(MobileNotifierRequest req) throws OXException, JSONException {
-        String[] providers = req.getParameterAsStringArray("provider");
+        String providerParam = req.checkParameter("provider");
+        String[] providers = req.getParameterAsStringArray(providerParam);
 
         final MobileNotifierServiceRegistry mobileNotifierRegistry = getService(MobileNotifierServiceRegistry.class);
         if (null == mobileNotifierRegistry) {
@@ -96,20 +96,17 @@ public class GetAction extends AbstractMobileNotifierAction {
         }
 
         final ServerSession session = req.getSession();
-        int uid = session.getUserId();
-        int cid = session.getContextId();
-        /*
-         * Writes a JSON notify item structure
-         */
-        final JSONObject itemJsonObject = new JSONObject();
-        final JSONObject providerObject = new JSONObject();
+        final int uid = session.getUserId();
+        final int cid = session.getContextId();
+        final JSONObject itemJSON = new JSONObject();
+        final JSONObject providerJSON = new JSONObject();
 
-        mobileNotifierRegistry.getAllServices(uid, cid);
+        // Get service for provider
         for (String provider : providers) {
             MobileNotifierService notifierService = mobileNotifierRegistry.getService(provider, uid, cid);
-            itemJsonObject.put(notifierService.getFrontendName(), NotifyItemWriter.write(notifierService));
+            itemJSON.put(notifierService.getFrontendName(), NotifyItemWriter.write(notifierService));
         }
-        providerObject.put(MobileNotifyField.PROVIDER, itemJsonObject);
-        return new AJAXRequestResult(providerObject);
+        providerJSON.put(MobileNotifyField.PROVIDER, itemJSON);
+        return new AJAXRequestResult(providerJSON);
     }
 }

@@ -50,7 +50,6 @@
 package com.openexchange.mobilenotifier.json.actions;
 
 import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -60,8 +59,9 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.mobilenotifier.MobileNotifierService;
 import com.openexchange.mobilenotifier.MobileNotifierServiceRegistry;
-import com.openexchange.mobilenotifier.NotifyTemplate;
 import com.openexchange.mobilenotifier.json.MobileNotifierRequest;
+import com.openexchange.mobilenotifier.json.convert.NotifyTemplateParser;
+import com.openexchange.mobilenotifier.json.convert.ParsedNotifyTemplate;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -76,7 +76,6 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "provider", optional = true, description = "The provider identifier.") }, requestBody = "A JSON object providing notify templates", responseDescription = "The boolean value \"true\" if successful.")
 public class ConfigPutAction extends AbstractMobileNotifierAction {
-
     /**
      * Initializes a new {@link ConfigPutAction}.
      * 
@@ -94,19 +93,15 @@ public class ConfigPutAction extends AbstractMobileNotifierAction {
         }
 
         final ServerSession session = req.getSession();
-        int uid = session.getUserId();
-        int cid = session.getContextId();
+        final int uid = session.getUserId();
+        final int cid = session.getContextId();
+        final JSONObject jsonBody = (JSONObject) req.getRequest().requireData();
+        final List<ParsedNotifyTemplate> parsedTemplates = NotifyTemplateParser.parseJSON(jsonBody);
 
-        JSONObject jsonObject = (JSONObject) req.getRequest().requireData();
-
-        // JSONArray jso = (JSONArray) jsonObject.get("provider");
-        // List<ParsedNotifyTemplate> parsedNotifyTemplate = NotifyTemplateParser.parseJSON(jso);
-
-        // dummy - testing put template
-        NotifyTemplate notifyTemplate = new NotifyTemplate();
-        List<MobileNotifierService> notifyServices = mobileNotifierRegistry.getAllServices(uid, cid);
-        for (MobileNotifierService notifyService : notifyServices) {
-            notifyService.putTemplate(notifyTemplate);
+        // Get service for parsed provider
+        for (ParsedNotifyTemplate parsedTemplate : parsedTemplates) {
+            MobileNotifierService notifierService = mobileNotifierRegistry.getService(parsedTemplate.getFrontendName(), uid, cid);
+            notifierService.putTemplate(parsedTemplate.getHtmlTemplate());
         }
         return new AJAXRequestResult(Boolean.TRUE);
     }

@@ -87,9 +87,10 @@ public class ExampleAppointmentMobileNotifierService extends AbstractMobileNotif
 
     @Override
     public NotifyTemplate getTemplate() throws OXException {
+        // main attributes
         final String fileName = MobileNotifierProviders.APPOINTMENT.getFileName();
-        final String htmlTemplate = MobileNotifierFileUtil.getTeamplateFileContent(fileName);
         final String title = MobileNotifierProviders.APPOINTMENT.getTitle();
+        final String htmlTemplate = MobileNotifierFileUtil.getTeamplateFileContent(fileName);
         int index = 2;
         // additional attribute
         Map<String, Object> attributes = new HashMap<String, Object>();
@@ -101,9 +102,7 @@ public class ExampleAppointmentMobileNotifierService extends AbstractMobileNotif
     }
 
     @Override
-    public void putTemplate(NotifyTemplate notifyTemplate) throws OXException {
-        MobileNotifierFileUtil.writeTemplateFileContent(
-            MobileNotifierProviders.APPOINTMENT.getFileName(),
-            "<div class=\"appointment-listitem\"> <div class=\"sender\"><%= title %></div><div class=\"date\"><%= location %></div><div class=\"subject\"><%= description %></div></div>");
+    public void putTemplate(String changedTemplate) throws OXException {
+        MobileNotifierFileUtil.writeTemplateFileContent(MobileNotifierProviders.APPOINTMENT.getFileName(), changedTemplate);
     }
 }

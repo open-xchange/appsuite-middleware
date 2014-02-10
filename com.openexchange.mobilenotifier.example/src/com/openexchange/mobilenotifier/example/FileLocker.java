@@ -78,7 +78,7 @@ public class FileLocker {
     public void writeChanges(String content) throws IOException, OXException {
         try {
             if (isLocked()) {
-                BufferedWriter isw = new BufferedWriter(new FileWriter(fileName));
+                final BufferedWriter isw = new BufferedWriter(new FileWriter(fileName));
                 isw.write(content);
                 Streams.close(isw);
             } else {

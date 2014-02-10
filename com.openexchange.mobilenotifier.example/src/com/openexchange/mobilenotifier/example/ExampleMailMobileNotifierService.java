@@ -97,9 +97,7 @@ public class ExampleMailMobileNotifierService extends AbstractMobileNotifierServ
     }
 
     @Override
-    public void putTemplate(NotifyTemplate notifyTemplate) throws OXException {
-        MobileNotifierFileUtil.writeTemplateFileContent(
-            MobileNotifierProviders.MAIL.getFileName(),
-            "<div class=\"mail-listitem\"><div class=\"sender\"><%= sender %></div><div class=\"date\"><%= receivedDate %></div><div class=\"subject\"><%= subject %></div></div>");
+    public void putTemplate(String changedTemplate) throws OXException {
+        MobileNotifierFileUtil.writeTemplateFileContent(MobileNotifierProviders.MAIL.getFileName(), changedTemplate);
     }
 }

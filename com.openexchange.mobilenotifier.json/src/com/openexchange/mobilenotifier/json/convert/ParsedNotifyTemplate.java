@@ -55,6 +55,7 @@ package com.openexchange.mobilenotifier.json.convert;
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
+
 public class ParsedNotifyTemplate {
 
     private String frontendName;

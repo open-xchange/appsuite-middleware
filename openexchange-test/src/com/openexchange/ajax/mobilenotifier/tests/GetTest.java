@@ -76,8 +76,8 @@ public class GetTest extends AbstractMobileNotifierTest {
 
     public void testMobileNotifierJSONResponse() throws OXException, IOException, JSONException {
         List<String> providerValue = new ArrayList<String>();
-        providerValue.add("mail");
-        providerValue.add("appointment");
+        providerValue.add("io.ox/mail");
+        providerValue.add("io.ox/calendar");
 
         GetMobileNotifierRequest req = new GetMobileNotifierRequest(providerValue);
         GetMobileNotifierResponse res = getClient().execute(req);

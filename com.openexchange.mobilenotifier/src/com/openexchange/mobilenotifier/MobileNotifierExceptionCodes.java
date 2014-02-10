@@ -73,11 +73,11 @@ public enum MobileNotifierExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Could not find service for provider %1$s
      */
-    IO_ERROR("An I/O error occured  %1$s", Category.CATEGORY_ERROR, 3),
+    IO_ERROR("An I/O error occured  %1$s", Category.CATEGORY_ERROR, 3, MobileNotifierExceptionMessages.MESSAGE),
     /**
      * The file %1$s is already locked %1$s
      */
-    ALREADY_LOCKED("The file %1$s is already locked", Category.CATEGORY_ERROR, 3);
+    ALREADY_LOCKED("The file %1$s is already locked", Category.CATEGORY_ERROR, 4);
     /**
      * The prefix constant.
      */

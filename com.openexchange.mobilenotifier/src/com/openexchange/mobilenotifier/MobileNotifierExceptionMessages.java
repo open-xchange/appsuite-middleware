@@ -65,4 +65,7 @@ public class MobileNotifierExceptionMessages implements LocalizableStrings {
     private MobileNotifierExceptionMessages() {
         super();
     }
+
+    // The default message displayed to user.
+    public static final String MESSAGE = "An error occurred inside the server which prevented it from fulfilling the request.";
 }

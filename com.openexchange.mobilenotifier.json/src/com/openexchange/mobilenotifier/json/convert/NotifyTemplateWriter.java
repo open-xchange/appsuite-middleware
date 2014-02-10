@@ -79,17 +79,17 @@ public class NotifyTemplateWriter {
      */
     public static JSONObject write(final MobileNotifierService service) throws JSONException, OXException {
         final JSONObject attributes = new JSONObject();
-        final NotifyTemplate nt = service.getTemplate();
+        final NotifyTemplate template = service.getTemplate();
 
-        attributes.put(MobileNotifyField.TITLE, nt.getTitle());
-        attributes.put(MobileNotifyField.TEMPLATE, nt.getHtmlTemplate());
-        attributes.put(MobileNotifyField.SLOW, nt.isSlow());
-        attributes.put(MobileNotifyField.INDEX, nt.getIndex());
+        attributes.put(MobileNotifyField.TITLE, template.getTitle());
+        attributes.put(MobileNotifyField.TEMPLATE, template.getHtmlTemplate());
+        attributes.put(MobileNotifyField.SLOW, template.isSlow());
+        attributes.put(MobileNotifyField.INDEX, template.getIndex());
 
         // writes additional attributes
-        Iterator<Entry<String, Object>> iter = nt.getAttributes().entrySet().iterator();
+        final Iterator<Entry<String, Object>> iter = template.getAttributes().entrySet().iterator();
         while (iter.hasNext()) {
-            Entry<String, Object> additionalAttribute = iter.next();
+            final Entry<String, Object> additionalAttribute = iter.next();
             attributes.put(additionalAttribute.getKey(), additionalAttribute.getValue());
         }
         return attributes;
