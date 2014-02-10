@@ -1723,59 +1723,25 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             return retval;
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
-            try {
-                if (null != write_ox_con) {
-                    write_ox_con.rollback();
-                    log.debug("Rollback successfull for ox db write connection");
-                }
-            } catch (final SQLException ecp) {
-                log.error("Error rollback ox db write connection", ecp);
-            }
+            dorollback(write_ox_con);
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
             // rollback operations on ox db connection
-            try {
-                if (null != write_ox_con) {
-                    write_ox_con.rollback();
-                    log.debug("Rollback successfull for ox db write connection");
-                }
-            } catch (final SQLException ecp) {
-                log.error("Error rollback ox db write connection", ecp);
-            }
+            dorollback(write_ox_con);
             throw new StorageException(sql.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);
-            // rollback operations on ox db connection
-            try {
-                if (null != write_ox_con) {
-                    write_ox_con.rollback();
-                    log.debug("Rollback successfull for ox db write connection");
-                }
-            } catch (final SQLException ecp) {
-                log.error("SQL Error rollback ox db write connection", ecp);
-            }
+            //no rollback operations on ox db connection needed, as the pool did not return any connection
             throw new StorageException(e);
         } catch (final StorageException e) {
-            try {
-                if (null != write_ox_con) {
-                    write_ox_con.rollback();
-                    log.debug("Rollback successfull for ox db write connection");
-                }
-            } catch (final SQLException ecp) {
-                log.error("SQL Error rollback ox db write connection", ecp);
-            }
+            dorollback(write_ox_con);
             throw e;
         } catch (final RuntimeException e) {
             log.error("", e);
             // rollback operations on ox db connection
-            try {
-                if (null != write_ox_con) {
-                    write_ox_con.rollback();
-                    log.debug("Rollback successfull for ox db write connection");
-                }
-            } catch (final SQLException ecp) {
-                log.error("SQL Error rollback ox db write connection", ecp);
+            if (null != write_ox_con) {
+                dorollback(write_ox_con);
             }
             throw e;
         } finally {
@@ -2856,4 +2822,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         return retval;
     }
 
+    private void dorollback(final Connection con) {
+        try {
+            con.rollback();
+            log.debug("Rollback successfull for ox db connection");
+        } catch (final SQLException e) {
+            log.error("Error processing rollback of ox db connection", e);
+        }
+    }
 }
