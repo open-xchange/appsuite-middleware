@@ -51,6 +51,8 @@ package com.openexchange.oauth.yahoo.internal;
 
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.YahooApi;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
@@ -62,12 +64,12 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OAuthServiceMetaDataYahooImpl extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware {
-    
+public class OAuthServiceMetaDataYahooImpl extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware, Reloadable {
+
     private static final String API_KEY = "com.openexchange.oauth.yahoo.apiKey";
 
     private static final String API_SECRET = "com.openexchange.oauth.yahoo.apiSecret";
-    
+
     private final DeferringURLService deferrer;
 
     public OAuthServiceMetaDataYahooImpl(DeferringURLService deferrer) {
@@ -95,5 +97,21 @@ public class OAuthServiceMetaDataYahooImpl extends AbstractOAuthServiceMetaData 
     @Override
     public Class<? extends Api> getScribeService() {
         return YahooApi.class;
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        String apiKey = configService.getProperty(apiKeyName);
+        String secretKey = configService.getProperty(apiSecretName);
+
+        if (apiKey.isEmpty()) {
+            throw new IllegalStateException("Missing following property in configuration: " + apiKeyName);
+        }
+        if (secretKey.isEmpty()) {
+            throw new IllegalStateException("Missing following property in configuration: " + apiSecretName);
+        }
+
+        this.apiKey = apiKey;
+        this.apiSecret = secretKey;
     }
 }
