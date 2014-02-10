@@ -277,7 +277,7 @@ public class AdminDaemon {
         context.addBundleListener(bl);
     }
 
-    public static void initCache(final ConfigurationService service) throws OXGenericException {
+    public synchronized static void initCache(final ConfigurationService service) throws OXGenericException {
         if (cache == null) {
             if (null == service) {
                 throw new OXGenericException("Absent service: " + ConfigurationService.class.getName());
