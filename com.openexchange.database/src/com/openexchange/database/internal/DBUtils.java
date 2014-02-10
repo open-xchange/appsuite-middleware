@@ -133,4 +133,17 @@ final class DBUtils {
             LOG.error(e.getMessage(), e);
         }
     }
+
+    static void close(Connection con) {
+        if (null == con) {
+            return;
+        }
+        try {
+            if (!con.isClosed()) {
+                con.close();
+            }
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
 }

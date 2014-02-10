@@ -105,6 +105,7 @@ final class TimeoutFetchAndSchema implements FetchAndSchema {
             try {
                 pool.back(retval);
             } catch (PoolingException e1) {
+                DBUtils.close(retval);
                 LOG.error(e1.getMessage(), e1);
             }
             throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
