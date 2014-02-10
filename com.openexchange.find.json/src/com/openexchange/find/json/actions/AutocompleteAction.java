@@ -75,7 +75,7 @@ public class AutocompleteAction extends AbstractFindAction {
         String prefix = request.requirePrefix();
         SearchService searchService = getSearchService();
         AutocompleteResult result = searchService.autocomplete(request.getServerSession(), Module.MAIL, new AutocompleteRequest(prefix));
-        return new AJAXRequestResult(result, "com.openexchange.find.AutocompleteResult");
+        return new AJAXRequestResult(result, AutocompleteResult.class.getName());
     }
 
 }

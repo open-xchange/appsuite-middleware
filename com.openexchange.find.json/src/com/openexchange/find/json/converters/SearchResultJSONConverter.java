@@ -51,11 +51,9 @@ package com.openexchange.find.json.converters;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
-import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.Document;
 import com.openexchange.find.SearchResult;
@@ -64,26 +62,16 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link SearchResultConverter}
+ * {@link SearchResultJSONConverter}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.0
  */
-public class SearchResultConverter implements ResultConverter {
+public class SearchResultJSONConverter extends AbstractJSONConverter {
 
     @Override
     public String getInputFormat() {
-        return "com.openexchange.find.SearchResult";
-    }
-
-    @Override
-    public String getOutputFormat() {
-        return "json";
-    }
-
-    @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
+        return SearchResult.class.getName();
     }
 
     @Override

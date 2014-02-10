@@ -47,43 +47,70 @@
  *
  */
 
-package com.openexchange.find.json.actions;
+package com.openexchange.find.json.converters;
 
-import java.util.Collections;
 import java.util.List;
-
+import org.json.JSONArray;
 import org.json.JSONException;
-
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.find.Facet;
+import com.openexchange.find.FacetValue;
 import com.openexchange.find.Filter;
-import com.openexchange.find.Module;
-import com.openexchange.find.SearchRequest;
-import com.openexchange.find.SearchResult;
-import com.openexchange.find.SearchService;
-import com.openexchange.find.json.FindRequest;
 
 
 /**
- * {@link QueryAction}
- *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since 7.6.0
+ * @since v7.6.0
  */
-public class QueryAction extends AbstractFindAction {
+public abstract class AbstractJSONConverter implements ResultConverter {
 
-    public QueryAction(SearchService searchService) {
-        super(searchService);
+    @Override
+    public String getOutputFormat() {
+        return "json";
     }
 
     @Override
-    protected AJAXRequestResult doPerform(FindRequest request) throws OXException, JSONException {
-        SearchService searchService = getSearchService();
-        List<String> queries = Collections.emptyList();
-        List<Filter> filters = Collections.singletonList(new Filter(Collections.singleton("folder"), "default0/INBOX"));
-        SearchRequest searchRequest = new SearchRequest(0, 10, queries, filters);
-        SearchResult result = searchService.search(request.getServerSession(), Module.MAIL, searchRequest);
-        return new AJAXRequestResult(result, SearchResult.class.getName());
+    public Quality getQuality() {
+        return Quality.GOOD;
     }
+
+    protected JSONArray convertFacets(List<Facet> facets) throws JSONException {
+        JSONArray result = new JSONArray();
+        for (Facet facet : facets) {
+            JSONObject facetJSON = new JSONObject();
+            facetJSON.put("name", facet.getName());
+            JSONArray values = new JSONArray();
+            for (FacetValue value : facet.getValues()) {
+                JSONObject valueJSON = new JSONObject();
+                Object name = value.getName();
+                if (name == null) {
+                    name = JSONObject.NULL;
+                }
+
+                valueJSON.put("name", name);
+                valueJSON.put("count", value.getCount());
+                valueJSON.put("filter", convertFilter(value.getFilter()));
+                values.put(valueJSON);
+            }
+            facetJSON.put("values", values);
+            result.put(facetJSON);
+        }
+
+        return result;
+    }
+
+    protected JSONObject convertFilter(Filter filter) throws JSONException {
+        JSONObject filterJSON = new JSONObject();
+        JSONArray fields = new JSONArray();
+        for (String field : filter.getFields()) {
+            fields.put(field);
+        }
+        filterJSON.put("fields", fields);
+        filterJSON.put("query", filter.getQuery());
+        return filterJSON;
+    }
+
+
 
 }

@@ -75,7 +75,7 @@ public class ConfigAction extends AbstractFindAction {
     protected AJAXRequestResult doPerform(FindRequest request) throws OXException {
         SearchService searchService = getSearchService();
         Map<Module, ModuleConfig> configuration = searchService.getConfiguration(request.getServerSession());
-        return new AJAXRequestResult(configuration, "com.openexchange.find.ModuleConfig");
+        return new AJAXRequestResult(configuration, ModuleConfig.class.getName());
     }
 
 }

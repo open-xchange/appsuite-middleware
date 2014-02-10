@@ -53,7 +53,9 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.find.SearchService;
 import com.openexchange.find.json.FindActionFactory;
-import com.openexchange.find.json.converters.SearchResultConverter;
+import com.openexchange.find.json.converters.AutocompleteResultJSONConverter;
+import com.openexchange.find.json.converters.ConfigJSONConverter;
+import com.openexchange.find.json.converters.SearchResultJSONConverter;
 
 /**
  *
@@ -71,7 +73,9 @@ public class FindJsonActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerService(ResultConverter.class, new SearchResultConverter());
+        registerService(ResultConverter.class, new ConfigJSONConverter());
+        registerService(ResultConverter.class, new AutocompleteResultJSONConverter());
+        registerService(ResultConverter.class, new SearchResultJSONConverter());
         registerModule(new FindActionFactory(getService(SearchService.class)), "find");
     }
 

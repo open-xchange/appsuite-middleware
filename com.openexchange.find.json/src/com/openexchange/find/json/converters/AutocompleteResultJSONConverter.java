@@ -47,43 +47,40 @@
  *
  */
 
-package com.openexchange.find.json.actions;
-
-import java.util.Collections;
-import java.util.List;
+package com.openexchange.find.json.converters;
 
 import org.json.JSONException;
-
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.exception.OXException;
-import com.openexchange.find.Filter;
-import com.openexchange.find.Module;
-import com.openexchange.find.SearchRequest;
-import com.openexchange.find.SearchResult;
-import com.openexchange.find.SearchService;
-import com.openexchange.find.json.FindRequest;
+import com.openexchange.find.AutocompleteResult;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link QueryAction}
- *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since 7.6.0
+ * @since v7.6.0
  */
-public class QueryAction extends AbstractFindAction {
+public class AutocompleteResultJSONConverter extends AbstractJSONConverter {
 
-    public QueryAction(SearchService searchService) {
-        super(searchService);
+    @Override
+    public String getInputFormat() {
+        return AutocompleteResult.class.getName();
     }
 
     @Override
-    protected AJAXRequestResult doPerform(FindRequest request) throws OXException, JSONException {
-        SearchService searchService = getSearchService();
-        List<String> queries = Collections.emptyList();
-        List<Filter> filters = Collections.singletonList(new Filter(Collections.singleton("folder"), "default0/INBOX"));
-        SearchRequest searchRequest = new SearchRequest(0, 10, queries, filters);
-        SearchResult result = searchService.search(request.getServerSession(), Module.MAIL, searchRequest);
-        return new AJAXRequestResult(result, SearchResult.class.getName());
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        AutocompleteResult autocompleteResult = (AutocompleteResult) result.getResultObject();
+        try {
+            JSONObject jsonResult = new JSONObject();
+            jsonResult.put("facets", convertFacets(autocompleteResult.getFacets()));
+            result.setResultObject(jsonResult, "json");
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        }
     }
 
 }
