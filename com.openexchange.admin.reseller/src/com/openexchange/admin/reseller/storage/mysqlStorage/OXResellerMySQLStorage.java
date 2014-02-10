@@ -198,7 +198,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw e;
         } catch (final PoolException e) {
             log.error("", e);
-            doRollback(oxcon);
+            // no Rollback needed as the connection is null at this moment
             throw new StorageException(e.getMessage());
         } catch (final SQLException e) {
             log.error("", e);
@@ -586,7 +586,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw e;
         } catch (final PoolException e) {
             log.error("", e);
-            doRollback(oxcon);
+            // no Rollback needed as the connection is null at this moment
             throw new StorageException(e.getMessage());
         } catch (final SQLException e) {
             log.error("", e);
@@ -641,7 +641,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw e;
         } catch (final PoolException e) {
             log.error("", e);
-            doRollback(oxcon);
+            // no Rollback needed as the connection is null at this moment
             throw new StorageException(e.getMessage());
         } catch (final SQLException e) {
             log.error("", e);
