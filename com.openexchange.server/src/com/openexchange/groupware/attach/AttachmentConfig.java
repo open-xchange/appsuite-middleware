@@ -119,7 +119,6 @@ public class AttachmentConfig extends AbstractConfig implements Initialization {
         return singleton.getPropertyInternal(key);
     }
 
-
     public static long getMaxUploadSize() {
 		final String sizeS = getProperty(AttachmentProperty.MAX_UPLOAD_SIZE.name());
 		if (null == sizeS) {
