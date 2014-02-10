@@ -228,7 +228,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             final String displayName = res.getDisplayname();
 
             int available;
-            if (null != res && null != res.getAvailable()) {
+            if (null != res.getAvailable()) {
                 if (res.getAvailable()) {
                     available = 1;
                 } else {
