@@ -51,8 +51,8 @@ package com.openexchange.emig.json.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.emig.EmigExceptionCodes;
 import com.openexchange.emig.EmigService;
 import com.openexchange.emig.json.EmigRequest;
 import com.openexchange.exception.OXException;
@@ -71,6 +71,8 @@ import com.openexchange.tools.session.ServerSession;
  * @since 7.4.2
  */
 public final class SenderAction extends AbstractEmigAction {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SenderAction.class);
 
     /**
      * Initializes a new {@link SenderAction}.
@@ -108,7 +110,9 @@ public final class SenderAction extends AbstractEmigAction {
         try {
             sender = new QuotedInternetAddress(sender, false).getIDNAddress();
         } catch (final Exception e) {
-            throw EmigExceptionCodes.EMAIL_PARSE_ERROR.create(e, sender);
+            LOG.warn("E-Mail address seems to be invalid, therefore signaling as non-EmiG capable: {}", sender, e);
+            // throw EmigExceptionCodes.EMAIL_PARSE_ERROR.create(e, sender);
+            return new AJAXRequestResult(Boolean.FALSE, "boolean");
         }
 
         if (accountId < 0) {
