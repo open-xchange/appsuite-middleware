@@ -50,6 +50,7 @@
 package com.openexchange.oauth.msn.osgi;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -66,7 +67,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class MSNOAuthActivator extends HousekeepingActivator {
 
-    
+
 
     private OAuthService oauthService;
 
@@ -85,6 +86,7 @@ public class MSNOAuthActivator extends HousekeepingActivator {
         oAuthMetadata = new OAuthServiceMetaDataMSNImpl(getService(DeferringURLService.class));
 
         registerService(OAuthServiceMetaData.class, oAuthMetadata);
+        registerService(Reloadable.class, oAuthMetadata);
         LOG.info("OAuthServiceMetaData for MSN was started");
 
         final MSNService msnService = new MSNServiceImpl(this);
