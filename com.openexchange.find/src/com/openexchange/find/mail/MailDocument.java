@@ -53,12 +53,14 @@ import com.openexchange.find.DocumentVisitor;
 import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
- * {@link MailDocument}
+ * An implementation of {@link Document} for the mail module.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
 public class MailDocument implements Document {
+
+    private static final long serialVersionUID = -6442103514302095398L;
 
     private final MailMessage mailMessage;
 

@@ -48,14 +48,20 @@
  */
 package com.openexchange.find;
 
+import java.io.Serializable;
+import com.openexchange.find.spi.ModuleSearchDriver;
+
 /**
- *
- * {@link MandatoryFilter}
+ * A {@link MandatoryFilter} is part of  a modules {@link ModuleConfig}.
+ * It denotes a filter must be contained in every {@link SearchRequest}
+ * for its according {@link ModuleSearchDriver}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.0
  */
-public class MandatoryFilter {
+public class MandatoryFilter implements Serializable {
+
+    private static final long serialVersionUID = 4594713366656547759L;
 
     private final Facet facet;
 
@@ -68,12 +74,55 @@ public class MandatoryFilter {
         this.defaultValue = defaultValue;
     }
 
+    /**
+     * Returns the filters {@link Facet}. Never <code>null</code>.
+     */
     public Facet getFacet() {
         return facet;
     }
 
+    /**
+     * A default {@link FacetValue} contained in the list of values
+     * of the filters facet. Never <code>null</code>.
+     */
     public FacetValue getDefaultValue() {
         return defaultValue;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((defaultValue == null) ? 0 : defaultValue.hashCode());
+        result = prime * result + ((facet == null) ? 0 : facet.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        MandatoryFilter other = (MandatoryFilter) obj;
+        if (defaultValue == null) {
+            if (other.defaultValue != null)
+                return false;
+        } else if (!defaultValue.equals(other.defaultValue))
+            return false;
+        if (facet == null) {
+            if (other.facet != null)
+                return false;
+        } else if (!facet.equals(other.facet))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "MandatoryFilter [facet=" + facet + ", defaultValue=" + defaultValue + "]";
     }
 
 }

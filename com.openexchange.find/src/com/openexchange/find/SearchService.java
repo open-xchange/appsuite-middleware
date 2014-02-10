@@ -55,17 +55,29 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  *
- * {@link SearchService}
+ * The {@link SearchService} is the entry point to utilize the Find API.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.0
  */
 public interface SearchService {
 
+    /**
+     * Gets a mapping of {@link Module}s to their according {@link ModuleConfig}s.
+     * @return A map containing available module configurations. Never <code>null</code>.
+     */
     Map<Module, ModuleConfig> getConfiguration(ServerSession session) throws OXException;
 
+    /**
+     * Performs an autocomplete request for a given module.
+     * @return An {@link AutocompleteResult}. Never <code>null</code>.
+     */
     AutocompleteResult autocomplete(ServerSession session, Module module, AutocompleteRequest autocompleteRequest) throws OXException;
 
+    /**
+     * Performs a search request for a given module.
+     * @return A {@link SearchResult}. Never <code>null</code>.
+     */
     SearchResult search(ServerSession session, Module module, SearchRequest searchRequest) throws OXException;
 
 }

@@ -48,14 +48,17 @@
  */
 package com.openexchange.find;
 
+import java.io.Serializable;
+
 /**
- *
- * {@link AutocompleteRequest}
+ * Encapsulates an autocomplete request.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.0
  */
-public class AutocompleteRequest {
+public class AutocompleteRequest implements Serializable {
+
+    private static final long serialVersionUID = -5927763265822552092L;
 
     private final String prefix;
 
@@ -65,8 +68,42 @@ public class AutocompleteRequest {
         this.prefix = prefix;
     }
 
+    /**
+     * @return The prefix to autocomplete on. Must not end
+     * with a wildcard character. Must never be <code>null</code>.
+     */
     public String getPrefix() {
         return prefix;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((prefix == null) ? 0 : prefix.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AutocompleteRequest other = (AutocompleteRequest) obj;
+        if (prefix == null) {
+            if (other.prefix != null)
+                return false;
+        } else if (!prefix.equals(other.prefix))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "AutocompleteRequest [prefix=" + prefix + "]";
     }
 
 }

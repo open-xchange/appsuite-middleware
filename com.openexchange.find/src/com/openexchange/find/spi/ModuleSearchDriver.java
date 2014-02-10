@@ -58,22 +58,40 @@ import com.openexchange.find.SearchResult;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- *
- * {@link ModuleSearchDriver}
+ * A {@link ModuleSearchDriver} has to be implemented for every
+ * module that enables searching via the find API.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.0
  */
 public interface ModuleSearchDriver {
 
+    /**
+     * @return The module supported by this driver.
+     */
     Module getModule();
 
+    /**
+     * Checks if this driver applies to a given {@link ServerSession}.
+     */
     boolean isValidFor(ServerSession session) throws OXException;
 
+    /**
+     * Gets the configuration for this driver based on a given session.
+     * @return The {@link ModuleConfig}. Never <code>null</code>.
+     */
     ModuleConfig getConfiguration(ServerSession session) throws OXException;
 
+    /**
+     * Performs an autocomplete request.
+     * @return The {@link AutocompleteResult}. Never <code>null</code>.
+     */
     AutocompleteResult autocomplete(ServerSession session, AutocompleteRequest autocompleteRequest) throws OXException;
 
+    /**
+     * Performs a search request.
+     * @return The {@link SearchResult}. Never <code>null</code>.
+     */
     SearchResult search(ServerSession session, SearchRequest searchRequest) throws OXException;
 
 }

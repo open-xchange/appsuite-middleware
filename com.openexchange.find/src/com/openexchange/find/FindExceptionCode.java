@@ -57,8 +57,6 @@ import com.openexchange.exception.OXExceptionStrings;
 
 
 /**
- * {@link FindExceptionCode}
- *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */

@@ -48,16 +48,23 @@
  */
 package com.openexchange.find;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
- *
- * {@link Facet}
+ * {@link Facet}s are used to refine a search by filtering results based
+ * on categories.<br>
+ * <br>
+ * Example:<br>
+ * You are searching in the mail module. A possible facet here can be "persons".
+ * A possible {@link FacetValue} might be "John Doe".
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.0
  */
-public class Facet {
+public class Facet implements Serializable {
+
+    private static final long serialVersionUID = -8445505622030799014L;
 
     private final String name;
 
@@ -70,12 +77,55 @@ public class Facet {
         this.values = values;
     }
 
+    /**
+     * @return The facets name. E.g. "persons".
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Returns a list of possible values.
+     * E.g. "John Doe", "Jane Doe".
+     */
     public List<FacetValue> getValues() {
         return values;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((values == null) ? 0 : values.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Facet other = (Facet) obj;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        if (values == null) {
+            if (other.values != null)
+                return false;
+        } else if (!values.equals(other.values))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "Facet [name=" + name + ", values=" + values + "]";
     }
 
 }

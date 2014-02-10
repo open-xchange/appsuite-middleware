@@ -48,14 +48,16 @@
  */
 package com.openexchange.find;
 
+import java.io.Serializable;
+
 /**
- *
- * {@link Document}
+ * A {@link Document} represents a found object. It always belongs to
+ * a {@link SearchResult}. It can be processed via a {@link DocumentVisitor}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.0
  */
-public interface Document {
+public interface Document extends Serializable {
 
     void accept(DocumentVisitor visitor);
 

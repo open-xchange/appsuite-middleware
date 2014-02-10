@@ -57,8 +57,6 @@ import com.openexchange.find.internal.SearchServiceImpl;
 import com.openexchange.find.spi.ModuleSearchDriver;
 
 /**
- * {@link Activator}
- *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.0
  */

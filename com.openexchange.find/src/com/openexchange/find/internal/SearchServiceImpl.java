@@ -76,7 +76,10 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link SearchServiceImpl}
+ * The implementation of the {@link SearchService} interface.
+ * Collects all {@link ModuleSearchDriver} implementations and
+ * chooses an appropriate one on every request for a given module
+ * and session.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0

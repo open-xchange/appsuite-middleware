@@ -48,16 +48,18 @@
  */
 package com.openexchange.find;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
- *
- * {@link SearchResult}
+ * The result of a {@link SearchRequest}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.0
  */
-public class SearchResult {
+public class SearchResult implements Serializable {
+
+    private static final long serialVersionUID = -4937862789320521401L;
 
     private final int numFound;
 
@@ -73,20 +75,74 @@ public class SearchResult {
         this.documents = documents;
     }
 
+    /**
+     * The total number of found documents.
+     * @return May be <code>-1</code> if unknown.
+     */
     public int getNumFound() {
         return numFound;
     }
 
+    /**
+     * Used for pagination.
+     * @return The start index within the set of total results.
+     * Never negative.
+     */
     public int getStart() {
         return start;
     }
 
+    /**
+     * Used for pagination.
+     * @return The max. number of documents to return.
+     * Never negative.
+     */
     public int getSize() {
         return documents.size();
     }
 
+    /**
+     * The list of found documents.
+     * @return May be empty but never <code>null</code>.
+     */
     public List<Document> getDocuments() {
         return documents;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((documents == null) ? 0 : documents.hashCode());
+        result = prime * result + numFound;
+        result = prime * result + start;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        SearchResult other = (SearchResult) obj;
+        if (documents == null) {
+            if (other.documents != null)
+                return false;
+        } else if (!documents.equals(other.documents))
+            return false;
+        if (numFound != other.numFound)
+            return false;
+        if (start != other.start)
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "SearchResult [numFound=" + numFound + ", start=" + start + ", documents=" + documents + "]";
     }
 
 }

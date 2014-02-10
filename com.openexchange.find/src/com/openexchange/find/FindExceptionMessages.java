@@ -53,8 +53,6 @@ import com.openexchange.i18n.LocalizableStrings;
 
 
 /**
- * {@link FindExceptionMessages}
- *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */

@@ -51,7 +51,7 @@ package com.openexchange.find;
 
 
 /**
- * {@link Module}
+ * A {@link Module} defines a component that contributes a search implementation.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.0

@@ -48,16 +48,18 @@
  */
 package com.openexchange.find;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
- *
- * {@link SearchRequest}
+ * Encapsulates a search request.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.0
  */
-public class SearchRequest {
+public class SearchRequest implements Serializable {
+
+    private static final long serialVersionUID = -3958179907725259325L;
 
     private final int start;
 
@@ -76,20 +78,81 @@ public class SearchRequest {
         this.filters = filters;
     }
 
+    /**
+     * Used for pagination.
+     * @return The start index within the set of total results.
+     * Never negative.
+     */
     public int getStart() {
         return start;
     }
 
+    /**
+     * Used for pagination.
+     * @return The max. number of documents to return.
+     * Never negative.
+     */
     public int getSize() {
         return size;
     }
 
+    /**
+     * A list of queries to search for.
+     * @return Never <code>null</code>.
+     * May be empty to denote no query at all.
+     */
     public List<String> getQueries() {
         return queries;
     }
 
+    /**
+     * A list of filters to be applied on the search results.
+     * @return May be empty but never <code>null</code>.
+     */
     public List<Filter> getFilters() {
         return filters;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((filters == null) ? 0 : filters.hashCode());
+        result = prime * result + ((queries == null) ? 0 : queries.hashCode());
+        result = prime * result + size;
+        result = prime * result + start;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        SearchRequest other = (SearchRequest) obj;
+        if (filters == null) {
+            if (other.filters != null)
+                return false;
+        } else if (!filters.equals(other.filters))
+            return false;
+        if (queries == null) {
+            if (other.queries != null)
+                return false;
+        } else if (!queries.equals(other.queries))
+            return false;
+        if (size != other.size)
+            return false;
+        if (start != other.start)
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "SearchRequest [start=" + start + ", size=" + size + ", queries=" + queries + ", filters=" + filters + "]";
     }
 
 }

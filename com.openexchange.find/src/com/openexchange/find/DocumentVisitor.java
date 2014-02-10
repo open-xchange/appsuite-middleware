@@ -51,11 +51,12 @@ package com.openexchange.find;
 import com.openexchange.find.mail.MailDocument;
 
 /**
-* {@link DocumentVisitor}
-*
-* @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
-* @since 7.6.0
-*/
+ * A {@link DocumentVisitor} has to be used to process the {@link Document}s
+ * of a {@link SearchResult}.
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since 7.6.0
+ */
 public interface DocumentVisitor {
 
     void visit(MailDocument mailDocument);
