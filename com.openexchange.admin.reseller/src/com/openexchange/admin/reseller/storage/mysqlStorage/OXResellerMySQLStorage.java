@@ -267,7 +267,9 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw AdminCache.parseDataTruncation(dt);
         } catch (final RuntimeException e) {
             log.error("", e);
-            doRollback(oxcon);
+            if (null != oxcon) {
+                doRollback(oxcon);
+            }
             throw e;
         } catch (final PoolException e) {
             log.error("", e);
@@ -318,7 +320,9 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw AdminCache.parseDataTruncation(dt);
         } catch (final RuntimeException e) {
             log.error("", e);
-            doRollback(oxcon);
+            if (null != oxcon) {
+                doRollback(oxcon);
+            }
             throw e;
         } catch (final PoolException e) {
             log.error("", e);
@@ -1375,7 +1379,9 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw AdminCache.parseDataTruncation(dt);
         } catch (final RuntimeException e) {
             log.error("", e);
-            doRollback(oxcon);
+            if (null != oxcon) {
+                doRollback(oxcon);
+            }
             throw e;
         } catch (final PoolException e) {
             log.error("", e);
