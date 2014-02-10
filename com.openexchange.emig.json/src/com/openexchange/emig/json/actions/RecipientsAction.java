@@ -50,12 +50,15 @@
 package com.openexchange.emig.json.actions;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.emig.EmigExceptionCodes;
 import com.openexchange.emig.EmigService;
+import com.openexchange.emig.Status;
 import com.openexchange.emig.json.EmigRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -71,6 +74,8 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @since 7.4.2
  */
 public final class RecipientsAction extends AbstractEmigAction {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(RecipientsAction.class);
 
     /**
      * Initializes a new {@link RecipientsAction}.
@@ -97,21 +102,28 @@ public final class RecipientsAction extends AbstractEmigAction {
 
         final int length = jBody.length();
         final List<String> addrs = new ArrayList<String>(length);
-        for (int i = 0; i < length; i++) {
-            final String sAddress = jBody.getString(i);
+        final Set<Integer> failedIndexes = new HashSet<Integer>(length);
+        for (int index = 0; index < length; index++) {
+            final String sAddress = jBody.getString(index);
             if (!Strings.isEmpty(sAddress)) {
                 try {
                     addrs.add(new QuotedInternetAddress(sAddress, false).getIDNAddress());
                 } catch (final Exception e) {
-                    throw EmigExceptionCodes.EMAIL_PARSE_ERROR.create(e, sAddress);
+                    LOG.warn("E-Mail address seems to be invalid, therefore signaling as non-EmiG capable: {}", sAddress, e);
+                    failedIndexes.add(Integer.valueOf(index));
+                    // throw EmigExceptionCodes.EMAIL_PARSE_ERROR.create(e, sAddress);
                 }
             }
         }
 
         final int[] colors = emigService.isEMIG_Recipient(addrs.toArray(new String[addrs.size()]));
-        final JSONArray retval = new JSONArray(colors.length);
-        for (int i = 0; i < colors.length; i++) {
-            retval.put(colors[i]);
+        final JSONArray retval = new JSONArray(length);
+        for (int index = 0, colorIndex = 0; index < length; index++) {
+            if (failedIndexes.contains(Integer.valueOf(index)) || (colorIndex >= colors.length)) {
+                retval.put(Status.NONE.getStatus());
+            } else {
+                retval.put(colors[colorIndex++]);
+            }
         }
 
         return new AJAXRequestResult(retval);
