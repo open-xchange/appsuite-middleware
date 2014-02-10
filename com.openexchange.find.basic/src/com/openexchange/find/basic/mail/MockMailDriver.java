@@ -53,8 +53,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
@@ -72,6 +73,8 @@ import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.mail.MailDocument;
 import com.openexchange.find.spi.ModuleSearchDriver;
+import com.openexchange.folderstorage.FolderField;
+import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
@@ -98,12 +101,12 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link MailDriver}
+ * {@link MockMailDriver}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.0
  */
-public class MailDriver implements ModuleSearchDriver {
+public class MockMailDriver implements ModuleSearchDriver {
 
     private static final MailFolderFilter NO_FILTER = null;
 
@@ -137,7 +140,7 @@ public class MailDriver implements ModuleSearchDriver {
 
     private static final Set<String> FOLDERS_FILTER_FIELDS = Collections.singleton("folder");
 
-    public MailDriver() {
+    public MockMailDriver() {
         super();
     }
 
@@ -161,7 +164,7 @@ public class MailDriver implements ModuleSearchDriver {
         } else {
             UserizedFolder defaultFolder = null;
             for (Iterator<UserizedFolder> it = mailFolders.iterator(); it.hasNext();) {
-                UserizedFolder folder = (UserizedFolder) it.next();
+                UserizedFolder folder = it.next();
                 if (folder.isDefault() && folder.getDefaultType() == MailFolderType.INBOX.getType()) {
                     defaultFolder = folder;
                     it.remove();
@@ -215,12 +218,12 @@ public class MailDriver implements ModuleSearchDriver {
         }
         Facet contactFacet = new Facet("persons", contactValues);
 
-        List<UserizedFolder> folders = autocompleteFolders(session, autocompleteRequest);
-        Facet folderFacet = buildFolderFacet(folders);
+//        List<UserizedFolder> folders = autocompleteFolders(session, autocompleteRequest);
+//        Facet folderFacet = buildFolderFacet(folders);
 
         List<Facet> facets = new ArrayList<Facet>();
         facets.add(contactFacet);
-        facets.add(folderFacet);
+//        facets.add(folderFacet);
 
         return new AutocompleteResult(facets);
     }

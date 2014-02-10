@@ -55,7 +55,7 @@ import org.osgi.framework.Constants;
 
 import com.openexchange.contact.ContactService;
 import com.openexchange.find.basic.Services;
-import com.openexchange.find.basic.mail.MailDriver;
+import com.openexchange.find.basic.mail.MockMailDriver;
 import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.mail.service.MailService;
@@ -79,7 +79,7 @@ public class Activator extends HousekeepingActivator {
         Services.setServiceLookup(this);
         Dictionary<String, Object> properties = new Hashtable<String, Object>();
         properties.put(Constants.SERVICE_RANKING, 0);
-        registerService(ModuleSearchDriver.class, new MailDriver(), properties);
+        registerService(ModuleSearchDriver.class, new MockMailDriver(), properties);
     }
 
 
