@@ -252,7 +252,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 
             @Override
             public void set(DistListMember member, String value) throws OXException {
-            	member.setEmailaddress(value);
+            	member.setEmailaddress(value, false); // don't validate when reading data
             }
 
             @Override
@@ -293,7 +293,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 				member.removeContextID();
 			}
         });
-		
+
 		mappings.put(DistListMemberField.UUID, new BinaryMapping<DistListMember>("uuid", "UUID") {
 
             @Override
@@ -315,7 +315,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
             public void remove(DistListMember member) {
                 member.removeUuid();
             }
-		    
+
 		});
 
 		return mappings;

@@ -1,3 +1,7 @@
+* 2014-02-11 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30966: Don't validate e-mail addresses of distribution list members when loading from the database
+
 * 2014-02-10 - thorben.betten@open-xchange.com
 
  - Fix for bug 31039: Perform a move to trash through a RENAME command on associated IMAP folder
