@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth.xing.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -78,7 +80,9 @@ public final class XingOAuthActivator extends HousekeepingActivator {
         try {
             XingOAuthServiceMetaData xingService = new XingOAuthServiceMetaData(config);
             registerService(OAuthServiceMetaData.class, xingService);
-            registerService(Reloadable.class, xingService);
+            Dictionary<String, String[]> props = new Hashtable<String, String[]>();
+            props.put("properties", new String[] {"com.openexchange.oauth.xing.apiKey", "com.openexchange.oauth.xing.apiSecret"});
+            registerService(Reloadable.class, xingService, props);
         } catch (final IllegalStateException e) {
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(XingOAuthActivator.class);
             log.warn("Could not start-up XING OAuth service", e);
