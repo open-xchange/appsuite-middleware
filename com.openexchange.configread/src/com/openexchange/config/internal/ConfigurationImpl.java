@@ -70,6 +70,7 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.ho.yaml.Yaml;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
 import com.openexchange.config.PropertyFilter;
@@ -722,7 +723,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
         LOG.info("Reloading configuration");
         // Copy current content to get associated files on check for expired PropertyWatchers
-        // final Map<String, String> propertiesFilesCopy = new HashMap<String, String>(propertiesFiles);
+        final Map<String, Properties> oldPropertiesByFile = new HashMap<String, Properties>(propertiesByFile);
 
         // Clear maps
         properties.clear();
@@ -735,6 +736,13 @@ public final class ConfigurationImpl implements ConfigurationService {
         // (Re-)load configuration
         // final Map<String, PropertyWatcher> watchers = PropertyWatcher.getAllWatchers();
         loadConfiguration(getDirectories());
+
+        // Check if properties has been changed, abort if not
+        List<String> changes = getChanges(oldPropertiesByFile);
+        if (changes.isEmpty()) {
+            return;
+        }
+
         final ConfigProviderServiceImpl configProvider = this.configProviderServiceImpl;
         if (configProvider != null) {
             configProvider.invalidate();
@@ -789,6 +797,29 @@ public final class ConfigurationImpl implements ConfigurationService {
      */
     public void setConfigProviderServiceImpl(ConfigProviderServiceImpl configProviderServiceImpl) {
         this.configProviderServiceImpl = configProviderServiceImpl;
+    }
+
+    @NonNull
+    private List<String> getChanges(Map<String, Properties> oldPropertiesByFile) {
+        List<String> result = new ArrayList<String>();
+        if (propertiesByFile.equals(oldPropertiesByFile)) {
+            return result;
+        }
+        for (String filename : propertiesByFile.keySet()) {
+            Properties newProperties = propertiesByFile.get(filename);
+            Properties oldProperties = oldPropertiesByFile.get(filename);
+            for (Object newPropertyName : newProperties.keySet()) {
+                String newProperty = newProperties.getProperty((String) newPropertyName);
+                String oldProperty = oldProperties.getProperty((String) newPropertyName);
+                if ((null == newProperty && null != oldProperties) || (null != newProperty && null == oldProperty)) {
+                    result.add(filename);
+                }
+                if (!oldProperty.equals(newProperty)) {
+                    result.add(filename);
+                }
+            }
+        }
+        return result;
     }
 
 }
