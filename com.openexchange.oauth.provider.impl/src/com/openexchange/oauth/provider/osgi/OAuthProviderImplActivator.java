@@ -52,6 +52,7 @@ package com.openexchange.oauth.provider.osgi;
 import net.oauth.OAuthServiceProvider;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
@@ -107,12 +108,14 @@ public final class OAuthProviderImplActivator extends HousekeepingActivator {
          */
         final DatabaseOAuthProviderService oauthProviderService = new DatabaseOAuthProviderService(this);
         registerService(OAuthProviderService.class, oauthProviderService);
+        registerService(Reloadable.class, oauthProviderService);
         addService(OAuthProviderService.class, oauthProviderService);
         /*
          * Register OAuth v2 provider service
          */
         final DatabaseOAuth2ProviderService oauth2ProviderService = new DatabaseOAuth2ProviderService(this);
         registerService(OAuth2ProviderService.class, oauth2ProviderService);
+        registerService(Reloadable.class, oauth2ProviderService);
         addService(OAuth2ProviderService.class, oauth2ProviderService);
         /*
          * Service trackers
