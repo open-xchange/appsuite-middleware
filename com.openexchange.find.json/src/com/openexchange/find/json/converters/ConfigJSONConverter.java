@@ -60,9 +60,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.exception.OXException;
-import com.openexchange.find.MandatoryFilter;
 import com.openexchange.find.Module;
 import com.openexchange.find.ModuleConfig;
+import com.openexchange.find.facet.MandatoryFilter;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -114,11 +114,11 @@ public class ConfigJSONConverter extends AbstractJSONConverter {
         for (MandatoryFilter mandatoryFilter : mandatoryFilters) {
             JSONObject filterJSON = new JSONObject();
             filterJSON.put("facet", mandatoryFilter.getFacet().getName());
-            Object defaultName = mandatoryFilter.getDefaultValue().getName();
-            if (defaultName == null) {
-                defaultName = JSONObject.NULL;
+            if (mandatoryFilter.getDefaultValue().hasDisplayItem()) {
+                filterJSON.put("defaultValue", convertFacetValue(mandatoryFilter.getDefaultValue()));
+            } else {
+                filterJSON.put("defaultValue", JSONObject.NULL);
             }
-            filterJSON.put("defaultValue", defaultName);
             result.put(filterJSON);
         }
         return result;

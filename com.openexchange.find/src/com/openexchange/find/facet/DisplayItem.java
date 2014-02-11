@@ -46,98 +46,19 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.find;
 
-import java.io.Serializable;
+package com.openexchange.find.facet;
+
 
 /**
- *
- * A {@link FacetValue} is a possible value for a given {@link Facet}.
+ * Interface for several kinds objects that can be displayed by a client.
+ * Inheritors must implement hashCode() and equals().
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since 7.6.0
+ * @since v7.6.0
  */
-public class FacetValue implements Serializable {
+public interface DisplayItem {
 
-    private static final long serialVersionUID = -7719065379433828901L;
+    void accept(DisplayItemVisitor visitor);
 
-    public static final String NO_NAME = null;
-
-    private final String name;
-
-    private final int count;
-
-    private final Filter filter;
-
-
-    public FacetValue(String name, int count, Filter filter) {
-        super();
-        this.name = name;
-        this.count = count;
-        this.filter = filter;
-    }
-
-    /**
-     * @return The values name. May be <code>null</code> if
-     * and only if this value is the only one for its facet.
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * @return The number of results to which this value applies.
-     * May be <code>-1</code> if unknown.
-     */
-    public int getCount() {
-        return count;
-    }
-
-    /**
-     * @return The filter that has to be applied to
-     * {@link SearchRequest}s to filter on this value.
-     * Never <code>null</code>.
-     */
-    public Filter getFilter() {
-        return filter;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + count;
-        result = prime * result + ((filter == null) ? 0 : filter.hashCode());
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        FacetValue other = (FacetValue) obj;
-        if (count != other.count)
-            return false;
-        if (filter == null) {
-            if (other.filter != null)
-                return false;
-        } else if (!filter.equals(other.filter))
-            return false;
-        if (name == null) {
-            if (other.name != null)
-                return false;
-        } else if (!name.equals(other.name))
-            return false;
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "FacetValue [name=" + name + ", count=" + count + ", filter=" + filter + "]";
-    }
 }

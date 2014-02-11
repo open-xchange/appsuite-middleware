@@ -46,86 +46,75 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.find;
 
-import java.io.Serializable;
-import java.util.Set;
+package com.openexchange.find.json;
+
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.find.common.ContactDisplayItem;
+import com.openexchange.find.common.FolderDisplayItem;
+import com.openexchange.find.facet.DisplayItemVisitor;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.container.Contact;
+
 
 /**
- *
- * {@link Filter}s are used to narrow down search results by conditions.
- * A filter belongs to a {@link FacetValue}. Multiple filters may be
- * contained in a {@link SearchRequest}.
+ * {@link JSONDisplayItemVisitor}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since 7.6.0
+ * @since v7.6.0
  */
-public class Filter implements Serializable {
+public class JSONDisplayItemVisitor implements DisplayItemVisitor {
 
-    private static final long serialVersionUID = -5712151560300214639L;
+    private final List<JSONException> errors;
 
-    private final Set<String> fields;
+    private final JSONObject json;
 
-    private final String query;
-
-
-    public Filter(Set<String> fields, String query) {
+    public JSONDisplayItemVisitor() {
         super();
-        this.fields = fields;
-        this.query = query;
-    }
-
-    /**
-     * The module specific fields to which the filter shall apply.
-     * E.g. a mail folder or a contacts mail address.
-     * Must neither be <code>null</code> nor empty.
-     */
-    public Set<String> getFields() {
-        return fields;
-    }
-
-    /**
-     * The query to filter on in the given fields.
-     * Never <code>null</code> or an empty string.
-     */
-    public String getQuery() {
-        return query;
+        json = new JSONObject();
+        errors = new ArrayList<JSONException>();
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((fields == null) ? 0 : fields.hashCode());
-        result = prime * result + ((query == null) ? 0 : query.hashCode());
-        return result;
+    public void visit(FolderDisplayItem item) {
+        UserizedFolder folder = item.getFolder();
+        try {
+            json.put("accountName", convertString(item.getAccountName()));
+            json.put("isDefaultAccount", item.isDefaultAccount());
+            json.put("folderName", convertString(folder.getLocalizedName(folder.getLocale())));
+        } catch (JSONException e) {
+            errors.add(e);
+        }
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Filter other = (Filter) obj;
-        if (fields == null) {
-            if (other.fields != null)
-                return false;
-        } else if (!fields.equals(other.fields))
-            return false;
-        if (query == null) {
-            if (other.query != null)
-                return false;
-        } else if (!query.equals(other.query))
-            return false;
-        return true;
+    public void visit(ContactDisplayItem item) {
+        Contact contact = item.getContact();
+        try {
+            json.put("givenName", convertString(contact.getGivenName()));
+            json.put("surName", convertString(contact.getSurName()));
+            json.put("displayName", convertString(contact.getDisplayName()));
+            json.put("email1", convertString(contact.getEmail1()));
+            json.put("email2", convertString(contact.getEmail2()));
+            json.put("email3", convertString(contact.getEmail3()));
+        } catch (JSONException e) {
+            errors.add(e);
+        }
     }
 
-    @Override
-    public String toString() {
-        return "Filter [fields=" + fields + ", query=" + query + "]";
+    public JSONObject getJSONObject() {
+        return json;
+    }
+
+    public List<JSONException> getErrors() {
+        return errors;
+    }
+
+    private Object convertString(String str) {
+        return str == null ? JSONObject.NULL : str;
     }
 
 }

@@ -46,43 +46,59 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.find;
+package com.openexchange.find.facet;
 
 import java.io.Serializable;
-import java.util.List;
-import com.openexchange.find.facet.Facet;
+import java.util.Set;
+import com.openexchange.find.SearchRequest;
 
 /**
- * The result of an {@link AutocompleteRequest}.
+ *
+ * {@link Filter}s are used to narrow down search results by conditions.
+ * A filter belongs to a {@link FacetValue}. Multiple filters may be
+ * contained in a {@link SearchRequest}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.0
  */
-public class AutocompleteResult implements Serializable {
+public class Filter implements Serializable {
 
-    private static final long serialVersionUID = -8830406356267375791L;
+    private static final long serialVersionUID = -5712151560300214639L;
 
-    private final List<Facet> facets;
+    private final Set<String> fields;
+
+    private final String query;
 
 
-    public AutocompleteResult(List<Facet> facets) {
+    public Filter(Set<String> fields, String query) {
         super();
-        this.facets = facets;
+        this.fields = fields;
+        this.query = query;
     }
 
     /**
-     * @return A list of facets based on the search for the requests prefix.
-     * May be empty but never <code>null</code>.
+     * The module specific fields to which the filter shall apply.
+     * E.g. a mail folder or a contacts mail address.
+     * Must neither be <code>null</code> nor empty.
      */
-    public List<Facet> getFacets() {
-        return facets;
+    public Set<String> getFields() {
+        return fields;
+    }
+
+    /**
+     * The query to filter on in the given fields.
+     * Never <code>null</code> or an empty string.
+     */
+    public String getQuery() {
+        return query;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((facets == null) ? 0 : facets.hashCode());
+        result = prime * result + ((fields == null) ? 0 : fields.hashCode());
+        result = prime * result + ((query == null) ? 0 : query.hashCode());
         return result;
     }
 
@@ -94,18 +110,23 @@ public class AutocompleteResult implements Serializable {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        AutocompleteResult other = (AutocompleteResult) obj;
-        if (facets == null) {
-            if (other.facets != null)
+        Filter other = (Filter) obj;
+        if (fields == null) {
+            if (other.fields != null)
                 return false;
-        } else if (!facets.equals(other.facets))
+        } else if (!fields.equals(other.fields))
+            return false;
+        if (query == null) {
+            if (other.query != null)
+                return false;
+        } else if (!query.equals(other.query))
             return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return "AutocompleteResult [facets=" + facets + "]";
+        return "Filter [fields=" + fields + ", query=" + query + "]";
     }
 
 }

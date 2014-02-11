@@ -51,6 +51,8 @@ package com.openexchange.find;
 
 import java.io.Serializable;
 import java.util.List;
+import com.openexchange.find.facet.Facet;
+import com.openexchange.find.facet.MandatoryFilter;
 import com.openexchange.find.spi.ModuleSearchDriver;
 
 /**

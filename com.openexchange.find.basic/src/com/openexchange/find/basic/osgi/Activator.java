@@ -50,15 +50,14 @@ package com.openexchange.find.basic.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-
 import org.osgi.framework.Constants;
-
 import com.openexchange.contact.ContactService;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.basic.mail.MockMailDriver;
 import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.mail.service.MailService;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -71,7 +70,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactService.class, FolderService.class, MailService.class };
+        return new Class<?>[] { ContactService.class, FolderService.class, MailService.class, MailAccountStorageService.class };
     }
 
     @Override

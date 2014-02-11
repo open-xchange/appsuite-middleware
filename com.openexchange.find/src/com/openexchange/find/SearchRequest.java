@@ -50,6 +50,7 @@ package com.openexchange.find;
 
 import java.io.Serializable;
 import java.util.List;
+import com.openexchange.find.facet.Filter;
 
 /**
  * Encapsulates a search request.

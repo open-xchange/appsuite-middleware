@@ -51,16 +51,14 @@ package com.openexchange.find.json.actions;
 
 import java.util.Collections;
 import java.util.List;
-
 import org.json.JSONException;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.find.Filter;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.SearchService;
+import com.openexchange.find.facet.Filter;
 import com.openexchange.find.json.FindRequest;
 
 

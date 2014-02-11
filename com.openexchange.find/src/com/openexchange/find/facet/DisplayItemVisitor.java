@@ -46,66 +46,24 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.find;
 
-import java.io.Serializable;
-import java.util.List;
-import com.openexchange.find.facet.Facet;
+package com.openexchange.find.facet;
+
+import com.openexchange.find.common.ContactDisplayItem;
+import com.openexchange.find.common.FolderDisplayItem;
+
+
 
 /**
- * The result of an {@link AutocompleteRequest}.
+ * {@link DisplayItemVisitor}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since 7.6.0
+ * @since v7.6.0
  */
-public class AutocompleteResult implements Serializable {
+public interface DisplayItemVisitor {
 
-    private static final long serialVersionUID = -8830406356267375791L;
+    void visit(FolderDisplayItem item);
 
-    private final List<Facet> facets;
-
-
-    public AutocompleteResult(List<Facet> facets) {
-        super();
-        this.facets = facets;
-    }
-
-    /**
-     * @return A list of facets based on the search for the requests prefix.
-     * May be empty but never <code>null</code>.
-     */
-    public List<Facet> getFacets() {
-        return facets;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((facets == null) ? 0 : facets.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        AutocompleteResult other = (AutocompleteResult) obj;
-        if (facets == null) {
-            if (other.facets != null)
-                return false;
-        } else if (!facets.equals(other.facets))
-            return false;
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "AutocompleteResult [facets=" + facets + "]";
-    }
+    void visit(ContactDisplayItem item);
 
 }

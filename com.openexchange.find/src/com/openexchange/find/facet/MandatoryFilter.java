@@ -46,9 +46,11 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.find;
+package com.openexchange.find.facet;
 
 import java.io.Serializable;
+import com.openexchange.find.ModuleConfig;
+import com.openexchange.find.SearchRequest;
 import com.openexchange.find.spi.ModuleSearchDriver;
 
 /**

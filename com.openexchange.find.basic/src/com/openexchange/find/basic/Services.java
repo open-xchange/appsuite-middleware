@@ -49,11 +49,11 @@
 package com.openexchange.find.basic;
 
 import java.util.concurrent.atomic.AtomicReference;
-
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.mail.service.MailService;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -80,6 +80,10 @@ public class Services {
 
     public static MailService getMailService() throws OXException {
         return getService(MailService.class);
+    }
+
+    public static MailAccountStorageService getMailAccountStorageService() throws OXException {
+        return getService(MailAccountStorageService.class);
     }
 
     public static void setServiceLookup(ServiceLookup lookup) {

@@ -50,31 +50,31 @@ package com.openexchange.find.basic.mail;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.Document;
-import com.openexchange.find.Facet;
-import com.openexchange.find.FacetValue;
-import com.openexchange.find.Filter;
-import com.openexchange.find.MandatoryFilter;
 import com.openexchange.find.Module;
 import com.openexchange.find.ModuleConfig;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.Services;
+import com.openexchange.find.common.ContactDisplayItem;
+import com.openexchange.find.common.FolderDisplayItem;
+import com.openexchange.find.facet.Facet;
+import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.facet.Filter;
+import com.openexchange.find.facet.MandatoryFilter;
 import com.openexchange.find.mail.MailDocument;
 import com.openexchange.find.spi.ModuleSearchDriver;
-import com.openexchange.folderstorage.FolderField;
-import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
@@ -93,9 +93,12 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
@@ -177,15 +180,17 @@ public class MockMailDriver implements ModuleSearchDriver {
                 defaultFolder = mailFolders.remove(0);
             }
 
-            FacetValue defaultValue = buildFolderFacetValue(defaultFolder);
+            MailAccountStorageService mass = Services.getMailAccountStorageService();
+            MailAccount mailAccount = mass.getMailAccount(new FullnameArgument(defaultFolder.getID()).getAccountId(), session.getUserId(), session.getContextId());
+            FacetValue defaultValue = buildFolderFacetValue(defaultFolder, mailAccount);
             folderFacet = buildFolderFacet(mailFolders);
             folderFacet.getValues().add(defaultValue);
             folderFilter = new MandatoryFilter(folderFacet, defaultValue);
         }
 
         List<Facet> staticFacets = new ArrayList<Facet>(3);
-        Facet subjectFacet = new Facet("subject", Collections.singletonList(new FacetValue(FacetValue.NO_NAME, -1, new Filter(Collections.singleton("subject"), "override"))));
-        Facet bodyFacet = new Facet("body", Collections.singletonList(new FacetValue(FacetValue.NO_NAME, -1, new Filter(Collections.singleton("body"), "override"))));
+        Facet subjectFacet = new Facet("subject", Collections.singletonList(new FacetValue(new Filter(Collections.singleton("subject"), "override"))));
+        Facet bodyFacet = new Facet("body", Collections.singletonList(new FacetValue(new Filter(Collections.singleton("body"), "override"))));
         if (folderFacet != null) {
             staticFacets.add(folderFacet);
         }
@@ -201,6 +206,7 @@ public class MockMailDriver implements ModuleSearchDriver {
         List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
         List<FacetValue> contactValues = new ArrayList<FacetValue>(contacts.size());
         for (Contact contact : contacts) {
+            // TODO: add multiple times for different mail addresses?
             String mailAddress = contact.getEmail1();
             if (mailAddress == null) {
                 mailAddress = contact.getEmail2();
@@ -214,7 +220,7 @@ public class MockMailDriver implements ModuleSearchDriver {
             }
 
             Filter filter = new Filter(PERSONS_FILTER_FIELDS, mailAddress);
-            contactValues.add(new FacetValue(contact.getDisplayName(), -1, filter));
+            contactValues.add(new FacetValue(new ContactDisplayItem(contact), FacetValue.UNKNOWN_COUNT, filter));
         }
         Facet contactFacet = new Facet("persons", contactValues);
 
@@ -278,10 +284,24 @@ public class MockMailDriver implements ModuleSearchDriver {
         return new SearchResult(-1, searchRequest.getStart(), documents);
     }
 
-    private Facet buildFolderFacet(List<UserizedFolder> folders) {
+    private Facet buildFolderFacet(List<UserizedFolder> folders) throws OXException {
+        MailAccountStorageService mass = Services.getMailAccountStorageService();
+        Map<Integer, MailAccount> accountCache = new HashMap<Integer, MailAccount>();
         List<FacetValue> folderValues = new ArrayList<FacetValue>(folders.size());
         for (UserizedFolder folder : folders) {
-            FacetValue value = buildFolderFacetValue(folder);
+            FullnameArgument fullnameArgument = MailFolderUtility.prepareMailFolderParam(folder.getID());
+            if (MailFolder.DEFAULT_FOLDER_ID.equals(fullnameArgument.getFullname())) {
+                // ignore the root folder (above INBOX)
+                continue;
+            }
+
+            MailAccount mailAccount = accountCache.get(fullnameArgument.getAccountId());
+            if (mailAccount == null) {
+                mailAccount = mass.getMailAccount(fullnameArgument.getAccountId(), folder.getUser().getId(), folder.getContext().getContextId());
+                accountCache.put(mailAccount.getId(), mailAccount);
+            }
+
+            FacetValue value = buildFolderFacetValue(folder, mailAccount);
             if (value != null) {
                 folderValues.add(value);
             }
@@ -290,15 +310,9 @@ public class MockMailDriver implements ModuleSearchDriver {
         return new Facet("folders", folderValues);
     }
 
-    private FacetValue buildFolderFacetValue(UserizedFolder folder) {
-        String id = folder.getID();
-        String name = extractDisplayName(folder);
-        if (id == null || name == null) {
-            return null;
-        }
-
-        Filter filter = new Filter(FOLDERS_FILTER_FIELDS, id);
-        return new FacetValue(name, -1, filter);
+    private FacetValue buildFolderFacetValue(UserizedFolder folder, MailAccount mailAccount) throws OXException {
+        Filter filter = new Filter(FOLDERS_FILTER_FIELDS, folder.getID());
+        return new FacetValue(new FolderDisplayItem(folder, mailAccount.getName(), mailAccount.isDefaultAccount()), FacetValue.UNKNOWN_COUNT, filter);
     }
 
     private List<Contact> autocompleteContacts(Session session, AutocompleteRequest autocompleteRequest) throws OXException {

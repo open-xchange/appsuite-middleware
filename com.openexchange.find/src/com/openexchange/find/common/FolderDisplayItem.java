@@ -47,82 +47,46 @@
  *
  */
 
-package com.openexchange.find.json.converters;
+package com.openexchange.find.common;
 
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.find.facet.DisplayItem;
-import com.openexchange.find.facet.Facet;
-import com.openexchange.find.facet.FacetValue;
-import com.openexchange.find.facet.Filter;
-import com.openexchange.find.json.JSONDisplayItemVisitor;
-
+import com.openexchange.find.facet.DisplayItemVisitor;
+import com.openexchange.folderstorage.UserizedFolder;
 
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public abstract class AbstractJSONConverter implements ResultConverter {
+public class FolderDisplayItem implements DisplayItem {
 
-    @Override
-    public String getOutputFormat() {
-        return "json";
+    private final UserizedFolder folder;
+
+    private final String accountName;
+
+    private final boolean isDefaultAccount;
+
+    public FolderDisplayItem(final UserizedFolder folder, final String accountName, final boolean isDefaultAccount) {
+        super();
+        this.folder = folder;
+        this.accountName = accountName;
+        this.isDefaultAccount = isDefaultAccount;
     }
 
     @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
+    public void accept(DisplayItemVisitor visitor) {
+        visitor.visit(this);
     }
 
-    protected JSONArray convertFacets(List<Facet> facets) throws JSONException {
-        JSONArray result = new JSONArray();
-        for (Facet facet : facets) {
-            JSONObject facetJSON = new JSONObject();
-            facetJSON.put("name", facet.getName());
-            JSONArray values = new JSONArray();
-            for (FacetValue value : facet.getValues()) {
-                JSONObject valueJSON = convertFacetValue(value);
-                values.put(valueJSON);
-            }
-            facetJSON.put("values", values);
-            result.put(facetJSON);
-        }
-
-        return result;
+    public UserizedFolder getFolder() {
+        return folder;
     }
 
-    protected JSONObject convertFacetValue(FacetValue value) throws JSONException {
-        JSONObject valueJSON = new JSONObject();
-        Object displayItem = JSONObject.NULL;
-        if (value.hasDisplayItem()) {
-            displayItem = convertDisplayItem(value.getDisplayItem());
-        }
-        valueJSON.put("displayItem", displayItem);
-        valueJSON.put("count", value.getCount());
-        valueJSON.put("filter", convertFilter(value.getFilter()));
-        return valueJSON;
+    public String getAccountName() {
+        return accountName;
     }
 
-    protected JSONObject convertDisplayItem(DisplayItem displayItem) {
-        JSONDisplayItemVisitor visitor = new JSONDisplayItemVisitor();
-        displayItem.accept(visitor);
-        return visitor.getJSONObject();
+    public boolean isDefaultAccount() {
+        return isDefaultAccount;
     }
-
-    protected JSONObject convertFilter(Filter filter) throws JSONException {
-        JSONObject filterJSON = new JSONObject();
-        JSONArray fields = new JSONArray();
-        for (String field : filter.getFields()) {
-            fields.put(field);
-        }
-        filterJSON.put("fields", fields);
-        filterJSON.put("query", filter.getQuery());
-        return filterJSON;
-    }
-
-
 
 }

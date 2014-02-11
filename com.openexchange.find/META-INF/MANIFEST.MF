@@ -7,6 +7,9 @@ Bundle-Activator: com.openexchange.find.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
+ com.openexchange.folderstorage,
+ com.openexchange.groupware.container,
+ com.openexchange.groupware.ldap,
  com.openexchange.i18n,
  com.openexchange.mail.dataobjects,
  com.openexchange.session,
@@ -14,5 +17,7 @@ Import-Package: com.openexchange.exception,
  org.osgi.framework,
  org.osgi.util.tracker
 Export-Package: com.openexchange.find,
+ com.openexchange.find.common,
+ com.openexchange.find.facet,
  com.openexchange.find.mail,
  com.openexchange.find.spi
