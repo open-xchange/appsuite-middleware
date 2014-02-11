@@ -58,6 +58,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.groupware.tools"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.hazelcast.configuration"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.hazelcast.serialization"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.html"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.http.client"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.http.client.json"/>
