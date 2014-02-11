@@ -95,6 +95,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigurationImpl.class);
 
     private final ConcurrentMap<String, Reloadable> reloadableServices;
+    private final ConcurrentMap<String, String[]> reloadableServicesProps;
 
     private static final class PropertyFileFilter implements FileFilter {
 
@@ -177,6 +178,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     public ConfigurationImpl(final String[] directories) {
         super();
         reloadableServices = new ConcurrentHashMap<String, Reloadable>(128);
+        reloadableServicesProps = new ConcurrentHashMap<String, String[]>(128);
         propertiesByFile = new HashMap<String, Properties>(256);
         texts = new ConcurrentHashMap<String, String>(1024);
         properties = new HashMap<String, String>(2048);
@@ -751,7 +753,12 @@ public final class ConfigurationImpl implements ConfigurationService {
         // Propagate reloaded configuration among Reloadables
         for (final Reloadable service : reloadableServices.values()) {
             try {
-                service.reloadConfiguration(this);
+                String[] props = reloadableServicesProps.get(service.getClass().getName());
+                for (String property : props) {
+                    if (changes.contains(property)) {
+                        service.reloadConfiguration(this);
+                    }
+                }
             } catch (final Exception e) {
                 LOG.warn("Failed to handle reloaded configuration to {}.", service.getClass().getName(), e);
             }
@@ -774,8 +781,11 @@ public final class ConfigurationImpl implements ConfigurationService {
          */
     }
 
-    public boolean addReloadable(Reloadable service) {
+    public boolean addReloadable(Reloadable service, String[] props) {
         if (null != service) {
+            if (null != props) {
+                reloadableServicesProps.putIfAbsent(service.getClass().getName(), props);
+            }
             return null == reloadableServices.putIfAbsent(service.getClass().getName(), service);
         }
         LOG.warn("Tried to add null to reloadable services");
@@ -785,6 +795,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     public void removeReloadable(Reloadable service) {
         if (null != service) {
             reloadableServices.remove(service.getClass().getName());
+            reloadableServicesProps.remove(service.getClass().getName());
         } else {
             LOG.warn("Tried to remove null from reloadable services");
         }
@@ -812,10 +823,10 @@ public final class ConfigurationImpl implements ConfigurationService {
                 String newProperty = newProperties.getProperty((String) newPropertyName);
                 String oldProperty = oldProperties.getProperty((String) newPropertyName);
                 if ((null == newProperty && null != oldProperties) || (null != newProperty && null == oldProperty)) {
-                    result.add(filename);
+                    result.add((String) newPropertyName);
                 }
                 if (!oldProperty.equals(newProperty)) {
-                    result.add(filename);
+                    result.add((String) newPropertyName);
                 }
             }
         }

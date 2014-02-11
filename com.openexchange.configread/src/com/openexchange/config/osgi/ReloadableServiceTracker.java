@@ -77,7 +77,8 @@ public class ReloadableServiceTracker implements ServiceTrackerCustomizer<Reload
     @Override
     public Reloadable addingService(ServiceReference<Reloadable> serviceRef) {
         Reloadable service = context.getService(serviceRef);
-        if (configService.addReloadable(service)) {
+        String[] props = (String[]) serviceRef.getProperty("properties");
+        if (configService.addReloadable(service, props)) {
             LOG.debug("Reloadable service added: " + service.getClass().getName());
             return service;
         }
