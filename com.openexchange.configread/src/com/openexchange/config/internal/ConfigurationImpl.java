@@ -61,12 +61,15 @@ import java.io.Reader;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.ho.yaml.Yaml;
@@ -812,24 +815,20 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     @NonNull
     private List<String> getChanges(Map<String, Properties> oldPropertiesByFile) {
-        List<String> result = new ArrayList<String>();
-        if (propertiesByFile.equals(oldPropertiesByFile)) {
-            return result;
-        }
-        for (String filename : propertiesByFile.keySet()) {
-            Properties newProperties = propertiesByFile.get(filename);
-            Properties oldProperties = oldPropertiesByFile.get(filename);
-            for (Object newPropertyName : newProperties.keySet()) {
-                String newProperty = newProperties.getProperty((String) newPropertyName);
-                String oldProperty = oldProperties.getProperty((String) newPropertyName);
-                if ((null == newProperty && null != oldProperties) || (null != newProperty && null == oldProperty)) {
-                    result.add((String) newPropertyName);
-                }
-                if (!oldProperty.equals(newProperty)) {
-                    result.add((String) newPropertyName);
-                }
+        final List<String> result = new LinkedList<String>();
+        for (final Map.Entry<String, Properties> newEntry : propertiesByFile.entrySet()) {
+            final String fileName = newEntry.getKey();
+            final Properties newProperties = newEntry.getValue();
+            final Properties oldProperties = oldPropertiesByFile.get(fileName);
+            if (null == oldProperties || !newProperties.equals(oldProperties)) {
+                // New or changed .properties file
+                result.add(fileName);
             }
         }
+        // Determine deleted ones
+        final Set<String> removedFiles = new HashSet<String>(oldPropertiesByFile.keySet());
+        removedFiles.removeAll(propertiesByFile.keySet());
+        result.addAll(removedFiles);
         return result;
     }
 
