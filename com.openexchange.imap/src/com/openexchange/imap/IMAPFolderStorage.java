@@ -2472,10 +2472,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         if (name == null) {
             name = getNameOf(toMove);
         }
-        return moveFolder(toMove, destFolder, name, true);
-    }
-
-    private IMAPFolder moveFolder(final IMAPFolder toMove, final IMAPFolder destFolder, final String folderName, final boolean checkForDuplicate) throws MessagingException, OXException {
         final String destFullname = destFolder.getFullName();
         final IMAPFolder newFolder;
         {
@@ -2483,10 +2479,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             if (destFullname.length() > 0) {
                 sb.append(destFullname).append(getSeparator(destFolder));
             }
-            sb.append(folderName);
+            sb.append(name);
             newFolder = (IMAPFolder) imapStore.getFolder(sb.toString());
         }
-        return moveFolder(toMove, destFolder, newFolder, checkForDuplicate);
+        return moveFolder(toMove, destFolder, newFolder, true);
     }
 
     private IMAPFolder moveFolder(final IMAPFolder toMove, final IMAPFolder destFolder, final IMAPFolder newFolder, final boolean checkForDuplicate) throws MessagingException, OXException {
