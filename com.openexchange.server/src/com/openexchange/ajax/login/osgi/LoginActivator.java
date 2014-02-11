@@ -58,9 +58,11 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.login.LoginRampUpService;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.v2.OAuth2ProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceSet;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tokenlogin.TokenLoginService;
 
@@ -105,9 +107,13 @@ public class LoginActivator extends HousekeepingActivator {
         }
         track(OAuthProviderService.class, new ServerServiceRegistryTracker<OAuthProviderService>());
         track(OAuth2ProviderService.class, new ServerServiceRegistryTracker<OAuth2ProviderService>());
-
+        
+        ServiceSet<LoginRampUpService> rampUp = new ServiceSet<LoginRampUpService>();
+        track(LoginRampUpService.class, rampUp);
+        
         final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DispatcherPrefixService.class.getName() + "))");
-        rememberTracker(new ServiceTracker<Object, Object>(context, filter, new LoginServletRegisterer(context)));
+        rememberTracker(new ServiceTracker<Object, Object>(context, filter, new LoginServletRegisterer(context, rampUp)));
+        
         track(TokenLoginService.class, new TokenLoginCustomizer(context));
         openTrackers();
     }

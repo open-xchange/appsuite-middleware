@@ -52,6 +52,7 @@ package com.openexchange.ajax.login;
 import static com.openexchange.ajax.ConfigMenu.convert2JS;
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import javax.servlet.http.HttpServletRequest;
@@ -63,6 +64,7 @@ import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.Multiple;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -75,13 +77,16 @@ import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.log.LogProperties;
+import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginResult;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -92,7 +97,13 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public abstract class AbstractLoginRequestHandler implements LoginRequestHandler {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractLoginRequestHandler.class);
-
+    
+    private Set<LoginRampUpService> rampUp = null;
+    
+    public AbstractLoginRequestHandler(Set<LoginRampUpService> rampUp) {
+        this.rampUp = rampUp;
+    }
+    
     /**
      * @return a boolean value indicated if an auto login should proceed afterwards
      */
@@ -146,10 +157,11 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
 
             // Handle initial multiple
             final String multipleRequest = req.getParameter("multiple");
+            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
             if (multipleRequest != null) {
                 final JSONArray dataArray = new JSONArray(multipleRequest);
                 if (dataArray.length() > 0) {
-                    JSONArray responses = Multiple.perform(dataArray, req, ServerSessionAdapter.valueOf(session));
+                    JSONArray responses = Multiple.perform(dataArray, req, serverSession);
                     json.put("multiple", responses);
                 } else {
                     json.put("multiple", new JSONArray(0));
@@ -173,7 +185,10 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                     LOG.warn("Modules could not be added to login JSON response", cause);
                 }
             }
-
+            
+            // Perform Client Specific Ramp-Up
+            performRampUp(req, session, json, serverSession);
+            
             // Set response
             response.setData(json);
         } catch (final OXException e) {
@@ -232,6 +247,18 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             return false;
         }
         return false;
+    }
+
+    protected void performRampUp(final HttpServletRequest req, final Session session, final JSONObject json, ServerSession serverSession) throws OXException, IOException, JSONException {
+        if (rampUp != null) {
+            for (LoginRampUpService rampUpService : rampUp) {
+                if (rampUpService.contributesTo(session.getClient())) {
+                    JSONObject contribution = rampUpService.getContribution(serverSession, AJAXRequestDataTools.getInstance().parseRequest(req, false, false, serverSession, ""));
+                    json.put("rampUp", contribution);
+                    break;
+                }
+            }                
+        }
     }
 
     private Locale bestGuessLocale(LoginResult result, final HttpServletRequest req) {

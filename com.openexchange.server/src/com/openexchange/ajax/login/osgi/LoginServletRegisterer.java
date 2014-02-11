@@ -66,6 +66,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.login.ConfigurationProperty;
+import com.openexchange.login.LoginRampUpService;
+import com.openexchange.osgi.ServiceSet;
 
 /**
  * {@link LoginServletRegisterer}
@@ -86,9 +88,12 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
 
     private LoginServlet login;
 
-    public LoginServletRegisterer(final BundleContext context) {
+    public LoginServletRegisterer(final BundleContext context, ServiceSet<LoginRampUpService> rampUp) {
         super();
         this.context = context;
+        if (LoginServlet.RAMP_UP == null) {
+            LoginServlet.RAMP_UP = rampUp;
+        }
     }
 
     @Override

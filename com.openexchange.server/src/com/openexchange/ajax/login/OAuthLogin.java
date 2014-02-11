@@ -51,6 +51,7 @@ package com.openexchange.ajax.login;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -62,6 +63,7 @@ import net.oauth.server.OAuthServlet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
@@ -83,7 +85,8 @@ public class OAuthLogin extends AbstractLoginRequestHandler {
      * 
      * @param login
      */
-    public OAuthLogin(LoginConfiguration conf) {
+    public OAuthLogin(LoginConfiguration conf, Set<LoginRampUpService> rampUp) {
+        super(rampUp);
         this.conf = conf;
     }
 

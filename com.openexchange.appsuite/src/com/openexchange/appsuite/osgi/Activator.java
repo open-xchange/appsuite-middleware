@@ -54,12 +54,14 @@ import java.text.MessageFormat;
 import org.osgi.framework.BundleException;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.requesthandler.Dispatcher;
+import com.openexchange.appsuite.AppSuiteLoginRampUp;
 import com.openexchange.appsuite.AppsLoadServlet;
 import com.openexchange.appsuite.FileContribution;
 import com.openexchange.appsuite.FileContributor;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
+import com.openexchange.login.LoginRampUpService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.tools.session.ServerSession;
@@ -71,7 +73,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HttpService.class, ConfigurationService.class, DispatcherPrefixService.class };
+        return new Class<?>[] { HttpService.class, ConfigurationService.class, DispatcherPrefixService.class, Dispatcher.class };
     }
 
     @Override
@@ -126,5 +128,7 @@ public class Activator extends HousekeepingActivator {
                 return null;
             }
         };
+        
+        registerService(LoginRampUpService.class, new AppSuiteLoginRampUp(this));
     }
 }

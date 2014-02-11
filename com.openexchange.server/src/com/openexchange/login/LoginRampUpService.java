@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,67 +47,36 @@
  *
  */
 
-package com.openexchange.ajax.login;
+package com.openexchange.login;
 
-import java.io.IOException;
-import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.ajax.LoginServlet;
-import com.openexchange.ajax.fields.LoginFields;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
-import com.openexchange.login.LoginRampUpService;
-import com.openexchange.login.LoginRequest;
-import com.openexchange.login.LoginResult;
-import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link Login}
- * 
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * A @link LoginRampUpService} contributes data based on the client id sent in the login request.
+ * This allows optimisation of the number of calls needed for an intial login.
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Login extends AbstractLoginRequestHandler {
-
+public interface LoginRampUpService {
+    
     /**
-     * 
+     * Return whether this ramp up service wants to contribute to a given client ID
+     * Note that only one RampUpService will ever be used for a given client.
+     * @param client
+     * @return true, if this ramp up service deals with the given client
      */
-    private final LoginConfiguration conf;
-
+    public boolean contributesTo(String client);
+    
     /**
-     * Initializes a new {@link Login}.
-     * 
-     * @param login
+     * Generate the contribution for the given session
+     * @param session The authenticated session
+     * @param request 
+     * @return The contribution
+     * @throws OXException
      */
-    public Login(LoginConfiguration conf, Set<LoginRampUpService> rampUp) {
-        super(rampUp);
-        this.conf = conf;
-    }
-
-    @Override
-    public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        // Look-up necessary credentials
-        try {
-            doLogin(req, resp);
-        } catch (final OXException e) {
-            LoginServlet.logAndSendException(resp, e);
-        }
-    }
-
-    private void doLogin(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, OXException {
-        loginOperation(req, resp, new LoginClosure() {
-
-            @Override
-            public LoginResult doLogin(final HttpServletRequest req2) throws OXException {
-                final LoginRequest request = LoginTools.parseLogin(
-                    req2,
-                    LoginFields.NAME_PARAM,
-                    false,
-                    conf.getDefaultClient(),
-                    conf.isCookieForceHTTPS(),
-                    conf.isDisableTrimLogin(),
-                    false);
-                return LoginPerformer.getInstance().doLogin(request);
-            }
-        }, conf);
-    }
+    public JSONObject getContribution(ServerSession session, AJAXRequestData request) throws OXException;
 }

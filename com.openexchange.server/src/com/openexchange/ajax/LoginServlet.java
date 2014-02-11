@@ -113,6 +113,7 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.ConfigurationProperty;
 import com.openexchange.login.Interface;
+import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
@@ -195,6 +196,8 @@ public class LoginServlet extends AJAXServlet {
 
     /** The login configuration reference */
     static final AtomicReference<LoginConfiguration> confReference = new AtomicReference<LoginConfiguration>();
+
+    public static Set<LoginRampUpService> RAMP_UP = null;
 
     /**
      * Gets the login configuration.
@@ -626,9 +629,9 @@ public class LoginServlet extends AJAXServlet {
         handlerMap.put(ACTION_TOKENLOGIN, new TokenLogin(conf));
         handlerMap.put(ACTION_TOKENS, new Tokens(conf));
         handlerMap.put(ACTION_REDEEM_TOKEN, new RedeemToken(conf));
-        handlerMap.put(ACTION_AUTOLOGIN, new AutoLogin(conf));
-        handlerMap.put(ACTION_OAUTH, new OAuthLogin(conf));
-        handlerMap.put(ACTION_LOGIN, new Login(conf));
+        handlerMap.put(ACTION_AUTOLOGIN, new AutoLogin(conf, RAMP_UP));
+        handlerMap.put(ACTION_OAUTH, new OAuthLogin(conf, RAMP_UP));
+        handlerMap.put(ACTION_LOGIN, new Login(conf, RAMP_UP));
     }
 
     @Override

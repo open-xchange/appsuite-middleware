@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,67 +47,92 @@
  *
  */
 
-package com.openexchange.ajax.login;
+package com.openexchange.ajax.requesthandler;
 
-import java.io.IOException;
-import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.ajax.LoginServlet;
-import com.openexchange.ajax.fields.LoginFields;
-import com.openexchange.exception.OXException;
-import com.openexchange.login.LoginRampUpService;
-import com.openexchange.login.LoginRequest;
-import com.openexchange.login.LoginResult;
-import com.openexchange.login.internal.LoginPerformer;
 
 /**
- * {@link Login}
- * 
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * An {@link AJAXRequestDataBuilder} is a fluent interface for constructing AJAXRequestData for use with the {@link Dispatcher}.
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Login extends AbstractLoginRequestHandler {
-
+public class AJAXRequestDataBuilder {
+    
     /**
-     * 
+     * Best used as a static import.
      */
-    private final LoginConfiguration conf;
-
+    public static AJAXRequestDataBuilder request() {
+        return new AJAXRequestDataBuilder();
+    }
+    
+    private AJAXRequestData data = new AJAXRequestData();
+    
+    private boolean formatSpecified = false;
+    
     /**
-     * Initializes a new {@link Login}.
-     * 
-     * @param login
+     * Specify the module
      */
-    public Login(LoginConfiguration conf, Set<LoginRampUpService> rampUp) {
-        super(rampUp);
-        this.conf = conf;
+    public AJAXRequestDataBuilder module(String module) {
+        data.setModule(module);
+        return this;
     }
-
-    @Override
-    public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        // Look-up necessary credentials
-        try {
-            doLogin(req, resp);
-        } catch (final OXException e) {
-            LoginServlet.logAndSendException(resp, e);
-        }
+    
+    /**
+     * Specify the action
+     */
+    public AJAXRequestDataBuilder action(String action) {
+        data.setAction(action);
+        data.putParameter("action", action);
+        return this;
     }
-
-    private void doLogin(final HttpServletRequest req, final HttpServletResponse resp) throws IOException, OXException {
-        loginOperation(req, resp, new LoginClosure() {
-
-            @Override
-            public LoginResult doLogin(final HttpServletRequest req2) throws OXException {
-                final LoginRequest request = LoginTools.parseLogin(
-                    req2,
-                    LoginFields.NAME_PARAM,
-                    false,
-                    conf.getDefaultClient(),
-                    conf.isCookieForceHTTPS(),
-                    conf.isDisableTrimLogin(),
-                    false);
-                return LoginPerformer.getInstance().doLogin(request);
+    
+    /**
+     * Specify parameters. Alternate parameter names and values. E.g. builder.params('id', '12', 'folder', '13')
+     */
+    public AJAXRequestDataBuilder params(String...params) {
+        String name = null;
+        for (String string : params) {
+            if (name != null) {
+                data.putParameter(name, string);
+                name = null;
+            } else {
+                name = string;
             }
-        }, conf);
+        }
+        return this;
     }
+    
+    /**
+     * Specify the body. Usually as a JSON formatted String.
+     */
+    public AJAXRequestDataBuilder data(Object body, String format) {
+        data.setData(body, format);
+        return this;
+    }
+    
+    /**
+     * Request a certain format in the results. Defaults to 'native';
+     */
+    public AJAXRequestDataBuilder format(String format) {
+        formatSpecified = true;
+        data.setFormat(format);
+        return this;
+    }
+    
+    public AJAXRequestDataBuilder pathInfo(String path) {
+        data.setPathInfo(path);
+        return this;
+    }
+    
+    public AJAXRequestData build() {
+        if (!formatSpecified) {
+            format("native");
+        }
+        return data;
+    }
+
+    public AJAXRequestDataBuilder hostname(String hostname) {
+        data.setHostname(hostname);
+        return this;
+    }
+    
 }
