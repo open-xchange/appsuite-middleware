@@ -162,10 +162,10 @@ public class ExternalGroupParticipant implements Participant, Comparable<Partici
             return false;
         }
         final ExternalGroupParticipant other = (ExternalGroupParticipant) obj;
-        if (null == emailaddress && null != other.emailaddress) {
-            return false;
+        if (null != emailaddress && null != other.emailaddress) {
+            return emailaddress.equals(other.emailaddress);
         }
-        return emailaddress.equals(other.emailaddress);
+        return false;
     }
 
     /**
