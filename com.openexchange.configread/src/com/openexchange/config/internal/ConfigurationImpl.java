@@ -64,7 +64,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -743,7 +742,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         loadConfiguration(getDirectories());
 
         // Check if properties has been changed, abort if not
-        List<String> changes = getChanges(oldPropertiesByFile);
+        Set<String> changes = getChanges(oldPropertiesByFile);
         if (changes.isEmpty()) {
             return;
         }
@@ -814,8 +813,8 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     @NonNull
-    private List<String> getChanges(Map<String, Properties> oldPropertiesByFile) {
-        final List<String> result = new LinkedList<String>();
+    private Set<String> getChanges(Map<String, Properties> oldPropertiesByFile) {
+        final Set<String> result = new HashSet<String>(oldPropertiesByFile.size());
         for (final Map.Entry<String, Properties> newEntry : propertiesByFile.entrySet()) {
             final String fileName = newEntry.getKey();
             final Properties newProperties = newEntry.getValue();
