@@ -1,23 +1,10 @@
-* 2014-03-30 - martin.schneider@open-xchange.com
-
- - Fix for bug 31648: Detect Content-Type by file name if specified one is of generic nature; e.g "application/binary"
- - Fix for bug 31443: Do not autorename folders equal to default folder names while creation. Throw exception instead.
-
 * 2014-04-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 32239: Filter associated account's address from recipient list
 
-* 2014-03-26 - thorben.betten@open-xchange.com
-
- - Fix for bug 31770: Retrieve deferrer URL from config-cascade look-up
-
-* 2014-03-25 - thorben.betten@open-xchange.com
+* 2014-04-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 31684: Prefer look-up by user identifier over look-up by object/folder identifier pair
-
-* 2014-04-25 - marc.arens@open-xchange.com
-
- - Fix for bug 32127: Don't send keepalive pings/processing while reading data from upstream
 
 * 2014-04-16 - tobias.friedrich@open-xchange.com
 
@@ -43,9 +30,21 @@
 
  - Fix for Bug 31855: [L3] email cannot be displayed and customer gets only a MSG-0020
 
+* 2014-03-30 - martin.schneider@open-xchange.com
+
+ - Fix for bug 31443: Do not autorename folders equal to default folder names while creation. Throw exception instead.
+
 * 2014-03-27 - martin.herfurth@open-xchange.com
 
  - Fix for bug 31525: Removed shown_as field (ical: transparency) from emmitted ical to suppress unnecessary changes.
+
+* 2014-03-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31770: Retrieve deferrer URL from config-cascade look-up
+
+* 2014-03-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31684: Prefer look-up by user identifier over look-up by object/folder identifier pair
 
 * 2014-03-14 - thorben.betten@open-xchange.com
 
