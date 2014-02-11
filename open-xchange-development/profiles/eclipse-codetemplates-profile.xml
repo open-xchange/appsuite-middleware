@@ -39,7 +39,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-${year} Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -61,6 +61,7 @@
  * {@link ${type_name}}
  *
  * @author &lt;a href="mailto:firstname.lastname@open-xchange.com"&gt;Firstname Lastname&lt;/a&gt;
+ * @since v7.6.0
  * ${tags}
  */</template><template autoinsert="true" context="fieldcomment_context" deleted="false" description="Comment for fields" enabled="true" id="org.eclipse.jdt.ui.text.codetemplates.fieldcomment" name="fieldcomment">/**
  * 

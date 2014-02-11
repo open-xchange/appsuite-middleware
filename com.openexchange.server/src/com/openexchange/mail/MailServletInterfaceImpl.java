@@ -86,6 +86,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -123,6 +124,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -1116,6 +1118,16 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         }
         return tmp.intValue();
+    }
+
+    static {
+        MailReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                maxForwardCount = null;
+            }
+        });
     }
 
     @Override
@@ -2622,7 +2634,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final int length = name.length();
         for (int i = 0; i < length; i++) {
             if (INVALID.indexOf(name.charAt(i)) >= 0) {
-                throw MailExceptionCode.INVALID_FOLDER_NAME2.create(name);
+                throw MailExceptionCode.INVALID_FOLDER_NAME2.create(name, INVALID);
             }
         }
     }

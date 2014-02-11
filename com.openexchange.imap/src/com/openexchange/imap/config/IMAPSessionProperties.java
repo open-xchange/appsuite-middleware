@@ -93,9 +93,11 @@ public final class IMAPSessionProperties {
      * Resets the default IMAP session properties
      */
     public static void resetDefaultSessionProperties() {
-        if (null != imapSessionProperties) {
+        Properties tmp = imapSessionProperties;
+        if (null != tmp) {
             synchronized (IMAPSessionProperties.class) {
-                if (null != imapSessionProperties) {
+                tmp = imapSessionProperties;
+                if (null != tmp) {
                     imapSessionProperties = null;
                 }
             }

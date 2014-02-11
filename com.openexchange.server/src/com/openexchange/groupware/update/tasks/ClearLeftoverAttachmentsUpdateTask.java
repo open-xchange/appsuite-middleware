@@ -236,9 +236,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
             }
 
             if(readCon != null) {
-                if(readCon != null) {
-                    Database.back(false, readCon);
-                }
+                Database.back(false, readCon);
             }
         }
     }

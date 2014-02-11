@@ -51,6 +51,7 @@ package com.openexchange.mailaccount.json.actions;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
@@ -118,7 +119,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
 
         final MailAccountDescription accountDescription = new MailAccountDescription();
         final List<OXException> warnings = new LinkedList<OXException>();
-        MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
+        MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings, false);
 
         if (accountDescription.getId() >= 0 && null == accountDescription.getPassword()) {
             /*
@@ -227,8 +228,12 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         }
         // Now try to connect
         final boolean success = mailAccess.ping();
-        if (success) {
-            warnings.addAll(mailAccess.getWarnings());
+        // Add possible warnings
+        {
+            final Collection<OXException> currentWarnings = mailAccess.getWarnings();
+            if (null != currentWarnings) {
+                warnings.addAll(currentWarnings);
+            }
         }
         return success;
     }

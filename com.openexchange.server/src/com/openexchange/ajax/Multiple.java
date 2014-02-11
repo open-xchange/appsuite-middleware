@@ -207,32 +207,44 @@ public class Multiple extends SessionServlet {
                 int concurrentTasksCount = 0;
                 // Build-up mapping & schedule for either serial or concurrent execution
                 final ConcurrentTIntObjectHashMap<JsonInOut> mapping = new ConcurrentTIntObjectHashMap<JsonInOut>(length);
-                for (int pos = 0; pos < length; pos++) {
+                if (length > 1) {
+                    for (int pos = 0; pos < length; pos++) {
+                        final JSONObject dataObject = dataArray.getJSONObject(pos);
+                        final JsonInOut jsonInOut = new JsonInOut(pos, dataObject);
+                        mapping.put(pos, jsonInOut);
+                        if (!dataObject.hasAndNotNull(MODULE)) {
+                            throw AjaxExceptionCodes.MISSING_PARAMETER.create(MODULE);
+                        }
+                        // Check if module indicates serial or concurrent execution
+                        final String module = dataObject.getString(MODULE);
+                        if (indicatesSerial(dataObject)) {
+                            if (null == serialTasks) {
+                                serialTasks = new ArrayList<JsonInOut>(length);
+                            }
+                            serialTasks.add(jsonInOut);
+                        } else {
+                            if (null == completionService) {
+                                final int concurrencyLevel = CONCURRENCY_LEVEL;
+                                if (concurrencyLevel <= 0 || length <= concurrencyLevel) {
+                                    completionService = new ThreadPoolCompletionService<Object>(ThreadPools.getThreadPool()).setTrackable(true);
+                                } else {
+                                    completionService = new BoundedCompletionService<Object>(ThreadPools.getThreadPool(), concurrencyLevel).setTrackable(true);
+                                }
+                            }
+                            completionService.submit(new CallableImpl(jsonInOut, session, module, req));
+                            concurrentTasksCount++;
+                        }
+                    }
+                } else {
+                    final int pos = 0;
                     final JSONObject dataObject = dataArray.getJSONObject(pos);
                     final JsonInOut jsonInOut = new JsonInOut(pos, dataObject);
                     mapping.put(pos, jsonInOut);
                     if (!dataObject.hasAndNotNull(MODULE)) {
                         throw AjaxExceptionCodes.MISSING_PARAMETER.create(MODULE);
                     }
-                    // Check if module indicates serial or concurrent execution
-                    final String module = dataObject.getString(MODULE);
-                    if (indicatesSerial(dataObject)) {
-                        if (null == serialTasks) {
-                            serialTasks = new ArrayList<JsonInOut>(length);
-                        }
-                        serialTasks.add(jsonInOut);
-                    } else {
-                        if (null == completionService) {
-                            final int concurrencyLevel = CONCURRENCY_LEVEL;
-                            if (concurrencyLevel <= 0 || length <= concurrencyLevel) {
-                                completionService = new ThreadPoolCompletionService<Object>(ThreadPools.getThreadPool()).setTrackable(true);
-                            } else {
-                                completionService = new BoundedCompletionService<Object>(ThreadPools.getThreadPool(), concurrencyLevel).setTrackable(true);
-                            }
-                        }
-                        completionService.submit(new CallableImpl(jsonInOut, session, module, req));
-                        concurrentTasksCount++;
-                    }
+                    serialTasks = new ArrayList<JsonInOut>(1);
+                    serialTasks.add(jsonInOut);
                 }
                 if (null != serialTasks) {
                     final int size = serialTasks.size();

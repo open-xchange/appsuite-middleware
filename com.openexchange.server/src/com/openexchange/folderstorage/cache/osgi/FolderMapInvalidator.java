@@ -53,6 +53,7 @@ import java.io.Serializable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
@@ -68,6 +69,8 @@ import com.openexchange.folderstorage.internal.Tools;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FolderMapInvalidator implements CacheListener, ServiceTrackerCustomizer<CacheEventService, CacheEventService> {
+
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(FolderMapInvalidator.class);
 
     private final BundleContext context;
 
@@ -85,6 +88,8 @@ public class FolderMapInvalidator implements CacheListener, ServiceTrackerCustom
     public void onEvent(final Object sender, final CacheEvent cacheEvent, final boolean fromRemote) {
         if (fromRemote) {
             // Remotely received
+            LOGGER.debug("Handling incoming remote cache event: {}", cacheEvent);
+
             final String region = cacheEvent.getRegion();
             if ("GlobalFolderCache".equals(region)) {
                 final int contextId = Tools.getUnsignedInteger(cacheEvent.getGroupName());

@@ -49,6 +49,7 @@
 
 package com.openexchange.threadpool.internal;
 
+import com.openexchange.marker.OXThreadMarker;
 import com.openexchange.threadpool.ThreadRenamer;
 
 /**
@@ -56,7 +57,7 @@ import com.openexchange.threadpool.ThreadRenamer;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CustomThread extends Thread implements ThreadRenamer {
+public final class CustomThread extends Thread implements ThreadRenamer, OXThreadMarker {
 
     private volatile String originalName;
     private volatile String appendix;

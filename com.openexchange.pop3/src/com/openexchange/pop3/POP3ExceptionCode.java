@@ -126,7 +126,7 @@ public enum POP3ExceptionCode implements DisplayableOXExceptionCode {
      */
     FOLDER_DOES_NOT_HOLD_FOLDERS("Folder %1$s does not allow subfolders.", POP3ExceptionMessage.FOLDER_DOES_NOT_HOLD_FOLDERS_MSG, CATEGORY_PERMISSION_DENIED, 2012),
     /**
-     * Mail folder cannot be created/rename. Name must not contain character '%1$s'
+     * Invalid folder name: "%1$s". Please avoid the following characters: %2$s
      */
     INVALID_FOLDER_NAME(MailExceptionCode.INVALID_FOLDER_NAME),
     /**
@@ -391,7 +391,7 @@ public enum POP3ExceptionCode implements DisplayableOXExceptionCode {
     private final Category category;
 
     private final String prefix;
-    
+
     private final String displayMessage;
 
     private POP3ExceptionCode(final String message, final String displayMessage, final Category category, final int detailNumber) {

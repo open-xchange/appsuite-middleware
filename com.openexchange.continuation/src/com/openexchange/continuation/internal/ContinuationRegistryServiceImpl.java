@@ -49,12 +49,17 @@
 
 package com.openexchange.continuation.internal;
 
+import java.io.Serializable;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentMap;
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-import com.googlecode.concurrentlinkedhashmap.Weighers;
+import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
 import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.ElementAttributes;
 import com.openexchange.continuation.Continuation;
 import com.openexchange.continuation.ContinuationRegistryService;
 import com.openexchange.exception.OXException;
@@ -71,16 +76,49 @@ import com.openexchange.session.Session;
  */
 public class ContinuationRegistryServiceImpl implements ContinuationRegistryService {
 
+    /** The logger constant */
+    static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ContinuationRegistryServiceImpl.class);
+
+    // ------------------------------------------------------------------------------------------------------ //
+
     private final ServiceLookup services;
     private final String region;
+    private final RemovalListener<UUID, Continuation<?>> removalListener;
 
     /**
      * Initializes a new {@link ContinuationRegistryServiceImpl}.
+     *
+     * @throws OXException If cache service is not available
      */
-    public ContinuationRegistryServiceImpl(final String region, final ServiceLookup services) {
+    public ContinuationRegistryServiceImpl(final String region, final ServiceLookup services) throws OXException {
         super();
         this.services = services;
         this.region = region;
+
+        this.removalListener = new RemovalListener<UUID, Continuation<?>>() {
+
+            @Override
+            public void onRemoval(final RemovalNotification<UUID, Continuation<?>> notification) {
+                final Continuation<?> continuation = notification.getValue();
+                if (null != continuation) {
+                    try {
+                        continuation.cancel(true);
+                    } catch (final Exception x) {
+                        LOGGER.warn("Failed to cancel continuation {}", continuation.getUuid());
+                    }
+                }
+            }
+        };
+
+        // Register cache event handler
+        final CacheService cacheService = services.getOptionalService(CacheService.class);
+        if (null == cacheService) {
+            throw ServiceExceptionCode.absentService(CacheService.class);
+        }
+        final Cache cache = cacheService.getCache(region);
+        final ElementAttributes attributes = cache.getDefaultElementAttributes();
+        attributes.addElementEventHandler(new ContinuationCacheElementEventHandler());
+        cache.setDefaultElementAttributes(attributes);
     }
 
     private Cache getCache() throws OXException {
@@ -91,9 +129,9 @@ public class ContinuationRegistryServiceImpl implements ContinuationRegistryServ
         return cacheService.getCache(region);
     }
 
-    private ConcurrentLinkedHashMap<UUID, Continuation<?>> newUserMap() {
-        // Not more than 100 concurrent continuations per user
-        return new ConcurrentLinkedHashMap.Builder<UUID, Continuation<?>>().initialCapacity(16).maximumWeightedCapacity(100).weigher(Weighers.entrySingleton()).build();
+    private com.google.common.cache.Cache<UUID, Continuation<?>> newUserCache() {
+        // Not more than 100 concurrent continuations per user, each with 5 minutes expiry
+        return CacheBuilder.newBuilder().initialCapacity(16).expireAfterAccess(5, TimeUnit.MINUTES).maximumSize(100).removalListener(removalListener).build();
     }
 
     private String cacheKey(final Session session) {
@@ -106,9 +144,9 @@ public class ContinuationRegistryServiceImpl implements ContinuationRegistryServ
         if (null != uuid && null != session) {
             final Cache cache = getCache();
             final Object object = cache.get(cacheKey(session));
-            if (object instanceof ConcurrentMap) {
-                final ConcurrentMap<UUID, Continuation<?>> userMap = (ConcurrentMap<UUID, Continuation<?>>) object;
-                return (Continuation<V>) userMap.get(uuid);
+            if (object instanceof com.google.common.cache.Cache) {
+                final com.google.common.cache.Cache<UUID, Continuation<?>> userCache = (com.google.common.cache.Cache<UUID, Continuation<?>>) object;
+                return (Continuation<V>) userCache.getIfPresent(uuid);
             }
         }
         return null;
@@ -117,21 +155,30 @@ public class ContinuationRegistryServiceImpl implements ContinuationRegistryServ
     @Override
     public <V> void putContinuation(final Continuation<V> continuation, final Session session) throws OXException {
         if (null != continuation && null != session) {
+            Object object;
+
             final Cache cache = getCache();
-            final String cacheKey = cacheKey(session);
-            Object object = cache.get(cacheKey);
-            while (!(object instanceof ConcurrentMap)) {
-                try {
-                    final ConcurrentLinkedHashMap<UUID, Continuation<?>> newUserMap = newUserMap();
-                    cache.putSafe(cacheKey, newUserMap);
-                    object = newUserMap;
-                } catch (final OXException e) {
-                    object = cache.get(cacheKey);
+            synchronized (cache) {
+                final String cacheKey = cacheKey(session);
+                object = cache.get(cacheKey);
+                while (!(object instanceof com.google.common.cache.Cache)) {
+                    try {
+                        final com.google.common.cache.Cache<UUID, Continuation<?>> newUserCache = newUserCache();
+                        cache.putSafe(cacheKey, (Serializable) newUserCache);
+                        object = newUserCache;
+                    } catch (final OXException e) {
+                        if (!CacheExceptionCode.FAILED_SAFE_PUT.equals(e)) {
+                            throw e;
+                        }
+                        // An object bound to given key already exists
+                        object = cache.get(cacheKey);
+                    }
                 }
             }
+
             @SuppressWarnings("unchecked")
-            final ConcurrentMap<UUID, Continuation<?>> userMap = (ConcurrentMap<UUID, Continuation<?>>) object;
-            if (null != userMap.putIfAbsent(continuation.getUuid(), continuation)) {
+            final com.google.common.cache.Cache<UUID, Continuation<?>> userCache = (com.google.common.cache.Cache<UUID, Continuation<?>>) object;
+            if (null != userCache.asMap().putIfAbsent(continuation.getUuid(), continuation)) {
                 // Already present
 
             }
@@ -142,11 +189,17 @@ public class ContinuationRegistryServiceImpl implements ContinuationRegistryServ
     public void removeContinuation(final UUID uuid, final Session session) throws OXException {
         if (null != uuid && null != session) {
             final Cache cache = getCache();
-            final Object object = cache.get(cacheKey(session));
-            if (object instanceof ConcurrentMap) {
-                @SuppressWarnings("unchecked")
-                final ConcurrentMap<UUID, Continuation<?>> userMap = (ConcurrentMap<UUID, Continuation<?>>) object;
-                userMap.remove(uuid);
+            synchronized (cache) {
+                final String key = cacheKey(session);
+                final Object object = cache.get(key);
+                if (object instanceof com.google.common.cache.Cache) {
+                    @SuppressWarnings("unchecked") final com.google.common.cache.Cache<UUID, Continuation<?>> userCache = (com.google.common.cache.Cache<UUID, Continuation<?>>) object;
+                    userCache.invalidate(uuid);
+
+                    if (userCache.asMap().isEmpty()) {
+                        cache.remove(key);
+                    }
+                }
             }
         }
     }

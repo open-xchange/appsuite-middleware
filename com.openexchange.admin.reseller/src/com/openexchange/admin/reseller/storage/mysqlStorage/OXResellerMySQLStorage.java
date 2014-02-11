@@ -194,11 +194,13 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw AdminCache.parseDataTruncation(dt);
         } catch (final RuntimeException e) {
             log.error("", e);
-            doRollback(oxcon);
+            if (null != oxcon){
+                doRollback(oxcon);
+            }
             throw e;
         } catch (final PoolException e) {
             log.error("", e);
-            doRollback(oxcon);
+            // no Rollback needed as the connection is null at this moment
             throw new StorageException(e.getMessage());
         } catch (final SQLException e) {
             log.error("", e);
@@ -267,7 +269,9 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw AdminCache.parseDataTruncation(dt);
         } catch (final RuntimeException e) {
             log.error("", e);
-            doRollback(oxcon);
+            if (null != oxcon) {
+                doRollback(oxcon);
+            }
             throw e;
         } catch (final PoolException e) {
             log.error("", e);
@@ -318,7 +322,9 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw AdminCache.parseDataTruncation(dt);
         } catch (final RuntimeException e) {
             log.error("", e);
-            doRollback(oxcon);
+            if (null != oxcon) {
+                doRollback(oxcon);
+            }
             throw e;
         } catch (final PoolException e) {
             log.error("", e);
@@ -582,7 +588,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw e;
         } catch (final PoolException e) {
             log.error("", e);
-            doRollback(oxcon);
+            // no Rollback needed as the connection is null at this moment
             throw new StorageException(e.getMessage());
         } catch (final SQLException e) {
             log.error("", e);
@@ -637,7 +643,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw e;
         } catch (final PoolException e) {
             log.error("", e);
-            doRollback(oxcon);
+            // no Rollback needed as the connection is null at this moment
             throw new StorageException(e.getMessage());
         } catch (final SQLException e) {
             log.error("", e);
@@ -1375,7 +1381,9 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw AdminCache.parseDataTruncation(dt);
         } catch (final RuntimeException e) {
             log.error("", e);
-            doRollback(oxcon);
+            if (null != oxcon) {
+                doRollback(oxcon);
+            }
             throw e;
         } catch (final PoolException e) {
             log.error("", e);
@@ -1768,7 +1776,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             con.commit();
         } catch (final PoolException e) {
             log.error("", e);
-            doRollback(con);
+            // no Rollback needed as the connection is null at this moment
             throw new StorageException(e.getMessage());
         } catch (final SQLException e) {
             log.error("", e);

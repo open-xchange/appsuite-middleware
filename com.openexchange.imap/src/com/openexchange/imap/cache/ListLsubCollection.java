@@ -70,8 +70,10 @@ import javax.mail.Folder;
 import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
+import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.services.Services;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.mime.MimeMailException;
@@ -320,6 +322,17 @@ final class ListLsubCollection {
             }
         }
         return tmp.intValue();
+    }
+
+    static {
+        IMAPReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(final ConfigurationService configService) {
+                initAclThreshold = null;
+                initStatusThreshold = null;
+            }
+        });
     }
 
     private void init(final boolean clearMaps, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl, final IMAPStore imapStore) throws MessagingException {

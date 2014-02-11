@@ -205,4 +205,5 @@ public class SimConfigurationService implements ConfigurationService {
     public List<String> getProperty(String name, String defaultValue, PropertyListener listener, String separator) {
         return Collections.emptyList();
     }
+
 }

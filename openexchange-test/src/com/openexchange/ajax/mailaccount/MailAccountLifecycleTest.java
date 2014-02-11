@@ -183,7 +183,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
         final GetSwitch actualSwitch = new GetSwitch(actualAcc);
 
         for (final Attribute attribute : Attribute.values()) {
-            if (attribute == Attribute.PASSWORD_LITERAL || attribute == Attribute.TRANSPORT_PASSWORD_LITERAL) {
+            if (attribute == Attribute.PASSWORD_LITERAL || attribute == Attribute.TRANSPORT_PASSWORD_LITERAL || attribute == Attribute.ARCHIVE_LITERAL) {
                 continue;
             }
             final Object expected = attribute.doSwitch(expectedSwitch);

@@ -24,6 +24,8 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
 	print "b.draw STACK\n";
 	print "c.label Eden Space\n";
 	print "c.draw STACK\n";
+	print "d.label Java heap\n";
+	print "d.draw AREA\n";
 	exit 0
 }
 									
@@ -76,4 +78,13 @@ $request = new JMX::Jmx4Perl::Request(READ,
 $response = $jmx->request($request);
 if ($response->is_ok()){
 	print "c.value ",$response->value(),"\n";
+}
+
+$request = new JMX::Jmx4Perl::Request(READ,
+	"java.lang:name=Java heap,type=MemoryPool",
+	"Usage",
+	"used");
+$response = $jmx->request($request);
+if ($response->is_ok()){
+	print "d.value ",$response->value(),"\n";
 }

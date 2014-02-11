@@ -55,8 +55,11 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import javax.mail.event.MessageRecentEvent;
 import javax.mail.event.MessageRecentListener;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.config.IMAPProperties;
+import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -158,6 +161,16 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
                 }
             }
         }
+    }
+
+    static {
+        IMAPReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(final ConfigurationService configService) {
+                dropFullNameChecker();
+            }
+        });
     }
 
     /**

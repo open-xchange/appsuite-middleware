@@ -62,6 +62,8 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventConstants;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -159,6 +161,26 @@ public abstract class AbstractResourceCache implements ResourceCache, EventHandl
         }
 
         return existingMetadata;
+    }
+
+    /**
+     * Prepares specified file MIME type for being put into storage.
+     *
+     * @param fileType The file MIME type to prepare
+     * @param maxLen The max. supported length
+     * @return The prepared file MIME type or <code>null</code>
+     */
+    protected String prepareFileType(final String fileType, final int maxLen) {
+        if (Strings.isEmpty(fileType)) {
+            return null;
+        }
+        try {
+            final String baseType = new ContentType(fileType.trim()).getBaseType();
+            return baseType.length() > maxLen ? baseType.substring(0, maxLen) : baseType;
+        } catch (final OXException e) {
+            LOG.warn("Could not parse file type: " + fileType, e);
+            return null;
+        }
     }
 
 }

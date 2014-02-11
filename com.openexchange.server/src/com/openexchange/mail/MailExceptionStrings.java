@@ -117,7 +117,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
 
     public final static String INVALID_FOLDER_NAME_EMPTY_MSG = "Mail folder cannot be created/renamed. Empty folder name.";
 
-    public final static String INVALID_FOLDER_NAME_MSG = "Invalid folder name.";
+    public final static String INVALID_FOLDER_NAME_MSG = "Invalid folder name. Please avoid the following characters: %2$s";
 
     public final static String DUPLICATE_FOLDER_MSG = "A folder named \"%1$s\" already exists.";
 
@@ -170,5 +170,9 @@ public final class MailExceptionStrings implements LocalizableStrings {
     public static final String MAX_MESSAGE_SIZE_EXCEEDED_MSG = "Maximum message size is exceeded. Max. is %1$s.";
 
     public static final String RESEND_DENIED_MSG = "Re-sending message denied because message is not located in \"%1$s\" folder.";
+
+    public static final String PING_FAILED_MSG = "Validation of server %1$s failed with reason: %3$s";
+
+    public static final String PING_FAILED_AUTH_MSG = "Validation of server %1$s failed due to invalid credentials";
 
 }

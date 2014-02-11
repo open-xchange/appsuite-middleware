@@ -61,6 +61,7 @@ import com.dropbox.client2.session.RequestTokenPair;
 import com.dropbox.client2.session.Session.AccessType;
 import com.dropbox.client2.session.WebAuthSession;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
@@ -80,7 +81,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DropboxOAuthServiceMetaData extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware {
+public final class DropboxOAuthServiceMetaData extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware, Reloadable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DropboxOAuthServiceMetaData.class);
 
@@ -198,6 +199,21 @@ public final class DropboxOAuthServiceMetaData extends AbstractOAuthServiceMetaD
     @Override
     public Class<? extends Api> getScribeService() {
         return DropBoxApi.class;
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        String apiKey = configService.getProperty("com.openexchange.oauth.dropbox.apiKey");
+        if (Strings.isEmpty(apiKey)) {
+            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.dropbox.apiKey");
+        }
+        this.apiKey = apiKey;
+
+        String apiSecret = configService.getProperty("com.openexchange.oauth.dropbox.apiSecret");
+        if (Strings.isEmpty(apiSecret)) {
+            throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.dropbox.apiSecret");
+        }
+        this.apiSecret = apiSecret;
     }
 
 }

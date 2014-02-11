@@ -228,7 +228,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             final String displayName = res.getDisplayname();
 
             int available;
-            if (null != res && null != res.getAvailable()) {
+            if (null != res.getAvailable()) {
                 if (res.getAvailable()) {
                     available = 1;
                 } else {
@@ -461,7 +461,6 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             throw new StorageException(e.toString());
         } catch (final PoolException e) {
             log.error("Pool Error", e);
-            dorollback(con);
             throw new StorageException(e);
         } catch (final CloneNotSupportedException e) {
             log.error("", e);

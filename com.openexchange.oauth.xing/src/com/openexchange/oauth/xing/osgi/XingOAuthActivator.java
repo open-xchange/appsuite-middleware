@@ -50,6 +50,7 @@
 package com.openexchange.oauth.xing.osgi;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.xing.XingOAuthServiceMetaData;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -75,7 +76,9 @@ public final class XingOAuthActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         final ConfigurationService config = getService(ConfigurationService.class);
         try {
-            registerService(OAuthServiceMetaData.class, new XingOAuthServiceMetaData(config));
+            XingOAuthServiceMetaData xingService = new XingOAuthServiceMetaData(config);
+            registerService(OAuthServiceMetaData.class, xingService);
+            registerService(Reloadable.class, xingService);
         } catch (final IllegalStateException e) {
             final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(XingOAuthActivator.class);
             log.warn("Could not start-up XING OAuth service", e);

@@ -85,166 +85,6 @@ msgstr ""
 msgid "No Kerberos delegation ticket found in session %1$s."
 msgstr ""
 
-#. Access denied.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:65
-msgid "Access denied."
-msgstr ""
-
-#. There is a problem with your AWS account that prevents the operation from completing successfully.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:68
-msgid ""
-"There is a problem with your AWS account that prevents the operation from "
-"completing successfully."
-msgstr ""
-
-#. The e-mail address you provided is associated with more than one account
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:71
-msgid ""
-"The e-mail address you provided is associated with more than one account"
-msgstr ""
-
-#. The requested bucket name is not available. The bucket namespace is shared by all users of the system. Please select a different name and try again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:74
-msgid ""
-"The requested bucket name is not available. The bucket namespace is shared "
-"by all users of the system. Please select a different name and try again."
-msgstr ""
-
-#. Your previous request to create the named bucket succeeded and you already own it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:77
-msgid ""
-"Your previous request to create the named bucket succeeded and you already "
-"own it."
-msgstr ""
-
-#. The bucket you tried to delete is not empty.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:80
-msgid "The bucket you tried to delete is not empty."
-msgstr ""
-
-#. This request does not support credentials.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:83
-msgid "This request does not support credentials."
-msgstr ""
-
-#. Cross location logging not allowed. Buckets in one geographic location cannot log information to a bucket in another location.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:86
-msgid ""
-"Cross location logging not allowed. Buckets in one geographic location "
-"cannot log information to a bucket in another location."
-msgstr ""
-
-#. Your proposed upload is smaller than the minimum allowed object size.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:89
-msgid "Your proposed upload is smaller than the minimum allowed object size."
-msgstr ""
-
-#. Your proposed upload exceeds the maximum allowed object size.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:92
-msgid "Your proposed upload exceeds the maximum allowed object size."
-msgstr ""
-
-#. The provided token has expired.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:95
-msgid "The provided token has expired."
-msgstr ""
-
-#. The AWS Access Key Id you provided does not exist in our records.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:98
-msgid "The AWS Access Key Id you provided does not exist in our records."
-msgstr ""
-
-#. The specified bucket is not valid.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:101
-msgid "The specified bucket is not valid."
-msgstr ""
-
-#. All access to this object has been disabled.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:104
-msgid "All access to this object has been disabled."
-msgstr ""
-
-#. The provided security credentials are not valid.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:107
-msgid "The provided security credentials are not valid."
-msgstr ""
-
-#. The provided token is malformed or otherwise invalid.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:110
-msgid "The provided token is malformed or otherwise invalid."
-msgstr ""
-
-#. Couldn't parse the specified URI.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:113
-msgid "Couldn't parse the specified URI."
-msgstr ""
-
-#. Your key is too long.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:116
-msgid "Your key is too long."
-msgstr ""
-
-#. Your request was too big.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:119
-msgid "Your request was too big."
-msgstr ""
-
-#. The specified method is not allowed against this resource.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:122
-msgid "The specified method is not allowed against this resource."
-msgstr ""
-
-#. The specified bucket does not exist.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:125
-msgid "The specified bucket does not exist."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:127
-msgid "The specified key does not exist."
-msgstr ""
-
-#. Your account is not signed up for the Amazon S3 service.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:130
-msgid "Your account is not signed up for the Amazon S3 service."
-msgstr ""
-
-#. A conflicting conditional operation is currently in progress against this resource. Please try again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:133
-msgid ""
-"A conflicting conditional operation is currently in progress against this "
-"resource. Please try again."
-msgstr ""
-
-#. At least one of the preconditions you specified did not hold.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:136
-msgid "At least one of the preconditions you specified did not hold."
-msgstr ""
-
-#. Temporary redirect.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:139
-msgid "Temporary redirect."
-msgstr ""
-
-#. Object restore is already in progress.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:142
-msgid "Object restore is already in progress."
-msgstr ""
-
-#. You are being redirected to the bucket while DNS updates.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:145
-msgid "You are being redirected to the bucket while DNS updates."
-msgstr ""
-
-#. The provided token must be refreshed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:148
-msgid "The provided token must be refreshed."
-msgstr ""
-
-#. The e-mail address you provided does not match any account on record.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.aws.s3/src/com/openexchange/aws/s3/internal/AwsS3ExceptionMessages.java:151
-msgid "The e-mail address you provided does not match any account on record."
-msgstr ""
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:92
 msgid "Calendar"
@@ -1407,7 +1247,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:84
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cmis/src/com/openexchange/file/storage/cmis/CMISExceptionMessages.java:84
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/WebDAVFileStorageExceptionMessages.java:97
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:74
 msgid "Missing file name."
 msgstr ""
 
@@ -1757,13 +1597,13 @@ msgstr ""
 
 #. Missing configuration for account "%1$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:89
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:77
 msgid "Missing configuration for account \"%1$s\"."
 msgstr ""
 
 #. Bad or expired access token. Need to re-authenticate user.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/DropboxExceptionMessages.java:92
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:95
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:80
 msgid "Bad or expired access token. Need to re-authenticate user."
 msgstr ""
 
@@ -1777,18 +1617,10 @@ msgstr ""
 
 #. An error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/WebDAVFileStorageExceptionMessages.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:62
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.inet.proxy/src/com/openexchange/inet/proxy/InetProxyExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.loxandra/src/com/openexchange/loxandra/LoxandraExceptionMessages.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.message.timeline/src/com/openexchange/message/timeline/MessageTimelineExceptionMessages.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.sms/src/com/openexchange/messaging/sms/service/SMSMessagingExceptionMessages.java:62
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push/src/com/openexchange/push/PushExceptionMessages.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rdiff/src/com/openexchange/rdiff/RdiffExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:124
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:62
 msgid "An error occurred: %1$s"
 msgstr ""
 
@@ -1882,6 +1714,173 @@ msgstr ""
 #. Invalid URL \"%1$s\". Please correct the value and try again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:79
 msgid "Invalid URL \"%1$s\". Please correct the value and try again."
+msgstr ""
+
+#. Access denied.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
+msgid "Access denied."
+msgstr ""
+
+#. There is a problem with your AWS account that prevents the operation from completing successfully.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:68
+msgid ""
+"There is a problem with your AWS account that prevents the operation from "
+"completing successfully."
+msgstr ""
+
+#. The e-mail address you provided is associated with more than one account
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:71
+msgid ""
+"The e-mail address you provided is associated with more than one account"
+msgstr ""
+
+#. The requested bucket name is not available. The bucket namespace is shared by all users of the system. Please select a different name and try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:74
+msgid ""
+"The requested bucket name is not available. The bucket namespace is shared "
+"by all users of the system. Please select a different name and try again."
+msgstr ""
+
+#. Your previous request to create the named bucket succeeded and you already own it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:77
+msgid ""
+"Your previous request to create the named bucket succeeded and you already "
+"own it."
+msgstr ""
+
+#. The bucket you tried to delete is not empty.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:80
+msgid "The bucket you tried to delete is not empty."
+msgstr ""
+
+#. This request does not support credentials.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:83
+msgid "This request does not support credentials."
+msgstr ""
+
+#. Cross location logging not allowed. Buckets in one geographic location cannot log information to a bucket in another location.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:86
+msgid ""
+"Cross location logging not allowed. Buckets in one geographic location "
+"cannot log information to a bucket in another location."
+msgstr ""
+
+#. Your proposed upload is smaller than the minimum allowed object size.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:89
+msgid "Your proposed upload is smaller than the minimum allowed object size."
+msgstr ""
+
+#. Your proposed upload exceeds the maximum allowed object size.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:92
+msgid "Your proposed upload exceeds the maximum allowed object size."
+msgstr ""
+
+#. The provided token has expired.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:95
+msgid "The provided token has expired."
+msgstr ""
+
+#. The AWS Access Key Id you provided does not exist in our records.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:98
+msgid "The AWS Access Key Id you provided does not exist in our records."
+msgstr ""
+
+#. The specified bucket is not valid.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:101
+msgid "The specified bucket is not valid."
+msgstr ""
+
+#. All access to this object has been disabled.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:104
+msgid "All access to this object has been disabled."
+msgstr ""
+
+#. The provided security credentials are not valid.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:107
+msgid "The provided security credentials are not valid."
+msgstr ""
+
+#. The provided token is malformed or otherwise invalid.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:110
+msgid "The provided token is malformed or otherwise invalid."
+msgstr ""
+
+#. Couldn't parse the specified URI.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:113
+msgid "Couldn't parse the specified URI."
+msgstr ""
+
+#. Your key is too long.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:116
+msgid "Your key is too long."
+msgstr ""
+
+#. Your request was too big.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:119
+msgid "Your request was too big."
+msgstr ""
+
+#. The specified method is not allowed against this resource.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:122
+msgid "The specified method is not allowed against this resource."
+msgstr ""
+
+#. The specified bucket does not exist.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:125
+msgid "The specified bucket does not exist."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:127
+msgid "The specified key does not exist."
+msgstr ""
+
+#. Your account is not signed up for the Amazon S3 service.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:130
+msgid "Your account is not signed up for the Amazon S3 service."
+msgstr ""
+
+#. A conflicting conditional operation is currently in progress against this resource. Please try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:133
+msgid ""
+"A conflicting conditional operation is currently in progress against this "
+"resource. Please try again."
+msgstr ""
+
+#. At least one of the preconditions you specified did not hold.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:136
+msgid "At least one of the preconditions you specified did not hold."
+msgstr ""
+
+#. Temporary redirect.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:139
+msgid "Temporary redirect."
+msgstr ""
+
+#. Object restore is already in progress.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:142
+msgid "Object restore is already in progress."
+msgstr ""
+
+#. You are being redirected to the bucket while DNS updates.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:145
+msgid "You are being redirected to the bucket while DNS updates."
+msgstr ""
+
+#. The provided token must be refreshed.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:148
+msgid "The provided token must be refreshed."
+msgstr ""
+
+#. The e-mail address you provided does not match any account on record.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:151
+msgid "The e-mail address you provided does not match any account on record."
+msgstr ""
+
+#. The service you requested is currently not available. Please try again later.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index/src/com/openexchange/index/IndexExceptionMessages.java:73
+msgid ""
+"The service you requested is currently not available. Please try again later."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.freebusy/src/com/openexchange/freebusy/FreeBusyExceptionMessages.java:63
@@ -2068,33 +2067,6 @@ msgstr ""
 msgid "No such managed file associated with ID: %1$s"
 msgstr ""
 
-#. An I/O error occurred: %1$s
-#. * An I/O error occurred: %1$s
-#. An I/O error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:72
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:79
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.inet.proxy/src/com/openexchange/inet/proxy/InetProxyExceptionMessages.java:66
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.loxandra/src/com/openexchange/loxandra/LoxandraExceptionMessages.java:67
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:92
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.message.timeline/src/com/openexchange/message/timeline/MessageTimelineExceptionMessages.java:66
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:66
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rdiff/src/com/openexchange/rdiff/RdiffExceptionMessages.java:66
-msgid "An I/O error occurred: %1$s"
-msgstr ""
-
-#. A SQL error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:68
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:152
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:75
-msgid "A SQL error occurred: %1$s"
-msgstr ""
-
-#. ID generation failed
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:71
-msgid "ID generation failed"
-msgstr ""
-
 #. *
 #. * The required service %1$s is temporary not available. Please try again later.
 #.
@@ -2154,56 +2126,6 @@ msgstr ""
 msgid ""
 "Cannot search a contact that is neither an internal user nor has an e-mail "
 "address."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:55
-msgid "The embedded Apache client threw an error: %1$s"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:56
-msgid "Parsing this JSON did not work: %1$s"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:57
-msgid "Parsing this XML with SAX did not work: %1$s"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:58
-msgid "Some generic exception was thrown: %1$s"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:59
-msgid "An IO error occurred: %1$s"
-msgstr ""
-
-#. * The grizzly server could not be started
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:62
-msgid "The grizzly server could not be started"
-msgstr ""
-
-#. * The following needed service is missing: \"%1$s\"
-#. The following needed service is missing: "%1$s"
-#. * The following needed service is missing: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jolokia/src/com/openexchange/jolokia/JolokiaExceptionMessage.java:62
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
-msgid "The following needed service is missing: \"%1$s\""
-msgstr ""
-
-#. * "Maximum number of HTTP sessions (%1$n) exceeded
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:66
-msgid "The maximum number of HTTP sessions (%1$n) is exceeded."
-msgstr ""
-
-#. * The following needed feature could not be enabled: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:68
-msgid "The following needed feature could not be enabled: \"%1$s\""
-msgstr ""
-
-#. * File "%1$s" could not be found
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:70
-msgid "File \"%1$s\" could not be found."
 msgstr ""
 
 #. *
@@ -2413,6 +2335,10 @@ msgstr ""
 msgid "Parsing thread-sort string failed: %1$s."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:152
+msgid "A SQL error occurred: %1$s"
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:154
 msgid "Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\"."
 msgstr ""
@@ -2437,48 +2363,6 @@ msgstr ""
 msgid ""
 "Currently not possible to establish a new connection to server %1$s with "
 "login %2$s. Please try again."
-msgstr ""
-
-#. Implementing class could not be found
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:70
-msgid "Implementing class could not be found"
-msgstr ""
-
-#. An I/O error occurred while creating the socket connection to IMAP server (%1$s): %2$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:73
-msgid ""
-"An I/O error occurred while creating the socket connection to IMAP server "
-"(%1$s): %2$s"
-msgstr ""
-
-#. Instantiating the class failed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:76
-msgid "Instantiating the class failed."
-msgstr ""
-
-#. Missing property %1$s in system.properties.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:82
-msgid "Missing property %1$s in imap.properties."
-msgstr ""
-
-#. Unknown IMAP server: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:85
-msgid "Unknown IMAP server: %1$s"
-msgstr ""
-
-#. Missing IMAP server arguments to resolve IMAP login to a user
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:88
-msgid "Missing IMAP server arguments to resolve IMAP login to a user"
-msgstr ""
-
-#. IMAP login %1$s could not be resolved to a user
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:91
-msgid "IMAP login %1$s could not be resolved to a user"
-msgstr ""
-
-#. User %1$s from context %2$s is not known on IMAP server "%3$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:94
-msgid "User %1$s from context %2$s is not known on IMAP server \"%3$s\"."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:61
@@ -2637,54 +2521,22 @@ msgid ""
 "You do not have the appropriate permissions to search within this module."
 msgstr ""
 
-#. The service you requested is currently not available. Please try again later.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index/src/com/openexchange/index/IndexExceptionMessages.java:73
-msgid ""
-"The service you requested is currently not available. Please try again later."
-msgstr ""
-
-#. An unexpected error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.indexedSearch.json/src/com/openexchange/indexedSearch/json/IndexedSearchExceptionMessages.java:62
-msgid "An unexpected error occurred: %1$s"
-msgstr ""
-
-#. A JSON error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.indexedSearch.json/src/com/openexchange/indexedSearch/json/IndexedSearchExceptionMessages.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.inet.proxy/src/com/openexchange/inet/proxy/InetProxyExceptionMessages.java:72
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:71
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:69
-msgid "A JSON error occurred: %1$s"
-msgstr ""
-
-#. Index-based search is not supported for module: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.indexedSearch.json/src/com/openexchange/indexedSearch/json/IndexedSearchExceptionMessages.java:68
-msgid "Index-based search is not supported for module: %1$s"
-msgstr ""
-
 #. There is no search handler for field %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.indexedSearch.json/src/com/openexchange/indexedSearch/json/IndexedSearchExceptionMessages.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.indexedSearch.json/src/com/openexchange/indexedSearch/json/IndexedSearchExceptionMessages.java:62
 msgid "There is no search handler for field %1$s."
-msgstr ""
-
-#. Method is not supported.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.inet.proxy/src/com/openexchange/inet/proxy/InetProxyExceptionMessages.java:69
-msgid "Method is not supported."
-msgstr ""
-
-#. The Internet proxy is not enabled.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.inet.proxy/src/com/openexchange/inet/proxy/InetProxyExceptionMessages.java:75
-msgid "The Internet proxy is not enabled."
-msgstr ""
-
-#. There is no such Internet proxy for id %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.inet.proxy/src/com/openexchange/inet/proxy/InetProxyExceptionMessages.java:78
-msgid "There is no such Internet proxy for id %1$s."
 msgstr ""
 
 #. Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:62
 msgid ""
 "Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done."
+msgstr ""
+
+#. An I/O error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.loxandra/src/com/openexchange/loxandra/LoxandraExceptionMessages.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.message.timeline/src/com/openexchange/message/timeline/MessageTimelineExceptionMessages.java:66
+msgid "An I/O error occurred: %1$s"
 msgstr ""
 
 #. A configuration error: %1$s
@@ -2702,15 +2554,17 @@ msgstr ""
 
 #. Missing property: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push/src/com/openexchange/push/PushExceptionMessages.java:66
 msgid "Missing property: %1$s"
 msgstr ""
 
 #. Invalid property value in property "%1$s": %2$s
-#. Invalid property value in property \"%1$s\": %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:68
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push/src/com/openexchange/push/PushExceptionMessages.java:69
 msgid "Invalid property value in property \"%1$s\": %2$s"
+msgstr ""
+
+#. A JSON error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:71
+msgid "A JSON error occurred: %1$s"
 msgstr ""
 
 #. HTTP request to server %1$s failed. Status line: %2$s
@@ -2863,63 +2717,48 @@ msgstr ""
 msgid "Account not found with identifier %1$s for user %2$s"
 msgstr ""
 
-#. Unknown OAuth service meta data: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:72
-msgid "Unknown OAuth service meta data: %1$s"
-msgstr ""
-
 #. Account not found with identifier %1$s for user %2$s in context %3$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:78
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:63
 msgid "Account not found with identifier %1$s for user %2$s in context %3$s."
 msgstr ""
 
-#. Unsupported OAuth service: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:81
-msgid "Unsupported OAuth service: %1$s"
-msgstr ""
-
 #. Missing argument: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:66
 msgid "Missing argument: %1$s"
 msgstr ""
 
 #. Your '%1$s' password changed. You have to authorize the server to use your account with the new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:87
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:69
 msgid ""
 "Your '%1$s' password changed. You have to authorize the server to use your "
 "account with the new password. To do so, go to Configuration -> My Social "
 "Configuration -> Accounts. Then try again."
 msgstr ""
 
-#. An OAuth error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:90
-msgid "An OAuth error occurred: %1$s"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:71
 msgid "The address %1$s is not white-listed as for the %2$s OAuth API"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:73
 msgid "The request sent was missing its body"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:96
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:75
 msgid "The account is invalid, please recreate it."
 msgstr ""
 
 #. Please provide a display name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:99
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:78
 msgid "Please provide a display name."
 msgstr ""
 
 #. The associated OAuth provider denied the request: %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:102
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:81
 msgid "The associated OAuth provider denied the request: %1$s."
 msgstr ""
 
 #. The OAuth authentication process has been canceled.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:105
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:84
 msgid "The OAuth authentication process has been canceled."
 msgstr ""
 
@@ -3450,111 +3289,6 @@ msgid ""
 "longer available."
 msgstr ""
 
-#. *
-#. * Push UDP Exception.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:71
-msgid "Push UDP Exception."
-msgstr ""
-
-#. *
-#. * Missing Push UDP configuration.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:76
-msgid "Missing Push UDP configuration."
-msgstr ""
-
-#. *
-#. * User ID is not a number: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:81
-msgid "User ID is not a number: %1$s."
-msgstr ""
-
-#. *
-#. * Context ID is not a number: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:86
-msgid "Context ID is not a number: %1$s."
-msgstr ""
-
-#. *
-#. * Magic bytes are not a number: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:91
-msgid "Magic bytes are not a number: %1$s."
-msgstr ""
-
-#. *
-#. * Invalid Magic bytes: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:96
-msgid "Invalid Magic bytes: %1$s."
-msgstr ""
-
-#. *
-#. * Folder ID is not a number: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:101
-msgid "Folder ID is not a number: %1$s."
-msgstr ""
-
-#. *
-#. * Module is not a number: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:106
-msgid "Module is not a number: %1$s."
-msgstr ""
-
-#. *
-#. * Port is not a number: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:111
-msgid "Port is not a number: %1$s."
-msgstr ""
-
-#. *
-#. * Request type is not a number: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:116
-msgid "Request type is not a number: %1$s."
-msgstr ""
-
-#. *
-#. * Length is not a number: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:121
-msgid "Length is not a number: %1$s."
-msgstr ""
-
-#. *
-#. * Invalid user IDs: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:126
-msgid "Invalid user IDs: %1$s."
-msgstr ""
-
-#. *
-#. * Unknown request type: %1$s.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:131
-msgid "Unknown request type: %1$s."
-msgstr ""
-
-#. *
-#. * Missing payload in datagram package.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:136
-msgid "Missing payload in datagram package."
-msgstr ""
-
-#. *
-#. * No UDP channel is configured.
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push.udp/src/com/openexchange/push/udp/PushUDPExceptionMessage.java:141
-msgid "No UDP channel is configured."
-msgstr ""
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:62
 msgid "Quota exceeded. Please delete some items in order to create new ones."
 msgstr ""
@@ -3684,6 +3418,12 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:94
 msgid ""
 "No appropriate channel found for recipient %1$s with payload namespace %2$s"
+msgstr ""
+
+#. * The following needed service is missing: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeStreamExceptionMessages.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:97
+msgid "The following needed service is missing: \"%1$s\""
 msgstr ""
 
 #. * Invalid ID. Resource identifier is missing.
@@ -6277,7 +6017,7 @@ msgid "Mail folder cannot be created/renamed. Empty folder name."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:120
-msgid "Invalid folder name."
+msgid "Invalid folder name. Please avoid the following characters: %2$s"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:122
@@ -6388,6 +6128,14 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:172
 msgid ""
 "Re-sending message denied because message is not located in \"%1$s\" folder."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:174
+msgid "Validation of server %1$s failed with reason: %3$s"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:176
+msgid "Validation of server %1$s failed due to invalid credentials"
 msgstr ""
 
 #. *
@@ -7076,21 +6824,6 @@ msgid ""
 "user %2$s. Please change configuration accordingly."
 msgstr ""
 
-#. Could not coerce value %1$s into class %2$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:66
-msgid "Could not coerce value %1$s into class %2$s"
-msgstr ""
-
-#. Can not define metadata %1$s in scope %2$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:69
-msgid "Can not define metadata %1$s in scope %2$s"
-msgstr ""
-
-#. Can not set property %1$s in scope %2$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:72
-msgid "Can not set property %1$s in scope %2$s"
-msgstr ""
-
 #. The message displayed if the requested subscription cannot be found from the server.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:69
 msgid "The subscription you requested is unkonwn!"
@@ -7137,43 +6870,23 @@ msgid "The OAuth Account to use"
 msgstr ""
 
 #. A XING error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:65
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:62
 msgid "A XING error occurred: %1$s"
 msgstr ""
 
-#. Invalid XING URL: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:68
-msgid "Invalid XING URL: %1$s"
-msgstr ""
-
-#. XING URL does not denote a directory: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:71
-msgid "XING URL does not denote a directory: %1$s"
-msgstr ""
-
 #. The XING resource does not exist: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:65
 msgid "The XING resource does not exist: %1$s"
 msgstr ""
 
 #. Update denied for XING resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:77
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:68
 msgid "Update denied for XING resource: %1$s"
 msgstr ""
 
 #. Delete denied for XING resource: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:80
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:71
 msgid "Delete denied for XING resource: %1$s"
-msgstr ""
-
-#. XING URL does not denote a file: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:83
-msgid "XING URL does not denote a file: %1$s"
-msgstr ""
-
-#. Versioning not supported by XING file storage.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:89
-msgid "Versioning not supported by XING file storage."
 msgstr ""
 
 #. The message displayed if the requested cannot be found.

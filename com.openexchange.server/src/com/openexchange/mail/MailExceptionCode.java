@@ -342,9 +342,9 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
     INVALID_FOLDER_NAME_EMPTY("Mail folder cannot be created/renamed. Empty folder name.",
         MailExceptionStrings.INVALID_FOLDER_NAME_EMPTY_MSG, CATEGORY_USER_INPUT, 60),
     /**
-     * Invalid folder name: "%1$s"
+     * Invalid folder name: "%1$s". Please avoid the following characters: %2$s
      */
-    INVALID_FOLDER_NAME("Invalid folder name: \"%1$s\"", MailExceptionStrings.INVALID_FOLDER_NAME_MSG, CATEGORY_USER_INPUT, 61),
+    INVALID_FOLDER_NAME("Invalid folder name: \"%1$s\". Please avoid the following characters: %2$s", MailExceptionStrings.INVALID_FOLDER_NAME_MSG, CATEGORY_USER_INPUT, 61),
     /**
      * Invalid Content-Disposition value: %1$s
      */
@@ -459,9 +459,9 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
     FLAG_FAIL("Your E-Mail has been successfully sent, but the original E-Mail could not be flagged as \"replied\" and/or"
         + " \"forwarded\".", MailExceptionStrings.FLAG_FAIL_MSG, CATEGORY_WARNING, 82),
     /**
-     * Invalid folder name: "%1$s"
+     * Invalid folder name: "%1$s". Please avoid the following characters: %2$s
      */
-    INVALID_FOLDER_NAME2("Invalid folder name: \"%1$s\"", INVALID_FOLDER_NAME.getCategory(), INVALID_FOLDER_NAME.getNumber()),
+    INVALID_FOLDER_NAME2("Invalid folder name: \"%1$s\". Please avoid the following characters: %2$s", MailExceptionStrings.INVALID_FOLDER_NAME_MSG, INVALID_FOLDER_NAME.getCategory(), INVALID_FOLDER_NAME.getNumber()),
     /**
      * Mail folder cannot be created/renamed. Folder name exceeds max length of %1$s.
      */
@@ -497,6 +497,16 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      */
     RESEND_DENIED("Re-sending message denied because message is not located in %1$s folder.", MailExceptionStrings.RESEND_DENIED_MSG,
         CATEGORY_USER_INPUT, 89),
+    /**
+     * Ping to server %1$s failed for login %2$s with reason: %3$s
+     */
+    PING_FAILED("Ping to server %1$s failed for login %2$s with reason: %3$s", MailExceptionStrings.PING_FAILED_MSG,
+        CATEGORY_WARNING, 90),
+    /**
+     * Ping to server %1$s failed with login %2$s due to invalid credentials.
+     */
+    PING_FAILED_AUTH("Ping to server %1$s failed with login %2$s due to invalid credentials.", MailExceptionStrings.PING_FAILED_AUTH_MSG,
+        CATEGORY_WARNING, 91),
     ;
 
     private static String PREFIX = "MSG";
@@ -515,7 +525,7 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
     }
 
     private String message;
-    
+
     private String displayMessage;
 
     private int number;
@@ -525,7 +535,7 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
     private MailExceptionCode(String message, Category category, int detailNumber) {
         this(message, null, category, detailNumber);
     }
-    
+
     private MailExceptionCode(String message, String displayMessage, Category category, int detailNumber) {
         this.message = message;
         this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
@@ -558,7 +568,7 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
     public String getMessage() {
         return message;
     }
-    
+
     @Override
     public String getDisplayMessage() {
         return displayMessage;

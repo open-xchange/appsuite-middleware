@@ -64,6 +64,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.util.SharedByteArrayInputStream;
 import javax.mail.util.SharedFileInputStream;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -71,6 +72,7 @@ import com.openexchange.java.Java7ConcurrentLinkedQueue;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -100,6 +102,16 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
             }
         }
         return tmp.booleanValue();
+    }
+
+    static {
+        MailReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                managedCloneEnabled = null;
+            }
+        });
     }
 
     /**

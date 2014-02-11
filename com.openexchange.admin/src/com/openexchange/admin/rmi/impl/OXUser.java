@@ -1590,6 +1590,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
 
         try {
+            basicauth.doAuthentication(auth);
+        } catch (final InvalidCredentialsException e) {
+            log.error("", e);
+            throw e;
+        }
+
+        try {
             contextcheck(ctx);
 
             checkContextAndSchema(ctx);

@@ -121,7 +121,7 @@ public final class RdbResourceCacheImpl extends AbstractResourceCache {
             metadata.setUserId(userId);
             metadata.setResourceId(id);
             metadata.setFileName(optName);
-            metadata.setFileType(optType);
+            metadata.setFileType(prepareFileType(optType, 32));
             metadata.setSize(bytes.length);
             metadata.setCreatedAt(System.currentTimeMillis());
             if (existingMetadata == null) {

@@ -56,8 +56,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPProvider;
+import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.services.Services;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
@@ -114,6 +116,17 @@ public final class IMAPStoreCache {
             tmp.shutDown();
             instance = null;
         }
+    }
+
+    static {
+        IMAPReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(final ConfigurationService configService) {
+               shutDownInstance();
+               initInstance();
+            }
+        });
     }
 
     /**

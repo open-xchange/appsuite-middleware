@@ -87,7 +87,7 @@ public final class ConfigurationServiceTrackerCustomizer implements ServiceTrack
          * ... and configure
          */
         final ConfigurationService configurationService = service;
-        TwitterConfiguration.configure(configurationService);
+        TwitterConfiguration.getInstance().configure(configurationService);
         OXConfigurationBase.getInstance().parseFrom(configurationService);
         return service;
     }

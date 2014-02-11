@@ -79,7 +79,11 @@ public enum ContinuationExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * No such continuation for %1$s
      */
-    NO_SUCH_CONTINUATION("No such continuation for %1$s", Category.CATEGORY_ERROR, 4)
+    NO_SUCH_CONTINUATION("No such continuation for %1$s", Category.CATEGORY_ERROR, 4),
+    /**
+     * Continuation with identifier %1$s has been canceled
+     */
+    CONTINUATION_CANCELED("Continuation with identifier %1$s has been canceled", Category.CATEGORY_ERROR, 5),
 
     ;
 

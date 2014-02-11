@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-
 import javax.management.*;
-
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
@@ -19,7 +17,6 @@ import org.jolokia.restrictor.AllowAllRestrictor;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.*;
 import org.json.simple.JSONObject;
-
 import static org.jolokia.config.ConfigKey.*;
 
 /*
@@ -67,9 +64,6 @@ public class BackendManager {
     // Storage for storing debug information
     private DebugStore debugStore;
 
-    // Loghandler for dispatching logs
-    private LogHandler logHandler;
-
     // List of RequestDispatchers to consult
     private List<RequestDispatcher> requestDispatchers;
 
@@ -78,6 +72,8 @@ public class BackendManager {
     // --> http://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html)
     private volatile Initializer initializer;
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BackendManager.class);
+
     /**
      * Constrcuct a new backend manager with the given configuration and which allows
      * every operation (no restrictor)
@@ -85,8 +81,8 @@ public class BackendManager {
      * @param pConfig configuration used for tuning this handler's behaviour
      * @param pLogHandler logger
      */
-    public BackendManager(Configuration pConfig, LogHandler pLogHandler) {
-        this(pConfig, pLogHandler, null);
+    public BackendManager(Configuration pConfig) {
+        this(pConfig, null);
     }
 
     /**
@@ -96,8 +92,8 @@ public class BackendManager {
      * @param pLogHandler logger
      * @param pRestrictor a restrictor for limiting access. Can be null in which case every operation is allowed
      */
-    public BackendManager(Configuration pConfig, LogHandler pLogHandler, Restrictor pRestrictor) {
-        this(pConfig,pLogHandler,pRestrictor,false);
+    public BackendManager(Configuration pConfig, Restrictor pRestrictor) {
+        this(pConfig,pRestrictor,false);
     }
 
     /**
@@ -108,13 +104,10 @@ public class BackendManager {
      * @param pRestrictor a restrictor for limiting access. Can be null in which case every operation is allowed
      * @param pLazy whether the initialisation should be done lazy
      */
-    public BackendManager(Configuration pConfig, LogHandler pLogHandler, Restrictor pRestrictor, boolean pLazy) {
+    public BackendManager(Configuration pConfig, Restrictor pRestrictor, boolean pLazy) {
 
         // Access restrictor
         restrictor = pRestrictor != null ? pRestrictor : new AllowAllRestrictor();
-
-        // Log handler for putting out debug
-        logHandler = pLogHandler;
 
         if (pLazy) {
             initializer = new Initializer(pConfig);
@@ -162,8 +155,8 @@ public class BackendManager {
         }
 
         if (debug) {
-            debug("Execution time: " + (System.currentTimeMillis() - time) + " ms");
-            debug("Response: " + json);
+            LOG.debug("Execution time: {} ms",(System.currentTimeMillis() - time));
+            LOG.debug("Response: {}", json);
         }
 
         return json;
@@ -196,7 +189,7 @@ public class BackendManager {
         try {
             localDispatcher.destroy();
         } catch (JMException e) {
-            error("Cannot unregister MBean: " + e,e);
+            LOG.error("Cannot unregister MBean: {}", e,e);
         }
     }
 
@@ -219,44 +212,6 @@ public class BackendManager {
      */
     public boolean isCorsAccessAllowed(String pOrigin) {
         return restrictor.isCorsAccessAllowed(pOrigin);
-    }
-
-    /**
-     * Log at info level
-     *
-     * @param msg to log
-     */
-    public void info(String msg) {
-        logHandler.info(msg);
-        if (debugStore != null) {
-            debugStore.log(msg);
-        }
-    }
-
-    /**
-     * Log at debug level
-     *
-     * @param msg message to log
-     */
-    public void debug(String msg) {
-        logHandler.debug(msg);
-        if (debugStore != null) {
-            debugStore.log(msg);
-        }
-    }
-
-    /**
-     * Log at error level.
-     *
-     * @param message message to log
-     * @param t ecxeption occured
-     */
-    public void error(String message, Throwable t) {
-        // Must not be final so that we can mock it in EasyMock for our tests
-        logHandler.error(message, t);
-        if (debugStore != null) {
-            debugStore.log(message, t);
-        }
     }
 
     /**
@@ -307,8 +262,7 @@ public class BackendManager {
         // Create and remember request dispatchers
         localDispatcher = new LocalRequestDispatcher(converters,
                                                      restrictor,
-                                                     pConfig,
-                                                     logHandler);
+                                                     pConfig);
         ServerHandle serverHandle = localDispatcher.getServerInfo();
         requestDispatchers = createRequestDispatchers(pConfig.get(DISPATCHER_CLASSES),
                                                       converters,serverHandle,restrictor);
@@ -428,17 +382,12 @@ public class BackendManager {
         try {
             localDispatcher.initMBeans(historyStore, debugStore);
         } catch (NotCompliantMBeanException e) {
-            intError("Error registering config MBean: " + e, e);
+            LOG.error("Error registering config MBean: {}", e, e);
         } catch (MBeanRegistrationException e) {
-            intError("Cannot register MBean: " + e, e);
+            LOG.error("Cannot register MBean: {}", e, e);
         } catch (MalformedObjectNameException e) {
-            intError("Invalid name for config MBean: " + e, e);
+            LOG.error("Invalid name for config MBean: {}", e, e);
         }
     }
 
-    // Final private error log for use in the constructor above
-    private void intError(String message,Throwable t) {
-        logHandler.error(message, t);
-        debugStore.log(message, t);
-    }
 }

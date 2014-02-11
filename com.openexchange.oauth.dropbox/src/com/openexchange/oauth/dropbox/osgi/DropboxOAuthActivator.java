@@ -50,6 +50,7 @@
 package com.openexchange.oauth.dropbox.osgi;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.dropbox.DropboxOAuthServiceMetaData;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -73,7 +74,9 @@ public final class DropboxOAuthActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerService(OAuthServiceMetaData.class, new DropboxOAuthServiceMetaData(getService(ConfigurationService.class)));
+        DropboxOAuthServiceMetaData service = new DropboxOAuthServiceMetaData(getService(ConfigurationService.class));
+        registerService(OAuthServiceMetaData.class, service);
+        registerService(Reloadable.class, service);
     }
 
 }

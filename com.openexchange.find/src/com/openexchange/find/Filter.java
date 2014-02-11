@@ -1,0 +1,131 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+package com.openexchange.find;
+
+import java.io.Serializable;
+import java.util.Set;
+
+/**
+ *
+ * {@link Filter}s are used to narrow down search results by conditions.
+ * A filter belongs to a {@link FacetValue}. Multiple filters may be
+ * contained in a {@link SearchRequest}.
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since 7.6.0
+ */
+public class Filter implements Serializable {
+
+    private static final long serialVersionUID = -5712151560300214639L;
+
+    private final Set<String> fields;
+
+    private final String query;
+
+
+    public Filter(Set<String> fields, String query) {
+        super();
+        this.fields = fields;
+        this.query = query;
+    }
+
+    /**
+     * The module specific fields to which the filter shall apply.
+     * E.g. a mail folder or a contacts mail address.
+     * Must neither be <code>null</code> nor empty.
+     */
+    public Set<String> getFields() {
+        return fields;
+    }
+
+    /**
+     * The query to filter on in the given fields.
+     * Never <code>null</code> or an empty string.
+     */
+    public String getQuery() {
+        return query;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((fields == null) ? 0 : fields.hashCode());
+        result = prime * result + ((query == null) ? 0 : query.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Filter other = (Filter) obj;
+        if (fields == null) {
+            if (other.fields != null)
+                return false;
+        } else if (!fields.equals(other.fields))
+            return false;
+        if (query == null) {
+            if (other.query != null)
+                return false;
+        } else if (!query.equals(other.query))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "Filter [fields=" + fields + ", query=" + query + "]";
+    }
+
+}

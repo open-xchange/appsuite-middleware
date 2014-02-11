@@ -53,6 +53,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthService;
@@ -95,6 +96,7 @@ public class Activator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         final OAuthServiceMetaDataLinkedInImpl linkedInMetaDataService = new OAuthServiceMetaDataLinkedInImpl(this);
         registerService(OAuthServiceMetaData.class, linkedInMetaDataService, null);
+        registerService(Reloadable.class, linkedInMetaDataService);
         LOG.info("OAuthServiceMetaData for LinkedIn was started");
 
         final LinkedInService linkedInService = new LinkedInServiceImpl(this);

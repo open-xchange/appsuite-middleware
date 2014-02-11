@@ -54,6 +54,7 @@ import java.util.Hashtable;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -96,6 +97,7 @@ public final class TwitterOAuthActivator extends HousekeepingActivator {
              */
             final OAuthServiceMetaDataTwitterImpl service = new OAuthServiceMetaDataTwitterImpl();
             registerService(OAuthServiceMetaData.class, service);
+            registerService(Reloadable.class, service);
 
             final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
             properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, "twitter");

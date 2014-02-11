@@ -301,9 +301,12 @@ public class IMAPDefaultFolderChecker {
                 } else {
                     if (fullName.indexOf(sep) > 0 || !fullName.equals(names[i])) {
                         // E.g. name=Sent, but fullName=INBOX/Sent or fullName=Zent
-                        LOG.warn("Found invalid full name in settings of account {}. Should be \"{}\", but is \"{}\" (user={}, context={})", Integer.valueOf(accountId), namespace + names[i], fullName, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                        final String expectedFullName = namespace + names[i];
+                        if (!expectedFullName.equals(fullName)) {
+                            LOG.warn("Found invalid full name in settings of account {}. Should be \"{}\", but is \"{}\" (user={}, context={})", Integer.valueOf(accountId), expectedFullName, fullName, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                            indexes.add(i);
+                        }
                         fullNames[i] = null;
-                        indexes.add(i);
                     }
                 }
             }
@@ -506,8 +509,10 @@ public class IMAPDefaultFolderChecker {
                     if (isAlreadyExistsException(e)) {
                         // Grab the first in sight
                         closeSafe(f);
-                        f = (IMAPFolder) candidates.get(0);
-                        desiredFullName = f.getFullName();
+                        if (!candidates.isEmpty()) {
+                            f = (IMAPFolder) candidates.get(0);
+                            desiredFullName = f.getFullName();
+                        }
                         checkSubscriptionStatus(subscribe, f, modified);
                         return desiredFullName;
                     }
@@ -537,8 +542,8 @@ public class IMAPDefaultFolderChecker {
      * Checks if given full name indicates to be located in specified namespace.
      * <p>
      * <table>
-     *  <tr><td align="right"><code>"INBOX/"</code></td><td>--&gt; <code>"INBOX/Trash"</code>, but not <code>"Trash"</code> and not <code>"INBOX/foobar/Trash"</code></td></tr>
-     *  <tr><td align="right"><code>""</code></td><td>--&gt; <code>"Trash"</code>, but not <code>"INBOX/Trash"</code></td></tr>
+     *  <tr><td align="center">&bull;</td><td align="right"><code>"INBOX/"</code></td><td>--&gt; <code>"INBOX/Trash"</code>, but not <code>"Trash"</code> and not <code>"INBOX/foobar/Trash"</code></td></tr>
+     *  <tr><td align="center">&bull;</td><td align="right"><code>""</code></td><td>--&gt; <code>"Trash"</code>, but not <code>"INBOX/Trash"</code></td></tr>
      * </table>
      *
      * @param fullName The full name to check

@@ -106,6 +106,7 @@ import net.htmlparser.jericho.Source;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.OperationKey.Type;
@@ -124,6 +125,7 @@ import com.openexchange.imap.command.MessageFetchIMAPCommand.FetchProfileModifie
 import com.openexchange.imap.command.MoveIMAPCommand;
 import com.openexchange.imap.command.SimpleFetchIMAPCommand;
 import com.openexchange.imap.config.IIMAPProperties;
+import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.search.IMAPSearch;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.sort.IMAPSort;
@@ -300,6 +302,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
         }
         return b.booleanValue();
+    }
+
+    static {
+        IMAPReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(final ConfigurationService configService) {
+                byEnvelope = null;
+                useImapThreaderIfSupported = null;
+                useReferenceOnlyThreader = null;
+            }
+        });
     }
 
     /*-

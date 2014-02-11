@@ -113,9 +113,9 @@ public class XingSubscribeService extends AbstractSubscribeService {
         this.services = services;
 
         final SubscriptionSource source = new SubscriptionSource();
-        source.setDisplayName("XING");
+        source.setDisplayName("XING OAuth");
         source.setFolderModule(FolderObject.CONTACT);
-        source.setId("com.openexchange.subscribe.socialplugin.xing");
+        source.setId("com.openexchange.subscribe.xing");
         source.setSubscribeService(this);
 
         final DynamicFormDescription form = new DynamicFormDescription();

@@ -68,11 +68,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.ho.yaml.Yaml;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
 import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.PropertyListener;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.WildcardFilter;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
 import com.openexchange.exception.OXException;
@@ -86,7 +88,12 @@ import com.openexchange.java.Strings;
  */
 public final class ConfigurationImpl implements ConfigurationService {
 
+    /**
+     * The logger constant.
+     */
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigurationImpl.class);
+
+    private final ConcurrentMap<String, Reloadable> reloadableServices;
 
     private static final class PropertyFileFilter implements FileFilter {
 
@@ -142,13 +149,17 @@ public final class ConfigurationImpl implements ConfigurationService {
      * Maps objects to yaml filename, with a path
      */
 
-     final Map<String, Object> yamlFiles;
+    final Map<String, Object> yamlFiles;
 
     /**
      * Maps filenames to whole file paths for yaml lookup
      */
+    final Map<String, String> yamlPaths;
 
-     final Map<String, String> yamlPaths;
+    /**
+     * The <code>ConfigProviderServiceImpl</code> reference.
+     */
+    private volatile ConfigProviderServiceImpl configProviderServiceImpl;
 
     /**
      * Initializes a new configuration. The properties directory is determined by system property "<code>openexchange.propdir</code>"
@@ -164,15 +175,21 @@ public final class ConfigurationImpl implements ConfigurationService {
      */
     public ConfigurationImpl(final String[] directories) {
         super();
-        if (null == directories || directories.length == 0) {
-            throw new IllegalArgumentException("Missing configuration directory path.");
-        }
+        reloadableServices = new ConcurrentHashMap<String, Reloadable>(128);
         propertiesByFile = new HashMap<String, Properties>(256);
         texts = new ConcurrentHashMap<String, String>(1024);
         properties = new HashMap<String, String>(2048);
         propertiesFiles = new HashMap<String, String>(2048);
         yamlFiles = new HashMap<String, Object>(64);
         yamlPaths = new HashMap<String, String>(64);
+        dirs = new File[directories.length];
+        loadConfiguration(directories);
+    }
+
+    private void loadConfiguration(String[] directories) {
+        if (null == directories || directories.length == 0) {
+            throw new IllegalArgumentException("Missing configuration directory path.");
+        }
         // First filter+processor pair
         final FileFilter fileFilter = new PropertyFileFilter();
         final FileProcessor processor = new FileProcessor() {
@@ -212,7 +229,6 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
 
         };
-        final File[] dirs = new File[directories.length];
         for (int i = 0; i < directories.length; i++) {
             if (null == directories[i]) {
                 throw new IllegalArgumentException("Given configuration directory path is null.");
@@ -229,7 +245,6 @@ public final class ConfigurationImpl implements ConfigurationService {
             // Process: Second round
             processDirectory(dir, fileFilter2, processor2);
         }
-        this.dirs = dirs;
     }
 
     private synchronized void processDirectory(final File dir, final FileFilter fileFilter, final FileProcessor processor) {
@@ -243,9 +258,8 @@ public final class ConfigurationImpl implements ConfigurationService {
                 processDirectory(file, fileFilter, processor);
             } else {
                 /**
-                 * Preparations for US: 55795476 Change configuration values without restarting the systems
-                 * final FileWatcher fileWatcher = FileWatcher.getFileWatcher(file); fileWatcher.addFileListener(new
-                 * ProcessingFileListener(file, processor));
+                 * Preparations for US: 55795476 Change configuration values without restarting the systems final FileWatcher fileWatcher =
+                 * FileWatcher.getFileWatcher(file); fileWatcher.addFileListener(new ProcessingFileListener(file, processor));
                  */
                 processor.processFile(file);
             }
@@ -317,7 +331,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     @Override
     public String getProperty(final String name, final PropertyListener listener) {
-        if(watchProperty(name, listener)) {
+        if (watchProperty(name, listener)) {
             return properties.get(name);
         }
         return null;
@@ -325,7 +339,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     @Override
     public String getProperty(final String name, final String defaultValue, final PropertyListener listener) {
-        if(watchProperty(name, listener)) {
+        if (watchProperty(name, listener)) {
             return properties.get(name);
         }
         return defaultValue;
@@ -339,7 +353,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     @Override
     public List<String> getProperty(String name, String defaultValue, PropertyListener propertyListener, String separator) {
-        if(watchProperty(name, propertyListener)) {
+        if (watchProperty(name, propertyListener)) {
             return getProperty(name, defaultValue, separator);
         }
         return Strings.splitAndTrim(defaultValue, separator);
@@ -351,7 +365,11 @@ public final class ConfigurationImpl implements ConfigurationService {
         if (pw != null) {
             pw.removePropertyListener(listener);
             if (pw.isEmpty()) {
-                PropertyWatcher.removePropertWatcher(name);
+                final PropertyWatcher removedWatcher = PropertyWatcher.removePropertWatcher(name);
+                final FileWatcher fileWatcher = FileWatcher.optFileWatcher(new File(propertiesFiles.get(name)));
+                if (null != fileWatcher) {
+                    fileWatcher.removeFileListener(removedWatcher);
+                }
             }
         }
     }
@@ -464,7 +482,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     @Override
     public boolean getBoolProperty(final String name, final boolean defaultValue, final PropertyListener propertyListener) {
-        if(watchProperty(name, propertyListener)) {
+        if (watchProperty(name, propertyListener)) {
             return getBoolProperty(name, defaultValue);
         }
         return defaultValue;
@@ -483,13 +501,13 @@ public final class ConfigurationImpl implements ConfigurationService {
         return defaultValue;
     }
 
-  @Override
-  public int getIntProperty(final String name, final int defaultValue, final PropertyListener propertyListener) {
-      if(watchProperty(name, propertyListener)) {
-          return getIntProperty(name, defaultValue);
-      }
-      return defaultValue;
-  }
+    @Override
+    public int getIntProperty(final String name, final int defaultValue, final PropertyListener propertyListener) {
+        if (watchProperty(name, propertyListener)) {
+            return getIntProperty(name, defaultValue);
+        }
+        return defaultValue;
+    }
 
     @Override
     public Iterator<String> propertyNames() {
@@ -668,10 +686,10 @@ public final class ConfigurationImpl implements ConfigurationService {
     public Object getYaml(final String filename) {
         String path = yamlPaths.get(filename);
         if (path == null) {
-            path = yamlPaths.get(filename+".yml");
+            path = yamlPaths.get(filename + ".yml");
         }
         if (path == null) {
-            path = yamlPaths.get(filename+".yaml");
+            path = yamlPaths.get(filename + ".yaml");
         }
         if (path == null) {
             return null;
@@ -679,7 +697,6 @@ public final class ConfigurationImpl implements ConfigurationService {
 
         return yamlFiles.get(path);
     }
-
 
     @Override
     public Map<String, Object> getYamlInFolder(final String folderName) {
@@ -696,6 +713,82 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
         }
         return retval;
+    }
+
+    /**
+     * Propagates the reloaded configuration among registered listeners.
+     */
+    public void reloadConfiguration() {
+
+        LOG.info("Reloading configuration");
+        // Copy current content to get associated files on check for expired PropertyWatchers
+        // final Map<String, String> propertiesFilesCopy = new HashMap<String, String>(propertiesFiles);
+
+        // Clear maps
+        properties.clear();
+        propertiesByFile.clear();
+        propertiesFiles.clear();
+        texts.clear();
+        yamlFiles.clear();
+        yamlPaths.clear();
+
+        // (Re-)load configuration
+        // final Map<String, PropertyWatcher> watchers = PropertyWatcher.getAllWatchers();
+        loadConfiguration(getDirectories());
+        final ConfigProviderServiceImpl configProvider = this.configProviderServiceImpl;
+        if (configProvider != null) {
+            configProvider.invalidate();
+        }
+
+        // Propagate reloaded configuration among Reloadables
+        for (final Reloadable service : reloadableServices.values()) {
+            try {
+                service.reloadConfiguration(this);
+            } catch (final Exception e) {
+                LOG.warn("Failed to handle reloaded configuration to {}.", service.getClass().getName(), e);
+            }
+        }
+
+        // Check for expired PropertyWatchers
+        /*-
+         *
+        for (final PropertyWatcher watcher : watchers.values()) {
+            final String propertyName = watcher.getName();
+            if (!properties.containsKey(propertyName)) {
+                final PropertyWatcher removedWatcher = PropertyWatcher.removePropertWatcher(propertyName);
+                final FileWatcher fileWatcher = FileWatcher.optFileWatcher(new File(propertiesFilesCopy.get(propertyName)));
+                if (null != fileWatcher) {
+                    fileWatcher.removeFileListener(removedWatcher);
+                }
+            }
+        }
+         *
+         */
+    }
+
+    public boolean addReloadable(Reloadable service) {
+        if (null != service) {
+            return null == reloadableServices.putIfAbsent(service.getClass().getName(), service);
+        }
+        LOG.warn("Tried to add null to reloadable services");
+        return false;
+    }
+
+    public void removeReloadable(Reloadable service) {
+        if (null != service) {
+            reloadableServices.remove(service.getClass().getName());
+        } else {
+            LOG.warn("Tried to remove null from reloadable services");
+        }
+    }
+
+    /**
+     * Sets associated <code>ConfigProviderServiceImpl</code> instance
+     *
+     * @param configProviderServiceImpl The instance
+     */
+    public void setConfigProviderServiceImpl(ConfigProviderServiceImpl configProviderServiceImpl) {
+        this.configProviderServiceImpl = configProviderServiceImpl;
     }
 
 }

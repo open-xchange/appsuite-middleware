@@ -50,32 +50,36 @@
 package com.openexchange.messaging.sms.service;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link SMSMessagingExceptionCodes} - Enumeration of all {@link SMSMessagingException}s.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum SMSMessagingExceptionCodes implements OXExceptionCode {
+public enum SMSMessagingExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(SMSMessagingExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1);
+    UNEXPECTED_ERROR("An error occurred: %1$s", Category.CATEGORY_ERROR, 1, null);
 
     private final Category category;
 
     private final int number;
 
     private final String message;
+    
+    private String displayMessage;
 
-    private SMSMessagingExceptionCodes(final String message, final Category category, final int number) {
+    private SMSMessagingExceptionCodes(final String message, final Category category, final int number, String displayMessage) {
         this.message = message;
         this.number = number;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -86,6 +90,11 @@ public enum SMSMessagingExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     /**

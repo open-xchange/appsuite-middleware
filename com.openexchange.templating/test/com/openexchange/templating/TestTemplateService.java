@@ -55,6 +55,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import com.openexchange.config.SimConfigurationService;
@@ -76,6 +78,9 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * 
+ * This test will not work if started from the MainTestSuite as the folder test-resources is not found
+ * TODO fix this in the future
  */
 public class TestTemplateService extends TestCase {
 
@@ -93,7 +98,7 @@ public class TestTemplateService extends TestCase {
     @Mock
     private User user;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
 
@@ -130,7 +135,7 @@ public class TestTemplateService extends TestCase {
         sessionWithoutInfostore = new ServerSessionAdapter(simSession, context, user, noInfostore, new UserPermissionBits(0, 1, 1));
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         configService = null;
         templateService = null;

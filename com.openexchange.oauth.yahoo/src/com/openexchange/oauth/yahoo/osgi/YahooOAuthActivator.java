@@ -50,6 +50,7 @@
 package com.openexchange.oauth.yahoo.osgi;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -102,6 +103,7 @@ public class YahooOAuthActivator extends HousekeepingActivator {
         oauthService = getService(OAuthService.class);
         oAuthMetaData = new OAuthServiceMetaDataYahooImpl(getService(DeferringURLService.class));
         registerService(OAuthServiceMetaData.class, oAuthMetaData);
+        registerService(Reloadable.class, oAuthMetaData);
         LOG.info("OAuthServiceMetaData for Yahoo was started");
 
         final YahooService yahooService = new YahooServiceImpl(this);

@@ -49,6 +49,8 @@
 
 package com.openexchange.pooling;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -221,7 +223,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             LOG.trace("Destroying object.");
             lifecycle.destroy(metaData.getPooled());
         }
-        LOG.trace("Back time: {}", getWaitTime(startTime));
+        LOG.trace("Back time: {}", L(getWaitTime(startTime)));
         return !destroy;
     }
 
@@ -363,7 +365,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                     lock.unlock();
                 }
             }
-            LOG.trace("Get time: {}, Created: {}", getWaitTime(startTime), created);
+            LOG.trace("Get time: {}, Created: {}", L(getWaitTime(startTime)), B(created));
             return retval.getPooled();
         }
         throw new PoolingException("Pool has been stopped.");
@@ -630,7 +632,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         } catch (final PoolingException e) {
             LOG.error("Problem creating the minimum number of connections.", e);
         }
-        LOG.trace("Clean run ending. Time: {}", getWaitTime(startTime));
+        LOG.trace("Clean run ending. Time: {}", L(getWaitTime(startTime)));
     }
 
     public static class Config implements Cloneable {

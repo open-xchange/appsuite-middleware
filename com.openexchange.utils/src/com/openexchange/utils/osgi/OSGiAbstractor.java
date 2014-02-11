@@ -824,6 +824,7 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
                 createRegisterServiceTracker(entry.getClassName(), entry.getService(), entry.getDictionary(), entry.getDependingServices(), entry.getProperties());
             } else {
                 m_context.registerService(entry.getClassName(), entry.getService(), entry.getDictionary());
+                registeredServiceImplementations++;
             }
         }
     }

@@ -50,6 +50,8 @@
 package com.openexchange.configuration;
 
 import java.io.File;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 import com.openexchange.tools.conf.AbstractConfig;
@@ -60,7 +62,7 @@ import com.openexchange.tools.conf.AbstractConfig;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class SystemConfig extends AbstractConfig implements Initialization {
+public final class SystemConfig extends AbstractConfig implements Initialization, Reloadable {
 
     /**
      * Singleton instance.
@@ -77,13 +79,6 @@ public final class SystemConfig extends AbstractConfig implements Initialization
      * system.properties configuration file.
      */
     private static final String KEY = "openexchange.propdir";
-
-    /**
-     * Prevent instantiation.
-     */
-    private SystemConfig() {
-        super();
-    }
 
     /**
      * Returns the value of the property with the specified key. This method
@@ -134,6 +129,26 @@ public final class SystemConfig extends AbstractConfig implements Initialization
      */
     public static SystemConfig getInstance() {
         return singleton;
+    }
+
+    /**
+     * Prevent instantiation.
+     */
+    private SystemConfig() {
+        super();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void reloadConfiguration(final ConfigurationService configService) {
+        try {
+            stop();
+            start();
+        } catch (final OXException e) {
+            LOG.warn("Could not reload system configuration.", e);
+        }
     }
 
     /**

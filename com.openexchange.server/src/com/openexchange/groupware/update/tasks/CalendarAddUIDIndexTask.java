@@ -124,7 +124,7 @@ public final class CalendarAddUIDIndexTask extends UpdateTaskAdapter {
                 final String indexName = existsIndex(con, table, new String[] { "cid", "uid" });
                 if (null == indexName) {
                     log.info("Creating new index named \"{}\" with columns (cid,uid) on table {}.", name, table);
-                    createIndex(con, table, name, new String[] { "cid", "uid(255)" }, false);
+                    createIndex(con, table, name, new String[] { "cid", "`uid`(255)" }, false);
                 } else {
                     log.info("New index named \"{}\" with columns (cid,uid) already exists on table {}.", indexName, table);
                 }

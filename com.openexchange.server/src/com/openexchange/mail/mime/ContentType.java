@@ -72,7 +72,7 @@ public class ContentType extends ParameterizedHeader {
 
     private static final long serialVersionUID = -9197784872892324694L;
 
-    private static Boolean contentTypeRegexFallback;
+    private volatile static Boolean contentTypeRegexFallback;
     private static boolean contentTypeRegexFallback() {
         Boolean b = contentTypeRegexFallback;
         if (null == b) {
