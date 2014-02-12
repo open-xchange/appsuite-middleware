@@ -331,7 +331,9 @@ public class UCSAuthentication implements AuthenticationService {
                     throw LoginExceptionCodes.UNKNOWN.create(file.getAbsolutePath());
                 } finally {
                     try {
-                        fis.close();
+                        if (null != fis) {
+                            fis.close();
+                        }
                     } catch (final IOException e) {
                         LOG.error("",e);
                         throw LoginExceptionCodes.UNKNOWN.create("Error closing stream for file:"+file.getAbsolutePath());
