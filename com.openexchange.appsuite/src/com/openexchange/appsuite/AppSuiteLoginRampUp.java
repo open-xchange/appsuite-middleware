@@ -50,6 +50,7 @@
 package com.openexchange.appsuite;
 
 import java.util.Arrays;
+import java.util.Collection;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -91,47 +92,77 @@ public class AppSuiteLoginRampUp implements LoginRampUpService {
         try {
             Dispatcher ox = services.getService(Dispatcher.class);
             AJAXRequestData manifestRequest = request().module("apps/manifests").action("config").format("json").hostname(loginRequest.getHostname()).build();
-            
-            rampUp.put("serverConfig", ox.perform(manifestRequest, null, session).getResultObject());
-            
-            JSONObject jslobs = new JSONObject();
-            rampUp.put("jslobs", jslobs);
-            
-            
-            JSONArray lobs = (JSONArray) ox.perform(request()
-                .module("jslob")
-                .action("list")
-                .data(
-                    new JSONArray(
-                            Arrays.asList("io.ox/core", "io.ox/core/updates", "io.ox/mail", "io.ox/contacts", "io.ox/calendar", "io.ox/core/settingOptions", "io.ox/caldav", "io.ox/files", "io.ox/tours", "io.ox/mail/emoji", "io.ox/tasks")
-                    ), "json"
-                ).format("json").build(), null, session).getResultObject();
-            
-            for(int i = 0, size = lobs.length(); i < size; i++) {
-                JSONObject lob = lobs.getJSONObject(i);
-                jslobs.put(lob.getString("id"), lob);
+            try {
+                rampUp.put("serverConfig", ox.perform(manifestRequest, null, session).getResultObject());
+            } catch (OXException x) {
+                // Omit result on error. Let the UI deal with this
             }
+            
+            
+            try {
+                JSONObject jslobs = new JSONObject();
+                JSONArray lobs = (JSONArray) ox.perform(request()
+                    .module("jslob")
+                    .action("list")
+                    .data(
+                        new JSONArray(
+                                Arrays.asList("io.ox/core", "io.ox/core/updates", "io.ox/mail", "io.ox/contacts", "io.ox/calendar", "io.ox/core/settingOptions", "io.ox/caldav", "io.ox/files", "io.ox/tours", "io.ox/mail/emoji", "io.ox/tasks")
+                        ), "json"
+                    ).format("json").build(), null, session).getResultObject();
+                for(int i = 0, size = lobs.length(); i < size; i++) {
+                    JSONObject lob = lobs.getJSONObject(i);
+                    jslobs.put(lob.getString("id"), lob);
+                }
+                rampUp.put("jslobs", jslobs);
+            } catch (OXException x) {
+                // Omit result on error. Let the UI deal with this
+            }
+            
             
             JSONObject oauth = new JSONObject();
             rampUp.put("oauth", oauth);
             
-            oauth.put("services", ox.perform(request().module("oauth/services").action("all").format("json").build(), null, session).getResultObject());
-            oauth.put("accounts", ox.perform(request().module("oauth/accounts").action("all").format("json").build(), null, session).getResultObject());
+            try {
+                oauth.put("services", ox.perform(request().module("oauth/services").action("all").format("json").build(), null, session).getResultObject());                
+            } catch (OXException x) {
+                // Omit result on error. Let the UI deal with this
+            }
+            try {
+                oauth.put("accounts", ox.perform(request().module("oauth/accounts").action("all").format("json").build(), null, session).getResultObject());                
+            } catch (OXException x) {
+            }
             
-            rampUp.put("secretCheck", ox.perform(request().module("recovery/secret").action("check").format("json").build(), null, session).getResultObject());
+            try {
+                rampUp.put("secretCheck", ox.perform(request().module("recovery/secret").action("check").format("json").build(), null, session).getResultObject());                
+            } catch (OXException x) {
+                // Omit result on error. Let the UI deal with this
+            }
             
-            rampUp.put("rootFolder", ox.perform(request().module("folders").action("get").params("id", "1", "tree", "1", "altNames", "true", "timezone", "UTC").format("json").build(), null, session).getResultObject());
+            try {
+                rampUp.put("rootFolder", ox.perform(request().module("folders").action("get").params("id", "1", "tree", "1", "altNames", "true", "timezone", "UTC").format("json").build(), null, session).getResultObject());
+            } catch (OXException x) {
+                // Omit result on error. Let the UI deal with this
+            }
             
-            rampUp.put("user", ox.perform(request().module("user").action("get").params("timezone", "utc", "id", "" + session.getUserId()).format("json").build(), null, session).getResultObject());
+            try {
+                rampUp.put("user", ox.perform(request().module("user").action("get").params("timezone", "utc", "id", "" + session.getUserId()).format("json").build(), null, session).getResultObject());
+            } catch (OXException x) {
+                // Omit result on error. Let the UI deal with this
+            }
             
-            rampUp.put("accounts", ox.perform(request().module("account").action("all").format("json").params("columns", "1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1011,1012,1013,1014,1015,1016,1017,1018,1019,1020,1021,1022,1023,1024,1025,1026,1027,1028,1029,1030,1031,1032,1033,1034,1035,1036,1037,1038,1039,1040").build(), null, session).getResultObject());
+            try {
+                rampUp.put("accounts", ox.perform(request().module("account").action("all").format("json").params("columns", "1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1011,1012,1013,1014,1015,1016,1017,1018,1019,1020,1021,1022,1023,1024,1025,1026,1027,1028,1029,1030,1031,1032,1033,1034,1035,1036,1037,1038,1039,1040").build(), null, session).getResultObject());
+            } catch (OXException x) {
+                // Omit result on error. Let the UI deal with this
+            }
             
         } catch (JSONException x) {
-            
+            // Omit result on error. Let the UI deal with this            
         }
         
         
         return rampUp;
     }
+
 
 }
