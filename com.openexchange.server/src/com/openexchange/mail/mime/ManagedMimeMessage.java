@@ -115,7 +115,7 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
 
             @Override
             public Set<String> getConfigfileNames() {
-                return MailReloadable.getConfigFiles();
+                return null;
             }
         });
     }

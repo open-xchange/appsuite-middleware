@@ -281,7 +281,7 @@ public final class HtmlProcessing {
 
             @Override
             public Set<String> getConfigfileNames() {
-                return MailReloadable.getConfigFiles();
+                return null;
             }
         });
     }

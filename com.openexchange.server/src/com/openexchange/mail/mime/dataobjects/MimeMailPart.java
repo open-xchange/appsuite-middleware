@@ -143,7 +143,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
 
             @Override
             public Set<String> getConfigfileNames() {
-                return MailReloadable.getConfigFiles();
+                return null;
             }
         });
     }

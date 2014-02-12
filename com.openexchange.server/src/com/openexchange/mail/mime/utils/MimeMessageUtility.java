@@ -1285,7 +1285,7 @@ public final class MimeMessageUtility {
 
             @Override
             public Set<String> getConfigfileNames() {
-                return MailReloadable.getConfigFiles();
+                return null;
             }
         });
     }

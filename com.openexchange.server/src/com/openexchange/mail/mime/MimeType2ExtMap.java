@@ -114,7 +114,7 @@ public final class MimeType2ExtMap {
 
             @Override
             public Set<String> getConfigfileNames() {
-                return MailReloadable.getConfigFiles();
+                return null;
             }
         });
     }

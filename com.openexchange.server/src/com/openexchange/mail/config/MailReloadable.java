@@ -83,15 +83,6 @@ public final class MailReloadable implements Reloadable {
         return INSTANCE;
     }
 
-    /**
-     * Gets the configuration file names of interest.
-     *
-     * @return The file names
-     */
-    public static Set<String> getConfigFiles() {
-        return CONFIGFILES;
-    }
-
     // --------------------------------------------------------------------------------------------------- //
 
     private final List<Reloadable> reloadables;
@@ -122,7 +113,6 @@ public final class MailReloadable implements Reloadable {
                 mailProperties.loadProperties();
             }
         } catch (final OXException e) {
-            // TODO Auto-generated catch block
             LOGGER.warn("Failed to reload IMAP properties", e);
         }
 

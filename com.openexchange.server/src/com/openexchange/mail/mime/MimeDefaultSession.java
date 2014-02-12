@@ -108,7 +108,7 @@ public final class MimeDefaultSession {
 
             @Override
             public Set<String> getConfigfileNames() {
-                return MailReloadable.getConfigFiles();
+                return null;
             }
         });
     }

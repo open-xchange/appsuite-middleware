@@ -626,7 +626,7 @@ public abstract class MailConfig {
 
             @Override
             public Set<String> getConfigfileNames() {
-                return MailReloadable.getConfigFiles();
+                return null;
             }
         });
     }

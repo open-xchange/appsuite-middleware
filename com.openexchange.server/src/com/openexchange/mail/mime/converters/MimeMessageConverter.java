@@ -2479,7 +2479,7 @@ public final class MimeMessageConverter {
 
             @Override
             public Set<String> getConfigfileNames() {
-                return MailReloadable.getConfigFiles();
+                return null;
             }
         });
     }
