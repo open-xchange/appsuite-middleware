@@ -165,6 +165,9 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
 
     @Override
     public boolean equals(final Object obj) {
+        if (null == obj) {
+            return false;
+        }
         if (this == obj) {
             return true;
         }
