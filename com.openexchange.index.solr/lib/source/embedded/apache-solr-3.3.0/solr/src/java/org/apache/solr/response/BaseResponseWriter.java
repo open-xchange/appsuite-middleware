@@ -58,7 +58,7 @@ import java.util.ArrayList;
  */
 public abstract class BaseResponseWriter {
 
-  private static final Logger LOG = LoggerFactory
+  private static final org.slf4j.Logger LOG = LoggerFactory
       .getLogger(BaseResponseWriter.class);
 
   private static final String SCORE_FIELD = "score";

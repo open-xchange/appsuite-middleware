@@ -73,7 +73,7 @@ public final class CustomCharsetProvider extends CharsetProvider {
     /**
      * The logger instance.
      */
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CustomCharsetProvider.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CustomCharsetProvider.class);
 
     /**
      * The charset map.
@@ -145,10 +145,10 @@ public final class CustomCharsetProvider extends CharsetProvider {
         try {
             charset = Charset.forName(delegateName);
         } catch (final IllegalCharsetNameException e) {
-            LOG.error(new com.openexchange.java.StringAllocator("Illegal charset name \"").append(e.getCharsetName()).append('"').toString(), e);
+            LOG.error("Illegal charset name \"{}\"", e.getCharsetName(), e);
             return false;
         } catch (final UnsupportedCharsetException e) {
-            LOG.error(new com.openexchange.java.StringAllocator("Detected no support for charset \"").append(e.getCharsetName()).append('"').toString(), e);
+            LOG.error("Detected no support for charset \"{}\"", e.getCharsetName(), e);
             return false;
         }
         return addAliasCharset(charset, canonicalName, aliases);
@@ -211,10 +211,10 @@ public final class CustomCharsetProvider extends CharsetProvider {
         try {
             charset = Charset.forName(delegateName);
         } catch (final IllegalCharsetNameException e) {
-            LOG.error(new com.openexchange.java.StringAllocator("Illegal charset name \"").append(e.getCharsetName()).append('"').toString(), e);
+            LOG.error("Illegal charset name \"{}\"", e.getCharsetName(), e);
             return false;
         } catch (final UnsupportedCharsetException e) {
-            LOG.error(new com.openexchange.java.StringAllocator("Detected no support for charset \"").append(e.getCharsetName()).append('"').toString(), e);
+            LOG.error("Detected no support for charset \"{}\"", e.getCharsetName(), e);
             return false;
         }
         return addStartsWithCharset(charset, startsWithName);

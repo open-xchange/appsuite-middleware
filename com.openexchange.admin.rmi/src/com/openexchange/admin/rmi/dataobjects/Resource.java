@@ -281,7 +281,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
      */
     @Deprecated
     public boolean removeExtension(final OXResourceExtensionInterface o) {
-        if (null == getAllExtensionsAsHash().remove(o)) {
+        if (null == getAllExtensionsAsHash().remove(o.getClass().getName())) {
             return false;
         } else {
             return true;

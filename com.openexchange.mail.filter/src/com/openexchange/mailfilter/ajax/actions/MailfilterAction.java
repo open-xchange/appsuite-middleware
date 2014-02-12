@@ -64,7 +64,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
-import org.apache.commons.logging.Log;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.TagArgument;
 import org.apache.jsieve.parser.generated.ParseException;
@@ -74,7 +73,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.Category;
-import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -93,7 +91,6 @@ import com.openexchange.jsieve.export.SieveTextFilter.ClientRulesAndRequire;
 import com.openexchange.jsieve.export.SieveTextFilter.RuleListAndNextUid;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredentialsException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mailfilter.ajax.Credentials;
 import com.openexchange.mailfilter.ajax.Parameter;
 import com.openexchange.mailfilter.ajax.actions.AbstractRequest.Parameters;
@@ -113,7 +110,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  */
 public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 
-    private static final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailfilterAction.class));
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MailfilterAction.class);
 
     private static final ConcurrentMap<Key, MailfilterAction> INSTANCES = new ConcurrentHashMap<Key, MailfilterAction>();
 
@@ -348,10 +345,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 } else {
                     script = "";
                 }
-                if (log.isDebugEnabled()) {
-                    log.debug("The following sieve script will be parsed:\n"
-                        + script);
-                }
+                log.debug("The following sieve script will be parsed:\n{}", script);
                 final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
                 final RuleListAndNextUid readScriptFromString = sieveTextFilter.readScriptFromString(script);
                 final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(
@@ -454,9 +448,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                     position = clientrules.size() - 1;
                 }
                 final String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
-                if (log.isDebugEnabled()) {
-                    log.debug("The following sieve script will be written:\n" + writeback);
-                }
+                log.debug("The following sieve script will be written:\n{}", writeback);
                 writeScript(sieveHandler, activeScript, writeback);
 
                 return nextuid;
@@ -608,10 +600,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                     final String writeback = sieveTextFilter.writeback(
                         clientrulesandrequire, new HashSet<String>(
                             sieveHandler.getCapabilities().getSieve()));
-                    if (log.isDebugEnabled()) {
-                        log.debug("The following sieve script will be written:\n"
-                            + writeback);
-                    }
+                    log.debug("The following sieve script will be written:\n{}", writeback);
                     writeScript(sieveHandler, activeScript, writeback);
                 } else {
                     throw OXMailfilterExceptionCode.NO_ACTIVE_SCRIPT.create();
@@ -776,7 +765,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 throw OXMailfilterExceptionCode.PROPERTY_ERROR.create(e, MailFilterProperties.Values.SIEVE_PORT.property);
             }
         } else if (MailFilterProperties.LoginTypes.USER.name.equals(logintype)) {
-            storageUser = UserStorage.getStorageUser(creds.getUserid(), creds.getContextid());
+            storageUser = UserStorage.getInstance().getUser(creds.getUserid(), creds.getContextid());
             if (null != storageUser) {
                 final String mailServerURL = storageUser.getImapServer();
                 final URI uri;
@@ -821,7 +810,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             if (null != storageUser) {
                 authname = storageUser.getImapLogin();
             } else {
-                storageUser = UserStorage.getStorageUser(creds.getUserid(), creds.getContextid());
+                storageUser = UserStorage.getInstance().getUser(creds.getUserid(), creds.getContextid());
                 if (null != storageUser) {
                     authname = storageUser.getImapLogin();
                 } else {
@@ -842,7 +831,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 if (null != storageUser) {
                     authname = storageUser.getMail();
                 } else {
-                    storageUser = UserStorage.getStorageUser(creds.getUserid(), creds.getContextid());
+                    storageUser = UserStorage.getInstance().getUser(creds.getUserid(), creds.getContextid());
                     if (null != storageUser) {
                         authname = storageUser.getMail();
                     } else {
@@ -982,10 +971,8 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         if (null != msg) {
             if (msg.startsWith(OXMailfilterExceptionCode.ERR_PREFIX_REJECTED_ADDRESS)) {
                 ret.setCategory(Category.CATEGORY_USER_INPUT);
-                ret.setLogLevel(LogLevel.ERROR);
             } else if (msg.startsWith(OXMailfilterExceptionCode.ERR_PREFIX_INVALID_ADDRESS)) {
                 ret.setCategory(Category.CATEGORY_USER_INPUT);
-                ret.setLogLevel(LogLevel.ERROR);
             }
         }
         return ret;

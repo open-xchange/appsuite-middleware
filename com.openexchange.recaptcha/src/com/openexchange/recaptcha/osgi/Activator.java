@@ -50,7 +50,6 @@
 package com.openexchange.recaptcha.osgi;
 
 import java.util.Properties;
-import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -62,7 +61,7 @@ import com.openexchange.recaptcha.impl.ReCaptchaServiceImpl;
 
 public class Activator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
     private static final String ALIAS_APPENDIX = "recaptcha";
 
@@ -122,7 +121,7 @@ public class Activator extends HousekeepingActivator {
                 httpService.registerServlet(getService(DispatcherPrefixService.class).getPrefix() + ALIAS_APPENDIX, servlet = new ReCaptchaServlet(), null, null);
                 LOG.info("reCAPTCHA Servlet registered.");
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

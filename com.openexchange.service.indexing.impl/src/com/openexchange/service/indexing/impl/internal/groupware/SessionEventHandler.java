@@ -51,7 +51,6 @@ package com.openexchange.service.indexing.impl.internal.groupware;
 
 import java.io.File;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.config.cascade.ConfigView;
@@ -91,14 +90,14 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class SessionEventHandler implements EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SessionEventHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionEventHandler.class);
 
 
     // TODO: move to infostore/server bundle and check if indexing is allowed
     @Override
     public void handleEvent(Event event) {
         String topic = event.getTopic();
-        if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic)) {
+        if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic) || SessiondEventConstants.TOPIC_RESTORED_SESSION.equals(topic)) {
             ContextService contextService = Services.getService(ContextService.class);
             UserService userService = Services.getService(UserService.class);
             UserConfigurationService configurationService = Services.getService(UserConfigurationService.class);
@@ -161,9 +160,7 @@ public class SessionEventHandler implements EventHandler {
                 }
             } catch (Exception e) {
                 if ((e instanceof OXException) && (IndexExceptionCodes.INDEX_LOCKED.equals((OXException) e) || IndexExceptionCodes.INDEXING_NOT_ENABLED.equals((OXException) e))) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Can not trigger infostore indexing jobs. Infostore index is disabled for user " + session.getUserId() + " in context " + session.getContextId() + ".");
-                    }
+                    LOG.debug("Can not trigger infostore indexing jobs. Infostore index is disabled for user {} in context {}.", session.getUserId(), session.getContextId());
                 } else {
                     LOG.warn("Error while triggering infostore indexing jobs.", e);
                 }

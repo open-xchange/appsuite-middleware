@@ -58,7 +58,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -75,11 +74,10 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.log.LogFactory;
 
 public class AdminDaemon {
 
-    static final Log LOG = LogFactory.getLog(AdminDaemon.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AdminDaemon.class);
 
     private static PropertyHandler prop = null;
 
@@ -241,29 +239,22 @@ public class AdminDaemon {
      * @param context
      */
     public void getCurrentBundleStatus(final BundleContext context) {
-        final boolean debugEnabled = LOG.isDebugEnabled();
         for (final Bundle bundle : context.getBundles()) {
             if (checkSimple()) {
                 if (isNoFragmentAndActive(bundle)) {
                     bundlelist.add(bundle);
-                    if (debugEnabled) {
-                        LOG.debug(bundle.getSymbolicName() + " already started before admin.");
-                    }
+                    LOG.debug("{} already started before admin.", bundle.getSymbolicName());
                 }
             } else {
                 if (bundle.getState() == Bundle.ACTIVE) {
                     if (isAllowdBundle(bundle)) {
                         bundlelist.add(bundle);
-                        if (debugEnabled) {
-                            LOG.debug(bundle.getSymbolicName() + " already started before admin.");
-                        }
+                        LOG.debug("{} already started before admin.", bundle.getSymbolicName());
                     }
                 } else if (bundle.getState() == Bundle.RESOLVED && null != bundle.getHeaders().get(Constants.FRAGMENT_HOST)) {
                     if (isAllowdBundle(bundle)) {
                         bundlelist.add(bundle);
-                        if (debugEnabled) {
-                            LOG.debug("fragment " + bundle.getSymbolicName() + " already started before admin.");
-                        }
+                        LOG.debug("fragment {} already started before admin.", bundle.getSymbolicName());
                     }
                 }
             }
@@ -280,7 +271,7 @@ public class AdminDaemon {
                 } else if (event.getType() == BundleEvent.STOPPED) {
                     bundlelist.remove(event.getBundle());
                 }
-                LOG.debug(event.getBundle().getSymbolicName() + " changed to " + event.getType());
+                LOG.debug("{0} changed to {}", event.getBundle().getSymbolicName(), event.getType());
             }
         };
         context.addBundleListener(bl);
@@ -334,9 +325,9 @@ public class AdminDaemon {
             services.add(context.registerService(Remote.class, oxtaskmgmt, null));
             services.add(context.registerService(Remote.class, oxpublication, null));
         } catch (final RemoteException e) {
-            LOG.fatal("Error creating RMI registry!", e);
+            LOG.error("Error creating RMI registry!", e);
         } catch (final StorageException e) {
-            LOG.fatal("Error while creating one instance for RMI interface", e);
+            LOG.error("Error while creating one instance for RMI interface", e);
         }
     }
 
@@ -374,12 +365,12 @@ public class AdminDaemon {
                         if (null != property && property.toString().equalsIgnoreCase(serviceName)) {
                             final Object obj = context.getService(servicereference);
                             if (null == obj) {
-                                LOG.error("Missing service " + serviceName + " in bundle " + bundleSymbolicName);
+                                LOG.error("Missing service {} in bundle {}", serviceName, bundleSymbolicName);
                             }
                             try {
                                 return clazz.cast(obj);
                             } catch (final ClassCastException e) {
-                                LOG.error("Service " + serviceName + "(" + ((null != obj) ? obj.getClass().getName() : "null") + ") in bundle " + bundleSymbolicName + " cannot be cast to an instance of " + clazz.getName());
+                                LOG.error("Service {}({}) in bundle {} cannot be cast to an instance of {}", serviceName, ((null != obj) ? obj.getClass().getName() : "null"), bundleSymbolicName, clazz.getName());
                                 return null;
                             }
                         }

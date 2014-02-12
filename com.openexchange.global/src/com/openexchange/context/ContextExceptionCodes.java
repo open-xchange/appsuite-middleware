@@ -51,8 +51,8 @@ package com.openexchange.context;
 
 import static com.openexchange.context.ContextExceptionMessages.CONTEXT_DISABLED_MSG;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
@@ -60,16 +60,19 @@ import com.openexchange.exception.OXExceptionFactory;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum ContextExceptionCodes implements OXExceptionCode {
+public enum ContextExceptionCodes implements DisplayableOXExceptionCode {
 
-    CONTEXT_DISABLED(CONTEXT_DISABLED_MSG, CATEGORY_PERMISSION_DENIED, 100);
+    /** Context %1$d (%2$s) is disabled. */
+    CONTEXT_DISABLED("Context %1$d (%2$s) is disabled.", CONTEXT_DISABLED_MSG, CATEGORY_PERMISSION_DENIED, 100);
 
-    private String message;
-    private Category category;
-    private int number;
+    private final String message;
+    private final String displayMessage;
+    private final Category category;
+    private final int number;
 
-    private ContextExceptionCodes(final String message, final Category category, final int number) {
+    private ContextExceptionCodes(final String message, String displayMessage, final Category category, final int number) {
         this.message = message;
+        this.displayMessage = displayMessage;
         this.category = category;
         this.number = number;
     }
@@ -89,8 +92,9 @@ public enum ContextExceptionCodes implements OXExceptionCode {
         return message;
     }
 
-    public String getHelp() {
-        return null;
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override
@@ -132,4 +136,5 @@ public enum ContextExceptionCodes implements OXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
+
 }

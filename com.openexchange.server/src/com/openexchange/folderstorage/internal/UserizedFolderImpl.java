@@ -55,6 +55,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.folderstorage.AltNameAwareFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExtension;
@@ -98,6 +99,7 @@ public final class UserizedFolderImpl implements UserizedFolder {
     private volatile Map<FolderField, FolderProperty> properties;
     private int[] totalAndUnread;
     private volatile ConcurrentMap<String, Object> parameters;
+    private boolean altNames;
 
     /**
      * Initializes a new {@link UserizedFolderImpl} from specified folder.
@@ -537,6 +539,29 @@ public final class UserizedFolderImpl implements UserizedFolder {
     @Override
     public void setSupportedCapabilities(Set<String> capabilities) {
         folder.setSupportedCapabilities(capabilities);
+    }
+
+    @Override
+    public boolean supportsAltName() {
+        return folder instanceof AltNameAwareFolder && ((AltNameAwareFolder) folder).supportsAltName();
+    }
+
+    @Override
+    public String getLocalizedName(final Locale locale, final boolean altName) {
+        if (folder instanceof AltNameAwareFolder) {
+            return ((AltNameAwareFolder) folder).getLocalizedName(locale, altName);
+        }
+        return getLocalizedName(locale);
+    }
+
+    @Override
+    public boolean isAltNames() {
+        return altNames;
+    }
+
+    @Override
+    public void setAltNames(final boolean altNames) {
+        this.altNames = altNames;
     }
 
 }

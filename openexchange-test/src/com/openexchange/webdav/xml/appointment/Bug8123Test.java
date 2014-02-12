@@ -1,7 +1,6 @@
 package com.openexchange.webdav.xml.appointment;
 
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
@@ -13,7 +12,7 @@ import com.openexchange.webdav.xml.GroupUserTest;
 
 public class Bug8123Test extends AppointmentTest {
 
-	private static final Log LOG = LogFactory.getLog(Bug8123Test.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug8123Test.class);
 
 	public Bug8123Test(final String name) {
 		super(name);

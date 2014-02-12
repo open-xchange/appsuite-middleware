@@ -76,6 +76,7 @@ import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tx.ConfigurableDBProvider;
+import com.openexchange.groupware.userconfiguration.MutableUserConfiguration;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.setuptools.TestConfig;
@@ -139,28 +140,28 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         try {
             for(int i = 0; i < 10; i++) {
                 final AttachmentMetadata copy = new AttachmentImpl(attachment);
-                attachmentBase.attachToObject(copy,in = new FileInputStream(testFile),MODE.getSession(),MODE.getContext(),MODE.getUser(), null);
+                attachmentBase.attachToObject(copy,in = new FileInputStream(testFile),MODE.getSession(),MODE.getContext(),MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
                 clean.add(copy);
 
             }
             clean.add(attachment);
-         } finally {
-             if(in != null) {
+        } finally {
+            if(in != null) {
                 in.close();
             }
-         }
+        }
 
         attachmentBase.deleteAll(MODE.getContext());
 
 
-        final TimedResult res = attachmentBase.getAttachments(MODE.getSession(), 22,22,22,MODE.getContext(),MODE.getUser(), null);
+        final TimedResult res = attachmentBase.getAttachments(MODE.getSession(), 22,22,22,MODE.getContext(),MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
         assertFalse("All attachments should have been deleted", res.results().hasNext());
         clean.clear();
     }
 
     public void doNotExists(final int folderId, final int attachedId, final int moduleId) throws Exception{
         try {
-            attachmentBase.getAttachment(MODE.getSession(), folderId, attachedId, moduleId,Integer.MAX_VALUE,MODE.getContext(), MODE.getUser(),null);
+            attachmentBase.getAttachment(MODE.getSession(), folderId, attachedId, moduleId,Integer.MAX_VALUE,MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
             fail("Got Wrong Exception");
         } catch (final OXException x) {
             assertTrue(true);
@@ -177,38 +178,38 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         InputStream in = null;
 
         try {
-            attachmentBase.attachToObject(attachment,in = new FileInputStream(testFile),MODE.getSession(),MODE.getContext(),MODE.getUser(), null);
+            attachmentBase.attachToObject(attachment,in = new FileInputStream(testFile),MODE.getSession(),MODE.getContext(),MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
             clean.add(attachment);
-         } finally {
-             if(in != null) {
+        } finally {
+            if(in != null) {
                 in.close();
             }
-         }
-         assertFalse(0 == attachment.getId());
-         final byte[] data  = "Hallo Welt".getBytes(com.openexchange.java.Charsets.UTF_8);
+        }
+        assertFalse(0 == attachment.getId());
+        final byte[] data  = "Hallo Welt".getBytes(com.openexchange.java.Charsets.UTF_8);
 
-         attachment.setFilesize(data.length);
-         final Date oldCreationDate = attachment.getCreationDate();
-         try {
-            attachmentBase.attachToObject(attachment,in = new ByteArrayInputStream(data),MODE.getSession(),MODE.getContext(),MODE.getUser(), null);
-         } finally {
-             if(in != null) {
+        attachment.setFilesize(data.length);
+        final Date oldCreationDate = attachment.getCreationDate();
+        try {
+            attachmentBase.attachToObject(attachment,in = new ByteArrayInputStream(data),MODE.getSession(),MODE.getContext(),MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
+        } finally {
+            if(in != null) {
                 in.close();
             }
-         }
+        }
 
-         final AttachmentMetadata reload = attachmentBase.getAttachment(MODE.getSession(), folderId, attachedId, moduleId, attachment.getId(), MODE.getContext(), MODE.getUser(), null);
+        final AttachmentMetadata reload = attachmentBase.getAttachment(MODE.getSession(), folderId, attachedId, moduleId, attachment.getId(), MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
 
-         assertFalse(reload.getCreationDate().getTime() == oldCreationDate.getTime());
-         assertEquals(reload.getFilesize(), data.length);
+        assertFalse(reload.getCreationDate().getTime() == oldCreationDate.getTime());
+        assertEquals(reload.getFilesize(), data.length);
 
-         final ByteArrayOutputStream out = new ByteArrayOutputStream();
-         in = attachmentBase.getAttachedFile(MODE.getSession(), folderId, attachedId, moduleId, attachment.getId(), MODE.getContext(), MODE.getUser(), null);
-         int b;
-         while((b = in.read()) != -1) {
-             out.write(b);
-         }
-         assertEquals("Hallo Welt", new String(out.toByteArray(), com.openexchange.java.Charsets.UTF_8));
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        in = attachmentBase.getAttachedFile(MODE.getSession(), folderId, attachedId, moduleId, attachment.getId(), MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
+        int b;
+        while((b = in.read()) != -1) {
+            out.write(b);
+        }
+        assertEquals("Hallo Welt", new String(out.toByteArray(), com.openexchange.java.Charsets.UTF_8));
     }
 
     public void doAttach(final int folderId, final int attachedId, final int moduleId) throws Exception{
@@ -219,39 +220,39 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         InputStream in = null;
 
         Date now = null;
-         try {
+        try {
             now = new Date();
-            attachmentBase.attachToObject(attachment,in = new FileInputStream(testFile),MODE.getSession(),MODE.getContext(),MODE.getUser(), null);
+            attachmentBase.attachToObject(attachment,in = new FileInputStream(testFile),MODE.getSession(),MODE.getContext(),MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
             clean.add(attachment);
-         } finally {
-             if(in != null) {
+        } finally {
+            if(in != null) {
                 in.close();
             }
-         }
-         assertFalse(0 == attachment.getId());
+        }
+        assertFalse(0 == attachment.getId());
 
-         final AttachmentMetadata reload = attachmentBase.getAttachment(MODE.getSession(), folderId, attachedId, moduleId, attachment.getId(), MODE.getContext(), MODE.getUser(), null);
+        final AttachmentMetadata reload = attachmentBase.getAttachment(MODE.getSession(), folderId, attachedId, moduleId, attachment.getId(), MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
 
-         copy.setCreationDate(now);
-         copy.setCreatedBy(MODE.getUser().getId());
-         copy.setId(attachment.getId());
+        copy.setCreationDate(now);
+        copy.setCreatedBy(MODE.getUser().getId());
+        copy.setId(attachment.getId());
 
-         assertEquals(copy,reload,10000);
+        assertEquals(copy,reload,10000);
 
-         in = null;
-         InputStream in2 = null;
-         try {
-             in2 = attachmentBase.getAttachedFile(MODE.getSession(), folderId, attachedId, moduleId, attachment.getId(), MODE.getContext(), MODE.getUser(), null);
-             OXTestToolkit.assertSameContent(in = new FileInputStream(testFile),in2);
-         } finally {
-             if(in != null) {
+        in = null;
+        InputStream in2 = null;
+        try {
+            in2 = attachmentBase.getAttachedFile(MODE.getSession(), folderId, attachedId, moduleId, attachment.getId(), MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
+            OXTestToolkit.assertSameContent(in = new FileInputStream(testFile),in2);
+        } finally {
+            if(in != null) {
                 in.close();
             }
-             if(in2 != null) {
+            if(in2 != null) {
                 in.close();
             }
 
-         }
+        }
     }
 
     public void doDetach(final int folderId, final int attachedId, final int moduleId) throws Exception {
@@ -259,11 +260,11 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         final int id = clean.get(0).getId();
 
         for(final AttachmentMetadata m : clean) {
-            attachmentBase.detachFromObject(m.getFolderId(), m.getAttachedId(), m.getModuleId(), new int[]{m.getId()},MODE.getSession(),MODE.getContext(),MODE.getUser(), null);
+            attachmentBase.detachFromObject(m.getFolderId(), m.getAttachedId(), m.getModuleId(), new int[]{m.getId()},MODE.getSession(),MODE.getContext(),MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
         }
 
         try {
-            attachmentBase.getAttachment(MODE.getSession(), folderId,attachedId,moduleId,id,MODE.getContext(), MODE.getUser(), null);
+            attachmentBase.getAttachment(MODE.getSession(), folderId,attachedId,moduleId,id,MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
             fail("The attachment wasn't removed");
         } catch (final Exception x) {
             assertTrue(true);
@@ -277,7 +278,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         doAttach(folderId, attachedId, moduleId);
         doAttach(folderId, attachedId, moduleId);
         doAttach(folderId, attachedId, moduleId);
-        SearchIterator iterator = attachmentBase.getAttachments(MODE.getSession(), folderId, attachedId, moduleId, MODE.getContext(), MODE.getUser(), null).results();
+        SearchIterator iterator = attachmentBase.getAttachments(MODE.getSession(), folderId, attachedId, moduleId, MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null)).results();
 
         final Set<AttachmentMetadata> metadata = new HashSet<AttachmentMetadata>(clean);
 
@@ -290,7 +291,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 
         iterator.close();
 
-        iterator = attachmentBase.getAttachments(MODE.getSession(), folderId, attachedId, moduleId, new AttachmentField[]{AttachmentField.ID_LITERAL}, AttachmentField.ID_LITERAL, AttachmentBase.ASC, MODE.getContext(), MODE.getUser(), null).results();
+        iterator = attachmentBase.getAttachments(MODE.getSession(), folderId, attachedId, moduleId, new AttachmentField[]{AttachmentField.ID_LITERAL}, AttachmentField.ID_LITERAL, AttachmentBase.ASC, MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null)).results();
 
         final List<Integer> ids = new ArrayList<Integer>();
         for(final AttachmentMetadata m : clean) {
@@ -310,12 +311,12 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         iterator.close();
 
         final int[] idsToFetch = new int[]{
-                clean.get(0).getId(),
-                clean.get(2).getId(),
-                clean.get(4).getId()
+            clean.get(0).getId(),
+            clean.get(2).getId(),
+            clean.get(4).getId()
         };
 
-        iterator = attachmentBase.getAttachments(MODE.getSession(), folderId, attachedId, moduleId, idsToFetch, new AttachmentField[]{AttachmentField.ID_LITERAL, AttachmentField.FILENAME_LITERAL}, MODE.getContext(), MODE.getUser(), null).results();
+        iterator = attachmentBase.getAttachments(MODE.getSession(), folderId, attachedId, moduleId, idsToFetch, new AttachmentField[]{AttachmentField.ID_LITERAL, AttachmentField.FILENAME_LITERAL}, MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null)).results();
 
         int i = 0;
         for(; iterator.hasNext(); i++) {
@@ -333,7 +334,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         doAttach(folderId, attachedId, moduleId);
         doAttach(folderId, attachedId, moduleId);
 
-        Delta delta = attachmentBase.getDelta(MODE.getSession(), folderId, attachedId, moduleId, ts,  true, MODE.getContext(), MODE.getUser(), null);
+        Delta delta = attachmentBase.getDelta(MODE.getSession(), folderId, attachedId, moduleId, ts,  true, MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
 
         Set<AttachmentMetadata> metadata = new HashSet<AttachmentMetadata>(clean.subList(1,clean.size()));
 
@@ -349,7 +350,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         delta.getDeleted().close();
         delta.getModified().close();
 
-        delta = attachmentBase.getDelta(MODE.getSession(), folderId, attachedId, moduleId, ts, true, new AttachmentField[]{AttachmentField.ID_LITERAL}, AttachmentField.ID_LITERAL, AttachmentBase.ASC, MODE.getContext(), MODE.getUser(), null);
+        delta = attachmentBase.getDelta(MODE.getSession(), folderId, attachedId, moduleId, ts, true, new AttachmentField[]{AttachmentField.ID_LITERAL}, AttachmentField.ID_LITERAL, AttachmentBase.ASC, MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
 
         final List<Integer> ids = new ArrayList<Integer>();
         for(final AttachmentMetadata m : clean.subList(1,clean.size())) {
@@ -376,12 +377,12 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         final List<AttachmentMetadata> all = new ArrayList<AttachmentMetadata>(clean);
 
         for(final AttachmentMetadata m : clean) {
-            attachmentBase.detachFromObject(m.getFolderId(), m.getAttachedId(), m.getModuleId(), new int[]{m.getId()},MODE.getSession(),MODE.getContext(),MODE.getUser(), null);
+            attachmentBase.detachFromObject(m.getFolderId(), m.getAttachedId(), m.getModuleId(), new int[]{m.getId()},MODE.getSession(),MODE.getContext(),MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
         }
         clean.clear();
 
 
-        delta = attachmentBase.getDelta(MODE.getSession(), folderId, attachedId, moduleId, ts, false , MODE.getContext(), MODE.getUser(), null);
+        delta = attachmentBase.getDelta(MODE.getSession(), folderId, attachedId, moduleId, ts, false , MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
 
         metadata = new HashSet<AttachmentMetadata>(all);
 
@@ -398,7 +399,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         delta.getModified().close();
 
 
-        delta = attachmentBase.getDelta(MODE.getSession(), folderId, attachedId, moduleId, ts, false, new AttachmentField[]{AttachmentField.ID_LITERAL}, AttachmentField.ID_LITERAL, AttachmentBase.ASC, MODE.getContext(), MODE.getUser(), null);
+        delta = attachmentBase.getDelta(MODE.getSession(), folderId, attachedId, moduleId, ts, false, new AttachmentField[]{AttachmentField.ID_LITERAL}, AttachmentField.ID_LITERAL, AttachmentBase.ASC, MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
 
         metadata = new HashSet<AttachmentMetadata>(all);
 
@@ -426,10 +427,10 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         InputStream in = null;
 
         try {
-            attachmentBase.attachToObject(attachment,in = new FileInputStream(testFile),MODE.getSession(),MODE.getContext(),MODE.getUser(), null);
+            attachmentBase.attachToObject(attachment,in = new FileInputStream(testFile),MODE.getSession(),MODE.getContext(),MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
             clean.add(attachment);
         } finally {
-             if(in != null) {
+            if(in != null) {
                 in.close();
             }
         }
@@ -444,20 +445,20 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         in = null;
         InputStream in2 = null;
         try {
-             in2 = e.getAttachedFile();
-             OXTestToolkit.assertSameContent(in = new FileInputStream(testFile),in2);
+            in2 = e.getAttachedFile();
+            OXTestToolkit.assertSameContent(in = new FileInputStream(testFile),in2);
         } finally {
-             if(in != null) {
+            if(in != null) {
                 in.close();
             }
-             if(in2 != null) {
+            if(in2 != null) {
                 in.close();
             }
         }
 
         final int id = clean.get(0).getId();
 
-        attachmentBase.detachFromObject(folderId,attachedId,moduleId,new int[]{id},MODE.getSession(),MODE.getContext(), MODE.getUser(), null);
+        attachmentBase.detachFromObject(folderId,attachedId,moduleId,new int[]{id},MODE.getSession(),MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
 
         e = listener.getEvent();
 
@@ -477,7 +478,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         try {
             try {
                 final AttachmentMetadata attachment = getAttachment(testFile, folderId,attachedId,moduleId,false);
-                attachmentBase.attachToObject(attachment,null,MODE.getSession(),MODE.getContext(),MODE.getUser(), null);
+                attachmentBase.attachToObject(attachment,null,MODE.getSession(),MODE.getContext(),MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
                 clean.add(attachment);
                 fail("Disallow failed");
             } catch (final OXException x) {
@@ -485,49 +486,67 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
             }
 
             try {
-                attachmentBase.getAttachment(MODE.getSession(), folderId,attachedId,moduleId,-1,MODE.getContext(),MODE.getUser(), null);
+                attachmentBase.getAttachment(MODE.getSession(), folderId,attachedId,moduleId,-1,MODE.getContext(),MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
                 fail("Disallow failed");
             } catch (final OXException x) {
                 authz.assertMayRead();
             }
 
             try {
-                attachmentBase.getAttachedFile(MODE.getSession(), folderId,attachedId,moduleId,-1,MODE.getContext(),MODE.getUser(), null);
+                attachmentBase.getAttachedFile(MODE.getSession(), folderId, attachedId, moduleId, -1, MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
                 fail("Disallow failed");
             } catch (final OXException x) {
                 authz.assertMayRead();
             }
 
             try {
-                attachmentBase.getAttachments(MODE.getSession(), folderId, attachedId, moduleId, MODE.getContext(), MODE.getUser(), null);
+                attachmentBase.getAttachments(MODE.getSession(), folderId, attachedId, moduleId, MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
                 fail("Disallow failed");
             } catch (final OXException x) {
                 authz.assertMayRead();
             }
 
             try {
-                attachmentBase.getDelta(MODE.getSession(), folderId, attachedId, moduleId, 0, false, MODE.getContext(), MODE.getUser(), null);
+                attachmentBase.getDelta(MODE.getSession(), folderId, attachedId, moduleId, 0, false, MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
                 fail("Disallow failed");
             } catch (final OXException x) {
                 authz.assertMayRead();
             }
 
             try {
-                attachmentBase.getAttachments(MODE.getSession(), folderId, attachedId, moduleId, new AttachmentField[]{AttachmentField.ID_LITERAL}, AttachmentField.ID_LITERAL, AttachmentBase.ASC, MODE.getContext(), MODE.getUser(), null);
+                attachmentBase.getAttachments(
+                    MODE.getSession(),
+                    folderId,
+                    attachedId,
+                    moduleId,
+                    new AttachmentField[] { AttachmentField.ID_LITERAL },
+                    AttachmentField.ID_LITERAL,
+                    AttachmentBase.ASC,
+                    MODE.getContext(),
+                    MODE.getUser(),
+                    new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
                 fail("Disallow failed");
             } catch (final OXException x) {
                 authz.assertMayRead();
             }
 
             try {
-                attachmentBase.getDelta(MODE.getSession(), folderId, attachedId, moduleId, 0, false, new AttachmentField[]{AttachmentField.ID_LITERAL}, AttachmentField.ID_LITERAL, AttachmentBase.ASC, MODE.getContext(), MODE.getUser(), null);
+                attachmentBase.getDelta(MODE.getSession(), folderId, attachedId, moduleId, 0, false, new AttachmentField[]{AttachmentField.ID_LITERAL}, AttachmentField.ID_LITERAL, AttachmentBase.ASC, MODE.getContext(), MODE.getUser(), new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
                 fail("Disallow failed");
             } catch (final OXException x) {
                 authz.assertMayRead();
             }
 
             try {
-                attachmentBase.detachFromObject(folderId,attachedId,moduleId,new int[]{},MODE.getSession(),MODE.getContext(), MODE.getUser(), null);
+                attachmentBase.detachFromObject(
+                    folderId,
+                    attachedId,
+                    moduleId,
+                    new int[] {},
+                    MODE.getSession(),
+                    MODE.getContext(),
+                    MODE.getUser(),
+                    new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
                 fail("Disallow failed");
             } catch (final OXException x) {
                 authz.assertMayDetach();
@@ -582,7 +601,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
                 assertEquals(
                     v1,
                     v2
-                );
+                    );
             }
         }
     }
@@ -610,7 +629,15 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
     @Override
     public void tearDown() throws Exception {
         for(final AttachmentMetadata m : clean) {
-            attachmentBase.detachFromObject(m.getFolderId(), m.getAttachedId(), m.getModuleId(), new int[]{m.getId()},MODE.getSession(),MODE.getContext(),MODE.getUser(), null);
+            attachmentBase.detachFromObject(
+                m.getFolderId(),
+                m.getAttachedId(),
+                m.getModuleId(),
+                new int[] { m.getId() },
+                MODE.getSession(),
+                MODE.getContext(),
+                MODE.getUser(),
+                new MutableUserConfiguration(new HashSet<String>(), 0, new int[0], null));
         }
         clean.clear();
 

@@ -65,7 +65,7 @@ import com.openexchange.exception.OXException;
  */
 public class MailNotifyPushUdpSocketListener implements Runnable {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailNotifyPushUdpSocketListener.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailNotifyPushUdpSocketListener.class);
 
     private static final int MAX_UDP_PACKET_SIZE = 4+64+1;
 
@@ -73,7 +73,11 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
 
     private final String imapLoginDelimiter;
 
-    public MailNotifyPushUdpSocketListener(final String udpListenHost, final int udpListenPort, final String imapLoginDelimiter, final boolean multicast) throws OXException, IOException {
+    private final MailNotifyPushListenerRegistry registry;
+
+    public MailNotifyPushUdpSocketListener(MailNotifyPushListenerRegistry registry, final String udpListenHost, final int udpListenPort, final String imapLoginDelimiter, final boolean multicast) throws OXException, IOException {
+        super();
+        this.registry = registry;
         final InetAddress senderAddress = InetAddress.getByName(udpListenHost);
 
         this.imapLoginDelimiter = imapLoginDelimiter;
@@ -98,14 +102,14 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
                 if (datagramPacket.getLength() > 0) {
                     // Packet received
                     final String mailboxName = getMailboxName(datagramPacket);
-                    MailNotifyPushListenerRegistry.getInstance().fireEvent(mailboxName);
+                    registry.fireEvent(mailboxName);
                 } else {
-                    LOG.warn("recieved empty udp package: " + datagramSocket);
+                    LOG.warn("recieved empty udp package: {}", datagramSocket);
                 }
             } catch (final IOException e) {
-                LOG.error("Receiving of UDP packet failed: " + e.getMessage(), e);
+                LOG.error("Receiving of UDP packet failed", e);
             } catch (final OXException e) {
-                LOG.error("Failed to create push event: " + e.getMessage(), e);
+                LOG.error("Failed to create push event", e);
             }
         }
     }
@@ -134,7 +138,7 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
         		packetDataString = packetDataString.substring(0, idx);
         	}
         }
-        LOG.debug("Username=" + packetDataString);
+        LOG.debug("Username={}", packetDataString);
         if (null != packetDataString && packetDataString.length() > 0) {
             return packetDataString;
         } else {

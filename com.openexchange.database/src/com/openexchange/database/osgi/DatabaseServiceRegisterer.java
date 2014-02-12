@@ -49,8 +49,6 @@
 
 package com.openexchange.database.osgi;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -67,7 +65,7 @@ import com.openexchange.exception.OXException;
  */
 public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<ConfigurationService, ConfigurationService> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DatabaseServiceRegisterer.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseServiceRegisterer.class);
 
     private final BundleContext context;
 

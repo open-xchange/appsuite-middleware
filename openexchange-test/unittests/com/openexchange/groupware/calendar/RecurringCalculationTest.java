@@ -51,14 +51,11 @@ package com.openexchange.groupware.calendar;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.dateString;
 import static com.openexchange.groupware.calendar.tools.CommonAppointments.recalculate;
-
 import java.util.Date;
 import java.util.TimeZone;
-
 import junit.framework.TestCase;
-
 import com.openexchange.calendar.recurrence.RecurringCalculation;
-import com.openexchange.calendar.recurrence.RecurringException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 
 /**
@@ -67,7 +64,7 @@ import com.openexchange.groupware.container.Appointment;
 public class RecurringCalculationTest extends TestCase {
 
     // Bug 11439
-    public void testShouldCalculateInTimeZone() throws RecurringException {
+    public void testShouldCalculateInTimeZone() throws OXException {
 
         final TimeZone utc = TimeZone.getTimeZone("UTC");
         final TimeZone ny = TimeZone.getTimeZone("America/New York");
@@ -94,7 +91,7 @@ public class RecurringCalculationTest extends TestCase {
 
     // Bug 10497
 
-    public void testWorkweekRelativeRecurrence() throws RecurringException {
+    public void testWorkweekRelativeRecurrence() throws OXException {
         final Date start = D("05/12/2007 10:00");
         final Date end = D("05/12/2007 12:00");
 
@@ -123,7 +120,7 @@ public class RecurringCalculationTest extends TestCase {
 
     // Bug 11655
 
-    public void testWeekendRelativeRecurrence() throws RecurringException {
+    public void testWeekendRelativeRecurrence() throws OXException {
         final Date start = D("02/12/2007 10:00");
         final Date end = D("02/12/2007 12:00");
 
@@ -151,7 +148,7 @@ public class RecurringCalculationTest extends TestCase {
     }
 
     // Bug 11730
-    public void testRecurrencesGoOnUntil99YearsInTheFuture() throws RecurringException {
+    public void testRecurrencesGoOnUntil99YearsInTheFuture() throws OXException {
         final RecurringCalculation calc = new RecurringCalculation(Appointment.YEARLY,1,0);
         final Date start = D("05/11/1900 10:00");
         calc.setStartAndEndTime(start.getTime(), D("05/11/1900 12:00").getTime());

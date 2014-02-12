@@ -64,8 +64,8 @@ import com.openexchange.sessiond.SessiondEventConstants;
  */
 public final class IndexEventHandler implements EventHandler {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IndexEventHandler.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(IndexEventHandler.class);
 
     /**
      * Initializes a new {@link IndexEventHandler}.

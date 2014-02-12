@@ -63,11 +63,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
+import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageEventConstants;
@@ -91,7 +91,7 @@ import com.openexchange.tx.TransactionException;
  */
 public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractService<Transaction> implements IDBasedFolderAccess {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractCompositingIDBasedFolderAccess.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractCompositingIDBasedFolderAccess.class);
 
     private final ThreadLocal<Map<String, FileStorageAccountAccess>> connectedAccounts = new ThreadLocal<Map<String, FileStorageAccountAccess>>();
     private final ThreadLocal<List<FileStorageAccountAccess>> accessesToClose = new ThreadLocal<List<FileStorageAccountAccess>>();
@@ -167,6 +167,11 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
 
     @Override
     public String moveFolder(String folderId, String newParentId) throws OXException {
+        return moveFolder(folderId, newParentId, null);
+    }
+
+    @Override
+    public String moveFolder(String folderId, String newParentId, String newName) throws OXException {
         FolderID folderID = new FolderID(folderId);
         FileStorageFolderAccess folderAccess = getFolderAccess(folderID);
         FileStorageFolder[] path = folderAccess.getPath2DefaultFolder(folderID.getFolderId());
@@ -174,13 +179,18 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
         String newID;
         Event deleteEvent = new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(folderID, path));
         if (folderID.getAccountId().equals(newParentID.getAccountId()) && folderID.getService().equals(newParentID.getService())) {
-            newID = folderAccess.moveFolder(folderID.getFolderId(), newParentID.getFolderId());
+            newID = folderAccess.moveFolder(folderID.getFolderId(), newParentID.getFolderId(), newName);
         } else {
             FileStorageFolder sourceFolder = folderAccess.getFolder(folderID.getFolderId());
-            FileStorageFolder toCreate = new IDManglingFolder(sourceFolder, null, newParentID.getFolderId());
+            DefaultFileStorageFolder toCreate = new DefaultFileStorageFolder();
+            toCreate.setName(null != newName ? newName : sourceFolder.getName());
+            toCreate.setParentId(newParentID.getFolderId());
+            toCreate.setSubscribed(sourceFolder.isSubscribed());
+            toCreate.setPermissions(sourceFolder.getPermissions());
             FileStorageFolderAccess targetFolderAccess = getFolderAccess(newParentID);
             path = targetFolderAccess.getPath2DefaultFolder(newParentID.getFolderId());
             newID = targetFolderAccess.createFolder(toCreate);
+            folderAccess.deleteFolder(folderID.getFolderId());
         }
         FolderID newFolderID = new FolderID(newParentID.getService(), newParentID.getAccountId(), newID);
         fire(deleteEvent);
@@ -439,19 +449,17 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractSer
 //        return properties;
 //    }
 
-    private void fire(Event event) {
+    private void fire(final Event event) {
         EventAdmin eventAdmin = getEventAdmin();
         if (null != eventAdmin) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Publishing: " + dump(event));
-            }
+            LOG.debug("Publishing: {}", new Object() { @Override public String toString() { return dump(event);} });
             eventAdmin.postEvent(event);
-        } else if (LOG.isWarnEnabled()) {
-            LOG.warn("Unable to access event admin, unable to publish event " + dump(event));
+        } else {
+            LOG.warn("Unable to access event admin, unable to publish event {}", dump(event));
         }
     }
 
-    private static String dump(Event event) {
+    static String dump(Event event) {
         if (null != event) {
             return new StringAllocator().append(event.getTopic())
                 .append(": folderId=").append(event.getProperty(FileStorageEventConstants.FOLDER_ID))

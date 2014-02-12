@@ -74,7 +74,7 @@ import com.openexchange.server.ServiceExceptionCode;
 public final class AJPv13Config implements Initialization {
 
     // Final static fields
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Config.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AJPv13Config.class);
 
     private static final AJPv13Config instance = new AJPv13Config();
 
@@ -128,7 +128,7 @@ public final class AJPv13Config implements Initialization {
     @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
-            LOG.error(this.getClass().getName() + " already started");
+            LOG.error("{} already started", this.getClass().getName());
             return;
         }
         init();
@@ -137,7 +137,7 @@ public final class AJPv13Config implements Initialization {
     @Override
     public void stop() {
         if (!started.compareAndSet(true, false)) {
-            LOG.error(this.getClass().getName() + " cannot be stopped since it has no been started before");
+            LOG.error("{} cannot be stopped since it has no been started before", this.getClass().getName());
             return;
         }
         reset();
@@ -189,8 +189,8 @@ public final class AJPv13Config implements Initialization {
             }
             final File servletConfigsFile = configService.getDirectory(servletConfigs);
             final boolean nonExisting = (null == servletConfigsFile) || !servletConfigsFile.exists() || !servletConfigsFile.isDirectory();
-            if (LOG.isTraceEnabled() && nonExisting) {
-                LOG.trace(servletConfigsFile + " does not exist or is not a directory");
+            if (nonExisting) {
+                LOG.trace("{} does not exist or is not a directory", servletConfigsFile);
             }
 
             this.logForwardRequest = configService.getBoolProperty("AJP_LOG_FORWARD_REQUEST", false);
@@ -222,9 +222,7 @@ public final class AJPv13Config implements Initialization {
                     List<String> proxyCandidates = IPTools.splitAndTrim(sProxyCandidates, IPTools.COMMA_SEPARATOR);
                     List<String> erroneousIPs = IPTools.filterErroneousIPs(proxyCandidates);
                     if (!erroneousIPs.isEmpty()) {
-                        if (LOG.isWarnEnabled()) {
-                            LOG.warn("Falling back to empty list as com.openexchange.server.knownProxies contains malformed IPs: " + erroneousIPs);
-                        }
+                        LOG.warn("Falling back to empty list as com.openexchange.server.knownProxies contains malformed IPs: {}", erroneousIPs);
                     } else {
                         this.knownProxies = proxyCandidates;
                     }
@@ -251,7 +249,7 @@ public final class AJPv13Config implements Initialization {
     }
 
     private static void logInfo(final String desc) {
-        if (LOG.isInfoEnabled()) {
+        LOG.info("{}", new Object() { @Override public String toString() {
             final StringBuilder logBuilder = new StringBuilder(1024);
             logBuilder.append("\nAJP CONFIGURATION:\n");
             logBuilder.append("\tAJP_PORT=").append(instance.port).append('\n');
@@ -270,8 +268,8 @@ public final class AJPv13Config implements Initialization {
             logBuilder.append("\tAJP_SERVLET_CONFIG_DIR=").append(instance.servletConfigs).append(null == desc ? "" : desc).append('\n');
             logBuilder.append("\tAJP_BIND_ADDR=").append(
                 instance.ajpBindAddr == null ? "* (all interfaces)" : instance.ajpBindAddr.toString());
-            LOG.info(logBuilder.toString());
-        }
+            return logBuilder.toString();
+        }});
     }
 
     private AJPv13Config() {

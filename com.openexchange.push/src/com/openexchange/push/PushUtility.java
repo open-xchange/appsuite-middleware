@@ -74,7 +74,7 @@ import com.openexchange.session.Session;
  */
 public final class PushUtility {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PushUtility.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushUtility.class);
 
     /**
      * Initializes a new {@link PushUtility}.
@@ -148,10 +148,7 @@ public final class PushUtility {
              * Finally post it
              */
             eventAdmin.postEvent(event);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(new StringBuilder(64).append("Notified new mails in folder \"").append(folder).append("\" for user ").append(
-                    userId).append(" in context ").append(contextId).toString());
-            }
+            LOG.debug("Notified new mails in folder \"{}\" for user {} in context {}", folder, userId, contextId);
         } catch (final OXException e) {
             throw e;
         }

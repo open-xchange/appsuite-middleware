@@ -51,7 +51,6 @@ package com.openexchange.mail.json.actions;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -65,7 +64,6 @@ import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.HashUtility;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -75,8 +73,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class AutosaveAction extends AbstractMailAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AutosaveAction.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(AutosaveAction.class);
 
     private static final String ATTACHMENTS = MailJSONField.ATTACHMENTS.getKey();
     private static final String CONTENT = MailJSONField.CONTENT.getKey();
@@ -99,20 +97,6 @@ public final class AutosaveAction extends AbstractMailAction {
             final List<OXException> warnings = new ArrayList<OXException>();
             {
                 final JSONObject jsonMailObj = (JSONObject) req.getRequest().requireData();
-                /*
-                 * Monitor
-                 */
-                String sha256 = null;
-                {
-                    final JSONArray jAttachments = jsonMailObj.optJSONArray(ATTACHMENTS);
-                    if (null != jAttachments) {
-                        final JSONObject jAttachment = jAttachments.optJSONObject(0);
-                        if (null != jAttachment) {
-                            final String sContent = jAttachment.optString(CONTENT, null);
-                            sha256 = null == sContent ? null : HashUtility.getSha256(sContent, "hex");
-                        }
-                    }
-                }
                 /*
                  * Parse with default account's transport provider
                  */
@@ -140,9 +124,7 @@ public final class AutosaveAction extends AbstractMailAction {
                             // Huh... No drafts folder in default account
                             throw MailExceptionCode.FOLDER_NOT_FOUND.create("Drafts");
                         }
-                        LOG.warn(new com.openexchange.java.StringAllocator(64).append("Mail account ").append(accountId).append(" for user ").append(
-                            session.getUserId()).append(" in context ").append(session.getContextId()).append(
-                            " has no drafts folder. Saving draft to default account's draft folder."));
+                        LOG.warn("Mail account {} for user {} in context {} has no drafts folder. Saving draft to default account's draft folder.", accountId, session.getUserId(), session.getContextId());
                         // No drafts folder in detected mail account; auto-save to default account
                         accountId = MailAccount.DEFAULT_ID;
                         composedMail.setFolder(mailInterface.getDraftsFolder(accountId));

@@ -111,7 +111,7 @@ public class Bug21026Test extends AbstractAJAXSession {
         first.setStatus(Task.DONE);
         first.setPercentComplete(100);
         first.setLastModified(client.execute(new UpdateRequest(first, timeZone)).getTimestamp());
-        second = findNext(task);
+        second = findNextOccurrence(client, task);
     }
 
     @Override
@@ -138,7 +138,7 @@ public class Bug21026Test extends AbstractAJAXSession {
         finish.setPercentComplete(100);
         finish.setLastModified(client.execute(new UpdateRequest(finish, timeZone)).getTimestamp());
         second.setLastModified(finish.getLastModified());
-        third = findNext(second);
+        third = findNextOccurrence(client, second);
         assertNull("No next occurrence should be created.", third);
 
         // Set last occurrence to not finished.
@@ -152,11 +152,11 @@ public class Bug21026Test extends AbstractAJAXSession {
         finish.setLastModified(client.execute(new UpdateRequest(finish, timeZone)).getTimestamp());
         second.setLastModified(finish.getLastModified());
 
-        third = findNext(second);
+        third = findNextOccurrence(client, second);
         assertNull("No next occurrence should be created.", third);
     }
 
-    private Task findNext(final Task previous) throws IOException, JSONException, OXException {
+    public static Task findNextOccurrence(AJAXClient client, Task previous) throws IOException, JSONException, OXException {
         final CommonAllResponse response = client.execute(new AllRequest(previous.getParentFolderID(), new int[] { Task.OBJECT_ID, Task.TITLE, Task.RECURRENCE_COUNT, Task.START_DATE, Task.END_DATE, Task.LAST_MODIFIED }, 0, null));
         Task retval = null;
         Calendar cal = new GregorianCalendar(TimeZones.UTC);

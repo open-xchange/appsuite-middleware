@@ -62,7 +62,7 @@ import com.openexchange.spamhandler.SpamHandlerRegistry;
  */
 public final class SpamHandlerServiceTracker implements ServiceTrackerCustomizer<SpamHandler,SpamHandler> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SpamHandlerServiceTracker.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamHandlerServiceTracker.class);
 
     private final BundleContext context;
 
@@ -82,17 +82,16 @@ public final class SpamHandlerServiceTracker implements ServiceTrackerCustomizer
         }
         final Object registrationName = reference.getProperty("name");
         if (null == registrationName) {
-            LOG.error("Missing registration name in spam handler service: " + addedService.getClass().getName());
+            LOG.error("Missing registration name in spam handler service: {}", addedService.getClass().getName());
             return addedService;
         }
         /*
          * TODO: Clarify if proxy object is reasonable or if service itself should be registered
          */
         if (SpamHandlerRegistry.registerSpamHandler(registrationName.toString(), addedService)) {
-            LOG.info(new StringBuilder(64).append("Spam handler registered for name '").append(registrationName.toString()));
+            LOG.info("Spam handler registered for name '{}", registrationName);
         } else {
-            LOG.warn(new StringBuilder(64).append("Spam handler could not be registered for name '").append(registrationName.toString()).append(
-                ". Another spam handler has already been registered for the same name."));
+            LOG.warn("Spam handler could not be registered for name '{}. Another spam handler has already been registered for the same name.", registrationName);
         }
         return addedService;
     }

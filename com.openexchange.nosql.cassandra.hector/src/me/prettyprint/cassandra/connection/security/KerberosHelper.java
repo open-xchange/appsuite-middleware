@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 
 public class KerberosHelper {
   
-  private static Logger log = LoggerFactory.getLogger(KerberosHelper.class);
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(KerberosHelper.class);
 
   /**
    * Log in using the service name for jaas.conf file and .keytab instead of specifying username and password

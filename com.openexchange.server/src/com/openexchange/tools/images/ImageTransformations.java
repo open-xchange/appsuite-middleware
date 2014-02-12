@@ -57,11 +57,22 @@ import java.io.InputStream;
 /**
  * {@link ImageTransformations}
  *
- * Allows chaining of multiple transformations to an image.
+ * Allows chaining of multiple transformations to an image. Every transformation has an expense.
+ * Expenses are summed up during processing and can be retrieved from a resulting {@link TransformedImage}.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface ImageTransformations {
+
+    /**
+     * Applies to cheap transformations.
+     */
+    static final int LOW_EXPENSE = 1;
+
+    /**
+     * Applies to expensive transformations.
+     */
+    static final int HIGH_EXPENSE = 3;
 
     /**
      * Adds a 'rotate' transformation, leading to the image being rotated according to the contained EXIF information.

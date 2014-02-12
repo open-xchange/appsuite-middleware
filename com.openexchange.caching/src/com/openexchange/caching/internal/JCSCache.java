@@ -49,26 +49,40 @@
 
 package com.openexchange.caching.internal;
 
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.CacheAccess;
+import org.apache.jcs.access.exception.CacheException;
 import org.apache.jcs.access.exception.ObjectExistsException;
 import org.apache.jcs.auxiliary.AuxiliaryCache;
 import org.apache.jcs.engine.behavior.ICache;
 import org.apache.jcs.engine.behavior.ICacheElement;
+import org.apache.jcs.engine.behavior.IElementAttributes;
 import org.apache.jcs.engine.control.CompositeCache;
+import org.apache.jcs.engine.control.event.ElementEvent;
+import org.apache.jcs.engine.control.event.behavior.IElementEvent;
+import org.apache.jcs.engine.control.event.behavior.IElementEventConstants;
+import org.apache.jcs.engine.control.event.behavior.IElementEventHandler;
 import org.apache.jcs.engine.control.group.GroupAttrName;
 import org.apache.jcs.engine.control.group.GroupId;
 import org.apache.jcs.engine.memory.MemoryCache;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
+import org.slf4j.Logger;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheElement;
+import com.openexchange.caching.CacheEventConstant;
 import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheStatistics;
@@ -79,17 +93,15 @@ import com.openexchange.caching.internal.cache2jcs.CacheStatistics2JCS;
 import com.openexchange.caching.internal.cache2jcs.ElementAttributes2JCS;
 import com.openexchange.caching.internal.jcs2cache.JCSElementAttributesDelegator;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link JCSCache} - A cache implementation that uses the <a href="http://jakarta.apache.org/jcs/">JCS</a> caching system.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class JCSCache implements Cache, SupportsLocalOperations {
+public final class JCSCache extends AbstractCache implements Cache, SupportsLocalOperations {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(JCSCache.class));
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(JCSCache.class);
 
     private static volatile Field cacheControlField;
     private static Field cacheControlField() {
@@ -111,19 +123,23 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
         return field;
     }
 
+    private static final boolean enableCacheEvents = false;
+
     // -------------------------------------------------------------------------------------------------------- //
 
     private final JCS cache;
     private final CompositeCache cacheControl;
     private volatile Boolean localOnly;
     private final MemoryCache memCache;
+    private final String region;
 
     /**
      * Initializes a new {@link JCSCache}
      */
-    public JCSCache(final JCS cache) {
+    public JCSCache(final JCS cache, final String region) throws CacheException {
         super();
         this.cache = cache;
+        this.region = region;
         // Init CompositeCache reference
         CompositeCache tmp;
         try {
@@ -133,6 +149,38 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
         }
         cacheControl = tmp;
         memCache = null == tmp ? null : tmp.getMemoryCache();
+
+        if (enableCacheEvents) {
+            final TIntSet removeEvents = new TIntHashSet(4);
+            removeEvents.add(IElementEventConstants.ELEMENT_EVENT_EXCEEDED_IDLETIME_BACKGROUND);
+            removeEvents.add(IElementEventConstants.ELEMENT_EVENT_EXCEEDED_IDLETIME_ONREQUEST);
+            removeEvents.add(IElementEventConstants.ELEMENT_EVENT_EXCEEDED_MAXLIFE_BACKGROUND);
+            removeEvents.add(IElementEventConstants.ELEMENT_EVENT_EXCEEDED_MAXLIFE_ONREQUEST);
+            final IElementAttributes defaultElementAttributes = cache.getDefaultElementAttributes();
+            defaultElementAttributes.addElementEventHandler(new IElementEventHandler() {
+
+                @Override
+                public void handleElementEvent(final IElementEvent event) {
+                    final int type = event.getElementEvent();
+                    if (removeEvents.contains(type)) {
+                        final ElementEvent elementEvent = (ElementEvent) event;
+                        final Object source = elementEvent.getSource();
+                        if (source instanceof ICacheElement) {
+                            final ICacheElement cacheElement = (ICacheElement) source;
+                            Serializable key = cacheElement.getKey();
+                            if (key instanceof GroupAttrName) {
+                                final GroupAttrName groupAttrName = (GroupAttrName) key;
+                                postRemove((Serializable) groupAttrName.attrName, groupAttrName.groupId.groupName, true);
+                            } else {
+                                postRemove(key, null, true);
+                            }
+                        }
+                    }
+
+                }
+            });
+            cache.setDefaultElementAttributes(defaultElementAttributes);
+        }
     }
 
     @Override
@@ -170,8 +218,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
                         }
                     }
                     this.localOnly = localOnly;
-                    LOG.info("Cache '" + cache.getCacheAttributes().getCacheName() + "' is operating in " +
-                        (localOnly.booleanValue() ? "local-only" : "distributed") + " mode");
+                    LOG.info("Cache ''{}'' is operating in {} mode", cache.getCacheAttributes().getCacheName(), (localOnly.booleanValue() ? "local-only" : "distributed"));
                 }
             }
         }
@@ -192,6 +239,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     public void clear() throws OXException {
         try {
             cache.clear();
+            postClear();
         } catch (final org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.CACHE_ERROR.create(e, e.getMessage());
         }
@@ -254,6 +302,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     @Override
     public void invalidateGroup(final String group) {
         cache.invalidateGroup(group);
+        postRemove(null, group, false);
     }
 
     @Override
@@ -339,6 +388,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     public void remove(final Serializable key) throws OXException {
         try {
             cache.remove(key);
+            postRemove(key, null, false);
         } catch (final org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_REMOVE.create(e, e.getMessage());
         }
@@ -348,6 +398,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     public void localRemove(final Serializable key) throws OXException {
         try {
             cacheControl.localRemove(key);
+            postRemove(key, null, false);
         } catch (final Exception e) {
             throw CacheExceptionCode.FAILED_REMOVE.create(e, e.getMessage());
         }
@@ -367,12 +418,14 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     @Override
     public void removeFromGroup(final Serializable key, final String group) {
         cache.remove(key, group);
+        postRemove(key, group, false);
     }
 
     @Override
     public void localRemoveFromGroup(final Serializable key, final String group) {
         final GroupAttrName groupAttrName = getGroupAttrName(group, key);
         this.cacheControl.localRemove(groupAttrName);
+        postRemove(key, group, false);
     }
 
     private GroupAttrName getGroupAttrName(final String group, final Object name) {
@@ -477,6 +530,45 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
         }
 
         return set;
+    }
+
+    private static final String TOPIC_REMOVE = CacheEventConstant.TOPIC_REMOVE;
+    private static final String TOPIC_CLEAR = CacheEventConstant.TOPIC_CLEAR;
+
+    private static final String PROP_REGION = CacheEventConstant.PROP_REGION;
+    private static final String PROP_KEY = CacheEventConstant.PROP_KEY;
+    private static final String PROP_GROUP = CacheEventConstant.PROP_GROUP;
+    private static final String PROP_EXCEEDED = CacheEventConstant.PROP_EXCEEDED;
+
+    void postRemove(final Serializable optKey, final String optGroup, final boolean exceeded) {
+        if (!enableCacheEvents) {
+            return;
+        }
+        final EventAdmin eventAdmin = EVENT_ADMIN_REF.get();
+        if (null != eventAdmin) {
+            final Map<String, Object> properties = new HashMap<String, Object>(6);
+            properties.put(PROP_REGION, region);
+            if (null != optGroup) {
+                properties.put(PROP_GROUP, optGroup);
+            }
+            if (null != optKey) {
+                properties.put(PROP_KEY, optKey);
+            }
+            properties.put(PROP_EXCEEDED, Boolean.valueOf(exceeded));
+            eventAdmin.postEvent(new Event(TOPIC_REMOVE, properties));
+        }
+    }
+
+    void postClear() {
+        if (!enableCacheEvents) {
+            return;
+        }
+        final EventAdmin eventAdmin = EVENT_ADMIN_REF.get();
+        if (null != eventAdmin) {
+            final Map<String, Object> properties = new HashMap<String, Object>(2);
+            properties.put(PROP_REGION, region);
+            eventAdmin.postEvent(new Event(TOPIC_CLEAR, properties));
+        }
     }
 
 }

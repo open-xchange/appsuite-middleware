@@ -60,7 +60,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.context.ContextService;
@@ -73,7 +72,6 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.util.TimeZones;
-import com.openexchange.log.LogFactory;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -92,7 +90,7 @@ public class freebusy extends HttpServlet {
 
     private static final long serialVersionUID = 6336387126907903347L;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(freebusy.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(freebusy.class);
 
     private static final DateFormat inputFormat = new SimpleDateFormat("yyyyMMdd");
 
@@ -221,7 +219,7 @@ public class freebusy extends HttpServlet {
             final ContextService service = ServerServiceRegistry.getInstance().getService(ContextService.class, true);
             context = service.getContext(contextId);
         } catch (final ServiceException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         } catch (final OXException e) {
             LOG.error("Can not load context.", e);
@@ -285,9 +283,9 @@ public class freebusy extends HttpServlet {
         } catch (final ServiceException e) {
             LOG.error("Calendar service not found.", e);
         } catch (final OXException e) {
-            LOG.error("Problem getting free busy information for '" + mailAddress + "'.", e);
+            LOG.error("Problem getting free busy information for '{}'.", mailAddress, e);
         } catch (final RuntimeException e) {
-            LOG.error("Problem getting free busy information for '" + mailAddress + "'.", e);
+            LOG.error("Problem getting free busy information for '{}'.", mailAddress, e);
         }
         printWriter.println("END:VFREEBUSY");
         printWriter.println("END:VCALENDAR");
@@ -330,9 +328,9 @@ public class freebusy extends HttpServlet {
             final UserService service = serviceRegistry.getService(UserService.class, true);
             user = service.searchUser(mailAddress, ctx);
         } catch (final ServiceException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final OXException e) {
-            LOG.debug("User '" + mailAddress + "' not found.");
+            LOG.debug("User '{}' not found.", mailAddress);
         }
 
         Resource resource = null;
@@ -343,9 +341,9 @@ public class freebusy extends HttpServlet {
                 resource = resources[0];
             }
         } catch (final ServiceException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final OXException e) {
-            LOG.error("Resource '" + mailAddress + "' not found.");
+            LOG.error("Resource '{}' not found.", mailAddress);
         }
 
         Participant retval = null;

@@ -54,6 +54,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.folderstorage.AltNameAwareFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExtension;
@@ -67,7 +68,7 @@ import com.openexchange.i18n.tools.StringHelper;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OutlookFolder implements FolderExtension {
+public final class OutlookFolder implements FolderExtension, AltNameAwareFolder {
 
     private static final long serialVersionUID = 1076412172524386127L;
 
@@ -474,6 +475,19 @@ public final class OutlookFolder implements FolderExtension {
     public void setSupportedCapabilities(Set<String> capabilities) {
         realFolder.setSupportedCapabilities(capabilities);
 
+    }
+
+    @Override
+    public boolean supportsAltName() {
+        return realFolder instanceof AltNameAwareFolder && ((AltNameAwareFolder) realFolder).supportsAltName();
+    }
+
+    @Override
+    public String getLocalizedName(Locale locale, boolean altName) {
+        if (realFolder instanceof AltNameAwareFolder) {
+            return ((AltNameAwareFolder) realFolder).getLocalizedName(locale, altName);
+        }
+        return getLocalizedName(locale);
     }
 
 }

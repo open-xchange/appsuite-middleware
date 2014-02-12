@@ -135,7 +135,7 @@ public final class CIFSActivator extends HousekeepingActivator {
                 registerService(EventHandler.class, eventHandler, dict);
             }
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CIFSActivator.class)).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(CIFSActivator.class).error("", e);
             throw e;
         }
     }
@@ -154,7 +154,7 @@ public final class CIFSActivator extends HousekeepingActivator {
             // Clear service registry
             CIFSServices.setServices(null);
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CIFSActivator.class)).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(CIFSActivator.class).error("", e);
             throw e;
         }
     }

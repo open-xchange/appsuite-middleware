@@ -227,11 +227,8 @@ abstract class CheckPermission {
              * Finally deliver it
              */
             eventAdmin.sendEvent(event);
-            final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CheckPermission.class));
-            if (logger.isDebugEnabled()) {
-                logger.debug(new StringBuilder(64).append("Notified ").append("content-related").append("-wise changed folder \"").append(
-                    folderId).append(" in context ").append(session.getContextId()).toString());
-            }
+            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CheckPermission.class);
+            logger.debug("Notified content-related-wise changed folder \"{} in context {}", folderId, session.getContextId());
         }
     }
 

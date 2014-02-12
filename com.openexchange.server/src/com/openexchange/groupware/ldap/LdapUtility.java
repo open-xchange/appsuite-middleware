@@ -59,8 +59,6 @@ import javax.naming.InvalidNameException;
 import javax.naming.Name;
 import javax.naming.NamingException;
 import javax.naming.ldap.LdapContext;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.configuration.DirectoryService;
@@ -76,7 +74,7 @@ public final class LdapUtility {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LdapUtility.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapUtility.class);
 
     /**
      * Empty map.
@@ -168,15 +166,19 @@ public final class LdapUtility {
     }
 
     /**
-     * This method prepare some pattern to make it useful for a relational
-     * database search. The pattern is surounded by wildcards and the wildcard
-     * character * is replaced with its database pendant %.
-     * @param pattern pattern to modify.
-     * @return the modified pattern.
+     * This method prepare some pattern to make it useful for a relational database search.
+     * <p>
+     * The pattern is surrounded by wild-cards and the wild-card character <code>'*'</code> is replaced with its database pendant
+     * <code>'%'</code>.
+     *
+     * @param pattern The pattern to modify
+     * @return The modified pattern or <code>null</code> if <code>pattern</code> is <code>null</code>
      */
     public static String prepareSearchPattern(final String pattern) {
-        final StringBuilder modifiedPattern = new StringBuilder(pattern.replace(
-            '*', '%'));
+        if (null == pattern) {
+            return null;
+        }
+        final StringBuilder modifiedPattern = new StringBuilder(pattern.replace('*', '%'));
         if (modifiedPattern.length() == 0) {
             modifiedPattern.append('%');
         }
@@ -247,7 +249,7 @@ public final class LdapUtility {
                             data);
                     }
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     retval = tag;
                 }
             }

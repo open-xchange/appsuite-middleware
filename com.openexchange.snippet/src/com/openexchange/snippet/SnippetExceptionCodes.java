@@ -50,63 +50,71 @@
 package com.openexchange.snippet;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link SnippetExceptionCodes} - Enumeration of all {@link OXException}s known in snippet module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum SnippetExceptionCodes implements OXExceptionCode {
+public enum SnippetExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(SnippetExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An error occurred: %1$s", CATEGORY_ERROR, 1),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(SnippetExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 2),
+    IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 2),
     /**
      * No such snippet found for identifier: %1$s
      */
-    SNIPPET_NOT_FOUND(SnippetExceptionMessages.SNIPPET_NOT_FOUND_MSG, CATEGORY_ERROR, 3),
+    SNIPPET_NOT_FOUND("No such snippet found for identifier: %1$s", CATEGORY_ERROR, 3),
     /**
      * A JSON error occurred: %1$s
      */
-    JSON_ERROR(SnippetExceptionMessages.JSON_ERROR_MSG, CATEGORY_ERROR, 4),
+    JSON_ERROR("A JSON error occurred: %1$s", CATEGORY_ERROR, 4),
     /**
      * Illegal state: %1$s
      */
-    ILLEGAL_STATE(SnippetExceptionMessages.ILLEGAL_STATE_MSG, CATEGORY_ERROR, 5),
+    ILLEGAL_STATE("Illegal state: %1$s", CATEGORY_ERROR, 5),
     /**
      * A SQL error occurred: %1$s
      */
-    SQL_ERROR(SnippetExceptionMessages.SQL_ERROR_MSG, CATEGORY_ERROR, 6),
+    SQL_ERROR("A SQL error occurred: %1$s", CATEGORY_ERROR, 6),
     /**
      * No such snippet attachment found for identifier %1$s in snippet %2$s
      */
-    ATTACHMENT_NOT_FOUND(SnippetExceptionMessages.ATTACHMENT_NOT_FOUND_MSG, CATEGORY_ERROR, 7),
+    ATTACHMENT_NOT_FOUND("No such snippet attachment found for identifier %1$s in snippet %2$s", CATEGORY_ERROR, 7),
 
     ;
 
     /**
      * The error code prefix for snippet module.
      */
-    public static final String PREFIX = "SNIPPET";
+    public static String PREFIX = "SNIPPET";
 
-    private final Category category;
+    private Category category;
 
-    private final int detailNumber;
+    private int detailNumber;
 
-    private final String message;
+    private String message;
+    
+    private String displayMessage;
 
-    private SnippetExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private SnippetExceptionCodes(String message, String displayMessage, Category category, int detailNumber) {
         this.message = message;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
         this.detailNumber = detailNumber;
         this.category = category;
+    }
+    
+    private SnippetExceptionCodes(String message, Category category, int detailNumber) {
+        this(message, null, category, detailNumber);
     }
 
     @Override
@@ -117,6 +125,11 @@ public enum SnippetExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override
@@ -130,7 +143,7 @@ public enum SnippetExceptionCodes implements OXExceptionCode {
     }
 
     @Override
-    public boolean equals(final OXException e) {
+    public boolean equals(OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
     }
 
@@ -149,7 +162,7 @@ public enum SnippetExceptionCodes implements OXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Object... args) {
+    public OXException create(Object... args) {
         return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
@@ -160,7 +173,7 @@ public enum SnippetExceptionCodes implements OXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Throwable cause, final Object... args) {
+    public OXException create(Throwable cause, Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

@@ -55,7 +55,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
@@ -77,7 +76,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class AppointmentIcalResultConverter implements ResultConverter {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AppointmentIcalResultConverter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppointmentIcalResultConverter.class);
 
     private final ServiceLookup services;
     private final Pattern emptyRDate;

@@ -58,6 +58,7 @@ import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -76,7 +77,7 @@ import com.openexchange.tools.URLParameter;
  */
 public final class BundleTestEventAdmin extends AbstractBundleTest {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(BundleTestEventAdmin.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(BundleTestEventAdmin.class);
 
     private static final String BUNDLE_ID = "org.eclipse.equinox.event";
 

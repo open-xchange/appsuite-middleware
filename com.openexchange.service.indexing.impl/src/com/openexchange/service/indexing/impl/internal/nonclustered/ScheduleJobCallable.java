@@ -52,7 +52,6 @@ package com.openexchange.service.indexing.impl.internal.nonclustered;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.concurrent.Callable;
-import org.apache.commons.logging.Log;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -72,12 +71,12 @@ import com.openexchange.service.indexing.impl.internal.Tools;
 
 /**
  * {@link ScheduleJobCallable}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ScheduleJobCallable implements Callable<Object>, Serializable {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ScheduleJobCallable.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ScheduleJobCallable.class);
 
     private static final long serialVersionUID = 5900667348491833307L;
 
@@ -99,14 +98,7 @@ public class ScheduleJobCallable implements Callable<Object>, Serializable {
 
     @Override
     public Object call() throws Exception {
-        if (LOG.isDebugEnabled()) {
-            if (LOG.isTraceEnabled()) {
-                Exception exception = new Exception();
-                LOG.trace("Scheduling job: " + jobInfo.toString() + ".", exception);
-            } else {
-                LOG.debug("Scheduling job: " + jobInfo.toString() + ".");
-            }
-        }
+        LOG.debug("Scheduling job: {}.", jobInfo);
 
         try {
             JobDataMap jobData = new JobDataMap();
@@ -154,13 +146,13 @@ public class ScheduleJobCallable implements Callable<Object>, Serializable {
                 scheduler.scheduleJob(trigger);
             } catch (SchedulerException e) {
                 if (e instanceof ObjectAlreadyExistsException) {
-                    LOG.info("Could not schedule trigger " + trigger.getKey() + ". It already exists.");
+                    LOG.info("Could not schedule trigger {}. It already exists.", trigger.getKey());
                 } else {
                     throw e;
                 }
             }
         } catch (Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
         }
         return null;
     }

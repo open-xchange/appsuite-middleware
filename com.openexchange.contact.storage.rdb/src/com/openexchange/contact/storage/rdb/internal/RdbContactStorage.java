@@ -57,7 +57,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.storage.DefaultContactStorage;
@@ -74,7 +73,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.log.LogFactory;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaService;
@@ -98,7 +96,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class RdbContactStorage extends DefaultContactStorage {
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbContactStorage.class));
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbContactStorage.class);
     private static boolean PREFETCH_ATTACHMENT_INFO = true;
     private static int DELETE_CHUNK_SIZE = 50;
 
@@ -298,6 +296,7 @@ public class RdbContactStorage extends DefaultContactStorage {
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         ConnectionHelper connectionHelper = new ConnectionHelper(session);
         Connection connection = connectionHelper.getWritable();
+        int deletedContacts = 0;
         try {
             /*
              * get a list of object IDs to delete
@@ -320,7 +319,7 @@ public class RdbContactStorage extends DefaultContactStorage {
             /*
              * delete contacts - per convention, don't check last modification time when clearing a folder
              */
-            deleteContacts(serverSession, connection, folderID, objectIDs, Long.MIN_VALUE);
+            deletedContacts = deleteContacts(serverSession, connection, folderID, objectIDs, Long.MIN_VALUE);
             /*
              * commit
              */
@@ -332,7 +331,11 @@ public class RdbContactStorage extends DefaultContactStorage {
             DBUtils.rollback(connection);
             throw e;
         } finally {
-            connectionHelper.backWritable();
+            if (deletedContacts <= 0) {
+                connectionHelper.backWritableAfterReading();
+            } else {
+                connectionHelper.backWritable();
+            }
         }
     }
 
@@ -968,3 +971,4 @@ public class RdbContactStorage extends DefaultContactStorage {
     }
 
 }
+

@@ -60,7 +60,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
@@ -128,7 +127,7 @@ public class AbstractICalTest extends AbstractAJAXTest {
 
     protected TimeZone timeZone = null;
 
-    private static final Log LOG = LogFactory.getLog(AbstractICalTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractICalTest.class);
 
     public AbstractICalTest(final String name) {
         super(name);

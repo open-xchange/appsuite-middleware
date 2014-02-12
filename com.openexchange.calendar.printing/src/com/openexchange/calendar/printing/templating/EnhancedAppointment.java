@@ -75,7 +75,7 @@ public class EnhancedAppointment {
     private final List<SimpleParticipant> tentative = new ArrayList<SimpleParticipant>();
     private final List<SimpleParticipant> undecided = new ArrayList<SimpleParticipant>();
     private final List<SimpleParticipant> resources = new ArrayList<SimpleParticipant>();
-    
+
     private final ServiceLookup services;
 
     private final Map<String, Object> appointment;
@@ -86,33 +86,33 @@ public class EnhancedAppointment {
         this.services = services;
         this.appointment = appointment;
         this.ctx = ctx;
-        
+
         List<Object> users = (List<Object>) appointment.get("users");
         if (users != null) {
             for(Object o: users) {
                 Map<String, Object> user = (Map<String, Object>) o;
                 Integer status = (Integer) user.get("confirmation");
-                getList(status).add(resolveUser(user));                
+                getList(status).add(resolveUser(user));
             }
         }
-        
+
         List<Object> confirmations = (List<Object>) appointment.get("confirmations");
-        
+
         if (confirmations != null) {
             for (Object o: confirmations) {
                 Map<String, Object> confirmation = (Map<String, Object>) o;
                 Integer status = (Integer) confirmation.get("confirmation");
-                getList(status).add(resolveConfirmation(confirmation));                
-                
+                getList(status).add(resolveConfirmation(confirmation));
+
             }
         }
-        
+
         List<Object> participants = (List<Object>) appointment.get("participants");
-        
+
         if (participants != null) {
             for(Object o: participants) {
                 Map<String, Object> participant = (Map<String, Object>) o;
-                if (participant.get("type") == Integer.valueOf(Participant.RESOURCE)) {
+                if (Integer.valueOf(Participant.RESOURCE).equals(participant.get("type"))) {
                     resources.add(resolveResource(participant));
                 }
             }
@@ -122,47 +122,47 @@ public class EnhancedAppointment {
     public boolean hasParticipants() {
         return hasAccepted() || hasDeclined() || hasTentative() || hasUndecided();
     }
-    
+
     public boolean hasAccepted() {
         return !accepted.isEmpty();
     }
-    
+
     public boolean hasDeclined() {
         return !declined.isEmpty();
     }
-    
+
     public boolean hasTentative() {
         return !tentative.isEmpty();
     }
-    
+
     public boolean hasUndecided() {
         return !undecided.isEmpty();
     }
-    
+
     public boolean hasResources() {
         return !resources.isEmpty();
     }
-    
+
     public List<SimpleParticipant> getAcceptedParticipants() {
         return accepted;
     }
-    
+
     public List<SimpleParticipant> getDeclinedParticipants() {
         return declined;
     }
-    
+
     public List<SimpleParticipant> getTentativeParticipants() {
         return tentative;
     }
-    
+
     public List<SimpleParticipant> getUndecidedParticipants() {
         return undecided;
     }
-    
+
     public List<SimpleParticipant> getResources() {
         return resources;
     }
-    
+
     private List<SimpleParticipant> getList(Integer status) {
         List<SimpleParticipant> list = undecided;
         if (status == null) {
@@ -179,32 +179,32 @@ public class EnhancedAppointment {
             list = declined;
             break;
         }
-        
+
         return list;
     }
-    
+
     private SimpleParticipant resolveResource(Map<String, Object> participant) throws OXException {
         Resource resource = services.getService(ResourceService.class).getResource((Integer)participant.get("id"), ctx);
-        
-        
+
+
         return new SimpleParticipant()
             .setDisplayName(resource.getDisplayName());
     }
 
     private SimpleParticipant resolveUser(Map<String, Object> userO) throws OXException {
         User user = services.getService(UserService.class).getUser((Integer)userO.get("id"), ctx);
-        
+
         return new SimpleParticipant()
             .setDisplayName(user.getDisplayName())
             .setMessage((String) userO.get("confirmmessage"));
     }
-    
+
     private SimpleParticipant resolveConfirmation(Map<String, Object> confirmation) {
         String dname = (String) confirmation.get("display_name");
         String mail = (String) confirmation.get("mail");
-        
+
         String displayName = (dname != null) ? dname : mail;
-        
+
         return new SimpleParticipant()
             .setDisplayName(displayName);
     }

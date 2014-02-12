@@ -51,8 +51,6 @@ package com.openexchange.management.internal;
 
 import static com.openexchange.management.services.ManagementServiceRegistry.getServiceRegistry;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
@@ -70,7 +68,7 @@ public final class ManagementInit implements Initialization {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementInit.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManagementInit.class);
 
     /**
      * Prevent instantiation.
@@ -92,7 +90,7 @@ public final class ManagementInit implements Initialization {
     @Override
     public void start() throws OXException {
         if (started.get()) {
-            LOG.error(ManagementInit.class.getName() + " already started");
+            LOG.error("{} already started", ManagementInit.class.getName());
             return;
         }
         final ManagementAgentImpl agent = ManagementAgentImpl.getInstance();
@@ -128,9 +126,7 @@ public final class ManagementInit implements Initialization {
          * Run
          */
         agent.run();
-        if (LOG.isInfoEnabled()) {
-            LOG.info("JMX server successfully initialized.");
-        }
+        LOG.info("JMX server successfully initialized.");
         started.set(true);
     }
 
@@ -140,7 +136,7 @@ public final class ManagementInit implements Initialization {
     @Override
     public void stop() throws OXException {
         if (!started.get()) {
-            LOG.error(ManagementInit.class.getName() + " has not been started");
+            LOG.error("{} has not been started", ManagementInit.class.getName());
             return;
         }
         final ManagementAgentImpl agent = ManagementAgentImpl.getInstance();

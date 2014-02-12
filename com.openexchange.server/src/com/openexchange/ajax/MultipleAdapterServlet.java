@@ -57,7 +57,6 @@ import java.util.Locale;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -68,7 +67,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedPushbackReader;
-import com.openexchange.log.LogFactory;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
@@ -85,7 +83,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class MultipleAdapterServlet extends PermissionServlet {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MultipleAdapterServlet.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MultipleAdapterServlet.class);
 
 
     @Override
@@ -157,7 +155,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
         try {
             writeResponse(response, resp, session);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -168,7 +166,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
         try {
             writeResponse(response, resp, session);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

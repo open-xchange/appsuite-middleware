@@ -61,13 +61,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveStrings;
 import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.drive.internal.PathNormalizer;
 import com.openexchange.drive.internal.SyncSession;
+import com.openexchange.drive.management.DriveConfig;
 import com.openexchange.drive.storage.filter.FileNameFilter;
 import com.openexchange.drive.storage.filter.Filter;
 import com.openexchange.drive.storage.filter.SynchronizedFileFilter;
@@ -76,6 +76,7 @@ import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -380,13 +381,13 @@ public class DriveStorage {
         }
         if (false == oldParentPath.equals(newParentPath)) {
             /*
-             * perform move
+             * perform move / rename
              */
-            folderID = getFolderAccess().moveFolder(folderID, newParentFolder.getId());
-        }
-        if (false == oldName.equals(newName)) {
+            folderID = oldName.equals(newName) ? getFolderAccess().moveFolder(folderID, newParentFolder.getId()) :
+                getFolderAccess().moveFolder(folderID, newParentFolder.getId(), newName);
+        } else if (false == oldName.equals(newName)) {
             /*
-             * perform rename
+             * perform rename only
              */
             folderID = getFolderAccess().renameFolder(folderID, newName);
         }
@@ -496,6 +497,14 @@ public class DriveStorage {
      * @throws OXException
      */
     public List<File> getFilesInFolder(String folderID, boolean all, String pattern, List<Field> fields) throws OXException {
+        FileStorageFolder folder = getFolderAccess().getFolder(folderID);
+        if (null == folder) {
+            throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderID, rootFolderID.getAccountId(), rootFolderID.getService(),
+                session.getServerSession().getUserId(), session.getServerSession().getContextId());
+        }
+        if (null == folder.getOwnPermission() || FileStoragePermission.READ_OWN_OBJECTS > folder.getOwnPermission().getReadPermission()) {
+            return Collections.emptyList();
+        }
         SearchIterator<File> filesIterator = getFilesIterator(folderID, pattern, null != fields ? fields : DriveConstants.FILE_FIELDS);
         if (all) {
             return Filter.apply(filesIterator, new FileNameFilter() {
@@ -606,8 +615,7 @@ public class DriveStorage {
 
     public String getVersionComment() {
         String device = Strings.isEmpty(session.getDeviceName()) ? session.getServerSession().getClient() : session.getDeviceName();
-        ConfigurationService configService = DriveServiceLookup.getService(ConfigurationService.class);
-        String product = configService.getProperty("com.openexchange.drive.shortProductName", "OX Drive");
+        String product = DriveConfig.getInstance().getShortProductName();
         String format = StringHelper.valueOf(session.getDriveSession().getLocale()).getString(DriveStrings.VERSION_COMMENT);
         return String.format(format, product, device);
     }

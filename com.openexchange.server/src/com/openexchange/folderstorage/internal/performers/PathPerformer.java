@@ -72,17 +72,14 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class PathPerformer extends AbstractUserizedFolderPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PathPerformer.class));
-
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
-
     /**
      * Initializes a new {@link PathPerformer} from given session.
      *
      * @param session The session
      * @param decorator The optional folder service decorator
+     * @throws OXException If passed session is invalid
      */
-    public PathPerformer(final ServerSession session, final FolderServiceDecorator decorator) {
+    public PathPerformer(final ServerSession session, final FolderServiceDecorator decorator) throws OXException {
         super(session, decorator);
     }
 
@@ -103,8 +100,9 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
      * @param session The session
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
+     * @throws OXException If passed session is invalid
      */
-    public PathPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public PathPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(session, decorator, folderStorageDiscoverer);
     }
 
@@ -184,7 +182,6 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
-        final long start = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         final java.util.List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
         if (folderStorage.startTransaction(storageParameters, false)) {
             openedStorages.add(folderStorage);
@@ -241,11 +238,6 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
                 fs.rollback(storageParameters);
             }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-        if (DEBUG_ENABLED) {
-            final long duration = System.currentTimeMillis() - start;
-            LOG.debug(new StringBuilder().append("Path.doPath() took ").append(duration).append(
-                "msec for parent folder: ").append(folderId).toString());
         }
         return ret;
     }

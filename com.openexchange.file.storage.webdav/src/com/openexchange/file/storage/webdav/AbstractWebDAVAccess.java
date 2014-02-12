@@ -52,6 +52,7 @@ package com.openexchange.file.storage.webdav;
 import java.io.IOException;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
+import org.slf4j.LoggerFactory;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
@@ -106,7 +107,7 @@ public abstract class AbstractWebDAVAccess {
             try {
                 Streams.close(httpMethod.getResponseBodyAsStream());
             } catch (final IOException e) {
-                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractWebDAVAccess.class)).error(e.getMessage(), e);
+                LoggerFactory.getLogger(AbstractWebDAVAccess.class).error("", e);
             } finally {
                 /*
                  * We are done with the connection and that it can now be reused

@@ -4299,7 +4299,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     final public OXUserExtensionInterface removeExtensionByIndex(final int index) {
         final ArrayList<OXCommonExtension> retval = new ArrayList<OXCommonExtension>(getAllExtensionsAsHash().values());
         final OXCommonExtension commonExtensionInterface = retval.get(index);
-        return (OXUserExtensionInterface) getAllExtensionsAsHash().remove(commonExtensionInterface);
+        return (OXUserExtensionInterface) getAllExtensionsAsHash().remove(commonExtensionInterface.getClass().getName());
     }
 
     /**

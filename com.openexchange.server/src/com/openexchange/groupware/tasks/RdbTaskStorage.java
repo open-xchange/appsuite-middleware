@@ -63,7 +63,6 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.DataObject;
@@ -72,7 +71,6 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskIterator2.StatementSetter;
 import com.openexchange.java.Charsets;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.arrays.Arrays;
@@ -86,7 +84,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class RdbTaskStorage extends TaskStorage {
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbTaskStorage.class));
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbTaskStorage.class);
 
     /**
      * This SQL statement counts the tasks in a folder. TODO Move to {@link SQL} class.
@@ -499,7 +497,7 @@ public class RdbTaskStorage extends TaskStorage {
             try {
                 tmp2 = DBUtils.getColumnSize(con, SQL.TASK_TABLES.get(type), mapper.getDBColumnName());
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 tmp2 = -1;
             }
             final int length = -1 == tmp2 ? 0 : tmp2;

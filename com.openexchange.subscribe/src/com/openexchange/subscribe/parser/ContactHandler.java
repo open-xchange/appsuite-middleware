@@ -51,11 +51,9 @@ package com.openexchange.subscribe.parser;
 
 import java.util.Collection;
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -70,7 +68,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
  */
 public class ContactHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactHandler.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactHandler.class);
 
     /**
      * Update or insert contacts from a subscription
@@ -90,7 +88,7 @@ public class ContactHandler {
                 try {
                     existingContact = existingContacts.next();
                 } catch (final SearchIteratorException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
                 if (existingContact == null) {
                     continue;
@@ -113,7 +111,7 @@ public class ContactHandler {
             try {
                 contactService.createContact(session, String.valueOf(folderId), updatedContact);
             } catch (final OXException x) {
-                LOG.error(x.getMessage(), x);
+                LOG.error("", x);
             }
         }
     }

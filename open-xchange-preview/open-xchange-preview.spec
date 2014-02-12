@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -15,6 +15,7 @@ BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange backend preview implementation
+Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 
 %description
@@ -44,6 +45,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Wed Dec 18 2013 Markus Wagner <markus.wagner@open-xchange.com>
+prepare for 7.4.2
 * Thu Oct 10 2013 Markus Wagner <markus.wagner@open-xchange.com>
 First sprint increment for 7.4.0 release
 * Mon Oct 07 2013 Markus Wagner <markus.wagner@open-xchange.com>

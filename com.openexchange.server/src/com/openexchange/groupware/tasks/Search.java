@@ -52,7 +52,6 @@ package com.openexchange.groupware.tasks;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -62,7 +61,6 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.SearchObject;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
@@ -75,7 +73,7 @@ import com.openexchange.tools.sql.SearchStrings;
  */
 public class Search {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Search.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Search.class);
 
     private final Context ctx;
 
@@ -160,9 +158,7 @@ public class Search {
         } catch (final OXException e) {
             throw e;
         }
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Search tasks, all: " + all + ", own: " + own + ", shared: " + shared);
-        }
+        LOG.trace("Search tasks, all: {}, own: {}, shared: {}", all, own, shared);
     }
 
     private static SearchIterator<FolderObject> loadFolder(final Context ctx, final int[] folderIds) throws OXException {

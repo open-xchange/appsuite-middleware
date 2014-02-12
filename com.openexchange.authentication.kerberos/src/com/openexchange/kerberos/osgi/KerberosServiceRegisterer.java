@@ -49,7 +49,6 @@
 
 package com.openexchange.kerberos.osgi;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -68,7 +67,7 @@ import com.openexchange.kerberos.impl.KerberosServiceImpl;
  */
 public class KerberosServiceRegisterer implements ServiceTrackerCustomizer<ConfigurationService, ConfigurationService> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(KerberosServiceRegisterer.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(KerberosServiceRegisterer.class);
     private final BundleContext context;
     private ServiceRegistration<KerberosService> registration;
     private KerberosServiceImpl impl;

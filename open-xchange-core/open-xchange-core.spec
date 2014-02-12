@@ -1,148 +1,151 @@
-%define	       configfiles     configfiles.list
+%define        configfiles     configfiles.list
 
 Name:          open-xchange-core
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
 BuildRequires: ant
 BuildRequires: ant-nodeps
-BuildRequires: open-xchange-log4j
+BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 21
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
-License:       GPL-2.0 
+License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The essential core of an Open-Xchange backend
+Autoreqprov:   no
 Requires:      open-xchange-osgi >= @OXVERSION@
 Requires:      open-xchange-xerces
 Provides:      open-xchange-cache = %{version}
-Obsoletes:     open-xchange-cache <= %{version}
+Obsoletes:     open-xchange-cache < %{version}
 Provides:      open-xchange-calendar = %{version}
-Obsoletes:     open-xchange-calendar <= %{version}
+Obsoletes:     open-xchange-calendar < %{version}
 Provides:      open-xchange-charset = %{version}
-Obsoletes:     open-xchange-charset <= %{version}
+Obsoletes:     open-xchange-charset < %{version}
 Provides:      open-xchange-common = %{version}
-Obsoletes:     open-xchange-common <= %{version}
+Obsoletes:     open-xchange-common < %{version}
 Provides:      open-xchange-config-cascade = %{version}
-Obsoletes:     open-xchange-config-cascade <= %{version}
+Obsoletes:     open-xchange-config-cascade < %{version}
 Provides:      open-xchange-config-cascade-context = %{version}
-Obsoletes:     open-xchange-config-cascade-context <= %{version}
+Obsoletes:     open-xchange-config-cascade-context < %{version}
 Provides:      open-xchange-config-cascade-user = %{version}
-Obsoletes:     open-xchange-config-cascade-user <= %{version}
+Obsoletes:     open-xchange-config-cascade-user < %{version}
 Provides:      open-xchange-configread = %{version}
-Obsoletes:     open-xchange-configread <= %{version}
+Obsoletes:     open-xchange-configread < %{version}
 Provides:      open-xchange-contactcollector = %{version}
-Obsoletes:     open-xchange-contactcollector <= %{version}
+Obsoletes:     open-xchange-contactcollector < %{version}
 Provides:      open-xchange-control = %{version}
-Obsoletes:     open-xchange-control <= %{version}
+Obsoletes:     open-xchange-control < %{version}
 Provides:      open-xchange-conversion = %{version}
-Obsoletes:     open-xchange-conversion <= %{version}
+Obsoletes:     open-xchange-conversion < %{version}
 Provides:      open-xchange-conversion-engine = %{version}
-Obsoletes:     open-xchange-conversion-engine <= %{version}
+Obsoletes:     open-xchange-conversion-engine < %{version}
 Provides:      open-xchange-conversion-servlet = %{version}
-Obsoletes:     open-xchange-conversion-servlet <= %{version}
+Obsoletes:     open-xchange-conversion-servlet < %{version}
 Provides:      open-xchange-crypto = %{version}
-Obsoletes:     open-xchange-crypto <= %{version}
+Obsoletes:     open-xchange-crypto < %{version}
 Provides:      open-xchange-data-conversion-ical4j = %{version}
-Obsoletes:     open-xchange-data-conversion-ical4j <= %{version}
+Obsoletes:     open-xchange-data-conversion-ical4j < %{version}
 Provides:      open-xchange-dataretention = %{version}
-Obsoletes:     open-xchange-dataretention <= %{version}
+Obsoletes:     open-xchange-dataretention < %{version}
 Provides:      open-xchange-genconf = %{version}
-Obsoletes:     open-xchange-genconf <= %{version}
+Obsoletes:     open-xchange-genconf < %{version}
 Provides:      open-xchange-genconf-mysql = %{version}
-Obsoletes:     open-xchange-genconf-mysql <= %{version}
+Obsoletes:     open-xchange-genconf-mysql < %{version}
 Provides:      open-xchange-file-storage = %{version}
-Obsoletes:     open-xchange-file-storage <= %{version}
+Obsoletes:     open-xchange-file-storage < %{version}
 Provides:      open-xchange-file-storage-composition = %{version}
-Obsoletes:     open-xchange-file-storage-composition <= %{version}
+Obsoletes:     open-xchange-file-storage-composition < %{version}
 Provides:      open-xchange-file-storage-config = %{version}
-Obsoletes:     open-xchange-file-storage-config <= %{version}
+Obsoletes:     open-xchange-file-storage-config < %{version}
 Provides:      open-xchange-file-storage-generic = %{version}
-Obsoletes:     open-xchange-file-storage-generic <= %{version}
+Obsoletes:     open-xchange-file-storage-generic < %{version}
 Provides:      open-xchange-file-storage-infostore = %{version}
-Obsoletes:     open-xchange-file-storage-infostore <= %{version}
+Obsoletes:     open-xchange-file-storage-infostore < %{version}
 Provides:      open-xchange-file-storage-json = %{version}
-Obsoletes:     open-xchange-file-storage-json <= %{version}
+Obsoletes:     open-xchange-file-storage-json < %{version}
 Provides:      open-xchange-folder-json = %{version}
-Obsoletes:     open-xchange-folder-json <= %{version}
+Obsoletes:     open-xchange-folder-json < %{version}
 Provides:      open-xchange-frontend-uwa = %{version}
-Obsoletes:     open-xchange-frontend-uwa <= %{version}
+Obsoletes:     open-xchange-frontend-uwa < %{version}
 Provides:      open-xchange-frontend-uwa-json = %{version}
-Obsoletes:     open-xchange-frontend-uwa-json <= %{version}
+Obsoletes:     open-xchange-frontend-uwa-json < %{version}
 Provides:      open-xchange-global = %{version}
-Obsoletes:     open-xchange-global <= %{version}
+Obsoletes:     open-xchange-global < %{version}
 Provides:      open-xchange-html = %{version}
-Obsoletes:     open-xchange-html <= %{version}
+Obsoletes:     open-xchange-html < %{version}
 Provides:      open-xchange-i18n = %{version}
-Obsoletes:     open-xchange-i18n <= %{version}
+Obsoletes:     open-xchange-i18n < %{version}
 Provides:      open-xchange-itip-json = %{version}
-Obsoletes:     open-xchange-itip-json <= %{version}
+Obsoletes:     open-xchange-itip-json < %{version}
 Provides:      open-xchange-jcharset = %{version}
-Obsoletes:     open-xchange-jcharset <= %{version}
+Obsoletes:     open-xchange-jcharset < %{version}
 Provides:      open-xchange-logging = %{version}
-Obsoletes:     open-xchange-logging <= %{version}
+Obsoletes:     open-xchange-logging < %{version}
 Provides:      open-xchange-management = %{version}
-Obsoletes:     open-xchange-management <= %{version}
+Obsoletes:     open-xchange-management < %{version}
 Provides:      open-xchange-modules-json = %{version}
-Obsoletes:     open-xchange-modules-json <= %{version}
+Obsoletes:     open-xchange-modules-json < %{version}
 Provides:      open-xchange-modules-model = %{version}
-Obsoletes:     open-xchange-modules-model <= %{version}
+Obsoletes:     open-xchange-modules-model < %{version}
 Provides:      open-xchange-modules-storage = %{version}
-Obsoletes:     open-xchange-modules-storage <= %{version}
+Obsoletes:     open-xchange-modules-storage < %{version}
 Provides:      open-xchange-monitoring = %{version}
-Obsoletes:     open-xchange-monitoring <= %{version}
+Obsoletes:     open-xchange-monitoring < %{version}
 Provides:      open-xchange-proxy = %{version}
-Obsoletes:     open-xchange-proxy <= %{version}
+Obsoletes:     open-xchange-proxy < %{version}
 Provides:      open-xchange-proxy-servlet = %{version}
-Obsoletes:     open-xchange-proxy-servlet <= %{version}
+Obsoletes:     open-xchange-proxy-servlet < %{version}
 Provides:      open-xchange-publish-basic = %{version}
-Obsoletes:     open-xchange-publish-basic <= %{version}
+Obsoletes:     open-xchange-publish-basic < %{version}
 Provides:      open-xchange-publish-infostore-online = %{version}
-Obsoletes:     open-xchange-publish-infostore-online <= %{version}
+Obsoletes:     open-xchange-publish-infostore-online < %{version}
 Provides:      open-xchange-push = %{version}
-Obsoletes:     open-xchange-push <= %{version}
+Obsoletes:     open-xchange-push < %{version}
 Provides:      open-xchange-push-udp = %{version}
-Obsoletes:     open-xchange-push-udp <= %{version}
+Obsoletes:     open-xchange-push-udp < %{version}
 Provides:      open-xchange-secret = %{version}
-Obsoletes:     open-xchange-secret <= %{version}
+Obsoletes:     open-xchange-secret < %{version}
 Provides:      open-xchange-secret-recovery = %{version}
-Obsoletes:     open-xchange-secret-recovery <= %{version}
+Obsoletes:     open-xchange-secret-recovery < %{version}
 Provides:      open-xchange-secret-recovery-json = %{version}
-Obsoletes:     open-xchange-secret-recovery-json <= %{version}
+Obsoletes:     open-xchange-secret-recovery-json < %{version}
 Provides:      open-xchange-secret-recovery-mail = %{version}
-Obsoletes:     open-xchange-secret-recovery-mail <= %{version}
+Obsoletes:     open-xchange-secret-recovery-mail < %{version}
 Provides:      open-xchange-server = %{version}
-Obsoletes:     open-xchange-server <= %{version}
+Obsoletes:     open-xchange-server < %{version}
 Provides:      open-xchange-sessiond = %{version}
-Obsoletes:     open-xchange-sessiond <= %{version}
+Obsoletes:     open-xchange-sessiond < %{version}
 Provides:      open-xchange-settings-extensions = %{version}
-Obsoletes:     open-xchange-settings-extensions <= %{version}
+Obsoletes:     open-xchange-settings-extensions < %{version}
 Provides:      open-xchange-sql = %{version}
-Obsoletes:     open-xchange-sql <= %{version}
+Obsoletes:     open-xchange-sql < %{version}
 Provides:      open-xchange-templating = %{version}
-Obsoletes:     open-xchange-templating <= %{version}
+Obsoletes:     open-xchange-templating < %{version}
 Provides:      open-xchange-templating-base = %{version}
-Obsoletes:     open-xchange-templating-base <= %{version}
+Obsoletes:     open-xchange-templating-base < %{version}
 Provides:      open-xchange-threadpool = %{version}
-Obsoletes:     open-xchange-threadpool <= %{version}
+Obsoletes:     open-xchange-threadpool < %{version}
 Provides:      open-xchange-tx = %{version}
-Obsoletes:     open-xchange-tx <= %{version}
+Obsoletes:     open-xchange-tx < %{version}
 Provides:      open-xchange-user-json = %{version}
-Obsoletes:     open-xchange-user-json <= %{version}
+Obsoletes:     open-xchange-user-json < %{version}
 Provides:      open-xchange-xml = %{version}
-Obsoletes:     open-xchange-xml <= %{version}
+Obsoletes:     open-xchange-xml < %{version}
 Provides:      open-xchange-passwordchange-servlet = %{version}
-Obsoletes:     open-xchange-passwordchange-servlet <= %{version}
+Obsoletes:     open-xchange-passwordchange-servlet < %{version}
 Provides:      open-xchange-file-storage-webdav = %{version}
-Obsoletes:     open-xchange-file-storage-webdav <= %{version}
+Obsoletes:     open-xchange-file-storage-webdav < %{version}
 Provides:      open-xchange-cluster-discovery-mdns = %{version}
-Obsoletes:     open-xchange-cluster-discovery-mdns <= %{version}
+Obsoletes:     open-xchange-cluster-discovery-mdns < %{version}
 Provides:      open-xchange-cluster-discovery-static = %{version}
-Obsoletes:     open-xchange-cluster-discovery-static <= %{version}
+Obsoletes:     open-xchange-cluster-discovery-static < %{version}
+Provides:      open-xchange-log4j = %{version}
+Obsoletes:     open-xchange-log4j <= %{version}
 
 %description
 This package installs all essential bundles that are necessary to get a working backend installation. This are the bundles for the main
@@ -179,6 +182,7 @@ find %{buildroot}/opt/open-xchange/etc \
         -type f \
         -printf "%%%config(noreplace) %p\n" > %{configfiles}
 perl -pi -e 's;%{buildroot};;' %{configfiles}
+perl -pi -e 's;^(.*?)\s+(.*/paths.perfMap)$;$2;' %{configfiles}
 perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server|filestorage|management|oauth-provider|secret|sessiond)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
 perl -pi -e 's;(^.*?)\s+(.*/(secrets|tokenlogin-secrets))$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
 
@@ -235,7 +239,7 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
        for prop in $CHECKPROPS; do
            oval=$(ox_read_property $prop ${pfile}.rpmnew)
            if [ -n "$oval" ]; then
-          ox_set_property $prop "$oval" $pfile
+               ox_set_property $prop "$oval" $pfile
            fi
        done
     fi
@@ -546,23 +550,6 @@ EOF
    rm -f $ptmp
 fi
 
-# SoftwareChange_Request-1214
-# SoftwareChange_Request-1429
-# SoftwareChange_Request-1467
-pfile=/opt/open-xchange/etc/file-logging.properties
-for opt in org.apache.cxf.level com.openexchange.soap.cxf.logger.level org.jaudiotagger.level \
-    com.gargoylesoftware.htmlunit.level; do
-    if ! ox_exists_property $opt $pfile; then
-       ox_set_property $opt WARNING $pfile
-    fi
-done
-
-# SoftwareChange_Request-1184
-pfile=/opt/open-xchange/etc/file-logging.properties
-if ! ox_exists_property com.hazelcast.level $pfile; then
-   ox_set_property com.hazelcast.level SEVERE $pfile
-fi
-
 # SoftwareChange_Request-1212
 pfile=/opt/open-xchange/etc/foldercache.properties
 if ! ox_exists_property com.openexchange.folderstorage.outlook.showPersonalBelowInfoStore $pfile; then
@@ -739,6 +726,7 @@ if ! grep "com.openexchange.import.contacts.limit" >/dev/null $pfile; then
 fi
 
 # SoftwareChange_Request-1564
+VALUE=""
 [ -e /opt/open-xchange/etc/cluster.properties ] && VALUE=$(ox_read_property com.openexchange.cluster.name /opt/open-xchange/etc/cluster.properties)
 TOVALUE=$(ox_read_property com.openexchange.hazelcast.group.name /opt/open-xchange/etc/hazelcast.properties)
 if [ -n "$VALUE" -a -z "$TOVALUE" ]; then
@@ -804,30 +792,10 @@ if ! ox_exists_property com.openexchange.templating.trusted $pfile; then
     ox_set_property com.openexchange.templating.trusted server $pfile
 fi
 
-# SoftwareChange_Request-1620, 1631
-PFILE=/opt/open-xchange/etc/file-logging.properties
-if ! ox_exists_property org.glassfish.grizzly.level $PFILE; then
-    ox_set_property org.glassfish.grizzly.level WARNING $PFILE
-fi
-if ! grep com.openexchange.appsuite.level >/dev/null $PFILE; then
-    echo -e "\n# Log access to UI files\n" >> $PFILE
-    echo "# com.openexchange.appsuite.level=FINE" >> $PFILE
-fi
-if ! ox_exists_property com.openexchange.ajax.requesthandler.DispatcherServlet.level $PFILE; then
-    ox_set_property com.openexchange.ajax.requesthandler.DispatcherServlet.level INFO $PFILE
-fi
-
 # SoftwareChange_Request-1635
 PFILE=/opt/open-xchange/etc/permissions.properties
 if ! ox_exists_property com.openexchange.capability.filestore $PFILE; then
     ox_set_property com.openexchange.capability.filestore true $PFILE
-fi
-
-# SoftwareChange_Request-1636
-PFILE=/opt/open-xchange/etc/file-logging.properties
-VALUE=$(ox_read_property org.jaudiotagger.level $PFILE)
-if [ "$VALUE" == "WARNING" -o -z "$VALUE" ]; then
-    ox_set_property org.jaudiotagger.level SEVERE $PFILE
 fi
 
 # SoftwareChange_Request-1643
@@ -866,6 +834,90 @@ ox_add_property com.openexchange.mail.transport.removeMimeVersionInSubParts fals
 # SoftwareChange_Request-1707
 ox_add_property com.openexchange.servlet.contentSecurityPolicy '""' /opt/open-xchange/etc/server.properties
 
+PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
+if ! grep "com.openexchange.groupware.update.tasks.FolderExtendNameTask" >/dev/null $PFILE; then
+    cat >> $PFILE <<EOF
+
+# v7.4.2 update tasks start here
+
+# Extends the size of the 'fname' column in the 'oxfolder_tree' table, as well as the 'name' column in the 'virtualTree' table.
+!com.openexchange.groupware.update.tasks.FolderExtendNameTask
+EOF
+fi
+
+# SoftwareChange_Request-1747
+ox_add_property com.openexchange.log.suppressedCategories USER_INPUT /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-1760
+ox_add_property com.openexchange.mail.account.blacklist "" /opt/open-xchange/etc/mail.properties
+
+# SoftwareChange_Request-1772
+MODIFIED=$(rpm --verify open-xchange-core | grep file-logging.properties | grep 5 | wc -l)
+if [ -e /opt/open-xchange/etc/file-logging.properties -a $MODIFIED -eq 1 ]; then
+    # Configuration has been modified after installation. Try to migrate.
+    TMPFILE=$(mktemp)
+    /opt/open-xchange/sbin/extractJULModifications -i /opt/open-xchange/etc/file-logging.properties | /opt/open-xchange/sbin/convertJUL2Logback -o $TMPFILE
+    /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/logger -r $TMPFILE -d @name
+    cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
+    /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/root -r $TMPFILE
+    cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
+    rm -f /opt/open-xchange/etc/logback.xml.new $TMPFILE
+fi
+rm -f /opt/open-xchange/etc/file-logging.properties
+if [ -e /opt/open-xchange/etc/log4j.xml ]; then
+    cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/appender[@name=\'ASYNC\']/appender-ref -r -
+<configuration>
+    <appender name="ASYNC">
+        <appender-ref ref="SYSLOG"/>
+    </appender>
+</configuration>
+EOF
+    cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
+    rm -f /opt/open-xchange/etc/logback.xml.new
+    MODIFIED=$(rpm --verify open-xchange-log4j | grep log4j.xml | grep 5 | wc -l)
+    if [ $MODIFIED -eq 1 ]; then
+        # Configuration has been modified after installation. Try to migrate.
+        TMPFILE=$(mktemp)
+        /opt/open-xchange/sbin/extractLog4JModifications -i /opt/open-xchange/etc/log4j.xml | /opt/open-xchange/sbin/convertJUL2Logback -o $TMPFILE
+        /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/logger -r $TMPFILE -d @name
+        cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
+        /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/root -r $TMPFILE
+        cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
+        rm -f /opt/open-xchange/etc/logback.xml.new $TMPFILE
+    fi
+else
+    cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/appender[@name=\'ASYNC\']/appender-ref -r -
+<configuration>
+    <appender name="ASYNC">
+        <appender-ref ref="FILE_COMPAT"/>
+    </appender>
+</configuration>
+EOF
+    cat /opt/open-xchange/etc/logback.xml.new >/opt/open-xchange/etc/logback.xml
+    rm -f /opt/open-xchange/etc/logback.xml.new
+fi
+rm -f /opt/open-xchange/etc/log4j.xml
+
+# SoftwareChange_Request-1773
+ox_add_property com.openexchange.hazelcast.network.symmetricEncryption false /opt/open-xchange/etc/hazelcast.properties
+ox_add_property com.openexchange.hazelcast.network.symmetricEncryption.algorithm PBEWithMD5AndDES /opt/open-xchange/etc/hazelcast.properties
+ox_add_property com.openexchange.hazelcast.network.symmetricEncryption.salt 2mw67LqNDEb3 /opt/open-xchange/etc/hazelcast.properties
+ox_add_property com.openexchange.hazelcast.network.symmetricEncryption.password D2xhL8mPkjsF /opt/open-xchange/etc/hazelcast.properties
+ox_add_property com.openexchange.hazelcast.network.symmetricEncryption.iterationCount 19 /opt/open-xchange/etc/hazelcast.properties
+
+# SoftwareChange_Request-1786
+ox_add_property com.openexchange.threadpool.keepAliveThreshold 1000 /opt/open-xchange/etc/threadpool.properties
+
+# SoftwareChange_Request-1823
+ox_add_property com.openexchange.preview.cache.enabled true /opt/open-xchange/etc/preview.properties
+
+# SoftwareChange_Request-1828
+ox_add_property com.openexchange.capability.alone false /opt/open-xchange/etc/permissions.properties
+
+# SoftwareChange_Request-1832
+ox_set_property readProperty.5 autoReconnect=false /opt/open-xchange/etc/configdb.properties
+ox_set_property writeProperty.5 autoReconnect=false /opt/open-xchange/etc/configdb.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
@@ -889,6 +941,7 @@ exit 0
 %dir /opt/open-xchange/i18n/
 %dir /opt/open-xchange/importCSV/
 %dir /opt/open-xchange/lib/
+/opt/open-xchange/lib/*
 /opt/open-xchange/lib/oxfunctions.sh
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
@@ -904,8 +957,14 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Fri Feb 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth release candidate for 7.4.2
 * Thu Feb 06 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-02-11
+* Thu Feb 06 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 7.4.2
+* Tue Feb 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 7.4.2
 * Thu Jan 30 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-02-03
 * Wed Jan 29 2014 Marcus Klein <marcus.klein@open-xchange.com>
@@ -914,24 +973,54 @@ Build for patch 2014-01-30
 Build for patch 2014-01-31
 * Tue Jan 28 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-01-30
+* Tue Jan 28 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-01-30
+* Mon Jan 27 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-01-30
+* Fri Jan 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-17
+* Thu Jan 23 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 7.4.2
+* Wed Jan 22 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-01-22
 * Mon Jan 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-01-20
 * Thu Jan 16 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-01-16
 * Mon Jan 13 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-01-14
+* Fri Jan 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.4.2
+* Fri Jan 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-17
 * Fri Jan 03 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-01-06
 * Mon Dec 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-12-09
+* Mon Dec 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.4.2
 * Thu Dec 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-12-23
+* Thu Dec 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-23
+* Thu Dec 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-23
+* Wed Dec 18 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.4.2
+* Tue Dec 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-19
 * Tue Dec 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-12-18
+* Tue Dec 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-16
+* Thu Dec 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-12
 * Thu Dec 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-12-12
 * Mon Dec 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-12-09
+* Fri Dec 06 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-11-29
 * Fri Dec 06 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-12-10
 * Tue Dec 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -940,6 +1029,8 @@ Build for patch 2013-11-28
 Fifth candidate for 7.4.1 release
 * Tue Nov 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth candidate for 7.4.1 release
+* Mon Nov 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-11-12
 * Mon Nov 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-11-12
 * Fri Nov 08 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -952,6 +1043,8 @@ Third candidate for 7.4.1 release
 Build for patch 2013-11-12
 * Wed Oct 30 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-10-28
+* Thu Oct 24 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-10-30
 * Thu Oct 24 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-10-30
 * Wed Oct 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -1108,8 +1201,6 @@ First candidate for 7.2.1 release
 Build for patch 2013-04-30
 * Wed Apr 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-09
-* Mon Apr 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
-prepare for 7.4.0
 * Mon Apr 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.2.1
 * Fri Apr 12 2013 Marcus Klein <marcus.klein@open-xchange.com>

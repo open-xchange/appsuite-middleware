@@ -52,7 +52,6 @@ package com.openexchange.groupware.tasks;
 import java.sql.Connection;
 import java.util.Date;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -61,7 +60,6 @@ import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeListener;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -77,7 +75,7 @@ public class TasksDowngrade extends DowngradeListener {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TasksDowngrade.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TasksDowngrade.class);
 
     /**
      * Default constructor.

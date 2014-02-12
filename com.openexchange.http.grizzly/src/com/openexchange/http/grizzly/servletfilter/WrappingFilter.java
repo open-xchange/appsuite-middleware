@@ -53,6 +53,7 @@ import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapp
 import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper.HTTP_SCHEME;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -61,16 +62,14 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper;
 import com.openexchange.http.grizzly.http.servlet.HttpServletResponseWrapper;
 import com.openexchange.http.grizzly.util.IPTools;
 import com.openexchange.java.Strings;
-import com.openexchange.log.ForceLog;
-import com.openexchange.log.Log;
-import com.openexchange.log.LogFactory;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 
 /**
  * {@link WrappingFilter} - Wrap the Request in {@link HttpServletResponseWrapper} and the Response in {@link HttpServletResponseWrapper}
@@ -80,7 +79,7 @@ import com.openexchange.log.Props;
  */
 public class WrappingFilter implements Filter {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(WrappingFilter.class));
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(WrappingFilter.class);
 
     IPTools remoteIPFinder;
 
@@ -146,17 +145,12 @@ public class WrappingFilter implements Filter {
             String protocol = httpServletRequest.getHeader(protocolHeader);
 
             if(!isValidProtocol(protocol)) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Could not detect a valid protocol header value in " + protocol + ", falling back to default");
-                }
+                LOG.debug("Could not detect a valid protocol header value in {}, falling back to default", protocol);
                  protocol = httpServletRequest.getScheme();
             }
 
             if (remoteIP.isEmpty()) {
-                if (LOG.isDebugEnabled()) {
-                    forHeaderValue = forHeaderValue == null ? "" : forHeaderValue;
-                    LOG.debug("Could not detect a valid remote ip in " + forHeader + ": [" + forHeaderValue + "], falling back to default");
-                }
+                LOG.debug("Could not detect a valid remote ip in {}: [{}], falling back to default", forHeader, forHeaderValue == null ? "" : forHeaderValue);
                 remoteIP = httpServletRequest.getRemoteAddr();
             }
 
@@ -167,34 +161,38 @@ public class WrappingFilter implements Filter {
         }
         httpServletResponseWrapper = new HttpServletResponseWrapper(httpServletResponse);
 
-        // Create a Session if needed
-        httpServletRequest.getSession(true);
-
         // Set LogProperties
-        if (LogProperties.isEnabled()) {
-            Props logProperties = LogProperties.getLogProperties();
+        {
 
             // Servlet related properties
-            logProperties.put(LogProperties.Name.GRIZZLY_REQUEST_URI, httpServletRequest.getRequestURI());
-            logProperties.put(LogProperties.Name.GRIZZLY_SERVLET_PATH, httpServletRequest.getServletPath());
-            logProperties.put(LogProperties.Name.GRIZZLY_PATH_INFO, httpServletRequest.getPathInfo());
+            LogProperties.put(LogProperties.Name.GRIZZLY_REQUEST_URI, httpServletRequest.getRequestURI());
+            LogProperties.put(LogProperties.Name.GRIZZLY_SERVLET_PATH, httpServletRequest.getServletPath());
+            LogProperties.put(LogProperties.Name.GRIZZLY_PATH_INFO, httpServletRequest.getPathInfo());
 
             // Remote infos
-            logProperties.put(LogProperties.Name.GRIZZLY_REMOTE_PORT, httpServletRequestWrapper.getRemotePort());
-            logProperties.put(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS, ForceLog.valueOf(httpServletRequestWrapper.getRemoteAddr()));
-            logProperties.put(LogProperties.Name.GRIZZLY_REQUEST_IP, httpServletRequestWrapper.getRemoteAddr());
+            LogProperties.put(LogProperties.Name.GRIZZLY_REMOTE_PORT, Integer.toString(httpServletRequestWrapper.getRemotePort()));
+            LogProperties.put(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS, httpServletRequestWrapper.getRemoteAddr());
+            LogProperties.put(LogProperties.Name.GRIZZLY_REQUEST_IP, httpServletRequestWrapper.getRemoteAddr());
 
             // Names, addresses
-            logProperties.put(LogProperties.Name.GRIZZLY_THREAD_NAME, Thread.currentThread().getName());
-            logProperties.put(LogProperties.Name.GRIZZLY_SERVER_NAME, httpServletRequest.getServerName());
+            final Thread currentThread = Thread.currentThread();
+            LogProperties.put(LogProperties.Name.GRIZZLY_THREAD_NAME, currentThread.getName());
+            LogProperties.put(LogProperties.Name.THREAD_ID, Long.toString(currentThread.getId()));
+            LogProperties.put(LogProperties.Name.GRIZZLY_SERVER_NAME, httpServletRequest.getServerName());
             final String userAgent = httpServletRequest.getHeader("User-Agent");
-            logProperties.put(LogProperties.Name.GRIZZLY_USER_AGENT, null == userAgent ? "<unknown>" : userAgent);
+            LogProperties.put(LogProperties.Name.GRIZZLY_USER_AGENT, null == userAgent ? "<unknown>" : userAgent);
 
             // AJAX action
             final String action = request.getParameter("action");
             if (null != action) {
-                logProperties.put(LogProperties.Name.AJAX_ACTION, action);
+                LogProperties.put(LogProperties.Name.AJAX_ACTION, action);
             }
+
+            String trackingId = request.getParameter("trackingId");
+            if (trackingId == null) {
+                trackingId = UUIDs.getUnformattedString(UUID.randomUUID());
+            }
+            LogProperties.putProperty(LogProperties.Name.REQUEST_TRACKING_ID, trackingId);
         }
 
         chain.doFilter(httpServletRequestWrapper, httpServletResponseWrapper);

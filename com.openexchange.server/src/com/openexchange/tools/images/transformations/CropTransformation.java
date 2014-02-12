@@ -54,8 +54,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 import java.io.IOException;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.impl.ImageInformation;
 
 /**
@@ -65,7 +64,7 @@ import com.openexchange.tools.images.impl.ImageInformation;
  */
 public class CropTransformation implements ImageTransformation {
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CropTransformation.class));
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CropTransformation.class);
 
     private final int x, y, width, height;
 
@@ -78,7 +77,7 @@ public class CropTransformation implements ImageTransformation {
     }
 
     @Override
-    public BufferedImage perform(BufferedImage sourceImage, ImageInformation imageInformation) throws IOException {
+    public BufferedImage perform(BufferedImage sourceImage, TransformationContext transformationContext, ImageInformation imageInformation) throws IOException {
         /*
          * prepare target image
          */
@@ -89,6 +88,7 @@ public class CropTransformation implements ImageTransformation {
              * extract sub-image directly
              */
             targetImage = sourceImage.getSubimage(x, y, width, height);
+            transformationContext.addExpense(ImageTransformations.LOW_EXPENSE);
         } else {
             /*
              * draw partial region to target image
@@ -103,6 +103,7 @@ public class CropTransformation implements ImageTransformation {
             graphics.setBackground(new Color(255, 255, 255, 0));
             graphics.clearRect(0, 0, width, height);
             graphics.drawImage(sourceImage, x, y, null);
+            transformationContext.addExpense(ImageTransformations.HIGH_EXPENSE);
         }
         return targetImage;
     }

@@ -64,7 +64,6 @@ import net.htmlparser.jericho.Renderer;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.Source;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
@@ -85,7 +84,7 @@ public class TikaTextXtractService extends AbstractTextXtractService {
 
     static final Set<String> PARSERS = new HashSet<String>();
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(TikaTextXtractService.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TikaTextXtractService.class);
 
     private static final Object PRESENT = new Object();
 
@@ -122,9 +121,9 @@ public class TikaTextXtractService extends AbstractTextXtractService {
             TikaConfig config = new TikaConfig(configMatch.document());
             tika = new Tika(config);
         } catch (TikaException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -201,7 +200,7 @@ public class TikaTextXtractService extends AbstractTextXtractService {
             if (tempFile == null) {
                 tikaInputStream = inputStream;
             } else {
-                tikaInputStream = new BufferedInputStream(new FileInputStream(tempFile));
+                tikaInputStream = new BufferedInputStream(new FileInputStream(tempFile), 65536);
             }
             return tika.parseToString(tikaInputStream);
         } catch (IOException e) {

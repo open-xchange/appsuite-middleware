@@ -57,7 +57,6 @@ import javax.mail.internet.idn.IDNA;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.Organizer;
-import org.apache.commons.logging.Log;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
@@ -66,7 +65,6 @@ import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 
 /**
  * Test implementation to write the organizer.
@@ -75,7 +73,7 @@ import com.openexchange.log.LogFactory;
  */
 public class CreatedBy<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T, U> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CreatedBy.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CreatedBy.class);
 
     public static UserResolver userResolver = UserResolver.EMPTY;
 

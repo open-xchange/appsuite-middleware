@@ -3,13 +3,12 @@ package com.openexchange.ajax.appointment.recurrence;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.container.Appointment;
 
 public class WeeklyRecurrenceTest extends AbstractRecurrenceTest {
 
-	private static final Log LOG = LogFactory.getLog(WeeklyRecurrenceTest.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WeeklyRecurrenceTest.class);
 
 	public WeeklyRecurrenceTest(final String name) {
 		super(name);

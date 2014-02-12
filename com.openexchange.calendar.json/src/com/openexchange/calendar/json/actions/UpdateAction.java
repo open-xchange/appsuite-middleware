@@ -86,8 +86,8 @@ import com.openexchange.tools.session.ServerSession;
 responseDescription = "Nothing, except the standard response object with empty data, the timestamp of the updated appointment, and maybe errors.")
 public final class UpdateAction extends AppointmentAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UpdateAction.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(UpdateAction.class);
 
     /**
      * Initializes a new {@link UpdateAction}.
@@ -129,8 +129,8 @@ public final class UpdateAction extends AppointmentAction {
             jsonResponseObj.put(DataFields.ID, appointmentObj.getObjectID());
             timestamp = appointmentObj.getLastModified();
         } else {
-            final JSONArray jsonConflictArray = new JSONArray();
-            final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone);
+            final JSONArray jsonConflictArray = new JSONArray(conflicts.length);
+            final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone).setSession(req.getSession());
             for (final Appointment conflict : conflicts) {
                 final JSONObject jsonAppointmentObj = new JSONObject();
                 appointmentWriter.writeAppointment(conflict, jsonAppointmentObj);

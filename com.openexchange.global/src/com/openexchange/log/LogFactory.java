@@ -49,36 +49,27 @@
 
 package com.openexchange.log;
 
-import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.LogConfigurationException;
 
 /**
  * {@link LogFactory} - The <code>org.apache.commons.logging.LogFactory</code> using {@link LogService}.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc annotations
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @deprecated Use slf4j logging
  */
+@Deprecated
 public class LogFactory {
-
-	/**
-	 * The <tt>AtomicReference</tt> holding {@link LogWrapperFactory} instance.
-	 */
-	public static final AtomicReference<LogWrapperFactory> FACTORY = new AtomicReference<LogWrapperFactory>();
 
 	/**
      * Convenience method to return a named logger, without the application having to care about factories.
      *
      * @param clazz The class from which a log name will be derived
      * @throws LogConfigurationException If a suitable <code>Log</code> instance cannot be returned
+     * @deprecated Use slf4j logging
      */
+    @Deprecated
     public static org.apache.commons.logging.Log getLog(final Class<?> clazz) {
-		org.apache.commons.logging.Log log = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(clazz));
-		final String name = clazz.getName();
-		final LogWrapperFactory factory = FACTORY.get();
-        if (factory != null) {
-			log = factory.wrap(name, log);
-		}
-		return new PropertiesAppendingLogWrapper(com.openexchange.exception.Log.valueOf(log));
+        return org.apache.commons.logging.LogFactory.getLog(clazz);
     }
 
     /**
@@ -87,17 +78,11 @@ public class LogFactory {
      * @param name The logical name of the <code>Log</code> instance to be returned (the meaning of this name is only known to the
      *            underlying logging implementation that is being wrapped)
      * @throws LogConfigurationException If a suitable <code>Log</code> instance cannot be returned
+     * @deprecated Use slf4j logging
      */
+    @Deprecated
     public static org.apache.commons.logging.Log getLog(final String name) {
-		org.apache.commons.logging.Log log = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(name));
-		final LogWrapperFactory factory = FACTORY.get();
-        if (factory != null) {
-			log = factory.wrap(name, log);
-		}
-		return new PropertiesAppendingLogWrapper(com.openexchange.exception.Log.valueOf(log));
+        return org.apache.commons.logging.LogFactory.getLog(name);
     }
-
-
-
 
 }

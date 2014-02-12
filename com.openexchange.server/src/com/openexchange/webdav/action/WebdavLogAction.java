@@ -55,116 +55,130 @@ import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class WebdavLogAction extends AbstractAction {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavLogAction.class);
+
     private static final Set<String> CONFIDENTIAL_HEADERS = new HashSet<String>() {{
         add("AUTHORIZATION");
     }};
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebdavLogAction.class));
+    // --------------------------------------------------------------------- //
+
 	private boolean logBody;
 	private boolean logResponse;
 
-	@Override
-    public void perform(WebdavRequest req, WebdavResponse res)
-			throws WebdavProtocolException {
-		StringBuilder b = new StringBuilder();
-		try {
-			b.append("URL: "); b.append(req.getUrl()); b.append('\n');
-			for(final String header : req.getHeaderNames()) {
-			    if(CONFIDENTIAL_HEADERS.contains(header.toUpperCase())) {
-			        b.append(header); b.append(": "); b.append("xxxxxxxxxxx"); b.append('\n');
-			    } else {
-			        b.append(header); b.append(": "); b.append(req.getHeader(header)); b.append('\n');
-			    }
-			}
-			final WebdavResource resource = req.getResource();
-			b.append("Resource: "); b.append(resource); b.append('\n');
-			b.append("exists: "); b.append(resource.exists()); b.append('\n');
-			b.append("isCollection: "); b.append(resource.isCollection()); b.append('\n');
+    /**
+     * Initializes a new {@link WebdavLogAction}.
+     */
+    public WebdavLogAction() {
+        super();
+    }
 
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(b.toString());
-			}
+    @Override
+    public void perform(final WebdavRequest req, final WebdavResponse resp) throws WebdavProtocolException {
+        if (!LOG.isDebugEnabled()) {
+            yield(req, resp);
+            return;
+        }
 
-			if(LOG.isTraceEnabled()) {
-				if(logBody) {
-					req = new ReplayWebdavRequest(req);
-					printRequestBody(req);
-				}
-				if(logResponse) {
-					res = new CapturingWebdavResponse(res);
-				}
-			}
+        WebdavRequest webdavReq = req;
+        WebdavResponse webdavResp = resp;
 
-			yield(req,res);
-			b = new StringBuilder();
-			b.append("DONE URL: "); b.append(req.getUrl()); b.append(' '); b.append(res.getStatus()); b.append('\n');
+        final String lineSeparator = System.getProperty("line.separator");
+        StringAllocator b = new StringAllocator(8192);
+        try {
+            b.append("URL: ").append(webdavReq.getUrl()).append(lineSeparator);
+            for (final String header : webdavReq.getHeaderNames()) {
+                if (CONFIDENTIAL_HEADERS.contains(header.toUpperCase())) {
+                    b.append(header).append(": ").append("xxxxxxxxxxx").append(lineSeparator);
+                } else {
+                    b.append(header).append(": ").append(webdavReq.getHeader(header)).append(lineSeparator);
+                }
+            }
+            final WebdavResource resource = webdavReq.getResource();
+            b.append("Resource: ").append(resource).append(lineSeparator);
+            b.append("exists: ").append(resource.exists()).append(lineSeparator);
+            b.append("isCollection: ").append(resource.isCollection()).append(lineSeparator);
 
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(b.toString());
-			}
+            LOG.debug(b.toString());
+            b = null;
 
-			if(LOG.isTraceEnabled() && logResponse) {
-				LOG.trace(((CapturingWebdavResponse)res).getBodyAsString());
-			}
+            CapturingWebdavResponse capturingRes = null;
+            if (LOG.isTraceEnabled()) {
+                if (logBody) {
+                    webdavReq = new ReplayWebdavRequest(webdavReq);
+                    logRequestBody(webdavReq, lineSeparator);
+                }
+                if (logResponse) {
+                    capturingRes = new CapturingWebdavResponse(webdavResp);
+                    webdavResp = capturingRes;
+                }
+            }
 
-		} catch (final WebdavProtocolException x) {
-			b = new StringBuilder();
-			b.append("Status: "); b.append(x.getMessage()); b.append(' '); b.append(x.getStatus()); b.append('\n');
-			b.append("WebdavException: ");
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(b.toString(),x);
-			} else if(LOG.isErrorEnabled() && x.getStatus() == HttpServletResponse.SC_INTERNAL_SERVER_ERROR) {
-				LOG.error("The request: "+b.toString()+" caused an internal server error: "+x.getMessage(),x);
-			}
-			throw x;
-		} catch (final RuntimeException x) {
-			if (LOG.isErrorEnabled()) {
-				LOG.error("RuntimeException In WebDAV for request: "+b.toString(),x);
-			}
-			throw x;
-		}
-	}
+            yield(webdavReq, webdavResp);
 
-	private void printRequestBody(final WebdavRequest req) {
-		if(logBody) {
-			BufferedReader reader = null;
-			try {
-				reader = new BufferedReader(new InputStreamReader(req.getBody(), com.openexchange.java.Charsets.UTF_8));
-				String line = null;
-				final StringBuilder b = new StringBuilder();
-				while((line = reader.readLine()) != null) {
-					b.append(line);
-					b.append('\n');
-				}
-				if (LOG.isTraceEnabled()) {
-					LOG.trace(b);
-				}
-			} catch (final IOException x) {
-				LOG.debug("",x);
-			} finally {
-			    Streams.close(reader);
-			}
-		}
-	}
+            LOG.debug("DONE URL: {} {}{}", webdavReq.getUrl(), webdavResp.getStatus(), lineSeparator);
 
+            if (null != capturingRes) {
+                LOG.trace(capturingRes.getBodyAsString());
+            }
+
+        } catch (final WebdavProtocolException x) {
+            b = new StringAllocator(2048);
+            b.append("Status: ").append(x.getMessage()).append(' ').append(x.getStatus()).append(lineSeparator);
+            b.append("WebdavException: ");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(b.toString(), x);
+            } else if (x.getStatus() == HttpServletResponse.SC_INTERNAL_SERVER_ERROR) {
+                LOG.error("The request: {} caused an internal server error", b, x);
+            }
+            throw x;
+        } catch (final RuntimeException x) {
+            LOG.error("RuntimeException In WebDAV for request: {}", b, x);
+            throw x;
+        }
+    }
+
+    private static void logRequestBody(final WebdavRequest req, final String lineSeparator) {
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(req.getBody(), com.openexchange.java.Charsets.UTF_8));
+            String line = null;
+            final StringAllocator b = new StringAllocator(65536);
+            while ((line = reader.readLine()) != null) {
+                b.append(line);
+                b.append(lineSeparator);
+            }
+            LOG.trace(b.toString());
+        } catch (final IOException x) {
+            LOG.debug("", x);
+        } finally {
+            Streams.close(reader);
+        }
+    }
+
+	/**
+	 * Sets whether to log request body
+	 *
+	 * @param b <code>true</code> to log request body; else <code>false</code>
+	 */
 	public void setLogRequestBody(final boolean b) {
 		logBody = b;
 	}
 
+	/**
+     * Sets whether to log response body
+     *
+     * @param b <code>true</code> to log response body; else <code>false</code>
+     */
 	public void setLogResponseBody(final boolean b) {
 		logResponse = b;
-	}
-
-	public boolean isEnabled() {
-		return LOG.isErrorEnabled();
 	}
 
 }

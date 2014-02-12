@@ -51,8 +51,6 @@ package com.openexchange.subscribe.crawler;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.FrameWindow;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -70,7 +68,7 @@ public class StringByFrameNumberAndRegexStep extends AbstractStep<String, HtmlPa
 
     private String regex;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(StringByFrameNumberAndRegexStep.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StringByFrameNumberAndRegexStep.class);
 
     public StringByFrameNumberAndRegexStep() {
 
@@ -84,32 +82,32 @@ public class StringByFrameNumberAndRegexStep extends AbstractStep<String, HtmlPa
     public void execute(final WebClient webClient) throws OXException {
         int index = 1;
         if (debuggingEnabled){
-            LOG.info("Number of Frames : " + input.getFrames().size());
+            LOG.info("Number of Frames : {}", input.getFrames().size());
         }
 
         for (FrameWindow frame : input.getFrames()) {
             if (debuggingEnabled){
-                LOG.info("Frame name : " + frame.getName() + ", number : " + index);
+                LOG.info("Frame name : {}, number : {}", frame.getName(), index);
                 HtmlPage page = (HtmlPage) frame.getEnclosedPage();
-                LOG.info("Frame content : " + page.getWebResponse().getContentAsString());
+                LOG.info("Frame content : {}", page.getWebResponse().getContentAsString());
             }
 
             if (index == frameNumber) {
                 HtmlPage page = (HtmlPage) frame.getEnclosedPage();
                 String pageString = page.getWebResponse().getContentAsString();
-                LOG.debug("Frame selected : " + frame.getName() + "\n" + pageString);
+                LOG.debug("Frame selected : {}\n{}", frame.getName(), pageString);
                 if (debuggingEnabled){
-                    LOG.info("Frame selected : " + frame.getName() + "\n" + pageString);
+                    LOG.info("Frame selected : {}\n{}", frame.getName(), pageString);
                     openPageInBrowser(page);
                 }
                 Pattern pattern = Pattern.compile(regex);
                 Matcher matcher = pattern.matcher(pageString);
                 if (matcher.find()) {
                     output = matcher.group(1);
-                    LOG.debug("String found is  : " + output);
+                    LOG.debug("String found is  : {}", output);
                     executedSuccessfully = true;
                 } else {
-                    LOG.info("This pattern was not found on the page : " + regex + "\n Page: " + pageString);
+                    LOG.info("This pattern was not found on the page : {}\n Page: {}", regex, pageString);
                 }
             }
             index++;

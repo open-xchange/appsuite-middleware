@@ -54,7 +54,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
@@ -65,7 +64,6 @@ import com.openexchange.groupware.infostore.database.InfostoreFilenameReservatio
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link SelectForUpdateReservation}
@@ -80,7 +78,7 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
 
     private static final String RESERVE_NAME_SQL = "INSERT INTO infostoreReservedPaths (uuid, cid, folder, name) VALUES (?, ?, ?, ?)";
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SelectForUpdateReservation.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SelectForUpdateReservation.class);
 
     private final String fileName;
 
@@ -113,7 +111,7 @@ public class SelectForUpdateReservation implements InfostoreFilenameReservation 
             openConnection();
             removeReservation();
         } catch (final Exception x) {
-            LOG.error(x.getMessage(), x);
+            LOG.error("", x);
         } finally {
             releaseConnection();
         }

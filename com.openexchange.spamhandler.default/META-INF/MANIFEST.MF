@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: DefaultSpamHandler
 Bundle-SymbolicName: com.openexchange.spamhandler.default
-Bundle-Version: 7.4.1
+Bundle-Version: 7.4.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
@@ -17,5 +17,6 @@ Import-Package: com.openexchange.config,
  com.openexchange.session,
  com.openexchange.spamhandler,
  org.apache.commons.logging,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j
 Bundle-Activator: com.openexchange.spamhandler.defaultspamhandler.osgi.DefaultSpamHandlerActivator

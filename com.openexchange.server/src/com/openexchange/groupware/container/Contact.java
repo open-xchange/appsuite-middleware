@@ -572,15 +572,15 @@ public class Contact extends CommonObject {
 
     protected int defaultaddress;
 
-    protected byte[] image1;
+    protected volatile byte[] image1;
 
     protected Date image_last_modified;
 
-    protected int number_of_images;
+    protected volatile int number_of_images;
 
     protected String file_as;
 
-    protected String imageContentType;
+    protected volatile String imageContentType;
 
     protected boolean mark_as_distributionlist;
 
@@ -738,9 +738,9 @@ public class Contact extends CommonObject {
 
     protected boolean b_company;
 
-    protected boolean b_image1;
+    protected volatile boolean b_image1;
 
-    protected boolean b_containsImage;
+    protected volatile boolean b_containsImage;
 
     protected boolean b_userfield01;
 
@@ -802,7 +802,7 @@ public class Contact extends CommonObject {
 
     protected boolean b_file_as;
 
-    protected boolean bImageContentType;
+    protected volatile boolean bImageContentType;
 
     protected boolean b_mark_as_distributionlist;
 
@@ -835,6 +835,7 @@ public class Contact extends CommonObject {
      */
     public Contact() {
         reset();
+        topic = "ox/common/contact";
         warnings = new LinkedList<OXException>();
     }
 
@@ -1762,7 +1763,7 @@ public class Contact extends CommonObject {
         this.image1 = image1;
         b_containsImage = true;
         b_image1 = true;
-        number_of_images++;
+        number_of_images = number_of_images + 1;
     }
 
     public void setImageContentType(final String imageContentType) {

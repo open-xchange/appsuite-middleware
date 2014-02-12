@@ -54,7 +54,6 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
@@ -501,8 +500,8 @@ public class ContentType extends ParameterizedHeader {
                     throw e;
                 }
                 // Content-Type could not be parsed the simple way
-                final Log logger = com.openexchange.log.Log.loggerFor(ContentType.class);
-                logger.debug(e.getMessage(), e);
+                final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ContentType.class);
+                logger.debug("", e);
             }
         }
         // Try with regex-based parsing

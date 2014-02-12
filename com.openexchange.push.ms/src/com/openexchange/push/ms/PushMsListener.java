@@ -54,7 +54,6 @@ import java.net.UnknownHostException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.event.EventFactoryService;
@@ -71,7 +70,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public class PushMsListener implements MessageListener<Map<String, Object>> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(PushMsListener.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushMsListener.class);
 
     private volatile String hostName;
 
@@ -86,11 +85,8 @@ public class PushMsListener implements MessageListener<Map<String, Object>> {
     public void onMessage(final Message<Map<String, Object>> message) {
         final PushMsObject pushObj = PushMsObject.valueFor(message.getMessageObject());
         if (null != pushObj) {
-            final boolean debug = LOG.isDebugEnabled();
             if (!getHostname().equals(pushObj.getHostname())) {
-                if (debug) {
-                    LOG.debug(getHostname() + " received PushMsObject: " + pushObj);
-                }
+                LOG.debug("{} received PushMsObject: {}", getHostname(), pushObj);
                 final ServiceLookup registry = Services.getServiceLookup();
                 final EventAdmin eventAdmin = registry.getService(EventAdmin.class);
                 final EventFactoryService eventFactoryService = registry.getService(EventFactoryService.class);
@@ -121,13 +117,11 @@ public class PushMsListener implements MessageListener<Map<String, Object>> {
                         final Dictionary<String, RemoteEvent> ht = new Hashtable<String, RemoteEvent>(1);
                         ht.put(RemoteEvent.EVENT_KEY, remEvent);
                         eventAdmin.postEvent(new Event(topicName, ht));
-                        if (debug) {
-                            LOG.debug("Posted remote event to user " + user + " in context " + pushObj.getContextId() + ": " + remEvent);
-                        }
+                        LOG.debug("Posted remote event to user {} in context {}: {}", user, pushObj.getContextId(), remEvent);
                     }
                 }
-            } else if (debug) {
-                LOG.debug("Recieved PushMsObject's host name is equal to this listener's host name: " + getHostname() + ". Ignore...");
+            } else {
+                LOG.debug("Recieved PushMsObject's host name is equal to this listener's host name: {}. Ignore...", getHostname());
             }
         } else {
             LOG.debug("Received null from topic. Ignore...");
@@ -144,7 +138,7 @@ public class PushMsListener implements MessageListener<Map<String, Object>> {
                     try {
                         tmp = InetAddress.getLocalHost().getHostName();
                     } catch (final UnknownHostException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                     hostName = tmp;
                 }

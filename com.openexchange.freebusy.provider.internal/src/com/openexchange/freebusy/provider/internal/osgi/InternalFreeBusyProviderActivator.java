@@ -49,14 +49,12 @@
 
 package com.openexchange.freebusy.provider.internal.osgi;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.context.ContextService;
 import com.openexchange.freebusy.provider.InternalFreeBusyProvider;
 import com.openexchange.freebusy.provider.internal.InternalFreeBusyProviderImpl;
 import com.openexchange.freebusy.provider.internal.InternalFreeBusyProviderLookup;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.user.UserService;
@@ -68,7 +66,7 @@ import com.openexchange.user.UserService;
  */
 public class InternalFreeBusyProviderActivator extends HousekeepingActivator {
 
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InternalFreeBusyProviderActivator.class));
+    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InternalFreeBusyProviderActivator.class);
 
     /**
      * Initializes a new {@link InternalFreeBusyProviderActivator}.

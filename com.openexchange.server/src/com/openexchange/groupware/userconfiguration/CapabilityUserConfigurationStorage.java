@@ -55,9 +55,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -73,7 +73,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class CapabilityUserConfigurationStorage extends UserConfigurationStorage {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CapabilityUserConfigurationStorage.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CapabilityUserConfigurationStorage.class);
 
     /**
      * Initializes a new {@link CapabilityUserConfigurationStorage}
@@ -169,7 +169,7 @@ public class CapabilityUserConfigurationStorage extends UserConfigurationStorage
         return stringify(capabilityService.getCapabilities(userId, cid));
     }
 
-    private static Set<String> stringify(Set<Capability> capabilities) {
+    private static Set<String> stringify(final CapabilitySet capabilities) {
         Set<String> set = new HashSet<String>(capabilities.size());
         for (Capability capability : capabilities) {
             set.add(toLowerCase(capability.getId()));

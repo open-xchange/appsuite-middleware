@@ -59,14 +59,13 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.mail.notify.MailNotifyPushDeleteListener;
 import com.openexchange.push.mail.notify.MailNotifyPushListenerRegistry;
 import com.openexchange.push.mail.notify.MailNotifyPushMailAccountDeleteListener;
 import com.openexchange.push.mail.notify.MailNotifyPushManagerService;
 import com.openexchange.push.mail.notify.MailNotifyPushUdpSocketListener;
-import com.openexchange.push.mail.notify.services.PushServiceRegistry;
+import com.openexchange.push.mail.notify.Services;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -77,9 +76,7 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public final class PushActivator extends HousekeepingActivator {
 
-    private static final String CRLF = "\r\n";
-
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PushActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushActivator.class);
 
     private static final String PROP_UDP_LISTEN_MULTICAST = "com.openexchange.push.mail.notify.udp_listen_multicast";
 
@@ -93,19 +90,22 @@ public final class PushActivator extends HousekeepingActivator {
 
     private static final String PROP_USE_EMAIL_ADDRESS = "com.openexchange.push.mail.notify.use_full_email_address";
 
-    private boolean multicast;
+    private final class Config {
+        boolean multicast;
+        String udpListenHost;
+        String imapLoginDelimiter;
+        int udpListenPort;
+        boolean useOXLogin;
+        boolean useEmailAddress;
 
-    private String udpListenHost;
+        Config() {
+            super();
+        }
+    }
 
-    private String imapLoginDelimiter;
+    private volatile Future<Object> udpThread;
 
-    private int udpListenPort;
-
-    private boolean useOXLogin;
-
-    private boolean useEmailAddress;
-
-    private Future<Object> udpThread;
+    private volatile MailNotifyPushListenerRegistry registry;
 
     /**
      * Initializes a new {@link PushActivator}.
@@ -120,48 +120,23 @@ public final class PushActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
-        PushServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
-        PushServiceRegistry.getServiceRegistry().removeService(clazz);
-    }
-
-    @Override
     protected void startBundle() throws Exception {
         try {
-            /*
-             * (Re-)Initialize service registry with available services
-             */
-            {
-                final ServiceRegistry registry = PushServiceRegistry.getServiceRegistry();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (int i = 0; i < classes.length; i++) {
-                    final Object service = getService(classes[i]);
-                    if (null != service) {
-                        registry.addService(classes[i], service);
-                    }
-                }
-            }
-            readConfiguration();
+            Services.set(this);
+
+            final Config config = readConfiguration();
             /*
              * Register push manager
              */
-            registerService(PushManagerService.class, new MailNotifyPushManagerService(useOXLogin, useEmailAddress), null);
-            registerService(MailAccountDeleteListener.class, new MailNotifyPushMailAccountDeleteListener(), null);
-            registerService(DeleteListener.class, new MailNotifyPushDeleteListener(), null);
-            startUdpListener();
+            final MailNotifyPushListenerRegistry registry = new MailNotifyPushListenerRegistry(config.useOXLogin, config.useEmailAddress);
+            this.registry = registry;
+            final MailNotifyPushManagerService pushManagerService = new MailNotifyPushManagerService(registry);
+            registerService(PushManagerService.class, pushManagerService, null);
+            registerService(MailAccountDeleteListener.class, new MailNotifyPushMailAccountDeleteListener(registry), null);
+            registerService(DeleteListener.class, new MailNotifyPushDeleteListener(registry), null);
+            startUdpListener(registry, config);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -177,57 +152,62 @@ public final class PushActivator extends HousekeepingActivator {
             /*
              * Shut down
              */
-            MailNotifyPushListenerRegistry.getInstance().clear();
-            /*
-             * Clear service registry
-             */
-            PushServiceRegistry.getServiceRegistry().clearRegistry();
+            final MailNotifyPushListenerRegistry registry = this.registry;
+            if (null != registry) {
+                registry.clear();
+                this.registry = null;
+            }
+
+            Services.set(null);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
 
-    private void readConfiguration() throws OXException {
+    private Config readConfiguration() throws OXException {
+        final String ls = System.getProperty("line.separator");
         final StringBuilder sb = new StringBuilder();
-        sb.append(CRLF);
-        sb.append("Properties for mail push:" + CRLF);
-        sb.append("------------------------" + CRLF);
+        sb.append(ls);
+        sb.append("Properties for mail push:").append(ls);
+        sb.append("------------------------").append(ls);
         /*
          * Read configuration
          */
+        Config config = new Config();
         final ConfigurationService configurationService = getService(ConfigurationService.class);
+
         String tmp = configurationService.getProperty(PROP_UDP_LISTEN_MULTICAST);
-        multicast = false;
+        config.multicast = false;
         if (null != tmp) {
             if (tmp.trim().equals("true")) {
-                sb.append("\t" + PROP_UDP_LISTEN_MULTICAST + ": true" + CRLF);
-                multicast = true;
+                sb.append("\t").append(PROP_UDP_LISTEN_MULTICAST).append(": true").append(ls);
+                config.multicast = true;
             }
         }
 
         tmp = configurationService.getProperty(PROP_UDP_LISTEN_HOST);
         if (null != tmp) {
-            udpListenHost = tmp.trim();
-            sb.append("\t" + PROP_UDP_LISTEN_HOST + ": " + udpListenHost + CRLF);
+            config.udpListenHost = tmp.trim();
+            sb.append("\t").append(PROP_UDP_LISTEN_HOST).append(": ").append(config.udpListenHost).append(ls);
         } else {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(PROP_UDP_LISTEN_HOST);
         }
 
         tmp = configurationService.getProperty(PROP_IMAP_LOGIN_DELIMITER);
         if (null != tmp) {
-            imapLoginDelimiter = tmp.trim();
-            sb.append("\t" + PROP_IMAP_LOGIN_DELIMITER + ": " + imapLoginDelimiter + CRLF);
+            config.imapLoginDelimiter = tmp.trim();
+            sb.append("\t").append(PROP_IMAP_LOGIN_DELIMITER).append(": ").append(config.imapLoginDelimiter).append(ls);
         } else {
-            imapLoginDelimiter = null;
-            sb.append("\t" + PROP_IMAP_LOGIN_DELIMITER + ": not set" + CRLF);
+            config.imapLoginDelimiter = null;
+            sb.append("\t").append(PROP_IMAP_LOGIN_DELIMITER).append(": not set").append(ls);
         }
 
         tmp = configurationService.getProperty(PROP_UDP_LISTEN_PORT);
         if (null != tmp) {
             try {
-                udpListenPort = Integer.parseInt(tmp.trim());
-                sb.append("\t" + PROP_UDP_LISTEN_PORT + ": " + udpListenPort + CRLF);
+                config.udpListenPort = Integer.parseInt(tmp.trim());
+                sb.append("\t").append(PROP_UDP_LISTEN_PORT).append(": ").append(config.udpListenPort).append(ls);
             } catch (final NumberFormatException e) {
                 throw ConfigurationExceptionCodes.PROPERTY_NOT_AN_INTEGER.create(PROP_UDP_LISTEN_PORT);
             }
@@ -236,34 +216,38 @@ public final class PushActivator extends HousekeepingActivator {
         }
 
         tmp = configurationService.getProperty(PROP_USE_OX_LOGIN);
-        useOXLogin = false;
+        config.useOXLogin = false;
         if (null != tmp) {
             if (tmp.trim().equals("true")) {
-                sb.append("\t" + PROP_USE_OX_LOGIN + ": true" + CRLF);
-                useOXLogin = true;
+                sb.append("\t").append(PROP_USE_OX_LOGIN).append(": true").append(ls);
+                config.useOXLogin = true;
             }
         }
 
         tmp = configurationService.getProperty(PROP_USE_EMAIL_ADDRESS);
-        useEmailAddress = false;
+        config.useEmailAddress = false;
         if (null != tmp) {
             if (tmp.trim().equals("true")) {
-                sb.append("\t" + PROP_USE_EMAIL_ADDRESS + ": true" + CRLF);
-                useEmailAddress = true;
+                sb.append("\t").append(PROP_USE_EMAIL_ADDRESS).append(": true").append(ls);
+                config.useEmailAddress = true;
             }
         }
 
-        LOG.info(sb);
+        LOG.info(sb.toString());
+
+        return config;
     }
 
-    private void startUdpListener() throws OXException, IOException {
+    private void startUdpListener(final MailNotifyPushListenerRegistry registry, final Config config) throws OXException, IOException {
         final ThreadPoolService threadPoolService = ThreadPools.getThreadPool();
-        udpThread = threadPoolService.submit(ThreadPools.task(new MailNotifyPushUdpSocketListener(udpListenHost, udpListenPort, imapLoginDelimiter, multicast)));
+        udpThread = threadPoolService.submit(ThreadPools.task(new MailNotifyPushUdpSocketListener(registry, config.udpListenHost, config.udpListenPort, config.imapLoginDelimiter, config.multicast)));
     }
 
     private void stopUdpListener() {
+        final Future<Object> udpThread = this.udpThread;
         if (null != udpThread) {
             udpThread.cancel(true);
+            this.udpThread = null;
         }
     }
 

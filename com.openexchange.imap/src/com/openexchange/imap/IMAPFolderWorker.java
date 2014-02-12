@@ -94,7 +94,7 @@ import com.sun.mail.imap.Rights.Right;
  */
 public abstract class IMAPFolderWorker extends MailMessageStorageLong {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPFolderWorker.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPFolderWorker.class);
 
     protected static final String STR_INBOX = "INBOX";
 
@@ -223,7 +223,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         try {
             closeIMAPFolder();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
 
     }
@@ -244,7 +244,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         try {
             closeIMAPFolder();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -393,9 +393,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                     /*
                      * Folder not open
                      */
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("IMAP folder's mode could not be checked, because folder is closed. Going to open folder.", e);
-                    }
+                    LOG.debug("IMAP folder's mode could not be checked, because folder is closed. Going to open folder.", e);
                 }
                 /*
                  * Folder is closed here
@@ -541,9 +539,9 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                 uidTable.clear();
             }
         } catch (final IllegalArgumentException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final IllegalAccessException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

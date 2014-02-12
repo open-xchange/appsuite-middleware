@@ -80,8 +80,6 @@ import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -109,10 +107,8 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "flags", optional = true, description = "In case the mail should be stored with status \"read\" (e.g. mail has been read already in the client inbox), the parameter \"flags\" has to be included. If no \"folder\" parameter is specified, this parameter must not be included. For infos about mail flags see Detailed mail data spec.") }, requestBody = "The MIME Data Block.", responseDescription = "Object ID of the newly created/moved mail.")
 public final class ImportAction extends AbstractMailAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ImportAction.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(ImportAction.class);
 
     /**
      * Initializes a new {@link ImportAction}.
@@ -305,7 +301,6 @@ public final class ImportAction extends AbstractMailAction {
         private final boolean force;
         private final int flags;
         private final BlockingQueue<MimeMessage> queue;
-        private final Props logProperties;
 
         protected AppenderTask(final MailServletInterface mailInterface, final String folder, final boolean force, final int flags, final BlockingQueue<MimeMessage> queue) {
             super();
@@ -315,8 +310,6 @@ public final class ImportAction extends AbstractMailAction {
             this.force = force;
             this.flags = flags;
             this.queue = queue;
-            final Props props = LogProperties.optLogProperties();
-            logProperties = null == props ? null : props;
         }
 
         protected void stop() throws OXException {
@@ -333,11 +326,6 @@ public final class ImportAction extends AbstractMailAction {
                 Thread.currentThread().interrupt();
                 throw MailExceptionCode.INTERRUPT_ERROR.create(e);
             }
-        }
-
-        @Override
-        public Props optLogProperties() {
-            return logProperties;
         }
 
         @Override

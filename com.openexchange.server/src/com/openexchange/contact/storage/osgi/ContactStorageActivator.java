@@ -49,8 +49,6 @@
 
 package com.openexchange.contact.storage.osgi;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.contact.storage.internal.DefaultContactStorageRegistry;
 import com.openexchange.contact.storage.registry.ContactStorageRegistry;
@@ -63,7 +61,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class ContactStorageActivator extends HousekeepingActivator {
 
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactStorageActivator.class));
+    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactStorageActivator.class);
 
     /**
      * Initializes a new {@link ContactStorageActivator}.

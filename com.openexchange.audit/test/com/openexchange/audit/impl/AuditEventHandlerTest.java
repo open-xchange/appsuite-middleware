@@ -56,10 +56,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.osgi.service.event.Event;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.slf4j.Logger;
 import com.openexchange.audit.configuration.AuditConfiguration;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.file.storage.FileStorageEventConstants;
@@ -109,27 +111,29 @@ public class AuditEventHandlerTest {
     /**
      * Mock for the logger
      */
-    private org.apache.commons.logging.Log log;
+    private org.slf4j.Logger log;
 
     /**
      * StringBuilder
      */
     private StringBuilder stringBuilder;
 
-    private int userId = 9999;
+    private final int userId = 9999;
 
-    private int contextId = 111111;
+    private final int contextId = 111111;
 
-    private int objectId = 555555555;
+    private final int objectId = 555555555;
 
-    private String objectTitle = "theObjectTitle";
+    private final String objectTitle = "theObjectTitle";
 
-    private Date date = new Date(2011, 12, 12);
+    private final Date date = new Date(2011, 12, 12);
 
     private Contact contact;
 
     @Before
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
         PowerMockito.mockStatic(AuditConfiguration.class);
         PowerMockito.mockStatic(UserStorage.class);
         PowerMockito.mockStatic(ContextStorage.class);
@@ -147,7 +151,7 @@ public class AuditEventHandlerTest {
         this.event = PowerMockito.mock(Event.class);
         this.commonEvent = PowerMockito.mock(CommonEvent.class);
         this.context = PowerMockito.mock(Context.class);
-        this.log = PowerMockito.mock(org.apache.commons.logging.Log.class);
+        this.log = PowerMockito.mock(org.slf4j.Logger.class);
 
         this.stringBuilder = new StringBuilder();
     }

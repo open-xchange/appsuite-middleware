@@ -62,7 +62,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
+import org.osgi.framework.BundleContext;
+import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -83,6 +84,8 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -91,7 +94,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
-import com.openexchange.log.LogFactory;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.BitAND;
 import com.openexchange.sql.grammar.BitOR;
@@ -107,7 +109,7 @@ import com.openexchange.sql.grammar.UPDATE;
  */
 public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefaultValues {
 
-    private final static Log log = LogFactory.getLog(OXToolMySQLStorage.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXToolMySQLStorage.class);
 
     private static final String FALLBACK_LANGUAGE_CREATE = "en";
 
@@ -1564,7 +1566,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             if (doUpdate) {
                 if (ctx == null) {
                     final StorageException e = new StorageException("context must not be null when schema update should be done");
-                    log.error(e.getMessage(), e);
+                    log.error("", e);
                     throw e;
                 }
                 updater.startUpdate(ctx.getId().intValue());
@@ -1691,7 +1693,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         try {
             con = cache.getConnectionForConfigDB();
         } catch (final PoolException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         }
         PreparedStatement stmt = null;
@@ -2363,6 +2365,10 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
     }
 
+    private static final String SYMBOLIC_NAME_CACHE = "com.openexchange.caching";
+
+    private static final String NAME_OXCACHE = "oxcache";
+
     private void changeAccessCombination(int cid, int filter, int addAccess, int removeAccess) throws StorageException {
         Connection con = null;
         Table table = new Table("user_configuration");
@@ -2381,6 +2387,24 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 values.add(filter);
             }
             new StatementBuilder().executeStatement(con, update, values);
+
+            // JCS
+            final BundleContext context = AdminCache.getBundleContext();
+            if (null != context) {
+                final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
+                    CacheService.class);
+                if (null != cacheService) {
+                    try {
+                        final Cache cache = cacheService.getCache("Capabilities");
+                        cache.invalidateGroup(Integer.toString(cid));
+                    } catch (final OXException e) {
+                        log.error("", e);
+                    } finally {
+                        AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+                    }
+                }
+            }
+            // End of JCS
         } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);

@@ -49,8 +49,6 @@
 
 package com.openexchange.mobile.configuration.generator.configuration;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.ServiceRegistry;
 
@@ -63,7 +61,7 @@ import com.openexchange.osgi.ServiceRegistry;
  */
 public class MobileConfigProperties {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MobileConfigProperties.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobileConfigProperties.class);
 
     /**
      * Fetches the property (convenience method)

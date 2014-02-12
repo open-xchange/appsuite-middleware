@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Autocontextid
 Bundle-SymbolicName: com.openexchange.admin.autocontextid
-Bundle-Version: 7.4.1
+Bundle-Version: 7.4.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-Activator: com.openexchange.admin.autocontextid.osgi.Activator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -25,5 +25,6 @@ Import-Package: com.openexchange.admin.daemons,
  com.openexchange.tools.pipesnfilters,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Bundle-ClassPath: .

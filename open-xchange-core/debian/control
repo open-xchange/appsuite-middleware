@@ -2,7 +2,7 @@ Source: open-xchange-core
 Section: web
 Priority: optional
 Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-osgi (>= @OXVERSION@), open-xchange-log4j (>= @OXVERSION@), open-xchange-xerces-sun
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-osgi (>= @OXVERSION@), open-xchange-xerces-sun
 Standards-Version: 3.8.4
 Homepage: http://www.open-xchange.com
 
@@ -26,3 +26,20 @@ Description: The essential core of an Open-Xchange backend
  * auto configuration for external email accounts
  * encrypted storing of passwords for integrated social accounts
  * and a lot more
+
+Package: open-xchange-log4j
+Priority: extra
+Architecture: all
+Depends: ${misc:Depends}
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Section: oldlibs
+Description: Log4J logging transitional package
+ Open-Xchange used either Java Util logging or Log4J logging framework. Logging
+ through Java Util logging was the default while the package open-xchange-log4j
+ installed logging through Log4J framework. Starting with the 7.4.2 release
+ both frameworks are replaced with the SLF4J logging API and its best
+ implementation Logback.
+ This transitional package tries to migrate the Log4J configuration to an
+ according configuration for Logback during upgrade process. This applies only
+ to additionally configured logger levels. After upgrade this package can be
+ safely removed.

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Realtime Stanza Handling
 Bundle-SymbolicName: com.openexchange.realtime.handle
-Bundle-Version: 7.4.1
+Bundle-Version: 7.4.2
 Bundle-Activator: com.openexchange.realtime.handle.osgi.StanzaHandlerActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -22,5 +22,6 @@ Import-Package: com.openexchange.exception,
  com.openexchange.threadpool,
  com.openexchange.threadpool.behavior,
  org.apache.commons.logging,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j
 Export-Package: com.openexchange.realtime.handle

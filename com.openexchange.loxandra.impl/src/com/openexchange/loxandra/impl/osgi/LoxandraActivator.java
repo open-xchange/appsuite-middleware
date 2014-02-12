@@ -50,7 +50,6 @@ package com.openexchange.loxandra.impl.osgi;
 
 import java.io.File;
 
-import org.apache.commons.logging.Log;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.loxandra.EAVContactFactoryService;
@@ -65,7 +64,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class LoxandraActivator extends HousekeepingActivator {
 
-	private static Log log = com.openexchange.log.Log.loggerFor(LoxandraActivator.class);
+	private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(LoxandraActivator.class);
 
 	/**
 	 * Default Constructor

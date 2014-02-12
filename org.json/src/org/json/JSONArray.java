@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -244,6 +245,57 @@ public class JSONArray extends AbstractJSONValue {
                 }
             }
         }
+    }
+
+    @Override
+    public boolean isEqualTo(final JSONValue jsonValue) {
+        if (jsonValue == this) {
+            return true;
+        }
+        if ((null == jsonValue) || !jsonValue.isArray()) {
+            return false;
+        }
+        final List<Object> l = jsonValue.toArray().myArrayList;
+        final ListIterator<Object> e1 = myArrayList.listIterator();
+        final ListIterator<Object> e2 = l.listIterator();
+        while (e1.hasNext() && e2.hasNext()) {
+            final Object o1 = e1.next();
+            final Object o2 = e2.next();
+            if (o1 instanceof JSONValue) {
+                if (o2 instanceof JSONValue) {
+                    if (!((JSONValue) o1).isEqualTo((JSONValue) o2)) {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            } else if (!(isNull(o1) ? isNull(o2) : o1.equals(o2))) {
+                return false;
+            }
+        }
+        return !(e1.hasNext() || e2.hasNext());
+    }
+
+    /**
+     * Gets the {@link List list} view for this JSON array.
+     *
+     * @return The list
+     */
+    public List<Object> asList() {
+        final List<Object> retval = new ArrayList<Object>(myArrayList.size());
+        for (final Object value : myArrayList) {
+            if (value instanceof JSONValue) {
+                final JSONValue jsonValue = (JSONValue) value;
+                if (jsonValue.isArray()) {
+                    retval.add(jsonValue.toArray().asList());
+                } else {
+                    retval.add(jsonValue.toObject().asMap());
+                }
+            } else {
+                retval.add(value);
+            }
+        }
+        return retval;
     }
 
     /**

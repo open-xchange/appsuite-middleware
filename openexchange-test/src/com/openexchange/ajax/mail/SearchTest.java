@@ -51,7 +51,6 @@ package com.openexchange.ajax.mail;
 
 import java.util.Date;
 import javax.mail.internet.MailDateFormat;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -70,7 +69,7 @@ import com.openexchange.mail.MailSortField;
  */
 public final class SearchTest extends AbstractMailTest {
 
-    private static final Log LOG = LogFactory.getLog(SearchTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SearchTest.class);
 
     String mailObject_25kb;
 

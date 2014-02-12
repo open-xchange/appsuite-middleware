@@ -232,7 +232,7 @@ final class SessionContainer {
                 }
                 final SessionImpl ole = sessionControl.getSession();
                 if (!ole.consideredEqual(session)) {
-                    ole.logDiff(session, com.openexchange.log.Log.loggerFor(SessionContainer.class));
+                    ole.logDiff(session, org.slf4j.LoggerFactory.getLogger(SessionContainer.class));
                     throw SessionExceptionCodes.SESSIONID_COLLISION.create(ole.getLogin(), session.getLogin());
                 }
             }

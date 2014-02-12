@@ -91,7 +91,7 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
  */
 public final class MultipleMailPartHandler implements MailMessageHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MultipleMailPartHandler.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MultipleMailPartHandler.class);
 
     private static final class TextMailPart extends MailPart {
 
@@ -396,7 +396,7 @@ public final class MultipleMailPartHandler implements MailMessageHandler {
                 throw MimeMailException.handleMessagingException(e);
             }
         } else {
-            LOG.error("Ignoring nested message. Cannot handle part's content which should be a RFC822 message according to its content type: " + (null == content ? "null" : content.getClass().getSimpleName()));
+            LOG.error("Ignoring nested message. Cannot handle part's content which should be a RFC822 message according to its content type: {}", (null == content ? "null" : content.getClass().getSimpleName()));
             return true;
         }
         final MultipleMailPartHandler nestedHandler = new MultipleMailPartHandler(ids, errorOnAbsence);

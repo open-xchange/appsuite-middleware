@@ -85,10 +85,8 @@ public final class ConfigFileStorageActivator extends HousekeepingActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ConfigFileStorageActivator.class));
-        if (logger.isWarnEnabled()) {
-            logger.warn("Absent service: " + clazz.getName());
-        }
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ConfigFileStorageActivator.class);
+        logger.warn("Absent service: {}", clazz.getName());
         if (ConfigurationService.class.equals(clazz)) {
             dropFileStorageProperties();
         }
@@ -96,10 +94,8 @@ public final class ConfigFileStorageActivator extends HousekeepingActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ConfigFileStorageActivator.class));
-        if (logger.isInfoEnabled()) {
-            logger.info("Re-available service: " + clazz.getName());
-        }
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ConfigFileStorageActivator.class);
+        logger.info("Re-available service: {}", clazz.getName());
         if (ConfigurationService.class.equals(clazz)) {
             parseFileStorageProperties(getService(ConfigurationService.class));
         }
@@ -107,11 +103,9 @@ public final class ConfigFileStorageActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ConfigFileStorageActivator.class));
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigFileStorageActivator.class);
         try {
-            if (log.isInfoEnabled()) {
-                log.info("starting bundle: com.openexchange.file.storage.config");
-            }
+            log.info("starting bundle: com.openexchange.file.storage.config");
             Services.setServices(this);
             /*
              * Parse file storage configuration
@@ -164,11 +158,9 @@ public final class ConfigFileStorageActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ConfigFileStorageActivator.class));
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConfigFileStorageActivator.class);
         try {
-            if (log.isInfoEnabled()) {
-                log.info("stopping bundle: com.openexchange.file.storage.config");
-            }
+            log.info("stopping bundle: com.openexchange.file.storage.config");
             Services.setServices(null);
             cleanUp();
             dropFileStorageProperties();

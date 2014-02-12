@@ -59,8 +59,6 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -75,7 +73,7 @@ import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
  */
 public class LoginInfoLoader implements Filter<Context, Context> {
 
-    private static final Log LOG = LogFactory.getLog(LoginInfoLoader.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LoginInfoLoader.class);
 
     private final AdminCache cache;
 
@@ -133,7 +131,7 @@ public class LoginInfoLoader implements Filter<Context, Context> {
             try {
                 cache.pushConnectionForConfigDB(con);
             } catch (final PoolException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

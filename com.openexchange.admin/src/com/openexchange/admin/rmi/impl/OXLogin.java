@@ -50,12 +50,9 @@
 package com.openexchange.admin.rmi.impl;
 
 import java.rmi.RemoteException;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.rmi.OXLoginInterface;
@@ -78,16 +75,14 @@ import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
  */
 public class OXLogin extends OXCommonImpl implements OXLoginInterface {
 
-    private final static Log log = LogFactory.getLog(OXLogin.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXLogin.class);
 
     private BundleContext context = null;
 
     public OXLogin(final BundleContext context) throws RemoteException, StorageException {
         super();
         this.context = context;
-        if (log.isInfoEnabled()) {
-            log.info("Class loaded: " + this.getClass().getName());
-        }
+        log.info("Class loaded: {}", this.getClass().getName());
     }
 
     @Override
@@ -132,9 +127,7 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
                         final Object property = servicereference.getProperty("name");
                         if (null != property && property.toString().equalsIgnoreCase("oxuser")) {
                             final OXUserPluginInterface oxuserplugin = (OXUserPluginInterface) this.context.getService(servicereference);
-                            if (log.isDebugEnabled()) {
-                                log.debug("Calling getData for plugin: " + bundlename);
-                            }
+                            log.debug("Calling getData for plugin: {}", bundlename);
                             retusers = oxuserplugin.getData(ctx, retusers, auth);
                         }
                     }

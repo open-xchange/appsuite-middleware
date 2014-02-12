@@ -68,10 +68,10 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageEfficientRetrieval;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.FileStorageEfficientRetrieval;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
@@ -257,7 +257,7 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
 
         if (newFile == null) {
             try {
-                newFile = new BufferedInputStream(new FileInputStream(file));
+                newFile = new BufferedInputStream(new FileInputStream(file), 65536);
             } catch (FileNotFoundException e) {
                 throw OXException.general(e.getMessage());
             }
@@ -294,12 +294,12 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
             throw OXException.general(e.getMessage());
         }
     }
-    
+
     @Override
     public Document getDocumentAndMetadata(String folderId, String fileId, String version) throws OXException {
         java.io.File fsFile = toFile(folderId, fileId);
-        
-        
+
+
         return toDocument(fsFile);
     }
 
@@ -314,7 +314,7 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
                     throw OXException.general("File not found: " + fsFile);
                 }
             }
-            
+
         }.setSize(fsFile.length()).setMimeType(null).setEtag("fs://" + fsFile.getAbsolutePath() +"/" + fsFile.lastModified());
     }
 

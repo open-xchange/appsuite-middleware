@@ -58,7 +58,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
@@ -74,7 +73,6 @@ import com.openexchange.importexport.formats.vcard.VCardTokenizer;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -97,14 +95,12 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public class VCardImporter extends ContactImporter implements OXExceptionConstants {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(VCardImporter.class));
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-    
-    
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(VCardImporter.class);
+
     public VCardImporter(ServiceLookup services) {
         super(services);
     }
-    
+
     @Override
     public boolean canImport(final ServerSession session, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
         if (!format.equals(Format.VCARD)) {
@@ -203,16 +199,16 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
 
                 if (def == null) {
                     // could not find appropriate parser for this part of the vcard file
-                    LOG.error("Could not recognize format of the following VCard data: " + Arrays.toString(chunk.getContent()));
+                    LOG.error("Could not recognize format of the following VCard data: {}", Arrays.toString(chunk.getContent()));
                     importResult.setDate(new Date(System.currentTimeMillis()));
                     importResult.setException(ImportExportExceptionCodes.UNKNOWN_VCARD_FORMAT.create(chunk.getContent()));
                 } else {
                     final VersitDefinition.Reader versitReader = def.getReader(new UnsynchronizedByteArrayInputStream(chunk.getContent()), "UTF-8");
                     try {
                         final VersitObject versitObject = def.parse(versitReader);
-                        
+
                         if (limit <= 0 || count <= limit) {
-                            
+
                             importResult.setFolder(String.valueOf(contactFolderId));
 
                             final Contact contactObj = oxContainerConverter.convertContact(versitObject);
@@ -223,9 +219,9 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                                 count++;
                             } catch (final OXException oxEx) {
                                 if (CATEGORY_USER_INPUT.equals(oxEx.getCategory())) {
-                                    LOG.debug(oxEx.getMessage(), oxEx);
+                                    LOG.debug("", oxEx);
                                 } else {
-                                    LOG.error(oxEx.getMessage(), oxEx);
+                                    LOG.error("", oxEx);
                                 }
                                 importResult.setException(oxEx);
                                 LOG.debug("cannot import contact object", oxEx);
@@ -236,26 +232,26 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                             throw ImportExportExceptionCodes.LIMIT_EXCEEDED.create(limit);
                         }
                     } catch (final VersitException e) {
-                        LOG.error(generateErrorMessage(e, DEBUG ? new String(chunk.getContent(), Charsets.UTF_8) : null), e);
+                        LOG.error(generateErrorMessage(e, LOG.isDebugEnabled() ? new String(chunk.getContent(), Charsets.UTF_8) : null), e);
                         importResult.setException(ImportExportExceptionCodes.VCARD_PARSING_PROBLEM.create(e, e.getMessage()));
                     } catch (final ConverterException e) {
-                        LOG.error(generateErrorMessage(e, DEBUG ? new String(chunk.getContent(), Charsets.UTF_8) : null), e);
+                        LOG.error(generateErrorMessage(e, LOG.isDebugEnabled() ? new String(chunk.getContent(), Charsets.UTF_8) : null), e);
                         importResult.setException(ImportExportExceptionCodes.VCARD_CONVERSION_PROBLEM.create(e, e.getMessage()));
                     } catch (final RuntimeException e) {
-                        LOG.error(generateErrorMessage(e, DEBUG ? new String(chunk.getContent(), Charsets.UTF_8) : null), e);
+                        LOG.error(generateErrorMessage(e, LOG.isDebugEnabled() ? new String(chunk.getContent(), Charsets.UTF_8) : null), e);
                         importResult.setException(ImportExportExceptionCodes.VCARD_CONVERSION_PROBLEM.create(e, e.getMessage()));
                     }
                 }
                 list.add(importResult);
             }
         } catch (final UnsupportedEncodingException e) {
-            LOG.fatal(e.getMessage(), e);
+            LOG.error("", e);
             throw ImportExportExceptionCodes.UTF8_ENCODE_FAILED.create(e);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw ImportExportExceptionCodes.VCARD_PARSING_PROBLEM.create(e, e.getMessage());
         } catch (final ConverterException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw ImportExportExceptionCodes.VCARD_CONVERSION_PROBLEM.create(e, e.getMessage());
         } finally {
             if (oxContainerConverter != null) {

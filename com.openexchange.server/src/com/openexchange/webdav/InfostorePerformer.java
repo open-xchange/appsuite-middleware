@@ -55,7 +55,6 @@ import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.springframework.beans.factory.BeanFactory;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.database.provider.DBPoolProvider;
@@ -74,7 +73,6 @@ import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.infostore.webdav.TouchInfoitemsWithExpiredLocksListener;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
@@ -119,7 +117,7 @@ import com.openexchange.xml.spring.SpringParser;
  */
 public final class InfostorePerformer implements SessionHolder {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostorePerformer.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostorePerformer.class);
 
     private static final InfostorePerformer INSTANCE = new InfostorePerformer();
 
@@ -288,12 +286,8 @@ public final class InfostorePerformer implements SessionHolder {
         final AbstractAction defaultHeader = new WebdavDefaultHeaderAction();
         final AbstractAction ifMatch = new WebdavIfMatchAction();
 
-        if (logAction.isEnabled()) {
-            lifeCycle.setNext(logAction);
-            logAction.setNext(defaultHeader);
-        } else {
-            lifeCycle.setNext(defaultHeader);
-        }
+        lifeCycle.setNext(logAction);
+        logAction.setNext(defaultHeader);
         defaultHeader.setNext(ifMatch);
 
         AbstractAction a = ifMatch;
@@ -338,9 +332,7 @@ public final class InfostorePerformer implements SessionHolder {
 
             session.set(sess);
             BehaviourLookup.getInstance().setRequest(webdavRequest);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Executing " + action);
-            }
+            LOG.debug("Executing {}", action);
             actions.get(action).perform(webdavRequest, webdavResponse);
         } catch (final WebdavProtocolException x) {
             resp.setStatus(x.getStatus());

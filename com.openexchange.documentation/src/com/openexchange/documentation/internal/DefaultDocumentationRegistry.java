@@ -52,7 +52,6 @@ package com.openexchange.documentation.internal;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.commons.logging.Log;
 import com.openexchange.documentation.DocumentationRegistry;
 import com.openexchange.documentation.descriptions.ContainerDescription;
 import com.openexchange.documentation.descriptions.ModuleDescription;
@@ -68,7 +67,7 @@ import com.openexchange.exception.OXException;
  */
 public class DefaultDocumentationRegistry implements DocumentationRegistry {
 
-	private static final Log LOG = com.openexchange.log.Log.loggerFor(DefaultDocumentationRegistry.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultDocumentationRegistry.class);
 
     private final Map<String, ModuleDescription> modules;
     private final Map<String, ContainerDescription> containers;
@@ -120,7 +119,7 @@ public class DefaultDocumentationRegistry implements DocumentationRegistry {
         if (this.modules.containsKey(module.getName())) {
             throw DocumentationExceptionCode.MODULE_ALREADY_REGISTERED.create(module.getName());
         }
-        LOG.debug("Adding module: " + module.getName());
+        LOG.debug("Adding module: {}", module.getName());
         this.modules.put(module.getName(), module);
         final ContainerDescription[] containers = module.getContainers();
         if (null != containers) {

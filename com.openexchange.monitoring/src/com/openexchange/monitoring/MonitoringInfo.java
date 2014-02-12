@@ -62,7 +62,7 @@ import com.openexchange.counter.Counter;
  */
 public class MonitoringInfo {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MonitoringInfo.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MonitoringInfo.class);
 
     // Constants for connection types
 
@@ -229,7 +229,7 @@ public class MonitoringInfo {
             retval = getCounter(connectionType).getCount();
             break;
         default:
-            LOG.error(new StringBuilder("MonitoringInfo.getNumberOfConnections(): Unknown connection type: ").append(connectionType).toString());
+            LOG.error("MonitoringInfo.getNumberOfConnections(): Unknown connection type: {}", connectionType);
         }
         return retval;
     }
@@ -285,9 +285,7 @@ public class MonitoringInfo {
             // Nothing to do
             break;
         default:
-            if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder("MonitoringInfo.changeNumberOfConnections(): Unknown connection type: ").append(connectionType).toString());
-            }
+            LOG.info("MonitoringInfo.changeNumberOfConnections(): Unknown connection type: {}", connectionType);
         }
     }
 

@@ -50,24 +50,25 @@
 package com.openexchange.config.cascade;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link ConfigCascadeExceptionCodes} - Enumeration of all {@link OXException}s.
  *
  * @author francisco.laguna@open-xchange.com
  */
-public enum ConfigCascadeExceptionCodes implements OXExceptionCode {
+public enum ConfigCascadeExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(ConfigCascadeExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
-    COULD_NOT_COERCE_VALUE(ConfigCascadeExceptionMessages.COULD_NOT_COERCE_VALUE_MSG, Category.CATEGORY_ERROR, 2),
-    CAN_NOT_DEFINE_METADATA(ConfigCascadeExceptionMessages.CAN_NOT_DEFINE_METADATA_MSG, Category.CATEGORY_ERROR, 3),
-    CAN_NOT_SET_PROPERTY(ConfigCascadeExceptionMessages.CAN_NOT_SET_PROPERTY_MSG, Category.CATEGORY_ERROR, 4),
+    UNEXPECTED_ERROR("An error occurred: %1$s", Category.CATEGORY_ERROR, 1),
+    COULD_NOT_COERCE_VALUE("Could not coerce value %1$s into class %2$s", Category.CATEGORY_ERROR, 2),
+    CAN_NOT_DEFINE_METADATA("Can not define metadata %1$s in scope %2$s", Category.CATEGORY_ERROR, 3),
+    CAN_NOT_SET_PROPERTY("Can not set property %1$s in scope %2$s", Category.CATEGORY_ERROR, 4),
     ;
 
     /**
@@ -91,6 +92,11 @@ public enum ConfigCascadeExceptionCodes implements OXExceptionCode {
     public String getPrefix() {
         return PREFIX;
     }
+    
+    @Override
+    public String getDisplayMessage() {
+        return OXExceptionStrings.MESSAGE;
+    }
 
     @Override
     public Category getCategory() {
@@ -105,10 +111,6 @@ public enum ConfigCascadeExceptionCodes implements OXExceptionCode {
     @Override
     public int getNumber() {
         return detailNumber;
-    }
-
-    public String getHelp() {
-        return null;
     }
 
     @Override

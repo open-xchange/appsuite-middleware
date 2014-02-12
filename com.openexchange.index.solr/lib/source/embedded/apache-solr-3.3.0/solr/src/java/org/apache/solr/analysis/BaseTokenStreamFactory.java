@@ -47,7 +47,7 @@ abstract class BaseTokenStreamFactory {
   /** the luceneVersion arg */
   protected Version luceneMatchVersion = null;
 
-  public static final Logger log = LoggerFactory.getLogger(BaseTokenStreamFactory.class);
+  public static final org.slf4j.Logger log = LoggerFactory.getLogger(BaseTokenStreamFactory.class);
 
   public void init(Map<String,String> args) {
     this.args=args;

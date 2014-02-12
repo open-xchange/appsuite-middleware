@@ -49,8 +49,8 @@
 
 package com.openexchange.webdav.acl.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
+import com.openexchange.contact.ContactService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.acl.servlets.WebdavPrincipalPerformer;
@@ -64,13 +64,13 @@ import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
  */
 public class WebdavACLActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(WebdavACLActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavACLActivator.class);
 
     private volatile OSGiPropertyMixin mixin;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, HttpService.class };
+        return new Class<?>[] { UserService.class, HttpService.class, ContactService.class };
     }
 
     @Override
@@ -86,7 +86,7 @@ public class WebdavACLActivator extends HousekeepingActivator {
             this.mixin = mixin;
             openTrackers();
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
         }
     }
 

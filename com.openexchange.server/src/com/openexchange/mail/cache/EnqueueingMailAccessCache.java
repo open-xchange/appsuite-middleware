@@ -84,12 +84,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
     /**
      * The logger instance.
      */
-    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(EnqueueingMailAccessCache.class));
-
-    /**
-     * The flag whether debug logging is enabled.
-     */
-    protected static final boolean DEBUG = LOG.isDebugEnabled();
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EnqueueingMailAccessCache.class);
 
     /**
      * Drop those queues of which all elements timed-out.
@@ -214,9 +209,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
             }
             final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = pooledMailAccess.getMailAccess();
             mailAccess.setCached(false);
-            if (DEBUG) {
-                LOG.debug(new com.openexchange.java.StringAllocator("Remove&Get for ").append(key).toString());
-            }
+            LOG.debug("Remove&Get for {}", key);
             return mailAccess;
         }
     }
@@ -261,20 +254,6 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
             idleSeconds = accessQueue.isEmpty() ? idleSeconds : (idleSeconds >> 1);
             if (accessQueue.offer(PooledMailAccess.valueFor(mailAccess, idleSeconds * 1000L))) {
                 mailAccess.setCached(true);
-                if (DEBUG) {
-                    final int size = accessQueue.size();
-                    if (size == 1) {
-                        LOG.debug(new com.openexchange.java.StringAllocator("Queued ONE mail access for ").append(key).toString());
-                    } else if (size > accessQueue.getCapacity()) {
-                        LOG.debug(new com.openexchange.java.StringAllocator("\n\tExceeded queue capacity! Detected ").append(size).append(" mail access(es) for ").append(
-                            key).append('\n').toString());
-                    } else if (size == accessQueue.getCapacity()) {
-                        LOG.debug(new com.openexchange.java.StringAllocator("\n\tReached queue capacity! Queued ").append(size).append(" mail access(es) for ").append(
-                            key).append('\n').toString());
-                    } else {
-                        LOG.debug(new com.openexchange.java.StringAllocator("Queued ").append(size).append(" mail access(es) for ").append(key).toString());
-                    }
-                }
                 return true;
             }
             return false;
@@ -329,9 +308,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
             PooledMailAccess pooledMailAccess;
             while (null != (pooledMailAccess = accessQueue.poll())) {
                 final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = pooledMailAccess.getMailAccess();
-                if (DEBUG) {
-                    LOG.debug(new com.openexchange.java.StringAllocator("Dropping: ").append(mailAccess).toString());
-                }
+                LOG.debug("Dropping: {}", mailAccess);
                 mailAccess.setCached(false);
                 mailAccess.close(false);
             }
@@ -394,12 +371,10 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
                             final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess =
                                 pooledMailAccess.getMailAccess();
                             mailAccess.setCached(false);
-                            if (DEBUG) {
-                                LOG.debug(new com.openexchange.java.StringAllocator("Timed-out mail access for ").append(entry.getKey()).toString());
-                            }
-                            
+                            LOG.debug("Timed-out mail access for {}", entry.getKey());
+
                             //System.out.println(new com.openexchange.java.StringAllocator("Timed-out mail access for ").append(entry.getKey()).toString());
-                            
+
                             mailAccess.close(false);
                         }
                         if (dropQueue && accessQueue.isEmpty()) {
@@ -407,16 +382,14 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
                              * Current queue is empty. Mark as deprecated
                              */
                             accessQueue.markDeprecated();
-                            if (DEBUG) {
-                                LOG.debug(new com.openexchange.java.StringAllocator("Dropped queue for ").append(entry.getKey()).toString());
-                            }
+                            LOG.debug("Dropped queue for {}", entry.getKey());
                             iterator.remove();
                         }
                     }
                 }
             } catch (final RuntimeException e) {
                 // A runtime exception
-                LOG.warn("Purge-expired run failed: " + e.getMessage(), e);
+                LOG.warn("Purge-expired run failed", e);
             }
         }
 

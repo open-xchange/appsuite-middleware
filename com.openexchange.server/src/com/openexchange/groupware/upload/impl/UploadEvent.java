@@ -57,7 +57,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.java.StringAllocator;
 
 /**
  * Just a plain class that wraps information about an upload e.g. files, form fields, content type, size, etc.
@@ -66,7 +65,7 @@ import com.openexchange.java.StringAllocator;
  */
 public class UploadEvent {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UploadEvent.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UploadEvent.class);
 
     /*-
      * ------------ Constants ------------
@@ -360,18 +359,16 @@ public class UploadEvent {
                 if (null != tmpFile && tmpFile.exists()) {
                     try {
                         if (!tmpFile.delete()) {
-                            LOG.error(new StringAllocator("Temporary upload file could not be deleted: ").append(tmpFile.getName()));
+                            LOG.error("Temporary upload file could not be deleted: {}", tmpFile.getName());
                         }
                     } catch (final Exception e) {
-                        LOG.error(new StringAllocator("Temporary upload file could not be deleted: ").append(tmpFile.getName()), e);
+                        LOG.error("Temporary upload file could not be deleted: {}", tmpFile.getName(), e);
                     }
                 }
             }
         }
         uploadFilesByFieldName.clear();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Upload event cleaned-up. All temporary stored files deleted.");
-        }
+        LOG.debug("Upload event cleaned-up. All temporary stored files deleted.");
     }
 
     /**

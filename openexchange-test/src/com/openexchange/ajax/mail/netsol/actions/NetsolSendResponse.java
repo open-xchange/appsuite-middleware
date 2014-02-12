@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.netsol.actions;
 
+import org.slf4j.Logger;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.configuration.AJAXConfig;
@@ -63,8 +64,7 @@ import com.openexchange.mail.MailPath;
  */
 public final class NetsolSendResponse extends AbstractAJAXResponse {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(NetsolSendResponse.class);
+	private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(NetsolSendResponse.class);
 
 	private String[] folderAndID;
 
@@ -92,7 +92,7 @@ public final class NetsolSendResponse extends AbstractAJAXResponse {
 				}
 				return new String[] { mp.getFolder(), String.valueOf(mp.getMailID()) };
 			} catch (final OXException e) {
-				LOG.error(e.getMessage(), e);
+				LOG.error("", e);
 				return null;
 			}
 

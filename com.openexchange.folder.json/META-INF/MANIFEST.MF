@@ -2,12 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Folder HTTP/JSON interface
 Bundle-SymbolicName: com.openexchange.folder.json
-Bundle-Version: 7.4.1
+Bundle-Version: 7.4.2
 Bundle-Activator: com.openexchange.folder.json.osgi.FolderJSONActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.customizer.folder,
+ com.openexchange.ajax.meta,
  com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.ajax.tools,
@@ -50,4 +51,5 @@ Import-Package: com.openexchange.ajax,
  org.json,
  org.osgi.framework,
  org.osgi.service.http,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j

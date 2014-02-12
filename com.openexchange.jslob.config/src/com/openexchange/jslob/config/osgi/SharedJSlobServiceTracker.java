@@ -51,7 +51,6 @@ package com.openexchange.jslob.config.osgi;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
@@ -59,7 +58,6 @@ import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.jslob.config.ConfigJSlobService;
 import com.openexchange.jslob.shared.SharedJSlobService;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link SharedJSlobServiceTracker}
@@ -68,7 +66,7 @@ import com.openexchange.log.LogFactory;
  */
 public class SharedJSlobServiceTracker implements ServiceTrackerCustomizer<SharedJSlobService, SharedJSlobService> {
 
-    private final static Log LOG = LogFactory.getLog(SharedJSlobServiceTracker.class);
+    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SharedJSlobServiceTracker.class);
 
     private final BundleContext context;
 
@@ -96,7 +94,7 @@ public class SharedJSlobServiceTracker implements ServiceTrackerCustomizer<Share
                 eventAdmin.postEvent(event);
             }
         } catch (RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return service;
     }
@@ -118,7 +116,7 @@ public class SharedJSlobServiceTracker implements ServiceTrackerCustomizer<Share
                 eventAdmin.postEvent(event);
             }
         } catch (RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         context.ungetService(reference);
     }

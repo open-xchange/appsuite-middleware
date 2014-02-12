@@ -129,6 +129,10 @@ public class WebDAVClient {
 		this.setCredentials(new UsernamePasswordCredentials(login, password));
 	}
 
+	public HttpClient getHttpClient() {
+	    return this.httpClient;
+	}
+
 	public int executeMethod(final HttpMethod method) throws HttpException, IOException {
 		return this.httpClient.executeMethod(method);
 	}

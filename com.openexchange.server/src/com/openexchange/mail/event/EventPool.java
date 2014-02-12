@@ -80,7 +80,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class EventPool implements Runnable {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(EventPool.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventPool.class);
 
     /**
      * The delay for a pooled event. TODO: Make configurable
@@ -91,8 +91,6 @@ public final class EventPool implements Runnable {
      * The minimum fixed delay between the termination of one execution and the commencement of the next.
      */
     private static final long MIN_TASK_DELAY = 5000L;
-
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 
     private static volatile EventPool instance;
 
@@ -105,7 +103,7 @@ public final class EventPool implements Runnable {
                 instance = new EventPool();
                 instance.startup();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -268,7 +266,7 @@ public final class EventPool implements Runnable {
                 } while ((pooledEvent = queue.poll()) != null);
             }
         } catch (final Throwable t) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(EventPool.class)).error(t.getMessage(), t);
+            org.slf4j.LoggerFactory.getLogger(EventPool.class).error("", t);
         } finally {
             blocker.unblock();
         }
@@ -317,11 +315,7 @@ public final class EventPool implements Runnable {
         } else {
             eventAdmin.sendEvent(event);
         }
-        if (DEBUG_ENABLED) {
-            LOG.debug(new com.openexchange.java.StringAllocator(64).append("Notified ").append(pooledEvent.isContentRelated() ? "content-related" : "hierarchical").append(
-                "-wise changed folder \"").append(pooledEvent.getFullname()).append("\" in account ").append(pooledEvent.getAccountId()).append(
-                " of user ").append(pooledEvent.getUserId()).append(" in context ").append(pooledEvent.getContextId()).toString());
-        }
+        LOG.debug("Notified {}-wise changed folder \"{}\" in account {} of user {} in context {}", pooledEvent.isContentRelated() ? "content-related" : "hierarchical", pooledEvent.getFullname(), pooledEvent.getAccountId(), pooledEvent.getUserId(), pooledEvent.getContextId());
     }
 
 }

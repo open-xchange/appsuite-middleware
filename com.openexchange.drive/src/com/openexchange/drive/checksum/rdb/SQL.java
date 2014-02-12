@@ -55,13 +55,11 @@ import java.net.URLEncoder;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link SQL}
@@ -70,7 +68,7 @@ import com.openexchange.log.LogFactory;
  */
 public class SQL {
 
-    public static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SQL.class));
+    public static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SQL.class);
 
     public static String getCreateFileChecksumsTableStmt() {
         return "CREATE TABLE fileChecksums (" +
@@ -285,7 +283,7 @@ public class SQL {
         } else {
             long start = System.currentTimeMillis();
             ResultSet resultSet = stmt.executeQuery();
-            LOG.debug("executeQuery: " + stmt.toString() + " - " + (System.currentTimeMillis() - start) + " ms elapsed.");
+            LOG.debug("executeQuery: {} - {} ms elapsed.", stmt.toString(), (System.currentTimeMillis() - start));
             return resultSet;
         }
     }
@@ -296,8 +294,7 @@ public class SQL {
         } else {
             long start = System.currentTimeMillis();
             int rowCount = stmt.executeUpdate();
-            LOG.debug("executeUpdate: " + stmt.toString() + " - " + rowCount + " rows affected, " +
-                (System.currentTimeMillis() - start) + " ms elapsed.");
+            LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), rowCount, (System.currentTimeMillis() - start));
             return rowCount;
         }
     }
@@ -324,7 +321,8 @@ public class SQL {
 
     public static String escape(String value) throws OXException {
         if (null == value) {
-            System.out.println(value);
+            //System.out.println(value);
+            return null;
         }
         try {
             return URLEncoder.encode(value, "US-ASCII");

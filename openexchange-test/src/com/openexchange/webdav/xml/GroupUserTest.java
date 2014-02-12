@@ -9,7 +9,6 @@ import java.util.Map;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -27,7 +26,7 @@ import com.openexchange.webdav.xml.types.Response;
 
 public class GroupUserTest extends AbstractWebdavXMLTest {
 
-    private static final Log LOG = LogFactory.getLog(GroupUserTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupUserTest.class);
 
 	public static final String GROUPUSER_URL = "/servlet/webdav.groupuser";
 

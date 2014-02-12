@@ -62,7 +62,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -91,7 +90,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
 
     private List<NameValuePair> parameters;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(GMXAndWebDeAPIStep.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GMXAndWebDeAPIStep.class);
 
     public GMXAndWebDeAPIStep() {
         super();
@@ -136,7 +135,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
             }
 
             if (debuggingEnabled) {
-                LOG.error("DEBUG: complete URL : " + urlString);
+                LOG.error("DEBUG: complete URL : {}", urlString);
             }
 
             WebRequestSettings requestSettings = new WebRequestSettings(new URL(urlString), HttpMethod.POST);
@@ -151,9 +150,9 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
             HtmlPage page = webClient.getPage(requestSettings);
 
             if (debuggingEnabled) {
-                LOG.error("DEBUG: Status Code : " + page.getWebResponse().getStatusCode());
-                LOG.error("DEBUG: URL : " + page.getWebResponse().getUrl());
-                LOG.error("DEBUG: webResponse : " + page.getWebResponse().getContentAsString());
+                LOG.error("DEBUG: Status Code : {}", page.getWebResponse().getStatusCode());
+                LOG.error("DEBUG: URL : {}", page.getWebResponse().getUrl());
+                LOG.error("DEBUG: webResponse : {}", page.getWebResponse().getContentAsString());
             }
         } catch (FailingHttpStatusCodeException e) {
             // catch the 302 that appears after logging in
@@ -183,7 +182,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                     try {
                         base64Encoded = new String(encoder.encode(toEncode.getBytes("UTF-8")));
                     } catch (UnsupportedEncodingException e2) {
-                        LOG.error(e2);
+                        LOG.error(e2.toString());
                     }
 
                     // remove the whitespaces otherwise there is an error
@@ -202,21 +201,21 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                         contactObjects = parseJSONIntoContacts(allContactsPage);
                         executedSuccessfully = true;
                     } catch (MalformedURLException e1) {
-                        LOG.error(e1.getMessage(), e1);
+                        LOG.error("", e1);
                     } catch (FailingHttpStatusCodeException e1) {
-                        LOG.error(e1.getMessage(), e1);
+                        LOG.error("", e1);
                     } catch (IOException e1) {
-                        LOG.error(e1.getMessage(), e1);
+                        LOG.error("", e1);
                     }
 
                 } else {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             } else {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         output = contactObjects.toArray(new Contact[contactObjects.size()]);
 
@@ -257,7 +256,7 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                     if (contactJSON.has("company")) {
                         contact.setCompany(contactJSON.getString("company"));
                     }
-                    
+
                     //setting the displayname
                     if (contactJSON.has("name") && contactJSON.has("firstName")){
                     	contact.setDisplayName(contact.getGivenName() + " " + contact.getSurName());
@@ -466,11 +465,11 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                     contacts.add(contact);
                     // An error in parsing one contact should not bring them all down
                 } catch (final JSONException e) {
-                    LOG.error(e);
+                    LOG.error(e.toString());
                 }
             }
         } catch (final JSONException e) {
-            LOG.error(e);
+            LOG.error(e.toString());
         }
         return contacts;
     }

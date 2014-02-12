@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<xs:schema xmlns="http://4psa.com/GlobalOpData.xsd/2.5.1" xmlns:mstns="http://4psa.com/GlobalOpData.xsd/2.5.1" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:common="http://4psa.com/Common.xsd/2.5.1" xmlns:clientData="http://4psa.com/ClientData.xsd/2.5.1" targetNamespace="http://4psa.com/GlobalOpData.xsd/2.5.1" elementFormDefault="qualified" id="GlobalOpData">
-	<xs:import namespace="http://4psa.com/Common.xsd/2.5.1" schemaLocation="../Common.xsd"/>
-	<xs:import namespace="http://4psa.com/ClientData.xsd/2.5.1" schemaLocation="../Client/ClientData.xsd"/>
-</xs:schema>

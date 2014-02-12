@@ -56,8 +56,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link FileWatcher}
@@ -66,7 +64,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class FileWatcher {
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FileWatcher.class));
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileWatcher.class);
 
     private final class FileWatcherTimerTask extends TimerTask {
 
@@ -86,7 +84,7 @@ public final class FileWatcher {
                     notifyListeners(false);
                 }
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

@@ -175,9 +175,9 @@ public class UpdateTest extends InfostoreAJAXTest {
 
         res = update(getWebConversation(),getHostName(),sessionId,id,Long.MAX_VALUE,m("title","otherTitle","version","1"));
         assertFalse(res.hasError());
-        
+
         res = get(getWebConversation(), getHostName(), sessionId, id);
-        
+
         JSONObject infoitem = (JSONObject) res.getData();
         assertEquals("theFile(1).txt", infoitem.get("filename"));
     }
@@ -293,7 +293,7 @@ public class UpdateTest extends InfostoreAJAXTest {
     public void virtualFolderTest(int folderId) throws Exception {
         final Response res = update(getWebConversation(), getHostName(), sessionId, clean.get(0), Long.MAX_VALUE, m("folder_id", ""+folderId));
         assertTrue(res.hasError());
-        assertTrue(res.getErrorMessage(), res.getErrorMessage().contains("virt"));
+        assertTrue(res.getErrorMessage(), res.getErrorMessage().contains("IFO-1700"));
     }
 
 }

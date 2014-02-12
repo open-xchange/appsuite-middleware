@@ -93,12 +93,10 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "tree", optional=true, description = "An optional boolean parameter which indicates whether on successful validation the folder tree shall be returned (NULL on failure) or if set to \"false\" or missing only a boolean is returned which indicates validation result.")
 }, requestBody = "A JSON object describing the new account to validate. See mail account data.",
-responseDescription = "Dependent on optional \"tree\" parameter a JSON folder object or a boolean value indicating the validation result.")
+    responseDescription = "Dependent on optional \"tree\" parameter a JSON folder object or a boolean value indicating the validation result.")
 public final class ValidateAction extends AbstractMailAccountTreeAction {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ValidateAction.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ValidateAction.class);
 
     public static final String ACTION = AJAXServlet.ACTION_VALIDATE;
 
@@ -113,14 +111,14 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jData) throws OXException, JSONException {
         if (!session.getUserPermissionBits().isMultipleMailAccounts()) {
             throw
-                MailAccountExceptionCodes.NOT_ENABLED.create(
+            MailAccountExceptionCodes.NOT_ENABLED.create(
                 Integer.valueOf(session.getUserId()),
                 Integer.valueOf(session.getContextId()));
         }
 
         final MailAccountDescription accountDescription = new MailAccountDescription();
         final List<OXException> warnings = new LinkedList<OXException>();
-        MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
+        MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings, false);
 
         if (accountDescription.getId() >= 0 && null == accountDescription.getPassword()) {
             /*
@@ -144,7 +142,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         checkNeededFields(accountDescription);
         if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
             // Deny validation of Unified Mail account
-            throw MailAccountExceptionCodes.VALIDATION_FAILED.create();
+            throw MailAccountExceptionCodes.UNIFIED_INBOX_ACCOUNT_VALIDATION_FAILED.create();
         }
         // Check for tree parameter
         final boolean tree;
@@ -244,9 +242,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         // Get the appropriate transport provider by transport server URL
         final TransportProvider transportProvider = TransportProviderRegistry.getTransportProviderByURL(transportServerURL);
         if (null == transportProvider) {
-            if (DEBUG) {
-                LOG.debug("Validating mail account failed. No transport provider found for URL: " + transportServerURL);
-            }
+            LOG.debug("Validating mail account failed. No transport provider found for URL: {}", transportServerURL);
             return false;
         }
         // Create a transport access instance
@@ -280,9 +276,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             mailTransport.ping();
             close = true;
         } catch (final OXException e) {
-            if (DEBUG) {
-                LOG.debug("Validating transport account failed.", e);
-            }
+            LOG.debug("Validating transport account failed.", e);
             Throwable cause = e.getCause();
             while ((null != cause) && (cause instanceof OXException)) {
                 cause = cause.getCause();

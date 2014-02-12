@@ -22,7 +22,7 @@ import com.google.common.collect.Lists;
 public class LeastActiveBalancingPolicy implements LoadBalancingPolicy {
   
   private static final long serialVersionUID = 329849818218657061L;
-  private static final Logger log = LoggerFactory.getLogger(LeastActiveBalancingPolicy.class);
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(LeastActiveBalancingPolicy.class);
   
   @Override
   public HClientPool getPool(Collection<HClientPool> pools, Set<CassandraHost> excludeHosts) {

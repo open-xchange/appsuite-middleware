@@ -81,7 +81,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class FolderMap {
 
-    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(FolderMap.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderMap.class);
 
     private final ConcurrentMap<Key, Wrapper> map;
     private final int maxLifeMillis;
@@ -251,9 +251,7 @@ public final class FolderMap {
             if (null == session) {
                 return;
             }
-            if (LogProperties.isEnabled()) {
-                LogProperties.putSessionProperties(session);
-            }
+            LogProperties.putSessionProperties(session);
             ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(new LoadSubfolders(folder, treeId, this, session)), AbortBehavior.getInstance());
         } catch (final Exception e) {
             // Ignore
@@ -508,7 +506,7 @@ public final class FolderMap {
                     lock.unlock();
                 }
             } catch (final Exception e) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             }
         }
     }
@@ -557,7 +555,7 @@ public final class FolderMap {
                     lock.unlock();
                 }
             } catch (final Exception e) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             }
         }
     }

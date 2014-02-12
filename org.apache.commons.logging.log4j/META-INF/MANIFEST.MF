@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: Log4j Logging
-Bundle-SymbolicName: org.apache.commons.logging.log4j
-Bundle-Version: 6.21.0
-Bundle-Vendor: Open-Xchange Inc.
-Fragment-Host: org.apache.commons.logging;bundle-version="[1.0.4,2.0.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: org.apache.log4j

@@ -57,7 +57,6 @@ import java.io.IOException;
 import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.LoginServlet;
@@ -83,7 +82,7 @@ import com.openexchange.user.UserService;
  */
 public final class Tokens implements LoginRequestHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Tokens.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Tokens.class);
 
     private final LoginConfiguration conf;
 
@@ -144,7 +143,7 @@ public final class Tokens implements LoginRequestHandler {
             response.setData(json);
         } catch (JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error(oje.getMessage(), oje);
+            LOG.error("", oje);
             response.setException(oje);
         }
         Tools.disableCaching(resp);
@@ -154,7 +153,7 @@ public final class Tokens implements LoginRequestHandler {
         try {
             ResponseWriter.write(response, resp.getWriter(), locale);
         } catch (JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }

@@ -58,11 +58,13 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.infostore.InfostoreConfig;
+import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
 import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobId;
 import com.openexchange.jslob.shared.SharedJSlobService;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -75,7 +77,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 public class SharedInfostoreJSlob implements SharedJSlobService {
 
     private final String serviceId;
-    
+
     private final DefaultJSlob jslob;
 
     /**
@@ -104,19 +106,21 @@ public class SharedInfostoreJSlob implements SharedJSlobService {
     @Override
     public JSlob getJSlob(Session session) throws OXException {
         try {
-            Context ctx = ContextStorage.getStorageContext(session);
-            QuotaFileStorage fs = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
-            UserSettingMail us = new UserSettingMail(session.getUserId(), session.getContextId());
-
             int maxBodySize = ServerConfig.getInt(ServerConfig.Property.MAX_BODY_SIZE);
             long infostoreMaxUploadSize = InfostoreConfig.getMaxUploadSize();
             long attachmentMaxUploadSize = AttachmentConfig.getMaxUploadSize();
 
+            Context ctx = ContextStorage.getStorageContext(session);
+
+            QuotaFileStorage fs = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
             long infostoreQuota = fs.getQuota();
             long infostoreUsage = fs.getUsage();
 
-            long attachmentQuota = us.getUploadQuota();
-            long attachmentQuotaPerFile = us.getUploadQuotaPerFile();
+            UserSettingMail userSettingMail = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
+
+            final MailUploadQuotaChecker mailUploadQuotaChecker = new MailUploadQuotaChecker(userSettingMail);
+            long attachmentQuota = mailUploadQuotaChecker.getQuotaMax();
+            long attachmentQuotaPerFile = mailUploadQuotaChecker.getFileQuotaMax();
 
             JSONObject json = new JSONObject();
             json.put("maxBodySize", maxBodySize);

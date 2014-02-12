@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public class EmbeddedServerHelper {
-  private static Logger log = LoggerFactory.getLogger(EmbeddedServerHelper.class);
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(EmbeddedServerHelper.class);
 
   private static final String TMP = "tmp";
 

@@ -90,7 +90,6 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.httpclient.URI;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -116,10 +115,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
-import com.openexchange.log.ForceLog;
-import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -141,7 +137,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      */
     private static final long serialVersionUID = 718576864014891156L;
 
-    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AJAXServlet.class));
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AJAXServlet.class);
 
     // Modules
     public static final String MODULE_TASK = "tasks";
@@ -442,8 +438,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	public static final String JS_FRAGMENT = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\"><html><head>"
 			+ "<META http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">"
 			+ "<script type=\"text/javascript\">"
-			+ "(parent.callback_**action** || window.opener && "
-			+ "window.opener.callback_**action**)(**json**)"
+			+ "(parent[\"callback_**action**\"] || window.opener && "
+			+ "window.opener[\"callback_**action**\"])(**json**)"
 			+ "</script></head></html>";
 
     public static final String SAVE_AS_TYPE = "application/octet-stream";
@@ -480,7 +476,13 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         if (null != user) {
             return user.getLocale();
         }
-        return UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
+
+        try {
+            return UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getLocale();
+        } catch (OXException e) {
+            LOG.warn("Could not load user to get his locale.", e);
+            return Locale.US;
+        }
     }
 
     /**
@@ -496,7 +498,13 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getUser().getLocale();
         }
-        return UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
+
+        try {
+            return UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getLocale();
+        } catch (OXException e) {
+            LOG.warn("Could not load user to get his locale.", e);
+            return Locale.US;
+        }
     }
 
     /**
@@ -507,8 +515,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         incrementRequests();
-        final Props props = LogProperties.getLogProperties();
-        props.put(LogProperties.Name.AJAX_REQUEST_NUMBER, ForceLog.valueOf(Long.toString(REQUEST_NUMBER.incrementAndGet())));
+        LogProperties.putProperty(LogProperties.Name.AJAX_REQUEST_NUMBER, Long.toString(REQUEST_NUMBER.incrementAndGet()));
         try {
             // create a new HttpSession if missing
             req.getSession(true);
@@ -522,13 +529,13 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             resp.setContentType("text/plain; charset=UTF-8");
             resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final ServletException se = new ServletException(e.getMessage());
             se.initCause(e);
             throw se;
         } finally {
             decrementRequests();
-            props.remove(LogProperties.Name.AJAX_REQUEST_NUMBER);
+            LogProperties.removeProperty(LogProperties.Name.AJAX_REQUEST_NUMBER);
         }
     }
 
@@ -1018,7 +1025,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             obj.put(STR_ERROR_PARAMS, Collections.emptyList());
 			w.write(substituteJS(obj.toString(), action));
         } catch (final JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             close(w);
         }
@@ -1266,7 +1273,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 try {
                     uploadListener.action(uploadEvent);
                 } catch (final OXException e) {
-                    LOG.error(new com.openexchange.java.StringAllocator(64).append("Failed upload listener: ").append(uploadListener.getClass()), e);
+                    LOG.error("Failed upload listener: {}", uploadListener.getClass(), e);
                 }
             }
         } finally {
@@ -1309,29 +1316,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     protected static void close(final Writer w) {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace(new com.openexchange.java.StringAllocator("Called close() with writer").append(w.toString()));
-        }
-        /*-
-         *
-        if (w != null) {
-            try {
-                w.flush();
-                System.out.println("INFOSTORE: Flushed!");
-            } catch (IOException e) {
-                LOG.error(e);
-            }
-            try {
-                w.close();
-                System.out.println("INFOSTORE: Closed!");
-            } catch (IOException e) {
-                LOG.error(e);
-            }
-        } else {
-            return;
-        }
-         *
-         */
+        LOG.trace("Called close() with writer{}", w);
     }
 
     /**

@@ -57,7 +57,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.context.ContextService;
@@ -68,8 +67,6 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.log.LogFactory;
-import com.openexchange.ms.Topic;
 
 /**
  * {@link PushMsHandler} - Listens for locally distributed OSGi events notifying about changes.
@@ -78,21 +75,17 @@ import com.openexchange.ms.Topic;
  */
 public class PushMsHandler implements EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushMsHandler.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushMsHandler.class);
 
     private final DelayPushQueue delayPushQueue;
-
-    private final Topic<Map<String, Object>> publishTopic;
 
     /**
      * Initializes a new {@link PushMsHandler}.
      *
-     * @param publishTopic
-     * @param delayPushQueue the delayQueue that is used for pushing PIM objects except E-Mails
+     * @param delayPushQueue the delayQueue that is used for pushing PIM objects
      */
-    public PushMsHandler(final Topic<Map<String, Object>> publishTopic, final DelayPushQueue delayPushQueue) {
+    public PushMsHandler(final DelayPushQueue delayPushQueue) {
         super();
-        this.publishTopic = publishTopic;
         this.delayPushQueue = delayPushQueue;
     }
 
@@ -107,7 +100,7 @@ public class PushMsHandler implements EventHandler {
             try {
                 event = (CommonEvent) obj;
             } catch (final ClassCastException cce) {
-                LOG.warn("Unexpected type: " + cce.getMessage(), cce);
+                LOG.warn("Unexpected type", cce);
                 return;
             }
         }
@@ -118,7 +111,7 @@ public class PushMsHandler implements EventHandler {
             final ContextService contextService = Services.getService(ContextService.class);
             ctx = contextService.getContext(contextId);
         } catch (final OXException exc) {
-            LOG.error("cannot resolve context id: " + contextId, exc);
+            LOG.error("cannot resolve context id: {}", Integer.valueOf(contextId), exc);
             return;
         }
 
@@ -144,38 +137,27 @@ public class PushMsHandler implements EventHandler {
             // fall-through
         case Types.FOLDER:
             for (final Entry<Integer, Set<Integer>> entry : transform(event.getAffectedUsersWithFolder()).entrySet()) {
-                publishDelayed(i(entry.getKey()), I2i(entry.getValue()), module, ctx, getTimestamp((DataObject) event.getActionObj()), e);
+                publish(i(entry.getKey()), I2i(entry.getValue()), module, ctx, getTimestamp((DataObject) event.getActionObj()), e, false);
             }
             break;
         case Types.EMAIL:
-            publish(1, new int[] { event.getUserId() }, module, ctx, 0, e);
+            publish(1, new int[] { event.getUserId() }, module, ctx, 0, e, true);
             break;
         case Types.INFOSTORE:
             for (final Entry<Integer, Set<Integer>> entry : transform(event.getAffectedUsersWithFolder()).entrySet()) {
-                publish(i(entry.getKey()), I2i(entry.getValue()), module, ctx, getTimestamp(((DocumentMetadata) event.getActionObj()).getLastModified()), e);
+                publish(i(entry.getKey()), I2i(entry.getValue()), module, ctx, getTimestamp(((DocumentMetadata) event.getActionObj()).getLastModified()), e, true);
             }
             break;
         default:
-            LOG.warn("Got event with unimplemented module: " + module);
+            LOG.warn("Got event with unimplemented module: {}", module);
         }
     }
 
-    private void publish(final int folderId, final int[] users, final int module, final Context ctx, final long timestamp, final Event e) {
+    private void publish(final int folderId, final int[] users, final int module, final Context ctx, final long timestamp, final Event e, final boolean immediate) {
         if (users == null) {
             return;
         }
-        try {
-            publishTopic.publish(newPushMsObject(folderId, users, module, ctx, timestamp, e).writePojo());
-        } catch (final RuntimeException ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
-    }
-
-    private void publishDelayed(final int folderId, final int[] users, final int module, final Context ctx, final long timestamp, final Event e) {
-        if (users == null) {
-            return;
-        }
-        delayPushQueue.add(newPushMsObject(folderId, users, module, ctx, timestamp, e));
+        delayPushQueue.add(newPushMsObject(folderId, users, module, ctx, timestamp, e), immediate);
     }
 
     private PushMsObject newPushMsObject(final int folderId, final int[] users, final int module, final Context ctx, final long timestamp, final Event e) {

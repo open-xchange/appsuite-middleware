@@ -85,7 +85,7 @@ import com.openexchange.session.Session;
  */
 public final class MimeProcessingUtility {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeProcessingUtility.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeProcessingUtility.class);
 
     /**
      * No instantiation
@@ -113,7 +113,7 @@ public final class MimeProcessingUtility {
             final MailFolder folder = access.getFolderStorage().getFolder(fullName);
             return folder.isShared() ? folder.getOwner() : null;
         } catch (final Exception e) {
-            LOG.warn("Couldn't resolve owner for " + fullName, e);
+            LOG.warn("Couldn't resolve owner for {}", fullName, e);
             return null;
         } finally {
             if (null != access) {
@@ -296,10 +296,7 @@ public final class MimeProcessingUtility {
         } catch (final java.io.CharConversionException e) {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "US-ASCII";
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(charset).append(
-                    "\". Using fallback charset \"").append(fallback).append("\" instead."), e);
-            }
+            LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback, e);
             return MessageUtility.readMailPart(mailPart, fallback);
         }
     }
@@ -312,7 +309,7 @@ public final class MimeProcessingUtility {
             String cs = contentType.getCharsetParameter();
             if (!CharsetDetector.isValid(cs)) {
                 if (null != cs) {
-                    LOG.warn("Illegal or unsupported encoding in a message detected: \"" + cs + '"', new UnsupportedEncodingException(cs));
+                    LOG.warn("Illegal or unsupported encoding in a message detected: \"{}\"", cs, new UnsupportedEncodingException(cs));
                 }
                 if (contentType.startsWith(TEXT)) {
                     cs = CharsetDetector.detectCharset(mailPart.getInputStream());

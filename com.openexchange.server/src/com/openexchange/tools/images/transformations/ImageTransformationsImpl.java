@@ -70,7 +70,6 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
-import org.apache.commons.logging.Log;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Directory;
@@ -82,7 +81,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.images.ImageTransformationUtility;
 import com.openexchange.tools.images.ImageTransformations;
@@ -101,8 +99,9 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class ImageTransformationsImpl implements ImageTransformations {
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ImageTransformationsImpl.class));
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ImageTransformationsImpl.class);
 
+    private final TransformationContext transformationContext;
     private final InputStream sourceImageStream;
     private final List<ImageTransformation> transformations;
     private BufferedImage sourceImage;
@@ -114,6 +113,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
         this.sourceImage = sourceImage;
         this.sourceImageStream = sourceImageStream;
         this.transformations = new ArrayList<ImageTransformation>();
+        this.transformationContext = new TransformationContext();
     }
 
     /**
@@ -228,7 +228,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
             ImageInformation imageInformation = null != this.metadata ? getImageInformation(this.metadata) : null;
             for (ImageTransformation transformation : transformations) {
                 if (transformation.supports(formatName)) {
-                    image = transformation.perform(image, imageInformation);
+                    image = transformation.perform(image, transformationContext, imageInformation);
                 }
             }
         }
@@ -245,7 +245,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
      */
     private BufferedImage getSourceImage(String formatName) throws IOException {
         if (null == this.sourceImage && null != this.sourceImageStream) {
-            this.sourceImage = needsMetadata(formatName) ? readAndExtractMetadata(sourceImageStream) : read(sourceImageStream);
+            this.sourceImage = needsMetadata(formatName) ? readAndExtractMetadata(sourceImageStream, formatName) : read(sourceImageStream, formatName);
         }
         return sourceImage;
     }
@@ -286,14 +286,15 @@ public class ImageTransformationsImpl implements ImageTransformations {
             outputStream = new UnsynchronizedByteArrayOutputStream(8192);
             digestOutputStream = new DigestOutputStream(outputStream, MessageDigest.getInstance("MD5"));
             if (needsCompression(formatName)) {
-                writeCompressed(image, formatName, digestOutputStream);
+                writeCompressed(image, formatName, digestOutputStream, transformationContext);
             } else {
                 write(image, formatName, digestOutputStream);
             }
+
             byte[] imageData = outputStream.toByteArray();
             byte[] md5 = digestOutputStream.getMessageDigest().digest();
-            return new TransformedImageImpl(
-                image.getWidth(), image.getHeight(), null != imageData ? imageData.length : 0, formatName, imageData, md5);
+            long size = null != imageData ? imageData.length : 0L;
+            return new TransformedImageImpl(image.getWidth(), image.getHeight(), size, formatName, imageData, md5, transformationContext.getExpenses());
         } catch (NoSuchAlgorithmException e) {
             throw new IOException(e);
         } finally {
@@ -317,7 +318,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
         try {
             outputStream = new UnsynchronizedByteArrayOutputStream(8192);
             if (needsCompression(formatName)) {
-                writeCompressed(image, formatName, outputStream);
+                writeCompressed(image, formatName, outputStream, transformationContext);
             } else {
                 write(image, formatName, outputStream);
             }
@@ -337,7 +338,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
         }
     }
 
-    private static void writeCompressed(BufferedImage image, String formatName, OutputStream output) throws IOException {
+    private static void writeCompressed(BufferedImage image, String formatName, OutputStream output, TransformationContext transformationContext) throws IOException {
         ImageWriter writer = null;
         ImageOutputStream imageOutputStream = null;
         try {
@@ -355,6 +356,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
             writer.setOutput(imageOutputStream);
             IIOImage iioImage = new IIOImage(image, null, null);
             writer.write(null, iioImage, iwp);
+            transformationContext.addExpense(ImageTransformations.LOW_EXPENSE);
         } finally {
             if (null != writer) {
                 writer.dispose();
@@ -375,17 +377,17 @@ public class ImageTransformationsImpl implements ImageTransformations {
         try {
             parameters.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
         } catch (UnsupportedOperationException e) {
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
         }
         try {
             parameters.setProgressiveMode(ImageWriteParam.MODE_DEFAULT);
         } catch (UnsupportedOperationException e) {
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
         }
         try {
             parameters.setCompressionQuality(0.8f);
         } catch (UnsupportedOperationException e) {
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
         }
     }
 
@@ -393,14 +395,15 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * Reads a buffered image from the supplied stream and closes the stream afterwards.
      *
      * @param inputStream The stream to read the image from
+     * @param formatName The format name
      * @return The buffered image
      * @throws IOException
      */
-    private BufferedImage read(InputStream inputStream) throws IOException {
+    private BufferedImage read(InputStream inputStream, String formatName) throws IOException {
         try {
             return ImageIO.read(inputStream);
         } catch (final RuntimeException e) {
-            LOG.debug("error reading image from stream", e);
+            LOG.debug("error reading image from stream for {}", formatName, e);
             return null;
         } finally {
             Streams.close(inputStream);
@@ -411,24 +414,25 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * Reads a buffered image from the supplied stream and closes the stream afterwards, trying to extract metadata information.
      *
      * @param inputStream The stream to read the image from
+     * @param formatName The format name
      * @return The buffered image
      * @throws IOException
      */
-    private BufferedImage readAndExtractMetadata(InputStream inputStream) throws IOException {
+    private BufferedImage readAndExtractMetadata(InputStream inputStream, String formatName) throws IOException {
         ManagedFile managedFile = null;
         try {
             ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             managedFile = mfm.createManagedFile(inputStream);
             try {
-                metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(managedFile.getInputStream()), false);
+                metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(managedFile.getInputStream(), 65536), false);
             } catch (ImageProcessingException e) {
-                LOG.warn("error getting metadata", e);
+                LOG.warn("error getting metadata for {}", formatName, e);
             }
             return ImageIO.read(managedFile.getInputStream());
         } catch (OXException e) {
             throw new IOException("error accessing managed file", e);
         } catch (IllegalArgumentException e) {
-            LOG.debug("error reading image from stream", e);
+            LOG.debug("error reading image from stream for {}", formatName, e);
             return null;
         } finally {
             if (managedFile != null) {

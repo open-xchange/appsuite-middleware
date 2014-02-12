@@ -64,16 +64,13 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class ConsistencyPerformer extends AbstractPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ConsistencyPerformer.class));
-
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
-
     /**
      * Initializes a new {@link ConsistencyPerformer}.
      *
      * @param session The session
+     * @throws OXException If passed session is invalid
      */
-    public ConsistencyPerformer(final ServerSession session) {
+    public ConsistencyPerformer(final ServerSession session) throws OXException {
         super(session);
     }
 
@@ -92,8 +89,9 @@ public final class ConsistencyPerformer extends AbstractPerformer {
      *
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
+     * @throws OXException If passed session is invalid
      */
-    public ConsistencyPerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public ConsistencyPerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(session, folderStorageDiscoverer);
     }
 
@@ -116,7 +114,6 @@ public final class ConsistencyPerformer extends AbstractPerformer {
      */
     public void doConsistencyCheck(final String treeId) throws OXException {
         final FolderStorage[] folderStorages = folderStorageDiscoverer.getFolderStoragesForTreeID(treeId);
-        final long start = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         for (final FolderStorage folderStorage : folderStorages) {
             final boolean started = folderStorage.startTransaction(storageParameters, true);
             try {
@@ -135,10 +132,6 @@ public final class ConsistencyPerformer extends AbstractPerformer {
                 }
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
-        }
-        if (DEBUG_ENABLED) {
-            final long duration = System.currentTimeMillis() - start;
-            LOG.debug(new com.openexchange.java.StringAllocator().append("ConsistencyPerformer.doConsistencyCheck() took ").append(duration).append("msec for tree: ").append(treeId).toString());
         }
     }
 

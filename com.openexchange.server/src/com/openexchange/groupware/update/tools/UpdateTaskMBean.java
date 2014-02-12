@@ -72,7 +72,6 @@ import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
-import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.ExecutedTask;
@@ -80,7 +79,6 @@ import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.internal.UpdateProcess;
-import com.openexchange.log.LogFactory;
 
 /**
  * MBean for update task toolkit.
@@ -90,7 +88,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class UpdateTaskMBean implements DynamicMBean {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UpdateTaskMBean.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateTaskMBean.class);
 
     private final MBeanInfo mbeanInfo;
 
@@ -174,7 +172,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 "javax.management.openmbean.TabularData",
                 MBeanOperationInfo.INFO));
         } catch (final OpenDataException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         // MBean info
         return new MBeanInfo(UpdateTaskMBean.class.getName(), "Update task toolkit", null, null, operations.toArray(new MBeanOperationInfo[operations.size()]), null);
@@ -212,14 +210,14 @@ public final class UpdateTaskMBean implements DynamicMBean {
                     }
                 }
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 final Exception wrapMe = new Exception(e.getMessage());
                 throw new MBeanException(wrapMe);
             } catch (final RuntimeException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw e;
             } catch (final Error e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw e;
             }
             // Void
@@ -240,14 +238,14 @@ public final class UpdateTaskMBean implements DynamicMBean {
                     }
                 }
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 final Exception wrapMe = new Exception(e.getMessage());
                 throw new MBeanException(wrapMe);
             } catch (final RuntimeException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw e;
             } catch (final Error e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw e;
             }
             // Void
@@ -263,14 +261,14 @@ public final class UpdateTaskMBean implements DynamicMBean {
 
                 return Utility.toTable(rows, new String[] { "schema", "version", "locked" }, false);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 final Exception wrapMe = new Exception(e.getMessage());
                 throw new MBeanException(wrapMe);
             } catch (final RuntimeException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw e;
             } catch (final Error e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw e;
             }
         } else if (actionName.equals("force")) {
@@ -288,14 +286,14 @@ public final class UpdateTaskMBean implements DynamicMBean {
                     }
                 }
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 final Exception wrapMe = new Exception(e.getMessage());
                 throw new MBeanException(wrapMe);
             } catch (final RuntimeException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw e;
             } catch (final Error e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw e;
             }
             // Void
@@ -304,14 +302,14 @@ public final class UpdateTaskMBean implements DynamicMBean {
             try {
                 UpdateTaskToolkit.forceUpdateTaskOnAllSchemas(((String) params[0]));
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 final Exception wrapMe = new Exception(e.getMessage());
                 throw new MBeanException(wrapMe);
             } catch (final RuntimeException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw e;
             } catch (final Error e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw e;
             }
             // Void
@@ -320,34 +318,34 @@ public final class UpdateTaskMBean implements DynamicMBean {
             try {
                 return getExecutedTasksList(params[0].toString());
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw new MBeanException(new Exception(e.getMessage()), e.getMessage());
             } catch (final RuntimeException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw e;
             } catch (final Error e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw e;
             }
         } else if (actionName.equals("runAllUpdate")) {
             try {
                 UpdateTaskToolkit.runUpdateOnAllSchemas();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 final Exception wrapMe = new Exception(e.getMessage());
                 throw new MBeanException(wrapMe);
             } catch (final RuntimeException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw e;
             } catch (final Error e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw e;
             }
             // Void
             return null;
         }
         final ReflectionException e = new ReflectionException(new NoSuchMethodException(actionName));
-        LOG.error(e.getMessage(), e);
+        LOG.error("", e);
         throw e;
     }
 

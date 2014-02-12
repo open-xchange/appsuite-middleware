@@ -61,8 +61,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -82,7 +80,7 @@ import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
  */
 public class ContextLoader implements Filter<Integer, Context> {
 
-    private static final Log LOG = LogFactory.getLog(ContextLoader.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContextLoader.class);
 
     private final AdminCache cache;
 
@@ -155,7 +153,7 @@ public class ContextLoader implements Filter<Integer, Context> {
             try {
                 cache.pushConnectionForConfigDB(con);
             } catch (final PoolException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         if (cids.size() != retval.size()) {
@@ -166,7 +164,7 @@ public class ContextLoader implements Filter<Integer, Context> {
             if (failOnMissing) {
                 throw new StorageException("Can not load the following contexts: " + missing.toString());
             }
-            LOG.warn("Can not load the following contexts: " + missing.toString());
+            LOG.warn("Can not load the following contexts: {}", missing);
         }
         return retval;
     }

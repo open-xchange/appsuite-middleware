@@ -52,7 +52,6 @@ package com.openexchange.drive.events.gcm.internal;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.google.android.gcm.server.Constants;
 import com.google.android.gcm.server.Message;
 import com.google.android.gcm.server.MulticastResult;
@@ -73,7 +72,7 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
 
     private static final int MULTICAST_LIMIT = 1000;
     private static final String SERIVCE_ID = "gcm";
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(GCMDriveEventPublisher.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GCMDriveEventPublisher.class);
 
     private final Sender sender;
 
@@ -94,9 +93,10 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
             subscriptions = Services.getService(DriveSubscriptionStore.class, true).getSubscriptions(
                 event.getContextID(), new String[] { SERIVCE_ID }, event.getFolderIDs());
         } catch (OXException e) {
-            LOG.error("unable to get subscriptions for service " + SERIVCE_ID, e);
+            LOG.error("unable to get subscriptions for service {}", SERIVCE_ID, e);
         }
         if (null != subscriptions && 0 < subscriptions.size()) {
+            String pushTokenReference = event.getPushTokenReference();
             for (int i = 0; i < subscriptions.size(); i += MULTICAST_LIMIT) {
                 /*
                  * prepare chunk
@@ -104,7 +104,12 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
                 int length = Math.min(subscriptions.size(), i + MULTICAST_LIMIT) - i;
                 List<String> registrationIDs = new ArrayList<String>(length);
                 for (int j = 0; j < length; j++) {
-                    registrationIDs.add(subscriptions.get(i + j).getToken());
+                    Subscription subscription = subscriptions.get(i + j);
+                    if (null != pushTokenReference && subscription.matches(pushTokenReference)) {
+                        LOG.trace("Skipping push notification for subscription: " + subscription);
+                        continue;
+                    }
+                    registrationIDs.add(subscription.getToken());
                 }
                 /*
                  * send chunk
@@ -115,13 +120,9 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
                 } catch (IOException e) {
                     LOG.warn("error publishing drive event", e);
                 }
-                if (null != result && LOG.isDebugEnabled()) {
-                    LOG.debug(result);
+                if (null != result) {
+                    LOG.debug("{}", result);
                 }
-                /*
-                 * process resulst
-                 */
-                processResult(event.getContextID(), registrationIDs, result);
             }
         }
     }
@@ -189,8 +190,7 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
                          * recoverable error that will also require removing the registration from the server database. See Interpreting
                          * an error response for all possible error values.
                          */
-                        LOG.warn("Received error " + error + " when sending push message to " + registrationID +
-                            ", removing registration ID.");
+                        LOG.warn("Received error {} when sending push message to {}, removing registration ID.", error, registrationID);
                         removeRegistrations(contextID, registrationID);
                     }
                 }
@@ -202,9 +202,9 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
         try {
              if (Services.getService(DriveSubscriptionStore.class, true).updateToken(
                  contextID, SERIVCE_ID, oldRegistrationID, newRegistrationID)) {
-                 LOG.info("Successfully updated registration ID from " + oldRegistrationID + " to " + newRegistrationID);
+                 LOG.info("Successfully updated registration ID from {} to {}", oldRegistrationID, newRegistrationID);
              } else {
-                 LOG.warn("Registration ID " + oldRegistrationID + " not updated.");
+                 LOG.warn("Registration ID {} not updated.", oldRegistrationID);
              }
         } catch (OXException e) {
             LOG.error("Error updating registration IDs", e);
@@ -214,9 +214,9 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
     private static void removeRegistrations(int contextID, String registrationID) {
         try {
             if (0 < Services.getService(DriveSubscriptionStore.class, true).removeSubscriptions(contextID, SERIVCE_ID, registrationID)) {
-                LOG.info("Successfully removed registration ID " + registrationID + ".");
+                LOG.info("Successfully removed registration ID {}.", registrationID);
             } else {
-                LOG.warn("Registration ID " + registrationID + " not removd.");
+                LOG.warn("Registration ID {} not removd.", registrationID);
             }
         } catch (OXException e) {
             LOG.error("Error removing registrations", e);

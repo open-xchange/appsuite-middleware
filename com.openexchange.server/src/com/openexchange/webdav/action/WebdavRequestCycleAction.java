@@ -49,12 +49,10 @@
 
 package com.openexchange.webdav.action;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 public class WebdavRequestCycleAction extends AbstractAction {
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebdavRequestCycleAction.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavRequestCycleAction.class);
 
 	@Override
     public void perform(final WebdavRequest req, final WebdavResponse res)

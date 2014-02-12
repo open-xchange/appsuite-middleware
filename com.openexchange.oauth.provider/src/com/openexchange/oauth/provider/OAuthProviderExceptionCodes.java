@@ -50,9 +50,10 @@
 package com.openexchange.oauth.provider;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link OAuthProviderExceptionCodes} - Enumeration of all {@link OXException}s.
@@ -60,48 +61,48 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
-public enum OAuthProviderExceptionCodes implements OXExceptionCode {
+public enum OAuthProviderExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(OAuthProviderExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An error occurred: %1$s", Category.CATEGORY_ERROR, 1),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(OAuthProviderExceptionMessages.IO_ERROR_MSG, Category.CATEGORY_ERROR, 2),
+    IO_ERROR("An I/O error occurred: %1$s", Category.CATEGORY_ERROR, 2),
     /**
-     * An I/O error occurred: %1$s
+     * A JSON error occurred: %1$s
      */
-    JSON_ERROR(OAuthProviderExceptionMessages.JSON_ERROR_MSG, Category.CATEGORY_ERROR, 3),
+    JSON_ERROR("A JSON error occurred: %1$s", Category.CATEGORY_ERROR, 3),
     /**
      * Unknown OAuth service meta data: %1$s
      */
-    UNKNOWN_OAUTH_SERVICE_META_DATA(OAuthProviderExceptionMessages.UNKNOWN_OAUTH_SERVICE_META_DATA_MSG, Category.CATEGORY_ERROR, 4),
+    UNKNOWN_OAUTH_SERVICE_META_DATA("Unknown OAuth service meta data: %1$s", Category.CATEGORY_ERROR, 4),
     /**
      * A SQL error occurred: %1$s
      */
-    SQL_ERROR(OAuthProviderExceptionMessages.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 5),
+    SQL_ERROR("A SQL error occurred: %1$s", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 5),
     /**
      * Account not found with identifier %1$s for user %2$s in context %3$s.
      */
-    ACCOUNT_NOT_FOUND(OAuthProviderExceptionMessages.ACCOUNT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 6),
+    ACCOUNT_NOT_FOUND("Account not found with identifier %1$s for user %2$s in context %3$s.", OAuthProviderExceptionMessages.ACCOUNT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 6),
     /**
      * Unsupported OAuth service: %1$s
      */
-    UNSUPPORTED_SERVICE(OAuthProviderExceptionMessages.UNSUPPORTED_SERVICE_MSG, Category.CATEGORY_ERROR, 7),
+    UNSUPPORTED_SERVICE("Unsupported OAuth service: %1$s", Category.CATEGORY_ERROR, 7),
     /**
      * Missing argument: %1$s
      */
-    MISSING_ARGUMENT(OAuthProviderExceptionMessages.MISSING_ARGUMENT_MSG, Category.CATEGORY_ERROR, 8),
+    MISSING_ARGUMENT("Missing argument: %1$s", Category.CATEGORY_ERROR, 8),
     /**
      * An OAuth error occurred: %1$s
      */
-    OAUTH_ERROR(OAuthProviderExceptionMessages.OAUTH_ERROR_MSG, Category.CATEGORY_ERROR, 9),
+    OAUTH_ERROR("An OAuth error occurred: %1$s", Category.CATEGORY_ERROR, 9),
     /**
      * No OAuth provider found for identifier %1$s.
      */
-    PROVIDER_NOT_FOUND(OAuthProviderExceptionMessages.PROVIDER_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 10),
+    PROVIDER_NOT_FOUND("No OAuth provider found for identifier %1$s.", Category.CATEGORY_ERROR, 10),
 
     ;
 
@@ -115,11 +116,18 @@ public enum OAuthProviderExceptionCodes implements OXExceptionCode {
     private final int number;
 
     private final String message;
+    
+    private final String displayMessage;
 
     private OAuthProviderExceptionCodes(final String message, final Category category, final int detailNumber) {
+        this(message, null, category, detailNumber);
+    }
+    
+    private OAuthProviderExceptionCodes(final String message, final String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
         this.number = detailNumber;
         this.category = category;
+        this.displayMessage = (displayMessage == null) ? OXExceptionStrings.MESSAGE : displayMessage;
     }
 
     @Override
@@ -140,10 +148,6 @@ public enum OAuthProviderExceptionCodes implements OXExceptionCode {
     @Override
     public int getNumber() {
         return number;
-    }
-
-    public String getHelp() {
-        return null;
     }
 
     @Override
@@ -179,5 +183,13 @@ public enum OAuthProviderExceptionCodes implements OXExceptionCode {
      */
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.exception.DisplayableOXExceptionCode#getDisplayMessage()
+     */
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 }

@@ -57,11 +57,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.apache.commons.logging.Log;
 import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -75,8 +73,7 @@ import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
  */
 public final class ConditionTreeMapManagement {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConditionTreeMapManagement.class));
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConditionTreeMapManagement.class);
 
     private static volatile ConditionTreeMapManagement instance;
 
@@ -234,33 +231,15 @@ public final class ConditionTreeMapManagement {
      * Drops elapsed maps.
      */
     protected void shrink() {
-        if (DEBUG) {
-            final long st = System.currentTimeMillis();
-            final long maxStamp = System.currentTimeMillis() - TIME2LIVE;
-            for (final Iterator<Future<ConditionTreeMap>> it = context2maps.values().iterator(); it.hasNext();) {
-                final Future<ConditionTreeMap> future = it.next();
-                if (null != future) {
-                    try {
-                        final ConditionTreeMap map = getFrom(future);
-                        map.trim(maxStamp);
-                    } catch (final Exception e) {
-                        // Ignore
-                    }
-                }
-            }
-            final long dur = System.currentTimeMillis() - st;
-            LOG.debug("ConditionTreeMapManagement.shrink() took " + dur + "msec.");
-        } else {
-            final long maxStamp = System.currentTimeMillis() - TIME2LIVE;
-            for (final Iterator<Future<ConditionTreeMap>> it = context2maps.values().iterator(); it.hasNext();) {
-                final Future<ConditionTreeMap> future = it.next();
-                if (null != future) {
-                    try {
-                        final ConditionTreeMap map = getFrom(future);
-                        map.trim(maxStamp);
-                    } catch (final Exception e) {
-                        // Ignore
-                    }
+        final long maxStamp = System.currentTimeMillis() - TIME2LIVE;
+        for (final Iterator<Future<ConditionTreeMap>> it = context2maps.values().iterator(); it.hasNext();) {
+            final Future<ConditionTreeMap> future = it.next();
+            if (null != future) {
+                try {
+                    final ConditionTreeMap map = getFrom(future);
+                    map.trim(maxStamp);
+                } catch (final Exception e) {
+                    // Ignore
                 }
             }
         }
@@ -285,9 +264,9 @@ public final class ConditionTreeMapManagement {
     private final class LoadTreeMapRunnable implements Runnable {
 
         private final int contextId;
-        private final Log logger;
+        private final org.slf4j.Logger logger;
 
-        protected LoadTreeMapRunnable(final int contextId, final Log logger) {
+        protected LoadTreeMapRunnable(final int contextId, final org.slf4j.Logger logger) {
             super();
             this.contextId = contextId;
             this.logger = logger;
@@ -306,9 +285,9 @@ public final class ConditionTreeMapManagement {
     private static final class InitTreeMapCallable implements Callable<ConditionTreeMap> {
 
         private final int contextId;
-        private final Log logger;
+        private final org.slf4j.Logger logger;
 
-        protected InitTreeMapCallable(final int contextId, final Log logger) {
+        protected InitTreeMapCallable(final int contextId, final org.slf4j.Logger logger) {
             super();
             this.contextId = contextId;
             this.logger = logger;
@@ -321,10 +300,10 @@ public final class ConditionTreeMapManagement {
                 newMap.init();
                 return newMap;
             } catch (final OXException e) {
-                logger.warn(e.getMessage(), e);
+                logger.warn("", e);
                 return null;
             } catch (final Exception e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
                 return null;
             }
         }

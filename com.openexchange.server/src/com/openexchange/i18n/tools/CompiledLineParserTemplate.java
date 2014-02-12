@@ -52,8 +52,6 @@ package com.openexchange.i18n.tools;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link CompiledLineParserTemplate} - Compiles a template as per
@@ -66,7 +64,7 @@ import com.openexchange.log.LogFactory;
  */
 public abstract class CompiledLineParserTemplate extends AbstractTemplate {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CompiledLineParserTemplate.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CompiledLineParserTemplate.class);
 
     private static final String STR_EMPTY = "";
 
@@ -141,7 +139,7 @@ public abstract class CompiledLineParserTemplate extends AbstractTemplate {
                     escaped = false;
                 } else {
                     if(firstPos == -1) {
-                        LOG.error("Parser Error: Missing opening bracket in line: "+lineCount, new Throwable());
+                        LOG.error("Parser Error: Missing opening bracket in line: {}", lineCount, new Throwable());
                         open = null;
                     } else {
                         positions.add(new int[] { firstPos, i });
@@ -172,8 +170,7 @@ public abstract class CompiledLineParserTemplate extends AbstractTemplate {
         }
 
         if (open != null) {
-            LOG.error("Parser Error: Seems that the bracket opened on line " + open[0] + " column " + open[1]
-                    + " is never closed.", new Throwable());
+            LOG.error("Parser Error: Seems that the bracket opened on line {} column {} is never closed.", open[0], open[1], new Throwable());
             return new int[0][];
         }
 

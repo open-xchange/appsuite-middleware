@@ -94,7 +94,7 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "Response with timestamp: An array with new, modified and deleted appointments. New and modified appointments are represented by arrays. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter. Deleted appointments (should the ignore parameter be ever implemented) would be identified by objects described in Full identifier for an appointment instead of arrays. Appointment sequencies are broken up into individual appointments and each modified occurrence of a sequence in the requested range is returned separately. The appointments are sorted in ascending order by the field start_date.")
 public final class UpdatesAction extends AppointmentAction {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UpdatesAction.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdatesAction.class);
 
     /**
      * Initializes a new {@link UpdatesAction}.
@@ -184,10 +184,10 @@ public final class UpdatesAction extends AppointmentAction {
                                 recuResults = recColl.calculateFirstRecurring(appointmentObj);
                                 written = true;
                             } catch (final OXException e) {
-                                LOG.error("Can not calculate recurrence " + appointmentObj.getObjectID() + ':' + session.getContextId(), e);
+                                LOG.error("Can not calculate recurrence {}:{}", appointmentObj.getObjectID(), session.getContextId(), e);
                             }
                             if (recuResults != null && recuResults.size() != 1) {
-                                LOG.warn("cannot load first recurring appointment from appointment object: " + +appointmentObj.getRecurrenceType() + " / " + appointmentObj.getObjectID() + "\n\n\n");
+                                LOG.warn("cannot load first recurring appointment from appointment object: {} / {}\n\n\n", +appointmentObj.getRecurrenceType(), appointmentObj.getObjectID());
                             } else if (recuResults != null) {
                                 appointmentObj.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
                                 appointmentObj.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));
@@ -208,7 +208,7 @@ public final class UpdatesAction extends AppointmentAction {
                                     written = true;
                                 }
                             } catch (final OXException e) {
-                                LOG.error("Can not calculate recurrence " + appointmentObj.getObjectID() + ':' + session.getContextId(), e);
+                                LOG.error("Can not calculate recurrence {}:{}", appointmentObj.getObjectID(), session.getContextId(), e);
                             }
 
                             if (recuResults != null) {

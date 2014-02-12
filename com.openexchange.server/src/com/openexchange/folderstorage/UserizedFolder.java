@@ -62,7 +62,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface UserizedFolder extends ParameterizedFolder {
+public interface UserizedFolder extends ParameterizedFolder, AltNameAwareFolder {
 
     /**
      * Gets the context.
@@ -155,6 +155,20 @@ public interface UserizedFolder extends ParameterizedFolder {
      * @param locale The locale for this user-sensitive folder
      */
     void setLocale(Locale locale);
+
+    /**
+     * Signals whether to prefer alternative App Suite folder names.
+     *
+     * @return <code>true</code> for alternative folder names; otherwise <code>false</code>
+     */
+    boolean isAltNames();
+
+    /**
+     * Sets whether to prefer alternative App Suite folder names.
+     *
+     * @param altNames <code>true</code> for alternative folder names; otherwise <code>false</code>
+     */
+    void setAltNames(boolean altNames);
 
     /**
      * Sets the dynamic metadata

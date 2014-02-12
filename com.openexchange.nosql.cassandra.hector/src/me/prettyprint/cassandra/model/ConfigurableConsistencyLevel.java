@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  * @author zznate
  */
 public class ConfigurableConsistencyLevel implements ConsistencyLevelPolicy {
-  private final Logger log = LoggerFactory.getLogger(ConfigurableConsistencyLevel.class);
+  private final org.slf4j.Logger log = LoggerFactory.getLogger(ConfigurableConsistencyLevel.class);
 
   private Map<String, HConsistencyLevel> readCfConsistencyLevels = new HashMap<String, HConsistencyLevel>();
   private Map<String, HConsistencyLevel> writeCfConsistencyLevels = new HashMap<String, HConsistencyLevel>();

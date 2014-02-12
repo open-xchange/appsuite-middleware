@@ -141,10 +141,6 @@ public enum SmalExceptionCodes implements OXExceptionCode {
         return detailNumber;
     }
 
-    public String getHelp() {
-        return null;
-    }
-
     @Override
     public boolean equals(final OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);

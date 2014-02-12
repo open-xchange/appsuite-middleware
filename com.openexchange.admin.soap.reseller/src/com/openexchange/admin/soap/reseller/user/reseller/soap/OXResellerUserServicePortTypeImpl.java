@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
@@ -45,7 +45,7 @@ import com.openexchange.admin.soap.reseller.user.soap.dataobjects.UserModuleAcce
 
 public class OXResellerUserServicePortTypeImpl implements OXResellerUserServicePortType {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(OXResellerUserServicePortTypeImpl.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(OXResellerUserServicePortTypeImpl.class);
 
     public static final AtomicReference<OXUserInterface> RMI_REFERENCE = new AtomicReference<OXUserInterface>();
 
@@ -635,7 +635,9 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         final List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.SOAPMapEntry> entries = soapStringMapMap.getEntries();
         final Map<String, Map<String, String>> map = new HashMap<String, Map<String,String>>(entries.size());
         for (final com.openexchange.admin.soap.reseller.user.soap.dataobjects.SOAPMapEntry soapMapEntry : entries) {
-            map.put(soapMapEntry.getKey(), soap2Map(soapMapEntry.getValue()));
+            if (null != soapMapEntry) {
+                map.put(soapMapEntry.getKey(), soap2Map(soapMapEntry.getValue()));
+            }
         }
         return map;
     }
@@ -647,7 +649,9 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         final List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.Entry> entries = soapStringMap.getEntries();
         final Map<String, String> map = new HashMap<String, String>(entries.size());
         for (final com.openexchange.admin.soap.reseller.user.soap.dataobjects.Entry entry : entries) {
-            map.put(entry.getKey(), entry.getValue());
+            if (null != entry) {
+                map.put(entry.getKey(), entry.getValue());
+            }
         }
         return map;
     }

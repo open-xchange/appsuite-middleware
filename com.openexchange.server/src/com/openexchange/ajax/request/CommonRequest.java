@@ -51,7 +51,6 @@ package com.openexchange.ajax.request;
 
 import java.util.Arrays;
 import java.util.Locale;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONWriter;
@@ -60,7 +59,6 @@ import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
@@ -68,20 +66,20 @@ public abstract class CommonRequest {
 
 	protected JSONWriter w;
 
-	private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CommonRequest.class));
+	private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CommonRequest.class);
 
 	public CommonRequest(final JSONWriter w) {
 		this.w = w;
 	}
 
-    private static Locale localeFrom(final Session session) {
+    private static Locale localeFrom(final Session session) throws OXException {
         if (null == session) {
             return Locale.US;
         }
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getUser().getLocale();
         }
-        return UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
+        return UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getLocale();
     }
 
 	protected void sendErrorAsJS(final String error, final String...errorParams) {
@@ -96,7 +94,7 @@ public abstract class CommonRequest {
 			response.put("error_params",arr);
 			w.value(response);*/
 		} catch (final JSONException e) {
-			LOG.debug(e.getMessage(),e);
+			LOG.debug("",e);
 		}
 	}
 
@@ -107,14 +105,16 @@ public abstract class CommonRequest {
 		    x.log(LOG);
 		    res.setException(x);
 		} else {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             res.setException(new OXException(t));
 		}
 		try {
 			ResponseWriter.write(res, w, localeFrom(session));
 		} catch (final JSONException e) {
-			LOG.error("",t);
-		}
+			LOG.error("", t);
+		} catch (OXException e) {
+		    LOG.error("", e);
+        }
 	}
 
 	protected void invalidParameter(final String parameter, final String value) {

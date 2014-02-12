@@ -51,16 +51,14 @@ package com.openexchange.admin.rmi.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.rmi.OXAdminCoreInterface;
-import com.openexchange.log.LogFactory;
 
 public class OXAdminCoreImpl implements OXAdminCoreInterface {
 
-    private static final Log log = LogFactory.getLog(OXAdminCoreImpl.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXAdminCoreImpl.class);
 
     private BundleContext context = null;
 
@@ -85,9 +83,9 @@ public class OXAdminCoreImpl implements OXAdminCoreInterface {
             return true;
         }
         if (!fragments.isEmpty()) {
-            log.info("System contains the following fragments which will not be started: " + fragments);
+            log.info("System contains the following fragments which will not be started: {}", fragments);
         }
-        log.error("The following bundles aren't started: " + notStarted);
+        log.error("The following bundles aren't started: {}", notStarted);
         return false;
     }
 }

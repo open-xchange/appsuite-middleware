@@ -68,7 +68,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Parsing;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.exception.OXException.Truncated;
-import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.EnumComponent;
 
@@ -137,14 +136,15 @@ public final class ResponseParser {
             	}
             }
             final Object[] args = parseErrorMessageArgs(json.optJSONArray(ResponseFields.ERROR_PARAMS));
+            final String logMessage = json.optString(ResponseFields.ERROR_DESC);
             final OXException exception;
             final Category category = categories.get(0);
             if (category.getLogLevel().implies(LogLevel.DEBUG)) {
                 exception = new OXException(number, message, args);
             } else {
-                exception = new OXException(number, Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE, args);
-                exception.setLogMessage(message);
+                exception = new OXException(number, message, args);
             }
+            exception.setLogMessage(logMessage);
             exception.setPrefix(prefix);
             for (final Category cat : categories) {
                 exception.addCategory(cat);

@@ -51,13 +51,13 @@ package com.openexchange.groupware.update.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardIdsTask;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardPrincipalTask;
+import com.openexchange.groupware.update.tasks.AddSnippetAttachmentPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.AddUUIDForDListTables;
 import com.openexchange.groupware.update.tasks.AddUUIDForInfostoreReservedPaths;
 import com.openexchange.groupware.update.tasks.AddUUIDForUpdateTaskTable;
@@ -104,7 +104,6 @@ import com.openexchange.groupware.update.tasks.UserClearDelTablesTask;
 import com.openexchange.groupware.update.tasks.UserSettingServerAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.UserSettingServerAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.VirtualFolderAddSortNumTask;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -114,7 +113,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class InternalList {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InternalList.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InternalList.class);
 
     private static final InternalList SINGLETON = new InternalList();
 
@@ -138,13 +137,13 @@ public final class InternalList {
         final DynamicList registry = DynamicList.getInstance();
         for (final UpdateTask task : OLD_TASKS) {
             if (!registry.addUpdateTask(task)) {
-                LOG.error("Internal update task \"" + task.getClass().getName() + "\" could not be registered.", new Exception());
+                LOG.error("Internal update task \"{}\" could not be registered.", task.getClass().getName(), new Exception());
             }
         }
         TASKS = genTaskList();
         for (final UpdateTaskV2 task : TASKS) {
             if (!registry.addUpdateTask(task)) {
-                LOG.error("Internal update task \"" + task.getClass().getName() + "\" could not be registered.", new Exception());
+                LOG.error("Internal update task \"{}\" could not be registered.", task.getClass().getName(), new Exception());
             }
         }
     }
@@ -702,6 +701,23 @@ public final class InternalList {
 
         // Extends the size of the 'name' column in the 'infostoreReservedPaths' table.
         list.add(new com.openexchange.groupware.update.tasks.InfostoreExtendReservedPathsNameTask());
+
+        // +++++++++++++++++++++++++++++++++ Version 7.4.2 starts here. +++++++++++++++++++++++++++++++++
+
+        // Extends the size of the 'fname' column in the 'oxfolder_tree' table, as well as the 'name' column in the 'virtualTree' table.
+        list.add(new com.openexchange.groupware.update.tasks.FolderExtendNameTask());
+
+        // Extende folder tables by "meta" JSON BLOB
+        list.add(new com.openexchange.groupware.update.tasks.AddMetaForOXFolderTable());
+
+        // Add primary key to snippetAttachment table, fix for bug 30293
+        list.add(new AddSnippetAttachmentPrimaryKeyUpdateTask());
+
+        // Performs several adjustments to DB schema to get aligned to clean v7.4.1 installation
+        list.add(new com.openexchange.groupware.update.tasks.DropFKTaskv2());
+
+        // Adds/corrects user mail index: INDEX (mail) -> INDEX (cid, mail(255))
+        list.add(new com.openexchange.groupware.update.tasks.UserAddMailIndexTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

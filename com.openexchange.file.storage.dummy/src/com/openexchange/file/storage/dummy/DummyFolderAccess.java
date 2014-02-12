@@ -110,7 +110,7 @@ public class DummyFolderAccess extends AbstractFileStorageFolderAccess {
     }
 
     @Override
-    public String moveFolder(String folderId, String newParentId) throws OXException {
+    public String moveFolder(String folderId, String newParentId, String newName) throws OXException {
         return null;
     }
 
@@ -126,7 +126,7 @@ public class DummyFolderAccess extends AbstractFileStorageFolderAccess {
 
     @Override
     public void clearFolder(String folderId, boolean hardDelete) throws OXException {
-        
+
     }
 
     /* (non-Javadoc)

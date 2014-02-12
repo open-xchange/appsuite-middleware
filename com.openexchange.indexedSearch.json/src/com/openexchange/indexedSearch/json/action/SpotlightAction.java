@@ -50,7 +50,6 @@
 package com.openexchange.indexedSearch.json.action;
 
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
@@ -118,7 +117,7 @@ import com.openexchange.tools.session.ServerSession;
 })
 public class SpotlightAction extends AbstractIndexAction {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SpotlightAction.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpotlightAction.class);
 
     /**
      * Initializes a new {@link SpotlightAction}.
@@ -165,9 +164,7 @@ public class SpotlightAction extends AbstractIndexAction {
 
         IndexResult<MailMessage> result = indexAccess.query(params, null);
         long diff = System.currentTimeMillis() - startTime;
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Spotlight search duration for field '" + field + "': " + diff + "ms.");
-        }
+        LOG.debug("Spotlight search duration for field '{}': {}ms.", field, diff);
 
         SearchResult<MailMessage> searchResult = new SearchResult<MailMessage>(Types.EMAIL);
         searchResult.setNumFound(result.getNumFound());

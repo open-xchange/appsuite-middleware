@@ -74,6 +74,7 @@ import com.openexchange.groupware.contact.helpers.SpecialAlphanumSortContactComp
 import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.search.Operand;
@@ -95,6 +96,7 @@ public class ContactRequest {
 
     private final AJAXRequestData request;
     private final ServerSession session;
+    private final User user;
 
     /**
      * Initializes a new {@link ContactRequest}.
@@ -107,6 +109,7 @@ public class ContactRequest {
         super();
         this.request = request;
         this.session = session;
+        user = session.getUser();
     }
 
     /**
@@ -165,9 +168,9 @@ public class ContactRequest {
         if (this.isInternalSort() && null != contacts && 1 < contacts.size()) {
             final int sort = this.getSort();
             if (0 == sort || Contact.SPECIAL_SORTING == sort) {
-                Collections.sort(contacts, new SpecialAlphanumSortContactComparator(session.getUser().getLocale()));
+                Collections.sort(contacts, new SpecialAlphanumSortContactComparator(user.getLocale()));
             } else if (Contact.USE_COUNT_GLOBAL_FIRST == sort) {
-                Collections.sort(contacts, new UseCountComparator(true, session.getUser().getLocale()));
+                Collections.sort(contacts, new UseCountComparator(true, user.getLocale()));
             }
         }
     }
@@ -184,9 +187,9 @@ public class ContactRequest {
         if (null != contacts && 1 < contacts.size()) {
             int sort = this.getSort();
             if (Contact.SPECIAL_SORTING == sort) {
-                Collections.sort(contacts, new SpecialAlphanumSortContactComparator(session.getUser().getLocale()));
+                Collections.sort(contacts, new SpecialAlphanumSortContactComparator(user.getLocale()));
             } else if (Contact.USE_COUNT_GLOBAL_FIRST == sort) {
-                Collections.sort(contacts, new UseCountComparator(true, session.getUser().getLocale()));
+                Collections.sort(contacts, new UseCountComparator(true, user.getLocale()));
             } else if (0 == sort) {
                 Collections.sort(contacts, RequestTools.getAnnualDateComparator(dateField, reference));
             }
@@ -360,7 +363,7 @@ public class ContactRequest {
         if (request.isSet("id")) {
             return request.getParameter("id", int.class);
         }
-        return session.getUser().getContactId();
+        return user.getContactId();
     }
 
     public int getFolder() throws OXException {
@@ -371,7 +374,7 @@ public class ContactRequest {
     public TimeZone getTimeZone() {
         final String timezone = request.getParameter("timezone");
         if (timezone == null) {
-            return TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
+            return TimeZoneUtils.getTimeZone(user.getTimeZone());
         } else {
             return TimeZoneUtils.getTimeZone(timezone);
         }

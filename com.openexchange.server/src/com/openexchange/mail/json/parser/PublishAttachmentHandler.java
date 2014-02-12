@@ -117,7 +117,7 @@ import com.openexchange.user.UserService;
  */
 public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PublishAttachmentHandler.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PublishAttachmentHandler.class);
 
     private final Session session;
 
@@ -162,8 +162,8 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
     public void addAttachment(final MailPart attachment) throws OXException {
         if (doAction && !exceeded) {
             final long size = attachment.getSize();
-            if (size <= 0 && LOG.isDebugEnabled()) {
-                LOG.debug(new com.openexchange.java.StringAllocator("Missing size: ").append(size).toString(), new Throwable());
+            if (size <= 0) {
+                LOG.debug("Missing size: {}", size, new Throwable());
             }
             if (uploadQuotaPerFile > 0 && size > uploadQuotaPerFile) {
                 if (LOG.isDebugEnabled()) {
@@ -173,9 +173,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                             Long.valueOf(uploadQuotaPerFile),
                             null == fileName ? "" : fileName,
                             Long.valueOf(size));
-                    LOG.debug(
-                        new com.openexchange.java.StringAllocator(64).append("Per-file quota (").append(getSize(uploadQuotaPerFile, 2, false, true)).append(
-                            ") exceeded. Message is going to be sent with links to publishing infostore folder.").toString(),
+                    LOG.debug("Per-file quota ({}) exceeded. Message is going to be sent with links to publishing infostore folder.", getSize(uploadQuotaPerFile, 2, false, true),
                         e);
                 }
                 exceeded = true;
@@ -187,9 +185,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             if (uploadQuota > 0 && consumed > uploadQuota) {
                 if (LOG.isDebugEnabled()) {
                     final OXException e = MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(Long.valueOf(uploadQuota));
-                    LOG.debug(
-                        new com.openexchange.java.StringAllocator(64).append("Overall quota (").append(getSize(uploadQuota, 2, false, true)).append(
-                            ") exceeded. Message is going to be sent with links to publishing infostore folder.").toString(),
+                    LOG.debug("Overall quota ({}) exceeded. Message is going to be sent with links to publishing infostore folder.", getSize(uploadQuota, 2, false, true),
                         e);
                 }
                 exceeded = true;
@@ -465,7 +461,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             return ((ServerSession) session).getUser().getLocale();
         }
         final Context context = ContextStorage.getStorageContext(session.getContextId());
-        return UserStorage.getStorageUser(session.getUserId(), context).getLocale();
+        return UserStorage.getInstance().getUser(session.getUserId(), context).getLocale();
     }
 
     private ComposedMailMessage copyOf(final ComposedMailMessage source, final Context ctx) throws OXException {
@@ -564,7 +560,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         file.setId(FileStorageFileAccess.NEW);
         file.setFolderId(String.valueOf(folderId));
         file.setFileName(name);
-        file.setFileMIMEType(attachment.getContentType().toString());
+        file.setFileMIMEType(attachment.getContentType().getBaseType());
         file.setTitle(name);
         if (null != msgInfo) {
             // Description
@@ -682,8 +678,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             try {
                 publisher.delete(publication.publication);
             } catch (final OXException e) {
-                LOG.error(
-                    new com.openexchange.java.StringAllocator("Publication with ID \"").append(publication.publication.getId()).append(" could not be roll-backed.").toString(),
+                LOG.error("Publication with ID \"{} could not be roll-backed.", publication.publication.getId(),
                     e);
             }
             try {
@@ -699,9 +694,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                     fileAccess.finish();
                 }
             } catch (final OXException e) {
-                LOG.error(
-                    new com.openexchange.java.StringAllocator("Transaction error while deleting infostore document with ID \"").append(publication.infostoreId).append(
-                        "\" failed.").toString(),
+                LOG.error("Transaction error while deleting infostore document with ID \"{}\" failed.", publication.infostoreId,
                     e);
             }
         }

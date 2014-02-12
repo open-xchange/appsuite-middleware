@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Management Implementation
 Bundle-SymbolicName: com.openexchange.management.impl
-Bundle-Version: 7.4.1
+Bundle-Version: 7.4.2
 Bundle-Activator: com.openexchange.management.osgi.ManagementActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
@@ -30,8 +30,8 @@ Import-Package: com.openexchange.config,
  javax.security.auth,
  org.apache.commons.codec.binary,
  org.apache.commons.logging,
- org.apache.commons.logging.impl,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Export-Package: com.openexchange.management.console
 Bundle-Vendor: Open-Xchange Inc.

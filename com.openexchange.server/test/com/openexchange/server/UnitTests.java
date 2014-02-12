@@ -75,10 +75,14 @@ import org.junit.runners.Suite.SuiteClasses;
     com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class,
     com.openexchange.groupware.userconfiguration.AllowAllUserConfigurationTest.class,
     com.openexchange.groupware.userconfiguration.UserConfigurationTest.class,
+    com.openexchange.mail.mime.ContentDispositionTest.class,
     com.openexchange.mail.mime.MimeStructureFixerTest.class,
     com.openexchange.mail.mime.MimeSmilFixerTest.class,
-    com.openexchange.groupware.notify.ParticipantNotifyTest.class
-
+    com.openexchange.groupware.notify.ParticipantNotifyTest.class,
+    com.openexchange.mail.json.actions.GetAttachmentActionTest.class,
+    com.openexchange.ajax.requesthandler.converters.preview.cache.FileStoreResourceCacheImplTest.class,
+    com.openexchange.server.services.SharedInfostoreJSlobTest.class,
+    com.openexchange.groupware.upload.quotachecker.MailUploadQuotaCheckerTest.class
 })
 public class UnitTests {
 

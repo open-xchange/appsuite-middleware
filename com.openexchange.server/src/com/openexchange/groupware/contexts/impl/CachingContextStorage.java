@@ -51,7 +51,6 @@ package com.openexchange.groupware.contexts.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
@@ -68,7 +67,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class CachingContextStorage extends ContextStorage {
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(CachingContextStorage.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CachingContextStorage.class);
 
     private static final String REGION_NAME = "Context";
 
@@ -92,19 +91,17 @@ public class CachingContextStorage extends ContextStorage {
         final Cache cache = cacheService.getCache(REGION_NAME);
         Integer contextId = (Integer) cache.get(loginInfo);
         if (null == contextId) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Cache MISS. Login info: " + loginInfo);
-            }
+            LOG.trace("Cache MISS. Login info: {}", loginInfo);
             contextId = I(persistantImpl.getContextId(loginInfo));
             if (NOT_FOUND != contextId.intValue()) {
                 try {
                     cache.put(loginInfo, contextId, false);
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
-        } else if (LOG.isTraceEnabled()) {
-            LOG.trace("Cache HIT. Login info: " + loginInfo);
+        } else {
+            LOG.trace("Cache HIT. Login info: {}", loginInfo);
         }
         return contextId.intValue();
     }
@@ -153,7 +150,7 @@ public class CachingContextStorage extends ContextStorage {
             try {
                 cacheService.freeCache(REGION_NAME);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         persistantImpl.shutDown();
@@ -212,7 +209,7 @@ public class CachingContextStorage extends ContextStorage {
             }
         } catch (final OXException e) {
             if (SchemaExceptionCodes.DATABASE_DOWN.equals(e)) {
-                LOG.warn("Switching to read only mode for context " + contextId + " because master database is down.", e);
+                LOG.warn("Switching to read only mode for context {} because master database is down.", contextId, e);
                 retval.setReadOnly(true);
             }
         }

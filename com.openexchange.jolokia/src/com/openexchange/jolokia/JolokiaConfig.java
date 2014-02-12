@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.restrictor.RestrictorFactory;
@@ -71,7 +70,7 @@ import com.openexchange.server.Initialization;
  */
 public class JolokiaConfig implements Initialization {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(JolokiaConfig.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JolokiaConfig.class);
 
     private static final JolokiaConfig instance = new JolokiaConfig();
 

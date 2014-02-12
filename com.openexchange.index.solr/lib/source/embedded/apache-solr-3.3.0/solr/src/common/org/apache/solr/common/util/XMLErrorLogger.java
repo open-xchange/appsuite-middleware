@@ -17,8 +17,8 @@
 
 package org.apache.solr.common.util;
 
+import java.text.MessageFormat;
 import org.slf4j.Logger;
-
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -29,7 +29,7 @@ import javax.xml.stream.XMLReporter;
 
 public final class XMLErrorLogger implements ErrorHandler,ErrorListener,XMLReporter {
 
-  private final Logger log;
+  private final org.slf4j.Logger log;
 
   public XMLErrorLogger(Logger log) {
     this.log = log;
@@ -38,7 +38,7 @@ public final class XMLErrorLogger implements ErrorHandler,ErrorListener,XMLRepor
   // ErrorHandler
 
   public void warning(SAXParseException e) {
-    log.warn("XML parse warning in \""+e.getSystemId()+"\", line "+e.getLineNumber()+", column "+e.getColumnNumber()+": "+e.getMessage());
+    log.warn("XML parse warning in \"{}\", line {}, column {}: {}", e.getSystemId(), e.getLineNumber(), e.getColumnNumber(), e.getMessage());
   }
 
   public void error(SAXParseException e) throws SAXException {

@@ -58,7 +58,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -71,7 +70,6 @@ import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -129,7 +127,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
 
     private String categories;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FreeBusyResults.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FreeBusyResults.class);
 
     /*public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final Connection con, final long range_start, final long range_end) throws OXException {
     	this.warnings =  new ArrayList<AbstractOXException>(2);
@@ -230,7 +228,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                             try {
                                 rrs = recColl.calculateRecurring(cdao, range_start, range_end, 0);
                             } catch (final OXException x) {
-                                LOG.error("Can not load appointment '"+cdao.getTitle()+"' with id "+cdao.getObjectID()+":"+cdao.getContextID()+" due to invalid recurrence pattern", x);
+                                LOG.error("Can not load appointment '{}' with id {}:{} due to invalid recurrence pattern", cdao.getTitle(), cdao.getObjectID(), cdao.getContextID(), x);
                                 recColl.recoverForInvalidPattern(cdao);
                                 seq = -1;
                                 rsNext();
@@ -254,7 +252,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         } catch (final SQLException sqle) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } catch(final Exception e) {
-            LOG.error("FreeBusyResults calculation problem with oid "+oid+" / "+cdao == null ? "" : cdao.toString() , e);
+            LOG.error("FreeBusyResults calculation problem with oid {} / {}", oid, cdao == null ? "" : cdao.toString() , e);
             throw SearchIteratorExceptionCodes.CALCULATION_ERROR.create(e, oid).setPrefix("APP");
         }
         if (ft != 0 && cdao != null) {
@@ -417,7 +415,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                         }
                     }
                 } catch (SQLException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 } finally {
                     DBUtils.closeSQLStuff(result, sharedFolderQuery);
                 }
@@ -546,13 +544,13 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                 list.add(pfio);
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             if(shared_folder_info != null) {
                 try {
                     shared_folder_info.close();
                 } catch (final SQLException e) {
-                	LOG.error(e.getMessage(), e);
+                	LOG.error("", e);
                 }
             }
         }

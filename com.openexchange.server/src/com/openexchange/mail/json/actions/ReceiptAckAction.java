@@ -67,11 +67,6 @@ import com.openexchange.server.ServiceLookup;
  */
 public final class ReceiptAckAction extends AbstractMailAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ReceiptAckAction.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     /**
      * Initializes a new {@link ReceiptAckAction}.
      *
@@ -97,8 +92,7 @@ public final class ReceiptAckAction extends AbstractMailAction {
             if (null == uid) {
                 throw MailExceptionCode.MISSING_PARAM.create(AJAXServlet.PARAMETER_ID);
             }
-            final String fromAddr =
-                bodyObj.has(MailJSONField.FROM.getKey()) && !bodyObj.isNull(MailJSONField.FROM.getKey()) ? bodyObj.getString(MailJSONField.FROM.getKey()) : null;
+            final String fromAddr = bodyObj.hasAndNotNull(MailJSONField.FROM.getKey()) ? bodyObj.getString(MailJSONField.FROM.getKey()) : null;
             final MailServletInterface mailInterface = getMailInterface(req);
             mailInterface.sendReceiptAck(folderPath, uid, fromAddr);
             return getJSONNullResult();

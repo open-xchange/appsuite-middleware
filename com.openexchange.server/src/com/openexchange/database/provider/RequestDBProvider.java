@@ -54,17 +54,15 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 
 public class RequestDBProvider implements DBProvider {
 
     private static final ThreadLocal<DBTransaction> txIds = new ThreadLocal<DBTransaction>();
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(RequestDBProvider.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RequestDBProvider.class);
     private boolean commits = true;
 
 
@@ -220,9 +218,7 @@ public class RequestDBProvider implements DBProvider {
         }
 
         final Connection readCon = getProvider().getReadConnection(ctx);
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("---> "+readCon);
-        }
+        LOG.debug("---> {}", readCon);
         if(tx != null) {
             tx.readConnection = readCon;
             rc++;
@@ -276,9 +272,7 @@ public class RequestDBProvider implements DBProvider {
             int rc = readCount.get();
             rc--;
             if(rc==0) {
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("<--- "+con);
-                }
+                LOG.debug("<--- {}", con);
                 getProvider().releaseReadConnection(ctx,con);
                 tx.readConnection=null;
             }
@@ -288,9 +282,7 @@ public class RequestDBProvider implements DBProvider {
         if(tx != null) {
             return;
         }
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("<--- "+con);
-        }
+        LOG.debug("<--- {}", con);
         getProvider().releaseReadConnection(ctx,con);
 
     }

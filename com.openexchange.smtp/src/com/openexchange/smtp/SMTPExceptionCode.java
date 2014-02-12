@@ -51,9 +51,8 @@
 package com.openexchange.smtp;
 
 import com.openexchange.exception.Category;
-import com.openexchange.exception.LogLevel;
-import com.openexchange.exception.LogLevelAwareOXExceptionCode;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.mail.MailExceptionCode;
 
@@ -62,7 +61,7 @@ import com.openexchange.mail.MailExceptionCode;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum SMTPExceptionCode implements LogLevelAwareOXExceptionCode {
+public enum SMTPExceptionCode implements OXExceptionCode {
 
     /**
      * An I/O error occurred: %1$s
@@ -120,24 +119,22 @@ public enum SMTPExceptionCode implements LogLevelAwareOXExceptionCode {
      * The following recipient is not allowed: %1$s. Please remove associated address and try again.
      */
     RECIPIENT_NOT_ALLOWED(SMTPExceptionMessage.RECIPIENT_NOT_ALLOWED, CATEGORY_USER_INPUT, 3014),
+    /**
+     * The SMTP server %1$s cannot be accessed using a secure SSL connection for user %2$s. Please change configuration accordingly.
+     */
+    SECURE_CONNECTION_NOT_POSSIBLE(SMTPExceptionMessage.SECURE_CONNECTION_NOT_POSSIBLE, CATEGORY_USER_INPUT, 3015),
     ;
 
     private final String message;
     private final int detailNumber;
     private final Category category;
     private final String prefix;
-    private final LogLevel logLevel;
 
     private SMTPExceptionCode(final String message, final Category category, final int detailNumber) {
-        this(message, category, detailNumber, null);
-    }
-
-    private SMTPExceptionCode(final String message, final Category category, final int detailNumber, final LogLevel logLevel) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
         prefix = SMTPProvider.PROTOCOL_SMTP.getName();
-        this.logLevel = logLevel;
     }
 
     private SMTPExceptionCode(final MailExceptionCode code) {
@@ -145,7 +142,6 @@ public enum SMTPExceptionCode implements LogLevelAwareOXExceptionCode {
         detailNumber = code.getNumber();
         category = code.getCategory();
         prefix = code.getPrefix();
-        logLevel = null;
     }
 
     @Override
@@ -166,11 +162,6 @@ public enum SMTPExceptionCode implements LogLevelAwareOXExceptionCode {
     @Override
     public String getMessage() {
         return message;
-    }
-
-    @Override
-    public LogLevel getLogLevel() {
-        return logLevel;
     }
 
     @Override

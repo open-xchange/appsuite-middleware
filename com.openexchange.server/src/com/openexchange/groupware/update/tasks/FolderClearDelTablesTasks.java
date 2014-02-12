@@ -55,7 +55,6 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -64,7 +63,6 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -80,7 +78,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class FolderClearDelTablesTasks extends UpdateTaskAdapter {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderClearDelTablesTasks.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderClearDelTablesTasks.class);
 
     /**
      * Initializes a new {@link FolderClearDelTablesTasks}.
@@ -107,11 +105,11 @@ public final class FolderClearDelTablesTasks extends UpdateTaskAdapter {
 
             LOG.info("Clearing obsolete fields in 'del_oxfolder_tree'...");
             int cleared = clearDelOxfolderTree(connection);
-            LOG.info("Cleared " + cleared + " rows in 'del_oxfolder_tree'.");
+            LOG.info("Cleared {} rows in 'del_oxfolder_tree'.", cleared);
 
             LOG.info("Clearing obsolete fields in 'virtualBackupTree'...");
             cleared = clearVirtuelBackupTree(connection);
-            LOG.info("Cleared " + cleared + " rows in 'virtualBackupTree'.");
+            LOG.info("Cleared {} rows in 'virtualBackupTree'.", cleared);
 
             connection.commit();
             rollback = false;

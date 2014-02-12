@@ -66,7 +66,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionServlet;
@@ -79,7 +78,6 @@ import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogProperties.Name;
-import com.openexchange.log.PropertiesAppendingLogWrapper;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -104,7 +102,7 @@ public class DispatcherServlet extends SessionServlet {
 
     private static final long serialVersionUID = -8060034833311074781L;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DispatcherServlet.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DispatcherServlet.class);
 
     private static final Session NO_SESSION = new SessionObject(Dispatcher.class.getSimpleName() + "-Fake-Session");
 
@@ -347,8 +345,8 @@ public class DispatcherServlet extends SessionServlet {
             {
                 final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
                 final String module = requestDataTools.getModule(PREFIX.get(), httpRequest);
-    			final String action = requestDataTools.getAction(httpRequest);
-    			session = getSession(httpRequest, dispatcher, module, action);
+                final String action = requestDataTools.getAction(httpRequest);
+                session = getSession(httpRequest, dispatcher, module, action);
                 /*
                  * Parse AJAXRequestData
                  */
@@ -376,7 +374,7 @@ public class DispatcherServlet extends SessionServlet {
             if (NOT_FOUND.equals(result.getType())) {
                 httpResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 return;
-            };
+            }
 
             if (DIRECT.equals(result.getType())) {
                 // No further processing
@@ -387,7 +385,7 @@ public class DispatcherServlet extends SessionServlet {
              */
             OXException exception = result.getException();
             if (exception != null) {
-                if (exception.isLoggable(LogLevel.DEBUG)) {
+                if (exception.isLoggable()) {
                     logException(exception, LogLevel.DEBUG);
                 } else {
                     logException(exception, LogLevel.TRACE);
@@ -409,18 +407,14 @@ public class DispatcherServlet extends SessionServlet {
             }
             // Handle other OXExceptions
             if (AjaxExceptionCodes.UNEXPECTED_ERROR.equals(e)) {
-                LOG.error(new StringAllocator("Unexpected error: '").append(e.getMessage()).append('\'').toString(), e);
-            } else if (e.isLoggable(LogLevel.ERROR)) {
+                LOG.error("Unexpected error", e);
+            } else {
                 // Ignore special "folder not found" error
                 if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
                     logException(e, LogLevel.DEBUG);
                 } else {
                     logException(e);
                 }
-            } else if (e.isLoggable(LogLevel.DEBUG)){
-                logException(e, LogLevel.DEBUG);
-            } else {
-                logException(e, LogLevel.TRACE);
             }
             final String action = httpRequest.getParameter(PARAMETER_ACTION);
             APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? toUpperCase(httpRequest.getMethod()) : action, httpRequest, httpResponse);
@@ -441,19 +435,8 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     private void logException(final Exception e, final LogLevel logLevel) {
-        final String msg;
-        if (LogProperties.isEnabled()) {
-            final StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:").append(lineSeparator);
-            if (LOG instanceof PropertiesAppendingLogWrapper) {
-                final Set<Name> nonmatching = ((PropertiesAppendingLogWrapper) LOG).getPropertiesFor(com.openexchange.log.LogPropertyName.LogLevel.ERROR, LogProperties.optLogProperties());
-                logBuilder.append(LogProperties.getAndPrettyPrint(nonmatching));
-            } else {
-                logBuilder.append(LogProperties.getAndPrettyPrint(PROPS_TO_IGNORE));
-            }
-            msg = logBuilder.toString();
-        } else {
-            msg = "Error processing request.";
-        }
+        final String msg = "Error processing request.";
+
         if (null == logLevel) {
             LOG.error(msg, e);
         } else {
@@ -495,13 +478,13 @@ public class DispatcherServlet extends SessionServlet {
         return session;
     }
 
-	private ServerSession fakeSession() {
-		final UserImpl user = new UserImpl();
-		user.setAttributes(new HashMap<String, Set<String>>(1));
-		return new ServerSessionAdapter(NO_SESSION, new ContextImpl(-1), user);
-	}
+    private ServerSession fakeSession() {
+        final UserImpl user = new UserImpl();
+        user.setAttributes(new HashMap<String, Set<String>>(1));
+        return new ServerSessionAdapter(NO_SESSION, new ContextImpl(-1), user);
+    }
 
-	/**
+    /**
      * Sends a proper response to requesting client after request has been orderly dispatched.
      *
      * @param requestData The AJAX request data

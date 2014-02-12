@@ -51,7 +51,6 @@
 package com.openexchange.hazelcast.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
@@ -85,7 +84,7 @@ public class HazelcastActivator extends HousekeepingActivator {
     /**
      * The logger for HazelcastActivator.
      */
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastActivator.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastActivator.class);
 
     /**
      * Initializes a new {@link HazelcastActivator}.
@@ -101,52 +100,39 @@ public class HazelcastActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        boolean infoEnabled = LOG.isInfoEnabled();
         String lf = Strings.getLineSeparator();
-        if (infoEnabled) {
-            LOG.info(lf + "Hazelcast:" + lf + "    Starting..." + lf);
-        }
-        long bundleStart = infoEnabled ? System.currentTimeMillis() : 0L;
+        LOG.info("{}Hazelcast:{}    Starting...{}", lf, lf, lf);
+        long bundleStart = System.currentTimeMillis();
         /*
          * Get hazelcast config service
          */
         HazelcastConfigurationService configService = getService(HazelcastConfigurationService.class);
         if (false == configService.isEnabled()) {
-            if (infoEnabled) {
-                LOG.info(lf + "Hazelcast:" + lf +
-                    "    Startup of Hazelcast clustering and data distribution platform denied per configuration." + lf);
-            }
+            LOG.info("{}Hazelcast:{}    Startup of Hazelcast clustering and data distribution platform denied per configuration.{}", lf, lf, lf);
             return;
         }
         /*
          * Create hazelcast instance from configuration
          */
         Config config = configService.getConfig();
-        if (infoEnabled) {
-            LOG.info(lf + "Hazelcast:" + lf + "    Creating new hazelcast instance..." + lf);
+        {
+            LOG.info("{}Hazelcast:{}    Creating new hazelcast instance...{}", lf, lf, lf);
             if (config.getNetworkConfig().getJoin().getMulticastConfig().isEnabled()) {
-                LOG.info(lf + "Hazelcast:" + lf +
-                    "    Using network join: " + config.getNetworkConfig().getJoin().getMulticastConfig() + lf);
+                LOG.info("{}Hazelcast:{}    Using network join: {}{}", lf, lf, config.getNetworkConfig().getJoin().getMulticastConfig(), lf);
             }
             if (config.getNetworkConfig().getJoin().getTcpIpConfig().isEnabled()) {
-                LOG.info(lf + "Hazelcast:" + lf +
-                    "    Using network join: " + config.getNetworkConfig().getJoin().getTcpIpConfig() + lf);
+                LOG.info("{}Hazelcast:{}    Using network join: {}{}", lf, lf, config.getNetworkConfig().getJoin().getTcpIpConfig(), lf);
             }
         }
-        long hzStart = infoEnabled ? System.currentTimeMillis() : 0L;
+        long hzStart = System.currentTimeMillis();
         HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance(config);
-        if (infoEnabled) {
-            LOG.info(lf + "Hazelcast:" + lf +
-                "    New hazelcast instance successfully created in " + (System.currentTimeMillis() - hzStart) + " msec." + lf);
-        }
+        LOG.info("{}Hazelcast:{}    New hazelcast instance successfully created in {} msec.{}", lf, lf, (System.currentTimeMillis() - hzStart), lf);
         /*
          * Register instance
          */
         registerService(HazelcastInstance.class, hazelcastInstance);
         REF_HAZELCAST_INSTANCE.set(hazelcastInstance);
-        if (infoEnabled) {
-            LOG.info(lf + "Hazelcast:" + lf + "    Started in " + (System.currentTimeMillis() - bundleStart) + " msec." + lf);
-        }
+        LOG.info("{}Hazelcast:{}    Started in {} msec.{}", lf, lf, (System.currentTimeMillis() - bundleStart), lf);
         /*
          * Register management mbean dynamically
          */
@@ -156,21 +142,15 @@ public class HazelcastActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        boolean infoEnabled = LOG.isInfoEnabled();
-        if (infoEnabled) {
-            String lf = Strings.getLineSeparator();
-            LOG.info(lf + "Hazelcast:" + lf + "    Shutting down..." + lf);
-        }
-        long start = infoEnabled ? System.currentTimeMillis() : 0L;
+        String lf = Strings.getLineSeparator();
+        LOG.info("{}Hazelcast:{}    Shutting down...{}", lf, lf, lf);
+        long start = System.currentTimeMillis();
         HazelcastInstance instance = REF_HAZELCAST_INSTANCE.get();
         if (null != instance) {
             instance.getLifecycleService().shutdown();
             REF_HAZELCAST_INSTANCE.set(null);
         }
-        if (LOG.isInfoEnabled()) {
-            String lf = Strings.getLineSeparator();
-            LOG.info(lf + "Hazelcast:" + lf + "    Shutdown completed after " + (System.currentTimeMillis() - start) + " msec." + lf);
-        }
+        LOG.info("{}Hazelcast:{}    Shutdown completed after {} msec.{}", lf, lf, (System.currentTimeMillis() - start), lf);
         super.stopBundle();
     }
 

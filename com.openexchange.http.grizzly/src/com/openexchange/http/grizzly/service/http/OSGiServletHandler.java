@@ -113,7 +113,6 @@ import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.Grizzly;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.localization.LogMessages;
@@ -136,7 +135,7 @@ import com.openexchange.tools.servlet.UploadServletException;
  */
 public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(OSGiServletHandler.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OSGiServletHandler.class);
 
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -414,12 +413,12 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
                  */
                 final Throwable rootCause = e.getRootCause();
                 if (null != rootCause) {
-                    LOG.error(rootCause.getMessage(), rootCause);
+                    LOG.error("", rootCause);
                 }
                 /*
                  * Now log actual UploadServletException...
                  */
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 /*
                  * ... and write bytes
                  */
@@ -461,9 +460,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
             ExceptionUtils.handleThrowable(throwable);
 
             StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
-            if (LogProperties.isEnabled()) {
-                logBuilder.append(LogProperties.getAndPrettyPrint(LogProperties.Name.SESSION_SESSION));
-            }
+            logBuilder.append(LogProperties.getAndPrettyPrint(LogProperties.Name.SESSION_SESSION));
 
             if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
                 appendHttpServletRequestInfo(logBuilder, (HttpServletRequest) request);
@@ -487,7 +484,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
                 for (Filter currentFilter : filters) {
                     if (currentFilter != null && currentFilter.getClass().equals(filter.getClass())) {
                         isAlreadyAdded = true;
-                        LOG.error("Tried to add Filter " + filter + " multiple times.");
+                        LOG.error("Tried to add Filter {} multiple times.", filter);
                         break;
                     }
                 }

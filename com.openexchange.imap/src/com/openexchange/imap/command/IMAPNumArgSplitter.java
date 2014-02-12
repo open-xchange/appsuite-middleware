@@ -63,7 +63,7 @@ import javax.mail.Message;
  */
 public final class IMAPNumArgSplitter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPNumArgSplitter.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPNumArgSplitter.class);
 
     private static interface Tokenizer {
 
@@ -401,10 +401,7 @@ public final class IMAPNumArgSplitter {
             }
             if (endPos <= offset) {
                 final int p = numArg.indexOf(',', offset);
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn(new com.openexchange.java.StringAllocator("Token does not fit into given max size of ").append(maxLen).append(" bytes: ").append(
-                        numArg.substring(offset, p)).toString());
-                }
+                LOG.warn("Token does not fit into given max size of {} bytes: {}", maxLen, numArg.substring(offset, p));
                 offset = p + 1;
             } else {
                 tmp.add(numArg.substring(offset, endPos));

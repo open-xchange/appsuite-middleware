@@ -52,8 +52,8 @@ package com.openexchange.ajax.mail.netsol.actions;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.mail.FolderAndID;
 import com.openexchange.ajax.mail.actions.AbstractMailRequest;
-import com.openexchange.ajax.mail.netsol.FolderAndID;
 
 /**
  * {@link NetsolGetRequest}

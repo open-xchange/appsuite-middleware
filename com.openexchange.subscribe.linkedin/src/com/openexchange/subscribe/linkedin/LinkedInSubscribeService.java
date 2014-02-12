@@ -53,13 +53,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.subscribe.AbstractSubscribeService;
@@ -78,7 +76,7 @@ public class LinkedInSubscribeService  extends AbstractSubscribeService {
 
     private final Activator activator;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinkedInSubscribeService.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LinkedInSubscribeService.class);
 
     private final SubscriptionSource source;
 

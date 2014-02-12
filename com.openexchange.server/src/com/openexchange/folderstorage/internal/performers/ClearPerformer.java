@@ -65,14 +65,13 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class ClearPerformer extends AbstractPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ClearPerformer.class));
-
     /**
      * Initializes a new {@link ClearPerformer}.
      *
      * @param session The session
+     * @throws OXException If passed session is invalid
      */
-    public ClearPerformer(final ServerSession session) {
+    public ClearPerformer(final ServerSession session) throws OXException {
         super(session);
     }
 
@@ -91,8 +90,9 @@ public final class ClearPerformer extends AbstractPerformer {
      *
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
+     * @throws OXException If passed session is invalid
      */
-    public ClearPerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public ClearPerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(session, folderStorageDiscoverer);
     }
 
@@ -119,14 +119,9 @@ public final class ClearPerformer extends AbstractPerformer {
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
-        final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
         final boolean started = folderStorage.startTransaction(storageParameters, true);
         try {
             folderStorage.clearFolder(treeId, folderId, storageParameters);
-            if (LOG.isDebugEnabled()) {
-                final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new com.openexchange.java.StringAllocator().append("Clear.doClear() took ").append(duration).append("msec for folder: ").append(folderId).toString());
-            }
             if (started) {
                 folderStorage.commitTransaction(storageParameters);
             }

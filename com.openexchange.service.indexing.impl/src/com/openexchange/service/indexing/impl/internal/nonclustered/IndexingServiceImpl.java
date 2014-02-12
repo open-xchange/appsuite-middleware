@@ -53,7 +53,6 @@ import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
-import org.apache.commons.logging.Log;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
@@ -84,7 +83,7 @@ import com.openexchange.threadpool.ThreadRenamer;
  */
 public class IndexingServiceImpl implements IndexingService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(IndexingServiceImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IndexingServiceImpl.class);
 
     @Override
     public void scheduleJobWithProgressiveInterval(JobInfo info, Date startDate, long timeout, long initialInterval, int progressionRate, int priority, boolean onlyResetProgression) throws OXException {
@@ -92,13 +91,7 @@ public class IndexingServiceImpl implements IndexingService {
             startDate = new Date();
         }
 
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Scheduling job " + info.toString() + " at " + startDate + "." +
-                "\n    Initial interval: " + initialInterval +
-                "\n    Progression rate: " + progressionRate +
-                "\n    Timeout: " + timeout +
-                "\n    Priority: " + priority);
-        }
+        LOG.trace("Scheduling job {} at {}.\n    Initial interval: {}\n    Progression rate: {}\n    Timeout: {}\n    Priority: {}", info, startDate, initialInterval, progressionRate, timeout, priority);
 
         if (timeout <= 0) {
             throw new IllegalArgumentException("Parameter 'timeout' must be > 0.");
@@ -144,10 +137,7 @@ public class IndexingServiceImpl implements IndexingService {
         long now = System.currentTimeMillis();
         long diff = now - (lastRun + interval);
         if (diff > 0) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Job " + old.getJobInfo().toString() + " was misfired for " + diff +
-                    "ms. Re-adding trigger and job on session reactivation.");
-            }
+            LOG.debug("Job {} was misfired for {}ms. Re-adding trigger and job on session reactivation.", old.getJobInfo(), diff);
             return true;
         }
 
@@ -188,10 +178,7 @@ public class IndexingServiceImpl implements IndexingService {
 
     @Override
     public void scheduleJob(boolean async, final JobInfo info, final Date startDate, final long repeatInterval, final int priority) throws OXException {
-        if (LOG.isTraceEnabled()) {
-            String at = startDate == null ? "now" : startDate.toString();
-            LOG.trace("Scheduling job " + info.toString() + " at " + at + " with interval " + repeatInterval + " and priority " + priority + ".");
-        }
+        LOG.trace("Scheduling job {} at {} with interval {} and priority {}.", info, startDate == null ? "now" : startDate.toString(), repeatInterval, priority);
 
         Task<Object> task = new TaskAdapter(new ScheduleJobCallable(info, startDate, repeatInterval, priority));
         try {
@@ -203,7 +190,7 @@ public class IndexingServiceImpl implements IndexingService {
             }
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
         }
     }
 
@@ -229,9 +216,7 @@ public class IndexingServiceImpl implements IndexingService {
 
     @Override
     public void unscheduleAllForUser(boolean async, int contextId, int userId) throws OXException {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Unscheduling all jobs for user " + userId + " in context " + contextId + ".");
-        }
+        LOG.trace("Unscheduling all jobs for user {} in context {}.", userId, contextId);
 
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         ExecutorService executorService = hazelcast.getExecutorService();
@@ -243,9 +228,7 @@ public class IndexingServiceImpl implements IndexingService {
 
     @Override
     public void unscheduleAllForContext(boolean async, int contextId) throws OXException {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Unscheduling all jobs for context " + contextId + ".");
-        }
+        LOG.trace("Unscheduling all jobs for context {}.", contextId);
 
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         ExecutorService executorService = hazelcast.getExecutorService();

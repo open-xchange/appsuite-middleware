@@ -49,12 +49,15 @@
 
 package com.openexchange.java;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Collection;
@@ -97,6 +100,38 @@ public class Streams {
             return -1;
         }
     };
+
+    /**
+     * Returns a buffered {@link InputStream} for specified stream.
+     *
+     * @param in The stream
+     * @return A new buffered input stream
+     */
+    public static InputStream bufferedInputStreamFor(final InputStream in) {
+        if (null == in) {
+            return in;
+        }
+        if ((in instanceof BufferedInputStream) || (in instanceof ByteArrayInputStream)) {
+            return in;
+        }
+        return new BufferedInputStream(in, 65536);
+    }
+
+    /**
+     * Returns a buffered {@link OutputStream} for specified stream.
+     *
+     * @param out The stream
+     * @return A new buffered output stream
+     */
+    public static OutputStream bufferedOutputStreamFor(final OutputStream out) {
+        if (null == out) {
+            return out;
+        }
+        if ((out instanceof BufferedOutputStream) || (out instanceof ByteArrayOutputStream)) {
+            return out;
+        }
+        return new BufferedOutputStream(out, 65536);
+    }
 
     /**
      * Reads the content from given reader.

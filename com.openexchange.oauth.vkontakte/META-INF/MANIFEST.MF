@@ -35,4 +35,5 @@ Import-Package: com.openexchange.capabilities,
  org.scribe.model,
  org.scribe.oauth,
  org.scribe.services,
- org.scribe.utils
+ org.scribe.utils,
+ org.slf4j

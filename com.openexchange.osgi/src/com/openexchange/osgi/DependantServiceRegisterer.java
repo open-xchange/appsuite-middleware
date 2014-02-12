@@ -56,7 +56,6 @@ import java.util.Dictionary;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
@@ -72,7 +71,7 @@ import com.openexchange.osgi.console.ServiceStateLookup;
  */
 public class DependantServiceRegisterer<S> implements ServiceTrackerCustomizer<Object,Object> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DependantServiceRegisterer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DependantServiceRegisterer.class);
 
     private final Lock lock = new ReentrantLock();
     private final BundleContext context;
@@ -120,10 +119,10 @@ public class DependantServiceRegisterer<S> implements ServiceTrackerCustomizer<O
             try {
                 Constructor<? extends S> constructor = serviceClass.getConstructor(neededServices);
                 registeredService = constructor.newInstance(foundServices);
-                LOG.trace("Registering service " + serviceClass.getName());
+                LOG.trace("Registering service {}", serviceClass.getName());
                 registration = context.registerService(serviceType, registeredService, properties);
             } catch (Throwable t) {
-                LOG.error("Can not register " + serviceClass.getName(), t);
+                LOG.error("Can not register {}", serviceClass.getName(), t);
             }
         }
         setState();
@@ -155,7 +154,7 @@ public class DependantServiceRegisterer<S> implements ServiceTrackerCustomizer<O
             lock.unlock();
         }
         if (null != unregister) {
-            LOG.trace("Unregistering service " + serviceClass.getName());
+            LOG.trace("Unregistering service {}", serviceClass.getName());
             unregister.unregister();
             try {
                 Method method = serviceClass.getMethod("shutDown", new Class<?>[0]);
@@ -165,7 +164,7 @@ public class DependantServiceRegisterer<S> implements ServiceTrackerCustomizer<O
             } catch (NoSuchMethodException e) {
                 // Service does not have a shutDown() method.
             } catch (Throwable t) {
-                LOG.error("Can not shut down " + serviceClass.getName(), t);
+                LOG.error("Can not shut down {}", serviceClass.getName(), t);
             }
         }
         setState();

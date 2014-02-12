@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.settings.tree.folder;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
@@ -81,7 +80,7 @@ public class Infostore implements PreferencesItemService {
     /**
      * The logger.
      */
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(Infostore.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Infostore.class);
 
     private static final String DEFAULT_ID = FileStorageAccount.DEFAULT_ID;
 
@@ -142,10 +141,7 @@ public class Infostore implements PreferencesItemService {
                         }
                     }
                 } catch (final OXException e) {
-                    // Unable to retrieve default folder
-                    if (LOG.isErrorEnabled()) {
-                        LOG.error("Infostore default folder could not be applied to user configuration.", e);
-                    }
+                    LOG.error("Infostore default folder could not be applied to user configuration.", e);
                 }
                 // All failed
                 setting.setSingleValue(Integer.valueOf(new OXFolderAccess(ctx).getDefaultFolder(

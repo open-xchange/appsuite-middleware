@@ -64,7 +64,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class CSVDataRetentionActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CSVDataRetentionActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVDataRetentionActivator.class);
 
     /**
      * Initializes a new {@link CSVDataRetentionActivator}.
@@ -83,7 +83,7 @@ public final class CSVDataRetentionActivator extends HousekeepingActivator {
         try {
             CSVDataRetentionConfig.getInstance().init((ConfigurationService) getService(clazz));
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -98,7 +98,7 @@ public final class CSVDataRetentionActivator extends HousekeepingActivator {
             CSVDataRetentionConfig.getInstance().init(getService(ConfigurationService.class));
             registerService(DataRetentionService.class, new CSVDataRetentionService(), null);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -110,7 +110,7 @@ public final class CSVDataRetentionActivator extends HousekeepingActivator {
 			CSVWriter.releaseInstance();
 			CSVDataRetentionConfig.releaseInstance();
 		} catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

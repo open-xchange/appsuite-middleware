@@ -78,14 +78,10 @@ import net.freeutils.tnef.mime.ContactHandler;
 import net.freeutils.tnef.mime.RawDataSource;
 import net.freeutils.tnef.mime.ReadReceiptHandler;
 import net.freeutils.tnef.mime.TNEFMime;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.ForceLog;
-import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
@@ -117,11 +113,9 @@ import com.openexchange.tools.tnef.TNEF2ICal;
  */
 public final class MailMessageParser {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailMessageParser.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailMessageParser.class);
 
     private static final String APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
-
-    private static final boolean WARN_ENABLED = LOG.isWarnEnabled();
 
     private static final String HDR_CONTENT_DISPOSITION = MessageHeaders.HDR_CONTENT_DISPOSITION;
 
@@ -286,21 +280,19 @@ public final class MailMessageParser {
         if (null == handler) {
             throw MailExceptionCode.MISSING_PARAMETER.create("handler");
         }
-        final boolean logPropsEnabled = LogProperties.isEnabled();
         try {
-            if (logPropsEnabled) {
-                final Props properties = LogProperties.getLogProperties();
+            {
                 final int accountId = mail.getAccountId();
                 if (accountId >= 0) {
-                    properties.put(LogProperties.Name.MAIL_ACCOUNT_ID, ForceLog.valueOf(Integer.valueOf(accountId)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_ACCOUNT_ID, Integer.valueOf(accountId));
                 }
                 final String mailId = mail.getMailId();
                 if (null != mailId) {
-                    properties.put(LogProperties.Name.MAIL_MAIL_ID, ForceLog.valueOf(mailId));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_MAIL_ID, mailId);
                 }
                 final String folder = mail.getFolder();
                 if (null != folder) {
-                    properties.put(LogProperties.Name.MAIL_FULL_NAME, ForceLog.valueOf(folder));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, folder);
                 }
             }
             /*
@@ -327,12 +319,9 @@ public final class MailMessageParser {
                 null == mailId ? "" : mailId,
                 null == folder ? "" : folder);
         } finally {
-            if (logPropsEnabled) {
-                final Props properties = LogProperties.getLogProperties();
-                properties.remove(LogProperties.Name.MAIL_ACCOUNT_ID);
-                properties.remove(LogProperties.Name.MAIL_MAIL_ID);
-                properties.remove(LogProperties.Name.MAIL_FULL_NAME);
-            }
+            LogProperties.removeProperty(LogProperties.Name.MAIL_ACCOUNT_ID);
+            LogProperties.removeProperty(LogProperties.Name.MAIL_MAIL_ID);
+            LogProperties.removeProperty(LogProperties.Name.MAIL_FULL_NAME);
         }
         handler.handleMessageEnd(mail);
     }
@@ -562,9 +551,7 @@ public final class MailMessageParser {
                     try {
                         mp = ReadReceiptHandler.convert(message);
                     } catch (final RuntimeException e) {
-                        if (WARN_ENABLED) {
-                            LOG.warn("Invalid TNEF read receipt", e);
-                        }
+                        LOG.warn("Invalid TNEF read receipt", e);
                         return;
                     }
                     parseMailContent(new MimeMailPart(mp), handler, prefix, partCount);
@@ -781,9 +768,7 @@ public final class MailMessageParser {
                     }
                 }
             } catch (final IOException tnefExc) {
-                if (WARN_ENABLED) {
-                    LOG.warn(tnefExc.getMessage(), tnefExc);
-                }
+                LOG.warn("", tnefExc);
                 if (!mailPart.containsSequenceId()) {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));
                 }
@@ -792,9 +777,7 @@ public final class MailMessageParser {
                     return;
                 }
             } catch (final MessagingException e) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(e.getMessage(), e);
-                }
+                LOG.error("", e);
                 if (!mailPart.containsSequenceId()) {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));
                 }
@@ -920,7 +903,7 @@ public final class MailMessageParser {
             // try {
             // filename = MimeUtility.decodeText(filename.replaceAll("\\?==\\?", "?= =?"));
             // } catch (final Exception e) {
-            // LOG.error(e.getMessage(), e);
+            // LOG.error("", e);
             // }
         }
         return filename;
@@ -988,7 +971,7 @@ public final class MailMessageParser {
      * </ul>
      *
      * @param contentType The content type
-     * @param fileName 
+     * @param fileName
      * @return <code>true</code> if content type matches text; otherwise <code>false</code>
      */
     private static boolean isText(final String contentType, String name) {

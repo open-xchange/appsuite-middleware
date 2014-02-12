@@ -50,6 +50,7 @@
 package com.openexchange.server.impl;
 
 import java.util.Arrays;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -84,7 +85,7 @@ public class EffectivePermission extends OCLPermission {
 
     private static final long serialVersionUID = -1303754404748836561L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(EffectivePermission.class));
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EffectivePermission.class);
 
     /**
      * The configuration profile of the current logged in user
@@ -196,19 +197,19 @@ public class EffectivePermission extends OCLPermission {
 
     @Override
     public int getFolderPermission() {
-        final int superFolderPermission = super.getFolderPermission();
         if (validateUserConfig()) {
             if (!hasModuleAccess(folderModule)) {
                 return NO_PERMISSIONS;
             } else if (isPublicFolder()) {
                 if (folderModule != FolderObject.INFOSTORE && !permissionBits.hasFullPublicFolderAccess()) {
+                    final int superFolderPermission = super.getFolderPermission();
                     return superFolderPermission > READ_FOLDER ? READ_FOLDER : superFolderPermission;
                 }
             } else if (!permissionBits.hasFullSharedFolderAccess() && folderType == FolderObject.SHARED) {
                 return NO_PERMISSIONS;
             }
         }
-        return superFolderPermission;
+        return super.getFolderPermission();
     }
 
     @Override
@@ -219,19 +220,19 @@ public class EffectivePermission extends OCLPermission {
 
     @Override
     public int getReadPermission() {
-        final int superReadPermission = super.getReadPermission();
         if (validateUserConfig()) {
             if (!hasModuleAccess(folderModule)) {
                 return NO_PERMISSIONS;
             } else if (isPublicFolder()) {
                 if (folderModule != FolderObject.INFOSTORE && !permissionBits.hasFullPublicFolderAccess()) {
+                    final int superReadPermission = super.getReadPermission();
                     return superReadPermission > READ_ALL_OBJECTS ? READ_ALL_OBJECTS : superReadPermission;
                 }
             } else if (!permissionBits.hasFullSharedFolderAccess() && folderType == FolderObject.SHARED) {
                 return NO_PERMISSIONS;
             }
         }
-        return superReadPermission;
+        return super.getReadPermission();
     }
 
     @Override
@@ -338,7 +339,7 @@ public class EffectivePermission extends OCLPermission {
                 folderModule = folderAccess.getFolderModule(fuid);
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return userConfigIsValid;
         }
         if (permissionBits.getUserId() == getEntity()) {

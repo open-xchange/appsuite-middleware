@@ -49,14 +49,12 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.tools.session.ServerSession;
@@ -68,7 +66,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 abstract class AbstractMailPreviewResultConverter implements ResultConverter {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractMailPreviewResultConverter.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractMailPreviewResultConverter.class);
 
     protected final AbstractPreviewResultConverter resultConverter;
 
@@ -108,7 +106,7 @@ abstract class AbstractMailPreviewResultConverter implements ResultConverter {
             if (!MailExceptionCode.NO_CONTENT.equals(e)) {
                 throw e;
             }
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
             fileHolder.close();
             fileHolder = new ThresholdFileHolder();
             fileHolder.write(new byte[0]);

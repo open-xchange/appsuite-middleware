@@ -51,6 +51,7 @@ package com.openexchange.mail.cache;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.slf4j.LoggerFactory;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -110,8 +111,7 @@ public final class SessionMailCache {
             }
         } catch (final Exception e) {
             // SWALLOW
-            final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SessionMailCache.class));
-            logger.warn(e.getMessage(), e);
+           LoggerFactory.getLogger(SessionMailCache.class).warn("", e);
         }
     }
 

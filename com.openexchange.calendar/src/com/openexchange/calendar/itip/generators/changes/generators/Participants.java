@@ -49,6 +49,9 @@
 
 package com.openexchange.calendar.itip.generators.changes.generators;
 
+import static com.openexchange.ajax.fields.CalendarFields.CONFIRMATIONS;
+import static com.openexchange.ajax.fields.CalendarFields.PARTICIPANTS;
+import static com.openexchange.ajax.fields.CalendarFields.USERS;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -85,7 +88,6 @@ import com.openexchange.java.Autoboxing;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.user.UserService;
-import static com.openexchange.ajax.fields.AppointmentFields.*;
 
 /**
  * {@link Participants}
@@ -249,7 +251,7 @@ public class Participants implements ChangeDescriptionGenerator{
 
         for(Integer id : groupChange.keySet()) {
             Group group = groups.getGroup(ctx, id.intValue());
-            ChangeType changeType = externalChange.get(id.toString());
+            ChangeType changeType = groupChange.get(id);
             if (changeType == null) {
                 continue;
             }
@@ -261,7 +263,7 @@ public class Participants implements ChangeDescriptionGenerator{
 
         for(Integer id : resourceChange.keySet()) {
             Resource resource = resources.getResource(id.intValue(), ctx);
-            ChangeType changeType = externalChange.get(id.toString());
+            ChangeType changeType = resourceChange.get(id);
             if (changeType == null) {
                 continue;
             }

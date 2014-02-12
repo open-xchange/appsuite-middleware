@@ -64,7 +64,7 @@ import com.openexchange.smtp.services.Services;
  */
 public final class SMTPProperties extends AbstractProtocolProperties implements ISMTPProperties {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SMTPProperties.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SMTPProperties.class);
 
     private static final SMTPProperties instance = new SMTPProperties();
 
@@ -94,6 +94,8 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
     private int smtpTimeout;
 
     private int smtpConnectionTimeout;
+
+    private boolean logTransport;
 
     /**
      * Initializes a new {@link SMTPProperties}
@@ -125,6 +127,12 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
             final String smtpEnvFromStr = configuration.getProperty("com.openexchange.smtp.setSMTPEnvelopeFrom", "false").trim();
             smtpEnvelopeFrom = Boolean.parseBoolean(smtpEnvFromStr);
             logBuilder.append("\tSet SMTP ENVELOPE-FROM: ").append(smtpEnvelopeFrom).append('\n');
+        }
+
+        {
+            final String tmp = configuration.getProperty("com.openexchange.smtp.logTransport", "false").trim();
+            logTransport = Boolean.parseBoolean(tmp);
+            logBuilder.append("\tLog transport: ").append(logTransport).append('\n');
         }
 
         {
@@ -166,10 +174,7 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
         }
 
         logBuilder.append("Global SMTP properties successfully loaded!");
-        if (LOG.isInfoEnabled()) {
-            LOG.info(logBuilder.toString());
-        }
-
+        LOG.info(logBuilder.toString());
     }
 
     @Override
@@ -180,6 +185,7 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
         smtpAuthEnc = null;
         smtpTimeout = 0;
         smtpConnectionTimeout = 0;
+        logTransport = false;
     }
 
     @Override
@@ -195,6 +201,11 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
     @Override
     public boolean isSmtpEnvelopeFrom() {
         return smtpEnvelopeFrom;
+    }
+
+    @Override
+    public boolean isLogTransport() {
+        return logTransport;
     }
 
     @Override

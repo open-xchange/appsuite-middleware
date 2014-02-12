@@ -71,7 +71,7 @@ public class BinaryContentDumper implements MessagingContentDumper {
         final BinaryContent binContent = (BinaryContent) content;
         final InputStream inputStream = binContent.getData();
 
-        final BufferedInputStream bin = new BufferedInputStream(inputStream);
+        final BufferedInputStream bin = new BufferedInputStream(inputStream, 65536);
         final BufferedOutputStream bout = new BufferedOutputStream(outputStream);
         try {
             int i = -1;

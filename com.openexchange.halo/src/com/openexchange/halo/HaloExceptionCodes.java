@@ -50,39 +50,56 @@
 package com.openexchange.halo;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link HaloExceptionCodes} - Enumeration of all {@link OXException}s known in halo module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum HaloExceptionCodes implements OXExceptionCode {
+public enum HaloExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(HaloExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR(HaloExceptionCodes.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(HaloExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 2),
+    IO_ERROR(HaloExceptionCodes.IO_ERROR_MSG, CATEGORY_ERROR, 2),
     /**
      * Unknown provider: %1$s
      */
-    UNKNOWN_PROVIDER(HaloExceptionMessages.UNKNOWN_PROVIDER_MSG, CATEGORY_USER_INPUT, 3),
+    UNKNOWN_PROVIDER(HaloExceptionCodes.UNKNOWN_PROVIDER_MSG, CATEGORY_USER_INPUT, 3),
     /**
      * Unavailable provider: %1$s
      */
-    UNAVAILABLE_PROVIDER(HaloExceptionMessages.UNAVAILABLE_PROVIDER_MSG, CATEGORY_USER_INPUT, 4),
+    UNAVAILABLE_PROVIDER(HaloExceptionCodes.UNAVAILABLE_PROVIDER_MSG, CATEGORY_USER_INPUT, 4),
     /**
      * Cannot search a contact that is neither an internal user nor has an e-mail address.
      */
-    INVALID_CONTACT(HaloExceptionMessages.INVALID_CONTACT_MSG, CATEGORY_USER_INPUT, 5),
+    INVALID_CONTACT(HaloExceptionCodes.INVALID_CONTACT_MSG, HaloExceptionMessages.INVALID_CONTACT_MSG, CATEGORY_USER_INPUT, 5),
 
     ;
+
+    // An error occurred: %1$s
+    private static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
+
+    // An I/O error occurred: %1$s
+    private static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
+
+    // Unknown provider: %1$s
+    private static final String UNKNOWN_PROVIDER_MSG = "Unknown provider: %1$s";
+
+    // Unavailable provider: %1$s
+    private static final String UNAVAILABLE_PROVIDER_MSG = "Unavailable provider: %1$s";
+
+    // Cannot search a contact that is neither an internal user nor has an e-mail address.
+    private static final String INVALID_CONTACT_MSG = "Cannot search a contact that is neither an internal user nor has an e-mail address.";
 
     /**
      * The error code prefix for halo module.
@@ -94,9 +111,16 @@ public enum HaloExceptionCodes implements OXExceptionCode {
     private final int detailNumber;
 
     private final String message;
+    
+    private String displayMessage;
 
     private HaloExceptionCodes(final String message, final Category category, final int detailNumber) {
+        this(message, OXExceptionStrings.MESSAGE, category, detailNumber);
+    }
+    
+    private HaloExceptionCodes(final String message, String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
+        this.displayMessage = displayMessage == null ? OXExceptionStrings.MESSAGE : displayMessage;
         this.detailNumber = detailNumber;
         this.category = category;
     }
@@ -109,6 +133,11 @@ public enum HaloExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

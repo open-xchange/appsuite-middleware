@@ -61,7 +61,6 @@ import javapns.notification.PayloadPerDevice;
 import javapns.notification.PushNotificationPayload;
 import javapns.notification.PushedNotification;
 import javapns.notification.PushedNotifications;
-import org.apache.commons.logging.Log;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
@@ -79,7 +78,7 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
     private final int STATUS_INVALID_TOKEN_SIZE = 5;
     private final int STATUS_INVALID_TOKEN = 8;
 
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(APNDriveEventPublisher.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(APNDriveEventPublisher.class);
 
     private final APNAccess access;
 
@@ -97,7 +96,7 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
             subscriptions = Services.getService(DriveSubscriptionStore.class, true).getSubscriptions(
                 event.getContextID(), new String[] { getServiceID() }, event.getFolderIDs());
         } catch (OXException e) {
-            LOG.error("unable to get subscriptions for service " + getServiceID(), e);
+            LOG.error("unable to get subscriptions for service {}", getServiceID(), e);
         }
         if (null != subscriptions && 0 < subscriptions.size()) {
             List<PayloadPerDevice> payloads = getPayloads(event, subscriptions);
@@ -117,17 +116,15 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
         if (null != notifications && 0 < notifications.size()) {
             for (PushedNotification notification : notifications) {
                 if (notification.isSuccessful()) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(notification);
-                    }
+                    LOG.debug("{}", notification);
                 } else {
-                    LOG.warn("Unsuccessful push notification: " + notification);
+                    LOG.warn("Unsuccessful push notification: {}", notification);
                     if (null != notification.getResponse()) {
                         int status = notification.getResponse().getStatus();
                         if (STATUS_INVALID_TOKEN == status || STATUS_INVALID_TOKEN_SIZE == status) {
                             Device device = notification.getDevice();
                             int removed = removeSubscriptions(device);
-                            LOG.info("Removed " + removed + " subscriptions for device with token: " + device.getToken() + ".");
+                            LOG.info("Removed {} subscriptions for device with token: {}.", removed, device.getToken());
                         }
                     }
                 }
@@ -139,7 +136,7 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
      * Queries the feedback service and processes the received results, removing reported tokens from the subscription store if needed.
      */
     public void queryFeedbackService() {
-        LOG.info("Querying APN feedback service for '" + getServiceID() + "'...");
+        LOG.info("Querying APN feedback service for '{}'...", getServiceID());
         long start = System.currentTimeMillis();
         List<Device> devices = null;
         try {
@@ -151,19 +148,24 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
         }
         if (null != devices && 0 < devices.size()) {
             for (Device device : devices) {
-                LOG.debug("Got feedback for device with token: " + device.getToken() + ", last registered: " + device.getLastRegister());
+                LOG.debug("Got feedback for device with token: {}, last registered: {}", device.getToken(), device.getLastRegister());
                 int removed = removeSubscriptions(device);
-                LOG.info("Removed " + removed + " subscriptions for device with token: " + device.getToken() + ".");
+                LOG.info("Removed {} subscriptions for device with token: {}.", removed, device.getToken());
             }
         } else {
             LOG.debug("No devices to unregister received from feedback service.");
         }
-        LOG.info("Finished processing APN feedback for '" + getServiceID() + "' after " + (System.currentTimeMillis() - start) + " ms.");
+        LOG.info("Finished processing APN feedback for ''{}'' after {} ms.", getServiceID(), (System.currentTimeMillis() - start));
     }
 
     private List<PayloadPerDevice> getPayloads(DriveEvent event, List<Subscription> subscriptions) {
+        String pushTokenReference = event.getPushTokenReference();
         List<PayloadPerDevice> payloads = new ArrayList<PayloadPerDevice>(subscriptions.size());
         for (Subscription subscription : subscriptions) {
+            if (null != pushTokenReference && subscription.matches(pushTokenReference)) {
+                LOG.trace("Skipping push notification for subscription: " + subscription);
+                continue;
+            }
             try {
                 PushNotificationPayload payload = new PushNotificationPayload();
                 payload.addCustomAlertLocKey("TRIGGER_SYNC");
@@ -175,7 +177,7 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
             } catch (JSONException e) {
                 LOG.warn("error constructing payload", e);
             } catch (InvalidDeviceTokenFormatException e) {
-                LOG.warn("Invalid device token: '" + subscription.getToken() + "', removing from subscription store.", e);
+                LOG.warn("Invalid device token: '{}', removing from subscription store.", subscription.getToken(), e);
                 removeSubscription(subscription);
             }
         }
@@ -200,7 +202,7 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
                 LOG.error("Error removing subscription", e);
             }
         } else {
-            LOG.warn("Unsufficient device information to remove subscriptions for: " + device);
+            LOG.warn("Unsufficient device information to remove subscriptions for: {}", device);
         }
         return 0;
     }

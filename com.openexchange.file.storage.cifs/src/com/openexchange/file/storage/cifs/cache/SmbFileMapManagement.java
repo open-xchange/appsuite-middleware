@@ -52,7 +52,8 @@ package com.openexchange.file.storage.cifs.cache;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.logging.Log;
+import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.file.storage.cifs.CIFSFileStorageService;
 import com.openexchange.file.storage.cifs.CIFSServices;
 import com.openexchange.session.Session;
@@ -66,7 +67,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class SmbFileMapManagement {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SmbFileMapManagement.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SmbFileMapManagement.class);
 
     private static final SmbFileMapManagement INSTANCE = new SmbFileMapManagement();
 
@@ -87,7 +88,7 @@ public final class SmbFileMapManagement {
      */
     private SmbFileMapManagement() {
         super();
-        map = new ConcurrentHashMap<Integer, ConcurrentMap<Integer, SmbFileMap>>(64);
+        map = new ConcurrentLinkedHashMap.Builder<Integer, ConcurrentMap<Integer, SmbFileMap>>().initialCapacity(64).maximumWeightedCapacity(5000).weigher(Weighers.entrySingleton()).build();
     }
 
     /**
@@ -151,9 +152,7 @@ public final class SmbFileMapManagement {
      */
     public void dropFor(final int contextId) {
         map.get(Integer.valueOf(contextId));
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder("Cleaned user-sensitive SMB file cache for context ").append(contextId).toString());
-        }
+        LOG.debug("Cleaned user-sensitive SMB file cache for context {}", contextId);
     }
 
     /**
@@ -169,10 +168,7 @@ public final class SmbFileMapManagement {
                 smbFileMap.clear();
             }
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder("Cleaned user-sensitive SMB file cache for user ").append(session.getUserId()).append(" in context ").append(
-                session.getContextId()).toString());
-        }
+        LOG.debug("Cleaned user-sensitive SMB file cache for user {} in context {}", session.getUserId(), session.getContextId());
     }
 
     /**
@@ -189,10 +185,7 @@ public final class SmbFileMapManagement {
                 smbFileMap.clear();
             }
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder("Cleaned user-sensitive SMB file cache for user ").append(userId).append(" in context ").append(
-                contextId).toString());
-        }
+        LOG.debug("Cleaned user-sensitive SMB file cache for user {} in context {}", userId, contextId);
     }
 
     /**

@@ -56,8 +56,6 @@ import java.net.MulticastSocket;
 import java.net.SocketException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -70,7 +68,7 @@ import com.openexchange.threadpool.ThreadPools;
 
 public class PushMulticastSocket implements Runnable {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushMulticastSocket.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushMulticastSocket.class);
 
     private Future<Object> thread;
 
@@ -88,18 +86,14 @@ public class PushMulticastSocket implements Runnable {
 
         try {
             if (config.isMultiCastEnabled()) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Starting Multicast Socket on Port: " + multicastPort);
-                }
+                LOG.info("Starting Multicast Socket on Port: {}", multicastPort);
                 multicastSocket = new MulticastSocket(multicastPort);
                 multicastSocket.joinGroup(multicastAddress);
 
                 final ThreadPoolService threadPool = PushServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
                 thread = threadPool.submit(ThreadPools.task(this));
             } else {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Multicast Socket is disabled");
-                }
+                LOG.info("Multicast Socket is disabled");
             }
         } catch (final Exception exc) {
             LOG.error("MultiCastPushSocket", exc);
@@ -117,14 +111,14 @@ public class PushMulticastSocket implements Runnable {
                     final PushRequest serverRegisterRequest = new PushRequest();
                     serverRegisterRequest.init(datagramPacket);
                 } else {
-                    LOG.warn("recieved empty multicast package: " + datagramPacket);
+                    LOG.warn("recieved empty multicast package: {}", datagramPacket);
                 }
             } catch (final SocketException e) {
                 if (running) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -141,10 +135,10 @@ public class PushMulticastSocket implements Runnable {
             } catch (final InterruptedException e) {
                 // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
                 Thread.currentThread().interrupt();
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final ExecutionException e) {
                 final Throwable cause = e.getCause();
-                LOG.error(cause.getMessage(), cause);
+                LOG.error("", cause);
             }
             thread = null;
         }

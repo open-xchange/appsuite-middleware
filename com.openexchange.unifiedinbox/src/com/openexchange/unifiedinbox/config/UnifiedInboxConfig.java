@@ -60,7 +60,7 @@ import com.openexchange.mail.api.MailConfig;
  */
 public final class UnifiedInboxConfig extends MailConfig {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UnifiedInboxConfig.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UnifiedInboxConfig.class);
 
     private IMailProperties mailProperties;
 

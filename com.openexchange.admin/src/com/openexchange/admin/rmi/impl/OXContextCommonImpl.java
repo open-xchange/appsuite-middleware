@@ -50,9 +50,6 @@ package com.openexchange.admin.rmi.impl;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashSet;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -68,8 +65,12 @@ import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.GenericChecks;
+import com.openexchange.eventsystem.Event;
+import com.openexchange.eventsystem.EventSystemService;
+import com.openexchange.eventsystem.provisioning.ProviosioningEventConstants;
 
 
 public abstract class OXContextCommonImpl extends OXCommonImpl {
@@ -80,7 +81,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         super();
     }
 
-    private final static Log log = LogFactory.getLog(OXContextCommonImpl.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXContextCommonImpl.class);
 
     protected void createchecks(final Context ctx, final User admin_user, final OXToolStorageInterface tool) throws StorageException, ContextExistsException, InvalidDataException {
 
@@ -121,15 +122,13 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             doNullCheck(ctx,admin_user);
         } catch (final InvalidDataException e1) {
             final InvalidDataException invalidDataException = new InvalidDataException("Context or user not correct");
-            log.error(invalidDataException.getMessage(), invalidDataException);
+            log.error("", invalidDataException);
             throw invalidDataException;
         }
 
         new BasicAuthenticator(context).doAuthentication(auth);
 
-        if (log.isDebugEnabled()) {
-            log.debug(ctx + " - " + admin_user);
-        }
+        log.debug("{} - {}", ctx, admin_user);
 
         try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
@@ -138,32 +137,52 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                 try {
                     ret = (Context)callPluginMethod("preCreate", ret, admin_user, auth);
                 } catch(final StorageException e) {
-                    log.error(e.getMessage(),e);
+                    log.error("",e);
                     throw e;
                 }
             }
 
             createchecks(ret, admin_user, tool);
 
-            final String name = ret.getName();
-            final HashSet<String> loginMappings = ret.getLoginMappings();
-            if (null == loginMappings || loginMappings.isEmpty()) {
-                ret.addLoginMapping(ret.getIdAsString());
-            }
-            if (null != name) {
-                // Add the name of the context to the login mappings and the id
-                ret.addLoginMapping(name);
+            // Ensure context identifier is contained in login mappings
+            {
+                final String sContextId = ret.getIdAsString();
+                if (null !=sContextId) {
+                    ret.addLoginMapping(sContextId);
+                }
             }
 
-            return createmaincall(ret, admin_user, db, access,auth);
+            // Ensure context name is contained in login mappings
+            {
+                final String name = ret.getName();
+                if (null != name) {
+                    // Add the name of the context to the login mappings and the id
+                    ret.addLoginMapping(name);
+                }
+            }
+
+            final Context retval = createmaincall(ret, admin_user, db, access,auth);
+
+            final EventSystemService eventSystemService = AdminServiceRegistry.getInstance().getService(EventSystemService.class);
+            if (null != eventSystemService) {
+                try {
+                    final Event event = new Event(ProviosioningEventConstants.TOPIC_CONTEXT_CREATE);
+                    event.setProperty(ProviosioningEventConstants.PROP_CONTEXT_ID, retval.getId());
+                    eventSystemService.publish(event);
+                } catch (final Exception e) {
+                    log.warn("Could not distribute context event.", e);
+                }
+            }
+
+            return retval;
         } catch (final ContextExistsException e) {
-            log.error(e.getMessage(),e);
+            log.error("",e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             // Eliminate nested root cause exceptions. These are mostly unknown to clients.
             throw new StorageException(e.getMessage());
         }
@@ -190,9 +209,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                         final Object property = servicereference.getProperty("name");
                         if (null != property && property.toString().equalsIgnoreCase("oxcontext")) {
                             final OXContextPluginInterface oxctx = (OXContextPluginInterface) this.context.getService(servicereference);
-                            if (log.isDebugEnabled()) {
-                                log.debug("Calling " + method + " for plugin: " + bundlename);
-                            }
+                            log.debug("Calling {} for plugin: {}", method, bundlename);
                             try {
                                 final Class[] classes = new Class[args.length];
                                 for(int i=0; i<args.length; i++) {
@@ -210,19 +227,19 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                                     args[0] = ret;
                                 }
                             } catch (final SecurityException e) {
-                                log.error("Error while calling method " + method + " of plugin " + bundlename,e);
+                                log.error("Error while calling method {} of plugin {}", method, bundlename,e);
                                 throw new StorageException(e.getCause());
                             } catch (final NoSuchMethodException e) {
-                                log.error("Error while calling method " + method + " of plugin " + bundlename,e);
+                                log.error("Error while calling method {} of plugin {}", method, bundlename,e);
                                 throw new StorageException(e.getCause());
                             } catch (final IllegalArgumentException e) {
-                                log.error("Error while calling method " + method + " of plugin " + bundlename,e);
+                                log.error("Error while calling method {} of plugin {}", method, bundlename,e);
                                 throw new StorageException(e.getCause());
                             } catch (final IllegalAccessException e) {
-                                log.error("Error while calling method " + method + " of plugin " + bundlename,e);
+                                log.error("Error while calling method {} of plugin {}", method, bundlename,e);
                                 throw new StorageException(e.getCause());
                             } catch (final InvocationTargetException e) {
-                                log.error("Error while calling method " + method + " of plugin " + bundlename,e);
+                                log.error("Error while calling method {} of plugin {}", method, bundlename,e);
                                 throw new StorageException(e.getCause());
                             }
                         }

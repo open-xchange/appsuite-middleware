@@ -58,8 +58,9 @@ import com.openexchange.realtime.util.ElementPath;
 
 
 /**
- * {@link DevNullChannel}
- *
+ * {@link DevNullChannel} - Discard incoming Messages. This can be used by clients to e.g. increment sequence numbers for failed query
+ * requests.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DevNullChannel implements Channel {

@@ -65,8 +65,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public final class CheckAction extends AbstractSecretRecoveryAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CheckAction.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CheckAction.class);
 
     /**
      * Initializes a new {@link CheckAction}.
@@ -88,7 +87,7 @@ public final class CheckAction extends AbstractSecretRecoveryAction {
         final JSONObject object = new JSONObject(2);
         object.put("secretWorks", diagnosis == null);
         if (diagnosis != null) {
-            LOG.info("Secrets in session " + req.getSession().getSessionID() + " seem to need migration: " + diagnosis);
+            LOG.info("Secrets in session {} seem to need migration: {}", req.getSession().getSessionID(), diagnosis);
             object.put("secretWorks", false);
             object.put("diagnosis", diagnosis);
         }

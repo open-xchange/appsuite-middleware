@@ -75,16 +75,13 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UpdatePerformer.class));
-
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
-
     /**
      * Initializes a new {@link UpdatePerformer} from given session.
      *
      * @param session The session
+     * @throws OXException If passed session is invalid
      */
-    public UpdatePerformer(final ServerSession session, final FolderServiceDecorator decorator) {
+    public UpdatePerformer(final ServerSession session, final FolderServiceDecorator decorator) throws OXException {
         super(session, decorator);
     }
 
@@ -103,8 +100,9 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
      *
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
+     * @throws OXException If passed session is invalid
      */
-    public UpdatePerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public UpdatePerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(session, decorator, folderStorageDiscoverer);
     }
 
@@ -139,7 +137,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         if (null == storage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
         }
-        final long start = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         if (null != timeStamp) {
             storageParameters.setTimeStamp(timeStamp);
         }
@@ -156,30 +153,11 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             {
                 final String newParentId = folder.getParentID();
                 move = (null != newParentId && !newParentId.equals(oldParentId));
-                if (move && !"infostore".equals(storageFolder.getContentType().toString())) {
-                    /*
-                     * Check for duplicate
-                     */
-                    CheckForDuplicateResult result = getCheckForDuplicateResult(folder.getName(), treeId, newParentId, openedStorages);
-                    if (null != result) {
-                        final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename"));
-                        if (!autoRename) {
-                            throw result.error;
-                        }
-                        final boolean useParenthesis = PARENTHESIS_CAPABLE.contains(storageFolder.getContentType().toString());
-                        int count = 2;
-                        final StringBuilder nameBuilder = new StringBuilder(folder.getName());
-                        final int resetLen = nameBuilder.length();
-                        do {
-                            nameBuilder.setLength(resetLen);
-                            if (useParenthesis) {
-                                nameBuilder.append(" (").append(count++).append(')');
-                            } else {
-                                nameBuilder.append(" ").append(count++);
-                            }
-                            result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, newParentId, openedStorages);
-                        } while (null != result);
-                        folder.setName(nameBuilder.toString());
+                if (move) {
+                    if ("infostore".equals(storageFolder.getContentType().toString())) { // Maybe something special to consider as not synchronized with OL
+                        checkForDuplicateOnMove(folder, treeId, openedStorages, storageFolder, newParentId);
+                    } else {
+                        checkForDuplicateOnMove(folder, treeId, openedStorages, storageFolder, newParentId);
                     }
                 }
             }
@@ -187,30 +165,11 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             {
                 final String newName = folder.getName();
                 rename = (null != newName && !newName.equals(storageFolder.getName()));
-                if (rename && !"infostore".equals(storageFolder.getContentType().toString())) {
-                    /*
-                     * Check for duplicate
-                     */
-                    CheckForDuplicateResult result = getCheckForDuplicateResult(newName, treeId, storageFolder.getParentID(), openedStorages);
-                    if (null != result) {
-                        final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename"));
-                        if (!autoRename) {
-                            throw result.error;
-                        }
-                        final boolean useParenthesis = PARENTHESIS_CAPABLE.contains(storageFolder.getContentType().toString());
-                        int count = 2;
-                        final StringBuilder nameBuilder = new StringBuilder(folder.getName());
-                        final int resetLen = nameBuilder.length();
-                        do {
-                            nameBuilder.setLength(resetLen);
-                            if (useParenthesis) {
-                                nameBuilder.append(" (").append(count++).append(')');
-                            } else {
-                                nameBuilder.append(" ").append(count++);
-                            }
-                            result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, storageFolder.getParentID(), openedStorages);
-                        } while (null != result);
-                        folder.setName(nameBuilder.toString());
+                if (rename) {
+                    if ("infostore".equals(storageFolder.getContentType().toString())) { // Maybe something special to consider as not synchronized with OL
+                        checkForDuplicateOnRename(folder, treeId, openedStorages, storageFolder, newName, false);
+                    } else {
+                        checkForDuplicateOnRename(folder, treeId, openedStorages, storageFolder, newName, false);
                     }
                 }
             }
@@ -274,7 +233,16 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     folder.setName(newName == null ? storageFolder.getName() : newName);
                 }
                 if (equallyNamedSibling(folder.getName(), treeId, newParentId, openedStorages)) {
-                    throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), newParentId, treeId);
+                    String parentName = newParentId;
+                    try {
+                        Folder parentFolder = newRealParentStorage.getFolder(FolderStorage.REAL_TREE_ID, newParentId, storageParameters);
+                        if (null != parentFolder) {
+                            parentName = parentFolder.getName();
+                        }
+                    } catch (OXException e) {
+                        // swallow
+                    }
+                    throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), parentName, treeId);
                 }
                 /*
                  * Check for forbidden public mail folder
@@ -379,11 +347,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 }
             }
 
-            if (DEBUG_ENABLED) {
-                final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new StringBuilder().append("UpdatePerformer.doUpdate() took ").append(duration).append("msec for folder: ").append(
-                    folderId).toString());
-            }
         } catch (final OXException e) {
             for (final FolderStorage fs : openedStorages) {
                 fs.rollback(storageParameters);
@@ -398,7 +361,61 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
 
     } // End of doUpdate()
 
-    private MovePerformer newMovePerformer() {
+    private void checkForDuplicateOnMove(final Folder folder, final String treeId, final List<FolderStorage> openedStorages, final Folder storageFolder, final String newParentId) throws OXException {
+        /*
+         * Check for duplicate
+         */
+        CheckForDuplicateResult result = getCheckForDuplicateResult(folder.getName(), treeId, newParentId, openedStorages);
+        if (null != result) {
+            final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename"));
+            if (!autoRename) {
+                throw result.error;
+            }
+            final boolean useParenthesis = PARENTHESIS_CAPABLE.contains(storageFolder.getContentType().toString());
+            int count = 2;
+            final StringBuilder nameBuilder = new StringBuilder(folder.getName());
+            final int resetLen = nameBuilder.length();
+            do {
+                nameBuilder.setLength(resetLen);
+                if (useParenthesis) {
+                    nameBuilder.append(" (").append(count++).append(')');
+                } else {
+                    nameBuilder.append(" ").append(count++);
+                }
+                result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, newParentId, openedStorages);
+            } while (null != result);
+            folder.setName(nameBuilder.toString());
+        }
+    }
+
+    private void checkForDuplicateOnRename(final Folder folder, final String treeId, final List<FolderStorage> openedStorages, final Folder storageFolder, final String newName, final boolean allowAutoRename) throws OXException {
+        CheckForDuplicateResult result = getCheckForDuplicateResult(newName, treeId, storageFolder.getParentID(), storageFolder.getID(), openedStorages);
+        if (null != result) {
+            if (!allowAutoRename) {
+                throw result.error;
+            }
+            final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename"));
+            if (!autoRename) {
+                throw result.error;
+            }
+            final boolean useParenthesis = PARENTHESIS_CAPABLE.contains(storageFolder.getContentType().toString());
+            int count = 2;
+            final StringBuilder nameBuilder = new StringBuilder(folder.getName());
+            final int resetLen = nameBuilder.length();
+            do {
+                nameBuilder.setLength(resetLen);
+                if (useParenthesis) {
+                    nameBuilder.append(" (").append(count++).append(')');
+                } else {
+                    nameBuilder.append(" ").append(count++);
+                }
+                result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, storageFolder.getParentID(), openedStorages);
+            } while (null != result);
+            folder.setName(nameBuilder.toString());
+        }
+    }
+
+    private MovePerformer newMovePerformer() throws OXException {
         if (null == session) {
             return new MovePerformer(user, context, folderStorageDiscoverer);
         }

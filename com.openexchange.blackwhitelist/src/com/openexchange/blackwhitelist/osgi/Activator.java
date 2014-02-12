@@ -49,7 +49,6 @@
 
 package com.openexchange.blackwhitelist.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 import com.openexchange.blackwhitelist.BlackWhiteListInterface;
 import com.openexchange.blackwhitelist.BlackWhiteListServlet;
@@ -64,7 +63,7 @@ import com.openexchange.osgi.ServiceRegistry;
  */
 public class Activator extends DeferredActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
     private BlackWhiteListServlet servlet;
 
@@ -112,7 +111,7 @@ public class Activator extends DeferredActivator {
                 httpService.registerServlet(getService(DispatcherPrefixService.class).getPrefix() + "blackwhitelist", servlet = new BlackWhiteListServlet(), null, null);
                 LOG.info("Black-/Whitelist Servlet registered.");
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

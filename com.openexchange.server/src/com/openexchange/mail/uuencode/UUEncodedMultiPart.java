@@ -64,8 +64,8 @@ import com.openexchange.java.Strings;
  */
 public class UUEncodedMultiPart {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UUEncodedMultiPart.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(UUEncodedMultiPart.class);
 
     private final List<UUEncodedPart> uuencodeParts;
 
@@ -148,7 +148,7 @@ public class UUEncodedMultiPart {
                 final int skip = examineBeginToken(m.group(1));
                 uuencodeParts.add(new UUEncodedPart(m.start(1) + skip, m.start(5), m.group().substring(skip), cleanAtom(m.group(3))));
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 break;
             }
         }

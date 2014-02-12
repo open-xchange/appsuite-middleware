@@ -53,8 +53,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaUpdateState;
@@ -71,7 +69,7 @@ import com.openexchange.java.Strings;
  */
 class UpdateTaskCollection {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UpdateTaskCollection.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateTaskCollection.class);
 
     private static final UpdateTaskCollection SINGLETON = new UpdateTaskCollection();
 
@@ -128,7 +126,7 @@ class UpdateTaskCollection {
                     break;
                 default:
                     OXException e = UpdateExceptionCodes.UNKNOWN_CONCURRENCY.create(toExecuteV2.getClass().getName());
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     blocking.add(toExecuteV2);
                 }
             } else {

@@ -52,9 +52,7 @@ package com.openexchange.server.impl;
 import java.text.NumberFormat;
 import java.util.Properties;
 import java.util.Stack;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.Initialization;
 import com.openexchange.version.Version;
 
@@ -233,7 +231,7 @@ public class Starter implements Initialization {
     new com.openexchange.mailaccount.internal.MailAccountStorageInit(),
     new com.openexchange.groupware.impl.id.IDGeneratorInit() };
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Starter.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Starter.class);
 
     private final Stack<Initialization> started;
 
@@ -255,16 +253,14 @@ public class Starter implements Initialization {
                 init.start();
                 started.push(init);
             } catch (Throwable t) {
-                LOG.error("initialization of " + init.getClass().getName() + " failed", t);
+                LOG.error("initialization of {} failed", init.getClass().getName(), t);
             }
         }
 
-        if (LOG.isInfoEnabled()) {
-            if (started.size() == inits.length) {
-                LOG.info("Groupware server successfully initialized.");
-            } else {
-                LOG.info("Groupware server initialized with errors.");
-            }
+        if (started.size() == inits.length) {
+            LOG.info("Groupware server successfully initialized.");
+        } else {
+            LOG.info("Groupware server initialized with errors.");
         }
 
         /*
@@ -272,12 +268,10 @@ public class Starter implements Initialization {
          * (FolderCacheProperties.isEnableInternalUsersEdit())
          */
 
-        if (LOG.isInfoEnabled()) {
-            if (started.size() == inits.length) {
-                LOG.info("SYSTEM IS UP & RUNNING...");
-            } else {
-                LOG.info("SYSTEM IS UP & RUNNING WITH ERRORS...");
-            }
+        if (started.size() == inits.length) {
+            LOG.info("SYSTEM IS UP & RUNNING...");
+        } else {
+            LOG.info("SYSTEM IS UP & RUNNING WITH ERRORS...");
         }
 
     }
@@ -292,22 +286,18 @@ public class Starter implements Initialization {
                 init.start();
                 started.push(init);
             } catch (final OXException e) {
-                LOG.error("Initialization of " + init.getClass().getName() + " failed", e);
+                LOG.error("Initialization of {} failed", init.getClass().getName(), e);
             }
         }
-        if (LOG.isInfoEnabled()) {
-            if (started.size() == adminInits.length) {
-                LOG.info("Admin successfully initialized.");
-            } else {
-                LOG.info("Admin initialized with errors.");
-            }
+        if (started.size() == adminInits.length) {
+            LOG.info("Admin successfully initialized.");
+        } else {
+            LOG.info("Admin initialized with errors.");
         }
-        if (LOG.isInfoEnabled()) {
-            if (started.size() == adminInits.length) {
-                LOG.info("SYSTEM IS UP & RUNNING IN ADMIN MODE...");
-            } else {
-                LOG.info("SYSTEM IS UP & RUNNING WITH ERRORS IN ADMIN MODE...");
-            }
+        if (started.size() == adminInits.length) {
+            LOG.info("SYSTEM IS UP & RUNNING IN ADMIN MODE...");
+        } else {
+            LOG.info("SYSTEM IS UP & RUNNING WITH ERRORS IN ADMIN MODE...");
         }
     }
 
@@ -317,31 +307,19 @@ public class Starter implements Initialization {
     private static final void dumpServerInfos() {
         try {
             final Properties p = System.getProperties();
-            if (LOG.isInfoEnabled()) {
-                LOG.info(p.getProperty("os.name") + ' ' + p.getProperty("os.arch") + ' ' + p.getProperty("os.version"));
-            }
-            if (LOG.isInfoEnabled()) {
-                LOG.info(p.getProperty("java.runtime.version"));
-            }
+            LOG.info("{} {} {}", p.getProperty("os.name"), p.getProperty("os.arch"), p.getProperty("os.version"));
+            LOG.info(p.getProperty("java.runtime.version"));
             final long totalMemory = Runtime.getRuntime().totalMemory() >> 10;
-            if (LOG.isInfoEnabled()) {
-                LOG.info("VM Total Memory       : " + NumberFormat.getNumberInstance().format(totalMemory) + " KB");
-            }
+            LOG.info("VM Total Memory       : {} KB", NumberFormat.getNumberInstance().format(totalMemory));
             final long freeMemory = Runtime.getRuntime().freeMemory() >> 10;
-            if (LOG.isInfoEnabled()) {
-                LOG.info("VM Free Memory        : " + NumberFormat.getNumberInstance().format(freeMemory) + " KB");
-            }
+            LOG.info("VM Free Memory        : {} KB", NumberFormat.getNumberInstance().format(freeMemory));
             final long usedMemory = totalMemory - freeMemory;
-            if (LOG.isInfoEnabled()) {
-                LOG.info("VM Used Memory        : " + NumberFormat.getNumberInstance().format(usedMemory) + " KB");
-            }
+            LOG.info("VM Used Memory        : {} KB", NumberFormat.getNumberInstance().format(usedMemory));
         } catch (final Exception gee) {
-            LOG.error(gee.getMessage(), gee);
+            LOG.error("", gee);
         }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("System version : " + Version.NAME + " Server [" + Version.getInstance().getVersionString() + "] initializing ...");
-            LOG.info("Server Footprint : " + OXException.getServerId());
-        }
+        LOG.info("System version : {} Server [{}] initializing ...", Version.NAME, Version.getInstance().getVersionString());
+        LOG.info("Server Footprint : {}", OXException.getServerId());
     }
 
     /**

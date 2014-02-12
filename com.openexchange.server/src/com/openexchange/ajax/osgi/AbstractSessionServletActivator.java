@@ -57,7 +57,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpServlet;
-import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.capabilities.CapabilityService;
@@ -71,7 +70,7 @@ import com.openexchange.configuration.ServerConfig.Property;
  */
 public abstract class AbstractSessionServletActivator extends AbstractServletActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractSessionServletActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractSessionServletActivator.class);
 
     /**
      * Initializes a new {@link AbstractSessionServletActivator}.
@@ -110,7 +109,7 @@ public abstract class AbstractSessionServletActivator extends AbstractServletAct
                         sb.append(alias);
                         sb.append("\".");
                         final IllegalStateException e = new IllegalStateException(sb.toString());
-                        LOG.warn(e.getMessage(), e);
+                        LOG.warn("", e);
                         property = "";
                     }
                     initParams.put(configKey, property);
@@ -124,7 +123,7 @@ public abstract class AbstractSessionServletActivator extends AbstractServletAct
 
             registerServlet(alias, servlet, initParams, getService(HttpService.class));
         } catch (final IllegalStateException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

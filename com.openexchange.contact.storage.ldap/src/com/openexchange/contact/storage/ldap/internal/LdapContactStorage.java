@@ -49,12 +49,13 @@
 
 package com.openexchange.contact.storage.ldap.internal;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import javax.naming.ldap.SortKey;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.DefaultContactStorage;
@@ -73,7 +74,6 @@ import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
-import com.openexchange.log.LogFactory;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
@@ -92,7 +92,8 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class LdapContactStorage extends DefaultContactStorage {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LdapContactStorage.class));
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapContactStorage.class);
+
     private static final ContactField[] DISTLISTMEMBER_FIELDS = { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3,
         ContactField.OBJECT_ID, ContactField.DISPLAY_NAME,ContactField.SUR_NAME, ContactField.GIVEN_NAME
     };
@@ -163,7 +164,7 @@ public class LdapContactStorage extends DefaultContactStorage {
     public SearchIterator<Contact> deleted(Session session, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
         check(session.getContextId(), folderId);
         if (null == mapper.opt(ContactField.LAST_MODIFIED)) {
-            LOG.warn("No LDAP mapping for " + ContactField.LAST_MODIFIED + ", unable to get deleted contacts in period.");
+            LOG.warn("No LDAP mapping for {}, unable to get deleted contacts in period.", ContactField.LAST_MODIFIED);
             return getSearchIterator(null);
         } else if (false == config.isAdsDeletionSupport()) {
             LOG.warn("No ADS deletion support available, unable to get deleted contacts in period.");
@@ -176,7 +177,7 @@ public class LdapContactStorage extends DefaultContactStorage {
     public SearchIterator<Contact> modified(Session session, String folderID, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
         check(session.getContextId(), folderID);
         if (null == mapper.opt(ContactField.LAST_MODIFIED)) {
-            LOG.warn("No LDAP mapping for " + ContactField.LAST_MODIFIED + ", unable to get modified contacts in period.");
+            LOG.warn("No LDAP mapping for {}, unable to get modified contacts in period.", ContactField.LAST_MODIFIED);
             return getSearchIterator(null);
         }
         return doModified(session, folderID, since, fields, sortOptions);
@@ -211,7 +212,7 @@ public class LdapContactStorage extends DefaultContactStorage {
     @Override
     public SearchIterator<Contact> searchByBirthday(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
         if (null == mapper.opt(ContactField.BIRTHDAY)) {
-            LOG.warn("No LDAP mapping for " + ContactField.BIRTHDAY + ", unable to search contacts by birthday.");
+            LOG.warn("No LDAP mapping for {}, unable to search contacts by birthday.", ContactField.BIRTHDAY);
             return getSearchIterator(null);
         } else {
             // use default implementation for now
@@ -222,7 +223,7 @@ public class LdapContactStorage extends DefaultContactStorage {
     @Override
     public SearchIterator<Contact> searchByAnniversary(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
         if (null == mapper.opt(ContactField.ANNIVERSARY)) {
-            LOG.warn("No LDAP mapping for " + ContactField.ANNIVERSARY + ", unable to search contacts by anniversary.");
+            LOG.warn("No LDAP mapping for {}, unable to search contacts by anniversary.", ContactField.ANNIVERSARY);
             return getSearchIterator(null);
         } else {
             // use default implementation for now
@@ -369,7 +370,7 @@ public class LdapContactStorage extends DefaultContactStorage {
                 try {
                     result = executor.getAttributes(member.getDisplayname(), distlistAttributeNames);
                 } catch (OXException e) {
-                    LOG.warn("Error resolving distribution list member " + member.getDisplayname(), e);
+                    LOG.warn("Error resolving distribution list member {}", member.getDisplayname(), e);
                 }
                 if (null != result) {
                     Contact referencedContact = this.createContact(executor, idResolver, mapper, result, DISTLISTMEMBER_FIELDS);
@@ -468,7 +469,7 @@ public class LdapContactStorage extends DefaultContactStorage {
         if (contact.getMarkAsDistribtuionlist()) {
             resolveDistList(executor, idResolver, contact);
             if (config.isExcludeEmptyLists() && (null == contact.getDistributionList() || 0 == contact.getDistributionList().length)) {
-                LOG.debug("Skipping empty distribution list '" + result + "'.");
+                LOG.debug("Skipping empty distribution list '{}'.", result);
                 return null;
             }
             if (false == contact.containsSurName() && contact.containsDisplayName()) {
@@ -577,3 +578,4 @@ public class LdapContactStorage extends DefaultContactStorage {
     }
 
 }
+

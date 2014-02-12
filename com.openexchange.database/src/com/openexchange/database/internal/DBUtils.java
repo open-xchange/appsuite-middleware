@@ -54,8 +54,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * Utilities for database resource handling.
@@ -64,7 +62,7 @@ import com.openexchange.log.LogFactory;
  */
 final class DBUtils {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DBUtils.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DBUtils.class);
 
     private DBUtils() {
         super();
@@ -75,7 +73,7 @@ final class DBUtils {
             try {
                 result.close();
             } catch (SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -85,7 +83,7 @@ final class DBUtils {
             try {
                 stmt.close();
             } catch (SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -104,7 +102,7 @@ final class DBUtils {
                 con.rollback();
             }
         } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -117,7 +115,7 @@ final class DBUtils {
                 con.rollback(savePoint);
             }
         } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -130,7 +128,7 @@ final class DBUtils {
                 con.setAutoCommit(true);
             }
         } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

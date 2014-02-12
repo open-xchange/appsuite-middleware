@@ -57,7 +57,6 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ITopic;
 import com.openexchange.java.util.UUIDs;
@@ -74,7 +73,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class HzTopic<E> implements Topic<E> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HzTopic.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HzTopic.class);
 
     static final String MESSAGE_DATA_OBJECT = HzDataUtility.MESSAGE_DATA_OBJECT;
     static final String MESSAGE_DATA_SENDER_ID = HzDataUtility.MESSAGE_DATA_SENDER_ID;
@@ -100,7 +99,7 @@ public final class HzTopic<E> implements Topic<E> {
         publishQueue = new HzDelayQueue<HzDelayed<E>>();
         // Timer task
         final TimerService timerService = Services.getService(TimerService.class);
-        final Log log = LOG;
+        final org.slf4j.Logger log = LOG;
         final Runnable r = new Runnable() {
 
             @Override
@@ -149,11 +148,7 @@ public final class HzTopic<E> implements Topic<E> {
                 hzTopic.removeMessageListener(hzListener);
             } catch (final RuntimeException e) {
                 // Removing message listener failed
-                if (LOG.isDebugEnabled()) {
-                    LOG.warn("Couldn't remove message listener from Hazelcast topic \"" + name + "\".", e);
-                } else {
-                    LOG.warn("Couldn't remove message listener from Hazelcast topic \"" + name + "\".");
-                }
+                LOG.warn("Couldn't remove message listener from Hazelcast topic \"{}\".", name, e);
             }
         }
     }
@@ -189,9 +184,9 @@ public final class HzTopic<E> implements Topic<E> {
     private static final int CHUNK_THRESHOLD = HzDataUtility.CHUNK_THRESHOLD;
 
     /**
-     * (Immediately) Publishes specified message to queue.
+     * (Immediately) Publishes specified messages to queue.
      *
-     * @param message The message to publish
+     * @param messages The messages to publish
      */
     private void publishNow(final List<E> messages) {
         final int size = messages.size();
@@ -202,28 +197,29 @@ public final class HzTopic<E> implements Topic<E> {
             for (int i = 0; i < size; i++) {
                 hzTopic.publish(HzDataUtility.generateMapFor(messages.get(i), senderId));
             }
-        }
-        // Chunk-wise
-        final StringBuilder sb = new StringBuilder(MULTIPLE_PREFIX);
-        final int reset = MULTIPLE_PREFIX.length();
-        final int chunkSize = CHUNK_SIZE;
-        int off = 0;
-        while (off < size) {
-            // Determine end index
-            int end = off + chunkSize;
-            if (end > size) {
-                end = size;
+        } else {
+            // Chunk-wise
+            final StringBuilder sb = new StringBuilder(MULTIPLE_PREFIX);
+            final int reset = MULTIPLE_PREFIX.length();
+            final int chunkSize = CHUNK_SIZE;
+            int off = 0;
+            while (off < size) {
+                // Determine end index
+                int end = off + chunkSize;
+                if (end > size) {
+                    end = size;
+                }
+                // Create map carrying multiple messages
+                final Map<String, Object> multiple = new LinkedHashMap<String, Object>(chunkSize + 1);
+                multiple.put(MULTIPLE_MARKER, Boolean.TRUE);
+                for (int i = off; i < end; i++) {
+                    sb.setLength(reset);
+                    multiple.put(sb.append(i+1).toString(), HzDataUtility.generateMapFor(messages.get(i), senderId));
+                }
+                // Publish
+                hzTopic.publish(multiple);
+                off = end;
             }
-            // Create map carrying multiple messages
-            final Map<String, Object> multiple = new LinkedHashMap<String, Object>(chunkSize + 1);
-            multiple.put(MULTIPLE_MARKER, Boolean.TRUE);
-            for (int i = off; i < end; i++) {
-                sb.setLength(reset);
-                multiple.put(sb.append(i+1).toString(), HzDataUtility.generateMapFor(messages.get(i), senderId));
-            }
-            // Publish
-            hzTopic.publish(multiple);
-            off = end;
         }
     }
 
@@ -260,11 +256,7 @@ public final class HzTopic<E> implements Topic<E> {
 
         private void onMessageReceived(final String name, final Map<String, Object> messageData) {
             final String messageSender = (String) messageData.get(MESSAGE_DATA_SENDER_ID);
-            listener.onMessage(new Message<E>(
-                name,
-                messageSender,
-                (E) messageData.get(MESSAGE_DATA_OBJECT),
-                !senderId.equals(messageSender)));
+            listener.onMessage(new Message<E>(name, messageSender, (E) messageData.get(MESSAGE_DATA_OBJECT), !senderId.equals(messageSender)));
         }
     }
 }

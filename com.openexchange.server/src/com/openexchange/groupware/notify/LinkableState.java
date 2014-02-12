@@ -52,7 +52,6 @@ package com.openexchange.groupware.notify;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.Types;
@@ -65,7 +64,6 @@ import com.openexchange.i18n.tools.Template;
 import com.openexchange.i18n.tools.TemplateToken;
 import com.openexchange.i18n.tools.replacement.ModuleReplacement;
 import com.openexchange.i18n.tools.replacement.StringReplacement;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -76,7 +74,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public abstract class LinkableState implements State {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinkableState.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LinkableState.class);
 
     protected static volatile Template object_link_template;
 
@@ -141,13 +139,9 @@ public abstract class LinkableState implements State {
         final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
         final String hostnameStr;
         if (hostnameService == null || (hostnameStr = hostnameService.getHostname(p.id, p.cid)) == null) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("No host name service available or "
-                        + "returned host name from service is null; using local host name as fallback.");
-            }
+            LOG.debug("No host name service available or returned host name from service is null; using local host name as fallback.");
             if (warnSpam != null) {
-                LOG.error("Can't resolve my own hostname, "
-                        + "using 'localhost' instead, which is certainly not what you want!", warnSpam);
+                LOG.error("Can't resolve my own hostname, using 'localhost' instead, which is certainly not what you want!", warnSpam);
             }
             subst.put(new StringReplacement(TemplateToken.HOSTNAME, hostname));
         } else {

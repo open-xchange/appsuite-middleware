@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 public class PrefixedSerializer<P, S> extends AbstractSerializer<S> {
 
-  private static Logger log = LoggerFactory.getLogger(PrefixedSerializer.class);
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(PrefixedSerializer.class);
 
   P prefix;
   Serializer<P> prefixSerializer;

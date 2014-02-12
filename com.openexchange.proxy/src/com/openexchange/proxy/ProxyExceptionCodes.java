@@ -50,52 +50,57 @@
 package com.openexchange.proxy;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link ProxyExceptionCodes} - Enumeration about all {@link OXException}s.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum ProxyExceptionCodes implements OXExceptionCode {
+public enum ProxyExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(ProxyExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An error occurred: %1$s", CATEGORY_ERROR, 1, ProxyExceptionMessages.PROXY_ERROR_MSG),
     /**
      * Duplicate proxy registration: %1$s
      */
-    DUPLICATE_REGISTRATION(ProxyExceptionMessages.DUPLICATE_REGISTRATION_MSG, CATEGORY_ERROR, 2),
+    DUPLICATE_REGISTRATION("Duplicate proxy registration: %1$s", CATEGORY_ERROR, 2, ProxyExceptionMessages.PROXY_ERROR_MSG),
     /**
      * Malformed URL: %1$s
      */
-    MALFORMED_URL(ProxyExceptionMessages.MALFORMED_URL_MSG, CATEGORY_ERROR, 3),
+    MALFORMED_URL("Malformed URL: %1$s", CATEGORY_ERROR, 3, ProxyExceptionMessages.PROXY_ERROR_MSG),
     /**
      * HTTP request to VoipNow server %1$s failed. Status line: %2$s
      */
-    HTTP_REQUEST_FAILED(ProxyExceptionMessages.HTTP_REQUEST_FAILED_MSG, CATEGORY_ERROR, 4),
+    HTTP_REQUEST_FAILED("HTTP request to VoipNow server %1$s failed. Status line: %2$s", CATEGORY_ERROR, 4,
+        ProxyExceptionMessages.PROXY_ERROR_MSG),
     /**
      * Malformed URI: %1$s
      */
-    MALFORMED_URI(ProxyExceptionMessages.MALFORMED_URI_MSG, CATEGORY_ERROR, 5),
+    MALFORMED_URI("Malformed URI: %1$s", CATEGORY_ERROR, 5, ProxyExceptionMessages.PROXY_ERROR_MSG),
     /**
      * Invalid session identifier: %1$s
      */
-    INVALID_SESSION_ID(ProxyExceptionMessages.INVALID_SESSION_ID_MSG, CATEGORY_ERROR, 6);
+    INVALID_SESSION_ID("Invalid session identifier: %1$s", CATEGORY_ERROR, 6, ProxyExceptionMessages.PROXY_ERROR_MSG);
 
     private final Category category;
 
     private final int detailNumber;
 
     private final String message;
+    
+    private final String displayMessage;
 
-    private ProxyExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private ProxyExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -116,6 +121,11 @@ public enum ProxyExceptionCodes implements OXExceptionCode {
     @Override
     public int getNumber() {
         return detailNumber;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

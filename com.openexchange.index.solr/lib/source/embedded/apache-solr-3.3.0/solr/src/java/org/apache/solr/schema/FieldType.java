@@ -50,7 +50,7 @@ import java.io.IOException;
  * @version $Id: FieldType.java 1100480 2011-05-07 08:37:00Z uschindler $
  */
 public abstract class FieldType extends FieldProperties {
-  public static final Logger log = LoggerFactory.getLogger(FieldType.class);
+  public static final org.slf4j.Logger log = LoggerFactory.getLogger(FieldType.class);
 
   /**
    * The default poly field separator.

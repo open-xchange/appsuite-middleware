@@ -70,7 +70,6 @@ import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.security.auth.login.LoginException;
-import org.apache.commons.logging.Log;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -93,7 +92,7 @@ import com.openexchange.exception.OXException;
  */
 public class UCSAuthentication implements AuthenticationService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(UCSAuthentication.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UCSAuthentication.class);
     private static Properties props;
 
     private static Hashtable<String, String> LDAP_CONFIG = null;
@@ -126,7 +125,7 @@ public class UCSAuthentication implements AuthenticationService {
 
             final String[] splitted = split(loginInfo.getUsername());
 
-            LOG.debug("Splitted:" + Arrays.toString(splitted));
+            LOG.debug("Splitted:{}", Arrays.toString(splitted));
 
 
             if (splitted[0] == null || splitted[0].length() == 0 || splitted[0].equals("defaultcontext")){
@@ -135,7 +134,7 @@ public class UCSAuthentication implements AuthenticationService {
 
             final String context_or_domain = splitted[0];
 
-            LOG.debug("Context is "+context_or_domain);
+            LOG.debug("Context is {}", context_or_domain);
 
             final String uid = splitted[1];
             final String password = loginInfo.getPassword();
@@ -159,7 +158,7 @@ public class UCSAuthentication implements AuthenticationService {
 
                 final NamingEnumeration<SearchResult> result = ctx.search("",search_pattern,sc);
 
-                LOG.debug("Now searching on server "+LDAP_CONFIG.get(Context.PROVIDER_URL)+" for DN of User "+uid+" with BASE: "+(String) props.get("LDAP_BASE")+ " and pattern "+search_pattern);
+                LOG.debug("Now searching on server {} for DN of User {} with BASE: {} and pattern {}", LDAP_CONFIG.get(Context.PROVIDER_URL), uid, props.get("LDAP_BASE"), search_pattern);
 
                 String user_dn = null;
                 String user_part = null;
@@ -167,14 +166,14 @@ public class UCSAuthentication implements AuthenticationService {
                 while(result.hasMoreElements()){
                     final SearchResult sr = result.next();
                     user_part = sr.getName();
-                    LOG.debug("User found : " + sr.getName());
+                    LOG.debug("User found : {}", sr.getName());
                     user_dn = sr.getName()+","+(String) props.get("LDAP_BASE");
                     count++;
                 }
 
                 if(count!=1){
                     // found more than 1 user or no user , this is not good :)
-                    LOG.debug("User "+uid+" not found in LDAP");
+                    LOG.debug("User {} not found in LDAP", uid);
                     throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                 }
                 if (null != ctx) {
@@ -182,7 +181,7 @@ public class UCSAuthentication implements AuthenticationService {
                         // unbind old context
                         ctx.close();
                     } catch (final NamingException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
 
@@ -191,7 +190,7 @@ public class UCSAuthentication implements AuthenticationService {
                 LDAP_CONFIG.put(Context.SECURITY_PRINCIPAL,user_dn);
                 LDAP_CONFIG.put(Context.SECURITY_CREDENTIALS, password);
 
-                LOG.debug("NOW trying to bind with DN: "+user_dn+" to fetch Attribute "+(String) props.get("LDAP_ATTRIBUTE"));
+                LOG.debug("NOW trying to bind with DN: {} to fetch Attribute {}", user_dn, props.get("LDAP_ATTRIBUTE"));
                 ctx = new InitialDirContext(LDAP_CONFIG);
 
                 final String[] attribs = {(String) props.get("LDAP_ATTRIBUTE"),"shadowLastChange","shadowMax"};
@@ -211,7 +210,7 @@ public class UCSAuthentication implements AuthenticationService {
                     try{
                         shadowlastchange_days = Long.parseLong(((String)shadowlastchange.get()));
                         shadowmax_days = Long.parseLong(((String)shadowmax.get()));
-                        LOG.debug("Found  shadowlastchange ("+shadowlastchange_days+") and shadowmax("+shadowmax_days+") in ldap! NOW calculating!");
+                        LOG.debug("Found  shadowlastchange ({}) and shadowmax({}) in ldap! NOW calculating!", shadowlastchange_days, shadowmax_days);
                     }catch(final Exception exp){
                         LOG.error("LDAP Attributes shadowlastchange or/and shadowmax contain invalid values!",exp);
                     }
@@ -226,7 +225,7 @@ public class UCSAuthentication implements AuthenticationService {
                     final long days_since_1970 = cal.getTimeInMillis()/86400000;
                     final long sum_up = shadowlastchange_days+shadowmax_days;
                     if(sum_up<days_since_1970){
-                        LOG.info("Password for account \""+uid+"\" seems to be expired("+sum_up+"<"+days_since_1970+")!");
+                        LOG.info("Password for account \"{}\" seems to be expired({}<{})!", uid, sum_up, days_since_1970);
                         throw LoginExceptionCodes.ACCOUNT_LOCKED.create(uid);
                     }
                 }else{
@@ -237,17 +236,17 @@ public class UCSAuthentication implements AuthenticationService {
 
                 if(emailattrib.size()!=1){
                     // more than one (String) props.get("LDAP_ATTRIBUTE") value found, cannot resolve correct context
-                    LOG.fatal("FATAL! More than one "+(String) props.get("LDAP_ATTRIBUTE")+" value found, cannot resolv correct context");
+                    LOG.error("FATAL! More than one "+(String) props.get("LDAP_ATTRIBUTE")+" value found, cannot resolv correct context");
                     throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                 }else{
                     final String[] data  = ((String)emailattrib.get()).split("@");
                     if(data.length!=2){
-                        LOG.fatal("FATAL! Email address "+(String)emailattrib.get()+" could be splitted correctly!!");
+                        LOG.error("FATAL! Email address {} could be splitted correctly!!", emailattrib.get());
                         throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                     }else{
                         splitted[0] = data[1];
                         splitted[1] = uid;
-                        LOG.debug("Returning "+Arrays.toString(splitted)+" to OX API!");
+                        LOG.debug("Returning {} to OX API!", Arrays.toString(splitted));
                         // return username AND context-name to the OX API
                         return new Authenticated() {
                             @Override
@@ -281,7 +280,7 @@ public class UCSAuthentication implements AuthenticationService {
                 try {
                     ctx.close();
                 } catch (final NamingException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -328,13 +327,13 @@ public class UCSAuthentication implements AuthenticationService {
                     props = new Properties();
                     props.load(fis);
                 } catch (final IOException e) {
-                    LOG.error(e.getMessage(),e);
+                    LOG.error("",e);
                     throw LoginExceptionCodes.UNKNOWN.create(file.getAbsolutePath());
                 } finally {
                     try {
                         fis.close();
                     } catch (final IOException e) {
-                        LOG.error(e.getMessage(),e);
+                        LOG.error("",e);
                         throw LoginExceptionCodes.UNKNOWN.create("Error closing stream for file:"+file.getAbsolutePath());
                     }
                 }

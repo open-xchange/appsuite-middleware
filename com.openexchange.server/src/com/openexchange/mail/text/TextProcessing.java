@@ -52,14 +52,14 @@ package com.openexchange.mail.text;
 import java.io.IOException;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
+import com.openexchange.java.CharsetDetector;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.java.CharsetDetector;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -70,8 +70,8 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class TextProcessing {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TextProcessing.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(TextProcessing.class);
 
     private static final String SPLIT_LINES = "\r?\n";
 
@@ -322,12 +322,7 @@ public final class TextProcessing {
         } catch (final java.io.CharConversionException e) {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "US-ASCII";
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(
-                    new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(charset).append(
-                        "\". Using fallback charset \"").append(fallback).append("\" instead."),
-                    e);
-            }
+            LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback, e);
             return MessageUtility.readMailPart(mailPart, fallback);
         }
     }
@@ -337,22 +332,13 @@ public final class TextProcessing {
         if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();
             if (!CharsetDetector.isValid(cs)) {
-                com.openexchange.java.StringAllocator sb = null;
-                if (null != cs) {
-                    sb = new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
-                }
+                final String prev = cs;
                 if (contentType.startsWith("text/")) {
                     cs = CharsetDetector.detectCharset(mailPart.getInputStream());
-                    if (LOG.isWarnEnabled() && null != sb) {
-                        sb.append(" Using auto-detected encoding: \"").append(cs).append('"');
-                        LOG.warn(sb.toString());
-                    }
+                    LOG.warn("Illegal or unsupported encoding \"{}\". Using auto-detected encoding: \"{}\"", prev, cs);
                 } else {
                     cs = MailProperties.getInstance().getDefaultMimeCharset();
-                    if (LOG.isWarnEnabled() && null != sb) {
-                        sb.append(" Using fallback encoding: \"").append(cs).append('"');
-                        LOG.warn(sb.toString());
-                    }
+                    LOG.warn("Illegal or unsupported encoding \"{}\". Using fallback encoding: \"{}\"", prev, cs);
                 }
             }
             charset = cs;

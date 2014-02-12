@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Printing
 Bundle-SymbolicName: com.openexchange.printing
-Bundle-Version: 7.4.1
+Bundle-Version: 7.4.2
 Bundle-Activator: com.openexchange.printing.osgi.PrintingActivator
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -25,6 +25,7 @@ Import-Package: com.openexchange.ajax.osgi,
  com.openexchange.templating,
  com.openexchange.tools.session,
  org.apache.commons.logging,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.openexchange.server

@@ -54,8 +54,6 @@ import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.datatypes.genericonf.WidgetSwitcher;
 import com.openexchange.exception.OXException;
@@ -73,7 +71,7 @@ import com.openexchange.subscribe.microformats.parser.OXMFForm;
  */
 public class HTTPFormSubmittingOXMFDataSource implements OXMFDataSource {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HTTPFormSubmittingOXMFDataSource.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HTTPFormSubmittingOXMFDataSource.class);
 
     @Override
     public Reader getData(Subscription subscription) throws OXException {
@@ -104,10 +102,10 @@ public class HTTPFormSubmittingOXMFDataSource implements OXMFDataSource {
         try {
             return HTTPToolkit.post(address, formValues);
         } catch (HttpException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw OXMFSubscriptionErrorMessage.HttpException.create(e.getMessage(), e);
         } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw OXMFSubscriptionErrorMessage.IOException.create(e.getMessage(), e);
         }
 

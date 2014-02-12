@@ -135,11 +135,9 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -207,7 +205,7 @@ public final class OutlookFolderStorage implements FolderStorage {
     /**
      * The logger.
      */
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OutlookFolderStorage.class));
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OutlookFolderStorage.class);
 
     /**
      * The prepared full name.
@@ -312,7 +310,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         try {
             tcm = new TimeoutConcurrentMap<Key, Future<List<SortableId>>>(10, true);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             tcm = null;
         }
         TCM = tcm;
@@ -371,7 +369,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             }
             return b.booleanValue();
         } catch (final OXException e) {
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
             return false;
         }
     }
@@ -398,7 +396,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             }
             return id;
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
     }
@@ -485,7 +483,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                                 folderStorage.restore(realTreeId, folderId, storageParameters);
                             } else {
                                 deleteFolder(treeId, folderId, storageParameters, isDatabaseFolder(folderId), memoryTable);
-                                LOG.warn("Deleted absent folder '" + folderId + "' from virtual folder tree as there is no real counterpart", new Throwable());
+                                LOG.warn("Deleted absent folder '{}' from virtual folder tree as there is no real counterpart", folderId, new Throwable());
                             }
                         } else if (isDatabaseFolder(folderId)) {
                             final String parentId = memoryTree.getParentOf(folderId);
@@ -502,11 +500,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                             }
                         }
                     } catch (final OXException oxe) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId, oxe);
-                        } else {
-                            LOG.warn("Checking consistency failed for folder " + folderId + " in tree " + treeId + ":\n" + oxe.getMessage());
-                        }
+                        LOG.warn("Checking consistency failed for folder {} in tree {}", folderId, treeId, oxe);
                     }
                 }
                 // Commit
@@ -517,20 +511,12 @@ public final class OutlookFolderStorage implements FolderStorage {
                 for (final FolderStorage folderStorage : storages) {
                     folderStorage.rollback(storageParameters);
                 }
-                if (LOG.isDebugEnabled()) {
-                    LOG.warn("Checking consistency failed in tree " + treeId, e);
-                } else {
-                    LOG.warn("Checking consistency failed in tree " + treeId + ":\n" + e.getMessage());
-                }
+                LOG.warn("Checking consistency failed in tree {}", treeId, e);
             } catch (final RuntimeException e) {
                 for (final FolderStorage folderStorage : storages) {
                     folderStorage.rollback(storageParameters);
                 }
-                if (LOG.isDebugEnabled()) {
-                    LOG.warn("Checking consistency failed for in tree " + treeId, e);
-                } else {
-                    LOG.warn("Checking consistency failed for in tree " + treeId + ":\n" + e.getMessage());
-                }
+                LOG.warn("Checking consistency failed for in tree {}", treeId, e);
             }
         }
     }
@@ -1601,7 +1587,6 @@ public final class OutlookFolderStorage implements FolderStorage {
                                     if (null == userAccounts) {
                                         userAccounts = fsService.getAccountManager().getAccounts(session);
                                     }
-                                    final Props props = LogProperties.getLogProperties();
                                     for (final FileStorageAccount userAccount : userAccounts) {
                                         if (SERVICE_INFOSTORE.equals(userAccount.getId()) || FileStorageAccount.DEFAULT_ID.equals(userAccount.getId())) {
                                             // Ignore infostore file storage and default account
@@ -1610,9 +1595,9 @@ public final class OutlookFolderStorage implements FolderStorage {
                                         final FileStorageAccountAccess accountAccess = getFSAccountAccess(storageParameters, userAccount);
                                         accountAccess.connect();
                                         try {
-                                            props.put(LogProperties.Name.FILE_STORAGE_ACCOUNT_ID, userAccount.getId());
-                                            props.put(LogProperties.Name.FILE_STORAGE_CONFIGURATION, userAccount.getConfiguration().toString());
-                                            props.put(LogProperties.Name.FILE_STORAGE_SERVICE_ID, fsService.getId());
+                                            LogProperties.put(LogProperties.Name.FILE_STORAGE_ACCOUNT_ID, userAccount.getId());
+                                            LogProperties.put(LogProperties.Name.FILE_STORAGE_CONFIGURATION, userAccount.getConfiguration().toString());
+                                            LogProperties.put(LogProperties.Name.FILE_STORAGE_SERVICE_ID, fsService.getId());
                                             final FileStorageFolder rootFolder = accountAccess.getFolderAccess().getRootFolder();
                                             if (null != rootFolder) {
                                                 fsAccounts.add(userAccount);
@@ -1622,14 +1607,14 @@ public final class OutlookFolderStorage implements FolderStorage {
                                             }
                                         } finally {
                                             accountAccess.close();
-                                            props.remove(LogProperties.Name.FILE_STORAGE_ACCOUNT_ID);
-                                            props.remove(LogProperties.Name.FILE_STORAGE_CONFIGURATION);
-                                            props.remove(LogProperties.Name.FILE_STORAGE_SERVICE_ID);
+                                            LogProperties.remove(LogProperties.Name.FILE_STORAGE_ACCOUNT_ID);
+                                            LogProperties.remove(LogProperties.Name.FILE_STORAGE_CONFIGURATION);
+                                            LogProperties.remove(LogProperties.Name.FILE_STORAGE_SERVICE_ID);
                                         }
                                     }
                                 }
                             } catch (final OXException e) {
-                                LOG.error(e.getMessage(), e);
+                                LOG.error("", e);
                             }
                             if (fsAccounts.isEmpty()) {
                                 // Do nothing
@@ -2152,7 +2137,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                                             unifiedMailIndex = accountSubfolderIDs.size() - 1;
                                         }
                                     } catch (final OXException e) {
-                                        LOG.error(e.getMessage(), e);
+                                        LOG.error("", e);
                                     }
                                 } else {
                                     accountSubfolderIDs.add(MailFolderUtility.prepareFullname(mailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID));
@@ -2188,12 +2173,12 @@ public final class OutlookFolderStorage implements FolderStorage {
                             try {
                                 messagingAccounts.addAll(messagingService.getAccountManager().getAccounts(parameters.getSession()));
                             } catch (final OXException e) {
-                                LOG.error(e.getMessage(), e);
+                                LOG.error("", e);
                             }
                         }
                     }
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
                 if (messagingAccounts.isEmpty()) {
                     messagingSubfolderIDs = Collections.emptyList();
@@ -2283,7 +2268,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         if (null == session) {
             return new StorageParametersImpl(source.getUser(), source.getContext());
         }
-        return new StorageParametersImpl((ServerSession) session);
+        return new StorageParametersImpl((ServerSession) session, source.getUser(), source.getContext());
     }
 
     @Override
@@ -2400,22 +2385,15 @@ public final class OutlookFolderStorage implements FolderStorage {
         private final int contextId;
         private final int tree;
         private final StorageParameters parameters;
-        private final Props props;
 
         public MailFolderCallable(final FolderNameComparator comparator, final Locale locale, final User user, final int contextId, final int tree, final StorageParameters parameters) {
             super();
-            this.props = LogProperties.optLogProperties(Thread.currentThread());
             this.comparator = comparator;
             this.locale = locale == null ? Locale.US : locale;
             this.user = user;
             this.contextId = contextId;
             this.tree = tree;
             this.parameters = parameters;
-        }
-
-        @Override
-        public Props optLogProperties() {
-            return props;
         }
 
         @Override
@@ -2445,36 +2423,28 @@ public final class OutlookFolderStorage implements FolderStorage {
                     }
                 } catch (final OXException e) {
                     if (MailExceptionCode.UNKNOWN_PROTOCOL.equals(e)) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug(e.getMessage(), e);
-                        }
+                        LOG.debug("", e);
                         parameters.addWarning(e);
                         /*
                          * Return empty map
                          */
                         return new TreeMap<String, List<String>>(comparator);
                     } else if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug(e.getMessage(), e);
-                        }
+                        LOG.debug("", e);
                         parameters.addWarning(e);
                         /*
                          * Return empty map
                          */
                         return new TreeMap<String, List<String>>(comparator);
                     } else if (MimeMailExceptionCode.INVALID_CREDENTIALS.equals(e) || MimeMailExceptionCode.LOGIN_FAILED.equals(e)) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug(e.getMessage(), e);
-                        }
+                        LOG.debug("", e);
                         parameters.addWarning(e);
                         /*
                          * Return empty map
                          */
                         return new TreeMap<String, List<String>>(comparator);
                     } else if (MimeMailExceptionCode.CONNECT_ERROR.equals(e) || MimeMailExceptionCode.UNKNOWN_HOST.equals(e)) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug(e.getMessage(), e);
-                        }
+                        LOG.debug("", e);
                         parameters.addWarning(e);
                         /*
                          * Return empty map
@@ -2705,22 +2675,6 @@ public final class OutlookFolderStorage implements FolderStorage {
         return null;
     }
 
-    /**
-     * Gets the locale for given session
-     *
-     * @param session The session
-     * @return The locale
-     */
-    private static Locale localeFrom(final Session session) {
-        if (null == session) {
-            return Locale.US;
-        }
-        if (session instanceof ServerSession) {
-            return ((ServerSession) session).getUser().getLocale();
-        }
-        return UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
-    }
-
     private static void doModifications(final OutlookFolder folder, final Session session, final boolean altNames) {
         final String id = folder.getID();
         if (FolderStorage.PUBLIC_ID.equals(id)) {
@@ -2804,15 +2758,8 @@ public final class OutlookFolderStorage implements FolderStorage {
      */
     private static abstract class TrackableCallable<V> implements Callable<V>, Trackable {
 
-        private final Props props;
         TrackableCallable() {
             super();
-            this.props = LogProperties.optLogProperties(Thread.currentThread());
-        }
-
-        @Override
-        public Props optLogProperties() {
-            return props;
         }
     }
 

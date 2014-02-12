@@ -70,8 +70,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class Resource extends DataServlet {
 
-	private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
-			.getLog(Resource.class);
+	private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Resource.class);
 
 	/**
 	 * For serialization.
@@ -89,7 +88,7 @@ public class Resource extends DataServlet {
 			try {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
 			} catch (final JSONException e) {
-				LOG.error(e.getMessage(), e);
+				LOG.error("", e);
 				response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
 				writeResponse(response, httpServletResponse, session);
 				return;
@@ -104,7 +103,7 @@ public class Resource extends DataServlet {
 			response.setException(e);
 		} catch (final JSONException e) {
 			final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-			LOG.error(oje.getMessage(), oje);
+			LOG.error("", oje);
 			response.setException(oje);
 		}
 
@@ -129,7 +128,7 @@ public class Resource extends DataServlet {
 					final OXException exc = OXJSONExceptionCodes.JSON_READ_ERROR.create(e, data);
 					response.setException(exc);
 					writeResponse(response, httpServletResponse, session);
-					LOG.error(exc.getMessage(), exc);
+					LOG.error("", exc);
 					return;
 				}
 				JSONObject jsonObj = null;
@@ -173,7 +172,7 @@ public class Resource extends DataServlet {
 			response.setException(e);
 		} catch (final JSONException e) {
 			final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-			LOG.error(oje.getMessage(), oje);
+			LOG.error("", oje);
 			response.setException(oje);
 		}
 

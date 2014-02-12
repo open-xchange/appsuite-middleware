@@ -51,6 +51,7 @@ package com.openexchange.data.conversion.ical.ical4j;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -66,7 +67,6 @@ import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.Method;
-import org.apache.commons.logging.Log;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverters;
@@ -80,7 +80,6 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link ICal4JITipParser}
@@ -89,20 +88,31 @@ import com.openexchange.log.LogFactory;
  */
 public class ICal4JITipParser extends ICal4JParser implements ITipParser {
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ICal4JITipParser.class));
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICal4JITipParser.class);
 
     @Override
     public List<ITipMessage> parseMessage(String icalText, TimeZone defaultTZ, Context ctx, int owner, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
         try {
             return parseMessage(new ByteArrayInputStream(icalText.getBytes("UTF-8")), defaultTZ, ctx, owner, errors, warnings);
         } catch (UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return Collections.emptyList();
     }
 
     @Override
     public List<ITipMessage> parseMessage(InputStream ical, TimeZone defaultTZ, Context ctx, int owner, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+//        BufferedReader in = new BufferedReader(new InputStreamReader(ical));
+//        String input;
+//        try {
+//            while ((input = in.readLine()) != null) {
+//                System.out.println(input);
+//            }
+//            in.close();
+//        } catch (IOException e1) {
+//            // TODO Auto-generated catch block
+//            e1.printStackTrace();
+//        }
         List<ITipMessage> messages = new ArrayList<ITipMessage>();
         Map<String, ITipMessage> messagesPerUID = new HashMap<String, ITipMessage>();
         BufferedReader reader = null;
@@ -157,7 +167,7 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
                     }
 
                 } catch (ConversionError conversionError) {
-                    LOG.error(conversionError.getMessage(), conversionError);
+                    LOG.error("", conversionError);
                     errors.add(conversionError);
                 }
             }

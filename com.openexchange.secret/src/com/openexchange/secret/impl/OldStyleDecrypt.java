@@ -66,7 +66,7 @@ import com.openexchange.java.Strings;
  */
 public final class OldStyleDecrypt {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OldStyleDecrypt.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OldStyleDecrypt.class);
 
     /**
      * The key length.
@@ -130,7 +130,7 @@ public final class OldStyleDecrypt {
             encrypted = org.apache.commons.codec.binary.Base64.decodeBase64(Strings.toAsciiBytes(encryptedPassword));
         } catch (final RuntimeException e) {
             // Cannot occur
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
 

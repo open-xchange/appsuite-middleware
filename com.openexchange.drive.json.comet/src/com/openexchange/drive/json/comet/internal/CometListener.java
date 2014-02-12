@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.comet.CometContext;
 import org.glassfish.grizzly.comet.CometEvent.Type;
 import org.json.JSONException;
@@ -64,7 +63,7 @@ import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.events.DriveEvent;
-import com.openexchange.drive.json.LongPollingListener;
+import com.openexchange.drive.json.DefaultLongPollingListener;
 import com.openexchange.drive.json.json.JsonDriveAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -74,11 +73,10 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class CometListener implements LongPollingListener {
+public class CometListener extends DefaultLongPollingListener {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CometListener.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CometListener.class);
 
-    private final DriveSession session;
     private final CometContext<DriveEvent> cometContext;
     private final ReentrantLock lock;
 
@@ -91,15 +89,9 @@ public class CometListener implements LongPollingListener {
      * @param session The session
      */
     public CometListener(DriveSession session, CometContext<DriveEvent> cometContext) {
-        super();
-        this.session = session;
+        super(session);
         this.cometContext = cometContext;
         this.lock = new ReentrantLock();
-    }
-
-    @Override
-    public DriveSession getSession() {
-        return session;
     }
 
     @Override
@@ -110,8 +102,8 @@ public class CometListener implements LongPollingListener {
                 /*
                  * wait for event inside comet handler
                  */
-                LOG.debug("Registering new comet handler for " + session + " ...");
-                cometHandler = new DriveCometHandler(session);
+                LOG.debug("Registering new comet handler for {} ...", driveSession);
+                cometHandler = new DriveCometHandler(driveSession);
                 cometContext.addCometHandler(cometHandler);
                 /*
                  * return placeholder result for now
@@ -123,7 +115,7 @@ public class CometListener implements LongPollingListener {
                 /*
                  * consume available event directly
                  */
-                LOG.debug("Stored event available for " + session + ", no need to wait.");
+                LOG.debug("Stored event available for {}, no need to wait.", driveSession);
                 AJAXRequestResult result = createResult(this.event);
                 this.event = null;
                 return result;
@@ -149,7 +141,7 @@ public class CometListener implements LongPollingListener {
     @Override
     public void onEvent(DriveEvent event) {
         if (false == isInteresting(event)) {
-            LOG.debug("Skipping uninteresting event: " + event);
+            LOG.debug("Skipping uninteresting event: {}", event);
             return;
         }
         lock.lock();
@@ -161,7 +153,7 @@ public class CometListener implements LongPollingListener {
                 try {
                     cometHandler.getCometContext().notify(event, Type.NOTIFY, cometHandler);
                 } catch (IOException e) {
-                    LOG.warn(e.getMessage(), e);
+                    LOG.warn("", e);
                 }
                 cometHandler = null;
             } else {
@@ -176,12 +168,12 @@ public class CometListener implements LongPollingListener {
     }
 
     private boolean isInteresting(DriveEvent event) {
-        return null != event && null != event.getFolderIDs() && event.getFolderIDs().contains(session.getRootFolderID());
+        return null != event && null != event.getFolderIDs() && event.getFolderIDs().contains(driveSession.getRootFolderID());
     }
 
     @Override
     public String toString() {
-        return "CometListener [session=" + session + "]";
+        return "CometListener [session=" + driveSession + "]";
     }
 
 }

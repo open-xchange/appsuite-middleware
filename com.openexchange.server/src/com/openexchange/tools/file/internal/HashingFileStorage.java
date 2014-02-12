@@ -49,18 +49,18 @@
 
 package com.openexchange.tools.file.internal;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.file.external.FileStorageCodes;
 
@@ -111,33 +111,36 @@ public class HashingFileStorage extends DefaultFileStorage {
 
     @Override
     public String saveNewFile(final InputStream file) throws OXException {
-        final String[] filestorePath = generateName();
-        final File path = new File(storage, filestorePath[0]);
-        if (!path.exists() && !path.mkdirs() && !path.exists()) {
-            throw FileStorageCodes.CREATE_DIR_FAILED.create(path.toString());
-        }
-
-        BufferedOutputStream bufOut = null;
-        BufferedInputStream bufIn = null;
-        final File filePath = new File(path, filestorePath[1]);
+        OutputStream out = null;
         try {
-            bufIn = new BufferedInputStream(file);
-            bufOut = new BufferedOutputStream(new FileOutputStream(filePath));
-
-            int i = 0;
-            while((i = bufIn.read()) >= 0) {
-                bufOut.write(i);
+            final String[] filestorePath = generateName();
+            final File path = new File(storage, filestorePath[0]);
+            if (!path.exists() && !path.mkdirs() && !path.exists()) {
+                throw FileStorageCodes.CREATE_DIR_FAILED.create(path.toString());
             }
-        } catch (final FileNotFoundException e) {
-            throw FileStorageCodes.FILE_NOT_FOUND.create(filePath.toString());
+
+            {
+                final File filePath = new File(path, filestorePath[1]);
+                try {
+                    out = new FileOutputStream(filePath);
+                } catch (final FileNotFoundException e) {
+                    throw FileStorageCodes.FILE_NOT_FOUND.create(e, filePath.toString());
+                }
+            }
+
+            final int buflen = 65536;
+            final byte[] buf = new byte[buflen];
+            for (int read; (read = file.read(buf, 0, buflen)) > 0;) {
+                out.write(buf, 0, read);
+            }
+            out.flush();
+
+            return new StringAllocator(filestorePath[0]).append('/').append(filestorePath[1]).toString();
         } catch (final IOException e) {
             throw FileStorageCodes.IOERROR.create(e.toString());
         } finally {
-            Streams.close(bufIn);
-            Streams.close(bufOut);
+            Streams.close(file, out);
         }
-
-        return filestorePath[0]+"/"+filestorePath[1];
     }
 
     public String[] generateName() {

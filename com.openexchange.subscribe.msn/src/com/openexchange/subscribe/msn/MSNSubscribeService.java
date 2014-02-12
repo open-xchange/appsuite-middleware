@@ -52,13 +52,11 @@ package com.openexchange.subscribe.msn;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
@@ -77,7 +75,7 @@ public class MSNSubscribeService  extends AbstractSubscribeService {
 
     private final SubscriptionSource source = new SubscriptionSource();
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MSNSubscribeService.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MSNSubscribeService.class);
 
     public MSNSubscribeService(final Activator activator){
         this.activator = activator;

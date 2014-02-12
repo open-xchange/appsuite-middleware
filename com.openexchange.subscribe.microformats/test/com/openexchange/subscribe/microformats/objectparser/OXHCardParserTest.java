@@ -453,7 +453,7 @@ public class OXHCardParserTest extends TestCase {
                     "<span class=\"given-name\"> Terry </span>\n" +
                 "</span>\n" +
             "</div>";
-        List<Contact> contacts = parser.parse(HCARD_SNIPPET);
+        List<Contact> contacts = parser.parse(html);
         Contact actual = contacts.get(0);
         assertEquals("Should contain the given name without any whitespaces around it", "Terry", actual.getGivenName());
     }

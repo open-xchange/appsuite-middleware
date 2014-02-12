@@ -1,5 +1,6 @@
 *.swp
 *.class
+*.pmd
 .DS_Store
 .lint4jprefs
 bin

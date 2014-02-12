@@ -59,14 +59,8 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class RssExceptionMessages implements LocalizableStrings {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
     // Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s
-    public static final String INVALID_RSS_MSG = "Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s";
+    public static final String INVALID_RSS_MSG = "Invalid RSS URL or not well-formed XML content provided by URL: %1$s";
 
     /**
      * Initializes a new {@link RssExceptionMessages}.

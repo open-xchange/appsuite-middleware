@@ -732,7 +732,7 @@ public class IMAPStore extends Store
 		protocol.disconnect();
 	    protocol = null;
 	    throw new AuthenticationFailedException(
-					cex.getResponse().getRest());
+					cex.getResponse().getRest(), cex);
 	} catch (ProtocolException pex) { // any other exception
 	    // failure in login command, close connection to server
 	    if (protocol != null)
@@ -2152,6 +2152,17 @@ public class IMAPStore extends Store
      */
     public int getPort() {
         return port;
+    }
+
+    /**
+     * Is this IMAP store currently connected?
+     * <p>
+     * This method just returns the value of a private boolean field and does not verify connected state via <code>NOOP</code> command.
+     * 
+     * @return <code>true</code> if the service is connected, <code>false</code> if it is not connected
+     */
+    public boolean isConnectedUnsafe() {
+        return super.isConnected();
     }
 
 }

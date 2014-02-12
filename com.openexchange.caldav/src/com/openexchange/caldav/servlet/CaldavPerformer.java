@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,7 +53,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
+import com.openexchange.caldav.CalDAVServiceLookup;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.WebdavPostAction;
@@ -67,7 +67,6 @@ import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.user.UserService;
@@ -108,15 +107,9 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
  */
 public class CaldavPerformer implements SessionHolder {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CaldavPerformer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CaldavPerformer.class);
 
     private static CaldavPerformer INSTANCE = null;
-
-    private static volatile ServiceLookup services;
-
-    public static void setServices(ServiceLookup lookup) {
-        services = lookup;
-    }
 
     /**
      * Gets the instance of {@link InfostorePerformer}.
@@ -161,16 +154,15 @@ public class CaldavPerformer implements SessionHolder {
         WebdavAction post;
         WebdavAction mkcalendar;
 
-        this.factory = new GroupwareCaldavFactory(
-            this,
-            services.getService(AppointmentSqlFactoryService.class),
-            services.getService(FolderService.class),
-            services.getService(ICalEmitter.class),
-            services.getService(ICalParser.class),
-            services.getService(UserService.class),
-            services.getService(CalendarCollectionService.class),
-            services.getService(ConfigViewFactory.class),
-            services.getService(FreeBusyService.class));
+        this.factory = new GroupwareCaldavFactory(this,
+            CalDAVServiceLookup.getService(AppointmentSqlFactoryService.class),
+            CalDAVServiceLookup.getService(FolderService.class),
+            CalDAVServiceLookup.getService(ICalEmitter.class),
+            CalDAVServiceLookup.getService(ICalParser.class),
+            CalDAVServiceLookup.getService(UserService.class),
+            CalDAVServiceLookup.getService(CalendarCollectionService.class),
+            CalDAVServiceLookup.getService(ConfigViewFactory.class),
+            CalDAVServiceLookup.getService(FreeBusyService.class));
 
         unlock = prepare(new WebdavUnlockAction(), true, true, new WebdavIfAction(0, false, false));
         propPatch = prepare(new WebdavProppatchAction(protocol), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false));
@@ -249,12 +241,8 @@ public class CaldavPerformer implements SessionHolder {
         lifeCycle.setBulkLoader(factory);
         final AbstractAction defaultHeader = new WebdavDefaultHeaderAction();
         defaultHeader.setBulkLoader(factory);
-        if (logAction.isEnabled()) {
-            lifeCycle.setNext(logAction);
-            logAction.setNext(defaultHeader);
-        } else {
-            lifeCycle.setNext(defaultHeader);
-        }
+        lifeCycle.setNext(logAction);
+        logAction.setNext(defaultHeader);
 
         AbstractAction a = defaultHeader;
 
@@ -300,9 +288,7 @@ public class CaldavPerformer implements SessionHolder {
             final ServletWebdavResponse webdavResponse = new ServletWebdavResponse(resp);
 
             session.set(sess);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Executing " + action);
-            }
+            LOG.debug("Executing {}", action);
 
             actions.get(action).perform(webdavRequest, webdavResponse);
         } catch (final WebdavProtocolException x) {

@@ -47,7 +47,7 @@ public class TransformerProvider {
   private Templates lastTemplates = null;
   private long cacheExpires = 0;
   
-  private static final Logger log = LoggerFactory.getLogger(TransformerProvider.class.getName());
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(TransformerProvider.class.getName());
   private static final XMLErrorLogger xmllog = new XMLErrorLogger(log);
   
   public static TransformerProvider instance = new TransformerProvider();

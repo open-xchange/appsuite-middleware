@@ -57,7 +57,6 @@ import javax.mail.event.MessageRecentEvent;
 import javax.mail.event.MessageRecentListener;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.config.IMAPProperties;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -73,10 +72,8 @@ import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
  */
 public final class IMAPNotifierMessageRecentListener implements MessageRecentListener {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPNotifierMessageRecentListener.class));
-
-    private static final boolean INFO_ENABLED = LOG.isInfoEnabled();
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(IMAPNotifierMessageRecentListener.class);
 
     /**
      * Checks validity of a specified IMAP folder's full name
@@ -245,15 +242,10 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
     @Override
     public void recentAvailable(final MessageRecentEvent event) {
         try {
-            PushUtility.triggerOSGiEvent(
-                MailFolderUtility.prepareFullname(accountId, fullName.length() == 0 ? MailFolder.DEFAULT_FOLDER_ID : fullName),
-                session);
-            if (INFO_ENABLED) {
-                LOG.info(new StringBuilder(64).append("\n\tNotified new mails in folder \"").append(fullName).append("\" in account ").append(
-                    accountId).append(" for user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).toString());
-            }
+            PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(accountId, fullName.length() == 0 ? MailFolder.DEFAULT_FOLDER_ID : fullName), session);
+            LOG.info("\n\tNotified new mails in folder \"{}\" in account {} for user {} in context {}", fullName, accountId, session.getUserId(), session.getContextId());
         } catch (final OXException e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(IMAPNotifierMessageRecentListener.class)).warn("Couldn't notify about possible recent message.", e);
+            org.slf4j.LoggerFactory.getLogger(IMAPNotifierMessageRecentListener.class).warn("Couldn't notify about possible recent message.", e);
         }
     }
 

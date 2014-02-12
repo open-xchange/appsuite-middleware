@@ -62,12 +62,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.pipesnfilters.Filter;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
 
@@ -78,7 +76,7 @@ import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
  */
 public class FilestoreUsageLoader implements Filter<Context, Context> {
 
-    private static final Log LOG = LogFactory.getLog(FilestoreUsageLoader.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FilestoreUsageLoader.class);
 
     private final AdminCache cache;
     private final long averageSize;
@@ -150,7 +148,7 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
                 try {
                     cache.pushConnectionForContextAfterReading(cid, con);
                 } catch (PoolException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }

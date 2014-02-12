@@ -52,7 +52,6 @@ package com.openexchange.subscribe.crawler;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
-import org.apache.commons.logging.Log;
 import org.ho.yaml.Yaml;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.BrowserVersionFeatures;
@@ -65,7 +64,6 @@ import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.ThreadedRefreshHandler;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.crawler.internal.HasLoginPage;
@@ -90,7 +88,7 @@ public class Workflow {
 
     private boolean useThreadedRefreshHandler;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Workflow.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Workflow.class);
 
     private Activator activator;
 
@@ -155,7 +153,7 @@ public class Workflow {
         try {
             webClient.setUseInsecureSSL(true);
         } catch (GeneralSecurityException e) {
-            LOG.error(e);
+            LOG.error(e.toString());
         }
         // ... and to javascript as well
         webClient.setThrowExceptionOnScriptError(false);
@@ -183,7 +181,7 @@ public class Workflow {
                     currentStep.setInput(previousStep.getOutput());
                 }
                 currentStep.setWorkflow(this);
-                LOG.info("Current Step : " + currentStep.getClass());
+                LOG.info("Current Step : {}", currentStep.getClass());
                 if (currentStep.isSwitchUserAgent()){
                     crawlerConnection.switchUserAgent();
                 }
@@ -195,15 +193,15 @@ public class Workflow {
                 previousStep = currentStep;
                 // if step fails try it 2 more times before crying foul
                 if (!currentStep.executedSuccessfully()) {
-                    LOG.error("This step did not perform as expected : " + currentStep.getClass()  + ". Repeating two more times ...");
+                    LOG.error("This step did not perform as expected : {}. Repeating two more times ...", currentStep.getClass());
                     logBadInput(currentStep);
                     currentStep.execute(webClient);
                     if (!currentStep.executedSuccessfully()) {
-                        LOG.error("This step failed again at repetition 1 : " + currentStep.getClass()   + ". Repeating one more time ...");
+                        LOG.error("This step failed again at repetition 1 : {}. Repeating one more time ...", currentStep.getClass());
                         logBadInput(currentStep);
                         currentStep.execute(webClient);
                         if (!currentStep.executedSuccessfully()) {
-                            LOG.error("This step failed again at repetition 2 : " + currentStep.getClass() + ". Throwing Error now.");
+                            LOG.error("This step failed again at repetition 2 : {}. Throwing Error now.", currentStep.getClass());
                             logBadInput(currentStep);
                             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create();
                         }
@@ -217,7 +215,7 @@ public class Workflow {
             webClient.closeAllWindows();
             return (Object[]) result;
         } catch (RuntimeException e) {
-            LOG.error("User with id="+subscription.getUserId()+ " and context="+ subscription.getContext()+" failed to subscribe source="+subscription.getSource().getDisplayName()+" with display_name="+subscription.getDisplayName(), e);
+            LOG.error("User with id={} and context={} failed to subscribe source={} with display_name={}", subscription.getUserId(), subscription.getContext(), subscription.getSource().getDisplayName(), subscription.getDisplayName(), e);
             throw SubscriptionErrorMessage.TEMPORARILY_UNAVAILABLE.create(e);
         } finally {
             /*MultiThreadedHttpConnectionManager manager = (MultiThreadedHttpConnectionManager) crawlerConnection.getHttpClient().getHttpConnectionManager();
@@ -303,11 +301,11 @@ public class Workflow {
     private void logBadInput(Step<?, ?> currentStep){
         if (currentStep.getInput() != null){
             if (currentStep.getInput() instanceof Page){
-                LOG.error("Bad Input causing the error at (" + currentStep.getClass() + ") : " + ((Page) currentStep.getInput()).getWebResponse().getContentAsString());
+                LOG.error("Bad Input causing the error at ({}) : {}", currentStep.getClass(), ((Page) currentStep.getInput()).getWebResponse().getContentAsString());
             } if (currentStep instanceof HasLoginPage){
-                LOG.error("Bad Page causing the error at (" + currentStep.getClass() + ") : " + (((HasLoginPage) currentStep).getLoginPage().getWebResponse().getContentAsString()));
+                LOG.error("Bad Page causing the error at ({}) : {}", currentStep.getClass(), (((HasLoginPage) currentStep).getLoginPage().getWebResponse().getContentAsString()));
             } else {
-                LOG.error(" Bad Input causing the error at (" + currentStep.getClass() + ") : " + currentStep.getInput().toString());
+                LOG.error(" Bad Input causing the error at ({}) : {}", currentStep.getClass(), currentStep.getInput());
             }
         }
     }

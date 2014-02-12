@@ -78,7 +78,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class ResourceDelete {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ResourceDelete.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResourceDelete.class);
 
     private final User user;
 
@@ -195,7 +195,7 @@ public final class ResourceDelete {
          * Check timestamp
          */
         if (clientLastModified != null && clientLastModified.getTime() < getOrig().getLastModified().getTime()) {
-            throw ResourceExceptionCode.CONCURRENT_MODIFICATION.create();
+            throw ResourceExceptionCode.CONCURRENT_MODIFICATION.create(resource.getSimpleName());
         }
     }
 

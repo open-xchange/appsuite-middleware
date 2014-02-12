@@ -51,7 +51,6 @@ package com.openexchange.oauth.provider.internal;
 
 import net.oauth.v2.OAuth2Validator;
 import net.oauth.v2.SimpleOAuth2Validator;
-import org.apache.commons.logging.Log;
 
 /**
  * {@link DatabaseOAuth2Validator} - A simple {@link OAuth2Validator}.
@@ -60,7 +59,7 @@ import org.apache.commons.logging.Log;
  */
 public final class DatabaseOAuth2Validator extends SimpleOAuth2Validator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DatabaseOAuth2Validator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseOAuth2Validator.class);
 
     /**
      * Initializes a new {@link DatabaseOAuth2Validator} that rejects messages more than five minutes old or with a OAuth version other than

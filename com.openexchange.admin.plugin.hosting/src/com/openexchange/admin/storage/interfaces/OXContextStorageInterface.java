@@ -53,7 +53,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -66,7 +65,6 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.pipesnfilters.Filter;
 
 /**
@@ -83,7 +81,7 @@ public abstract class OXContextStorageInterface {
      */
     private static Class<? extends OXContextStorageInterface> implementingClass;
 
-    private static final Log log = LogFactory.getLog(OXContextStorageInterface.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXContextStorageInterface.class);
 
     protected static final AdminCacheExtended cache = ClientAdminThreadExtended.cache;
 
@@ -102,12 +100,12 @@ public abstract class OXContextStorageInterface {
                     try {
                         implementingClass = Class.forName(className).asSubclass(OXContextStorageInterface.class);
                     } catch (final ClassNotFoundException e) {
-                        log.error(e.getMessage(), e);
+                        log.error("", e);
                         throw new StorageException(e);
                     }
                 } else {
                     final StorageException storageException = new StorageException("Property for context_storage not defined");
-                    log.error(storageException.getMessage(), storageException);
+                    log.error("", storageException);
                     throw storageException;
                 }
             }
@@ -117,22 +115,22 @@ public abstract class OXContextStorageInterface {
             cons = implementingClass.getConstructor(new Class[] {});
             return cons.newInstance(new Object[] {});
         } catch (final SecurityException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         } catch (final NoSuchMethodException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         } catch (final IllegalArgumentException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         } catch (final InstantiationException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         } catch (final IllegalAccessException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         } catch (final InvocationTargetException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e);
         }
     }

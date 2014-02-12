@@ -58,26 +58,9 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class DataExceptionMessages implements LocalizableStrings {
 
-    public static final String TYPE_NOT_SUPPORTED_MSG = "The given type of %1$s is not supported";
-
-    public static final String MISSING_ARGUMENT_MSG = "Missing argument %1$s";
-
-    public static final String INVALID_ARGUMENT_MSG = "Invalid value for argument %1$s: ``%2$s''";
-
-    public static final String UNKNOWN_DATA_SOURCE_MSG = "Unknown data source identifier: %1$s";
-
-    public static final String UNKNOWN_DATA_HANDLER_MSG = "Unknown data handler identifier: %1$s";
-
-    public static final String NO_MATCHING_TYPE_MSG = "No matching type could be found for data source %1$s and data handler %2$s";
-
-    public static final String ERROR_MSG = "An error occurred: %1$s";
+    public static final String TYPE_NOT_SUPPORTED_MSG = "The type %1$s of the provided file is not supported.";
 
     public static final String TRUNCATED_MSG = "The following field(s) are too long: %1$s";
-
-    public static final String UNABLE_TO_CHANGE_DATA_MSG = "Unable to change data. (%1$s)";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
 
     /**
      * Prevent instantiation.

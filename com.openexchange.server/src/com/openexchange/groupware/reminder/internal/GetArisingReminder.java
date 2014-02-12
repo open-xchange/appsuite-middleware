@@ -53,8 +53,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
@@ -79,7 +77,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class GetArisingReminder {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(GetArisingReminder.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetArisingReminder.class);
     private static final ReminderStorage STORAGE = ReminderStorage.getInstance();
 
     private final Session session;
@@ -116,11 +114,11 @@ public class GetArisingReminder {
                         STORAGE.deleteReminder(ctx, reminder);
                         continue;
                     }
-                    LOG.debug(e.getMessage(), e);
+                    LOG.debug("", e);
                     continue;
                 } catch (final SQLException e) {
                     final OXException re = ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-                    LOG.debug(re.getMessage(), re);
+                    LOG.debug("", re);
                     continue;
                 }
                 if (appointment.getRecurrenceType() != CalendarObject.NO_RECURRENCE && (!appointment.containsUntil() || appointment.getUntil().after(now))) {

@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * Add documents to solr using the noggit JSON parser.
  */
 public class JsonUpdateRequestHandler extends ContentStreamHandlerBase {
-  public static Logger log = LoggerFactory.getLogger(JsonUpdateRequestHandler.class);
+  public static org.slf4j.Logger log = LoggerFactory.getLogger(JsonUpdateRequestHandler.class);
 
 
   @Override

@@ -52,7 +52,6 @@ package com.openexchange.realtime.handle.impl.presence;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.Resource;
@@ -85,7 +84,7 @@ import com.openexchange.realtime.util.IDMap;
  */
 public class PresenceHandler extends AbstractStrategyHandler<Presence> {
 
-    private final static Log LOG = com.openexchange.log.Log.loggerFor(PresenceHandler.class);
+    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PresenceHandler.class);
 
     public PresenceHandler(BlockingQueue<Presence> queue) {
         super(queue, new HandlerStrategy<Presence>());
@@ -377,9 +376,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
                 throw HandleExceptionCode.DIRECT_PRESENCE_FAILED.create(presence.getTo().toGeneralForm());
             }
         } catch (OXException oxe) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(oxe);
-            }
+            LOG.debug(oxe.toString(), oxe);
             handleError(presence, oxe);
         }
     }
@@ -439,7 +436,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
             }
             messageDispatcher.send(errorPresence);
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

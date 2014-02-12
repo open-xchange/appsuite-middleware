@@ -65,8 +65,7 @@ public final class DataSourceTracker implements ServiceTrackerCustomizer<DataSou
 
     private static final String PROP_IDENTIFIER = "identifier";
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DataSourceTracker.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DataSourceTracker.class);
 
     private final BundleContext context;
 
@@ -90,19 +89,19 @@ public final class DataSourceTracker implements ServiceTrackerCustomizer<DataSou
         }
         final String identifier = (String) reference.getProperty(PROP_IDENTIFIER);
         if (null == identifier) {
-            LOG.error("Missing identifier in data source: " + addedService.getClass().getName());
+            LOG.error("Missing identifier in data source: {}", addedService.getClass().getName());
             context.ungetService(reference);
             return null;
         }
         final ConversionEngineRegistry registry = getInstance();
         synchronized (registry) {
             if (registry.getDataSource(identifier) != null) {
-                LOG.error("A data source is already registered for identifier: " + identifier);
+                LOG.error("A data source is already registered for identifier: {}", identifier);
                 context.ungetService(reference);
                 return null;
             }
             registry.putDataSource(identifier, addedService);
-            LOG.info(new StringBuilder(64).append("Data source for identifier '").append(identifier).append("' successfully registered"));
+            LOG.info("Data source for identifier '{}' successfully registered", identifier);
         }
         return addedService;
 
@@ -121,11 +120,11 @@ public final class DataSourceTracker implements ServiceTrackerCustomizer<DataSou
         try {
             final String identifier = (String) reference.getProperty(PROP_IDENTIFIER);
             if (null == identifier) {
-                LOG.error("Missing identifier in data source: " + service.getClass().getName());
+                LOG.error("Missing identifier in data source: {}", service.getClass().getName());
                 return;
             }
             getInstance().removeDataSource(identifier);
-            LOG.info(new StringBuilder(64).append("Data source for identifier '").append(identifier).append("' successfully unregistered"));
+            LOG.info("Data source for identifier '{}' successfully unregistered", identifier);
 
         } finally {
             context.ungetService(reference);

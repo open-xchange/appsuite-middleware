@@ -51,8 +51,6 @@ package com.openexchange.osgi.osgi;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -100,27 +98,27 @@ class ManagementRegisterer implements ServiceTrackerCustomizer<ManagementService
 
     private void registerOsgiMBean(final ManagementService management) {
         if (objectName == null) {
-            final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementRegisterer.class));
+            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ManagementRegisterer.class);
             try {
                 objectName = getObjectName(DeferredActivatorMBeanImpl.class.getName(), DeferredActivatorMBean.OSGI_DOMAIN);
                 management.registerMBean(objectName, new DeferredActivatorMBeanImpl());
             } catch (final MalformedObjectNameException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
             } catch (final OXException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
             } catch (final Exception e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
             }
         }
     }
 
     private void unregisterOsgiMBean(final ManagementService management) {
         if (objectName != null) {
-            final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementRegisterer.class));
+            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ManagementRegisterer.class);
             try {
                 management.unregisterMBean(objectName);
             } catch (final OXException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
             } finally {
                 objectName = null;
             }

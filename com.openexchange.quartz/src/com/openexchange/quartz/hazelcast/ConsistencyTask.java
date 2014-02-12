@@ -53,7 +53,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
 import org.quartz.Calendar;
 import org.quartz.JobKey;
 import org.quartz.TriggerKey;
@@ -61,7 +60,6 @@ import org.quartz.spi.OperableTrigger;
 import com.hazelcast.core.ILock;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.ISet;
-import com.openexchange.quartz.hazelcast.TriggerStateWrapper;
 import com.openexchange.quartz.hazelcast.predicates.AcquiredAndExecutingTriggersPredicate;
 
 /**
@@ -72,7 +70,7 @@ import com.openexchange.quartz.hazelcast.predicates.AcquiredAndExecutingTriggers
  */
 public final class ConsistencyTask extends TimerTask {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConsistencyTask.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConsistencyTask.class);
 
     private final ConcurrentMap<TriggerKey, Boolean> locallyAcquiredTriggers;
 
@@ -89,12 +87,9 @@ public final class ConsistencyTask extends TimerTask {
 
     @Override
     public void run() {
-        long start = System.currentTimeMillis();
         int restored = 0;
         try {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Started consistency task run.");
-            }
+            LOG.debug("Started consistency task run.");
 
             final String nodeIp = jobStore.getNodeIp();
             ILock lock = jobStore.getClusterLock();
@@ -143,11 +138,6 @@ public final class ConsistencyTask extends TimerTask {
             }
         } catch (Throwable t) {
             LOG.warn("Error during consistency task run.", t);
-        } finally {
-            if (LOG.isDebugEnabled()) {
-                long diff = System.currentTimeMillis() - start;
-                LOG.debug("Restored " + restored + " triggers from job store in " + diff + "ms.");
-            }
         }
     }
 }

@@ -53,7 +53,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
+import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -99,7 +99,7 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WebdavPrincipalPerformer implements SessionHolder{
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(WebdavPrincipalPerformer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavPrincipalPerformer.class);
 
     private static WebdavPrincipalPerformer INSTANCE = null;
 
@@ -151,7 +151,7 @@ public class WebdavPrincipalPerformer implements SessionHolder{
         WebdavAction report;
 
 
-        this.factory = new PrincipalWebdavFactory(services.getService(UserService.class),this);
+        this.factory = new PrincipalWebdavFactory(services.getService(UserService.class), services.getService(ContactService.class), this);
 
         unlock = prepare(new WebdavUnlockAction(), true, true, new WebdavIfAction(0, false, false));
         propPatch = prepare(new WebdavProppatchAction(protocol), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false));
@@ -227,12 +227,8 @@ public class WebdavPrincipalPerformer implements SessionHolder{
         final AbstractAction defaultHeader = new WebdavDefaultHeaderAction();
         final AbstractAction ifMatch = new WebdavIfMatchAction();
 
-        if (logAction.isEnabled()) {
-            lifeCycle.setNext(logAction);
-            logAction.setNext(defaultHeader);
-        } else {
-            lifeCycle.setNext(defaultHeader);
-        }
+        lifeCycle.setNext(logAction);
+        logAction.setNext(defaultHeader);
         defaultHeader.setNext(ifMatch);
 
         AbstractAction a = ifMatch;
@@ -277,9 +273,7 @@ public class WebdavPrincipalPerformer implements SessionHolder{
             final ServletWebdavResponse webdavResponse = new ServletWebdavResponse(resp);
 
             session.set(sess);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Executing " + action);
-            }
+            LOG.debug("Executing {}", action);
             actions.get(action).perform(webdavRequest, webdavResponse);
         } catch (final WebdavProtocolException x) {
             resp.setStatus(x.getStatus());

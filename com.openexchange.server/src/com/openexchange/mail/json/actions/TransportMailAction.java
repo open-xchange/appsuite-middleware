@@ -55,6 +55,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
@@ -66,6 +67,7 @@ import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.structure.parser.MIMEStructureParser;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
@@ -78,10 +80,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class TransportMailAction extends AbstractMailAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TransportMailAction.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(TransportMailAction.class);
 
     /**
      * Initializes a new {@link TransportMailAction}.
@@ -127,19 +127,29 @@ public final class TransportMailAction extends AbstractMailAction {
                     // Re-throw
                     throw e;
                 }
-                LOG.warn(new com.openexchange.java.StringAllocator(128).append(e.getMessage()).append(". Using default account's transport.").toString());
+                LOG.warn("{}. Using default account's transport.", e.getMessage());
                 // Send with default account's transport provider
                 accountId = MailAccount.DEFAULT_ID;
             }
             /*
+             * User settings
+             */
+            final UserSettingMail usm = session.getUserSettingMail();
+            usm.setNoSave(true);
+            final boolean copy2Sent = AJAXRequestDataTools.parseBoolParameter("copy2Sent", req.getRequest(), !usm.isNoCopyIntoStandardSentFolder());
+            usm.setNoCopyIntoStandardSentFolder(!copy2Sent);
+            /*
              * Transport mail
              */
-            final String id = mailInterface.sendMessage(composedMail, ComposeType.NEW, accountId);
+            final String id = mailInterface.sendMessage(composedMail, ComposeType.NEW, accountId, usm);
+            if (null == id) {
+                return new AJAXRequestResult(new JSONObject(1), "json");
+            }
             final int pos = id.lastIndexOf(MailPath.SEPERATOR);
             if (-1 == pos) {
                 throw MailExceptionCode.INVALID_MAIL_IDENTIFIER.create(id);
             }
-            final JSONObject responseObj = new JSONObject();
+            final JSONObject responseObj = new JSONObject(3);
             responseObj.put(FolderChildFields.FOLDER_ID, id.substring(0, pos));
             responseObj.put(DataFields.ID, id.substring(pos + 1));
             /*

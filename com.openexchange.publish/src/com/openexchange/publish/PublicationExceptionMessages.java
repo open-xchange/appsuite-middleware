@@ -59,21 +59,14 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class PublicationExceptionMessages implements LocalizableStrings {
 
-    public static final String SQL_EXCEPTION_MSG = "A SQL error occurred.";
+    // Cannot find the requested publication site.
+    public static final String PUBLICATION_NOT_FOUND_MSG_DISPLAY = "Cannot find the requested publication site.";
 
-    public static final String PARSE_EXCEPTION_MSG = "A parsing error occurred: %1$s.";
+    // You do not have the appropriate permissions to perform the chosen action.
+    public static final String ACCESS_DENIED_MSG_DISPLAY = "You do not have the appropriate permissions to perform the chosen action.";
 
-    public static final String NO_LOADER_FOUND_MSG = "Could not load publications of type %1$s";
-
-    public static final String ID_GIVEN_MSG = "Unable to save a given ID.";
-
-    public static final String PUBLICATION_NOT_FOUND_MSG = "Cannot find the publication site.";
-
-    public static final String UNIQUENESS_CONSTRAINT_VIOLATION = "%1$s has already been taken (field: %2$s)";
-
-    public static final String ACCESS_DENIED_MSG = "You do not have the permissions to perform the chosen action (%s)";
-
-    public static final String NOT_EXIST_MSG = "The published document has been deleted in the meantime and therefore is no longer available.";
+    // The published document has been deleted in the meantime and therefore is no longer available.
+    public static final String NOT_FOUND_MSG_DISPLAY = "The published document has been deleted in the meantime and therefore is no longer available.";
 
     private PublicationExceptionMessages() {
         super();

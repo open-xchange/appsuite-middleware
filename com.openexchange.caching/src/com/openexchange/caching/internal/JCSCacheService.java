@@ -118,7 +118,7 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
         		c.dispose();
         	}
         } catch (final CacheException e) {
-        	LOG.error(e.getMessage(), e);
+        	LOG.error("", e);
         }
          */
     }
@@ -131,7 +131,7 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
                 /*
                  * The JCS cache manager already tracks initialized caches though the same region name always points to the same cache
                  */
-                cache = new JCSCache(JCS.getInstance(name));
+                cache = new JCSCache(JCS.getInstance(name), name);
                 /*
                  * Wrap with notifying cache if configured
                  */
@@ -166,7 +166,12 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
 
     @Override
     public void loadConfiguration(final InputStream inputStream) throws OXException {
-        JCSCacheServiceInit.getInstance().loadConfiguration(inputStream);
+        JCSCacheServiceInit.getInstance().loadConfiguration(inputStream, false);
+    }
+
+    @Override
+    public void loadConfiguration(final InputStream inputStream, final boolean overwrite) throws OXException {
+        JCSCacheServiceInit.getInstance().loadConfiguration(inputStream, overwrite);
     }
 
     @Override

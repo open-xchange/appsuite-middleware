@@ -57,11 +57,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Iterator;
-import org.apache.commons.logging.Log;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link SQL}
@@ -150,7 +148,7 @@ public class SQL {
         } else {
             long start = System.currentTimeMillis();
             ResultSet resultSet = stmt.executeQuery();
-            LOG.debug("executeQuery: " + stmt.toString() + " - " + (System.currentTimeMillis() - start) + " ms elapsed.");
+            LOG.debug("executeQuery: {} - {} ms elapsed.", stmt.toString(), (System.currentTimeMillis() - start));
             return resultSet;
         }
     }
@@ -161,15 +159,15 @@ public class SQL {
         } else {
             long start = System.currentTimeMillis();
             int rowCount = stmt.executeUpdate();
-            LOG.debug("executeUpdate: " + stmt.toString() + " - " + rowCount + " rows affected, " +
-                (System.currentTimeMillis() - start) + " ms elapsed.");
+            LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), rowCount, (System.currentTimeMillis() - start));
             return rowCount;
         }
     }
 
     public static String escape(String value) throws OXException {
         if (null == value) {
-            System.out.println(value);
+            // System.out.println(value);
+            return null;
         }
         try {
             return URLEncoder.encode(value, "US-ASCII");
@@ -186,7 +184,7 @@ public class SQL {
         }
     }
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SQL.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SQL.class);
 
     private SQL() {
         super();

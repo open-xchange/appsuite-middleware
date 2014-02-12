@@ -60,13 +60,13 @@ import gnu.trove.list.array.TLongArrayList;
  */
 final class COPYUIDResponse {
 
-    private final org.apache.commons.logging.Log logger;
+    private final org.slf4j.Logger logger;
 
     protected String src;
 
     protected String dest;
 
-    public COPYUIDResponse(final org.apache.commons.logging.Log logger) {
+    public COPYUIDResponse(final org.slf4j.Logger logger) {
         super();
         this.logger = logger;
     }

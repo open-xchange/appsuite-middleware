@@ -58,11 +58,9 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import com.hazelcast.config.Config;
@@ -72,10 +70,10 @@ import com.hazelcast.config.MapIndexConfig;
 import com.hazelcast.config.MultiMapConfig;
 import com.hazelcast.config.QueueConfig;
 import com.hazelcast.config.SemaphoreConfig;
+import com.hazelcast.config.SymmetricEncryptionConfig;
 import com.hazelcast.config.TopicConfig;
 import com.hazelcast.impl.GroupProperties;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.WildcardNamePropertyFilter;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -99,7 +97,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
     private static final String NETWORK_JOIN_AWS = "aws";
 
     /** Named logger instance */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastConfigurationServiceImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastConfigurationServiceImpl.class);
 
     /** Name of the subdirectory containing the hazelcast data structure properties */
     private static final String DIRECTORY_NAME = "hazelcast";
@@ -153,8 +151,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         String groupPassword = configService.getProperty("com.openexchange.hazelcast.group.password");
         if (false == Strings.isEmpty(groupPassword)) {
             if ("wtV6$VQk8#+3ds!a".equalsIgnoreCase(groupPassword)) {
-                LOG.warn("The value 'wtV6$VQk8#+3ds!a' for 'com.openexchange.hazelcast.group.password' has not been changed from it's " +
-                    "default. Please do so to restrict access to your cluster.");
+                LOG.warn("The value 'wtV6$VQk8#+3ds!a' for 'com.openexchange.hazelcast.group.password' has not been changed from it's default. Please do so to restrict access to your cluster.");
             }
             config.getGroupConfig().setPassword(groupPassword);
         }
@@ -252,6 +249,17 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         config.setProperty(GroupProperties.PROP_SOCKET_BIND_ANY, String.valueOf(
             configService.getBoolProperty("com.openexchange.hazelcast.socket.bindAny", false)));
         /*
+         * Encryption
+         */
+        if (configService.getBoolProperty("com.openexchange.hazelcast.network.symmetricEncryption", false)) {
+            config.getNetworkConfig().setSymmetricEncryptionConfig(new SymmetricEncryptionConfig().setEnabled(true)
+                .setAlgorithm(configService.getProperty("com.openexchange.hazelcast.network.symmetricEncryption.algorithm", "PBEWithMD5AndDES"))
+                .setSalt(configService.getProperty("com.openexchange.hazelcast.network.symmetricEncryption.salt", "2mw67LqNDEb3"))
+                .setPassword(configService.getProperty("com.openexchange.hazelcast.network.symmetricEncryption.password", "D2xhL8mPkjsF"))
+                .setIterationCount(configService.getIntProperty("com.openexchange.hazelcast.network.symmetricEncryption.iterationCount", 19)))
+            ;
+        }
+        /*
          * Miscellaneous
          */
         boolean loggingEnabled = configService.getBoolProperty("com.openexchange.hazelcast.logging.enabled", true);
@@ -273,8 +281,6 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         config.setProperty(GroupProperties.PROP_MAX_OPERATION_TIMEOUT,
             configService.getProperty("com.openexchange.hazelcast.maxOperationTimeout", "5000"));
         config.setProperty(GroupProperties.PROP_ENABLE_JMX, configService.getProperty("com.openexchange.hazelcast.jmx", "true"));
-        config.setProperty(GroupProperties.PROP_ENABLE_JMX_DETAILED,
-            configService.getProperty("com.openexchange.hazelcast.jmxDetailed", "false"));
         config.setProperty(GroupProperties.PROP_ENABLE_JMX_DETAILED,
             configService.getProperty("com.openexchange.hazelcast.jmxDetailed", "false"));
         config.setProperty(GroupProperties.PROP_REDO_GIVE_UP_THRESHOLD,
@@ -301,134 +307,6 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         applyDataStructures(config, listPropertyFiles());
 
         return this.config;
-    }
-
-    public synchronized Config getConfig_OLD() throws OXException {
-        if (null == this.config) {
-            ConfigurationService configService = Services.getService(ConfigurationService.class);
-            config = new Config();
-            /*
-             * cluster group name
-             */
-            String groupName = configService.getProperty("com.openexchange.cluster.name");
-            if (isEmpty(groupName)) {
-                throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.cluster.name");
-            }
-            /*
-             * Continue Hazelcast configuration
-             */
-            final String lf = Strings.getLineSeparator();
-            if ("ox".equalsIgnoreCase(groupName)) {
-                LOG.warn(lf + "    The configuration value for \"com.openexchange.cluster.name\" has not been changed from it's default " +
-                        "value \"ox\". Please do so to make this warning disappear." + lf);
-            }
-            config.getGroupConfig().setName(groupName).setPassword("YXV0b2JhaG4=");
-            /*
-             * Logging system
-             */
-            {
-                final boolean loggingEnabled = configService.getBoolProperty("com.openexchange.hazelcast.logging.enabled", true);
-                if (loggingEnabled) {
-                    // Check if log4j is running
-                    boolean hasLog4J = false;
-                    final Bundle[] bundles = context.getBundles();
-                    for (int i = 0; !hasLog4J && i < bundles.length; i++) {
-                        hasLog4J = ("org.apache.commons.logging.log4j".equals(bundles[i].getSymbolicName()));
-                    }
-                    if (hasLog4J) {
-                        System.setProperty("hazelcast.logging.type", "log4j");
-                        config.setProperty("hazelcast.logging.type", "log4j");
-                    }
-                } else {
-                    System.setProperty("hazelcast.logging.type", "none");
-                    config.setProperty("hazelcast.logging.type", "none");
-                }
-            }
-            /*
-             * JMX
-             */
-            if (configService.getBoolProperty("com.openexchange.hazelcast.jmx", true)) {
-                config.setProperty(GroupProperties.PROP_ENABLE_JMX, "true")
-                    .setProperty(GroupProperties.PROP_ENABLE_JMX_DETAILED, "true");
-            }
-            /*
-             * IPv6 support
-             */
-            if (configService.getBoolProperty("com.openexchange.hazelcast.enableIPv6Support", false)) {
-                config.setProperty(GroupProperties.PROP_PREFER_IPv4_STACK, "false");
-            }
-            /*
-             * limit number of redos
-             */
-            config.setProperty(GroupProperties.PROP_REDO_GIVE_UP_THRESHOLD, "10");
-            /*
-             * configure merge run intervals
-             */
-            String mergeFirstRunDelay = configService.getProperty("com.openexchange.hazelcast.mergeFirstRunDelay", "120s");
-            config.setProperty(GroupProperties.PROP_MERGE_FIRST_RUN_DELAY_SECONDS,
-                String.valueOf(TimeSpanParser.parseTimespan(mergeFirstRunDelay).longValue() / 1000));
-            String mergeRunDelay = configService.getProperty("com.openexchange.hazelcast.mergeRunDelay", "120s");
-            config.setProperty(GroupProperties.PROP_MERGE_NEXT_RUN_DELAY_SECONDS,
-                String.valueOf(TimeSpanParser.parseTimespan(mergeRunDelay).longValue() / 1000));
-            /*
-             * set interfaces
-             */
-            String interfaces = configService.getProperty("com.openexchange.hazelcast.interfaces");
-            if (false == isEmpty(interfaces)) {
-                String[] ips = Strings.splitByComma(interfaces);
-                if (null != ips && 0 < ips.length) {
-                    config.getNetworkConfig().getInterfaces().setInterfaces(Arrays.asList(ips)).setEnabled(true);
-                }
-            }
-            /*
-             * enable TCP/IP network join for ox internal cluster discovery
-             */
-            config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
-            config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(false);
-            config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(true).setConnectionTimeoutSeconds(10);
-            /*
-             * incoming / outgoing ports
-             */
-            config.getNetworkConfig().setPort(configService.getIntProperty("com.openexchange.hazelcast.networkConfig.port", 5701));
-            config.getNetworkConfig().setPortAutoIncrement(
-                configService.getBoolProperty("com.openexchange.hazelcast.networkConfig.portAutoIncrement", true));
-            String[] outboundPortDefinitions = Strings.splitByComma(
-                configService.getProperty("com.openexchange.hazelcast.networkConfig.outboundPortDefinitions", ""));
-            if (null != outboundPortDefinitions && 0 < outboundPortDefinitions.length) {
-                for (String portDefintion : outboundPortDefinitions) {
-                    if (false == isEmpty(portDefintion)) {
-                        config.getNetworkConfig().addOutboundPortDefinition(portDefintion);
-                    }
-                }
-            }
-            /*-
-             * Maximum operation timeout in milliseconds if no timeout is specified for an operation. (default 300 seconds)
-             *
-             * hazelcast.max.operation.timeout
-             */
-            String maxOperationTimeout = configService.getProperty("com.openexchange.hazelcast.maxOperationTimeout", "300000");
-            config.setProperty(GroupProperties.PROP_MAX_OPERATION_TIMEOUT, maxOperationTimeout);
-            /*-
-             * Arbitrary Hazelcast properties
-             *
-             * http://www.hazelcast.com/docs/2.3/manual/multi_html/ch12s06.html
-             */
-            final PropertyFilter filter = new WildcardNamePropertyFilter("hazelcast.*");
-            final Map<String, String> properties = configService.getProperties(filter);
-            if (null != properties && !properties.isEmpty()) {
-                for (final Entry<String, String> entry : properties.entrySet()) {
-                    final String value = entry.getValue();
-                    if (!isEmpty(value)) {
-                        config.setProperty(entry.getKey(), value.trim());
-                    }
-                }
-            }
-            /*
-             * data structure configs
-             */
-            applyDataStructures(config, listPropertyFiles());
-        }
-        return config;
     }
 
     private static void applyDataStructures(Config config, File[] propertyFiles) throws OXException {
@@ -494,14 +372,14 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
                     field.setAccessible(true);
                     field.set(dataConfig, stringParser.parse(properties.getProperty(propertyName), field.getType()));
                 } catch (SecurityException e) {
-                    LOG.warn("Unable to set field for '" + propertyName + "'", e);
+                    LOG.warn("Unable to set field for ''{}''", propertyName, e);
                 } catch (IllegalArgumentException e) {
                     throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, propertyName);
                 } catch (IllegalAccessException e) {
-                    LOG.warn("Unable to set field for '" + propertyName + "'", e);
+                    LOG.warn("Unable to set field for ''{}''", propertyName, e);
                 }
             } else {
-                LOG.debug("No matching field found for '" + propertyName + "', skipping.");
+                LOG.debug("No matching field found for ''{}'', skipping.", propertyName);
             }
         }
         return dataConfig;
@@ -575,9 +453,9 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
                 try {
                     return ConfigLoader.load(xmlConfigFile.getAbsolutePath());
                 } catch (RuntimeException e) {
-                   LOG.warn("Error loading configuration from file " + xmlConfigFile.getAbsolutePath(), e);
+                   LOG.warn("Error loading configuration from file {}", xmlConfigFile.getAbsolutePath(), e);
                 } catch (IOException e) {
-                    LOG.warn("Error loading configuration from file " + xmlConfigFile.getAbsolutePath(), e);
+                    LOG.warn("Error loading configuration from file {}", xmlConfigFile.getAbsolutePath(), e);
                 }
             }
         }

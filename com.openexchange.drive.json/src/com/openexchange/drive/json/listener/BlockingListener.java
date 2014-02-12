@@ -55,14 +55,13 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.events.DriveEvent;
-import com.openexchange.drive.json.LongPollingListener;
+import com.openexchange.drive.json.DefaultLongPollingListener;
 import com.openexchange.drive.json.json.JsonDriveAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -72,11 +71,10 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class BlockingListener implements LongPollingListener {
+public class BlockingListener extends DefaultLongPollingListener {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(BlockingListener.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BlockingListener.class);
 
-    private final DriveSession session;
     private final ReentrantLock lock;
     private final Condition hasEvent;
 
@@ -89,15 +87,9 @@ public class BlockingListener implements LongPollingListener {
      * @param rootFolderID The root folder ID
      */
     public BlockingListener(DriveSession session) {
-        super();
-        this.session = session;
+        super(session);
         this.lock = new ReentrantLock();
         this.hasEvent = this.lock.newCondition();
-    }
-
-    @Override
-    public DriveSession getSession() {
-        return session;
     }
 
     @Override
@@ -106,7 +98,7 @@ public class BlockingListener implements LongPollingListener {
         lock.lock();
         try {
             if (null == this.event) {
-                LOG.debug("Awaiting events for max. " + timeout + "ms...");
+                LOG.debug("Awaiting events for max. {}ms...", timeout);
                 hasEvent.await(timeout, TimeUnit.MILLISECONDS);
             } else {
                 LOG.debug("Stored event available, no need to wait.");
@@ -122,7 +114,7 @@ public class BlockingListener implements LongPollingListener {
         if (null == data) {
             LOG.debug("No event available.");
         } else {
-            LOG.debug("Available event: " + data);
+            LOG.debug("Available event: {}", data);
         }
         return createResult(data);
     }
@@ -143,7 +135,7 @@ public class BlockingListener implements LongPollingListener {
     @Override
     public void onEvent(DriveEvent event) {
         if (false == isInteresting(event)) {
-            LOG.debug("Skipping uninteresting event: " + event);
+            LOG.debug("Skipping uninteresting event: {}", event);
             return;
         }
         lock.lock();
@@ -156,7 +148,7 @@ public class BlockingListener implements LongPollingListener {
     }
 
     private boolean isInteresting(DriveEvent event) {
-        return null != event && null != event.getFolderIDs() && event.getFolderIDs().contains(session.getRootFolderID());
+        return null != event && null != event.getFolderIDs() && event.getFolderIDs().contains(driveSession.getRootFolderID());
     }
 
 }

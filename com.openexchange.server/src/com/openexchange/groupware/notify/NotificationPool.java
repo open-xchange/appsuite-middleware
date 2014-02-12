@@ -78,7 +78,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class NotificationPool {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(NotificationPool.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NotificationPool.class);
 
     private static final NotificationPool instance = new NotificationPool();
 
@@ -149,17 +149,11 @@ public final class NotificationPool {
             if (prev == null) {
                 map.put(pooledNotification, pooledNotification);
                 queue.offer(pooledNotification);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(new StringBuilder().append("New pooled notification added for receiver ").append(
-                        pooledNotification.getParticipant().email).toString());
-                }
+                LOG.debug("New pooled notification added for receiver {}", pooledNotification.getParticipant().email);
             } else {
                 prev.merge(pooledNotification);
                 prev.touch();
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(new StringBuilder().append("Pooled notification merged for receiver ").append(
-                        pooledNotification.getParticipant().email).toString());
-                }
+                LOG.debug("Pooled notification merged for receiver {}", pooledNotification.getParticipant().email);
             }
         } finally {
             readLock.unlock();
@@ -222,7 +216,7 @@ public final class NotificationPool {
 
     private class NotificationPoolTimerTask implements Runnable {
 
-        private final org.apache.commons.logging.Log logger;
+        private final org.slf4j.Logger logger;
 
         private final Lock taskWriteLock;
 
@@ -232,7 +226,7 @@ public final class NotificationPool {
 
         public NotificationPoolTimerTask(final Map<PooledNotification, PooledNotification> map, final DelayQueue<PooledNotification> queue, final Lock writeLock) {
             super();
-            logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(NotificationPoolTimerTask.class));
+            logger = org.slf4j.LoggerFactory.getLogger(NotificationPoolTimerTask.class);
             this.taskMap = map;
             this.taskQueue = queue;
             this.taskWriteLock = writeLock;
@@ -264,7 +258,7 @@ public final class NotificationPool {
                     } while (null != cur);
                 }
             } catch (final Throwable t) {
-                logger.error(t.getMessage(), t);
+                logger.error("", t);
             } finally {
                 taskWriteLock.unlock();
             }
@@ -272,10 +266,7 @@ public final class NotificationPool {
 
         private void handlePooledNotification(final PooledNotification cur, final StringBuilder b) {
             final EmailableParticipant p = cur.getParticipant();
-            if (logger.isDebugEnabled()) {
-                logger.debug(b.append("Found elapsed pooled notification for receiver ").append(p.email).toString());
-                b.setLength(0);
-            }
+            logger.debug("Found elapsed pooled notification for receiver {}", p.email);
             final RenderMap renderMap = cur.getRenderMap();
             renderMap.applyLocale(cur.getLocale());
             renderMap.applyTimeZone(p.timeZone == null ? TimeZone.getDefault() : p.timeZone);
@@ -317,12 +308,11 @@ public final class NotificationPool {
                             true,
                             b);
                 }
-                if (logger.isDebugEnabled()) {
-                    logger.debug(b.append("Pooled ").append((Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task")).append(
-                        " (id = ").append(calendarObject.getObjectID()).append(") notification message generated for receiver ").append(
-                        p.email).toString());
-                    b.setLength(0);
-                }
+                logger.debug(
+                    "Pooled {} (id = {}) notification message generated for receiver {}",
+                    (Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task"),
+                    calendarObject.getObjectID(),
+                    p.email);
                 /*
                  * Send notification
                  */

@@ -51,6 +51,7 @@ package com.openexchange.ajax.requesthandler.osgi;
 
 import java.util.HashSet;
 import java.util.Set;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.Multiple;
@@ -59,6 +60,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionCustomizer;
 import com.openexchange.ajax.requesthandler.AJAXActionCustomizerFactory;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXResultDecorator;
 import com.openexchange.ajax.requesthandler.AJAXResultDecoratorRegistry;
 import com.openexchange.ajax.requesthandler.Converter;
@@ -70,9 +72,9 @@ import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.converters.BasicTypeAPIResultConverter;
 import com.openexchange.ajax.requesthandler.converters.BasicTypeJsonConverter;
+import com.openexchange.ajax.requesthandler.converters.DebugConverter;
 import com.openexchange.ajax.requesthandler.converters.Native2JSONConverter;
 import com.openexchange.ajax.requesthandler.converters.NativeConverter;
-import com.openexchange.ajax.requesthandler.converters.DebugConverter;
 import com.openexchange.ajax.requesthandler.converters.cover.CoverExtractor;
 import com.openexchange.ajax.requesthandler.converters.cover.CoverExtractorRegistry;
 import com.openexchange.ajax.requesthandler.converters.cover.CoverResultConverter;
@@ -88,6 +90,8 @@ import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRendere
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.PreviewResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.StringResponseRenderer;
+import com.openexchange.ajax.response.IncludeStackTraceService;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.mail.mime.utils.ImageMatcher;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -171,6 +175,14 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
         });
 
+        final BundleContext context = this.context;
+
+        {
+            final BodyParserRegistry registry = new BodyParserRegistry(context);
+            rememberTracker(registry);
+            AJAXRequestDataTools.setBodyParserRegistry(registry);
+        }
+
         final OSGiCoverExtractorRegistry coverExtractorRegistry = new OSGiCoverExtractorRegistry(context);
         track(CoverExtractor.class, coverExtractorRegistry);
         registerService(CoverExtractorRegistry.class, coverExtractorRegistry);
@@ -214,6 +226,20 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
             @Override
             public void removed(final ServiceReference<ResponseRenderer> ref, final ResponseRenderer thing) {
                 DispatcherServlet.unregisterRenderer(thing);
+            }
+
+        });
+
+        track(IncludeStackTraceService.class, new SimpleRegistryListener<IncludeStackTraceService>() {
+
+            @Override
+            public void added(final ServiceReference<IncludeStackTraceService> ref, final IncludeStackTraceService thing) {
+                ResponseWriter.setIncludeStackTraceService(thing);
+            }
+
+            @Override
+            public void removed(final ServiceReference<IncludeStackTraceService> ref, final IncludeStackTraceService thing) {
+                ResponseWriter.setIncludeStackTraceService(null);
             }
 
         });
@@ -276,6 +302,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         ServerServiceRegistry.getInstance().removeService(DispatcherPrefixService.class);
         ImageMatcher.setPrefixService(null);
         Multiple.setDispatcher(null);
+        AJAXRequestDataTools.setBodyParserRegistry(null);
     }
 
     @Override

@@ -9,7 +9,7 @@ BuildRequires: open-xchange-oauth
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 21
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -17,23 +17,24 @@ BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/ 
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange backend subscribe extension
+Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-oauth >= @OXVERSION@
 Requires:      open-xchange-xerces
 Provides:      open-xchange-subscribe-crawler = %{version}
-Obsoletes:     open-xchange-subscribe-crawler <= %{version}
+Obsoletes:     open-xchange-subscribe-crawler < %{version}
 Provides:      open-xchange-subscribe-facebook = %{version}
-Obsoletes:     open-xchange-subscribe-facebook <= %{version}
+Obsoletes:     open-xchange-subscribe-facebook < %{version}
 Provides:      open-xchange-subscribe-json = %{version}
-Obsoletes:     open-xchange-subscribe-json <= %{version}
+Obsoletes:     open-xchange-subscribe-json < %{version}
 Provides:      open-xchange-subscribe-linkedin = %{version} 
-Obsoletes:     open-xchange-subscribe-linkedin <= %{version}
+Obsoletes:     open-xchange-subscribe-linkedin < %{version}
 Provides:      open-xchange-subscribe-microformats = %{version}
-Obsoletes:     open-xchange-subscribe-microformats <= %{version}
+Obsoletes:     open-xchange-subscribe-microformats < %{version}
 Provides:      open-xchange-subscribe-msn = %{version}
-Obsoletes:     open-xchange-subscribe-msn <= %{version}
+Obsoletes:     open-xchange-subscribe-msn < %{version}
 Provides:      open-xchange-subscribe-yahoo = %{version}
-Obsoletes:     open-xchange-subscribe-yahoo <= %{version}
+Obsoletes:     open-xchange-subscribe-yahoo < %{version}
 
 %description
 Adds the feature to subscribe to third party services or
@@ -132,6 +133,17 @@ if [ ${1:-0} -eq 2 ]; then
         fi
     done
 
+    #SoftwareChange_Request-1800
+    pfile=/opt/open-xchange/etc/crawler.properties
+    for prop in com.openexchange.subscribe.crawler.updatepath com.openexchange.subscribe.crawler.updatedfile com.openexchange.subscribe.crawler.updateinterval com.openexchange.subscribe.crawler.enableautoupdate com.openexchange.subscribe.crawler.onlyupdatealreadyinstalled; do
+        if ox_exists_property $prop $pfile; then
+            ox_remove_property $prop $pfile
+        fi
+    done
+
+    #SoftwareChange_Request-1847
+    ox_move_config_file /opt/open-xchange/etc/crawlers /opt/open-xchange/etc/crawlers XING.yml xing.yml
+
     find /opt/open-xchange/etc/crawlers -name "*.yml" -print0 | while read -d $'\0' i; do
         ox_update_permissions "$i" open-xchange:root 644
     done
@@ -154,8 +166,14 @@ fi
 %doc docs/
 
 %changelog
+* Fri Feb 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth release candidate for 7.4.2
 * Thu Feb 06 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-02-11
+* Thu Feb 06 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth release candidate for 7.4.2
+* Tue Feb 04 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 7.4.2
 * Thu Jan 30 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-02-03
 * Wed Jan 29 2014 Marcus Klein <marcus.klein@open-xchange.com>
@@ -164,24 +182,54 @@ Build for patch 2014-01-30
 Build for patch 2014-01-31
 * Tue Jan 28 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-01-30
+* Tue Jan 28 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-01-30
+* Mon Jan 27 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-01-30
+* Fri Jan 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-17
+* Thu Jan 23 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 7.4.2
+* Wed Jan 22 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2014-01-22
 * Mon Jan 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-01-20
 * Thu Jan 16 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-01-16
 * Mon Jan 13 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-01-14
+* Fri Jan 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.4.2
+* Fri Jan 10 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-17
 * Fri Jan 03 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-01-06
 * Mon Dec 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-12-09
+* Mon Dec 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.4.2
 * Thu Dec 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-12-23
+* Thu Dec 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-23
+* Thu Dec 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-23
+* Wed Dec 18 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.4.2
+* Tue Dec 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-19
 * Tue Dec 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-12-18
+* Tue Dec 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-16
+* Thu Dec 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-12-12
 * Thu Dec 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-12-12
 * Mon Dec 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-12-09
+* Fri Dec 06 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-11-29
 * Fri Dec 06 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-12-10
 * Tue Dec 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -190,6 +238,8 @@ Build for patch 2013-11-28
 Fifth candidate for 7.4.1 release
 * Tue Nov 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth candidate for 7.4.1 release
+* Mon Nov 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-11-12
 * Mon Nov 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-11-12
 * Fri Nov 08 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -202,6 +252,8 @@ Third candidate for 7.4.1 release
 Build for patch 2013-11-12
 * Wed Oct 30 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-10-28
+* Thu Oct 24 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-10-30
 * Thu Oct 24 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-10-30
 * Wed Oct 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -338,8 +390,6 @@ Build for patch 2013-04-23
 Build for patch 2013-04-17
 * Mon Apr 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.2.1 release
-* Mon Apr 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
-prepare for 7.4.0
 * Mon Apr 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.2.1
 * Fri Apr 12 2013 Marcus Klein <marcus.klein@open-xchange.com>

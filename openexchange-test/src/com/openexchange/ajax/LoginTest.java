@@ -50,7 +50,6 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
@@ -75,7 +74,7 @@ public class LoginTest extends AbstractAJAXTest {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(LoginTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LoginTest.class);
 
     /**
      * URL of the login AJAX servlet.

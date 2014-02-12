@@ -66,7 +66,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractMailAccountTreeAction extends AbstractMailAccountAction {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractMailAccountTreeAction.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractMailAccountTreeAction.class);
 
     /**
      * Initializes a new {@link AbstractMailAccountTreeAction}.
@@ -92,9 +92,7 @@ public abstract class AbstractMailAccountTreeAction extends AbstractMailAccountA
                 session);
             return root;
         } catch (final OXException e) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Composing mail account's folder tree failed.", e);
-            }
+            LOG.debug("Composing mail account's folder tree failed.", e);
             // TODO: How to indicate error if folder tree requested?
             return null;
         } finally {

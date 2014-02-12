@@ -72,7 +72,7 @@ import com.openexchange.push.malpoll.services.MALPollServiceRegistry;
  */
 public final class MALPollDBUtility {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MALPollDBUtility.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MALPollDBUtility.class);
 
     private static final int CHUNK_SIZE = 100;
 
@@ -386,7 +386,7 @@ public final class MALPollDBUtility {
                 }
                 return toUUID(rs.getBytes(1));
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 return null;
             } finally {
                 MALPollDBUtility.closeSQLStuff(rs);
@@ -504,7 +504,7 @@ public final class MALPollDBUtility {
         try {
             con.rollback();
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -520,7 +520,7 @@ public final class MALPollDBUtility {
         try {
             con.setAutoCommit(true);
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -534,7 +534,7 @@ public final class MALPollDBUtility {
             try {
                 result.close();
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -549,7 +549,7 @@ public final class MALPollDBUtility {
             try {
                 stmt.close();
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

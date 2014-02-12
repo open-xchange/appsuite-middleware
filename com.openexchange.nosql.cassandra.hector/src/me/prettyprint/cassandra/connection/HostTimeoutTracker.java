@@ -25,7 +25,7 @@ import me.prettyprint.cassandra.service.CassandraHostConfigurator;
  * @author zznate
  */
 public class HostTimeoutTracker extends BackgroundCassandraHostService {
-  private static final Logger log = LoggerFactory.getLogger(HostTimeoutTracker.class);
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(HostTimeoutTracker.class);
 
   private ConcurrentHashMap<CassandraHost, LinkedBlockingQueue<Long>> timeouts;
   private ConcurrentHashMap<CassandraHost, Long> suspended;

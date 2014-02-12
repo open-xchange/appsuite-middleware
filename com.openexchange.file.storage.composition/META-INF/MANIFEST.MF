@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: File Storage Composition Plug-in
 Bundle-SymbolicName: com.openexchange.file.storage.composition
-Bundle-Version: 7.4.1
+Bundle-Version: 7.4.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
@@ -29,6 +29,7 @@ Import-Package: com.openexchange.config,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.service.event,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Export-Package: com.openexchange.file.storage.composition
 Bundle-Activator: com.openexchange.file.storage.composition.osgi.FileStorageCompositionActivator

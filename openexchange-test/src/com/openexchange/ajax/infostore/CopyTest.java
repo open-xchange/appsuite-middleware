@@ -208,7 +208,7 @@ public class CopyTest extends InfostoreAJAXTest {
             clean.add(id);
             fail("Expected IOException");
         } catch (final JSONException x) {
-            assertTrue(x.getMessage(), x.getMessage().contains("virt"));
+            assertTrue(x.getMessage(), x.getMessage().contains("IFO-1700"));
         }
 
     }

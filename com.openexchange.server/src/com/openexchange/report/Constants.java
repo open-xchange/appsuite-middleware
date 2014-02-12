@@ -51,8 +51,6 @@ package com.openexchange.report;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link Constants}
@@ -61,7 +59,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class Constants {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Constants.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Constants.class);
 
     public static final ObjectName REPORTING_NAME = initReportingName();
     public static final ObjectName LOGIN_COUNTER_NAME = initOxtenderMonitorName();
@@ -78,9 +76,9 @@ public final class Constants {
         try {
             retval = new ObjectName("com.openexchange.reporting", "name", "Reporting");
         } catch (MalformedObjectNameException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (NullPointerException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return retval;
     }
@@ -90,9 +88,9 @@ public final class Constants {
         try {
             retval = new ObjectName("com.openexchange.reporting", "name", "Login Counter");
         } catch (MalformedObjectNameException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (NullPointerException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return retval;
     }

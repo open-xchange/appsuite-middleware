@@ -49,7 +49,6 @@
 
 package com.openexchange.carddav.mixins;
 
-import org.apache.commons.logging.Log;
 
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.resources.CardDAVCollection;
@@ -69,7 +68,7 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  */
 public class CTag extends SingleXMLPropertyMixin {
 
-	protected static final Log LOG = com.openexchange.log.Log.loggerFor(CTag.class);
+	protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CTag.class);
 
 	private final GroupwareCarddavFactory factory;
     private final CardDAVCollection collection;
@@ -98,16 +97,16 @@ public class CTag extends SingleXMLPropertyMixin {
 				if (null != token) {
 					try {
 						this.timestamp = Long.parseLong(token);
-						LOG.debug("Overriding CTag property to '" + timestamp + "' for user '" + factory.getUser() + "'.");
+						LOG.debug("Overriding CTag property to '{}' for user '{}'.", timestamp, factory.getUser());
 					} catch (NumberFormatException e) {
-						LOG.warn("Invalid sync token: '" + token + "'.");
+						LOG.warn("Invalid sync token: '{}'.", token);
 					}
 				}
 				if (-1 == this.timestamp) {
 					this.timestamp = this.collection.getLastModified().getTime();
 				}
 			} catch (OXException e) {
-		        LOG.error(e.getMessage(), e);
+		        LOG.error("", e);
 		        this.timestamp = 0;
 			}
 		}

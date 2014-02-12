@@ -49,6 +49,7 @@
 
 package com.openexchange.authentication.database.impl;
 
+import static com.openexchange.authentication.LoginExceptionCodes.COMMUNICATION;
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
@@ -114,7 +115,12 @@ public class DatabaseAuthentication implements AuthenticationService {
         }
         final String[] splitted = split(loginInfo.getUsername());
         try {
-            final int ctxId = contextService.getContextId(splitted[0]);
+            final int ctxId;
+            try {
+                ctxId = contextService.getContextId(splitted[0]);
+            } catch (final OXException e) {
+                throw COMMUNICATION.create(e);
+            }
             if (ContextStorage.NOT_FOUND == ctxId) {
                 throw INVALID_CREDENTIALS.create();
             }

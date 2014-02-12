@@ -50,9 +50,10 @@
 package com.openexchange.langdetect;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 
 /**
@@ -60,16 +61,16 @@ import com.openexchange.exception.OXExceptionFactory;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public enum LanguageDetectionExceptionCodes implements OXExceptionCode {
+public enum LanguageDetectionExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An unexpected error occurred: %1$s
      */
-    UNEXPECTED_ERROR(LanguageDetectionExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An unexpected error occurred: %1$s", Category.CATEGORY_ERROR, 1),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(LanguageDetectionExceptionMessages.IO_ERROR_MSG, Category.CATEGORY_CONNECTIVITY, 2),
+    IO_ERROR("An I/O error occurred: %1$s", Category.CATEGORY_CONNECTIVITY, 2),
 
     ;
 
@@ -79,11 +80,14 @@ public enum LanguageDetectionExceptionCodes implements OXExceptionCode {
     private int number;
 
     private Category category;
+    
+    private final String displayMessage;
 
     private LanguageDetectionExceptionCodes(final String message, final Category category, final int detailNumber) {
         this.message = message;
         number = detailNumber;
         this.category = category;
+        this.displayMessage = OXExceptionStrings.MESSAGE;
     }
 
     /**
@@ -141,4 +145,11 @@ public enum LanguageDetectionExceptionCodes implements OXExceptionCode {
         return message;
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.exception.DisplayableOXExceptionCode#getDisplayMessage()
+     */
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
+    }
 }

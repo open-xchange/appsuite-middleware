@@ -63,7 +63,6 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.microformats.OXMFParser;
 import com.openexchange.subscribe.microformats.OXMFSubscriptionErrorMessage;
@@ -162,7 +161,7 @@ public final class OXMFParserImpl implements OXMFParser {
             try {
                 parser.close();
             } catch (final XMLStreamException e) {
-                com.openexchange.log.Log.valueOf(LogFactory.getLog(OXMFParserImpl.class)).error(e.getMessage(), e);
+                org.slf4j.LoggerFactory.getLogger(OXMFParserImpl.class).error("", e);
             }
         }
     }

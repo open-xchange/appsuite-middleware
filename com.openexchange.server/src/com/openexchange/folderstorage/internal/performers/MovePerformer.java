@@ -148,8 +148,9 @@ final class MovePerformer extends AbstractPerformer {
      * Initializes a new {@link MovePerformer} from given session.
      *
      * @param session The session
+     * @throws OXException If passed session is invalid
      */
-    MovePerformer(final ServerSession session) {
+    MovePerformer(final ServerSession session) throws OXException {
         super(session);
     }
 
@@ -168,8 +169,9 @@ final class MovePerformer extends AbstractPerformer {
      *
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
+     * @throws OXException If passed session is invalid
      */
-    MovePerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    MovePerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(session, folderStorageDiscoverer);
     }
 
@@ -440,7 +442,7 @@ final class MovePerformer extends AbstractPerformer {
                 /*
                  * (!parentChildEquality && !parentEquality) ?
                  */
-                throw FolderExceptionErrorMessage.MOVE_NOT_PERMITTED.create(new Object[0]);
+                throw FolderExceptionErrorMessage.MOVE_NOT_PERMITTED.create(folder.getName());
             }
         }
     }

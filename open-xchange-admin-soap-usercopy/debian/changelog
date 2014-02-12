@@ -1,3 +1,45 @@
+open-xchange-admin-soap-usercopy (7.4.2-6) stable; urgency=low
+
+  * Sixth release candidate for 7.4.2
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 07 Feb 2014 13:39:37 +0100
+
+open-xchange-admin-soap-usercopy (7.4.2-5) stable; urgency=low
+
+  * Fifth release candidate for 7.4.2
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 06 Feb 2014 15:09:30 +0100
+
+open-xchange-admin-soap-usercopy (7.4.2-4) stable; urgency=low
+
+  * Fourth release candidate for 7.4.2
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 04 Feb 2014 16:43:27 +0100
+
+open-xchange-admin-soap-usercopy (7.4.2-3) stable; urgency=low
+
+  * Third release candidate for 7.4.2
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 23 Jan 2014 16:00:36 +0100
+
+open-xchange-admin-soap-usercopy (7.4.2-2) stable; urgency=low
+
+  * Second release candidate for 7.4.2
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 10 Jan 2014 16:10:21 +0100
+
+open-xchange-admin-soap-usercopy (7.4.2-1) stable; urgency=low
+
+  * First release candidate for 7.4.2
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 23 Dec 2013 12:47:37 +0100
+
+open-xchange-admin-soap-usercopy (7.4.2-0) unstable; urgency=low
+
+  * prepare for 7.4.2
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 18 Dec 2013 17:33:32 +0100
+
 open-xchange-admin-soap-usercopy (7.4.1-21) stable; urgency=low
 
   * Build for patch 2014-02-11
@@ -129,6 +171,48 @@ open-xchange-admin-soap-usercopy (7.4.1-0) unstable; urgency=low
   * prepare for 7.4.1 release
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 20 Sep 2013 11:43:30 +0200
+
+open-xchange-admin-soap-usercopy (7.4.0-27) stable; urgency=low
+
+  * Build for patch 2014-01-30
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 28 Jan 2014 12:10:11 +0100
+
+open-xchange-admin-soap-usercopy (7.4.0-26) stable; urgency=low
+
+  * Build for patch 2013-12-17
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 24 Jan 2014 14:56:13 +0100
+
+open-xchange-admin-soap-usercopy (7.4.0-25) stable; urgency=low
+
+  * Build for patch 2013-12-17
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 10 Jan 2014 10:07:54 +0100
+
+open-xchange-admin-soap-usercopy (7.4.0-24) stable; urgency=low
+
+  * Build for patch 2013-12-23
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 19 Dec 2013 09:06:11 +0100
+
+open-xchange-admin-soap-usercopy (7.4.0-23) stable; urgency=low
+
+  * Build for patch 2013-12-19
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 17 Dec 2013 10:46:34 +0100
+
+open-xchange-admin-soap-usercopy (7.4.0-22) stable; urgency=low
+
+  * Build for patch 2013-12-16
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 17 Dec 2013 09:33:40 +0100
+
+open-xchange-admin-soap-usercopy (7.4.0-21) stable; urgency=low
+
+  * Build for patch 2013-12-12
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 12 Dec 2013 11:40:11 +0100
 
 open-xchange-admin-soap-usercopy (7.4.0-20) stable; urgency=low
 
@@ -262,11 +346,41 @@ open-xchange-admin-soap-usercopy (7.4.0-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 16 Jul 2013 15:15:15 +0200
 
-open-xchange-admin-soap-usercopy (7.4.0-0) UNRELEASED; urgency=low
+open-xchange-admin-soap-usercopy (7.2.2-28) stable; urgency=low
 
-  * prepare for 7.4.0
+  * Build for patch 2014-01-30
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Apr 2013 10:29:00 +0200
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 27 Jan 2014 17:09:48 +0100
+
+open-xchange-admin-soap-usercopy (7.2.2-27) stable; urgency=low
+
+  * Build for patch 2014-01-22
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 22 Jan 2014 17:02:22 +0100
+
+open-xchange-admin-soap-usercopy (7.2.2-26) stable; urgency=low
+
+  * Build for patch 2013-12-23
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 19 Dec 2013 09:06:39 +0100
+
+open-xchange-admin-soap-usercopy (7.2.2-25) stable; urgency=low
+
+  * Build for patch 2013-11-29
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 06 Dec 2013 13:35:48 +0100
+
+open-xchange-admin-soap-usercopy (7.2.2-24) stable; urgency=low
+
+  * Build for patch 2013-11-12
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 11 Nov 2013 12:38:43 +0100
+
+open-xchange-admin-soap-usercopy (7.2.2-23) stable; urgency=low
+
+  * Build for patch 2013-10-30
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 24 Oct 2013 15:56:22 +0200
 
 open-xchange-admin-soap-usercopy (7.2.2-22) stable; urgency=low
 

@@ -176,10 +176,10 @@ public final class NonBlockingHttpServletManager extends AbstractHttpServletMana
                     servletQueue =
                         new FiFoServletQueue(1, servlet.getClass().getConstructor(CLASS_ARR), !(servlet instanceof SingleThreadModel), path);
                 } catch (final SecurityException e) {
-                    LOG.error("Default constructor could not be found for servlet class: " + servlet.getClass().getName(), e);
+                    LOG.error("Default constructor could not be found for servlet class: {}", servlet.getClass().getName(), e);
                     return;
                 } catch (final NoSuchMethodException e) {
-                    LOG.error("Default constructor could not be found for servlet class: " + servlet.getClass().getName(), e);
+                    LOG.error("Default constructor could not be found for servlet class: {}", servlet.getClass().getName(), e);
                     return;
                 }
                 final ServletConfig conf = ServletConfigLoader.getDefaultInstance().getConfig(servlet.getClass().getCanonicalName(), path);

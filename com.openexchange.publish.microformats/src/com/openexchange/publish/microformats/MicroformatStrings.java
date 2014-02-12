@@ -59,16 +59,18 @@ import com.openexchange.i18n.LocalizableStrings;
 public final class MicroformatStrings implements LocalizableStrings {
 
     public static final String DISCLAIMER_PRIVACY = "Privacy:\n"
-    +   "The data and any references contained in this webpage are shared with you under the assumption "
-    +   "that the owner of the data was entitled to make them available to you. Neither Open-Xchange, "
-    +   "nor any of its subsidiaries or affiliates shall be liable for its publication or "
-    +   "re-publication.\n"
-    +   "Any unauthorized use or dissemination of this data is prohibited. If you intend to store, "
-    +   "process, or pass on this data, please make sure that you have the right to do so.\n"
-    +   "If you are one of the people listed or responsible for a resource listed on this page and you "
-    +   "don't agree with the publication, please send an email containing the URL (the link) to this "
-    +   "webpage to %s and the publisher of the data:\n"
-    +   "Data published by %s on %s\n";
+        +   "The data and any references contained in this webpage are shared with you under the assumption "
+        +   "that the owner of the data was entitled to make them available to you. Neither %s, "
+        +   "nor any of its subsidiaries or affiliates shall be liable for its publication or "
+        +   "re-publication.\n"
+        +   "Any unauthorized use or dissemination of this data is prohibited. If you intend to store, "
+        +   "process, or pass on this data, please make sure that you have the right to do so.\n"
+        +   "If you are one of the people listed or responsible for a resource listed on this page and you "
+        +   "don't agree with the publication, please send an email containing the URL (the link) to this "
+        +   "webpage to %s and the publisher of the data:\n"
+        +   "Data published by %s on %s\n";
+
+    public static final String DISCLAIMER_ALTERNATIV_HOSTER_NAME_WORDING = "the hoster";
 
     public MicroformatStrings() {
         super();

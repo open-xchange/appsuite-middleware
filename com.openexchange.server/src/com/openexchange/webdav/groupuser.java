@@ -59,8 +59,6 @@ import java.sql.Timestamp;
 import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
@@ -78,8 +76,8 @@ import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.DBPool;
-import com.openexchange.version.Version;
 import com.openexchange.session.Session;
+import com.openexchange.version.Version;
 import com.openexchange.webdav.xml.DataWriter;
 import com.openexchange.webdav.xml.GroupUserWriter;
 import com.openexchange.webdav.xml.XmlServlet;
@@ -106,7 +104,7 @@ public final class groupuser extends PermissionServlet {
 
     private static String DELETED_RESOURCE_SQL = "SELECT id, lastmodified FROM del_resource WHERE cid=? AND lastmodified > ?";
 
-    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(groupuser.class));
+    private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(groupuser.class);
 
     @Override
     protected Interface getInterface() {
@@ -115,9 +113,7 @@ public final class groupuser extends PermissionServlet {
 
     @Override
     public void doPropFind(final HttpServletRequest req, final HttpServletResponse resp) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("PROPFIND");
-        }
+        LOG.debug("PROPFIND");
 
         String s_user = null;
         String s_group = null;
@@ -186,7 +182,7 @@ public final class groupuser extends PermissionServlet {
             if (s_user != null) {
                 os.write(("<ox:users>").getBytes());
                 os.flush();
-                final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+                final User userObj = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
                 final GroupUserWriter groupuserwriter = new GroupUserWriter(userObj, ctx, sessionObj, new Element("user", XmlServlet.NS));
 
                 if ("*".equals(s_user)) {
@@ -412,9 +408,7 @@ public final class groupuser extends PermissionServlet {
 
     public void doError(final HttpServletResponse resp, final int code, final String msg) {
         try {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("status: " + code + " message: " + msg);
-            }
+            LOG.debug("status: {} message: {}", code, msg);
 
             resp.setStatus(code);
             resp.setContentType("text/html");

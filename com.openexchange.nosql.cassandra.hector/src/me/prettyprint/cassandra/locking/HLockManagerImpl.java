@@ -44,7 +44,7 @@ import com.google.common.collect.Maps;
  */
 public class HLockManagerImpl extends AbstractLockManager {
 
-  private static final Logger logger = LoggerFactory.getLogger(HLockManagerImpl.class);
+  private static final org.slf4j.Logger logger = LoggerFactory.getLogger(HLockManagerImpl.class);
 
   private ScheduledExecutorService scheduler;
   private long lockTtl = 5000;

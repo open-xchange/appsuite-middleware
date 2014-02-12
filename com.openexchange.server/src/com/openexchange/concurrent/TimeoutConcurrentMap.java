@@ -321,13 +321,13 @@ public final class TimeoutConcurrentMap<K, V> {
 
     private static final class ValueWrapper<V> {
 
-        public final V value;
-        public final long ttl;
-        public final TimeoutListener<V> timeoutListener;
-        public final boolean forceTimeout;
-        public volatile long lastAccessed;
+        final V value;
+        final long ttl;
+        final TimeoutListener<V> timeoutListener;
+        final boolean forceTimeout;
+        volatile long lastAccessed;
 
-        public ValueWrapper(final V value, final long ttl, final boolean forceTimeout, final TimeoutListener<V> timeoutListener) {
+        ValueWrapper(final V value, final long ttl, final boolean forceTimeout, final TimeoutListener<V> timeoutListener) {
             super();
             this.value = value;
             this.ttl = ttl;
@@ -336,7 +336,7 @@ public final class TimeoutConcurrentMap<K, V> {
             this.forceTimeout = forceTimeout;
         }
 
-        public V touch() {
+        V touch() {
             if (forceTimeout) {
                 // Force time out; don't touch last-accessed time stamp.
                 return value;

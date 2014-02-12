@@ -61,7 +61,7 @@ import java.util.regex.Pattern;
  */
 public final class URIParser {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(URIParser.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(URIParser.class);
 
     // The magic is the not being there of the dot character that would allow the match to IPv4 addresses. Place here \. in the pattern to
     // break it.
@@ -180,7 +180,7 @@ public final class URIParser {
             /*
              * Cannot sanitize
              */
-            LOG.warn("Couldn't sanitize URI: " + input, e);
+            LOG.warn("Couldn't sanitize URI: {}", input, e);
             return null;
         }
     }
@@ -198,7 +198,7 @@ public final class URIParser {
                 if (URIDefaults.NULL.equals(defaults)) {
                     throw new URISyntaxException(input, "A valid port value is between 0 and 65535, but is: " + port);
                 }
-                LOG.warn("Invalid port: " + port);
+                LOG.warn("Invalid port: {}", port);
                 return defaults.getPort();
             }
             return iPort;
@@ -206,7 +206,7 @@ public final class URIParser {
             if (URIDefaults.NULL.equals(defaults)) {
                 throw new URISyntaxException(input, e.getMessage());
             }
-            LOG.warn("Couldn't parse port: " + e.getMessage(), e);
+            LOG.warn("Couldn't parse port", e);
             return defaults.getPort();
         }
     }

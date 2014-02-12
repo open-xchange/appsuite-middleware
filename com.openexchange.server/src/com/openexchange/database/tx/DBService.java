@@ -58,13 +58,11 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBProviderUser;
 import com.openexchange.database.provider.RequestDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tx.TransactionAware;
 import com.openexchange.tx.TransactionExceptionCodes;
@@ -73,7 +71,7 @@ import com.openexchange.tx.UndoableAction;
 
 public abstract class DBService implements TransactionAware, DBProviderUser, DBProvider {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DBService.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DBService.class);
 
     private RequestDBProvider provider;
 
@@ -209,20 +207,18 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
             try {
                 undo.undo();
             } catch (final OXException x) {
-                LOG.fatal(x.getMessage(), x);
+                LOG.error("", x);
                 failed.add(undo);
             }
         }
         if (!failed.isEmpty()) {
             final OXException exception = TransactionExceptionCodes.NO_COMPLETE_ROLLBACK.create();
-            if (LOG.isFatalEnabled()) {
-                final StringBuilder explanations = new StringBuilder();
-                for (final Undoable undo : failed) {
-                    explanations.append(undo.error());
-                    explanations.append('\n');
-                }
-                LOG.fatal(explanations.toString(), exception);
+            final StringBuilder explanations = new StringBuilder();
+            for (final Undoable undo : failed) {
+                explanations.append(undo.error());
+                explanations.append('\n');
             }
+            LOG.error(explanations.toString(), exception);
             throw exception;
         }
     }

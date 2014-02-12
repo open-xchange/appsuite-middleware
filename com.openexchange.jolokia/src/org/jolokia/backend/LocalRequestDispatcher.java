@@ -17,9 +17,15 @@ package org.jolokia.backend;
  */
 
 import java.util.UUID;
-
-import javax.management.*;
-
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.JMException;
+import javax.management.MBeanException;
+import javax.management.MBeanRegistrationException;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ReflectionException;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
@@ -31,7 +37,6 @@ import org.jolokia.history.HistoryStore;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.util.DebugStore;
-import org.jolokia.util.LogHandler;
 
 /**
  * Dispatcher which dispatches to one or more local {@link javax.management.MBeanServer}.
@@ -49,8 +54,7 @@ public class LocalRequestDispatcher implements RequestDispatcher {
     // An (optional) qualifier for registering MBeans.
     private String qualifier;
 
-    // Logger
-    private LogHandler log;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LocalRequestDispatcher.class);
 
     /**
      * Create a new local dispatcher which accesses local MBeans.
@@ -60,12 +64,11 @@ public class LocalRequestDispatcher implements RequestDispatcher {
      * @param pConfig agent configuration
      * @param pLogHandler local handler used for logging out errors and warnings
      */
-    public LocalRequestDispatcher(Converters pConverters, Restrictor pRestrictor, Configuration pConfig, LogHandler pLogHandler) {
+    public LocalRequestDispatcher(Converters pConverters, Restrictor pRestrictor, Configuration pConfig) {
         // Get all MBean servers we can find. This is done by a dedicated
         // handler object
-        mBeanServerHandler = new MBeanServerHandler(pConfig,pLogHandler);
+        mBeanServerHandler = new MBeanServerHandler(pConfig);
         qualifier = pConfig.get(ConfigKey.MBEAN_QUALIFIER);
-        log = pLogHandler;
 
         // Request handling manager 
         requestHandlerManager =
@@ -115,12 +118,12 @@ public class LocalRequestDispatcher implements RequestDispatcher {
                 // Another instance has already started a Jolokia agent within the JVM. We are trying to add the MBean nevertheless with
                 // a dynamically generated ObjectName. Of course, it would be good to have a more semantic meaning instead of
                 // a random number, but this can already be performed with a qualifier
-                log.info(oName + " is already registered. Adding it with " + alternativeOName + ", but you should revise your setup in " +
-                         "order to either use a qualifier or ensure, that only a single agent gets registered (otherwise history functionality might not work)");
+                LOG.info("{} is already registered. Adding it with {}, but you should revise your setup in " +
+                         "order to either use a qualifier or ensure, that only a single agent gets registered (otherwise history functionality might not work)", oName, alternativeOName);
                 Config config = new Config(pHistoryStore,pDebugStore,alternativeOName);
                 mBeanServerHandler.registerMBean(config,alternativeOName);
             } catch (InstanceAlreadyExistsException e) {
-                log.error("Cannot even register fallback MBean with name " + alternativeOName + ". Should never happen. Really.",e);
+                LOG.error("Cannot even register fallback MBean with name {}. Should never happen. Really.", alternativeOName, e);
             }
         }
 
@@ -131,8 +134,8 @@ public class LocalRequestDispatcher implements RequestDispatcher {
             Config legacyConfig = new Config(pHistoryStore,pDebugStore,legacyOName);
             mBeanServerHandler.registerMBean(legacyConfig,legacyOName);
         } catch (InstanceAlreadyExistsException exp) {
-            log.info("Cannot register (legacy) MBean handler for config store with name " + legacyOName + " since it already exists. " +
-                     "This is the case if another agent has been already started within the same JVM. The registration is skipped.");
+            LOG.info("Cannot register (legacy) MBean handler for config store with name {} since it already exists. " +
+                     "This is the case if another agent has been already started within the same JVM. The registration is skipped.",legacyOName);
         }
     }
 

@@ -107,7 +107,6 @@ import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.parser.SearchTermParser;
-import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.Category;
@@ -135,7 +134,6 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.json.OXJSONWriter;
-import com.openexchange.log.Log;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
@@ -208,9 +206,7 @@ import com.openexchange.tools.versit.utility.VersitUtility;
  */
 public class Mail extends PermissionServlet implements UploadListener {
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Mail.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Mail.class);
 
     private static final long ZERO = 0L;
 
@@ -240,20 +236,13 @@ public class Mail extends PermissionServlet implements UploadListener {
      */
     protected static final OXException getWrappingOXException(final Exception cause) {
         final String message = cause.getMessage();
-        if (LOG.isWarnEnabled()) {
-            final StringBuilder warnBuilder = new StringBuilder(140);
-            final String lineSeparator = System.getProperty("line.separator");
-            warnBuilder.append("An unexpected exception occurred, which is going to be wrapped for proper display.").append(lineSeparator);
-            warnBuilder.append("For safety reason its original content is displayed here.").append(lineSeparator);
-            warnBuilder.append(null == message ? "[Not available]" : message);
-            if (Log.appendTraceToMessage()) {
-                warnBuilder.append(lineSeparator);
-                appendStackTrace(cause.getStackTrace(), warnBuilder, lineSeparator);
-                LOG.warn(warnBuilder.toString());
-            } else {
-                LOG.warn(warnBuilder.toString(), cause);
-            }
-        }
+        final String lineSeparator = System.getProperty("line.separator");
+        LOG.warn(
+            "An unexpected exception occurred, which is going to be wrapped for proper display.{}For safety reason its original content is displayed here.{}{}",
+            lineSeparator,
+            lineSeparator,
+            (null == message ? "[Not available]" : message),
+            cause);
         return MailExceptionCode.UNEXPECTED_ERROR.create(cause, null == message ? "[Not available]" : message);
     }
 
@@ -488,7 +477,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 localeFrom(session));
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
@@ -574,11 +563,11 @@ public class Mail extends PermissionServlet implements UploadListener {
             // MailMessageCache.getInstance().removeFolderMessages(fa.getAccountId(), fa.getFullname(), session.getUserId(),
             // session.getContext());
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         jsonWriter.endArray();
@@ -606,7 +595,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 localeFrom(session));
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
@@ -648,13 +637,13 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             if (!e.getCategory().equals(Category.CATEGORY_PERMISSION_DENIED)) {
                 response.setException(e);
             }
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -681,7 +670,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 localeFrom(session));
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
@@ -691,7 +680,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 sendError(resp);
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Response response = new Response(session);
             response.setException(e);
             try {
@@ -716,7 +705,6 @@ public class Mail extends PermissionServlet implements UploadListener {
         /*
          * Start response
          */
-        final long start = DEBUG ? System.currentTimeMillis() : ZERO;
         jsonWriter.array();
         SearchIterator<MailMessage> it = null;
         try {
@@ -787,7 +775,15 @@ public class Mail extends PermissionServlet implements UploadListener {
                         if (mail != null && !mail.isDeleted()) {
                             final JSONArray ja = new JSONArray();
                             for (final MailFieldWriter writer : writers) {
-                                writer.writeField(ja, mail, mail.getThreadLevel(), false, mailInterface.getAccountID(), userId, contextId, timeZone);
+                                writer.writeField(
+                                    ja,
+                                    mail,
+                                    mail.getThreadLevel(),
+                                    false,
+                                    mailInterface.getAccountID(),
+                                    userId,
+                                    contextId,
+                                    timeZone);
                             }
                             jsonWriter.value(ja);
                         }
@@ -816,11 +812,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         } finally {
             if (it != null) {
@@ -831,11 +827,6 @@ public class Mail extends PermissionServlet implements UploadListener {
          * Close response and flush print writer
          */
         jsonWriter.endArray();
-        if (DEBUG) {
-            final long d = System.currentTimeMillis() - start;
-            LOG.debug(new com.openexchange.java.StringAllocator(32).append(DefaultDispatcherPrefixService.getInstance().getPrefix()).append(
-                "mail?action=all performed in ").append(d).append("msec"));
-        }
         response.setData(jsonWriter.getObject());
         response.setTimestamp(null);
         return response;
@@ -857,7 +848,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 localeFrom(session));
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
@@ -886,7 +877,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
             final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             final String view = paramContainer.getStringParam(PARAMETER_VIEW);
-            final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
+            final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
             /*
              * Deny saving for this request-specific settings
              */
@@ -921,11 +912,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -955,7 +946,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 localeFrom(session));
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
@@ -984,7 +975,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
             final String uid = paramContainer.checkStringParam(PARAMETER_ID);
             final String view = paramContainer.getStringParam(PARAMETER_VIEW);
-            final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
+            final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
             /*
              * Deny saving for this request-specific settings
              */
@@ -1019,11 +1010,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -1053,7 +1044,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
@@ -1066,7 +1057,6 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private final Response actionGetStructure(final ServerSession session, final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg) {
-        final long s = DEBUG ? System.currentTimeMillis() : ZERO;
         /*
          * Some variables
          */
@@ -1165,11 +1155,11 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
 
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -1177,11 +1167,6 @@ public class Mail extends PermissionServlet implements UploadListener {
          */
         response.setData(data);
         response.setTimestamp(null);
-        if (DEBUG) {
-            final long d = System.currentTimeMillis() - s;
-            LOG.debug(new StringBuilder(32).append(DefaultDispatcherPrefixService.getInstance().getPrefix()).append(
-                "mail?action=get performed in ").append(d).append("msec"));
-        }
         return response;
     }
 
@@ -1201,7 +1186,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
@@ -1280,7 +1265,6 @@ public class Mail extends PermissionServlet implements UploadListener {
             /*
              * Get message
              */
-            final long s = DEBUG ? System.currentTimeMillis() : ZERO;
             MailServletInterface mailInterface = mailInterfaceArg;
             boolean closeMailInterface = false;
             try {
@@ -1318,7 +1302,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         if (!MailExceptionCode.NO_CONTENT.equals(e)) {
                             throw e;
                         }
-                        LOG.debug(e.getMessage(), e);
+                        LOG.debug("", e);
                         baos.reset();
                     }
                     // Filter
@@ -1433,7 +1417,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         }
                     }
                 } else {
-                    final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
+                    final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
                     /*
                      * Deny saving for this request-specific settings
                      */
@@ -1489,11 +1473,6 @@ public class Mail extends PermissionServlet implements UploadListener {
                             LOG.warn("Contact collector could not be triggered.", e);
                         }
                     }
-                    if (DEBUG) {
-                        final long d = System.currentTimeMillis() - s;
-                        LOG.debug(new StringBuilder(32).append(DefaultDispatcherPrefixService.getInstance().getPrefix()).append(
-                            "mail?action=get performed in ").append(d).append("msec served from message storage"));
-                    }
                 }
             } finally {
                 if (closeMailInterface && mailInterface != null) {
@@ -1503,12 +1482,10 @@ public class Mail extends PermissionServlet implements UploadListener {
         } catch (final OXException e) {
             if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
                 LOG.warn(
-                    new StringBuilder("Requested mail could not be found. ").append(
-                        "Most likely this is caused by concurrent access of multiple clients ").append(
-                        "while one performed a delete on affected mail.").toString(),
+                    "Requested mail could not be found. Most likely this is caused by concurrent access of multiple clients while one performed a delete on affected mail.",
                     e);
             } else {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             response.setException(e);
             if (errorAsCallback) {
@@ -1526,7 +1503,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
             if (errorAsCallback) {
                 try {
@@ -1574,8 +1551,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 usmNoSave.setAllowHTMLImages(false);
                 displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
             } else {
-                LOG.warn(new StringBuilder(64).append("Unknown value in parameter ").append(PARAMETER_VIEW).append(": ").append(view).append(
-                    ". Using user's mail settings as fallback."));
+                LOG.warn("Unknown value in parameter {}: {}. Using user's mail settings as fallback.", PARAMETER_VIEW, view);
                 displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
             }
         } else {
@@ -1584,7 +1560,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         return displayMode;
     }
 
-    private static void triggerContactCollector(final ServerSession session, final MailMessage mail) {
+    private static void triggerContactCollector(final ServerSession session, final MailMessage mail) throws OXException {
         final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (null != ccs) {
             final Set<InternetAddress> addrs = new HashSet<InternetAddress>();
@@ -1599,7 +1575,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
                     validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
                 }
-                final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
+                final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
                 validAddrs.add(new QuotedInternetAddress(user.getMail()));
                 final String[] aliases = user.getAliases();
                 for (final String alias : aliases) {
@@ -1607,7 +1583,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
                 addrs.removeAll(validAddrs);
             } catch (final AddressException e) {
-                LOG.warn("Collected contacts could not be stripped by user's email aliases: " + e.getMessage(), e);
+                LOG.warn("Collected contacts could not be stripped by user's email aliases", e);
 
             }
             if (!addrs.isEmpty()) {
@@ -1617,7 +1593,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         }
     }
 
-    private static void triggerContactCollector(final ServerSession session, final JSONObject mail) {
+    private static void triggerContactCollector(final ServerSession session, final JSONObject mail) throws OXException {
         final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (null != ccs) {
             final Set<InternetAddress> addrs = new HashSet<InternetAddress>();
@@ -1632,7 +1608,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
                     validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
                 }
-                final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
+                final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
                 validAddrs.add(new QuotedInternetAddress(user.getMail()));
                 final String[] aliases = user.getAliases();
                 for (final String alias : aliases) {
@@ -1640,9 +1616,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
                 addrs.removeAll(validAddrs);
             } catch (final AddressException e) {
-                LOG.warn(MessageFormat.format("Contact collector could not be triggered: {0}", e.getMessage()), e);
+                LOG.warn("Contact collector could not be triggered", e);
             } catch (final JSONException e) {
-                LOG.warn(MessageFormat.format("Contact collector could not be triggered: {0}", e.getMessage()), e);
+                LOG.warn("Contact collector could not be triggered", e);
             }
             if (!addrs.isEmpty()) {
                 // Add addresses
@@ -1676,7 +1652,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 localeFrom(session));
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
@@ -1686,7 +1662,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 sendError(resp);
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Response response = new Response(session);
             response.setException(e);
             try {
@@ -1769,11 +1745,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         } finally {
             if (it != null) {
@@ -1799,7 +1775,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             actionGetSaveVersit(session, resp.getWriter(), ParamContainer.getInstance(req, EnumComponent.MAIL, resp), null);
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
@@ -1890,11 +1866,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -1979,11 +1955,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             callbackError(resp, outSelected, true, session, e);
         } catch (final Exception e) {
             final OXException exc = getWrappingOXException(e);
-            LOG.error(exc.getMessage(), exc);
+            LOG.error("", exc);
             callbackError(resp, outSelected, true, session, exc);
         }
     }
@@ -2056,11 +2032,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             callbackError(resp, outSelected, true, session, e);
         } catch (final Exception e) {
             final OXException exc = getWrappingOXException(e);
-            LOG.error(exc.getMessage(), exc);
+            LOG.error("", exc);
             callbackError(resp, outSelected, true, session, exc);
         }
     }
@@ -2081,7 +2057,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 localeFrom(session));
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response = new Response();
             response.setException(oxe);
             try {
@@ -2156,11 +2132,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final RuntimeException e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -2308,11 +2284,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             callbackError(resp, outSelected, saveToDisk, session, e);
         } catch (final Exception e) {
             final OXException exc = getWrappingOXException(e);
-            LOG.error(exc.getMessage(), exc);
+            LOG.error("", exc);
             callbackError(resp, outSelected, saveToDisk, session, exc);
         }
     }
@@ -2343,16 +2319,16 @@ public class Mail extends PermissionServlet implements UploadListener {
             writer.flush();
         } catch (final UnsupportedEncodingException uee) {
             uee.initCause(e);
-            LOG.error(uee.getMessage(), uee);
+            LOG.error("", uee);
         } catch (final IOException ioe) {
             ioe.initCause(e);
-            LOG.error(ioe.getMessage(), ioe);
+            LOG.error("", ioe);
         } catch (final IllegalStateException ise) {
             ise.initCause(e);
-            LOG.error(ise.getMessage(), ise);
+            LOG.error("", ise);
         } catch (final JSONException je) {
             je.initCause(e);
-            LOG.error(je.getMessage(), je);
+            LOG.error("", je);
         }
     }
 
@@ -2386,7 +2362,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             try {
                 tmp.append(Helper.encodeFilename(fileName, STR_UTF8, internetExplorer));
             } catch (final UnsupportedEncodingException e) {
-                LOG.error("Unsupported encoding in a message detected and monitored: \"" + STR_UTF8 + '"', e);
+                LOG.error("Unsupported encoding in a message detected and monitored: \"{}{}", STR_UTF8, '"', e);
                 MailServletInterface.mailInterfaceMonitor.addUnsupportedEncodingExceptions(STR_UTF8);
                 return fileName;
             }
@@ -2475,7 +2451,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 localeFrom(session));
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
@@ -2510,7 +2486,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 ids[i] = folderAndID.getString(PARAMETER_ID);
             }
             final String view = paramContainer.getStringParam(PARAMETER_VIEW);
-            final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
+            final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
             /*
              * Deny saving for this request-specific settings
              */
@@ -2531,8 +2507,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     usmNoSave.setDisplayHtmlInlineContent(true);
                     usmNoSave.setAllowHTMLImages(false);
                 } else {
-                    LOG.warn(new StringBuilder(64).append("Unknown value in parameter ").append(PARAMETER_VIEW).append(": ").append(view).append(
-                        ". Using user's mail settings as fallback."));
+                    LOG.warn("Unknown value in parameter {}: {}. Using user's mail settings as fallback.", PARAMETER_VIEW, view);
                 }
             }
             /*
@@ -2561,11 +2536,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -2600,7 +2575,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 localeFrom(session));
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
@@ -2626,7 +2601,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             try {
                 map.put(name, paramContainer.getStringParam(name));
             } catch (final OXException e) {
-                LOG.warn(e.getMessage(), e);
+                LOG.warn("", e);
             }
         }
         for (int i = 0; i < length; i++) {
@@ -2656,7 +2631,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 localeFrom(session));
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
@@ -2736,7 +2711,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 localeFrom(session));
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
@@ -2800,9 +2775,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 // Huh... No drafts folder in default account
                                 throw MailExceptionCode.FOLDER_NOT_FOUND.create("Drafts");
                             }
-                            LOG.warn(new StringBuilder(64).append("Mail account ").append(accountId).append(" for user ").append(
-                                session.getUserId()).append(" in context ").append(session.getContextId()).append(
-                                " has no drafts folder. Saving draft to default account's draft folder."));
+                            LOG.warn(
+                                "Mail account {} for user {} in context {} has no drafts folder. Saving draft to default account's draft folder.",
+                                accountId,
+                                session.getUserId(),
+                                session.getContextId());
                             // No drafts folder in detected mail account; auto-save to default account
                             accountId = MailAccount.DEFAULT_ID;
                             composedMail.setFolder(mailInterface.getDraftsFolder(accountId));
@@ -2827,18 +2804,14 @@ public class Mail extends PermissionServlet implements UploadListener {
         } catch (final OXException e) {
             if (MimeMailExceptionCode.INVALID_EMAIL_ADDRESS.equals(e)) {
                 e.setCategory(Category.CATEGORY_USER_INPUT);
-                if (DEBUG) {
-                    LOG.warn(e.getMessage(), e);
-                } else {
-                    LOG.warn(e.getMessage());
-                }
+                LOG.warn("", e);
             } else {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -2864,7 +2837,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 localeFrom(session));
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
@@ -2919,11 +2892,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -2955,7 +2928,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 localeFrom(session));
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
@@ -2965,7 +2938,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 sendError(resp);
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Response response = new Response(session);
             response.setException(e);
             try {
@@ -3141,11 +3114,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         } finally {
             if (it != null) {
@@ -3177,7 +3150,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 localeFrom(session));
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
@@ -3200,7 +3173,6 @@ public class Mail extends PermissionServlet implements UploadListener {
         /*
          * Start response
          */
-        final long start = DEBUG ? System.currentTimeMillis() : ZERO;
         jsonWriter.array();
         try {
             final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
@@ -3225,9 +3197,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 /*
                  * Request body is an empty JSON array
                  */
-                if (DEBUG) {
-                    LOG.debug("Empty JSON array detected in request body.", new Throwable());
-                }
+                LOG.debug("Empty JSON array detected in request body.", new Throwable());
                 final Response r = new Response(session);
                 r.setData(EMPTY_JSON_ARR);
                 return r;
@@ -3268,22 +3238,17 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
          * Close response and flush print writer
          */
         jsonWriter.endArray();
-        if (DEBUG) {
-            final long d = System.currentTimeMillis() - start;
-            LOG.debug(new StringBuilder(32).append(DefaultDispatcherPrefixService.getInstance().getPrefix()).append(
-                "mail?action=list performed in ").append(d).append("msec"));
-        }
         response.setData(jsonWriter.getObject());
         response.setTimestamp(null);
         return response;
@@ -3355,7 +3320,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 localeFrom(session));
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
@@ -3423,11 +3388,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -3459,7 +3424,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 localeFrom(session));
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
@@ -3562,11 +3527,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -3587,7 +3552,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 localeFrom(session));
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
@@ -3608,7 +3573,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response1 = new Response(session);
             response1.setException(oxe);
             try {
@@ -3721,11 +3686,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 responseData = responseObj;
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         } finally {
             if (null != managedMimeMessage) {
@@ -3762,7 +3727,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 localeFrom(session));
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
@@ -3812,7 +3777,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         // Re-throw
                         throw e;
                     }
-                    LOG.warn(new StringBuilder(128).append(e.getMessage()).append(". Using default account's transport.").toString());
+                    LOG.warn("{}. Using default account's transport.", e.getMessage());
                     // Send with default account's transport provider
                     accountId = MailAccount.DEFAULT_ID;
                 }
@@ -3849,11 +3814,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         // Close response and flush print writer
@@ -4093,11 +4058,11 @@ public class Mail extends PermissionServlet implements UploadListener {
             responseData = respArray;
 
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         // Close response and flush print writer
@@ -4120,7 +4085,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     // Re-throw
                     throw e;
                 }
-                LOG.warn(new StringBuilder(128).append(e.getMessage()).append(". Using default account's transport.").toString());
+                LOG.warn("{}. Using default account's transport.", e.getMessage());
                 // Send with default account's transport provider
                 accId = MailAccount.DEFAULT_ID;
             }
@@ -4204,7 +4169,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 session.getUserId(),
                                 session.getContext().getContextId());
                         } catch (final OXException e) {
-                            LOG.error(e.getMessage(), e);
+                            LOG.error("", e);
                         }
                     } catch (final OXException e) {
                         if (e.getMessage().indexOf("quota") != -1) {
@@ -4288,7 +4253,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     new Object[] { Integer.valueOf(MailMessage.FLAG_ANSWERED) });
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -4312,7 +4277,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 localeFrom(session));
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
@@ -4354,11 +4319,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -4412,7 +4377,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Response response = new Response(session);
             for (String mailID : mailIDs) {
                 response.reset();
@@ -4423,7 +4388,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             final Response response = new Response(session);
             for (String mailID : mailIDs) {
                 response.reset();
@@ -4462,7 +4427,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Response response = new Response(session);
             for (String mailID : mailIDs) {
                 response.reset();
@@ -4473,7 +4438,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             final Response response = new Response(session);
             for (String mailID : mailIDs) {
                 response.reset();
@@ -4512,7 +4477,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final Response response = new Response(session);
             for (String mailID : mailIDs) {
                 response.reset();
@@ -4523,7 +4488,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             final Response response = new Response(session);
             for (String mailID : mailIDs) {
                 response.reset();
@@ -4555,7 +4520,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 localeFrom(session));
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
@@ -4611,7 +4576,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 if (!set.contains(Field.FILENAME)) {
                     file.setFileName(mailPart.getFileName());
                 }
-                file.setFileMIMEType(mailPart.getContentType().toString());
+                file.setFileMIMEType(mailPart.getContentType().getBaseType());
                 /*
                  * Since file's size given from IMAP server is just an estimation and therefore does not exactly match the file's size a
                  * future file access via webdav can fail because of the size mismatch. Thus set the file size to 0 to make the infostore
@@ -4643,11 +4608,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -4679,7 +4644,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 localeFrom(session));
         } catch (final JSONException e) {
             final OXException oxe = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
-            LOG.error(oxe.getMessage(), oxe);
+            LOG.error("", oxe);
             final Response response = new Response(session);
             response.setException(oxe);
             try {
@@ -4724,11 +4689,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -4802,46 +4767,46 @@ public class Mail extends PermissionServlet implements UploadListener {
                     try {
                         mailInterface.close(true);
                     } catch (final Exception e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }
         } catch (final UploadException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             JSONObject responseObj = null;
             try {
                 final Response response = new Response(session);
                 response.setException(e);
                 responseObj = ResponseWriter.getJSON(response);
             } catch (final JSONException e1) {
-                LOG.error(e1.getMessage(), e1);
+                LOG.error("", e1);
             }
             throw new UploadServletException(resp, substituteJS(
                 responseObj == null ? STR_NULL : responseObj.toString(),
                 e.getAction() == null ? STR_NULL : e.getAction()), e.getMessage(), e);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             JSONObject responseObj = null;
             try {
                 final Response response = new Response(session);
                 response.setException(e);
                 responseObj = ResponseWriter.getJSON(response);
             } catch (final JSONException e1) {
-                LOG.error(e1.getMessage(), e1);
+                LOG.error("", e1);
             }
             throw new UploadServletException(resp, substituteJS(
                 responseObj == null ? STR_NULL : responseObj.toString(),
                 actionStr == null ? STR_NULL : actionStr), e.getMessage(), e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             JSONObject responseObj = null;
             try {
                 final Response response = new Response(session);
                 response.setException(wrapper);
                 responseObj = ResponseWriter.getJSON(response);
             } catch (final JSONException e1) {
-                LOG.error(e1.getMessage(), e1);
+                LOG.error("", e1);
             }
             throw new UploadServletException(resp, substituteJS(
                 responseObj == null ? STR_NULL : responseObj.toString(),
@@ -4903,7 +4868,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 // Re-throw
                                 throw e;
                             }
-                            LOG.warn(new StringBuilder(128).append(e.getMessage()).append(". Using default account's transport.").toString());
+                            LOG.warn("{}. Using default account's transport.", e.getMessage());
                             // Send with default account's transport provider
                             accountId = MailAccount.DEFAULT_ID;
                         }
@@ -5001,9 +4966,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 // Huh... No drafts folder in default account
                                 throw MailExceptionCode.FOLDER_NOT_FOUND.create("Drafts");
                             }
-                            LOG.warn(new StringBuilder(64).append("Mail account ").append(accountId).append(" for user ").append(
-                                session.getUserId()).append(" in context ").append(session.getContextId()).append(
-                                " has no drafts folder. Saving draft to default account's draft folder."));
+                            LOG.warn(
+                                "Mail account {} for user {} in context {} has no drafts folder. Saving draft to default account's draft folder.",
+                                accountId,
+                                session.getUserId(),
+                                session.getContextId());
                             // No drafts folder in detected mail account; auto-save to default account
                             accountId = MailAccount.DEFAULT_ID;
                         }
@@ -5076,7 +5043,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                             // Re-throw
                             throw e;
                         }
-                        LOG.warn(new StringBuilder(128).append(e.getMessage()).append(". Using default account's transport.").toString());
+                        LOG.warn("{}. Using default account's transport.", e.getMessage());
                         // Send with default account's transport provider
                         accountId = MailAccount.DEFAULT_ID;
                     }
@@ -5113,7 +5080,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 /*
                  * Message could not be sent
                  */
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 final Response response = new Response(session);
                 response.setException(e);
                 final String jsResponse = substituteJS(ResponseWriter.getJSON(response).toString(), actionStr);

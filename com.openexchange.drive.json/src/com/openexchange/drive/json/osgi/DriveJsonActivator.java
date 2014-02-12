@@ -49,7 +49,6 @@
 
 package com.openexchange.drive.json.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
@@ -71,7 +70,7 @@ import com.openexchange.drive.json.listener.BlockingListenerFactory;
  */
 public class DriveJsonActivator extends AJAXModuleActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveJsonActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DriveJsonActivator.class);
 
     /**
      * Initializes a new {@link DriveJsonActivator}.

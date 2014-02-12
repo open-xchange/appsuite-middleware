@@ -43,7 +43,7 @@ import java.util.Locale;
 */
 
 public class SolrIndexWriter extends IndexWriter {
-  private static Logger log = LoggerFactory.getLogger(SolrIndexWriter.class);
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(SolrIndexWriter.class);
 
   String name;
   private PrintStream infoStream;

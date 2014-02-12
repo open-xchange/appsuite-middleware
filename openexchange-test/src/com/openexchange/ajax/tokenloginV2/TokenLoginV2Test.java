@@ -99,11 +99,16 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
         LoginResponse loginResponse = client.execute(login);
         assertEquals("Wrong password.", AJAXConfig.getProperty(User.User1.getPassword()), loginResponse.getPassword());
 
+        Thread.sleep(500);
         login = new LoginRequest(new TokenLoginParameters(token, SECRET_1, generateAuthId(), TokenLoginV2Test.class.getName(), "7.4.0"), false);
         client = new AJAXClient();
         loginResponse = client.execute(login);
-        assertTrue("Error expected", loginResponse.hasError());
-        assertEquals("Wrong error.", TokenLoginExceptionCodes.NO_SUCH_TOKEN.getNumber(), loginResponse.getException().getCode());
+
+        assertTrue("Error expected, but got: " + loginResponse.getResponse().toString(), loginResponse.hasError());
+
+        int expectedErrorCode = TokenLoginExceptionCodes.NO_SUCH_TOKEN.getNumber();
+        int actualErrorCode = loginResponse.getException().getCode();
+        assertEquals("Wrong error. Expected \"" + expectedErrorCode + "\", but was \""+ actualErrorCode+"\".", expectedErrorCode, actualErrorCode);
     }
 
     public void testLoginWithoutPassword() throws Exception {

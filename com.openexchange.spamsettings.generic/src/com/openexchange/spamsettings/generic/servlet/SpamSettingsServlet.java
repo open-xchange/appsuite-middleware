@@ -78,7 +78,7 @@ public final class SpamSettingsServlet extends PermissionServlet {
      */
     private static final long serialVersionUID = 2124511440962531967L;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(SpamSettingsServlet.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamSettingsServlet.class);
 
     /**
      * Initializes
@@ -111,7 +111,7 @@ public final class SpamSettingsServlet extends PermissionServlet {
             LOG.error("Missing or wrong field action in JSON request", e);
             response.setException(e);
         } catch (final JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e));
         }
 

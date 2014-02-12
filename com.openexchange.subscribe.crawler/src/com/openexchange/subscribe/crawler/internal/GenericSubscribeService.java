@@ -56,7 +56,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
@@ -135,7 +134,6 @@ public class GenericSubscribeService extends AbstractSubscribeService {
             final List<Contact> contacts = new ArrayList<Contact>();
             for (final Object object : list){
                 final Contact contact = (Contact) object;
-                contact.setUserField20(UUID.randomUUID().toString());
                 contacts.add(contact);
             }
             return contacts;

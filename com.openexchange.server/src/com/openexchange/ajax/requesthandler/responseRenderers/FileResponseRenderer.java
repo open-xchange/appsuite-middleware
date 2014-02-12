@@ -69,7 +69,6 @@ import java.util.regex.Pattern;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
 import com.openexchange.ajax.AJAXServlet;
@@ -105,6 +104,7 @@ import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.images.ImageTransformationUtility;
 import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.ScaleType;
+import com.openexchange.tools.images.TransformedImage;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -116,8 +116,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class FileResponseRenderer implements ResponseRenderer {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FileResponseRenderer.class);
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileResponseRenderer.class);
 
     /** The default in-memory threshold of 1MB. */
     private static final int DEFAULT_IN_MEMORY_THRESHOLD = 1024 * 1024; // 1MB
@@ -283,7 +282,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                     if ((stream instanceof ByteArrayInputStream) || (stream instanceof BufferedInputStream)) {
                         documentData = stream;
                     } else {
-                        documentData = new BufferedInputStream(stream);
+                        documentData = new BufferedInputStream(stream, 65536);
                     }
                 }
             }
@@ -613,9 +612,9 @@ public class FileResponseRenderer implements ResponseRenderer {
                 final String lmsg = toLowerCase(e.getMessage());
                 if ("broken pipe".equals(lmsg) || "connection reset".equals(lmsg)) {
                     // Assume client-initiated connection closure
-                    LOG.debug("Underlying (TCP) protocol communication aborted while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.debug("Underlying (TCP) protocol communication aborted while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
                 } else {
-                    LOG.warn("Lost connection to client while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.warn("Lost connection to client while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
                 }
             } catch (final com.sun.mail.util.MessageRemovedIOException e) {
                 sendErrorSafe(HttpServletResponse.SC_NOT_FOUND, "Message not found.", resp);
@@ -630,9 +629,9 @@ public class FileResponseRenderer implements ResponseRenderer {
                      * For the next write attempt by us, the peer's TCP stack will issue an RST,
                      * which results in this exception and message at the sender.
                      */
-                    LOG.debug("Client dropped connection while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.debug("Client dropped connection while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
                 } else {
-                    LOG.warn("Lost connection to client while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.warn("Lost connection to client while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
                 }
             }
         } catch (final Exception e) {
@@ -742,13 +741,17 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
 
         // Check cache first
-        final ResourceCache previewCache = ResourceCaches.getResourceCache();
+        final ResourceCache resourceCache;
+        {
+            final ResourceCache tmp = ResourceCaches.getResourceCache();
+            resourceCache = null == tmp ? null : (tmp.isEnabledFor(request.getSession().getContextId(), request.getSession().getUserId()) ? tmp : null);
+        }
         // Get eTag from result that provides the IFileHolder
         final String eTag = result.getHeader("ETag");
         final boolean isValidEtag = !isEmpty(eTag);
-        if (null != previewCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
+        if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
             final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request);
-            final CachedResource cachedResource = previewCache.get(cacheKey, 0, request.getSession().getContextId());
+            final CachedResource cachedResource = resourceCache.get(cacheKey, 0, request.getSession().getContextId());
             if (null != cachedResource) {
                 // Scaled version already cached
                 // Create appropriate IFileHolder
@@ -832,10 +835,17 @@ public class FileResponseRenderer implements ResponseRenderer {
         /*
          * Transform
          */
+        boolean cachingAdvised = false;
         try {
-            InputStream transformed;
+            final byte[] transformed;
             try {
-                transformed = transformations.getInputStream(file.getContentType());
+                TransformedImage transformedImage = transformations.getTransformedImage(file.getContentType());
+                int expenses = transformedImage.getTransformationExpenses();
+                if (expenses >= ImageTransformations.HIGH_EXPENSE) {
+                    cachingAdvised = true;
+                }
+
+                transformed = transformedImage.getImageData();
             } catch (final IOException ioe) {
                 if ("Unsupported Image Type".equals(ioe.getMessage())) {
                     return handleFailure(file, stream, markSupported);
@@ -844,29 +854,30 @@ public class FileResponseRenderer implements ResponseRenderer {
                 throw ioe;
             }
             if (null == transformed) {
-                if (DEBUG) {
-                    LOG.debug("Got no resulting input stream from transformation, trying to recover original input");
-                }
+                LOG.debug("Got no resulting input stream from transformation, trying to recover original input");
                 return handleFailure(file, stream, markSupported);
             }
             // Return immediately if not cacheable
-            if (null == previewCache || !isValidEtag) {
-                return new FileHolder(transformed, -1, file.getContentType(), file.getName());
+            if (!cachingAdvised || null == resourceCache || !isValidEtag || !AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
+                return new FileHolder(Streams.newByteArrayInputStream(transformed), -1, file.getContentType(), file.getName());
             }
+
             // (Asynchronously) Add to cache if possible
-            final byte[] bytes = Streams.stream2bytes(transformed);
-            final int size = bytes.length;
-            // Specify task
+            final int size = transformed.length;
             final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request);
             final ServerSession session = request.getSession();
             final String fileName = file.getName();
             final String contentType = file.getContentType();
             final AbstractTask<Void> task = new AbstractTask<Void>() {
-
                 @Override
-                public Void call() throws OXException {
-                    final CachedResource preview = new CachedResource(bytes, fileName, contentType, bytes.length);
-                    previewCache.save(cacheKey, preview, 0, session.getContextId());
+                public Void call() {
+                    try {
+                        final CachedResource preview = new CachedResource(transformed, fileName, contentType, size);
+                        resourceCache.save(cacheKey, preview, 0, session.getContextId());
+                    } catch (OXException e) {
+                        LOG.warn("Could not cache preview.", e);
+                    }
+
                     return null;
                 }
             };
@@ -893,17 +904,17 @@ public class FileResponseRenderer implements ResponseRenderer {
                 threadPool.submit(task);
             }
             // Return
-            return new FileHolder(new ByteArrayInputStreamClosure(bytes), size, contentType, fileName);
+            return new FileHolder(new ByteArrayInputStreamClosure(transformed), size, contentType, fileName);
         } catch (final RuntimeException e) {
-            if (DEBUG && file.repetitive()) {
+            if (LOG.isDebugEnabled() && file.repetitive()) {
                 try {
                     final File tmpFile = writeBrokenImage2Disk(file);
-                    LOG.error("Unable to transform image from " + file + ". Unparseable image file is written to disk at: " + tmpFile.getPath());
+                    LOG.error("Unable to transform image from {}. Unparseable image file is written to disk at: {}", file.getName(), tmpFile.getPath());
                 } catch (final Exception x) {
-                    LOG.error("Unable to transform image from " + file);
+                    LOG.error("Unable to transform image from {}", file.getName());
                 }
             } else {
-                LOG.error("Unable to transform image from " + file);
+                LOG.error("Unable to transform image from {}", file.getName());
             }
             return file.repetitive() ? file : null;
         }
@@ -918,7 +929,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 LOG.warn("Error resetting input stream", e);
             }
         }
-        LOG.warn("Unable to transform image from " + file.getName());
+        LOG.warn("Unable to transform image from {}", file.getName());
         return file.repetitive() ? file : null;
     }
 

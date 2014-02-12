@@ -50,7 +50,6 @@
 package com.openexchange.publish.microformats.osgi;
 
 import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
@@ -61,7 +60,6 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.microformats.ContactPictureServlet;
@@ -80,7 +78,7 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public class ServletActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServletActivator.class);
 
     private final PublicationServicesActivator activator;
     private volatile boolean registered;
@@ -171,17 +169,17 @@ public class ServletActivator extends HousekeepingActivator {
         try {
             httpService.registerServlet("/publications", microformatServlet, null, null);
         } catch (final ServletException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final NamespaceException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         try {
             httpService.registerServlet("/publications/contactPictures", new ContactPictureServlet(), null, null);
             httpService.registerServlet("/publications/files", new InfostoreFileServlet(), null, null);
         } catch (final ServletException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final NamespaceException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

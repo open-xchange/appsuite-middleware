@@ -61,7 +61,7 @@ import com.openexchange.mobile.configuration.json.servlet.MobilityProvisioningSe
 
 public class SMS {
 
-	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MobilityProvisioningServlet.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobilityProvisioningServlet.class);
 
 	private String sipgateuser = "";
 	private String sipgatepass = ""; // openexchange

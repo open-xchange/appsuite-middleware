@@ -51,8 +51,6 @@ package com.openexchange.subscribe.crawler;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -67,7 +65,7 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
  */
 public class PageByUrlAndParameterStep extends AbstractStep<Page, String> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PageByUrlAndParameterStep.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PageByUrlAndParameterStep.class);
 
     private String url;
 
@@ -78,9 +76,9 @@ public class PageByUrlAndParameterStep extends AbstractStep<Page, String> {
     @Override
     public void execute(final WebClient webClient) throws OXException {
         try {
-            LOG.debug("Page to call : " + url + input);
+            LOG.debug("Page to call : {}{}", url, input);
             output = webClient.getPage(url + input);
-            LOG.debug("Page : " + output.getWebResponse().getContentAsString());
+            LOG.debug("Page : {}", output.getWebResponse().getContentAsString());
             // openPageInBrowser(output);
             executedSuccessfully = true;
         } catch (final FailingHttpStatusCodeException e) {

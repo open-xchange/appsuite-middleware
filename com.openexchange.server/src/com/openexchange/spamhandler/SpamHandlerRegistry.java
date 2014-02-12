@@ -55,7 +55,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -69,7 +68,7 @@ import com.openexchange.session.Session;
  */
 public final class SpamHandlerRegistry {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SpamHandlerRegistry.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamHandlerRegistry.class);
 
     /**
      * Dummy value to associate with an Object in the backing Map.
@@ -117,10 +116,11 @@ public final class SpamHandlerRegistry {
     public static boolean hasSpamHandler(final MailAccount mailAccount) {
         final SpamHandler handler;
         try {
-            handler = getSpamHandler0(mailAccount, new URLMailProviderGetter(mailAccount));
+            final MailProvider provider = MailProviderRegistry.getRealMailProvider(mailAccount.getMailProtocol());
+            handler = getSpamHandler0(mailAccount, new StaticMailProviderGetter(provider));
         } catch (final OXException e) {
             // Cannot occur
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return false;
         }
         return handler == null ? false : !SpamHandler.SPAM_HANDLER_FALLBACK.equals(handler.getSpamHandlerName());
@@ -247,20 +247,14 @@ public final class SpamHandlerRegistry {
      */
     public static SpamHandler getSpamHandler(final String registrationName) {
         if (null == registrationName) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder(64).append("Given registration name is null. Using fallback spam handler '").append(
-                    SpamHandler.SPAM_HANDLER_FALLBACK).append('\'').toString());
-            }
+            LOG.warn("Given registration name is null. Using fallback spam handler '{}'", SpamHandler.SPAM_HANDLER_FALLBACK);
             return NoSpamHandler.getInstance();
         } else if (SpamHandler.SPAM_HANDLER_FALLBACK.equals(registrationName) || unknownSpamHandlers.containsKey(registrationName)) {
             return NoSpamHandler.getInstance();
         }
         final SpamHandler spamHandler = spamHandlers.get(registrationName);
         if (null == spamHandler) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder(64).append("No spam handler found for registration name '").append(registrationName).append(
-                    "'. Using fallback '").append(SpamHandler.SPAM_HANDLER_FALLBACK).append('\'').toString());
-            }
+            LOG.warn("No spam handler found for registration name '{}'. Using fallback '{}'", registrationName, SpamHandler.SPAM_HANDLER_FALLBACK);
             unknownSpamHandlers.put(registrationName, PRESENT);
             return NoSpamHandler.getInstance();
         }
@@ -289,7 +283,7 @@ public final class SpamHandlerRegistry {
             unknownSpamHandlers.remove(registrationName);
             return true;
         } catch (final RuntimeException t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             return false;
         }
     }
@@ -379,18 +373,19 @@ public final class SpamHandlerRegistry {
         }
     }
 
-    private static final class URLMailProviderGetter implements MailProviderGetter {
+    private static final class StaticMailProviderGetter implements MailProviderGetter {
 
-        private final MailAccount mailAccount;
+        private final MailProvider mailProvider;
 
-        public URLMailProviderGetter(final MailAccount mailAccount) {
+        public StaticMailProviderGetter(final MailProvider mailProvider) {
             super();
-            this.mailAccount = mailAccount;
+            this.mailProvider = mailProvider;
         }
 
         @Override
         public MailProvider getMailProvider() {
-            return MailProviderRegistry.getMailProviderByURL(MailConfig.getMailServerURL(mailAccount));
+            return mailProvider;
         }
+
     }
 }

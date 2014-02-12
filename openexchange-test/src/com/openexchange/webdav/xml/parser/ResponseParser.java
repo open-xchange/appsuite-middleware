@@ -38,7 +38,7 @@
 package com.openexchange.webdav.xml.parser;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.jdom2.Document;
@@ -268,7 +268,7 @@ public class ResponseParser {
         final ContactParser contactParser = new ContactParser();
         contactParser.parse(contactObj, eProp);
 
-        final Map<Object, Object> hm = new HashMap<Object, Object>();
+        final Map<String, Object> hm = new LinkedHashMap<String, Object>(4);
 
         if (DataParser.hasElement(eProp.getChild("myidentity", XmlServlet.NS))) {
             hm.put("myidentity", DataParser.getValue(eProp.getChild("myidentity", XmlServlet.NS)));

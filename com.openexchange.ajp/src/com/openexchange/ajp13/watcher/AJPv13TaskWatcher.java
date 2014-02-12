@@ -49,7 +49,6 @@
 
 package com.openexchange.ajp13.watcher;
 
-import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -64,9 +63,7 @@ import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.Services;
 import com.openexchange.ajp13.exception.AJPv13Exception;
-import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.threadpool.Task;
@@ -82,7 +79,7 @@ import com.openexchange.timer.TimerService;
  */
 public class AJPv13TaskWatcher {
 
-    private static final org.apache.commons.logging.Log LOG = Log.loggerFor(AJPv13TaskWatcher.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AJPv13TaskWatcher.class);
 
     private ScheduledTimerTask scheduledTimerTask;
 
@@ -119,7 +116,7 @@ public class AJPv13TaskWatcher {
      */
     public void addTask(final com.openexchange.ajp13.watcher.Task task) {
         if (null != tasks.putIfAbsent(task.getNum(), task)) {
-            LOG.error(MessageFormat.format("AJP task with number {0} task could not be added to watcher!", task.getNum()));
+            LOG.error("AJP task with number {} task could not be added to watcher!", task.getNum());
         }
     }
 
@@ -158,7 +155,7 @@ public class AJPv13TaskWatcher {
         private static final long MAX_PROC_TIME = 0L;
 
         private final ConcurrentMap<Long, com.openexchange.ajp13.watcher.Task> tasks;
-        private final org.apache.commons.logging.Log log;
+        private final org.slf4j.Logger log;
         private final ThreadPoolService threadPoolService;
 
         /**
@@ -174,7 +171,7 @@ public class AJPv13TaskWatcher {
          * @param threadPoolService The thread pool service
          * @param log The logger instance to use
          */
-        public TimerTaskRunnable(final ConcurrentMap<Long, com.openexchange.ajp13.watcher.Task> tasks, final ThreadPoolService threadPoolService, final String lineSeparator, final org.apache.commons.logging.Log log) {
+        public TimerTaskRunnable(final ConcurrentMap<Long, com.openexchange.ajp13.watcher.Task> tasks, final ThreadPoolService threadPoolService, final String lineSeparator, final org.slf4j.Logger log) {
             super();
             this.lineSeparator = lineSeparator;
             this.tasks = tasks;
@@ -189,7 +186,7 @@ public class AJPv13TaskWatcher {
                     return;
                 }
                 final boolean logExceededTasks = AJPv13Config.getAJPWatcherEnabled();
-                if (logExceededTasks && log.isInfoEnabled()) {
+                if (logExceededTasks) {
                     final AtomicInteger countWaiting = new AtomicInteger();
                     final AtomicInteger countProcessing = new AtomicInteger();
                     final AtomicInteger countExceeded = new AtomicInteger();
@@ -214,16 +211,14 @@ public class AJPv13TaskWatcher {
                         final int numProcessing = countProcessing.get();
                         if (numProcessing > 0 && countExceeded.get() == numProcessing) {
                             final String delimStr = "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-                            log.error(new com.openexchange.java.StringAllocator(128 + delimStr.length()).append(delimStr).append(
-                                "AJP-Watcher's run done: SYSTEM DEADLOCK DETECTED!").append(" Going to stop and re-initialize system").append(
-                                delimStr).toString());
+                            log.error("{}AJP-Watcher's run done: SYSTEM DEADLOCK DETECTED! Going to stop and re-initialize system{}", delimStr, delimStr);
                             /*
                              * Restart AJP Server
                              */
                             try {
                                 AJPv13Server.restartAJPServer();
                             } catch (final AJPv13Exception e) {
-                                log.error(e.getMessage(), e);
+                                log.error("", e);
                             }
                         }
                     }
@@ -244,7 +239,7 @@ public class AJPv13TaskWatcher {
                     }
                 }
             } catch (final Exception e) {
-                log.error(e.getMessage(), e);
+                log.error("", e);
             }
         }
     } // End of class TimerTaskRunnable
@@ -258,7 +253,7 @@ public class AJPv13TaskWatcher {
         private final AtomicInteger processing;
         private final AtomicInteger exceeded;
         private final String lineSeparator;
-        private final org.apache.commons.logging.Log log;
+        private final org.slf4j.Logger log;
         private final long now;
         private final ConcurrentMap<Long, com.openexchange.ajp13.watcher.Task> tasks;
 
@@ -272,7 +267,7 @@ public class AJPv13TaskWatcher {
          * @param logExceededTasks Whether to log exceeded tasks
          * @param log The logger
          */
-        public TaskRunCallable(ConcurrentMap<Long, com.openexchange.ajp13.watcher.Task> tasks, final long now, final long maxLogTime, final long max, final com.openexchange.ajp13.watcher.Task task, final AtomicInteger waiting, final AtomicInteger processing, final AtomicInteger exceeded, final String lineSeparator, final org.apache.commons.logging.Log log) {
+        public TaskRunCallable(ConcurrentMap<Long, com.openexchange.ajp13.watcher.Task> tasks, final long now, final long maxLogTime, final long max, final com.openexchange.ajp13.watcher.Task task, final AtomicInteger waiting, final AtomicInteger processing, final AtomicInteger exceeded, final String lineSeparator, final org.slf4j.Logger log) {
             super();
             this.tasks = tasks;
             this.lineSeparator = lineSeparator;
@@ -323,29 +318,20 @@ public class AJPv13TaskWatcher {
                     }
                     t.setStackTrace(stackTrace);
                 }
-                final Map<String, Object> taskProperties;
-                {
-                    final Props taskProps = LogProperties.optLogProperties(task.getThread());
-                    taskProperties = null == taskProps ? null : taskProps.asMap();
-                }
+                final Map<String, String> taskProperties = task.getMdcMap();
                 if (null == taskProperties) {
                     final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(196).append("AJP Listener \"").append(task.getThreadName());
                     logBuilder.append("\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime());
                     logBuilder.append("msec -> Processing time: ").append(now - task.getProcessingStartTime());
                     logBuilder.append("msec");
                     logBuilder.append(lineSeparator);
-                    if (Log.appendTraceToMessage()) {
-                        appendStackTrace(t, lineSeparator, logBuilder);
-                        log.info(logBuilder);
-                    } else {
-                        log.info(logBuilder, t);
-                    }
+                    log.info(logBuilder.toString(), t);
                 } else {
                     final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(2048);
                     final Map<String, String> sorted = new TreeMap<String, String>();
-                    for (final Entry<String, Object> entry : taskProperties.entrySet()) {
+                    for (final Entry<String, String> entry : taskProperties.entrySet()) {
                         final String propertyName = entry.getKey();
-                        final Object value = entry.getValue();
+                        final String value = entry.getValue();
                         if (null != value) {
                             if (LogProperties.Name.SESSION_SESSION_ID.getName().equals(propertyName) && !isValidSession(value.toString())) {
                                 // Non-existent or elapsed session
@@ -353,7 +339,7 @@ public class AJPv13TaskWatcher {
                                 tasks.remove(task.getNum());
                                 return;
                             }
-                            sorted.put(propertyName, value.toString());
+                            sorted.put(propertyName, value);
                         }
                     }
                     for (final Map.Entry<String, String> entry : sorted.entrySet()) {
@@ -364,13 +350,7 @@ public class AJPv13TaskWatcher {
                     logBuilder.append("\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime());
                     logBuilder.append("msec -> Processing time: ").append(now - task.getProcessingStartTime());
                     logBuilder.append("msec");
-                    if (Log.appendTraceToMessage()) {
-                        logBuilder.append(lineSeparator);
-                        appendStackTrace(t, lineSeparator, logBuilder);
-                        log.info(logBuilder);
-                    } else {
-                        log.info(logBuilder, t);
-                    }
+                    log.info(logBuilder.toString(), t);
                 }
             }
             if (max > 0 && task.getProcessingStartTime() < max) {

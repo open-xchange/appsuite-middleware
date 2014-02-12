@@ -74,7 +74,6 @@ import javax.mail.MessagingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -116,7 +115,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.json.OXJSONWriter;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
@@ -128,6 +126,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.json.writer.FolderWriter.MailFolderFieldWriter;
 import com.openexchange.mail.messaging.MailMessagingService;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -167,7 +166,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
 
     private static final long serialVersionUID = -889739420660750770L;
 
-    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Folder.class));
+    private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Folder.class);
 
     private static final AdditionalFolderFieldList FIELDS = new AdditionalFolderFieldList();
 
@@ -176,12 +175,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
     }
 
     private static final OXException getWrappingOXException(final Throwable cause) {
-        if (LOG.isWarnEnabled()) {
-            final StringBuilder warnBuilder = new StringBuilder(140);
-            warnBuilder.append("An unexpected exception occurred, which is going to be wrapped for proper display.\n");
-            warnBuilder.append("For safety reason its original content is display here.");
-            LOG.warn(warnBuilder.toString(), cause);
-        }
+        LOG.warn("An unexpected exception occurred, which is going to be wrapped for proper display.\nFor safety reason its original content is display here.", cause);
         final String message = cause.getMessage();
         return OXFolderExceptionCode.UNKNOWN_EXCEPTION.create(cause, null == message ? "[Not available]" : message);
     }
@@ -360,11 +354,11 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -715,7 +709,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                 final JSONArray[] arrays = new JSONArray[size];
                                 final CompletionFuture<Object> completionFuture;
                                 {
-                                    final Log logger = LOG;
+                                    final org.slf4j.Logger logger = LOG;
                                     final List<Task<Object>> tasks = new ArrayList<Task<Object>>(size);
                                     int sz = accounts.size();
                                     int index = 0;
@@ -754,7 +748,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                                         /*
                                                          * TODO: Does UI already accept warnings?
                                                          */
-                                                        warning = (OXException) t;
+                                                        warning = MimeMailException.handleMessagingException((MessagingException) t);
                                                         warning.setCategory(Category.CATEGORY_WARNING);
                                                     }
                                                 } else {
@@ -793,7 +787,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         } catch (final OXException e) {
                             // Internal users folder not visible to current user
                             if (e.isGeneric(Generic.NO_PERMISSION)) {
-                                LOG.debug(e.getMessage(), e);
+                                LOG.debug("", e);
                             } else {
                                 throw e;
                             }
@@ -837,12 +831,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                             }
                         } catch (final OXException e) {
                             if (e.getCode() == OXFolderExceptionCode.NO_MODULE_ACCESS.getNumber() && CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
-                                /*
-                                 * No non-tree-visible public calendar folders due to user configuration
-                                 */
-                                if (LOG.isTraceEnabled()) {
-                                    LOG.trace(e.getMessage(), e);
-                                }
+                                LOG.trace("", e);
                             } else {
                                 throw e;
                             }
@@ -868,12 +857,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                             }
                         } catch (final OXException e) {
                             if (OXFolderExceptionCode.NO_MODULE_ACCESS.getNumber() == e.getCode() && CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
-                                /*
-                                 * No non-tree-visible public contact folders due to user configuration
-                                 */
-                                if (LOG.isTraceEnabled()) {
-                                    LOG.trace(e.getMessage(), e);
-                                }
+                                LOG.trace("", e);
                             } else {
                                 throw e;
                             }
@@ -899,12 +883,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                             }
                         } catch (final OXException e) {
                             if (e.getCode() == OXFolderExceptionCode.NO_MODULE_ACCESS.getNumber() && CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
-                                /*
-                                 * No non-tree-visible public task folders due to user configuration
-                                 */
-                                if (LOG.isTraceEnabled()) {
-                                    LOG.trace(e.getMessage(), e);
-                                }
+                                LOG.trace("", e);
                             } else {
                                 throw e;
                             }
@@ -1012,7 +991,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                 mailInterface.close(true);
                                 mailInterface = null;
                             } catch (final OXException e) {
-                                LOG.error(e.getMessage(), e);
+                                LOG.error("", e);
                             }
                         }
                     }
@@ -1044,11 +1023,11 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -1161,6 +1140,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 }
             } else {
                 final MessagingFolderIdentifier mfi = MessagingFolderIdentifier.parseFQN(folderIdentifier);
+                final Locale locale = session.getUser().getLocale();
                 if (null == mfi) {
                     MailServletInterface mailInterface = null;
                     SearchIterator<MailFolder> it = null;
@@ -1228,7 +1208,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         }
                         folderWriter.writeOXFolderFieldsAsArray(columns, privateFolder, FolderObject.getFolderString(
                             FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-                            session.getUser().getLocale()), -1);
+                            locale), -1);
                     } finally {
                         if (it != null) {
                             it.close();
@@ -1239,7 +1219,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                 mailInterface.close(true);
                                 mailInterface = null;
                             } catch (final OXException e) {
-                                LOG.error(e.getMessage(), e);
+                                LOG.error("", e);
                             }
                         }
                     }
@@ -1299,18 +1279,18 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         }
                         folderWriter.writeOXFolderFieldsAsArray(columns, privateFolder, FolderObject.getFolderString(
                             FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-                            session.getUser().getLocale()), -1);
+                            locale), -1);
                     } finally {
                         accountAccess.close();
                     }
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -1394,10 +1374,11 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             boolean checkVirtualListFolders = false;
             int size = q.size();
             Iterator<FolderObject> iter = q.iterator();
+            final User user = session.getUser();
             {
                 final UserPermissionBits userPerm = session.getUserPermissionBits();
                 final UserStorage us = UserStorage.getInstance();
-                final StringHelper strHelper = StringHelper.valueOf(session.getUser().getLocale());
+                final StringHelper strHelper = StringHelper.valueOf(user.getLocale());
                 final boolean sharedFolderAccess = userPerm.hasFullSharedFolderAccess();
                 for (int i = 0; i < size; i++) {
                     final FolderObject fo = iter.next();
@@ -1481,7 +1462,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
              */
             if (addSystemSharedFolder) {
                 final FolderObject sharedFolder = access.getFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID);
-                sharedFolder.setFolderName(FolderObject.getFolderString(FolderObject.SYSTEM_SHARED_FOLDER_ID, session.getUser().getLocale()));
+                sharedFolder.setFolderName(FolderObject.getFolderString(FolderObject.SYSTEM_SHARED_FOLDER_ID, user.getLocale()));
                 updatedQueue.add(sharedFolder);
                 if (!displayNames.isEmpty()) {
                     for (final Entry<String, Integer> entry : displayNames.entrySet()) {
@@ -1546,7 +1527,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                     final List<MailAccount> tmp = new ArrayList<MailAccount>(accountsArr.length);
                     tmp.addAll(Arrays.asList(accountsArr));
                     // Sort them
-                    Collections.sort(tmp, new MailAccountComparator(session.getUser().getLocale()));
+                    Collections.sort(tmp, new MailAccountComparator(user.getLocale()));
                     accounts = tmp;
                 } else {
                     accounts = new ArrayList<MailAccount>(1);
@@ -1586,7 +1567,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                     final JSONArray[] arrays = new JSONArray[accountSize];
                     final CompletionFuture<Object> completionFuture;
                     {
-                        final Log logger = LOG;
+                        final org.slf4j.Logger logger = LOG;
                         final List<Task<Object>> tasks = new ArrayList<Task<Object>>(accountSize);
                         int sz = accounts.size();
                         for (int i = 0; i < sz; i++) {
@@ -1652,7 +1633,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                         /*
                                          * TODO: Does UI already accept warnings?
                                          */
-                                        warning = (OXException) t;
+                                        warning = MimeMailException.handleMessagingException((MessagingException) t);
                                         warning.setCategory(Category.CATEGORY_WARNING);
                                     }
                                 } else {
@@ -1679,11 +1660,11 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
              */
             lastModifiedDate = lastModified == 0 ? null : new Date(lastModified);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -1722,7 +1703,8 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         /*
          * Some variables
          */
-        final Response response = new Response(session.getUser().getLocale());
+        final Locale locale = session.getUser().getLocale();
+        final Response response = new Response(locale);
         OXJSONWriter jsonWriter = null;
         Date lastModifiedDate = null;
         /*
@@ -1743,7 +1725,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 new FolderWriter(jsonWriter, session, ctx, timeZoneId, FIELDS).writeOXFolderFieldsAsObject(
                     columns,
                     fo,
-                    session.getUser().getLocale());
+                    locale);
             } else if (folderIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
                 int userId = -1;
                 try {
@@ -1779,7 +1761,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                 mailInterface.close(true);
                             }
                         } catch (final OXException e) {
-                            LOG.error(e.getMessage(), e);
+                            LOG.error("", e);
                         }
                     }
                 } else {
@@ -1808,11 +1790,11 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -1893,7 +1875,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         try {
                             mailInterface.close(true);
                         } catch (final OXException e) {
-                            LOG.error(e.getMessage(), e);
+                            LOG.error("", e);
                         }
                     }
                 } else {
@@ -1944,11 +1926,11 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -2026,7 +2008,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         try {
                             mailInterface.close(true);
                         } catch (final OXException e) {
-                            LOG.error(e.getMessage(), e);
+                            LOG.error("", e);
                         }
                     }
                 } else {
@@ -2053,11 +2035,11 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -2174,11 +2156,11 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -2248,12 +2230,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         try {
                             delFolderObj = access.getFolderObject(delFolderId);
                         } catch (final OXException exc) {
-                            /*
-                             * Folder could not be found and therefore need not to be deleted
-                             */
-                            if (LOG.isWarnEnabled()) {
-                                LOG.warn(exc.getMessage(), exc);
-                            }
+                            LOG.warn("", exc);
                             continue NextId;
                         }
                         if (delFolderObj.getLastModified().getTime() > timestamp.getTime()) {
@@ -2299,13 +2276,13 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             if (!e.getCategory().equals(Category.CATEGORY_PERMISSION_DENIED)) {
                 response.setException(e);
             }
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
-            LOG.error(wrapper.getMessage(), wrapper);
+            LOG.error("", wrapper);
             response.setException(wrapper);
         }
         /*
@@ -2408,7 +2385,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         int digit;
 
         if (i < max) {
-            digit = Character.digit(s.charAt(i++), RADIX);
+            digit = digit(s.charAt(i++));
             if (digit < 0) {
                 return -1;
             }
@@ -2418,7 +2395,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             /*
              * Accumulating negatively avoids surprises near MAX_VALUE
              */
-            digit = Character.digit(s.charAt(i++), RADIX);
+            digit = digit(s.charAt(i++));
             if (digit < 0) {
                 return -1;
             }
@@ -2434,6 +2411,33 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         return -result;
     }
 
+    private static int digit(final char c) {
+        switch (c) {
+        case '0':
+            return 0;
+        case '1':
+            return 1;
+        case '2':
+            return 2;
+        case '3':
+            return 3;
+        case '4':
+            return 4;
+        case '5':
+            return 5;
+        case '6':
+            return 6;
+        case '7':
+            return 7;
+        case '8':
+            return 8;
+        case '9':
+            return 9;
+        default:
+            return -1;
+        }
+    }
+
     /**
      * Writes an account's root folder into a JSON array.
      */
@@ -2443,7 +2447,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
 
         private final ServerSession session;
 
-        private final Log logger;
+        private final org.slf4j.Logger logger;
 
         private final MailAccount mailAccount;
 
@@ -2451,7 +2455,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
 
         private final int index;
 
-        MailRootFolderWriter(final JSONArray[] arrays, final ServerSession session, final Log logger, final MailAccount mailAccount, final int[] columns, final int index) {
+        MailRootFolderWriter(final JSONArray[] arrays, final ServerSession session, final org.slf4j.Logger logger, final MailAccount mailAccount, final int[] columns, final int index) {
             this.arrays = arrays;
             this.session = session;
             this.logger = logger;
@@ -2470,12 +2474,10 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 } catch (final OXException e) {
                     arrays[index] = null;
                     if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.getNumber() == e.getCode()) {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug(e.getMessage(), e);
-                        }
+                        logger.debug("", e);
                         return null;
                     }
-                    logger.error(e.getMessage(), e);
+                    logger.error("", e);
                     throw e;
                 }
                 final MailFolder rootFolder = mailAccess.getRootFolder();
@@ -2498,7 +2500,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 arrays[index] = ja;
                 return null;
             } catch (final OXException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
                 arrays[index] = null;
                 throw e;
             } finally {
@@ -2518,7 +2520,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
 
         private final ServerSession session;
 
-        private final Log logger;
+        private final org.slf4j.Logger logger;
 
         private final MessagingAccount messagingAccount;
 
@@ -2526,7 +2528,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
 
         private final int index;
 
-        MessagingRootFolderWriter(final JSONArray[] arrays, final ServerSession session, final Log logger, final MessagingAccount messagingAccount, final int[] columns, final int index) {
+        MessagingRootFolderWriter(final JSONArray[] arrays, final ServerSession session, final org.slf4j.Logger logger, final MessagingAccount messagingAccount, final int[] columns, final int index) {
             this.arrays = arrays;
             this.session = session;
             this.logger = logger;
@@ -2548,11 +2550,11 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 serviceId = service.getId();
             } catch (final OXException e) {
                 arrays[index] = null;
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
                 throw e;
             } catch (final Exception e) {
                 arrays[index] = null;
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
                 throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
             try {
@@ -2568,7 +2570,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 arrays[index] = ja;
                 return null;
             } catch (final OXException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
                 arrays[index] = null;
                 throw e;
             } finally {

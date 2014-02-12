@@ -50,6 +50,7 @@
 package com.openexchange.contact.storage.ldap.internal;
 
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -62,13 +63,13 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.log.LogFactory;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.Operand;
 import com.openexchange.search.SearchTerm;
@@ -83,7 +84,8 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class LdapContactCache {
 
-    private static final org.apache.commons.logging.Log LOG = LogFactory.getLog(LdapContactCache.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapContactCache.class);
+
     private static final EnumSet<ContactField> CACHED_FIELDS = EnumSet.of(
         ContactField.CONTEXTID, ContactField.FOLDER_ID, ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.UID,
         ContactField.LAST_MODIFIED, ContactField.CREATION_DATE, ContactField.MODIFIED_BY, ContactField.CREATED_BY,
@@ -164,7 +166,7 @@ public class LdapContactCache {
             return contacts;
         }
     }
-    
+
     /**
      * @return If the cache is already filled with objects.
      */
@@ -307,7 +309,7 @@ public class LdapContactCache {
                     refreshContacts();
                 }
             } catch (OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
 
@@ -343,8 +345,7 @@ public class LdapContactCache {
             }
             if (0 < updated || 0 < deleted) {
                 this.lastModified = newLastModified;
-                LOG.debug("Contacts refreshed, got " + updated + " modified and " + deleted +
-                    " deleted contacts in "  + (new Date().getTime() - start.getTime()) + "ms.");
+                LOG.debug("Contacts refreshed, got {} modified and {} deleted contacts in {}ms.", updated, deleted, (new Date().getTime() - start.getTime()));
             } else {
                 LOG.debug("No changes detected, check took " + (new Date().getTime() - start.getTime()) + "ms.");
             }
@@ -369,7 +370,7 @@ public class LdapContactCache {
                 Tools.close(contacts);
             }
             this.lastModified = newLastModified;
-            LOG.debug("Contacts reloaded, got " + added + " entries in " + (new Date().getTime() - start.getTime()) + "ms.");
+            LOG.debug("Contacts reloaded, got {} entries in {}ms.", added, (new Date().getTime() - start.getTime()));
         }
 
         private Date getLatestModified(Date lastModified, Contact contact) {

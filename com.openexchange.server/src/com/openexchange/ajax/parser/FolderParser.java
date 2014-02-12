@@ -50,7 +50,6 @@
 package com.openexchange.ajax.parser;
 
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -75,7 +74,7 @@ import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
  */
 public class FolderParser {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FolderParser.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderParser.class);
 
     private final UserPermissionBits userPermissionBits;
 
@@ -169,8 +168,12 @@ public class FolderParser {
             final OCLPermission[] perms = parseOCLPermission(jsonArr, fo.containsObjectID() ? Integer.valueOf(fo.getObjectID()) : null);
             fo.setPermissionsAsArray(perms);
         }
-        if (jsonObj.has(FolderFields.META) && !jsonObj.isNull(FolderFields.META)) {
-            fo.setMeta((Map<String, Object>)JSONCoercion.coerceToNative(jsonObj.getJSONObject("meta")));
+        if (jsonObj.has(FolderFields.META)) {
+            if (jsonObj.isNull(FolderFields.META)) {
+                fo.setMeta(null);
+            } else {
+                fo.setMeta((Map<String, Object>)JSONCoercion.coerceToNative(jsonObj.getJSONObject("meta")));
+            }
         }
     }
 

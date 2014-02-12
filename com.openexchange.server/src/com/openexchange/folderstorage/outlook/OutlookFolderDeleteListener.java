@@ -52,6 +52,7 @@ package com.openexchange.folderstorage.outlook;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
@@ -125,7 +126,7 @@ public final class OutlookFolderDeleteListener implements DeleteListener {
                 try {
                     stmt.close();
                 } catch (final SQLException e) {
-                    com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OutlookFolderDeleteListener.class)).error(e.getMessage(), e);
+                    LoggerFactory.getLogger(OutlookFolderDeleteListener.class).error("", e);
                 }
             }
         }

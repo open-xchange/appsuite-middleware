@@ -60,7 +60,7 @@ import java.util.Map;
 @Deprecated
 public class AnalysisRequestHandler extends RequestHandlerBase {
 
-  public static Logger log = LoggerFactory.getLogger(AnalysisRequestHandler.class);
+  public static org.slf4j.Logger log = LoggerFactory.getLogger(AnalysisRequestHandler.class);
 
   private XMLInputFactory inputFactory;
 

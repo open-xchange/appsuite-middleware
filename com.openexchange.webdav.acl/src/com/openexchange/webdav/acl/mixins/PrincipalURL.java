@@ -49,7 +49,7 @@
 
 package com.openexchange.webdav.acl.mixins;
 
-import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -62,16 +62,21 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 public class PrincipalURL extends SingleXMLPropertyMixin {
 
     private static final String PROPERTY_NAME = "principal-URL";
-    private SessionHolder sessionHolder = null;
+    private final User user;
 
-    public PrincipalURL(SessionHolder sessionHolder) {
+    /**
+     * Initializes a new {@link PrincipalURL}.
+     *
+     * @param user The user
+     */
+    public PrincipalURL(User user) {
         super(Protocol.DAV_NS.getURI(), PROPERTY_NAME);
-        this.sessionHolder = sessionHolder;
+        this.user = user;
     }
 
     @Override
     protected String getValue() {
-        return "<D:href>/principals/users/"+sessionHolder.getUser().getLoginInfo()+"/</D:href>";
+        return "<D:href>/principals/users/" + user.getLoginInfo() + "/</D:href>";
     }
 
 }

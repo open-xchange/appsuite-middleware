@@ -92,8 +92,8 @@ public abstract class MailMessage extends MailPart {
 
     private static final long serialVersionUID = 8585899349289256569L;
 
-    private static final transient org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailMessage.class));
+    private static final transient org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(MailMessage.class);
 
     private static final String HDR_REFERENCES = MessageHeaders.HDR_REFERENCES;
     private static final String HDR_MESSAGE_ID = MessageHeaders.HDR_MESSAGE_ID;
@@ -289,9 +289,7 @@ public abstract class MailMessage extends MailPart {
         try {
             return Integer.parseInt(cl.substring('$' == cl.charAt(0) ? COLOR_LABEL_PREFIX.length() : COLOR_LABEL_PREFIX_OLD.length()));
         } catch (final NumberFormatException e) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Invalid color label: " + cl, e);
-            }
+            LOG.debug("Invalid color label: {}", cl, e);
             return defaultValue;
         }
     }
@@ -535,7 +533,7 @@ public abstract class MailMessage extends MailPart {
             try {
                 addFrom(QuotedInternetAddress.parse(fromStr, true));
             } catch (final AddressException e) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 addFrom(new PlainTextAddress(fromStr));
             }
         }
@@ -602,7 +600,7 @@ public abstract class MailMessage extends MailPart {
             try {
                 addTo(QuotedInternetAddress.parse(toStr, true));
             } catch (final AddressException e) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 addTo(new PlainTextAddress(toStr));
             }
         }
@@ -669,7 +667,7 @@ public abstract class MailMessage extends MailPart {
             try {
                 addCc(QuotedInternetAddress.parse(ccStr, true));
             } catch (final AddressException e) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 addCc(new PlainTextAddress(ccStr));
             }
         }
@@ -736,7 +734,7 @@ public abstract class MailMessage extends MailPart {
             try {
                 addBcc(QuotedInternetAddress.parse(bccStr, true));
             } catch (final AddressException e) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 addBcc(new PlainTextAddress(bccStr));
             }
         }
@@ -1000,7 +998,7 @@ public abstract class MailMessage extends MailPart {
                             setSentDate(parsedDate);
                         }
                     } catch (final java.text.ParseException e) {
-                        LOG.warn("Date string could not be parsed: " + sentDateStr, e);
+                        LOG.warn("Date string could not be parsed: {}", sentDateStr, e);
                     }
                 }
             }
@@ -1242,7 +1240,7 @@ public abstract class MailMessage extends MailPart {
                 try {
                     setDispositionNotification(new QuotedInternetAddress(dispNotTo, false));
                 } catch (final AddressException e) {
-                    LOG.debug(e.getMessage(), e);
+                    LOG.debug("", e);
                     setDispositionNotification(new PlainTextAddress(dispNotTo));
                 }
             }
@@ -1633,9 +1631,6 @@ public abstract class MailMessage extends MailPart {
     /**
      * Gets the implementation-specific unique ID of this mail in its mail folder. The ID returned by this method is used in storages to
      * refer to a mail.
-     * <p>
-     * <b>Note</b> If ID is numeric, max. 52 bits may be used in returned value which implies a max. allowed value of
-     * <code>4503599627370495</code>.
      *
      * @return The ID of this mail or <code>null</code> if not available.
      */
@@ -1644,9 +1639,6 @@ public abstract class MailMessage extends MailPart {
     /**
      * Sets the implementation-specific unique mail ID of this mail in its mail folder. The ID returned by this method is used in storages
      * to refer to a mail.
-     * <p>
-     * <b>Note</b> If ID is numeric, max. 52 bits may be used in specified value which implies a max. allowed value of
-     * <code>4503599627370495</code>.
      *
      * @param id The mail ID or <code>null</code> to indicate its absence
      */

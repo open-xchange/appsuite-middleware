@@ -76,7 +76,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HKerberosSecuredThriftClientFactoryImpl implements HClientFactory {
 
-  private static final Logger log = LoggerFactory.getLogger(HKerberosSecuredThriftClientFactoryImpl.class);
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(HKerberosSecuredThriftClientFactoryImpl.class);
 
   public static final String JAAS_CONFIG = "jaas.conf";
   public static final String KRB5_CONFIG = "krb5.conf";

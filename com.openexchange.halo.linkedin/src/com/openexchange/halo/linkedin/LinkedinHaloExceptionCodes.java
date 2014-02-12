@@ -50,35 +50,49 @@
 package com.openexchange.halo.linkedin;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link LinkedinHaloExceptionCodes} - Enumeration of all {@link OXException}s known in Linked-In halo module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum LinkedinHaloExceptionCodes implements OXExceptionCode {
+public enum LinkedinHaloExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(LinkedinHaloExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR(LinkedinHaloExceptionCodes.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(LinkedinHaloExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 2),
+    IO_ERROR(LinkedinHaloExceptionCodes.IO_ERROR_MSG, CATEGORY_ERROR, 2),
     /**
      * No Linked-In account available.
      */
-    NO_ACCOUNT(LinkedinHaloExceptionMessages.NO_ACCOUNT_MSG, CATEGORY_USER_INPUT, 3),
+    NO_ACCOUNT(LinkedinHaloExceptionCodes.NO_ACCOUNT_MSG, LinkedinHaloExceptionMessages.NO_ACCOUNT_DISPLAY, CATEGORY_USER_INPUT, 3),
     /**
      * Need an e-mail address to look up Linked-In data.
      */
-    MISSING_EMAIL_ADDR(LinkedinHaloExceptionMessages.MISSING_EMAIL_ADDR_MSG, CATEGORY_USER_INPUT, 4),
+    MISSING_EMAIL_ADDR(LinkedinHaloExceptionCodes.MISSING_EMAIL_ADDR_MSG, LinkedinHaloExceptionMessages.MISSING_EMAIL_ADDR_DISPLAY, CATEGORY_USER_INPUT, 4),
 
     ;
+    
+    // An error occurred: %1$s
+    private static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
+
+    // An I/O error occurred: %1$s
+    private static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
+
+    // No Linked-In account available.
+    private static final String NO_ACCOUNT_MSG = "No Linked-In account available.";
+
+    // Need an e-mail address to look up Linked-In data
+    private static final String MISSING_EMAIL_ADDR_MSG = "Need an e-mail address to look up Linked-In data.";
+
 
     /**
      * The error code prefix for Linked-In halo module.
@@ -90,9 +104,16 @@ public enum LinkedinHaloExceptionCodes implements OXExceptionCode {
     private final int detailNumber;
 
     private final String message;
+    
+    private String displayMessage;
 
     private LinkedinHaloExceptionCodes(final String message, final Category category, final int detailNumber) {
+        this(message, OXExceptionStrings.MESSAGE, category, detailNumber);
+    }
+    
+    private LinkedinHaloExceptionCodes(final String message, String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
+        this.displayMessage = displayMessage == null ? OXExceptionStrings.MESSAGE : displayMessage;
         this.detailNumber = detailNumber;
         this.category = category;
     }
@@ -105,6 +126,11 @@ public enum LinkedinHaloExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

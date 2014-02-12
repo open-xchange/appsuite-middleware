@@ -53,6 +53,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -67,13 +68,13 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.mail.internet.MimeUtility;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -85,9 +86,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class HeaderCollection implements Serializable {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HeaderCollection.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HeaderCollection.class);
 
     private static final String ERR_HEADER_NAME_IS_INVALID = "Header name is invalid";
 
@@ -438,11 +437,7 @@ public class HeaderCollection implements Serializable {
 
     private final void putHeader(final String name, final String value, final boolean clear) {
         if (isInvalid(name, true)) {
-            if (DEBUG) {
-                final IllegalArgumentException tmp =
-                    new IllegalArgumentException(new com.openexchange.java.StringAllocator(ERR_HEADER_NAME_IS_INVALID).append(": ").append(name).toString());
-                LOG.debug(tmp.getMessage(), tmp);
-            }
+            LOG.debug("{0}: {1}", ERR_HEADER_NAME_IS_INVALID, name, new IllegalArgumentException());
             // Do nothing...
             return;
         }
@@ -963,7 +958,7 @@ public class HeaderCollection implements Serializable {
      * Simple test method
      */
     public static final void test() {
-        final Log log2 = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HeaderCollection.class));
+        final Logger log2 = org.slf4j.LoggerFactory.getLogger(HeaderCollection.class);
         try {
             final HeaderCollection hc = new HeaderCollection();
 
@@ -981,7 +976,7 @@ public class HeaderCollection implements Serializable {
             final Iterator<Map.Entry<String, String>> iter = hc.getAllHeaders();
             while (iter.hasNext()) {
                 final Map.Entry<String, String> e = iter.next();
-                log2.info(e.getKey() + ": " + e.getValue());
+                log2.info(MessageFormat.format("{0}: {1}", e.getKey(), e.getValue()));
                 if ("Faust".equals(e.getKey())) {
                     iter.remove();
                 }
@@ -992,7 +987,7 @@ public class HeaderCollection implements Serializable {
             final Iterator<Map.Entry<String, String>> iter2 = hc.getAllHeaders();
             while (iter2.hasNext()) {
                 final Map.Entry<String, String> e = iter2.next();
-                log2.info(e.getKey() + ": " + e.getValue());
+                log2.info(MessageFormat.format("{0}: {1}", e.getKey(), e.getValue()));
             }
 
             log2.info("\n\nNon-Matching");
@@ -1000,7 +995,7 @@ public class HeaderCollection implements Serializable {
             final Iterator<Map.Entry<String, String>> iter3 = hc.getNonMatchingHeaders(new String[] { "To", "From" });
             while (iter3.hasNext()) {
                 final Map.Entry<String, String> e = iter3.next();
-                log2.info(e.getKey() + ": " + e.getValue());
+                log2.info(MessageFormat.format("{0}: {1}", e.getKey(), e.getValue()));
             }
 
             log2.info("\n\nMatching");
@@ -1008,7 +1003,7 @@ public class HeaderCollection implements Serializable {
             final Iterator<Map.Entry<String, String>> iter4 = hc.getMatchingHeaders(new String[] { "To", "From" });
             while (iter4.hasNext()) {
                 final Map.Entry<String, String> e = iter4.next();
-                log2.info(e.getKey() + ": " + e.getValue());
+                log2.info(MessageFormat.format("{0}: {1}", e.getKey(), e.getValue()));
             }
 
             log2.info("\n\nEquals");
@@ -1026,10 +1021,10 @@ public class HeaderCollection implements Serializable {
             hc2.addHeader("Subject", "The simple subject");
             hc2.addHeader("Aaa", "dummy header here");
 
-            log2.info(Boolean.valueOf(hc.equals(hc2)));
+            log2.info(Boolean.toString(hc.equals(hc2)));
 
         } catch (final Exception e) {
-            log2.error(e.getMessage(), e);
+            log2.error("", e);
         }
     }
 }

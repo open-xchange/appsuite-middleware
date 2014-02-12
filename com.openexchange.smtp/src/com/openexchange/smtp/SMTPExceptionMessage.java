@@ -111,4 +111,7 @@ public class SMTPExceptionMessage implements LocalizableStrings {
     // The following recipient is not allowed: %1$s. Please remove associated address and try again.
     public static final String RECIPIENT_NOT_ALLOWED = "The following recipient is not allowed: %1$s. Please remove associated address and try again.";
 
+    // The SMTP server %1$s cannot be accessed using a secure SSL connection for user %2$s. Please change configuration accordingly.
+    public static final String SECURE_CONNECTION_NOT_POSSIBLE = "The SMTP server %1$s cannot be accessed using a secure SSL connection for user %2$s. Please change configuration accordingly.";
+
 }

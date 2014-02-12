@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.smal.impl;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailExceptionCode;
@@ -72,7 +71,7 @@ public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMess
 
     private static final long serialVersionUID = 3887048765113161340L;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SmalMailAccess.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SmalMailAccess.class);
 
     private static MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> newDelegate(final Session session, final int accountId) throws OXException {
         return SmalMailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailAccess(session, accountId);
@@ -152,7 +151,7 @@ public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMess
                     return;
                 }
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         // Couldn't be put into cache

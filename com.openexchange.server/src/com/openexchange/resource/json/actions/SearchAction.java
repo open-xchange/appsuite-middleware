@@ -77,8 +77,7 @@ import com.openexchange.server.ServiceLookup;
 responseDescription = "An array of resource objects as described in Resource response.")
 public final class SearchAction extends AbstractResourceAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SearchAction.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SearchAction.class);
 
     /**
      * Initializes a new {@link SearchAction}.
@@ -104,17 +103,13 @@ public final class SearchAction extends AbstractResourceAction {
 
         final JSONArray jsonResponseArray = new JSONArray();
 
-        final String searchpattern;
         final JSONObject jData = req.getData();
-        if (jData.has(SearchFields.PATTERN) && !jData.isNull(SearchFields.PATTERN)) {
-            searchpattern = jData.getString(SearchFields.PATTERN);
-        } else {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder(64).append("Missing field \"").append(SearchFields.PATTERN).append(
-                        "\" in JSON data. Searching for all as fallback"));
-            }
+        if (!jData.hasAndNotNull(SearchFields.PATTERN)) {
+            LOG.warn("Missing field \"{}\" in JSON data. Searching for all as fallback", SearchFields.PATTERN);
             return new AllAction(services).perform(req);
         }
+
+        final String searchpattern = jData.getString(SearchFields.PATTERN);
 
         final com.openexchange.resource.Resource[] resources = resourceService.searchResources(searchpattern, req.getSession().getContext());
         final Date timestamp;

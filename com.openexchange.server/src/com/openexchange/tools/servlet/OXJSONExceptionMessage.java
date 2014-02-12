@@ -66,48 +66,18 @@ public class OXJSONExceptionMessage implements LocalizableStrings {
     }
 
     /**
-     * Exception while writing JSON.
+     * The provided cookie is invalid. Please login.
      */
-    public static final String JSON_WRITE_ERROR_MSG = "Exception while writing JSON.";
+    public static final String INVALID_COOKIE_MSG_DISPLAY = "The provided cookie is invalid. Please login.";
 
     /**
-     * Exception while parsing JSON: "%s".
+     * The value \"%1$s\" you set for attribute %2$s do not have to contain non digit characters.
      */
-    public static final String JSON_READ_ERROR_MSG = "Exception while parsing JSON: \"%s\".";
+    public static final String CONTAINS_NON_DIGITS_MSG_DISPLAY = "The value \"%1$s\" you set for attribute %2$s must not contain non digit characters.";
 
     /**
-     * Invalid cookie.
+     * You inserted too many digits into field %1$s.
      */
-    public static final String INVALID_COOKIE_MSG = "Invalid cookie.";
-
-    /**
-     * Exception while building JSON.
-     */
-    public static final String JSON_BUILD_ERROR_MSG = "Exception while building JSON.";
-
-    /**
-     * Value "%1$s" of attribute %s contains non digit characters.
-     */
-    public static final String CONTAINS_NON_DIGITS_MSG = "Value \"%1$s\" of attribute %2$s contains non digit characters.";
-
-    /**
-     * Too many digits within field %1$s.
-     */
-    public static final String TOO_BIG_NUMBER_MSG = "Too many digits within field %1$s.";
-
-    /**
-     * Unable to parse value "%1$s" within field %2$s as a number.
-     */
-    public static final String NUMBER_PARSING_MSG = "Unable to parse value \"%1$s\" within field %2$s as a number.";
-
-    /**
-     * Invalid value \"%2$s\" in JSON attribute \"%1$s\".
-     */
-    public static final String INVALID_VALUE_MSG = "Invalid value \"%2$s\" in JSON attribute \"%1$s\".";
-
-    /**
-     * Missing field "%1$s" in JSON data.
-     */
-    public static final String MISSING_FIELD_MSG = "Missing field \"%1$s\" in JSON data.";
+    public static final String TOO_BIG_NUMBER_MSG_DISPLAY = "You inserted too many digits into field %1$s.";
 
 }

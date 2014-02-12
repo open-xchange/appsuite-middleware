@@ -5,7 +5,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /*
@@ -62,7 +61,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class TokenUtils {
 
-	private static final Log log = LogFactory.getLog(TokenUtils.class);
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TokenUtils.class);
 
 	/**
 	 * Method for calculating unique tokens for each node
@@ -82,7 +81,7 @@ public class TokenUtils {
 			BigInteger pow = BigInteger.valueOf(2).pow(127);
             BigInteger token = pow.divide(n).multiply(BigInteger.valueOf(i));
             tokens[i] = token;
-            log.info("Node " + i + ": " + token);
+            log.info("Node {}: {}", i, token);
 
             i++;
 		}
@@ -120,14 +119,14 @@ public class TokenUtils {
 
 			if (future.compareTo(current) == 0) {
 				p = pending(p);
-				log.debug("Node " + c + " stays at " + current );
+				log.debug("Node {} stays at {}", c, current );
 				tokens[f] = current;
 				c++;
 			}
 
 			if (future.compareTo(current) == 1) {
 				p = pending(p);
-				log.debug("Node " + c + " ===> " + future);
+				log.debug("Node {} ===> {}", c, future);
 				tokens[f] = future;
 				c++;
 			}
@@ -143,7 +142,7 @@ public class TokenUtils {
 		}
 
 		while (f < fn.length) {
-			log.debug("New node at: " + fn[f]);
+			log.debug("New node at: {}", fn[f]);
 			tokens[f] = fn[f];
 			f++;
 		}

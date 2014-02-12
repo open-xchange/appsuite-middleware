@@ -71,15 +71,14 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class AllVisibleFoldersPerformer extends AbstractUserizedFolderPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AllVisibleFoldersPerformer.class));
-
     /**
      * Initializes a new {@link AllVisibleFoldersPerformer}.
      *
      * @param session The session
      * @param decorator The optional folder service decorator
+     * @throws OXException If passed session is invalid
      */
-    public AllVisibleFoldersPerformer(final ServerSession session, final FolderServiceDecorator decorator) {
+    public AllVisibleFoldersPerformer(final ServerSession session, final FolderServiceDecorator decorator) throws OXException {
         super(session, decorator);
     }
 
@@ -100,8 +99,9 @@ public final class AllVisibleFoldersPerformer extends AbstractUserizedFolderPerf
      * @param session The session
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
+     * @throws OXException If passed session is invalid
      */
-    public AllVisibleFoldersPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public AllVisibleFoldersPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(session, decorator, folderStorageDiscoverer);
     }
 
@@ -130,7 +130,6 @@ public final class AllVisibleFoldersPerformer extends AbstractUserizedFolderPerf
         if (null == rootStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, FolderStorage.ROOT_ID);
         }
-        final long start = LOG.isDebugEnabled() ? System.currentTimeMillis() : 0L;
         final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
         if (rootStorage.startTransaction(storageParameters, false)) {
             openedStorages.add(rootStorage);
@@ -146,11 +145,6 @@ public final class AllVisibleFoldersPerformer extends AbstractUserizedFolderPerf
 
             for (final FolderStorage fs : openedStorages) {
                 fs.commitTransaction(storageParameters);
-            }
-
-            if (LOG.isDebugEnabled()) {
-                final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new com.openexchange.java.StringAllocator().append("AllVisibleFolders.doAllVisibleFolders() took ").append(duration).append("msec").toString());
             }
 
             return ret;

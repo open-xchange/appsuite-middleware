@@ -50,31 +50,31 @@
 package com.openexchange.crypto;
 
 import com.openexchange.exception.Category;
-import com.openexchange.exception.LogLevel;
-import com.openexchange.exception.LogLevelAwareOXExceptionCode;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public enum CryptoErrorMessage implements LogLevelAwareOXExceptionCode {
+public enum CryptoErrorMessage implements DisplayableOXExceptionCode {
     /**
      * Bad password.
      */
-    BadPassword(CATEGORY_USER_INPUT, 1, CryptoExceptionMessage.BAD_PASSWORD_HELP, CryptoExceptionMessage.BAD_PASSWORD_MSG, LogLevel.ERROR),
+    BadPassword(CATEGORY_USER_INPUT, 1, "Wrong Password.", CryptoExceptionMessage.BAD_PASSWORD_DISPLAY),
     /**
      * Encoding error.
      */
-    EncodingException(CATEGORY_ERROR, 2, CryptoExceptionMessage.ENCODING_ERROR_HELP, CryptoExceptionMessage.ENCODING_ERROR_MSG, LogLevel.ERROR),
+    EncodingException(CATEGORY_ERROR, 2, "Error during encoding operation."),
     /**
      * Security Exception.
      */
-    SecurityException(CATEGORY_ERROR, 3, CryptoExceptionMessage.SECURITY_EXCEPTION_HELP, CryptoExceptionMessage.SECURITY_EXCEPTION_MSG, LogLevel.ERROR),
+    SecurityException(CATEGORY_ERROR, 3, "General Security Exception occurred."),
     /**
      * Arbitrary byte sequence is missing to generate a secure key.
      */
-    NoSalt(CATEGORY_USER_INPUT, 4, CryptoExceptionMessage.NO_SALT_HELP, CryptoExceptionMessage.NO_SALT_MSG, LogLevel.ERROR);
+    NoSalt(CATEGORY_USER_INPUT, 4, "Arbitrary byte sequence is missing to generate a secure key.");
 
     private static final String PREFIX = "CRP";
 
@@ -89,26 +89,23 @@ public enum CryptoErrorMessage implements LogLevelAwareOXExceptionCode {
 
     private final Category category;
     private final int errorCode;
-    private final String help;
     private final String message;
-    private final LogLevel logLevel;
+    private String displayMessage;
 
-    private CryptoErrorMessage(final Category category, final int errorCode, final String help, final String message, final LogLevel logLevel) {
+    private CryptoErrorMessage(Category category, int errorCode, String message) {
+        this(category, errorCode, message, OXExceptionStrings.MESSAGE);
+    }
+
+    private CryptoErrorMessage(final Category category, final int errorCode, final String message, String displayMessage) {
         this.category = category;
         this.errorCode = errorCode;
-        this.help = help;
         this.message = message;
-        this.logLevel = logLevel;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
     public String getPrefix() {
         return PREFIX;
-    }
-
-    @Override
-    public LogLevel getLogLevel() {
-        return logLevel;
     }
 
     @Override
@@ -124,6 +121,11 @@ public enum CryptoErrorMessage implements LogLevelAwareOXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

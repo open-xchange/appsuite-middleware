@@ -53,8 +53,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.ms.Topic;
 
 /**
@@ -68,7 +66,7 @@ import com.openexchange.ms.Topic;
 public class DelayPushQueue implements Runnable {
 
     /** The logger */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DelayPushQueue.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DelayPushQueue.class);
 
     /** The special poison object */
     private static final DelayedPushMsObject POISON = new DelayedPushMsObject(null, 0, 0);
@@ -105,8 +103,12 @@ public class DelayPushQueue implements Runnable {
      *
      * @param pushMsObject the pushMsObject to add
      */
-    public void add(final PushMsObject pushMsObject) {
-        delayQueue.offerIfAbsentElseReschedule(new DelayedPushMsObject(pushMsObject, delayDuration, maxDelayDuration));
+    public void add(final PushMsObject pushMsObject, final boolean immediate) {
+        if (immediate) {
+            delayQueue.offerIfAbsentElseReschedule(new DelayedPushMsObject(pushMsObject, 0, 0));
+        } else {
+            delayQueue.offerIfAbsentElseReschedule(new DelayedPushMsObject(pushMsObject, delayDuration, maxDelayDuration));
+        }
     }
 
     /**
@@ -125,9 +127,7 @@ public class DelayPushQueue implements Runnable {
         final PushMSDelayQueue delayQueue = this.delayQueue;
         final List<DelayedPushMsObject> objects = new ArrayList<DelayedPushMsObject>(16);
         while (isRunning.get()) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Awaiting push objects from DelayQueue with current size: " + delayQueue.size());
-            }
+            LOG.debug("Awaiting push objects from DelayQueue with current size: {}", delayQueue.size());
             try {
                 objects.clear();
                 // Blocking wait for at least 1 DelayedPushMsObject to expire.
@@ -146,13 +146,11 @@ public class DelayPushQueue implements Runnable {
                     if (delayedPushMsObject != null) {
                         // Publish
                         publishTopic.publish(delayedPushMsObject.getPushObject().writePojo());
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Published delayed PushMsObject: " + delayedPushMsObject.getPushObject());
-                        }
+                        LOG.debug("Published delayed PushMsObject: {}", delayedPushMsObject.getPushObject());
                     }
                 }
             } catch (final Exception exc) {
-                LOG.error(exc.getMessage(), exc);
+                LOG.error("", exc);
             }
         }
     }

@@ -49,6 +49,7 @@
 
 package com.openexchange.html.internal;
 
+import static com.openexchange.java.Strings.isEmpty;
 import gnu.inet.encoding.IDNAException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -114,9 +115,7 @@ import com.openexchange.proxy.ProxyRegistry;
  */
 public final class HtmlServiceImpl implements HtmlService {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HtmlServiceImpl.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HtmlServiceImpl.class);
 
     private static final String CHARSET_UTF_8 = "UTF-8";
 
@@ -190,7 +189,7 @@ public final class HtmlServiceImpl implements HtmlService {
             }
 
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return content;
     }
@@ -239,13 +238,13 @@ public final class HtmlServiceImpl implements HtmlService {
                     sb.append("src=\"").append(uri.toString()).append('"');
                 }
             } catch (final MalformedURLException e) {
-                LOG.debug("Invalid URL found in \"img\" tag: " + imgTag + ". Keeping original content.", e);
+                LOG.debug("Invalid URL found in \"img\" tag: {}. Keeping original content.", imgTag, e);
                 sb.append(srcMatcher.group());
             } catch (final OXException e) {
-                LOG.warn("Proxy registration failed for \"img\" tag: " + imgTag, e);
+                LOG.warn("Proxy registration failed for \"img\" tag: {}", imgTag, e);
                 sb.append(srcMatcher.group());
             } catch (final Exception e) {
-                LOG.warn("URL replacement failed for \"img\" tag: " + imgTag, e);
+                LOG.warn("URL replacement failed for \"img\" tag: {}", imgTag, e);
                 sb.append(srcMatcher.group());
             }
             lastMatch = srcMatcher.end();
@@ -276,7 +275,7 @@ public final class HtmlServiceImpl implements HtmlService {
             targetBuilder.append(content.substring(lastMatch));
             return targetBuilder.toString();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final StackOverflowError error) {
             LOG.error(StackOverflowError.class.getName(), error);
         }
@@ -334,7 +333,7 @@ public final class HtmlServiceImpl implements HtmlService {
             targetBuilder.append(content.substring(lastMatch));
             return targetBuilder.toString();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final StackOverflowError error) {
             LOG.error(StackOverflowError.class.getName(), error);
         }
@@ -371,7 +370,7 @@ public final class HtmlServiceImpl implements HtmlService {
             /*
              * Append as-is
              */
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
             builder.append(url);
         }
     }
@@ -536,7 +535,6 @@ public final class HtmlServiceImpl implements HtmlService {
     @Override
     public String sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified, final String cssPrefix) {
         try {
-            final long st = DEBUG ? System.currentTimeMillis() : 0L;
             String html = htmlContent;
             // Perform one-shot sanitizing
             html = replacePercentTags(html);
@@ -571,10 +569,6 @@ public final class HtmlServiceImpl implements HtmlService {
                 sanitized[0] = false;
                 // Start sanitizing round
                 html = SaneScriptTags.saneScriptTags(html, sanitized);
-            }
-            if (DEBUG) {
-                final long dur = System.currentTimeMillis() - st;
-                LOG.debug("\tHTMLServiceImpl.sanitize() took " + dur + "msec.");
             }
             return html;
         } catch (final RuntimeException e) {
@@ -644,10 +638,6 @@ public final class HtmlServiceImpl implements HtmlService {
 
     @Override
     public String html2text(final String htmlContent, final boolean appendHref) {
-//        final HTML2TextHandler handler = new HTML2TextHandler(this, htmlContent.length(), appendHref);
-//        HTMLParser.parse(htmlContent, handler);
-//        return handler.getText();
-
         if (isEmpty(htmlContent)) {
             return htmlContent;
         }
@@ -655,6 +645,7 @@ public final class HtmlServiceImpl implements HtmlService {
         try {
             String prepared = prepareSignatureStart(htmlContent);
             prepared = prepareHrTag(prepared);
+            prepared = prepareAnchorTag(prepared);
             prepared = insertBlockquoteMarker(prepared);
             prepared = insertSpaceMarker(prepared);
             String text = quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).setConvertNonBreakingSpaces(true).setMaxLineLength(9999).setIncludeHyperlinkURLs(appendHref).toString());
@@ -689,6 +680,23 @@ public final class HtmlServiceImpl implements HtmlService {
         } finally {
             IOUtils.closeQuietly(inputStream);
         }
+    }
+
+    private static final Pattern PATTERN_ANCHOR = Pattern.compile("<a[^>]+href=[\"']([^\"']+)[\"'][^>]*>(.*?)</a>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static String prepareAnchorTag(final String htmlContent) {
+        final Matcher m = PATTERN_ANCHOR.matcher(htmlContent);
+        if (!m.find()) {
+            return htmlContent;
+        }
+        final StringBuffer sb = new StringBuffer(htmlContent.length());
+        do {
+            final String href = m.group(1);
+            if (href.equals(m.group(2))) { // href attribute equals anchor's text
+                m.appendReplacement(sb, com.openexchange.java.Strings.quoteReplacement(href));
+            }
+        } while (m.find());
+        m.appendTail(sb);
+        return sb.toString();
     }
 
     private static final Pattern PATTERN_HR = Pattern.compile("<hr[^>]*>(.*?</hr>)?", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
@@ -796,18 +804,6 @@ public final class HtmlServiceImpl implements HtmlService {
             sb.append("> ");
         }
         return sb.toString();
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     private static final Pattern PATTERN_BLOCKQUOTE_START = Pattern.compile("(<blockquote.*?>)", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
@@ -1048,17 +1044,17 @@ public final class HtmlServiceImpl implements HtmlService {
             return writer.toString();
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
-            LOG.error("Unsupported encoding: " + e.getMessage(), e);
+            LOG.error("Unsupported encoding", e);
             return htmlContent;
         } catch (final IOException e) {
             // Cannot occur
-            LOG.error("I/O error: " + e.getMessage(), e);
+            LOG.error("I/O error", e);
             return htmlContent;
         } catch (final RuntimeException rte) {
             /*
              * HtmlCleaner failed horribly...
              */
-            LOG.warn("HtmlCleaner library failed to pretty-print HTML content with: " + rte.getMessage(), rte);
+            LOG.warn("HtmlCleaner library failed to pretty-print HTML content", rte);
             return htmlContent;
         }
     }
@@ -1129,7 +1125,7 @@ public final class HtmlServiceImpl implements HtmlService {
                         epos = imgTag.indexOf('>', pos+4);
                         href = imgTag.substring(pos+4, epos);
                     }
-                    if (!href.startsWith("cid") && !href.startsWith("http")) {
+                    if (!href.startsWith("cid") && !href.startsWith("http") && !href.startsWith("mailto")) {
                         if (!href.startsWith("/")) {
                             href = '/' + href;
                         }
@@ -1165,7 +1161,7 @@ public final class HtmlServiceImpl implements HtmlService {
                         epos = hrefTag.indexOf('>', pos+11);
                         href = hrefTag.substring(pos+11, epos);
                     }
-                    if (!href.startsWith("cid") && !href.startsWith("http")) {
+                    if (!href.startsWith("cid") && !href.startsWith("http") && !href.startsWith("mailto")) {
                         if (!href.startsWith("/")) {
                             href = '/' + href;
                         }
@@ -1201,7 +1197,7 @@ public final class HtmlServiceImpl implements HtmlService {
                         epos = hrefTag.indexOf('>', pos+5);
                         href = hrefTag.substring(pos+5, epos);
                     }
-                    if (!href.startsWith("cid") && !href.startsWith("http")) {
+                    if (!href.startsWith("cid") && !href.startsWith("http") && !href.startsWith("mailto")) {
                         if (!href.startsWith("/")) {
                             href = '/' + href;
                         }
@@ -1381,9 +1377,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 final StringBuilder sb = new StringBuilder(html);
                 final String cs;
                 if (null == charset) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.warn("Missing charset. Using fallback \"UTF-8\" instead.");
-                    }
+                    LOG.warn("Missing charset. Using fallback \"UTF-8\" instead.");
                     cs = CHARSET_UTF_8;
                 } else {
                     cs = charset;
@@ -1816,17 +1810,17 @@ public final class HtmlServiceImpl implements HtmlService {
             return P_HTMLE_REG.matcher(P_HTMLE_COPY.matcher(buffer.toString()).replaceAll("\u00a9")).replaceAll("\u00ae");
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
-            LOG.error("HtmlCleaner library failed to pretty-print HTML content with an unsupported encoding: " + e.getMessage(), e);
+            LOG.error("HtmlCleaner library failed to pretty-print HTML content with an unsupported encoding", e);
             return htmlContent;
         } catch (final IOException e) {
             // Cannot occur
-            LOG.error("HtmlCleaner library failed to pretty-print HTML content with I/O error: " + e.getMessage(), e);
+            LOG.error("HtmlCleaner library failed to pretty-print HTML content with I/O error", e);
             return htmlContent;
         } catch (final RuntimeException rte) {
             /*
              * HtmlCleaner failed horribly...
              */
-            LOG.warn("HtmlCleaner library failed to pretty-print HTML content with: " + rte.getMessage(), rte);
+            LOG.warn("HtmlCleaner library failed to pretty-print HTML content", rte);
             return htmlContent;
         }
     }

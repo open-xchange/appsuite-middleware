@@ -59,8 +59,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -73,7 +71,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public class NewAdminExtensionsUpdateTask implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(NewAdminExtensionsUpdateTask.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NewAdminExtensionsUpdateTask.class);
 
     /*
      * (non-Javadoc)

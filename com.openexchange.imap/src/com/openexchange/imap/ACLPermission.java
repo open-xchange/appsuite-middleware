@@ -71,7 +71,7 @@ public final class ACLPermission extends MailPermission {
 
     private static final long serialVersionUID = -3140342221453395764L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ACLPermission.class));
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ACLPermission.class);
 
     private transient ACL acl;
 
@@ -143,16 +143,12 @@ public final class ACLPermission extends MailPermission {
 
     @Override
     public void setFuid(final int pid) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn(ERR);
-        }
+        LOG.warn(ERR);
     }
 
     @Override
     public int getFuid() {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn(ERR);
-        }
+        LOG.warn(ERR);
         return -1;
     }
 
@@ -342,7 +338,7 @@ public final class ACLPermission extends MailPermission {
             clone.acl = null;
             return clone;
         } catch (final CloneNotSupportedException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw new RuntimeException("CloneNotSupportedException even though it's cloenable", e);
         }
     }

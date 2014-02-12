@@ -68,7 +68,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.commons.logging.Log;
 import org.ho.yaml.Yaml;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
@@ -79,7 +78,6 @@ import com.openexchange.config.internal.filewatcher.FileWatcher;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link ConfigurationImpl}
@@ -88,19 +86,20 @@ import com.openexchange.log.LogFactory;
  */
 public final class ConfigurationImpl implements ConfigurationService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigurationImpl.class));
-
-    private static final String EXT = ".properties";
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigurationImpl.class);
 
     private static final class PropertyFileFilter implements FileFilter {
 
-        public PropertyFileFilter() {
+        private final String ext;
+
+        PropertyFileFilter() {
             super();
+            ext = ".properties";
         }
 
         @Override
         public boolean accept(final File pathname) {
-            return pathname.isDirectory() || pathname.getName().toLowerCase().endsWith(EXT);
+            return pathname.isDirectory() || pathname.getName().toLowerCase().endsWith(ext);
         }
 
     }
@@ -193,7 +192,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
 
         };
-        final Log log = LOG;
+        final org.slf4j.Logger log = LOG;
         final FileProcessor processor2 = new FileProcessor() {
 
             @Override
@@ -205,7 +204,7 @@ public final class ConfigurationImpl implements ConfigurationService {
                     // IGNORE
                     return;
                 } catch (final RuntimeException x) {
-                    log.error(file, x);
+                    log.error(file.toString(), x);
                     throw x;
                 }
                 yamlPaths.put(file.getName(), file.getPath());
@@ -236,7 +235,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     private synchronized void processDirectory(final File dir, final FileFilter fileFilter, final FileProcessor processor) {
         final File[] files = dir.listFiles(fileFilter);
         if (files == null) {
-            LOG.info(MessageFormat.format("Can't read {0}. Skipping.", dir));
+            LOG.info("Can't read {}. Skipping.", dir);
             return;
         }
         for (final File file : files) {
@@ -269,24 +268,24 @@ public final class ConfigurationImpl implements ConfigurationService {
                 final String otherValue = properties.get(propName);
                 if (properties.containsKey(propName) && otherValue != null && !otherValue.equals(e.getValue())) {
                     final String otherFile = propertiesFiles.get(propName);
-                    if (LOG.isDebugEnabled()) {
-                        final com.openexchange.java.StringAllocator sa =
-                            new com.openexchange.java.StringAllocator(64).append("Overwriting property ").append(propName).append(" from file '");
-                        sa.append(otherFile).append("' with property from file '").append(propFilePath).append("', overwriting value '");
-                        sa.append(otherValue).append("' with value '").append(e.getValue()).append("'.");
-                        LOG.debug(sa.toString());
-                    }
+                    LOG.debug(
+                        "Overwriting property {} from file ''{}'' with property from file ''{}'', overwriting value ''{}'' with value ''{}''",
+                        propName,
+                        otherFile,
+                        propFilePath,
+                        otherValue,
+                        e.getValue());
                 }
                 properties.put(propName, e.getValue().toString().trim());
                 propertiesFiles.put(propName, propFilePath);
             }
         } catch (final IOException e) {
-            LOG.warn("An error occurred while processing property file \"" + propFile + "\".", e);
+            LOG.warn("An error occurred while processing property file \"{}\".", propFile, e);
         }
     }
 
     private static Properties loadProperties(final File propFile) throws IOException {
-        final InputStream fis = new BufferedInputStream(new FileInputStream(propFile));
+        final InputStream fis = new BufferedInputStream(new FileInputStream(propFile), 65536);
         try {
             final Properties tmp = new Properties();
             tmp.load(fis);
@@ -330,7 +329,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
         return defaultValue;
     }
-    
+
     @Override
     public List<String> getProperty(String name, String defaultValue, String separator) {
         String property = getProperty(name, defaultValue);
@@ -434,7 +433,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     /**
      * Watch a property for changes.
-     * 
+     *
      * @param name the name of the property to watch
      * @param propertyListener the PropertyListener to register for property changes
      * @return true if the property with the given name can be found and a watcher is added, else false
@@ -448,7 +447,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             fileWatcher.startFileWatcher(10000);
             return true;
         } else {
-            LOG.error("Unable to watch missing property: " + name);
+            LOG.error("Unable to watch missing property: {}", name);
             return false;
         }
     }
@@ -477,9 +476,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             try {
                 return Integer.parseInt(prop.trim());
             } catch (final NumberFormatException e) {
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace(e.getMessage(), e);
-                }
+                LOG.trace("", e);
             }
         }
         return defaultValue;
@@ -522,7 +519,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         if ((pos = fileName.lastIndexOf('/')) >= 0 || (pos = fileName.lastIndexOf('\\')) >= 0) {
             fn = fileName.substring(pos + 1);
         } else {
-            LOG.warn("No such file: " + fileName);
+            LOG.warn("No such file: {}", fileName);
             return null;
         }
         for (final String dir : getDirectories()) {
@@ -531,7 +528,7 @@ public final class ConfigurationImpl implements ConfigurationService {
                 return f;
             }
         }
-        LOG.warn("No such file: " + fileName);
+        LOG.warn("No such file: {}", fileName);
         return null;
     }
 
@@ -569,7 +566,7 @@ public final class ConfigurationImpl implements ConfigurationService {
                 return fdir;
             }
         }
-        LOG.warn("No such directory: " + directoryName);
+        LOG.warn("No such directory: {}", directoryName);
         return null;
     }
 
@@ -659,7 +656,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
             return builder.toString();
         } catch (final IOException x) {
-            LOG.fatal("Can't read file: " + file);
+            LOG.error("Can't read file: {}", file);
             return null;
         } finally {
             Streams.close(reader);

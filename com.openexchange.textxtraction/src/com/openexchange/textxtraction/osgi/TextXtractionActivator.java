@@ -49,7 +49,6 @@
 
 package com.openexchange.textxtraction.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -74,9 +73,9 @@ public class TextXtractionActivator extends HousekeepingActivator {
 
     @Override
     public void startBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.loggerFor(TextXtractionActivator.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TextXtractionActivator.class);
         final String name = "com.openexchange.textxtraction";
-        log.info("Starting bundle: " + name);
+        log.info("Starting bundle: {}", name);
         try {
             final TikaTextXtractService tikaTextXtractService = new TikaTextXtractService();
             final BundleContext context = this.context;
@@ -108,20 +107,20 @@ public class TextXtractionActivator extends HousekeepingActivator {
             openTrackers();
             registerService(TextXtractService.class, tikaTextXtractService);
         } catch (final Exception e) {
-            log.info("Starting bundle failed: " + name, e);
+            log.info("Starting bundle failed: {}", name, e);
             throw e;
         }
     }
 
     @Override
     public void stopBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.loggerFor(TextXtractionActivator.class);
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TextXtractionActivator.class);
         final String name = "com.openexchange.textxtraction";
-        log.info("Stopping bundle: " + name);
+        log.info("Stopping bundle: {}", name);
         try {
             cleanUp();
         } catch (final Exception e) {
-            log.info("Stopping bundle failed: " + name, e);
+            log.info("Stopping bundle failed: {}", name, e);
             throw e;
         }
     }

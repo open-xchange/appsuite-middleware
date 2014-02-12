@@ -59,7 +59,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 
 /**
  * {@link ServiceHolder} - Provides convenient access to a bundle service formerly applied with {@link #setService(Object)}. The service may
@@ -74,7 +73,7 @@ import org.apache.commons.logging.Log;
 public abstract class ServiceHolder<S> {
 
     /** The logger */
-    static final Log LOG = com.openexchange.log.Log.loggerFor(ServiceHolder.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServiceHolder.class);
 
     private static final Object PRESENT = new Object();
 
@@ -96,7 +95,7 @@ public abstract class ServiceHolder<S> {
                     for (final Iterator<ServiceProxy> proxyIter = q.keySet().iterator(); proxyIter.hasNext();) {
                         final ServiceProxy proxy = proxyIter.next();
                         if (proxy.isExceeded()) {
-                            LOG.error("Forced unget: Found non-ungetted service after " + serviceUsageTimeout + "msec that was acquired at:\n" + printStackTrace(proxy.trace));
+                            LOG.error("Forced unget: Found non-ungetted service after {}msec that was acquired at:\n{}", serviceUsageTimeout, printStackTrace(proxy.trace));
                             proxy.proxyService = null;
                             proxy.delegate = null;
                             proxy.propagateForcedUnget();
@@ -108,7 +107,7 @@ public abstract class ServiceHolder<S> {
                     }
                 }
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -276,7 +275,7 @@ public abstract class ServiceHolder<S> {
         }
         countActive.incrementAndGet();
         if (serviceUsageInspection) {
-            if (LOG.isWarnEnabled() && usingThreads.containsKey(Thread.currentThread())) {
+            if (usingThreads.containsKey(Thread.currentThread())) {
                 LOG.warn("Found thread using two (or more) services without ungetting service.", new Throwable());
             }
             final Thread thread = Thread.currentThread();
@@ -322,7 +321,7 @@ public abstract class ServiceHolder<S> {
              * Blocking OSGi framework is not allowed, but security mechanism built into this class ensures that an acquired service is
              * released in any case.
              */
-            LOG.error("Service counting for " + this.getClass().getName() + " is not zero: " + countActive.toString());
+            LOG.error("Service counting for {} is not zero: {}", this.getClass().getName(), countActive);
             if (waiting.compareAndSet(false, true)) {
                 synchronized (countActive) {
                     try {
@@ -331,7 +330,7 @@ public abstract class ServiceHolder<S> {
                         }
                     } catch (final InterruptedException e) {
                         Thread.currentThread().interrupt();
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     } finally {
                         waiting.set(false);
                     }

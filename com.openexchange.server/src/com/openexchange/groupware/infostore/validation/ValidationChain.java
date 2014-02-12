@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
@@ -125,7 +124,6 @@ public class ValidationChain {
         if (failed) {
             if (null != exception) {
                 exception.setLogMessage(InfostoreExceptionCodes.VALIDATION_FAILED.getMessage(), message.toString());
-                exception.setLogLevel(LogLevel.ERROR);
                 throw exception;
             }
             throw InfostoreExceptionCodes.VALIDATION_FAILED.create(message.toString());

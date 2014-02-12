@@ -56,7 +56,6 @@ import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.logging.Log;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
@@ -89,7 +88,7 @@ public class ListenerRegistrar implements DriveEventPublisher  {
         return INSTANCE;
     }
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ListenerRegistrar.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ListenerRegistrar.class);
     private static final int EXPIRY_TIME = 300;
     private static final ListenerRegistrar INSTANCE = new ListenerRegistrar();
 
@@ -115,9 +114,7 @@ public class ListenerRegistrar implements DriveEventPublisher  {
                      */
                     LongPollingListener listener = notification.getValue();
                     listenersPerFolder.remove(getFolderKey(listener.getSession()), notification.getKey());
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Unregistered listener: " + listener);
-                    }
+                    LOG.debug("Unregistered listener: {}", listener);
                 }
             })
             .build();
@@ -141,7 +138,7 @@ public class ListenerRegistrar implements DriveEventPublisher  {
                 LongPollingListener listener = createListener(session);
                 listenersPerFolder.put(getFolderKey(session), sessionID);
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Registered new listener: " + listener);
+                    LOG.debug("Registered new listener: {}", listener);
                 }
                 return listener;
             }
@@ -179,7 +176,13 @@ public class ListenerRegistrar implements DriveEventPublisher  {
         for (String folderID : event.getFolderIDs()) {
             listenerSessionIDs.addAll(listenersPerFolder.get(getFolderKey(folderID, event.getContextID())));
         }
+        String pushTokenReference = event.getPushTokenReference();
         for (LongPollingListener listener : listeners.getAllPresent(listenerSessionIDs).values()) {
+            if (null != pushTokenReference && listener.matches(pushTokenReference)) {
+                // don't send back to originator
+                LOG.trace("Skipping push notification for listener: {}", listener);
+                continue;
+            }
             listener.onEvent(event);
         }
     }

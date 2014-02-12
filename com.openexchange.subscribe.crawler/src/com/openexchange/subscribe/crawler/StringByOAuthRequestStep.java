@@ -68,8 +68,6 @@ import net.oauth.OAuthServiceProvider;
 import net.oauth.client.OAuthClient;
 import net.oauth.client.httpclient4.HttpClient4;
 import net.oauth.client.httpclient4.HttpClientPool;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -98,7 +96,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
 
     private OAuthAccessor oAuthAccessor;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(StringByOAuthRequestStep.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StringByOAuthRequestStep.class);
 
     private Page loginPage;
 
@@ -139,13 +137,13 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
 
                 LOG.info("Successfully requested OAuth token");
             } catch (final IOException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
             } catch (final URISyntaxException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
             } catch (final NullPointerException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
             } catch (final OAuthException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
             }
 
             // Authorize the request
@@ -156,7 +154,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
                 paramProps.setProperty("application_name", "Open-Xchange Contact Aggregator");
                 paramProps.setProperty("oauth_token", requestToken);
                 final OAuthMessage response = sendRequest(paramProps, oAuthAccessor.consumer.serviceProvider.userAuthorizationURL);
-                LOG.info("Successfully requested authorization-url: "+response.URL);
+                LOG.info("Successfully requested authorization-url: {}", response.URL);
 
                 // Fill out form / confirm the access otherwise
                 final LoginPageByFormActionRegexStep authorizeStep = new LoginPageByFormActionRegexStep("", response.URL,  username, password, "/uas/oauth/authorize/submit", nameOfUserField, nameOfPasswordField, ".*", 1, "");
@@ -164,8 +162,8 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
                 loginPage = authorizeStep.getLoginPage();
                 final HtmlPage pageWithVerifier = authorizeStep.getOutput();
                 final String pageString2 = pageWithVerifier.getWebResponse().getContentAsString();
-                LOG.debug("Page contains the verifier : " + pageString2.contains("access-code"));
-                LOG.debug("Cookie-Problem : " + pageString2.contains("Please make sure you have cookies"));
+                LOG.debug("Page contains the verifier : {}", pageString2.contains("access-code"));
+                LOG.debug("Cookie-Problem : {}", pageString2.contains("Please make sure you have cookies"));
 
                 // get the verifier
                 final Pattern pattern = Pattern.compile("access-code\">([0-9]*)<");
@@ -176,14 +174,14 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
                 } else {
                     LOG.error("Verifier not found");
                 }
-                LOG.debug("This is the verifier : " + verifier);
+                LOG.debug("This is the verifier : {}", verifier);
                 //openPageInBrowser(pageWithVerifier);
             } catch (final IOException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
             } catch (final URISyntaxException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
             } catch (final OAuthException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
             }
 
 
@@ -198,11 +196,11 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
                 tokenSecret = response.getParameter("oauth_token_secret");
                 LOG.info("Accessed and conformed using the verifier");
             } catch (final IOException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
             } catch (final URISyntaxException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
             } catch (final OAuthException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
             }
 
             // Execute an API-Request (fully logged in now)
@@ -214,14 +212,14 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
                 final String result = response.readBodyAsString();
                 LOG.info("Successfully executed an API-Request");
                 executedSuccessfully = true;
-                LOG.debug("This is the result of the whole operation : " + result);
+                LOG.debug("This is the result of the whole operation : {}", result);
                 output = result;
             } catch (final IOException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
             } catch (final URISyntaxException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
             } catch (final OAuthException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
             }
 
         } finally {

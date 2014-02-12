@@ -52,7 +52,6 @@ package com.openexchange.database.internal;
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -60,8 +59,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.internal.wrapping.JDBC4ConnectionReturner;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.ForceLog;
-import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.pooling.PoolingException;
 
@@ -72,7 +69,7 @@ import com.openexchange.pooling.PoolingException;
  */
 public final class DatabaseServiceImpl implements DatabaseService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DatabaseServiceImpl.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseServiceImpl.class);
 
     private final Pools pools;
     private final ConfigDatabaseService configDatabaseService;
@@ -89,32 +86,32 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     private Connection get(final int contextId, final boolean write, final boolean noTimeout) throws OXException {
         final AssignmentImpl assign = assignmentService.getAssignment(contextId);
-        LogProperties.putLogProperty(LogProperties.Name.DATABASE_SCHEMA, ForceLog.valueOf(assign.getSchema()));
+        LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, assign.getSchema());
         return monitor.checkActualAndFallback(pools, assign, noTimeout, write);
     }
 
     private static void back(final Connection con) {
         if (null == con) {
-            LogProperties.putLogProperty(LogProperties.Name.DATABASE_SCHEMA, null);
+            LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, null);
             final OXException e = DBPoolingExceptionCodes.NULL_CONNECTION.create();
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return;
         }
         try {
             con.close();
         } catch (final SQLException e) {
             final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
         } finally {
-            LogProperties.putLogProperty(LogProperties.Name.DATABASE_SCHEMA, null);
+            LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, null);
         }
     }
 
     private static void backFromReading(Connection con) {
         if (null == con) {
-            LogProperties.putLogProperty(LogProperties.Name.DATABASE_SCHEMA, null);
+            LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, null);
             final OXException e = DBPoolingExceptionCodes.NULL_CONNECTION.create();
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return;
         }
         try {
@@ -125,9 +122,9 @@ public final class DatabaseServiceImpl implements DatabaseService {
             con.close();
         } catch (final SQLException e) {
             final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
         } finally {
-            LogProperties.putLogProperty(LogProperties.Name.DATABASE_SCHEMA, null);
+            LogProperties.putProperty(LogProperties.Name.DATABASE_SCHEMA, null);
         }
     }
 
@@ -295,9 +292,9 @@ public final class DatabaseServiceImpl implements DatabaseService {
         } catch (final PoolingException e) {
             DBUtils.close(con);
             final OXException e2 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
-            LOG.error(e2.getMessage(), e2);
+            LOG.error("", e2);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -306,7 +303,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
         try {
             pools.getPool(poolId).backWithoutTimeout(con);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

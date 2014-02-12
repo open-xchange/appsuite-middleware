@@ -50,10 +50,10 @@
 package com.openexchange.groupware.contexts.impl;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * {@link ContextImpl} - The implementation of {@link ContextExtended}.
@@ -76,10 +76,12 @@ public class ContextImpl implements ContextExtended {
     private boolean enabled = true;
     private boolean updating = false;
     private boolean readOnly = false;
-    private final Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
+    private final Map<String, List<String>> attributes;
 
     public ContextImpl(final int contextId) {
+        super();
         this.contextId = contextId;
+        attributes = new ConcurrentHashMap<String, List<String>>();
     }
 
     @Override
@@ -199,16 +201,25 @@ public class ContextImpl implements ContextExtended {
     }
 
     @Override
-    public Map<String, Set<String>> getAttributes() {
+    public Map<String, List<String>> getAttributes() {
         return Collections.unmodifiableMap(attributes);
     }
 
+    /**
+     * Adds given attribute.
+     *
+     * @param attrName The name
+     * @param value The value
+     */
     public void addAttribute(String attrName, String value) {
-        Set<String> set = attributes.get(attrName);
-        if (set == null) {
-            set = new HashSet<String>();
-            attributes.put(attrName, set);
+        List<String> list = attributes.get(attrName);
+        if (list == null) {
+            list = new LinkedList<String>();
+            attributes.put(attrName, list);
         }
-        set.add(value);
+        if (!list.contains(value)) {
+            list.add(value);
+        }
     }
+
 }

@@ -56,12 +56,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.log.LogFactory;
 
 /**
  * This switcher is able to convert a given String into a date using
@@ -71,7 +69,7 @@ import com.openexchange.log.LogFactory;
  */
 public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherWithDelegate {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactSwitcherForSimpleDateFormat.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactSwitcherForSimpleDateFormat.class);
 
     private static interface DateValidator {
 
@@ -111,7 +109,7 @@ public class ContactSwitcherForSimpleDateFormat extends AbstractContactSwitcherW
             final String invalidRegex = pattern.replaceAll("[a-zA-Z]+", "0+");
             return new RegexDateValidator(Pattern.compile(invalidRegex));
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return DEFAULT_VALIDATOR;
         }
     }

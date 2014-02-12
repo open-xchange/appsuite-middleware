@@ -51,9 +51,7 @@ package com.openexchange.freebusy.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.freebusy.provider.FreeBusyProvider;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link FreeBusyProviderRegistry}
@@ -64,7 +62,7 @@ import com.openexchange.log.LogFactory;
  */
 public class FreeBusyProviderRegistry {
 
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FreeBusyProviderRegistry.class));
+    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FreeBusyProviderRegistry.class);
 
     private final List<FreeBusyProvider> providers;
 
@@ -83,7 +81,7 @@ public class FreeBusyProviderRegistry {
      * @param service The service to add
      */
     public void add(FreeBusyProvider service) {
-        LOG.info("adding free/busy provider: " + service);
+        LOG.info("adding free/busy provider: {}", service);
         this.providers.add(service);
     }
 
@@ -93,7 +91,7 @@ public class FreeBusyProviderRegistry {
      * @param service The service to remove
      */
     public void remove(FreeBusyProvider service) {
-        LOG.info("removing free/busy provider: " + service);
+        LOG.info("removing free/busy provider: {}", service);
         this.providers.remove(service);
     }
 

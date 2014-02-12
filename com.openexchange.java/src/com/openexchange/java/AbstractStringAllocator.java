@@ -969,6 +969,20 @@ abstract class AbstractStringAllocator implements Appendable, CharSequence {
     }
 
     /**
+     * Removes the last <code>char</code> in this sequence. This sequence is shortened by one <code>char</code>.
+     * <p>
+     * Note: If the character at the given index is a supplementary character, this method does not remove the entire character. If correct
+     * handling of supplementary characters is required, determine the number of <code>char</code>s to remove by calling
+     * <code>Character.charCount(thisSequence.codePointAt(index))</code>, where <code>thisSequence</code> is this sequence.
+     *
+     * @return This object.
+     * @throws StringIndexOutOfBoundsException if the this sequence is empty
+     */
+    public AbstractStringAllocator deleteLastChar() {
+        return deleteCharAt(count - 1);
+    }
+
+    /**
      * Replaces the characters in a substring of this sequence with characters in the specified <code>String</code>. The substring begins at
      * the specified <code>start</code> and extends to the character at index <code>end - 1</code> or to the end of the sequence if no such
      * character exists. First the characters in the substring are removed and then the specified <code>String</code> is inserted at

@@ -50,125 +50,183 @@
 package com.openexchange.mailaccount;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link MailAccountExceptionCodes} - The error messages for mail account exceptions.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum MailAccountExceptionCodes implements OXExceptionCode {
+public enum MailAccountExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * Unexpected error: %1$s.
      */
-    UNEXPECTED_ERROR(MailAccountExceptionStrings.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR(MailAccountExceptionCodes.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
     /**
      * Cannot find mail account with identifier %1$s for user %2$s in context %3$s.
      */
-    NOT_FOUND(MailAccountExceptionStrings.NOT_FOUND_MSG, CATEGORY_USER_INPUT, 2),
+    NOT_FOUND(MailAccountExceptionCodes.NOT_FOUND_MSG, CATEGORY_USER_INPUT, 2, MailAccountExceptionStrings.NOT_FOUND_MSG_DISPLAY),
     /**
      * Found two mail accounts with same identifier %1$s for user %2$s in context %3$s.
      */
-    CONFLICT(MailAccountExceptionStrings.CONFLICT_MSG, CATEGORY_USER_INPUT, 3),
+    CONFLICT(MailAccountExceptionCodes.CONFLICT_MSG, CATEGORY_CONFLICT, 3),
     /**
      * A SQL error occurred: %1$s.
      */
-    SQL_ERROR(MailAccountExceptionStrings.SQL_ERROR_MSG, CATEGORY_ERROR, 4),
+    SQL_ERROR(MailAccountExceptionCodes.SQL_ERROR_MSG, CATEGORY_ERROR, 4, OXExceptionStrings.SQL_ERROR_MSG),
     /**
      * A host could not be resolved: %1$s.
      */
-    UNKNOWN_HOST_ERROR(MailAccountExceptionStrings.UNKNOWN_HOST_ERROR_MSG, CATEGORY_ERROR, 5),
+    UNKNOWN_HOST_ERROR(MailAccountExceptionCodes.UNKNOWN_HOST_ERROR_MSG, CATEGORY_ERROR, 5),
     /**
      * Denied deletion of default mail account of user %1$s in context %2$s.
      */
-    NO_DEFAULT_DELETE(MailAccountExceptionStrings.NO_DEFAULT_DELETE_MSG, CATEGORY_PERMISSION_DENIED, 6),
+    NO_DEFAULT_DELETE(MailAccountExceptionCodes.NO_DEFAULT_DELETE_MSG, CATEGORY_PERMISSION_DENIED, 6, MailAccountExceptionStrings.NO_DEFAULT_DELETE_MSG_DISPLAY),
     /**
      * Denied update of default mail account of user %1$s in context %2$s.
      */
-    NO_DEFAULT_UPDATE(MailAccountExceptionStrings.NO_DEFAULT_UPDATE_MSG, CATEGORY_PERMISSION_DENIED, 7),
+    NO_DEFAULT_UPDATE(MailAccountExceptionCodes.NO_DEFAULT_UPDATE_MSG, CATEGORY_PERMISSION_DENIED, 7, MailAccountExceptionStrings.NO_DEFAULT_UPDATE_MSG_DISPLAY),
     /**
      * No duplicate default account allowed.
      */
-    NO_DUPLICATE_DEFAULT(MailAccountExceptionStrings.NO_DUPLICATE_DEFAULT_MSG, CATEGORY_USER_INPUT, 8),
+    NO_DUPLICATE_DEFAULT(MailAccountExceptionCodes.NO_DUPLICATE_DEFAULT_MSG, CATEGORY_USER_INPUT, 8, MailAccountExceptionStrings.NO_DUPLICATE_DEFAULT_MSG_DISPLAY),
     /**
      * Password encryption failed for login %1$s on server %2$s (user=%3$s, context=%4$s).
      */
-    PASSWORD_ENCRYPTION_FAILED(MailAccountExceptionStrings.PASSWORD_ENCRYPTION_FAILED_MSG, CATEGORY_ERROR, 9),
+    PASSWORD_ENCRYPTION_FAILED(MailAccountExceptionCodes.PASSWORD_ENCRYPTION_FAILED_MSG, CATEGORY_ERROR, 9),
     /**
      * Password decryption failed for login %1$s on server %2$s (user=%3$s, context=%4$s).
      */
-    PASSWORD_DECRYPTION_FAILED(MailAccountExceptionStrings.PASSWORD_DECRYPTION_FAILED_MSG, CATEGORY_ERROR, 10),
+    PASSWORD_DECRYPTION_FAILED(MailAccountExceptionCodes.PASSWORD_DECRYPTION_FAILED_MSG, CATEGORY_ERROR, 10),
     /**
      * The Unified Mail account already exists for user %1$s in context %2$s.
      */
-    DUPLICATE_UNIFIED_INBOX_ACCOUNT(MailAccountExceptionStrings.DUPLICATE_UNIFIED_INBOX_ACCOUNT_MSG, CATEGORY_USER_INPUT, 11),
+    DUPLICATE_UNIFIED_INBOX_ACCOUNT(MailAccountExceptionCodes.DUPLICATE_UNIFIED_INBOX_ACCOUNT_MSG, CATEGORY_USER_INPUT, 11, MailAccountExceptionStrings.DUPLICATE_UNIFIED_INBOX_ACCOUNT_MSG_DISPLAY),
     /**
-     * Mail account creation failed.
+     * It is not allowed to create a new mail account for Unified Mail with id %1$s.
      */
-    CREATION_FAILED(MailAccountExceptionStrings.CREATION_FAILED_MSG, CATEGORY_USER_INPUT, 12),
+    UNIFIED_INBOX_ACCOUNT_CREATION_FAILED(MailAccountExceptionCodes.UNIFIED_INBOX_ACCOUNT_CREATION_FAILED_MSG, CATEGORY_USER_INPUT, 12, MailAccountExceptionStrings.UNIFIED_INBOX_ACCOUNT_CREATION_FAILED_MSG_DISPLAY),
     /**
-     * Mail account validation failed.
+     * Validation for Unified Mail account failed.
      */
-    VALIDATION_FAILED(MailAccountExceptionStrings.VALIDATION_FAILED_MSG, CATEGORY_USER_INPUT, 13),
+    UNIFIED_INBOX_ACCOUNT_VALIDATION_FAILED(MailAccountExceptionCodes.UNIFIED_INBOX_ACCOUNT_VALIDATION_FAILED_MSG, CATEGORY_USER_INPUT, 13, MailAccountExceptionStrings.UNIFIED_INBOX_ACCOUNT_VALIDATION_FAILED_MSG_DISPLAY),
     /**
      * Multiple mail accounts not enabled for user %1$s in context %2$s.
      */
-    NOT_ENABLED(MailAccountExceptionStrings.NOT_ENABLED_MSG, CATEGORY_PERMISSION_DENIED, 14),
+    NOT_ENABLED(MailAccountExceptionCodes.NOT_ENABLED_MSG, CATEGORY_PERMISSION_DENIED, 14, MailAccountExceptionStrings.NOT_ENABLED_MSG_DISPLAY),
     /**
      * Found two mail accounts with same email address %1$s for user %2$s in context %3$s.
      */
-    CONFLICT_ADDR(MailAccountExceptionStrings.CONFLICT_ADDR_MSG, CATEGORY_USER_INPUT, 15),
+    CONFLICT_ADDR(MailAccountExceptionCodes.CONFLICT_ADDR_MSG, CATEGORY_USER_INPUT, 15, MailAccountExceptionStrings.CONFLICT_ADDR_MSG_DISPLAY),
     /**
      * Invalid mail account name: %1$s
      */
-    INVALID_NAME(MailAccountExceptionStrings.INVALID_NAME_MSG, CATEGORY_USER_INPUT, 16),
+    INVALID_NAME(MailAccountExceptionCodes.INVALID_NAME_MSG, CATEGORY_USER_INPUT, 16, MailAccountExceptionStrings.INVALID_NAME_MSG_DISPLAY),
     /**
      * Duplicate mail account for user %1$s in context %2$s.
      */
-    DUPLICATE_MAIL_ACCOUNT(MailAccountExceptionStrings.DUPLICATE_MAIL_ACCOUNT_MSG, CATEGORY_USER_INPUT, 17),
+    DUPLICATE_MAIL_ACCOUNT(MailAccountExceptionCodes.DUPLICATE_MAIL_ACCOUNT_MSG, CATEGORY_USER_INPUT, 17, MailAccountExceptionStrings.DUPLICATE_MAIL_ACCOUNT_MSG_DISPLAY),
     /**
      * Duplicate transport account for user %1$s in context %2$s.
      */
-    DUPLICATE_TRANSPORT_ACCOUNT(MailAccountExceptionStrings.DUPLICATE_TRANSPORT_ACCOUNT_MSG, CATEGORY_USER_INPUT, 17),
+    DUPLICATE_TRANSPORT_ACCOUNT(MailAccountExceptionCodes.DUPLICATE_TRANSPORT_ACCOUNT_MSG, CATEGORY_ERROR, 17),
     /**
      * Unable to parse mail server URI "%1$s".
      */
-    URI_PARSE_FAILED(MailAccountExceptionStrings.URI_PARSE_FAILED_MSG, CATEGORY_ERROR, 18),
+    URI_PARSE_FAILED(MailAccountExceptionCodes.URI_PARSE_FAILED_MSG, CATEGORY_ERROR, 18, MailAccountExceptionStrings.INVALID_HOST_NAME_MSG_DISPLAY),
     /**
      * Invalid host name: %1$s
      */
-    INVALID_HOST_NAME(MailAccountExceptionStrings.INVALID_HOST_NAME_MSG, CATEGORY_USER_INPUT, 19),
+    INVALID_HOST_NAME(MailAccountExceptionCodes.INVALID_HOST_NAME_MSG, CATEGORY_USER_INPUT, 19, MailAccountExceptionStrings.INVALID_HOST_NAME_MSG_DISPLAY),
     /**
      * Could not connect to mail server "%1$s" for login %2$s
      */
-    VALIDATE_FAILED_MAIL(MailAccountExceptionStrings.VALIDATE_FAILED_MAIL_MSG, CATEGORY_WARNING, 20),
+    VALIDATE_FAILED_MAIL(MailAccountExceptionCodes.VALIDATE_FAILED_MAIL_MSG, CATEGORY_WARNING, 20, MailAccountExceptionStrings.UNABLE_TO_CONNECT_TO_HOST_MSG_DISPLAY),
     /**
      * Could not connect to transport server "%1$s" for login %2$s
      */
-    VALIDATE_FAILED_TRANSPORT(MailAccountExceptionStrings.VALIDATE_FAILED_TRANSPORT_MSG, CATEGORY_WARNING, 21),
+    VALIDATE_FAILED_TRANSPORT(MailAccountExceptionCodes.VALIDATE_FAILED_TRANSPORT_MSG, CATEGORY_WARNING, 21, MailAccountExceptionStrings.UNABLE_TO_CONNECT_TO_HOST_MSG_DISPLAY),
     /**
      * Default port specified for mail protocol "%1$s", but SSL is enabled. Please review if appropriate.
      */
-    DEFAULT_BUT_SECURE_MAIL(MailAccountExceptionStrings.DEFAULT_BUT_SECURE_MAIL_MSG, CATEGORY_WARNING, 22),
+    DEFAULT_BUT_SECURE_MAIL(MailAccountExceptionCodes.DEFAULT_BUT_SECURE_MAIL_MSG, CATEGORY_WARNING, 22, MailAccountExceptionStrings.UNABLE_TO_CONNECT_TO_HOST_MSG_DISPLAY),
     /**
      * Secure port specified for mail protocol "%1$s", but SSL is not enabled. Please review if appropriate.
      */
-    SECURE_BUT_DEFAULT_MAIL(MailAccountExceptionStrings.SECURE_BUT_DEFAULT_MAIL_MSG, CATEGORY_WARNING, 23),
+    SECURE_BUT_DEFAULT_MAIL(MailAccountExceptionCodes.SECURE_BUT_DEFAULT_MAIL_MSG, CATEGORY_WARNING, 23, MailAccountExceptionStrings.UNABLE_TO_CONNECT_TO_HOST_MSG_DISPLAY),
     /**
      * Default port specified for transport protocol "%1$s", but SSL is enabled. Please review if appropriate.
      */
-    DEFAULT_BUT_SECURE_TRANSPORT(MailAccountExceptionStrings.DEFAULT_BUT_SECURE_TRANSPORT_MSG, CATEGORY_WARNING, 24),
+    DEFAULT_BUT_SECURE_TRANSPORT(MailAccountExceptionCodes.DEFAULT_BUT_SECURE_TRANSPORT_MSG, CATEGORY_WARNING, 24, MailAccountExceptionStrings.UNABLE_TO_CONNECT_TO_HOST_MSG_DISPLAY),
     /**
      * Secure port specified for transport protocol "%1$s", but SSL is not enabled. Please review if appropriate.
      */
-    SECURE_BUT_DEFAULT_TRANSPORT(MailAccountExceptionStrings.SECURE_BUT_DEFAULT_TRANSPORT_MSG, CATEGORY_WARNING, 25),
-
+    SECURE_BUT_DEFAULT_TRANSPORT(MailAccountExceptionCodes.SECURE_BUT_DEFAULT_TRANSPORT_MSG, CATEGORY_WARNING, 25, MailAccountExceptionStrings.UNABLE_TO_CONNECT_TO_HOST_MSG_DISPLAY),
+    /**
+     * Mail account creation denied. The host/server name "%1$s" is covered by specified IP range back-list.
+     */
+    BLACKLISTED_SERVER(MailAccountExceptionCodes.BLACKLISTED_SERVER_MSG, CATEGORY_WARNING, 25, MailAccountExceptionStrings.BLACKLISTED_SERVER_MSG_DISPLAY),
     ;
 
     private static final String PREFIX = "ACC";
+
+    private static final String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s.";
+
+    private static final String NOT_FOUND_MSG = "Cannot find mail account with identifier %1$s for user %2$s in context %3$s.";
+
+    private static final String CONFLICT_MSG = "Found two mail accounts with same identifier %1$s for user %2$s in context %3$s.";
+
+    private static final String SQL_ERROR_MSG = "A SQL error occurred: %1$s.";
+
+    private static final String UNKNOWN_HOST_ERROR_MSG = "A host could not be resolved: %1$s.";
+
+    private static final String NO_DEFAULT_DELETE_MSG = "Denied deletion of default mail account of user %1$s in context %2$s.";
+
+    private static final String NO_DEFAULT_UPDATE_MSG = "Denied update of default mail account of user %1$s in context %2$s.";
+
+    private static final String NO_DUPLICATE_DEFAULT_MSG = "No duplicate default account allowed.";
+
+    private static final String PASSWORD_ENCRYPTION_FAILED_MSG = "Password encryption failed for login %1$s on server %2$s (user=%3$s, context=%4$s).";
+
+    private static final String PASSWORD_DECRYPTION_FAILED_MSG = "Password decryption failed for login %1$s on server %2$s (user=%3$s, context=%4$s).";
+
+    private static final String DUPLICATE_UNIFIED_INBOX_ACCOUNT_MSG = "The Unified Mail account already exists for user %1$s in context %2$s.";
+
+    private static final String UNIFIED_INBOX_ACCOUNT_CREATION_FAILED_MSG = "It is not allowed to create a new mail account for Unified Mail with id %1$s.";
+
+    private static final String UNIFIED_INBOX_ACCOUNT_VALIDATION_FAILED_MSG = "Validation for Unified Mail account failed.";
+
+    private static final String NOT_ENABLED_MSG = "Multiple mail accounts not enabled for user %1$s in context %2$s.";
+
+    private static final String CONFLICT_ADDR_MSG = "Found two mail accounts with same E-Mail address %1$s for user %2$s in context %3$s.";
+
+    private static final String INVALID_NAME_MSG = "Invalid mail account name: %1$s";
+
+    private static final String DUPLICATE_MAIL_ACCOUNT_MSG = "Duplicate mail account for user %1$s in context %2$s.";
+
+    private static final String DUPLICATE_TRANSPORT_ACCOUNT_MSG = "Duplicate transport account for user %1$s in context %2$s.";
+
+    private static final String URI_PARSE_FAILED_MSG = "Unable to parse mail server URI \"%1$s\".";
+
+    private static final String INVALID_HOST_NAME_MSG = "Invalid host name: %1$s";
+
+    private static final String VALIDATE_FAILED_MAIL_MSG = "Could not connect to mail server \"%1$s\" for login %2$s";
+
+    private static final String VALIDATE_FAILED_TRANSPORT_MSG = "Could not connect to transport server \"%1$s\" for login %2$s";
+
+    private static final String DEFAULT_BUT_SECURE_MAIL_MSG = "Default port specified for mail protocol \"%1$s\", but SSL is enabled. Please review if appropriate.";
+
+    private static final String SECURE_BUT_DEFAULT_MAIL_MSG = "Secure port specified for mail protocol \"%1$s\", but SSL is not enabled. Please review if appropriate.";
+
+    private static final String DEFAULT_BUT_SECURE_TRANSPORT_MSG = "Default port specified for transport protocol \"%1$s\", but SSL is enabled. Please review if appropriate.";
+
+    private static final String SECURE_BUT_DEFAULT_TRANSPORT_MSG = "Secure port specified for transport protocol \"%1$s\", but SSL is not enabled. Please review if appropriate.";
+
+    private static final String BLACKLISTED_SERVER_MSG = "Mail account creation denied. The host/server name \"%1$s\" is covered by specified IP range back-list.";
 
     /**
      * Checks if specified {@code OXException}'s prefix is equal to this {@code OXExceptionCode} enumeration.
@@ -199,6 +257,11 @@ public enum MailAccountExceptionCodes implements OXExceptionCode {
     private final int number;
 
     /**
+     * Message displayed to the user
+     */
+    private String displayMessage;
+
+    /**
      * Default constructor.
      *
      * @param message message.
@@ -206,9 +269,22 @@ public enum MailAccountExceptionCodes implements OXExceptionCode {
      * @param number number.
      */
     private MailAccountExceptionCodes(final String message, final Category category, final int number) {
+        this(message, category, number, null);
+    }
+
+    /**
+     * Default constructor.
+     *
+     * @param message
+     * @param category
+     * @param number
+     * @param displayMessage
+     */
+    private MailAccountExceptionCodes(final String message, final Category category, final int number, final String displayMessage) {
         this.message = message;
         this.category = category;
         this.number = number;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -226,10 +302,6 @@ public enum MailAccountExceptionCodes implements OXExceptionCode {
         return number;
     }
 
-    public String getHelp() {
-        return null;
-    }
-
     @Override
     public String getMessage() {
         return message;
@@ -238,6 +310,14 @@ public enum MailAccountExceptionCodes implements OXExceptionCode {
     @Override
     public boolean equals(final OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDisplayMessage() {
+        return this.displayMessage;
     }
 
     /**

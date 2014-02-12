@@ -49,7 +49,6 @@
 
 package com.openexchange.threadpool.internal;
 
-import java.text.MessageFormat;
 import java.util.AbstractCollection;
 import java.util.Arrays;
 import java.util.Collection;
@@ -83,15 +82,13 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import org.slf4j.MDC;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.log.Log;
-import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.MdcProvider;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.TaskWrapper;
 import com.openexchange.threadpool.ThreadRenamer;
-import com.openexchange.threadpool.Trackable;
 import com.openexchange.threadpool.osgi.ThreadPoolServiceRegistry;
 
 /**
@@ -239,7 +236,7 @@ import com.openexchange.threadpool.osgi.ThreadPoolServiceRegistry;
  */
 public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implements ScheduledExecutorService {
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CustomThreadPoolExecutor.class));
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CustomThreadPoolExecutor.class);
 
     static final Object PRESENT = new Object();
 
@@ -428,16 +425,23 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         if (null != t) {
             // Log spawning of a new thread
             if (null != firstTask) {
-                final Object task;
-                if (firstTask instanceof CustomFutureTask) {
-                    final Task<?> tsk = ((CustomFutureTask<?>) firstTask).getTask();
-                    task = tsk instanceof TaskWrapper ? ((TaskWrapper) tsk).getWrapped() : tsk;
-                } else if (firstTask instanceof ScheduledFutureTask) {
-                    task = ((ScheduledFutureTask<?>) firstTask).getWrapped();
-                } else {
-                    task = firstTask;
-                }
-                LOG.debug(new StringBuilder("Spawned new thread for ").append(task.getClass().getName()), new Throwable("Thread-Creation-Watcher"));
+                final Object stringer = new Object() {
+
+                    @Override
+                    public String toString() {
+                        final Object task;
+                        if (firstTask instanceof CustomFutureTask) {
+                            final Task<?> tsk = ((CustomFutureTask<?>) firstTask).getTask();
+                            task = tsk instanceof TaskWrapper ? ((TaskWrapper) tsk).getWrapped() : tsk;
+                        } else if (firstTask instanceof ScheduledFutureTask) {
+                            task = ((ScheduledFutureTask<?>) firstTask).getWrapped();
+                        } else {
+                            task = firstTask;
+                        }
+                        return task.getClass().getName();
+                    }
+                };
+                LOG.debug("Spawned new thread for {}", stringer, new Throwable("Thread-Creation-Watcher"));
             }
             // Continue initialization worker
             w.thread = t;
@@ -563,9 +567,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 try {
                     return workQueue.take();
                 } catch (final InterruptedException ignore) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(ignore.getMessage(), ignore);
-                    }
+                    LOG.debug("", ignore);
                 }
                 break;
             }
@@ -788,6 +790,8 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
         /**
          * Run a single task between before/after methods.
+         *
+         * @throws RuntimeException If task execution fails unexpectedly
          */
         private void runTask(final Runnable task) {
             final ReentrantLock runLock = this.runLock;
@@ -805,7 +809,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
 
                 // Prepare thread
                 Thread.interrupted(); // clear interrupt status on entry
-                LogProperties.removeLogProperties(); // Drop possible log properties
+                MDC.clear(); // Drop possible log properties
 
                 boolean ran = false;
                 beforeExecute(thread, task);
@@ -842,6 +846,9 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 }
             } catch (final InterruptedException ie) {
                 // fall through
+            } catch (final RuntimeException re) {
+                // Task execution failed horribly
+                LOG.error("Task execution failed unexpectedly", re);
             } finally {
                 workerDone(this);
             }
@@ -1049,7 +1056,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                             try {
                                 command.run();
                             } catch (final Exception e) {
-                                LOG.error(e.getMessage(), e);
+                                LOG.error("", e);
                             }
                             // rejectCustom(command);
                             break;
@@ -1058,11 +1065,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                     }
                 }
             } catch (final Exception e) {
-                LOG.fatal(
-                    MessageFormat.format(
-                        "{0} thread aborted execution due to an exception! TimerService is no more active!",
-                        currentThread.getName()),
-                    e);
+                LOG.error("{} thread aborted execution due to an exception! TimerService is no more active!", currentThread.getName(), e);
             }
         }
     }
@@ -1231,7 +1234,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             }
         }
 
-        void addTask(final long number, final Thread thread, final Props logProperties) {
+        void addTask(final long number, final Thread thread, final Map<String, Object> logProperties) {
             final ReentrantLock lock = this.lock;
             lock.lock();
             try {
@@ -1282,11 +1285,11 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                             }
                             if (taskInfo.stamp < max) {
                                 final Thread thread = taskInfo.t;
-                                final Props logProperties = taskInfo.logProperties;
+                                final Map<String, Object> logProperties = taskInfo.logProperties;
                                 logBuilder.setLength(0);
                                 if (null != logProperties) {
                                     final Map<String, String> sorted = new TreeMap<String, String>();
-                                    for (final Map.Entry<String, Object> entry : logProperties.asMap().entrySet()) {
+                                    for (final Map.Entry<String, Object> entry : logProperties.entrySet()) {
                                         final String propertyName = entry.getKey();
                                         final Object value = entry.getValue();
                                         if (null != value) {
@@ -1302,26 +1305,20 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                                 logBuilder.append("\" exceeds max. running time of ").append(maxRunningTime);
                                 logBuilder.append("msec -> Processing time: ").append(System.currentTimeMillis() - taskInfo.stamp);
                                 logBuilder.append("msec");
-                                if (Log.appendTraceToMessage()) {
-                                    logBuilder.append(lineSeparator);
-                                    appendStackTrace(thread.getStackTrace(), logBuilder);
-                                    LOG.info(logBuilder);
-                                } else {
-                                    final Throwable t = new FastThrowable();
-                                    t.setStackTrace(thread.getStackTrace());
-                                    LOG.info(logBuilder, t);
-                                }
+                                final Throwable t = new FastThrowable();
+                                t.setStackTrace(thread.getStackTrace());
+                                LOG.info(logBuilder.toString(), t);
                             }
                         }
                         if (poisoned) {
                             return;
                         }
                     } catch (final Exception e) {
-                        LOG.fatal("Watcher run aborted due to an exception!", e);
+                        LOG.error("Watcher run aborted due to an exception!", e);
                     }
                 }
             } catch (final Exception e) {
-                LOG.fatal("Watcher aborted execution due to an exception! Watcher is no more active!", e);
+                LOG.error("Watcher aborted execution due to an exception! Watcher is no more active!", e);
             }
         }
 
@@ -1358,13 +1355,13 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     private static final class TaskInfo {
         final Thread t;
         final long stamp;
-        final Props logProperties;
+        final Map<String, Object> logProperties;
 
         TaskInfo(final Thread t) {
             this(t, null);
         }
 
-        TaskInfo(final Thread t, final Props logProperties) {
+        TaskInfo(final Thread t, final Map<String, Object> logProperties) {
             super();
             this.t = t;
             stamp = System.currentTimeMillis();
@@ -1626,7 +1623,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 }
             };
         }
-        final CustomFutureTask<T> ftask = new CustomFutureTask<T>(task);
+        final CustomFutureTask<T> ftask = new CustomFutureTask<T>(task, callable instanceof MdcProvider ? ((MdcProvider) callable).getMdc() : MDC.getCopyOfContextMap());
         execute(ftask);
         return ftask;
     }
@@ -1634,11 +1631,10 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     @Override
     protected void afterExecute(final Runnable r, final Throwable throwable) {
         super.afterExecute(r, throwable);
-        LogProperties.removeLogProperties(); // Drop possible log properties
+        MDC.clear(); // Drop possible log properties
         if (r instanceof CustomFutureTask<?>) {
             final CustomFutureTask<?> customFutureTask = (CustomFutureTask<?>) r;
-            final Trackable trackable = customFutureTask.getTrackable();
-            if (null != trackable) {
+            if (customFutureTask.isTrackable()) {
                 activeTaskWatcher.removeTask(customFutureTask.getNumber());
             }
             customFutureTask.getTask().afterExecute(throwable);
@@ -1655,18 +1651,28 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     @Override
     protected void beforeExecute(final Thread thread, final Runnable r) {
         activeCount.incrementAndGet();
+        thread.setUncaughtExceptionHandler(CustomUncaughtExceptionhandler.getInstance());
         if (r instanceof CustomFutureTask<?>) {
             final CustomFutureTask<?> customFutureTask = (CustomFutureTask<?>) r;
             final Task<?> task = customFutureTask.getTask();
             task.setThreadName((ThreadRenamer) thread);
             task.beforeExecute(thread);
-            final Trackable trackable = customFutureTask.getTrackable();
-            if (null != trackable) {
-                final Props props = trackable.optLogProperties();
-                activeTaskWatcher.addTask(customFutureTask.getNumber(), thread, props);
-                if (null != props) {
-                    LogProperties.getLogProperties(thread).putAll(props);
+            // MDC map for executing thread
+            {
+                final Map<String, Object> mdc = customFutureTask.getMdc();
+                if (null != mdc) {
+                    MDC.setContextMap(mdc);
                 }
+            }
+            // Check if trackable
+            if (customFutureTask.isTrackable()) {
+                activeTaskWatcher.addTask(customFutureTask.getNumber(), thread, customFutureTask.getMdc());
+            }
+        } else if (r instanceof MdcProvider) {
+            // MDC map for executing thread
+            final Map<String, Object> mdc = ((MdcProvider) r).getMdc();
+            if (null != mdc) {
+                MDC.setContextMap(mdc);
             }
         } else if (r instanceof ScheduledFutureTask<?>) {
             ((ThreadRenamer) thread).renamePrefix("OXTimer");
@@ -1688,12 +1694,14 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         if (null == command) {
             throw new NullPointerException();
         }
+
+        final Runnable mdcCommand = command instanceof MdcProvider ? command : new MDCProvidingRunnable(command, MDC.getCopyOfContextMap());
         if (blocking) {
             if (runState != RUNNING) {
-                rejectCustom(command);
+                rejectCustom(mdcCommand);
                 return;
             }
-            if (poolSize < corePoolSize && addIfUnderCorePoolSize(command)) {
+            if (poolSize < corePoolSize && addIfUnderCorePoolSize(mdcCommand)) {
                 return;
             }
             /*
@@ -1702,7 +1710,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             boolean acquired = false;
             do {
                 try {
-                    workQueue.put(command);
+                    workQueue.put(mdcCommand);
                     acquired = true;
                 } catch (final InterruptedException e) {
                     /*
@@ -1713,24 +1721,24 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         } else {
             for (;;) {
                 if (runState != RUNNING) {
-                    rejectCustom(command);
+                    rejectCustom(mdcCommand);
                     return;
                 }
-                if (poolSize < corePoolSize && addIfUnderCorePoolSize(command)) {
+                if (poolSize < corePoolSize && addIfUnderCorePoolSize(mdcCommand)) {
                     return;
                 }
                 /*
                  * Non-blocking behavior, just offer and accept a possible rejected execution exception
                  */
-                if (workQueue.offer(command)) {
+                if (workQueue.offer(mdcCommand)) {
                     return;
                 }
-                final Runnable r = addIfUnderMaximumPoolSize(command);
-                if (r == command) {
+                final Runnable r = addIfUnderMaximumPoolSize(mdcCommand);
+                if (r == mdcCommand) {
                     return;
                 }
                 if (null == r) {
-                    rejectCustom(command);
+                    rejectCustom(mdcCommand);
                     return;
                 }
                 // else retry
@@ -2465,6 +2473,31 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 e.getQueue().poll();
                 e.execute(r);
             }
+        }
+    }
+
+    /**
+     * Enhances a {@link Runnable} by MDC properties.
+     */
+    private static final class MDCProvidingRunnable implements Runnable, MdcProvider {
+
+        private final Runnable delegate;
+        private final Map<String, Object> mdc;
+
+        MDCProvidingRunnable(Runnable delegate, Map<String, Object> mdc) {
+            super();
+            this.delegate = delegate;
+            this.mdc = mdc;
+        }
+
+        @Override
+        public Map<String, Object> getMdc() {
+            return mdc;
+        }
+
+        @Override
+        public void run() {
+            delegate.run();
         }
     }
 

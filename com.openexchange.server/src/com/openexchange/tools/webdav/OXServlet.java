@@ -60,7 +60,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
 import com.openexchange.ajax.AJAXServlet;
@@ -69,7 +68,6 @@ import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.log.LogFactory;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.internal.LoginPerformer;
@@ -94,7 +92,7 @@ public abstract class OXServlet extends WebDavServlet {
 
     private static final long serialVersionUID = 301910346402779362L;
 
-    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OXServlet.class));
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXServlet.class);
 
     /**
      * Simple {@link LoginRequest} implementation.
@@ -270,16 +268,14 @@ public abstract class OXServlet extends WebDavServlet {
             return;
         }
         try {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Entering HTTP sub method. Session: " + getSession(req));
-            }
+            LOG.trace("Entering HTTP sub method. Session: {}", getSession(req));
             super.service(req, resp);
         } catch (final ServletException e) {
             throw e;
         } catch (final IOException e) {
             throw e;
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final ServletException se = new ServletException(e.getMessage(), e);
             throw se;
         }
@@ -326,7 +322,7 @@ public abstract class OXServlet extends WebDavServlet {
             try {
                 session = findSessionByCookie(req, resp);
             } catch (OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
                 return false;
             }
@@ -342,7 +338,7 @@ public abstract class OXServlet extends WebDavServlet {
                     loginRequest = customizer.modifyLogin(loginRequest);
                 }
             } catch (final OXException e) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 addUnauthorizedHeader(req, resp);
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
                 return false;
@@ -365,7 +361,7 @@ public abstract class OXServlet extends WebDavServlet {
                     addUnauthorizedHeader(req, resp);
                     resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
                 } else {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
                 }
                 return false;
@@ -379,9 +375,7 @@ public abstract class OXServlet extends WebDavServlet {
              */
             final String address = req.getRemoteAddr();
             if (null == address || !address.equals(session.getLocalIp())) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Request to server denied for session: " + session.getSessionID() + ". in WebDAV XML interface. Client login IP changed from " + session.getLocalIp() + " to " + address + '.');
-                }
+                LOG.info("Request to server denied for session: {}. in WebDAV XML interface. Client login IP changed from {} to {}{}", session.getSessionID(), session.getLocalIp(), address, '.');
                 addUnauthorizedHeader(req, resp);
                 removeSession(session.getSessionID());
                 removeCookie(req, resp, COOKIE_SESSIONID);
@@ -469,9 +463,7 @@ public abstract class OXServlet extends WebDavServlet {
     private static LoginRequest parseLogin(final HttpServletRequest req, final Interface face) throws OXException {
         final String auth = req.getHeader(Header.AUTH_HEADER);
         if (null == auth) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Authorization header missing.");
-            }
+            LOG.debug("Authorization header missing.");
             throw WebdavExceptionCode.MISSING_HEADER_FIELD.create("Authorization");
         }
         if (com.openexchange.tools.servlet.http.Authorization.checkForBasicAuthorization(auth)) {
@@ -515,9 +507,7 @@ public abstract class OXServlet extends WebDavServlet {
          */
         final int pos = auth.indexOf(' ');
         final String mech = pos > 0 ? auth.substring(0, pos) : auth;
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Unsupported Authentication header.");
-        }
+        LOG.debug("Unsupported Authentication header.");
         throw WebdavExceptionCode.UNSUPPORTED_AUTH_MECH.create(mech);
     }
 

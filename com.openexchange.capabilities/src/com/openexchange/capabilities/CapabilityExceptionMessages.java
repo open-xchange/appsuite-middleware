@@ -59,18 +59,6 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class CapabilityExceptionMessages implements LocalizableStrings {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
-    // A JSON error occurred: %1$s
-    public static final String JSON_ERROR_MSG = "A JSON error occurred: %1$s";
-
-    // A SQL error occurred: %1$s
-    public static final String SQL_ERROR_MSG = "A SQL error occurred: %1$s";
-
     /**
      * Initializes a new {@link CapabilityExceptionMessages}.
      */

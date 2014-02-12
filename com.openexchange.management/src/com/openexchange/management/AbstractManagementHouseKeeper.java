@@ -59,22 +59,22 @@ import com.openexchange.server.ServiceLookup;
  * {@link AbstractManagementHouseKeeper} - Housekeeper for {@link ManagementObject}s. Should be used as bundle-wide singleton so classes can
  * register their {@link ManagementObject}s while the Activators take care of exposing or concealing those objects during bundle start and
  * stop. Activators have to initialize the instances with a ServiceLookup instance before trying to expose objects.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public abstract class AbstractManagementHouseKeeper {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(AbstractManagementHouseKeeper.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractManagementHouseKeeper.class);
 
     private ServiceLookup serviceLookup = null;
 
     private boolean exposed = false;
 
-    private ConcurrentHashMap<ObjectName, ManagementObject<?>> managementObjects;
+    private final ConcurrentHashMap<ObjectName, ManagementObject<?>> managementObjects;
 
     /**
      * Initializes a new {@link AbstractManagementHouseKeeper}.
-     * 
+     *
      * @param managementObjects
      */
     protected AbstractManagementHouseKeeper() {
@@ -84,7 +84,7 @@ public abstract class AbstractManagementHouseKeeper {
 
     /**
      * Initialize the HouseKeeper by setting the needed ServiceLookup instance.
-     * 
+     *
      * @param serviceLookup The needed ServiceLookup instance.
      */
     public void initialize(ServiceLookup serviceLookup) {
@@ -102,7 +102,7 @@ public abstract class AbstractManagementHouseKeeper {
 
     /**
      * Add a new ManagementObject to the Housekeeper
-     * 
+     *
      * @param managementObject The object to add
      * @return true if the object was successfully added, false if an Object with the same name already exists.
      */
@@ -113,7 +113,7 @@ public abstract class AbstractManagementHouseKeeper {
 
     /**
      * Add a new ManagementObject to the Housekeeper
-     * 
+     *
      * @param managementObject The object to add
      * @return true if the object was successfully added, false if an Object with the same name already exists.
      */
@@ -124,7 +124,7 @@ public abstract class AbstractManagementHouseKeeper {
 
     /**
      * Expose all known {@link ManagementObject}s
-     * 
+     *
      * @throws OXException
      */
     public void exposeManagementObjects() throws OXException {
@@ -141,7 +141,7 @@ public abstract class AbstractManagementHouseKeeper {
 
     /**
      * Expose all known {@link ManagementObject}s
-     * 
+     *
      * @throws OXException
      */
     public void concealManagementObjects() throws OXException {
@@ -158,7 +158,7 @@ public abstract class AbstractManagementHouseKeeper {
 
     /**
      * Get an instance of the ManagementService
-     * 
+     *
      * @return an instance of the ManagementService
      * @throws RealtimeException if the service can't be found
      */

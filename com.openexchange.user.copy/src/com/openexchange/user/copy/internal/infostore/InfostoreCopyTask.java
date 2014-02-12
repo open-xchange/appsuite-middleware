@@ -63,7 +63,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.groupware.Types;
@@ -74,7 +73,6 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.file.external.QuotaFileStorage;
 import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 import com.openexchange.tools.sql.DBUtils;
@@ -95,7 +93,7 @@ import com.openexchange.user.copy.internal.user.UserCopyTask;
  */
 public class InfostoreCopyTask implements CopyUserTaskService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreCopyTask.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreCopyTask.class);
 
     private static final String SELECT_INFOSTORE_MASTERS =
         "SELECT " +
@@ -269,7 +267,7 @@ public class InfostoreCopyTask implements CopyUserTaskService {
                     try {
                         is = srcFileStorage.getFile(location);
                         if (is == null) {
-                            LOG.warn("Did not find file for infostore document " + master.getId() + " (" + master.getFileName() + ").");
+                            LOG.warn("Did not find file for infostore document {} ({}).", master.getId(), master.getFileName());
                             continue;
                         }
 

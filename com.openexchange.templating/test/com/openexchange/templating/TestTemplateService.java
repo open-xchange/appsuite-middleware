@@ -55,10 +55,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import com.openexchange.config.SimConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.SimUser;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.MutableUserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.session.SimSession;
@@ -83,9 +89,17 @@ public class TestTemplateService extends TestCase {
     private FolderObject privateTemplateFolder;
     private FolderObject globalTemplateFolder;
 
-    @Override
+    @Mock
+    private Context context;
+
+    @Mock
+    private User user;
+
+    @Before
     public void setUp() throws Exception {
         super.setUp();
+
+        MockitoAnnotations.initMocks(this);
 
         configService = new SimConfigurationService();
         configService.stringProperties.put("com.openexchange.templating.path", "test-resources");
@@ -114,11 +128,11 @@ public class TestTemplateService extends TestCase {
         noInfostore.setInfostore(false);
 
         SimSession simSession = new SimSession(1, 1);
-        session = new ServerSessionAdapter(simSession, null, new SimUser(1), userConfig, new UserPermissionBits(UserPermissionBits.INFOSTORE, 1, 1));
-        sessionWithoutInfostore = new ServerSessionAdapter(simSession, null, null, noInfostore, new UserPermissionBits(0, 1, 1));
+        session = new ServerSessionAdapter(simSession, context, new SimUser(1), userConfig, new UserPermissionBits(UserPermissionBits.INFOSTORE, 1, 1));
+        sessionWithoutInfostore = new ServerSessionAdapter(simSession, context, user, noInfostore, new UserPermissionBits(0, 1, 1));
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         configService = null;
         templateService = null;

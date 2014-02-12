@@ -77,7 +77,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
     /**
      * The logger.
      */
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Activator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AJPv13Activator.class);
 
     private volatile List<Initialization> inits;
 
@@ -149,9 +149,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
             for (final Initialization initialization : inits) {
                 initialization.start();
             }
-            if (LOG.isInfoEnabled()) {
-                LOG.info("AJP server successfully started.");
-            }
+            LOG.info("AJP server successfully started.");
             /*
              * Start trackers
              */
@@ -163,7 +161,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
             final HttpServiceImpl http = new HttpServiceImpl();
             registerService(HttpService.class, http);
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Activator.class)).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(AJPv13Activator.class).error("", e);
             throw e;
         }
     }
@@ -179,15 +177,13 @@ public final class AJPv13Activator extends HousekeepingActivator {
                 }
                 this.inits = null;
             }
-            if (LOG.isInfoEnabled()) {
-                LOG.info("AJP server successfully stopped.");
-            }
+            LOG.info("AJP server successfully stopped.");
             /*
              * Clear service registry
              */
             Services.setServiceLookup(null);
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Activator.class)).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(AJPv13Activator.class).error("", e);
             throw e;
         }
     }

@@ -51,11 +51,9 @@ package com.openexchange.ajax.itip.actions;
 
 import java.util.List;
 import java.util.TimeZone;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.itip.ITipAnalysisWriter;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.calendar.itip.ITipAnalysis;
@@ -75,22 +73,19 @@ public class AnalyzeAction extends AbstractITipAction {
 
     @Override
     protected Object process(List<ITipAnalysis> analysis, AJAXRequestData request, ServerSession session, TimeZone tz) {
-        JSONArray array = new JSONArray();
+        JSONArray array = new JSONArray(analysis.size());
 
-        ITipAnalysisWriter writer = new ITipAnalysisWriter(tz);
+        ITipAnalysisWriter writer = new ITipAnalysisWriter(tz, session);
         for (ITipAnalysis anAnalysis : analysis) {
             JSONObject object = new JSONObject();
             try {
                 writer.write(anAnalysis, object);
             } catch (JSONException e) {
-                LOG.error(e.getMessage(), e); // Shouldn't happen
+                LOG.error("", e); // Shouldn't happen
             }
             array.put(object);
         }
-       return array;
+        return array;
     }
-
-
-
 
 }

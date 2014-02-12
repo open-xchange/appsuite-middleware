@@ -95,7 +95,7 @@ public class Activator extends HousekeepingActivator {
     public synchronized void registerSubscribeService() {
         if (null == serviceRegistration) {
             serviceRegistration = context.registerService(SubscribeService.class, new YahooSubscribeService(this), null);
-            com.openexchange.log.Log.loggerFor(Activator.class).info("YahooSubscribeService was started");
+            org.slf4j.LoggerFactory.getLogger(Activator.class).info("YahooSubscribeService was started");
         }
     }
 
@@ -107,7 +107,7 @@ public class Activator extends HousekeepingActivator {
         if (null != serviceRegistration) {
             serviceRegistration.unregister();
             this.serviceRegistration = null;
-            com.openexchange.log.Log.loggerFor(Activator.class).info("YahooSubscribeService was stopped");
+            org.slf4j.LoggerFactory.getLogger(Activator.class).info("YahooSubscribeService was stopped");
         }
     }
 

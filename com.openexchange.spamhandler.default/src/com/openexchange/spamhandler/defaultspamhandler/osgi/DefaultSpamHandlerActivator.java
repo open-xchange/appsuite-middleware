@@ -66,8 +66,7 @@ import com.openexchange.spamhandler.defaultspamhandler.Services;
  */
 public final class DefaultSpamHandlerActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DefaultSpamHandlerActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultSpamHandlerActivator.class);
 
     /**
      * Initializes a new {@link DefaultSpamHandlerActivator}
@@ -89,7 +88,7 @@ public final class DefaultSpamHandlerActivator extends HousekeepingActivator {
             dictionary.put("name", DefaultSpamHandler.getInstance().getSpamHandlerName());
             registerService(SpamHandler.class, DefaultSpamHandler.getInstance(), dictionary);
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
 
@@ -101,7 +100,7 @@ public final class DefaultSpamHandlerActivator extends HousekeepingActivator {
             cleanUp();
             Services.setServiceLookup(null);
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
     }

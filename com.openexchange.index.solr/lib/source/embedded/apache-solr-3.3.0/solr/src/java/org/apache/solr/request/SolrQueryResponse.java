@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 @Deprecated
 public class SolrQueryResponse extends org.apache.solr.response.SolrQueryResponse 
 {
-  private static Logger log = LoggerFactory.getLogger(SolrQueryResponse.class.getName());
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(SolrQueryResponse.class.getName());
   
   public SolrQueryResponse() {
     super();

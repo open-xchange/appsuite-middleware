@@ -51,13 +51,11 @@ package com.openexchange.secret.recovery.impl;
 
 import java.security.GeneralSecurityException;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.secret.SecretExceptionCodes;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
@@ -75,9 +73,7 @@ import com.openexchange.user.UserService;
  */
 public class FastSecretInconsistencyDetector implements SecretInconsistencyDetector, SecretMigrator, EncryptedItemCleanUpService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FastSecretInconsistencyDetector.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FastSecretInconsistencyDetector.class);
 
     private static final String PROPERTY = "com.openexchange.secret.recovery.fast.token";
 
@@ -107,9 +103,10 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
         }
 
         // Continue with non-empty secret
-        final Set<String> token = session.getUser().getAttributes().get(PROPERTY);
+        final User user = session.getUser();
+        final Set<String> token = user.getAttributes().get(PROPERTY);
         if (token == null || token.isEmpty()) {
-            saveNewToken(session.getUser(), secret, session.getContext());
+            saveNewToken(user, secret, session.getContext());
             return null;
         }
 
@@ -120,7 +117,7 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
         if (detector.hasEncryptedItems(session)) {
             return "Could not decrypt token";
         }
-        saveNewToken(session.getUser(), secret, session.getContext());
+        saveNewToken(user, secret, session.getContext());
         return null;
     }
 
@@ -133,11 +130,7 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
             } catch (final GeneralSecurityException inner) {
                 // Ignore
             }
-            if (DEBUG) {
-                final String message = "Could not decrypt fast-crypt token from user's attributes.";
-                final Throwable t = new Throwable(message);
-                LOG.debug(message, t);
-            }
+            LOG.debug("Could not decrypt fast-crypt token from user's attributes.", new Throwable());
             return false;
         }
     }
@@ -146,13 +139,9 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
         try {
             final String encrypted = cryptoService.encrypt(TEST_STRING, secret);
             userService.setAttribute(PROPERTY, encrypted, user.getId(), context);
-            if (DEBUG) {
-                final String message = "Saved fast-crypt token in user's attributes: " + encrypted;
-                final Throwable t = new Throwable(message);
-                LOG.debug(message, t);
-            }
+            LOG.debug("Saved fast-crypt token in user''s attributes: {}", encrypted, new Throwable());
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

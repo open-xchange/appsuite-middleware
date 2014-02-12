@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import org.slf4j.Logger;
 import com.openexchange.contact.storage.ldap.mapping.LdapMapper;
 import com.openexchange.contact.storage.ldap.mapping.LdapMapping;
 import com.openexchange.exception.OXException;
@@ -73,7 +74,7 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
  */
 public class SearchFilter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(SearchFilter.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SearchFilter.class);
 
     private final Locale locale;
     private final SearchTerm<?> term;
@@ -127,7 +128,7 @@ public class SearchFilter {
          */
         LdapMapping<? extends Object> mapping = LdapMapper.GENERIC.getMapping(term);
         if (null == mapping) {
-            LOG.debug("No mapping for term '" + term.toString() + "' available, excluding from search filter.");
+            LOG.debug("No mapping for term '{}' available, excluding from search filter.", term);
             return true;
         }
         /*

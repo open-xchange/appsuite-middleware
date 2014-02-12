@@ -1,7 +1,6 @@
 
 LIBPATH=@libDir@
 PROPERTIESDIR=@propertiesdir@
-LOGGINGPROPERTIES=@loggingproperties@
 OSGIPATH=@oxgroupwaresysconfdir@/osgi
 
 # Defines the Java options for the groupware Java virtual machine.

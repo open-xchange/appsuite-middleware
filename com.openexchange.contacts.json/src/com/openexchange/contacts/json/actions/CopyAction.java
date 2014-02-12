@@ -50,7 +50,6 @@
 package com.openexchange.contacts.json.actions;
 
 import java.sql.Connection;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -71,7 +70,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.links.Links;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -90,7 +88,7 @@ requestBody = "",
 responseDescription = "")
 public class CopyAction extends ContactAction {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CopyAction.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CopyAction.class);
 
     /**
      * Initializes a new {@link CopyAction}.
@@ -179,7 +177,7 @@ public class CopyAction extends ContactAction {
                         folderId,
                         ctx.getContextId());
                 } else {
-                    LOG.error("Invalid link retrieved from Links.getAllLinksFromObject()." + " Neither first nor second ID matches!");
+                    LOG.error("Invalid link retrieved from Links.getAllLinksFromObject(). Neither first nor second ID matches!");
                     continue;
                 }
                 Links.performLinkStorage(copy, user.getId(), user.getGroups(), session, writeCon);

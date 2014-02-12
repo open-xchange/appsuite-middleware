@@ -58,7 +58,6 @@ import java.util.regex.Pattern;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
@@ -68,7 +67,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -81,7 +79,7 @@ public class APIResponseRenderer implements ResponseRenderer {
     /**
      * The logger constant.
      */
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(APIResponseRenderer.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(APIResponseRenderer.class);
 
     private static final String JSONP = "jsonp";
 
@@ -176,19 +174,6 @@ public class APIResponseRenderer implements ResponseRenderer {
         writeResponse(response, action, req, resp, false);
     }
 
-    /*-
-     *      <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-     *      <html>
-     *       <head>
-     *        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
-     *        <script type="text/javascript">
-     *          (parent.callback_**action** || window.opener && window.opener.callback_**action**)(**json**)
-     *        </script>
-     *       </head>
-     *      </html>
-     *
-     */
-
     private static final char[] JS_FRAGMENT_PART1 = ("<!DOCTYPE HTML PUBLIC "
         + "\"-//W3C//DTD HTML 4.01//EN\" "
         + "\"http://www.w3.org/TR/html4/strict.dtd\"><html><head>"
@@ -217,7 +202,6 @@ public class APIResponseRenderer implements ResponseRenderer {
                         callback = PATTERN_QUOTE.matcher(callback).replaceAll("$1\\\\\"");
                     }
                 }
-                // Write: PART1 + <action> + PART2 + <action> + ")(" + <json> + PART3
                 final PrintWriter writer = resp.getWriter();
                 writer.write(JS_FRAGMENT_PART1);
                 writer.write(callback);
@@ -247,14 +231,14 @@ public class APIResponseRenderer implements ResponseRenderer {
                 ResponseWriter.write(response, resp.getWriter(), localeFrom(req));
             }
         } catch (final JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             try {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "A JSON error occurred: " + e.getMessage());
             } catch (final IOException ioe) {
-                LOG.error(ioe.getMessage(), ioe);
+                LOG.error("", ioe);
             }
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

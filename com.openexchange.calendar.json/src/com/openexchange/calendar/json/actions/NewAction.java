@@ -84,8 +84,8 @@ import com.openexchange.tools.session.ServerSession;
 responseDescription = "If the appointment was created successfully, an object with the attribute id of the newly created appointment. If the appointment could not be created due to conflicts, the response body is an object with the field conflicts, which is an array of appointment objects which caused the conflict. Each appointment object which represents a resource conflict contains an additional field hard_conflict with the Boolean value true. If the user does not have read access to a conflicting appointment, only the fields id, start_date, end_date, shown_as and participants are present and the field participants contains only the participants which caused the conflict.")
 public final class NewAction extends AppointmentAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(NewAction.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(NewAction.class);
 
     /**
      * Initializes a new {@link NewAction}.
@@ -127,8 +127,8 @@ public final class NewAction extends AppointmentAction {
             jsonResponseObj.put(DataFields.ID, appointmentObj.getObjectID());
             timestamp = appointmentObj.getLastModified();
         } else {
-            final JSONArray jsonConflictArray = new JSONArray();
-            final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone);
+            final JSONArray jsonConflictArray = new JSONArray(conflicts.length);
+            final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone).setSession(req.getSession());
             for (final Appointment conflict : conflicts) {
                 final JSONObject jsonAppointmentObj = new JSONObject();
                 appointmentWriter.writeAppointment(conflict, jsonAppointmentObj);

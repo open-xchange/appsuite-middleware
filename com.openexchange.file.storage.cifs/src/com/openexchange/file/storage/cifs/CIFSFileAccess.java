@@ -66,7 +66,6 @@ import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileFilter;
 import jcifs.smb.SmbFileInputStream;
 import jcifs.smb.SmbFileOutputStream;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -92,8 +91,7 @@ import com.openexchange.tx.TransactionException;
  */
 public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStorageIgnorableVersionFileAccess/*, FileStorageSequenceNumberProvider*/ {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CIFSFileAccess.class);
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CIFSFileAccess.class);
 
     private final FileStorageAccountAccess accountAccess;
 
@@ -485,7 +483,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
             try {
                 data.close();
             } catch (final IOException e) {
-                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CIFSFileAccess.class)).error(e.getMessage(), e);
+                org.slf4j.LoggerFactory.getLogger(CIFSFileAccess.class).error("", e);
             }
         }
     }
@@ -695,14 +693,7 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
              */
             SmbFile[] subFiles;
             try {
-                if (DEBUG) {
-                    final long st = System.currentTimeMillis();
-                    subFiles = smbFolder.canRead() ? smbFolder.listFiles(FILE_FILTER) : new SmbFile[0];
-                    final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("CIFSFileAccess.getFileList() - SmbFile.listFiles() took " + dur + "msec.");
-                } else {
-                    subFiles = smbFolder.canRead() ? smbFolder.listFiles(FILE_FILTER) : new SmbFile[0];
-                }
+                subFiles = smbFolder.canRead() ? smbFolder.listFiles(FILE_FILTER) : new SmbFile[0];
             } catch (final SmbException e) {
                 if (!indicatesNotReadable(e)) {
                     throw e;

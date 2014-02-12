@@ -18,5 +18,6 @@ Import-Package: com.openexchange.config,
  javax.net,
  javax.net.ssl,
  org.apache.commons.logging,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j
 Bundle-Activator: com.openexchange.inet.proxy.config.osgi.ConfigInetProxyActivator

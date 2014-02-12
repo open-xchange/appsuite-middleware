@@ -62,7 +62,7 @@ import com.openexchange.folderstorage.internal.FolderStorageRegistry;
  */
 public final class FolderStorageTracker implements ServiceTrackerCustomizer<FolderStorage,FolderStorage> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FolderStorageTracker.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderStorageTracker.class);
 
     private final BundleContext context;
 
@@ -82,8 +82,7 @@ public final class FolderStorageTracker implements ServiceTrackerCustomizer<Fold
         {
             final Object obj = reference.getProperty("tree");
             if (null == obj) {
-                LOG.error(new StringBuilder(32).append("Missing tree identifier property \"tree\" for ").append(
-                    addedService.getClass().getName()).toString());
+                LOG.error("Missing tree identifier property \"tree\" for {}", addedService.getClass().getName());
                 // Nothing to track, return null
                 context.ungetService(reference);
                 return null;
@@ -94,8 +93,7 @@ public final class FolderStorageTracker implements ServiceTrackerCustomizer<Fold
         if (FolderStorageRegistry.getInstance().addFolderStorage(treeId, addedService)) {
             return addedService;
         }
-        LOG.error(new StringBuilder(32).append("Failed registration to tree identifier \"").append(treeId).append("\" for ").append(
-            addedService.getClass().getName()).toString());
+        LOG.error("Failed registration to tree identifier \"{}\" for {}", treeId, addedService.getClass().getName());
         // Nothing to track, return null
         context.ungetService(reference);
         return null;
@@ -115,8 +113,7 @@ public final class FolderStorageTracker implements ServiceTrackerCustomizer<Fold
                 {
                     final Object obj = reference.getProperty("tree");
                     if (null == obj) {
-                        LOG.error(new StringBuilder(32).append("Missing tree identifier property \"tree\" for ").append(
-                            service.getClass().getName()).toString());
+                        LOG.error("Missing tree identifier property \"tree\" for {}", service.getClass().getName());
                         return;
                     }
                     treeId = obj.toString();

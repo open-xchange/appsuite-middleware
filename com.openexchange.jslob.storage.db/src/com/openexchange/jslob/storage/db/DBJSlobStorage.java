@@ -411,7 +411,12 @@ public final class DBJSlobStorage implements JSlobStorage {
         try {
             final DatabaseService databaseService = getDatabaseService();
             final int contextId = ids.get(0).getContext();
-            final Connection con = databaseService.getReadOnly(contextId);
+            final Connection con;
+            try {
+                con = databaseService.getReadOnly(contextId);
+            } catch (OXException e) {
+                throw DBJSlobStorageExceptionCode.CONNECTION_ERROR.create(e);
+            }
             try {
                 return loadThem(ids, contextId, con);
             } finally {

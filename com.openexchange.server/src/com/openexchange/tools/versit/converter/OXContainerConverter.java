@@ -178,7 +178,7 @@ public class OXContainerConverter {
 
     private static final String P_CLASS = "CLASS";
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OXContainerConverter.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXContainerConverter.class);
 
     private static final String CHARSET_ISO_8859_1 = "ISO-8859-1";
 
@@ -193,7 +193,7 @@ public class OXContainerConverter {
         try {
             domain = InetAddress.getLocalHost().getCanonicalHostName();
         } catch (final UnknownHostException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         atdomain = new StringBuilder().append('@').append(domain).toString();
     }
@@ -210,6 +210,8 @@ public class OXContainerConverter {
 
     private boolean addDisplayName4DList;
 
+    private boolean skipOxCTypeAttribute;
+
     public OXContainerConverter(final TimeZone timezone, final String organizerMailAddress) {
         super();
         this.timezone = timezone;
@@ -217,20 +219,20 @@ public class OXContainerConverter {
         ctx = null;
     }
 
-    public OXContainerConverter(final Session session) throws ConverterException {
+    public OXContainerConverter(final Session session) throws ConverterException, OXException {
         super();
         try {
             ctx = ContextStorage.getStorageContext(session.getContextId());
         } catch (final OXException e) {
             throw new ConverterException(e);
         }
-        timezone = TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
+        timezone = TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
     }
 
-    public OXContainerConverter(final Session session, final Context ctx) {
+    public OXContainerConverter(final Session session, final Context ctx) throws OXException {
         super();
         this.ctx = ctx;
-        timezone = TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
+        timezone = TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
     }
 
     public OXContainerConverter(final Context ctx, final TimeZone tz) {
@@ -240,9 +242,7 @@ public class OXContainerConverter {
     }
 
     public void close() {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("OXContainerConverter.close()");
-        }
+        LOG.trace("OXContainerConverter.close()");
     }
 
     public boolean isSendFloating() {
@@ -269,6 +269,26 @@ public class OXContainerConverter {
      */
     public void setAddDisplayName4DList(final boolean addDisplayName4DList) {
         this.addDisplayName4DList = addDisplayName4DList;
+    }
+
+    /**
+     * Gets a value whether the <code>X-OPEN-XCHANGE-CTYPE</code> attribute is set in vCards to distinguish between distribution lists
+     * and contacts.
+     *
+     * @return <code>true</code> if the <code>X-OPEN-XCHANGE-CTYPE</code> attribute is skipped, <code>false</code>, otherwise
+     */
+    public boolean isSkipOxCTypeAttribute() {
+        return skipOxCTypeAttribute;
+    }
+
+    /**
+     * Configures if the <code>X-OPEN-XCHANGE-CTYPE</code> attribute will be set in vCards to distinguish between distribution lists
+     * and contacts.
+     *
+     * @param <code>true</code> to skip the <code>X-OPEN-XCHANGE-CTYPE</code> attribute, <code>false</code>, otherwise
+     */
+    public void setSkipOxCTypeAttribute(final boolean skipOxCTypeAttribute) {
+        this.skipOxCTypeAttribute = skipOxCTypeAttribute;
     }
 
     public boolean isSendUTC() {
@@ -382,7 +402,7 @@ public class OXContainerConverter {
             AddAlarms(taskContainer, object);
             return taskContainer;
         } catch (final Exception e) {
-            LOG.error(e);
+            LOG.error(e.toString());
             throw new ConverterException(e);
         }
     }
@@ -591,10 +611,7 @@ public class OXContainerConverter {
                             loadImageFromURL(contactContainer, url);
                             value = null;
                         } catch (final MalformedURLException e) {
-                            // Not a valid URL
-                            if (LOG.isTraceEnabled()) {
-                                LOG.trace(e.getMessage(), e);
-                            }
+                            LOG.trace("", e);
                         }
                     }
                 }
@@ -986,7 +1003,7 @@ public class OXContainerConverter {
                     } else if (value instanceof String) {
                         cats.addAll(Arrays.asList(value.toString().split(" *, *")));
                     } else {
-                        LOG.error("Unexpected class: " + value.getClass().getName());
+                        LOG.error("Unexpected class: {}", value.getClass().getName());
                     }
                 }
             }
@@ -1038,7 +1055,7 @@ public class OXContainerConverter {
         				int targetHeight = Integer.parseInt(matcher.group(4));
         				return new Rectangle(offsetLeft, offsetBottom, targetWidth, targetHeight);
     				} catch (NumberFormatException e) {
-    					LOG.warn("unable to parse clipping rectangle from " + text, e);
+    					LOG.warn("unable to parse clipping rectangle from {}", text, e);
     				}
     			}
     		}
@@ -1196,9 +1213,8 @@ public class OXContainerConverter {
                 // In case the configuration file was not read (yet) the default value is given here
                 final long maxSize = ContactConfig.getInstance().getMaxImageSize();
                 if (maxSize > 0 && bytes.length > maxSize) {
-                    final ConverterException e = new ConverterException(
-                        "Contact image is " + bytes.length + " bytes large and limit is " + maxSize + " bytes. Image is therefore ignored.");
-                    LOG.warn(e.getMessage(), e);
+                    final ConverterException e = new ConverterException("Contact image is " + bytes.length + " bytes large and limit is " + maxSize + " bytes. Image is therefore ignored.");
+                    LOG.warn("", e);
                     bytes = null;
                 }
             } finally {
@@ -1764,7 +1780,7 @@ public class OXContainerConverter {
                 final CalendarCollectionService calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
                 result = calColl.calculateFirstRecurring(app);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw new ConverterException(e);
             }
             if (result.size() == 1) {
@@ -1805,7 +1821,9 @@ public class OXContainerConverter {
         addProperty(object, "NICKNAME", getList(contact.getNickname(), ','));
         // Distribution list?
         if (!contact.containsMarkAsDistributionlist() || !contact.getMarkAsDistribtuionlist()) {
-            addProperty(object, P_OPEN_XCHANGE_CTYPE, CTYPE_CONTACT);
+            if (false == skipOxCTypeAttribute) {
+                addProperty(object, P_OPEN_XCHANGE_CTYPE, CTYPE_CONTACT);
+            }
             // PHOTO
             if (contact.getImage1() != null) {
                 byte[] imageData = contact.getImage1();
@@ -1813,7 +1831,7 @@ public class OXContainerConverter {
                 try {
                     addProperty(object, "PHOTO", "VALUE", new String[] { "URI" }, new URI(new String(imageData, Charsets.ISO_8859_1)));
                 } catch (final UnsupportedCharsetException e2) {
-                    LOG.error(e2);
+                    LOG.error(e2.toString());
                     throw new ConverterException(e2);
                 } catch (final URISyntaxException e) {
                     // Insert raw base64-encoded image bytes
@@ -1939,7 +1957,9 @@ public class OXContainerConverter {
                 addProperty(object, "ORG", list);
             }
         } else {
-            addProperty(object, P_OPEN_XCHANGE_CTYPE, CTYPE_DISTRIBUTION_LIST);
+            if (false == skipOxCTypeAttribute) {
+                addProperty(object, P_OPEN_XCHANGE_CTYPE, CTYPE_DISTRIBUTION_LIST);
+            }
             final DistributionListEntryObject[] distributionList = contact.getDistributionList();
             if (null != distributionList && 0 < distributionList.length) {
                 for (final DistributionListEntryObject distributionListEntry : distributionList) {
@@ -2226,7 +2246,7 @@ public class OXContainerConverter {
                 object.addProperty(property);
             }
         } catch (final Exception e) {
-            LOG.error(e);
+            LOG.error(e.toString());
             throw new ConverterException(e);
         }
     }
@@ -2250,7 +2270,7 @@ public class OXContainerConverter {
                 object.addProperty(property);
             }
         } catch (final Exception e) {
-            LOG.error(e);
+            LOG.error(e.toString());
             throw new ConverterException(e);
         }
     }

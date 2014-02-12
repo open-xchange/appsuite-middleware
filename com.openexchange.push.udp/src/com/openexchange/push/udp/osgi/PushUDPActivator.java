@@ -73,7 +73,7 @@ import com.openexchange.timer.TimerService;
  */
 public class PushUDPActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PushUDPActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushUDPActivator.class);
 
     /**
      * Initializes a new {@link PushUDPActivator}.
@@ -89,20 +89,13 @@ public class PushUDPActivator extends HousekeepingActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        /*
-         * Never stop the server even if a needed service is absent
-         */
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
         getServiceRegistry().removeService(clazz);
     }
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         getServiceRegistry().addService(clazz, getService(clazz));
     }
 
@@ -134,7 +127,7 @@ public class PushUDPActivator extends HousekeepingActivator {
             rememberTracker(new ServiceTracker<TimerService,TimerService>(context, TimerService.class, new TimerCustomizer(context)));
             openTrackers();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -155,7 +148,7 @@ public class PushUDPActivator extends HousekeepingActivator {
              */
             getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

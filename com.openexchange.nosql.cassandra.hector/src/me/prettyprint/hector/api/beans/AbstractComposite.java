@@ -50,7 +50,7 @@ import com.google.common.collect.ImmutableClassToInstanceMap;
 public abstract class AbstractComposite extends AbstractList<Object> implements
     Comparable<AbstractComposite> {
 
-  public static Logger log = LoggerFactory.getLogger(AbstractComposite.class);
+  public static org.slf4j.Logger log = LoggerFactory.getLogger(AbstractComposite.class);
 
   public enum ComponentEquality {
     LESS_THAN_EQUAL((byte) -1), EQUAL((byte) 0), GREATER_THAN_EQUAL((byte) 1);

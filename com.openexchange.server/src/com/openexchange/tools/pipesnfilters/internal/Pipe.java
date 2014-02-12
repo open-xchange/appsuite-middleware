@@ -54,8 +54,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.pipesnfilters.DataSource;
 import com.openexchange.tools.pipesnfilters.Filter;
@@ -68,7 +66,7 @@ import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
  */
 final class Pipe<T> implements DataSource<T>, DataSink<T> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Pipe.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Pipe.class);
 
     private final ThreadPoolService threadPool;
     private final BlockingQueue<Object> queue = new LinkedBlockingQueue<Object>();
@@ -141,7 +139,7 @@ final class Pipe<T> implements DataSource<T>, DataSink<T> {
         } catch (final InterruptedException e1) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
         }
     }
 

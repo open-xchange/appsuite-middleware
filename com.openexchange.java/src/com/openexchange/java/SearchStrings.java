@@ -51,7 +51,7 @@ package com.openexchange.java;
 
 /**
  * Provides methodes for dealing with search string or search patterns.
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class SearchStrings {
@@ -62,21 +62,20 @@ public final class SearchStrings {
 
     /**
      * Gets the length of specified pattern without wild-card characters.
-     *
+     * 
      * @param pattern The pattern
      * @return The length without wild-card characters
      */
     public static int lengthWithoutWildcards(String pattern) {
-        StringBuilder sb = new StringBuilder(pattern);
-        int i = 0;
-        while (i < sb.length()) {
-            final char toTest = sb.charAt(i);
-            if (toTest == ' ' || toTest == '*' || toTest == '%' || toTest == '?') {
-                sb.deleteCharAt(i);
-            } else {
-                i++;
+        final int length = pattern.length();
+        final StringAllocator sb = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char toTest = pattern.charAt(i);
+            if (toTest != ' ' && toTest != '*' && toTest != '?') {
+                sb.append(toTest);
             }
         }
         return sb.length();
     }
+    
 }

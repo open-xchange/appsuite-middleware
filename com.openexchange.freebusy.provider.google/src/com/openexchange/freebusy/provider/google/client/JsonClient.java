@@ -66,7 +66,6 @@ import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -75,7 +74,6 @@ import com.openexchange.freebusy.BusyStatus;
 import com.openexchange.freebusy.FreeBusyData;
 import com.openexchange.freebusy.FreeBusyExceptionCodes;
 import com.openexchange.freebusy.FreeBusyInterval;
-import com.openexchange.log.LogFactory;
 
 
 /**
@@ -95,7 +93,7 @@ public class JsonClient {
         }
     };
 
-    private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(JsonClient.class));
+    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JsonClient.class);
 
     private final String apiKey;
     private final String apiEndpoint;
@@ -192,10 +190,11 @@ public class JsonClient {
     }
 
     private JSONObject getResponse(String requestURL, JSONObject request) throws OXException {
+        final boolean traceEnabled = LOG.isTraceEnabled();
         long start = 0;
-        if (LOG.isTraceEnabled()) {
-            start = new Date().getTime();
-            LOG.trace(String.format("==> POST %s%n  > %s", requestURL, request));
+        if (traceEnabled) {
+            start = System.currentTimeMillis();
+            LOG.trace("==> POST {}{}  > {}", requestURL, System.getProperty("line.separator"), request);
         }
         PostMethod method = createPostMethod(requestURL, request);
         executeMethod(method);
@@ -203,8 +202,8 @@ public class JsonClient {
             //TODO: upgrade our json.jar
             //JSONObject response = new JSONObject(new JSONTokener(new InputStreamReader(method.getResponseBodyAsStream())));
             String body = method.getResponseBodyAsString();
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(String.format("<== %s (%dms elapsed)%n<  %s", method.getStatusLine(), new Date().getTime() - start, body));
+            if (traceEnabled) {
+                LOG.trace("<== {} ({}ms elapsed){}<  {}", method.getStatusLine(), System.currentTimeMillis() - start, System.getProperty("line.separator"), body);
             }
             return null != body ? new JSONObject(body) : null;
         } catch (IOException e) {

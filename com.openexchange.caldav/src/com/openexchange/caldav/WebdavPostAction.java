@@ -53,9 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.action.AbstractAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
@@ -69,7 +67,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
  */
 public class WebdavPostAction extends AbstractAction {
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebdavPostAction.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavPostAction.class);
 
     protected final GroupwareCaldavFactory factory;
 
@@ -82,18 +80,6 @@ public class WebdavPostAction extends AbstractAction {
 		WebdavResource resource = request.getResource();
 		if (null != request.getHeader("content-length")) {
 			resource.setLength(new Long(request.getHeader("content-length")));
-		}
-		String contentType = request.getHeader("content-type");
-		if (null == contentType || false == contentType.toLowerCase().contains("text/calendar")) {
-			/*
-			 * only 'text/calendar' files supported
-			 */
-			throw WebdavProtocolException.generalError(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
-        } else if (false == resource instanceof com.openexchange.caldav.resources.ScheduleOutboxCollection) {
-			/*
-			 * only the schedule-outbox resource can fulfill the request
-			 */
-			throw WebdavProtocolException.generalError(request.getUrl(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		}
 		/*
 		 * put request body

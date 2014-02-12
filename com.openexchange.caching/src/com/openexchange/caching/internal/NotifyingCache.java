@@ -52,8 +52,8 @@ package com.openexchange.caching.internal;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
-import org.osgi.service.event.EventAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.CacheKey;
@@ -63,8 +63,6 @@ import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link NotifyingCache}
@@ -74,20 +72,9 @@ import com.openexchange.log.LogFactory;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class NotifyingCache implements Cache, CacheListener {
+public class NotifyingCache extends AbstractCache implements CacheListener {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(NotifyingCache.class));
-
-    private static final AtomicReference<EventAdmin> EVENT_ADMIN_REF = new AtomicReference<EventAdmin>();
-
-    /**
-     * Sets the event admin.
-     *
-     * @param eventAdmin The event admin or <code>null</code>
-     */
-    public static void setEventAdmin(final EventAdmin eventAdmin) {
-        EVENT_ADMIN_REF.set(eventAdmin);
-    }
+    private static final Logger LOG = LoggerFactory.getLogger(NotifyingCache.class);
 
     private final Cache delegate;
     private final String region;
@@ -108,7 +95,9 @@ public class NotifyingCache implements Cache, CacheListener {
         this.delegate = delegate;
         this.eventService = eventService;
         this.notifyOnLocalOperations = notifyOnLocalOperations;
-        this.eventService.addListener(region, this);
+        if (null != eventService && (notifyOnLocalOperations || false == isLocal())) {
+            this.eventService.addListener(region, this);
+        }
     }
 
     /**
@@ -202,7 +191,7 @@ public class NotifyingCache implements Cache, CacheListener {
 
     @Override
     public void put(Serializable key, Serializable val, ElementAttributes attr) throws OXException {
-        put(key, val, attr);
+        put(key, val, attr, true);
     }
 
     @Override
@@ -314,9 +303,7 @@ public class NotifyingCache implements Cache, CacheListener {
     @Override
     public void onEvent(Object sender, CacheEvent cacheEvent, boolean fromRemote) {
         if (fromRemote && sender != this && null != cacheEvent) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("onEvent: " + cacheEvent);
-            }
+            LOG.debug("onEvent: {}", cacheEvent);
             try {
                 switch (cacheEvent.getOperation()) {
                 case INVALIDATE_GROUP:
@@ -330,10 +317,10 @@ public class NotifyingCache implements Cache, CacheListener {
                     }
                     break;
                 default:
-                    LOG.warn("Unknown cache event operation: " + cacheEvent.getOperation());
+                    LOG.warn("Unknown cache event operation: {}", cacheEvent.getOperation());
                 }
             } catch (OXException e) {
-                LOG.error("Error handling cache event: " + cacheEvent, e);
+                LOG.error("Error handling cache event: {}", cacheEvent, e);
             }
         }
     }
@@ -341,9 +328,7 @@ public class NotifyingCache implements Cache, CacheListener {
     private void fireInvalidateGroup(String groupName) {
         if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
             CacheEvent event = CacheEvent.INVALIDATE_GROUP(region, groupName);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("fireInvalidateGroup: " + event);
-            }
+            LOG.debug("fireInvalidateGroup: {}", event);
             eventService.notify(this, event, false);
         }
     }
@@ -355,11 +340,13 @@ public class NotifyingCache implements Cache, CacheListener {
     private void fireInvalidate(Serializable key, String groupName) {
         if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
             CacheEvent event = CacheEvent.INVALIDATE(region, groupName, key);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("fireInvalidate: " + event);
-            }
+            LOG.debug("fireInvalidate: {}", event);
             eventService.notify(this, event, false);
         }
     }
 
+    @Override
+    public String toString() {
+        return "NotifyingCache [region=" + region + ", isLocal=" + isLocal() + "]";
+    }
 }

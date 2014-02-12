@@ -3,7 +3,6 @@ package com.openexchange.ajax.appointment.recurrence;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import com.openexchange.ajax.AppointmentTest;
@@ -22,7 +21,7 @@ public class AbstractRecurrenceTest extends AppointmentTest {
 
 	protected SimpleDateFormat simpleDateFormatUTC = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
-	private static final Log LOG = LogFactory.getLog(AbstractRecurrenceTest.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractRecurrenceTest.class);
 
 	protected final static int[] _fields = {
 		DataObject.OBJECT_ID,

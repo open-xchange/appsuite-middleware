@@ -60,9 +60,9 @@ import java.io.RandomAccessFile;
 import java.util.HashSet;
 import java.util.Set;
 import javax.activation.MimetypesFileTypeMap;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.external.FileStorageCodes;
 
@@ -104,7 +104,7 @@ public abstract class DefaultFileStorage implements FileStorage {
      * @param name The filename, relative to the storage's parent directory
      * @param readOnly <code>true</code> if read-only access is sufficient, <code>false</code> to use read-write access
      * @return A new {@link EnhancedRandomAccessFile} instance
-     * @throws OXException If the denoted file was not found or an I/O-error occured
+     * @throws OXException If the denoted file was not found or an I/O-error occurred
      */
     protected EnhancedRandomAccessFile eraf(String name, boolean readOnly) throws OXException {
         File file = file(name);
@@ -130,7 +130,7 @@ public abstract class DefaultFileStorage implements FileStorage {
         try {
             return new RandomAccessFile(file, readOnly ? READ : READ_WRITE);
         } catch (FileNotFoundException e) {
-            throw FileStorageCodes.FILE_NOT_FOUND.create(file.getAbsolutePath());
+            throw FileStorageCodes.FILE_NOT_FOUND.create(e, file.getAbsolutePath());
         }
     }
 
@@ -153,9 +153,9 @@ public abstract class DefaultFileStorage implements FileStorage {
     @Override
     public InputStream getFile(String name) throws OXException {
         try {
-            return new BufferedInputStream(new FileInputStream(file(name)));
+            return new BufferedInputStream(new FileInputStream(file(name)), 65536);
         } catch (FileNotFoundException e) {
-            throw FileStorageCodes.FILE_NOT_FOUND.create(name);
+            throw FileStorageCodes.FILE_NOT_FOUND.create(e, name);
         }
     }
 
@@ -183,7 +183,7 @@ public abstract class DefaultFileStorage implements FileStorage {
             }
             return new RandomAccessFileInputStream(eraf, offset, length);
         } catch (FileNotFoundException e) {
-            throw FileStorageCodes.FILE_NOT_FOUND.create(name);
+            throw FileStorageCodes.FILE_NOT_FOUND.create(e, name);
         } catch (IOException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         }
@@ -212,7 +212,7 @@ public abstract class DefaultFileStorage implements FileStorage {
                 try {
                     eraf.close();
                 } catch (IOException e) {
-                    com.openexchange.log.Log.valueOf(LogFactory.getLog(HashingFileStorage.class))
+                    LoggerFactory.getLogger(DefaultFileStorage.class)
                         .warn("error closing random access file", e);
                 }
             }

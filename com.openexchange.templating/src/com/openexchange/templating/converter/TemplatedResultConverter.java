@@ -53,6 +53,7 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -114,10 +115,11 @@ public class TemplatedResultConverter implements ResultConverter, SimpleRegistry
         rootObject.put("templates", templates.createHelper(rootObject, session, false));
         rootObject.put("data", result.getResultObject());
 
-        StringHelper strings = StringHelper.valueOf(session.getUser().getLocale());
+        Locale locale = session.getUser().getLocale();
+        StringHelper strings = StringHelper.valueOf(locale);
         rootObject.put("strings", strings);
-        rootObject.put("locale", session.getUser().getLocale());
-        rootObject.put("dates", new Dates(session.getUser().getLocale()));
+        rootObject.put("locale", locale);
+        rootObject.put("dates", new Dates(locale));
         
         rootObject.put("JSON", new JSONHelper());
         

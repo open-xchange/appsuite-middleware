@@ -95,7 +95,7 @@ public final class ModifyCharsetStandardProvider {
             /*
              * Leave unchanged since fall-back charset "CP50220" is not support by JVM
              */
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ModifyCharsetStandardProvider.class)).warn(
+            org.slf4j.LoggerFactory.getLogger(ModifyCharsetStandardProvider.class).warn(
                 new com.openexchange.java.StringAllocator("Charset \"CP50220\" is not supported by JVM \"").append(System.getProperty("java.vm.vendor")).append(" v").append(
                     System.getProperty("java.vm.version")).append("\". Japanese encoding \"ISO-2022-JP\" not supported ! ! !").toString());
         }
@@ -105,7 +105,7 @@ public final class ModifyCharsetStandardProvider {
             /*
              * Leave unchanged since fall-back charset "WINDOWS-1252" is not support by JVM
              */
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ModifyCharsetStandardProvider.class)).warn(
+            org.slf4j.LoggerFactory.getLogger(ModifyCharsetStandardProvider.class).warn(
                 new com.openexchange.java.StringAllocator("Charset \"WINDOWS-1252\" is not supported by JVM \"").append(System.getProperty("java.vm.vendor")).append(" v").append(
                     System.getProperty("java.vm.version")).append("\".").toString());
         }
@@ -115,7 +115,7 @@ public final class ModifyCharsetStandardProvider {
             /*
              * Leave unchanged since fall-back charset "WINDOWS-1252" is not support by JVM
              */
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ModifyCharsetStandardProvider.class)).warn(
+            org.slf4j.LoggerFactory.getLogger(ModifyCharsetStandardProvider.class).warn(
                 new com.openexchange.java.StringAllocator("Charset \"WINDOWS-1252\" is not supported by JVM \"").append(System.getProperty("java.vm.vendor")).append(" v").append(
                     System.getProperty("java.vm.version")).append("\".").toString());
         }

@@ -49,7 +49,12 @@
 
 package com.openexchange.webdav.acl;
 
+import java.util.Arrays;
+import java.util.List;
+import org.jdom2.Namespace;
 import com.openexchange.webdav.acl.reports.PrincipalMatchReport;
+import com.openexchange.webdav.acl.reports.PrinicpalPropertySearchReport;
+import com.openexchange.webdav.acl.reports.PrinicpalSearchPropertySetReport;
 import com.openexchange.webdav.action.WebdavAction;
 import com.openexchange.webdav.protocol.Protocol;
 
@@ -60,6 +65,20 @@ import com.openexchange.webdav.protocol.Protocol;
  */
 public class PrincipalProtocol extends Protocol {
 
+    /** urn:ietf:params:xml:ns:caldav */
+    public static final Namespace CAL_NS = Namespace.getNamespace("CAL", "urn:ietf:params:xml:ns:caldav");
+
+    /** http://apple.com/ns/ical/ */
+    public static final Namespace APPLE_NS = Namespace.getNamespace("APPLE", "http://apple.com/ns/ical/");
+
+    /** http://calendarserver.org/ns/ */
+    public static final Namespace CALENDARSERVER_NS = Namespace.getNamespace("CS", "http://calendarserver.org/ns/");
+
+    private static final List<Namespace> ADDITIONAL_NAMESPACES = Arrays.asList(CAL_NS, APPLE_NS, CALENDARSERVER_NS);
+
+    /**
+     * Initializes a new {@link PrincipalProtocol}.
+     */
     public PrincipalProtocol() {
         super();
     }
@@ -68,8 +87,17 @@ public class PrincipalProtocol extends Protocol {
     public WebdavAction getReportAction(String ns, String name) {
         if (PrincipalMatchReport.NAMESPACE.equals(ns) && PrincipalMatchReport.NAME.equals(name)) {
             return new PrincipalMatchReport(this);
+        } else if (PrinicpalSearchPropertySetReport.NAMESPACE.equals(ns) && PrinicpalSearchPropertySetReport.NAME.equals(name)) {
+            return new PrinicpalSearchPropertySetReport(this);
+        } else if (PrinicpalPropertySearchReport.NAMESPACE.equals(ns) && PrinicpalPropertySearchReport.NAME.equals(name)) {
+            return new PrinicpalPropertySearchReport(this);
         }
         return null;
+    }
+
+    @Override
+    public List<Namespace> getAdditionalNamespaces() {
+        return ADDITIONAL_NAMESPACES;
     }
 
 }

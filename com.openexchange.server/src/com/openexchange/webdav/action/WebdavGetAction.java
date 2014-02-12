@@ -60,15 +60,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class WebdavGetAction extends WebdavHeadAction {
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebdavGetAction.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavGetAction.class);
 	private static final Pattern RANGE_PATTERN = Pattern.compile("bytes=(\\S+)");
 
 	@Override

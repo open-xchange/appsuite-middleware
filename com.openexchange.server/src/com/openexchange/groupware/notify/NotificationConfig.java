@@ -52,11 +52,9 @@ package com.openexchange.groupware.notify;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.conf.AbstractConfig;
@@ -66,7 +64,7 @@ import com.openexchange.tools.conf.AbstractConfig;
  */
 public class NotificationConfig extends AbstractConfig implements Initialization {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(NotificationConfig.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NotificationConfig.class);
 
     public enum NotificationProperty{
 
@@ -118,7 +116,7 @@ public class NotificationConfig extends AbstractConfig implements Initialization
             try {
                 INSTANCE.loadPropertiesInternal();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 return def;
             }
         }

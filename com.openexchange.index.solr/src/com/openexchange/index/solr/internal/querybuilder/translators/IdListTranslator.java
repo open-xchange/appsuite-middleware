@@ -51,7 +51,6 @@ package com.openexchange.index.solr.internal.querybuilder.translators;
 
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
 
 import com.openexchange.index.solr.internal.config.FieldConfiguration;
 import com.openexchange.index.solr.internal.querybuilder.Configuration;
@@ -75,20 +74,20 @@ public class IdListTranslator implements QueryTranslator {
 
     private String handlerName;
 
-    private static Log log = com.openexchange.log.Log.loggerFor(IdListTranslator.class);
+    private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IdListTranslator.class);
 
 
     @Override
     public void init(String name, Configuration config, FieldConfiguration fieldConfig) throws TranslationException {
         handlerName = name.trim();
 
-        log.info("[init]: initializing configuration for handler \'" + handlerName + "\'");
+        log.info("[init]: initializing configuration for handler \'{}\'", handlerName);
 
         Set<String> keys = config.getKeys(handlerName);
         String key = handlerName + '.' + ID_FIELD;
         if (keys.contains(key)) {
             idKey = config.getRawMapping().get(key);
-            log.info("[init]: ID key is \'" + idKey + "\'");
+            log.info("[init]: ID key is \'{}\'", idKey);
             return;
         }
 

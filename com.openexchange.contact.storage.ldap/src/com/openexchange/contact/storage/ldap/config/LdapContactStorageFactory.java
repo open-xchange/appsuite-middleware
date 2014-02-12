@@ -54,7 +54,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.contact.storage.ldap.LdapExceptionCodes;
 import com.openexchange.contact.storage.ldap.config.LdapConfig.IDMapping;
@@ -63,7 +63,6 @@ import com.openexchange.contact.storage.ldap.internal.CachingLdapContactStorage;
 import com.openexchange.contact.storage.ldap.internal.LdapContactStorage;
 import com.openexchange.contact.storage.ldap.internal.Tools;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link LdapContactStorageFactory}
@@ -74,7 +73,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class LdapContactStorageFactory {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LdapContactStorageFactory.class));
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapContactStorageFactory.class);
 
     private LdapContactStorageFactory() {
         super();
@@ -86,7 +85,7 @@ public final class LdapContactStorageFactory {
         if (null != properties && properties.containsKey("com.openexchange.contact.storage.ldap.contextID")) {
             return create(properties);
         } else {
-            LOG.debug("File " + propertyFile + " contains no contact-storage-ldap settings, skipping.");
+            LOG.debug("File {} contains no contact-storage-ldap settings, skipping.", propertyFile);
             return null;
         }
     }

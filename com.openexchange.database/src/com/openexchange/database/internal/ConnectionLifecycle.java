@@ -168,7 +168,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
             } else if (!con.getAutoCommit()) {
                 final OXException dbe = DBPoolingExceptionCodes.NO_AUTOCOMMIT.create();
                 addTrace(dbe, data);
-                ConnectionPool.LOG.error(dbe.getMessage(), dbe);
+                ConnectionPool.LOG.error("", dbe);
                 con.rollback();
                 con.setAutoCommit(true);
             }
@@ -180,19 +180,17 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
                 if (active > 0) {
                     final OXException dbe = DBPoolingExceptionCodes.ACTIVE_STATEMENTS.create(I(active));
                     addTrace(dbe, data);
-                    ConnectionPool.LOG.error(dbe.getMessage(), dbe);
+                    ConnectionPool.LOG.error("", dbe);
                     retval = false;
                 }
             } catch (final Exception e) {
-                ConnectionPool.LOG.error(e.getMessage(), e);
+                ConnectionPool.LOG.error("", e);
             }
             // Write warning if using this connection was longer than 2 seconds.
             if (data.getTimeDiff() > 2000) {
                 final OXException dbe = DBPoolingExceptionCodes.TOO_LONG.create(L(data.getTimeDiff()));
                 addTrace(dbe, data);
-                if (ConnectionPool.LOG.isWarnEnabled()) {
-                    ConnectionPool.LOG.warn(dbe.getMessage(), dbe);
-                }
+                ConnectionPool.LOG.warn("", dbe);
             }
         } catch (final SQLException e) {
             retval = false;

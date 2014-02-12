@@ -54,8 +54,6 @@ import java.io.OutputStream;
 import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.jdom2.output.XMLOutputter;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -92,7 +90,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
 
     private static final long serialVersionUID = 5779820324953825111L;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(calendar.class));
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(calendar.class);
 
     /**
      * Initializes a new {@link calendar}.
@@ -161,9 +159,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                 }
                 break;
             case DataParser.DELETE:
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("delete appointment: " + appointmentobject.getObjectID() + " in folder: " + inFolder);
-                }
+                LOG.debug("delete appointment: {} in folder: {}", appointmentobject.getObjectID(), inFolder);
 
                 pendingInvocations.add(new QueuedAppointment(appointmentobject, ap.getClientID(),
                         DataParser.DELETE, lastModified, inFolder));
@@ -173,9 +169,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                         DataParser.CONFIRM, lastModified, inFolder));
                 break;
             default:
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("invalid method: " + method);
-                }
+                LOG.debug("invalid method: {}", method);
             }
         } else {
             parser.next();
@@ -217,7 +211,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
     @Override
     protected void startWriter(final Session sessionObj, final Context ctx, final int objectId, final int folderId,
             final OutputStream os) throws Exception {
-        final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+        final User userObj = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
         final AppointmentWriter appointmentwriter = new AppointmentWriter(userObj, ctx, sessionObj);
         appointmentwriter.startWriter(objectId, folderId, os);
     }
@@ -233,7 +227,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
     protected void startWriter(final Session sessionObj, final Context ctx, final int folderId,
             final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync,
             final OutputStream os) throws Exception {
-        final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+        final User userObj = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
         final AppointmentWriter appointmentwriter = new AppointmentWriter(userObj, ctx, sessionObj);
         appointmentwriter.startWriter(bModified, bDelete, bList, folderId, lastsync, os);
     }
@@ -312,9 +306,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
                     }
                     break;
                 case DataParser.DELETE:
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("delete appointment: " + appointmentobject.getObjectID() + " in folder: " + inFolder);
-                    }
+                    LOG.debug("delete appointment: {} in folder: {}", appointmentobject.getObjectID(), inFolder);
 
                     if (lastModified == null) {
                         throw WebdavExceptionCode.MISSING_FIELD.create(DataFields.LAST_MODIFIED);

@@ -64,10 +64,10 @@ import com.openexchange.caching.CacheKeyService;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.DefaultCacheKeyService;
 import com.openexchange.caching.events.CacheEventService;
+import com.openexchange.caching.internal.AbstractCache;
 import com.openexchange.caching.internal.JCSCacheInformation;
 import com.openexchange.caching.internal.JCSCacheService;
 import com.openexchange.caching.internal.JCSCacheServiceInit;
-import com.openexchange.caching.internal.NotifyingCache;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
@@ -82,7 +82,7 @@ import com.openexchange.osgi.SimpleRegistryListener;
  */
 public final class CacheActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CacheActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheActivator.class);
 
     static volatile CacheService cacheService;
 
@@ -192,12 +192,12 @@ public final class CacheActivator extends HousekeepingActivator {
 
             @Override
             public void added(final ServiceReference<EventAdmin> ref, final EventAdmin service) {
-                NotifyingCache.setEventAdmin(service);
+                AbstractCache.setEventAdmin(service);
             }
 
             @Override
             public void removed(final ServiceReference<EventAdmin> ref, final EventAdmin service) {
-                NotifyingCache.setEventAdmin(null);
+                AbstractCache.setEventAdmin(null);
             }
         });
         openTrackers();
@@ -225,11 +225,11 @@ public final class CacheActivator extends HousekeepingActivator {
                 this.objectName = objectName;
                 management.registerMBean(objectName, new JCSCacheInformation());
             } catch (final MalformedObjectNameException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final NotCompliantMBeanException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -240,7 +240,7 @@ public final class CacheActivator extends HousekeepingActivator {
             try {
                 management.unregisterMBean(objectName);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } finally {
                 this.objectName = null;
             }

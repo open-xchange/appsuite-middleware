@@ -54,8 +54,6 @@ import java.io.OutputStream;
 import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.jdom2.output.XMLOutputter;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -87,7 +85,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
 
     private static final long serialVersionUID = 1750720959626156342L;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(tasks.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(tasks.class);
 
     public tasks() {
         super();
@@ -149,9 +147,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
                 pendingInvocations.add(new QueuedTask(task, taskparser.getClientID(), DataParser.CONFIRM, lastModified, inFolder));
                 break;
             default:
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("invalid method: " + method);
-                }
+                LOG.debug("invalid method: {}", method);
             }
         } else {
             parser.next();
@@ -172,7 +168,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
 
     @Override
     protected void startWriter(final Session sessionObj, final Context ctx, final int objectId, final int folderId, final OutputStream os) throws Exception {
-        final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+        final User userObj = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
         final TaskWriter taskwriter = new TaskWriter(userObj, ctx, sessionObj);
         taskwriter.startWriter(objectId, folderId, os);
     }
@@ -184,7 +180,7 @@ public final class tasks extends XmlServlet<TasksSQLInterface> {
 
     @Override
     protected void startWriter(final Session sessionObj, final Context ctx, final int folderId, final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
-        final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+        final User userObj = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
         final TaskWriter taskwriter = new TaskWriter(userObj, ctx, sessionObj);
         taskwriter.startWriter(bModified, bDelete, bList, folderId, lastsync, os);
     }

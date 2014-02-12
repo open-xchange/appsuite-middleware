@@ -54,11 +54,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * DataObject
+ * {@link DataObject} - The root-level data object.
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-
 public abstract class DataObject extends SystemObject {
 
     private static final long serialVersionUID = 4792432831176202196L;
@@ -75,6 +75,8 @@ public abstract class DataObject extends SystemObject {
 
     public static final int LAST_MODIFIED_UTC = 6;
 
+    public static final int META = 23;
+
     protected int objectId;
 
     protected int createdBy;
@@ -85,15 +87,20 @@ public abstract class DataObject extends SystemObject {
 
     protected Date lastModified;
 
-    protected boolean b_object_id;
+    /** The data object's contribution topic */
+    protected String topic;
 
-    protected boolean b_created_by;
+    protected boolean b_objectId;
 
-    protected boolean b_modified_by;
+    protected boolean b_createdBy;
 
-    protected boolean b_creation_date;
+    protected boolean b_modifiedBy;
 
-    protected boolean b_last_modified;
+    protected boolean b_creationDate;
+
+    protected boolean b_lastModified;
+
+    protected boolean b_topic;
 
     // GET METHODS
     public int getObjectID() {
@@ -116,77 +123,104 @@ public abstract class DataObject extends SystemObject {
         return lastModified;
     }
 
+    /**
+     * Gets the topic
+     *
+     * @return The topic
+     */
+    public String getTopic() {
+        return topic;
+    }
+
     // SET METHODS
     public void setObjectID(final int object_id) {
         objectId = object_id;
-        b_object_id = true;
+        b_objectId = true;
     }
 
     public void setCreatedBy(final int created_by) {
         createdBy = created_by;
-        b_created_by = true;
+        b_createdBy = true;
     }
 
     public void setModifiedBy(final int modified_by) {
         modifiedBy = modified_by;
-        b_modified_by = true;
+        b_modifiedBy = true;
     }
 
     public void setCreationDate(final Date creation_date) {
         creationDate = creation_date;
-        b_creation_date = true;
+        b_creationDate = true;
     }
 
     public void setLastModified(final Date last_modified) {
         lastModified = last_modified;
-        b_last_modified = true;
+        b_lastModified = true;
+    }
+
+    /**
+     * Sets the topic
+     *
+     * @param topic The topic to set
+     */
+    public void setTopic(String topic) {
+        this.topic = topic;
     }
 
     // REMOVE METHODS
     public void removeObjectID() {
         objectId = 0;
-        b_object_id = false;
+        b_objectId = false;
     }
 
     public void removeCreatedBy() {
         createdBy = 0;
-        b_created_by = false;
+        b_createdBy = false;
     }
 
     public void removeModifiedBy() {
         modifiedBy = 0;
-        b_modified_by = false;
+        b_modifiedBy = false;
     }
 
     public void removeCreationDate() {
         creationDate = null;
-        b_creation_date = false;
+        b_creationDate = false;
     }
 
     public void removeLastModified() {
         lastModified = null;
-        b_last_modified = false;
+        b_lastModified = false;
+    }
+
+    public void removeTopic() {
+        topic = null;
+        b_topic = false;
     }
 
     // CONTAINS METHODS
     public boolean containsObjectID() {
-        return b_object_id;
+        return b_objectId;
     }
 
     public boolean containsCreatedBy() {
-        return b_created_by;
+        return b_createdBy;
     }
 
     public boolean containsModifiedBy() {
-        return b_modified_by;
+        return b_modifiedBy;
     }
 
     public boolean containsCreationDate() {
-        return b_creation_date;
+        return b_creationDate;
     }
 
     public boolean containsLastModified() {
-        return b_last_modified;
+        return b_lastModified;
+    }
+
+    public boolean containsTopic() {
+        return b_topic;
     }
 
     public void reset() {
@@ -195,36 +229,38 @@ public abstract class DataObject extends SystemObject {
         modifiedBy = 0;
         creationDate = null;
         lastModified = null;
-        b_object_id = false;
-        b_created_by = false;
-        b_modified_by = false;
-        b_creation_date = false;
-        b_last_modified = false;
+        topic = null;
+        b_objectId = false;
+        b_createdBy = false;
+        b_modifiedBy = false;
+        b_creationDate = false;
+        b_lastModified = false;
+        b_topic = false;
     }
 
     public Set<Integer> findDifferingFields(DataObject other) {
         Set<Integer> differingFields = new HashSet<Integer>();
 
         if ((!containsCreatedBy() && other.containsCreatedBy()) || (containsCreatedBy() && other.containsCreatedBy() && getCreatedBy() != other.getCreatedBy())) {
-            differingFields.add(CREATED_BY);
+            differingFields.add(Integer.valueOf(CREATED_BY));
         }
 
         if ((!containsCreationDate() && other.containsCreationDate()) || (containsCreationDate() && other.containsCreationDate() && getCreationDate() != other.getCreationDate() && (getCreationDate() == null || !getCreationDate().equals(
             other.getCreationDate())))) {
-            differingFields.add(CREATION_DATE);
+            differingFields.add(Integer.valueOf(CREATION_DATE));
         }
 
         if ((!containsLastModified() && other.containsLastModified()) || (containsLastModified() && other.containsLastModified() && getLastModified() != other.getLastModified() && (getLastModified() == null || !getLastModified().equals(
             other.getLastModified())))) {
-            differingFields.add(LAST_MODIFIED);
+            differingFields.add(Integer.valueOf(LAST_MODIFIED));
         }
 
         if ((!containsModifiedBy() && other.containsModifiedBy()) || (containsModifiedBy() && other.containsModifiedBy() && getModifiedBy() != other.getModifiedBy())) {
-            differingFields.add(MODIFIED_BY);
+            differingFields.add(Integer.valueOf(MODIFIED_BY));
         }
 
         if ((!containsObjectID() && other.containsObjectID()) || (containsObjectID() && other.containsObjectID() && getObjectID() != other.getObjectID())) {
-            differingFields.add(OBJECT_ID);
+            differingFields.add(Integer.valueOf(OBJECT_ID));
         }
 
         return differingFields;
@@ -237,16 +273,16 @@ public abstract class DataObject extends SystemObject {
             setLastModified((Date) value);
             break;
         case OBJECT_ID:
-            setObjectID((Integer) value);
+            setObjectID(((Integer) value).intValue());
             break;
         case MODIFIED_BY:
-            setModifiedBy((Integer) value);
+            setModifiedBy(((Integer) value).intValue());
             break;
         case CREATION_DATE:
             setCreationDate((Date) value);
             break;
         case CREATED_BY:
-            setCreatedBy((Integer) value);
+            setCreatedBy(((Integer) value).intValue());
             break;
         default:
             throw new IllegalArgumentException("I don't know how to set " + field);
@@ -259,13 +295,13 @@ public abstract class DataObject extends SystemObject {
         case LAST_MODIFIED_UTC:
             return getLastModified();
         case OBJECT_ID:
-            return getObjectID();
+            return Integer.valueOf(getObjectID());
         case MODIFIED_BY:
-            return getModifiedBy();
+            return Integer.valueOf(getModifiedBy());
         case CREATION_DATE:
             return getCreationDate();
         case CREATED_BY:
-            return getCreatedBy();
+            return Integer.valueOf(getCreatedBy());
         default:
             throw new IllegalArgumentException("I don't know how to get " + field);
         }

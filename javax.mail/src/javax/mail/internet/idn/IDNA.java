@@ -51,7 +51,7 @@ package javax.mail.internet.idn;
 
 import gnu.inet.encoding.IDNAException;
 import javax.mail.internet.AddressException;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link IDNA} - Helper class for internationalized domain names (IDN).
@@ -168,7 +168,7 @@ public final class IDNA {
             }
             return b.toString();
         } catch (final IDNAException e) {
-            LogFactory.getLog(IDNA.class).warn("Couldn't create ASCII representation for host name: " + unicodeHostName, e);
+            LoggerFactory.getLogger(IDNA.class).warn("Couldn''t create ASCII representation for host name: {}", unicodeHostName, e);
             return unicodeHostName;
         }
     }

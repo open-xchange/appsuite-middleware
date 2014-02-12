@@ -49,9 +49,9 @@
 
  package com.openexchange.ajax.parser;
 
+import java.text.MessageFormat;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.sqlinjectors.SQLInjector;
 import com.openexchange.groupware.contact.sqlinjectors.StringSQLInjector;
@@ -69,7 +69,7 @@ import com.openexchange.search.SingleSearchTerm;
 
 public class ContactSearchtermSqlConverter  implements ContactSearchTermConverter {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContactSearchtermSqlConverter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactSearchtermSqlConverter.class);
 
 	private static final String FOLDER_AJAXNAME = ContactField.FOLDER_ID.getAjaxName();
 
@@ -158,7 +158,7 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
         } else if(term instanceof CompositeSearchTerm) {
             traverseViaInorder((CompositeSearchTerm) term);
         } else {
-            LOG.error("Got a search term that was neither Composite nor Single. How? " + System.getProperty("line.separator") + term);
+            LOG.error("Got a search term that was neither Composite nor Single. How? {}{}", System.getProperty("line.separator"), term);
         }
 	}
 

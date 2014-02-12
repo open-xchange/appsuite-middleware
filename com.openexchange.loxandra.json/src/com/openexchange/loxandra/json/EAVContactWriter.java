@@ -52,7 +52,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.TimeZone;
 
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -69,7 +68,7 @@ import com.openexchange.tools.TimeZoneUtils;
  */
 public class EAVContactWriter extends CommonWriter {
 
-	private static Log log = com.openexchange.log.Log.loggerFor(EAVContactWriter.class);
+	private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EAVContactWriter.class);
 
 	private final TimeZone utc;
 

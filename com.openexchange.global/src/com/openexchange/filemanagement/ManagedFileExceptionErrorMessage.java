@@ -101,10 +101,6 @@ public enum ManagedFileExceptionErrorMessage implements OXExceptionCode {
         return detailNumber;
     }
 
-    public String getHelp() {
-        return null;
-    }
-
     @Override
     public String getMessage() {
         return message;

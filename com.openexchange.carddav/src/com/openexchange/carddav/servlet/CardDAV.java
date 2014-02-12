@@ -53,7 +53,7 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.carddav.servlet.CarddavPerformer.Action;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -75,7 +75,7 @@ public class CardDAV extends OXServlet {
 
 	private static final long serialVersionUID = -6381396333467867154L;
 
-	private static final transient Log LOG = com.openexchange.log.Log.loggerFor(CardDAV.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CardDAV.class);
 
     private static volatile ServiceLookup services;
 

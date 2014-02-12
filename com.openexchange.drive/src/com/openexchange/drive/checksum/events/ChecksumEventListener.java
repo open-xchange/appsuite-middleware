@@ -54,11 +54,9 @@ import static com.openexchange.file.storage.FileStorageEventConstants.DELETE_FOL
 import static com.openexchange.file.storage.FileStorageEventConstants.DELETE_TOPIC;
 import static com.openexchange.file.storage.FileStorageEventConstants.UPDATE_FOLDER_TOPIC;
 import static com.openexchange.file.storage.FileStorageEventConstants.UPDATE_TOPIC;
-import java.util.Arrays;
-import java.util.List;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.drive.DriveClientType;
 import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventHelper;
@@ -82,15 +80,7 @@ public class ChecksumEventListener implements EventHandler {
         return new String[] { DELETE_TOPIC, UPDATE_TOPIC, CREATE_TOPIC, DELETE_FOLDER_TOPIC, UPDATE_FOLDER_TOPIC };
     }
 
-    private static final List<String> DRIVE_CLIENTS = Arrays.asList(new String[] {
-        "OpenXchange.HTTPClient.OXDrive",
-        "OpenXchange.HTTPClient.TestDrive",
-        "ox-client.android.normal.hdpi",
-        "OpenXchange.iosClient.OXDrive",
-        "OSX.OXDrive",
-    });
-
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ChecksumEventListener.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ChecksumEventListener.class);
 
     /**
      * Initializes a new {@link ChecksumEventListener}.
@@ -100,16 +90,14 @@ public class ChecksumEventListener implements EventHandler {
     }
 
     @Override
-    public void handleEvent(Event event) {
+    public void handleEvent(final Event event) {
         try {
             Session session = FileStorageEventHelper.extractSession(event);
             if (null == session || isDriveSession(session)) {
                 // skip
                 return;
             }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(FileStorageEventHelper.createDebugMessage("event", event));
-            }
+            LOG.debug("{}", new Object() { @Override public String toString() { return FileStorageEventHelper.createDebugMessage("event", event);}});
             RdbChecksumStore checksumStore = new RdbChecksumStore(session.getContextId());
             String topic = event.getTopic();
             if (DELETE_TOPIC.equals(topic) || UPDATE_TOPIC.equals(topic) || CREATE_TOPIC.equals(topic)) {
@@ -150,7 +138,7 @@ public class ChecksumEventListener implements EventHandler {
     }
 
     private static boolean isDriveSession(Session session) {
-        return null != session && DRIVE_CLIENTS.contains(session.getClient());
+        return null != session && false == DriveClientType.UNKNOWN.equals(DriveClientType.parse(session.getClient()));
     }
 
 }

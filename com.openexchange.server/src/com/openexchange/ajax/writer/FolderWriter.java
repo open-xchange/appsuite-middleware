@@ -90,7 +90,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class FolderWriter extends DataWriter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FolderWriter.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderWriter.class);
 
     private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
 
@@ -344,21 +344,22 @@ public final class FolderWriter extends DataWriter {
      * @param session The session providing needed user data
      * @param ctx The session's context
      * @param timeZone The time zone identifier
+     * @throws OXException
      */
-    public FolderWriter(final JSONWriter jw, final Session session, final Context ctx, final String timeZone, final AdditionalFolderFieldList fields) {
+    public FolderWriter(final JSONWriter jw, final Session session, final Context ctx, final String timeZone, final AdditionalFolderFieldList fields) throws OXException {
         super(null == timeZone ? getTimeZoneBySession(session, ctx) : getTimeZone(timeZone), jw);
-        this.user = UserStorage.getStorageUser(session.getUserId(), ctx);
+        this.user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
         this.userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
         this.ctx = ctx;
         this.fields = fields;
         this.session = ServerSessionAdapter.valueOf(session, ctx, user, userConfig);
     }
 
-    private static TimeZone getTimeZoneBySession(final Session session, final Context ctx) {
+    private static TimeZone getTimeZoneBySession(final Session session, final Context ctx) throws OXException {
         if (session instanceof ServerSession) {
             return getTimeZone(((ServerSession) session).getUser().getTimeZone());
         }
-        return getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
+        return getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
     }
 
     /**
@@ -664,8 +665,8 @@ public final class FolderWriter extends DataWriter {
                     break Fields;
                 default:
 
-                    if (!this.fields.knows(field) && LOG.isWarnEnabled()) {
-                        LOG.warn("Unknown folder field: " + field);
+                    if (!this.fields.knows(field)) {
+                        LOG.warn("Unknown folder field: {}", field);
                     }
 
                     final AdditionalFolderField folderField = this.fields.get(field);

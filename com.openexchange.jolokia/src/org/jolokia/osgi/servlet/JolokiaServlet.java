@@ -16,15 +16,12 @@ package org.jolokia.osgi.servlet;
  * limitations under the License.
  */
 
-import javax.servlet.*;
-
-import org.apache.commons.logging.Log;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import org.jolokia.http.AgentServlet;
-import org.jolokia.osgi.JolokiaActivator;
 import org.jolokia.restrictor.Restrictor;
-import org.jolokia.util.LogHandler;
 import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * Extended here for the sole purpose of exporting
@@ -50,9 +47,6 @@ public class JolokiaServlet extends AgentServlet {
     // the https service during initialization
     private static final ThreadLocal<BundleContext> BUNDLE_CONTEXT_THREAD_LOCAL = new ThreadLocal<BundleContext>();
 
-    // Internal Ox Logging
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(JolokiaServlet.class);
-    
     /**
      * Constructor with an empty context
      */
@@ -126,45 +120,4 @@ public class JolokiaServlet extends AgentServlet {
         }
 
     }
-
-    // LogHandler which logs to a LogService if available, otherwise
-    // it uses simply the servlets log facility
-//    private final class ActivatorLogHandler implements LogHandler {
-//
-//        private ServiceTracker logTracker;
-//
-//        private ActivatorLogHandler(ServiceTracker pLogTracker) {
-//            logTracker = pLogTracker;
-//        }
-//
-//        /** {@inheritDoc} */
-//        public void debug(String message) {
-//            doLog(LogService.LOG_DEBUG, message);
-//        }
-//
-//        /** {@inheritDoc} */
-//        public void info(String message) {
-//            doLog(LogService.LOG_INFO, message);
-//        }
-//
-//        private void doLog(int level, String message) {
-//            LogService logService = (LogService) logTracker.getService();
-//            if (logService != null) {
-//                logService.log(level,message);
-//            } else {
-//                log(message);
-//            }
-//        }
-//
-//        /** {@inheritDoc} */
-//        public void error(String message, Throwable t) {
-//            LogService logService = (LogService) logTracker.getService();
-//            if (logService != null) {
-//                logService.log(LogService.LOG_ERROR,message,t);
-//            } else {
-//                log(message,t);
-//            }
-//        }
-//    }
-
 }

@@ -1,14 +1,16 @@
 
 package com.openexchange.mail.utils;
 
+import static org.junit.Assert.assertEquals;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.mail.internet.InternetAddress;
-import junit.framework.TestCase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -30,23 +32,28 @@ import com.openexchange.session.Session;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ UserStorage.class, ServerServiceRegistry.class, ContactUtil.class })
-public class MsisdnUtilityTest extends TestCase {
+public class MsisdnUtilityTest {
 
-    Session mockedSession = PowerMockito.mock(Session.class);
+    @Mock
+    private Session mockedSession;
 
-    User mockedUser = PowerMockito.mock(User.class);
+    @Mock
+    private User mockedUser;
 
-    ServerServiceRegistry serverServiceRegistry = PowerMockito.mock(ServerServiceRegistry.class);
+    @Mock
+    private ServerServiceRegistry serverServiceRegistry;
 
-    ContactService contactService = PowerMockito.mock(ContactService.class);
+    @Mock
+    private ContactService contactService;
 
     Set<String> numbers = new TreeSet<String>();
 
     Contact contact = new Contact();
 
-    @Override
     @Before
     public void setUp() throws OXException {
+        MockitoAnnotations.initMocks(this);
+
         PowerMockito.mockStatic(UserStorage.class);
         PowerMockito.mockStatic(ServerServiceRegistry.class);
         PowerMockito.mockStatic(ContactUtil.class);
@@ -57,10 +64,10 @@ public class MsisdnUtilityTest extends TestCase {
         PowerMockito.when(serverServiceRegistry.getService(ContactService.class)).thenReturn(contactService);
         PowerMockito.when(
             contactService.getContact(mockedSession, Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID), Integer.toString(1))).thenReturn(
-            contact);
+                contact);
         PowerMockito.when(
             contactService.getUser(mockedSession, 1)).thenReturn(
-            contact);
+                contact);
         PowerMockito.when(UserStorage.getStorageUser(1, 1)).thenReturn(mockedUser);
         PowerMockito.when(ServerServiceRegistry.getInstance()).thenReturn(serverServiceRegistry);
         PowerMockito.when(ContactUtil.gatherTelephoneNumbers(contact)).thenReturn(numbers);
@@ -128,7 +135,7 @@ public class MsisdnUtilityTest extends TestCase {
     public final void testAddMsisdnAddress_contactNull_return() throws OXException {
         PowerMockito.when(
             contactService.getContact(mockedSession, Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID), Integer.toString(1))).thenReturn(
-            null);
+                null);
 
         final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>();
 

@@ -80,7 +80,6 @@ import net.oauth.v2.OAuth2Validator;
 import net.oauth.v2.server.OAuth2Servlet;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -100,7 +99,7 @@ public final class DatabaseOAuth2ProviderService extends AbstractOAuthProviderSe
     /**
      * The logger constant.
      */
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(DatabaseOAuth2ProviderService.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseOAuth2ProviderService.class);
 
     private final OAuth2Validator validator;
 
@@ -197,8 +196,6 @@ public final class DatabaseOAuth2ProviderService extends AbstractOAuthProviderSe
                 @Override
                 public void run() {
                     try {
-                        final boolean infoEnabled = LOG.isInfoEnabled();
-                        final long st = infoEnabled ? System.currentTimeMillis() : 0L;
                         final TIntSet processed = new TIntHashSet(contextIds.size());
                         final AtomicReference<OXException> errorRef = new AtomicReference<OXException>();
                         final List<int[]> delete = new LinkedList<int[]>();
@@ -327,10 +324,6 @@ public final class DatabaseOAuth2ProviderService extends AbstractOAuthProviderSe
                                     databaseService.backWritable(cid, con);
                                 }
                             }
-                        }
-                        if (infoEnabled) {
-                            final long dur = System.currentTimeMillis() - st;
-                            LOG.info("DatabaseOAuth2ProviderService.loadConsumers(): Loading accessors took " + dur + "msec");
                         }
                     } catch (final Exception e) {
                         LOG.warn("Couldn't load OAuth2 accessors.", e);

@@ -57,7 +57,6 @@ import java.util.Set;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 import org.jdom2.Text;
@@ -73,7 +72,6 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -120,7 +118,7 @@ public class ContactWriter extends CommonWriter {
 
     protected final static ContactField[] deleteFields = { ContactField.OBJECT_ID, ContactField.LAST_MODIFIED };
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactWriter.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactWriter.class);
 
     public ContactWriter() {
 
@@ -147,7 +145,7 @@ public class ContactWriter extends CommonWriter {
                 writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(XmlServlet.SERVER_ERROR_EXCEPTION, XmlServlet.SERVER_ERROR_STATUS), xo, os);
             }
         } catch (final Exception ex) {
-            LOG.error(ex.getMessage(), ex);
+            LOG.error("", ex);
             writeResponseElement(eProp, 0, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(XmlServlet.SERVER_ERROR_EXCEPTION, XmlServlet.SERVER_ERROR_STATUS), xo, os);
         }
     }
@@ -381,15 +379,13 @@ public class ContactWriter extends CommonWriter {
                  * A child element with the same name already exists
                  */
                 if (children.size() > 1) {
-                    LOG.warn(new StringBuilder(128).append("Conflicting email address detected!").append(" Multiple elements named \"").append(
-                        name).append("\" already exist."));
+                    LOG.warn("Conflicting email address detected! Multiple elements named \"{}\" already exist.", name);
                     return;
                 }
                 final Element elem = children.get(0);
                 final Text text = (Text) elem.getContent().get(0);
                 if (!new QuotedInternetAddress(text.getText()).equals(ia)) {
-                    LOG.warn(new StringBuilder(128).append("Conflicting email address detected!").append(" An element named \"").append(
-                        name).append("\" already exists."));
+                    LOG.warn("Conflicting email address detected! An element named \"{}\" already exists.", name);
                     return;
                 }
                 /*

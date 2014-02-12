@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Conversion Engine
 Bundle-SymbolicName: com.openexchange.conversion.engine
-Bundle-Version: 7.4.1
+Bundle-Version: 7.4.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.conversion,
@@ -11,7 +11,7 @@ Import-Package: com.openexchange.conversion,
  com.openexchange.osgi,
  com.openexchange.session,
  org.apache.commons.logging,
- org.apache.commons.logging.impl,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Bundle-Activator: com.openexchange.conversion.engine.osgi.ConversionEngineActivator

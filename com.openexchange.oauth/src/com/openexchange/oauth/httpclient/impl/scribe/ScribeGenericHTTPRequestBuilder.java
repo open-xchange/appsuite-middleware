@@ -49,11 +49,11 @@
 
 package com.openexchange.oauth.httpclient.impl.scribe;
 
+import java.text.MessageFormat;
 import java.util.Map;
 import java.util.TreeMap;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.util.URIUtil;
-import org.apache.commons.logging.Log;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.DropBoxApi;
@@ -91,7 +91,7 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
 
     /**
      * Initializes a new {@link ScribeGenericHTTPRequestBuilder}.
-     * 
+     *
      * @param coreBuilder The parental request builder
      * @throws IllegalStateException If associated API cannot be mapped to a Scribe provider
      */
@@ -108,14 +108,14 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
 
     /**
      * Gets the associated verb.
-     * 
+     *
      * @return The verb
      */
     protected abstract Verb getVerb();
 
     /**
      * Gets the Scribe provider for given API.
-     * 
+     *
      * @param api The API
      * @return The associated Scribe provider
      * @throws IllegalStateException If given API cannot be mapped to a Scribe provider
@@ -188,7 +188,7 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
 
     /**
      * Builds the HTTP request.
-     * 
+     *
      * @return The HTTP request
      * @throws OXException If operation fails
      */
@@ -236,7 +236,7 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
 
     /**
      * Gets the Scribe token for associated OAuth account.
-     * 
+     *
      * @return The Scribe token
      * @throws OXException If operation fails due to an invalid account
      */
@@ -245,8 +245,8 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
         try {
             return new Token(account.getToken(), account.getSecret());
         } catch (final RuntimeException e) {
-            final Log logger = com.openexchange.log.Log.loggerFor(ScribeGenericHTTPRequestBuilder.class);
-            logger.warn("Associated OAuth \"" + account.getDisplayName() + " (" + account.getId() + ")\" account misses token information.");
+            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ScribeGenericHTTPRequestBuilder.class);
+            logger.warn("Associated OAuth \"{} ({})\" account misses token information.", account.getDisplayName(), account.getId());
             throw OAuthExceptionCodes.INVALID_ACCOUNT.create(e, new Object[0]);
         }
     }

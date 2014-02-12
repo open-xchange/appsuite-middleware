@@ -49,17 +49,10 @@
 
 package com.openexchange.report.internal;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
@@ -73,7 +66,7 @@ import com.openexchange.user.UserService;
  */
 public class LastLoginRecorder implements LoginHandlerService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(LastLoginRecorder.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LastLoginRecorder.class);
 
     private int maxClientCount = -1;
     private final UserService userService;
@@ -105,7 +98,7 @@ public class LastLoginRecorder implements LoginHandlerService {
             int count = 0;
             for (String origKey : user.getAttributes().keySet()) {
                 if (origKey.startsWith("client:") && ++count > maxClientCount) {
-                    LOG.warn("Login of client " + client + " for login " + login + " (Context: " + context.getContextId() + ", User: " + user.getId() + ") will not be recorded in the database.");
+                    LOG.warn("Login of client {} for login {} (Context: {}, User: {}) will not be recorded in the database.", client, login, context.getContextId(), user.getId());
                 }
             }
         }
@@ -124,15 +117,9 @@ public class LastLoginRecorder implements LoginHandlerService {
         if (context.isReadOnly()) {
             return;
         }
-        // Set attribute
-        final Map<String, Set<String>> attributes = new HashMap<String, Set<String>>(origUser.getAttributes());
-        // Add current time stamp
-        attributes.put("client:" + client, new HashSet<String>(Arrays.asList(Long.toString(System.currentTimeMillis()))));
-        final UserImpl newUser = new UserImpl();
-        newUser.setId(origUser.getId());
-        newUser.setAttributes(attributes);
+        // Set attribute and add current time stamp
         try {
-            userService.updateUser(newUser, context);
+            userService.setAttribute("client:" + client, Long.toString(System.currentTimeMillis()), origUser.getId(), context);
         } catch (final OXException e) {
             throw e;
         }

@@ -121,7 +121,7 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
     public synchronized void registerSubscribeService() {
         if (null == serviceRegistration) {
             serviceRegistration = context.registerService(SubscribeService.class, new XingSubscribeService(this), null);
-            com.openexchange.log.Log.loggerFor(XingSubscribeActivator.class).info("XingSubscribeService was started");
+            org.slf4j.LoggerFactory.getLogger(XingSubscribeActivator.class).info("XingSubscribeService was started");
         }
     }
 
@@ -133,7 +133,7 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
         if (null != serviceRegistration) {
             serviceRegistration.unregister();
             this.serviceRegistration = null;
-            com.openexchange.log.Log.loggerFor(XingSubscribeActivator.class).info("XingSubscribeService was stopped");
+            org.slf4j.LoggerFactory.getLogger(XingSubscribeActivator.class).info("XingSubscribeService was stopped");
         }
     }
 

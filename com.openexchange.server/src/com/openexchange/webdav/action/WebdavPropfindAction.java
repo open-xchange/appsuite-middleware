@@ -52,13 +52,11 @@ package com.openexchange.webdav.action;
 import java.io.IOException;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 import org.jdom2.output.XMLOutputter;
-import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
@@ -74,7 +72,7 @@ public class WebdavPropfindAction extends AbstractAction {
 
 	protected static final Namespace DAV_NS = Protocol.DAV_NS;
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebdavPropfindAction.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavPropfindAction.class);
 
 	protected final XMLOutputter outputter = new XMLOutputter();
 

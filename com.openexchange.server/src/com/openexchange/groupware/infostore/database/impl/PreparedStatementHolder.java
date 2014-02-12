@@ -54,8 +54,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 
 /**
@@ -65,7 +63,7 @@ import com.openexchange.log.LogFactory;
  *
  */
 public class PreparedStatementHolder {
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PreparedStatementHolder.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PreparedStatementHolder.class);
 
     private final Connection writeConnection;
     private final Map<String, PreparedStatement> statements = new HashMap<String, PreparedStatement>();
@@ -97,7 +95,7 @@ public class PreparedStatementHolder {
             try {
                 stmt.close();
             } catch (SQLException x) {
-                LOG.error(x.getMessage(), x);
+                LOG.error("", x);
             }
         }
     }

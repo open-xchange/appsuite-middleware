@@ -52,13 +52,11 @@ package com.openexchange.subscribe.osgi;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleActivator;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.NonTransient;
@@ -78,7 +76,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class AutoUpdateActivator extends HousekeepingActivator implements BundleActivator {
 
-    private static final Log LOG = LogFactory.getLog(AutoUpdateActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AutoUpdateActivator.class);
 
     public static OSGiSubscriptionSourceDiscoveryCollector COLLECTOR;
 
@@ -134,7 +132,7 @@ public class AutoUpdateActivator extends HousekeepingActivator implements Bundle
 
                 EXECUTOR.executeSubscriptions(subscriptionsToRefresh, ServerSessionAdapter.valueOf(session));
             } catch (OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
 

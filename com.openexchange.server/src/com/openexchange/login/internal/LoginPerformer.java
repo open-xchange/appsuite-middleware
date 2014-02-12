@@ -59,7 +59,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 import javax.security.auth.login.LoginException;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.Cookie;
@@ -79,7 +78,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.login.Blocking;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
@@ -94,8 +92,6 @@ import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link LoginPerformer} - Performs a login for specified credentials.
@@ -104,7 +100,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class LoginPerformer {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginPerformer.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LoginPerformer.class);
 
     private static final LoginPerformer SINGLETON = new LoginPerformer();
 
@@ -238,13 +234,6 @@ public final class LoginPerformer {
             }
             retval.setSession(session);
 
-            // init session
-            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-            serverSession.getUser();
-            serverSession.getUserSettingMail();
-            serverSession.getUserPermissionBits();
-            //serverSession.getUserConfiguration();
-
             // Trigger registered login handlers
             triggerLoginHandlers(retval);
             return retval;
@@ -324,9 +313,7 @@ public final class LoginPerformer {
         }
         final Session session = sessiondService.getSession(sessionId);
         if (null == session) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("No session found for ID: " + sessionId);
-            }
+            LOG.debug("No session found for ID: {}", sessionId);
             return null;
         }
         // Get context
@@ -473,7 +460,7 @@ public final class LoginPerformer {
         } catch (final OXException e) {
             e.log(LOG);
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -510,13 +497,15 @@ public final class LoginPerformer {
             sb.append(')');
         }
         final Session session = result.getSession();
-        if (null != session) {
+        if (null == session) {
+            sb.append(" No session created.");
+        } else {
             sb.append(" Session:");
             sb.append(session.getSessionID());
             sb.append(" Random:");
             sb.append(session.getRandomToken());
-        } else {
-            sb.append(" Failed.");
+            sb.append(" Transient:");
+            sb.append(session.isTransient());
         }
         LOG.info(sb.toString());
     }

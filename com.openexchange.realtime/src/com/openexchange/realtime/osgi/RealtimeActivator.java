@@ -60,6 +60,8 @@ import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.Component;
 import com.openexchange.realtime.RealtimeConfig;
+import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
+import com.openexchange.realtime.cleanup.LocalRealtimeCleanupImpl;
 import com.openexchange.realtime.management.ManagementHouseKeeper;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
@@ -79,7 +81,7 @@ import com.openexchange.user.UserService;
  */
 public class RealtimeActivator extends HousekeepingActivator {
 
-    private SyntheticChannel synth; 
+    private SyntheticChannel synth;
     private RealtimeConfig realtimeConfig;
 
     @Override
@@ -92,18 +94,19 @@ public class RealtimeActivator extends HousekeepingActivator {
         RealtimeServiceRegistry.SERVICES.set(this);
         ManagementHouseKeeper managementHouseKeeper = ManagementHouseKeeper.getInstance();
         managementHouseKeeper.initialize(this);
-        
+
         realtimeConfig = RealtimeConfig.getInstance();
         realtimeConfig.start();
+
         managementHouseKeeper.addManagementObject(realtimeConfig.getManagementObject());
 
         synth = new SyntheticChannel(this);
 
         TimerService timerService = getService(TimerService.class);
         timerService.scheduleAtFixedRate(synth, 0, 1, TimeUnit.MINUTES);
-        
+
         registerService(Channel.class, synth);
-        
+
         track(Component.class, new SimpleRegistryListener<Component>() {
 
             @Override
@@ -116,26 +119,32 @@ public class RealtimeActivator extends HousekeepingActivator {
                 synth.removeComponent(service);
             }
         });
-        
+
         DefaultPayloadTreeConverter converter = new DefaultPayloadTreeConverter(this);
         PayloadTree.CONVERTER = converter;
         PayloadTreeNode.CONVERTER = converter;
-        
+
         registerService(PayloadTreeConverter.class, converter);
-        
+
         registerService(Channel.class, new DevNullChannel());
-        
+
+        //Add the node-wide cleanup service and start tracking Janitors 
+        LocalRealtimeCleanupImpl localRealtimeCleanup = new LocalRealtimeCleanupImpl(context);
+        rememberTracker(localRealtimeCleanup);
+        registerService(LocalRealtimeCleanup.class, localRealtimeCleanup);
+
         //Expose all ManagementObjects for this bundle
         managementHouseKeeper.exposeManagementObjects();
         openTrackers();
     }
-    
+
     @Override
     protected void stopBundle() throws Exception {
         synth.shutdown();
         //Conceal all ManagementObjects for this bundle and remove them from the housekeeper
         ManagementHouseKeeper.getInstance().cleanup();
         realtimeConfig.stop();
+        super.cleanUp();
     }
 
 }

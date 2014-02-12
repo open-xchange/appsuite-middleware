@@ -103,7 +103,6 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -288,7 +287,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         FileStorageEfficientRetrieval retrieval = (FileStorageEfficientRetrieval) fileAccess;
         // Post event
         {
-            File metaData = fileAccess.getFileMetadata(fileID.getFolderId(), fileID.toUniqueID(), version);
+            File metaData = fileAccess.getFileMetadata(fileID.getFolderId(), fileID.getFileId(), version);
             if (null != metaData) {
                 postEvent(FileStorageEventHelper.buildAccessEvent(
                     session,
@@ -340,7 +339,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         FileStorageEfficientRetrieval retrieval = (FileStorageEfficientRetrieval) fileAccess;
         // Post event
         {
-            File metaData = fileAccess.getFileMetadata(fileID.getFolderId(), fileID.toUniqueID(), version);
+            File metaData = fileAccess.getFileMetadata(fileID.getFolderId(), fileID.getFileId(), version);
             if (null != metaData) {
                 postEvent(FileStorageEventHelper.buildAccessEvent(
                     session,
@@ -388,7 +387,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
         // Post event
         {
-            File metaData = fileAccess.getFileMetadata(fileID.getFolderId(), fileID.toUniqueID(), version);
+            File metaData = fileAccess.getFileMetadata(fileID.getFolderId(), fileID.getFileId(), version);
             if (null != metaData) {
                 postEvent(FileStorageEventHelper.buildAccessEvent(
                     session,
@@ -640,29 +639,35 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             removed.remove(i);
         }
 
-        String objectId = fileID.getFileId();
-        FolderID folderID;
-        String fileFolder = fileID.getFolderId();
-        String fileName = null;
-        if (fileFolder == null) {
-            /*
-             * Reload the document to get it's folder id.
-             */
-            File fileMetadata = access.getFileMetadata(fileFolder, objectId, FileStorageFileAccess.CURRENT_VERSION);
-            fileName = fileMetadata.getFileName();
-            folderID = new FolderID(serviceId, accountId, fileMetadata.getFolderId());
-        } else {
-            folderID = new FolderID(serviceId, accountId, fileFolder);
+        /*
+         * prepare event if needed
+         */
+        if (0 < removed.size()) {
+            String objectId = fileID.getFileId();
+            FolderID folderID;
+            String fileFolder = fileID.getFolderId();
+            String fileName = null;
+            if (fileFolder == null) {
+                /*
+                 * Reload the document to get it's folder id.
+                 */
+                File fileMetadata = access.getFileMetadata(fileFolder, objectId, FileStorageFileAccess.CURRENT_VERSION);
+                fileName = fileMetadata.getFileName();
+                folderID = new FolderID(serviceId, accountId, fileMetadata.getFolderId());
+            } else {
+                folderID = new FolderID(serviceId, accountId, fileFolder);
+            }
+
+            postEvent(FileStorageEventHelper.buildDeleteEvent(
+                session,
+                serviceId,
+                accountId,
+                folderID.toUniqueID(),
+                fileID.toUniqueID(),
+                fileName,
+                removed));
         }
 
-        postEvent(FileStorageEventHelper.buildDeleteEvent(
-            session,
-            serviceId,
-            accountId,
-            folderID.toUniqueID(),
-            fileID.toUniqueID(),
-            fileName,
-            removed));
         return notRemoved;
     }
 
@@ -1446,17 +1451,13 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
     }
 
     private EventProperty extractRemoteAddress() {
-        Props properties = LogProperties.getLogProperties();
-        if (null != properties) {
-            Object serverName = properties.get(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS);
-            if (null == serverName) {
-                serverName = properties.get(LogProperties.Name.AJP_REMOTE_ADDRESS);
-            }
-            if (null != serverName) {
-                return new EventProperty("remoteAddress", serverName.toString());
-            }
+        Object serverName = LogProperties.get(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS);
+        if (null == serverName) {
+            serverName = LogProperties.get(LogProperties.Name.AJP_REMOTE_ADDRESS);
         }
-
+        if (null != serverName) {
+            return new EventProperty("remoteAddress", serverName.toString());
+        }
         return null;
     }
 

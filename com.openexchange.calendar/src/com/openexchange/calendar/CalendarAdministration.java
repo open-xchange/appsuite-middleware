@@ -56,14 +56,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
-import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
@@ -82,6 +80,7 @@ import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeFailedExceptionCode;
 import com.openexchange.groupware.downgrade.DowngradeListener;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
@@ -97,7 +96,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
 
     private com.openexchange.java.StringAllocator u1;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarAdministration.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarAdministration.class);
 
     private final Set<Integer> handledObjects = new HashSet<Integer>();
 
@@ -151,7 +150,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
         try {
             removeAppointmentsWithOnlyTheUserAsParticipant(downgradeEvent.getSession(),downgradeEvent.getContext(),downgradeEvent.getNewUserConfiguration().getUserId(), downgradeEvent.getWriteCon());
         } catch (final SQLException e) {
-            LOG.error(e);
+            LOG.error(e.toString());
             throw DowngradeFailedExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -199,7 +198,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
 
 
         } catch (final SQLException e) {
-            LOG.error(e);
+            LOG.error(e.toString());
             throw DowngradeFailedExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             final CalendarCollection collection = new CalendarCollection();
@@ -268,7 +267,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
                 deleteFromView.executeUpdate();
             }
         } catch (final SQLException e) {
-            LOG.error(e);
+            LOG.error(e.toString());
             throw DowngradeFailedExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             final CalendarCollection collection = new CalendarCollection();
@@ -775,7 +774,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
                 collection.triggerEvent(so, type, cdao);
 
             } catch (final OXException ex) {
-                LOG.warn("While deleting an object (type:"+type+") the master object with id "+object_id+" in context "+context.getContextId()+" was not found!", ex);
+                LOG.warn("While deleting an object (type:{}) the master object with id {} in context {} was not found!", type, object_id, context.getContextId(), ex);
             }
         } finally {
             collection.closeResultSet(rs);

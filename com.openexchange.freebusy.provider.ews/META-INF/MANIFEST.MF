@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Free/Busy provider accessing a MS Exchange system using EWS
 Bundle-SymbolicName: com.openexchange.freebusy.provider.ews
-Bundle-Version: 7.4.1
+Bundle-Version: 7.4.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.microsoft.schemas.exchange.services._2006.messages,
@@ -25,5 +25,6 @@ Import-Package: com.microsoft.schemas.exchange.services._2006.messages,
  javax.xml.ws,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Bundle-Activator: com.openexchange.freebusy.provider.ews.osgi.EWSFreeBusyProviderActivator

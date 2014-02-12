@@ -51,6 +51,7 @@ package com.openexchange.ajp13.servlet.http;
 
 import java.lang.reflect.Constructor;
 import javax.servlet.http.HttpServlet;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajp13.servlet.FIFOQueue;
 import com.openexchange.ajp13.servlet.ServletConfigLoader;
 
@@ -120,7 +121,7 @@ public final class FiFoServletQueue extends FIFOQueue<HttpServlet> implements Se
                 servletKey));
             return servletInstance;
         } catch (final Throwable t) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FiFoServletQueue.class)).error(t.getMessage(), t);
+            LoggerFactory.getLogger(FiFoServletQueue.class).error("", t);
         }
         return null;
     }

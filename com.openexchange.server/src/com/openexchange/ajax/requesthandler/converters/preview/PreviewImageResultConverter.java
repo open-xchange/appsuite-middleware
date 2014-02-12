@@ -91,6 +91,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class PreviewImageResultConverter extends AbstractPreviewResultConverter {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PreviewImageResultConverter.class);
+
     private static final String PARAMETER_ACTION = AJAXServlet.PARAMETER_ACTION;
     private static final String PARAMETER_SESSION = AJAXServlet.PARAMETER_SESSION;
 
@@ -120,14 +122,18 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
     public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         try {
             // Check cache first
-            final ResourceCache previewCache = ResourceCaches.getResourceCache();
+            final ResourceCache resourceCache;
+            {
+                final ResourceCache tmp = ResourceCaches.getResourceCache();
+                resourceCache = null == tmp ? null : (tmp.isEnabledFor(session.getContextId(), session.getUserId()) ? tmp : null);
+            }
 
             // Get eTag from result that provides the IFileHolder
             final String eTag = result.getHeader("ETag");
             final boolean isValidEtag = !Strings.isEmpty(eTag);
-            if (null != previewCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", requestData, true)) {
+            if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", requestData, true)) {
                 final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData);
-                final CachedResource cachedPreview = previewCache.get(cacheKey, 0, session.getContextId());
+                final CachedResource cachedPreview = resourceCache.get(cacheKey, 0, session.getContextId());
                 if (null != cachedPreview) {
                     requestData.setFormat("file");
                     // Create appropriate IFileHolder
@@ -152,42 +158,56 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             // No cached preview available -- get the preview document from appropriate 'PreviewService'
             final PreviewDocument previewDocument;
             {
-                final Object resultObject = result.getResultObject();
-                if (!(resultObject instanceof IFileHolder)) {
-                    throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(IFileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
-                }
-                final IFileHolder fileHolder = (IFileHolder) resultObject;
-
-                // Check file holder's content
-                InputStream stream = fileHolder.getStream();
-                {
-                    if (0 == fileHolder.getLength()) {
-                        Streams.close(stream, fileHolder);
-                        setDefaulThumbnail(requestData, result);
-                        return;
+                InputStream stream = null;
+                IFileHolder fileHolder = null;
+                try {
+                    final Object resultObject = result.getResultObject();
+                    if (!(resultObject instanceof IFileHolder)) {
+                        throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(IFileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
                     }
-                    final Ref<InputStream> ref = new Ref<InputStream>();
-                    if (streamIsEof(stream, ref)) {
-                        Streams.close(stream, fileHolder);
-                        setDefaulThumbnail(requestData, result);
-                        return;
-                    }
-                    stream = ref.getValue();
-                }
+                    fileHolder = (IFileHolder) resultObject;
 
-                // Obtain preview
-                final PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
-                final DataProperties dataProperties = new DataProperties(9);
-                dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null));
-                dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
-                dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
-                dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
-                dataProperties.put("PreviewType", requestData.getModule().equals("files") ? "DetailView" : "Thumbnail");
-                dataProperties.put("PreviewWidth", requestData.getParameter("width"));
-                dataProperties.put("PreviewHeight", requestData.getParameter("height"));
-                dataProperties.put("PreviewDelivery", requestData.getParameter("delivery"));
-                dataProperties.put("PreviewScaleType", requestData.getParameter("scaleType"));
-                previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(stream, dataProperties), getOutput(), session, 1);
+                    // Check file holder's content
+                    stream = fileHolder.getStream();
+                    {
+                        if (0 == fileHolder.getLength()) {
+                            Streams.close(stream, fileHolder);
+                            stream = null;
+                            setDefaulThumbnail(requestData, result);
+                            return;
+                        }
+                        final Ref<InputStream> ref = new Ref<InputStream>();
+                        if (streamIsEof(stream, ref)) {
+                            Streams.close(stream, fileHolder);
+                            stream = null;
+                            setDefaulThumbnail(requestData, result);
+                            return;
+                        }
+                        stream = ref.getValue();
+                    }
+
+                    // Obtain preview
+                    final PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
+                    final DataProperties dataProperties = new DataProperties(9);
+                    dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null));
+                    dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
+                    dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
+                    dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
+                    dataProperties.put("PreviewType", requestData.getModule().equals("files") ? "DetailView" : "Thumbnail");
+                    dataProperties.put("PreviewWidth", requestData.getParameter("width"));
+                    dataProperties.put("PreviewHeight", requestData.getParameter("height"));
+                    dataProperties.put("PreviewDelivery", requestData.getParameter("delivery"));
+                    dataProperties.put("PreviewScaleType", requestData.getParameter("scaleType"));
+                    previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(stream, dataProperties), getOutput(), session, 1);
+                } finally {
+                    Streams.close(stream, fileHolder);
+                }
+            }
+
+            // Check result
+            if (null == previewDocument) {
+                // No thumbnail available
+                throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create(new NullPointerException("previewDocument is null"), new Object[0]);
             }
 
             // Check thumbnail stream
@@ -206,18 +226,22 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             // (Asynchronously) Put to cache if ETag is available
             final String fileName = previewDocument.getMetaData().get("resourcename");
             int size = -1;
-            if (null != previewCache && isValidEtag) {
+            if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", requestData, true)) {
                 final byte[] bytes = Streams.stream2bytes(thumbnail);
                 thumbnail = Streams.newByteArrayInputStream(bytes);
                 size = bytes.length;
                 // Specify task
                 final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData);
                 final AbstractTask<Void> task = new AbstractTask<Void>() {
-
                     @Override
-                    public Void call() throws OXException {
-                        final CachedResource preview = new CachedResource(bytes, fileName, "image/jpeg", bytes.length);
-                        previewCache.save(cacheKey, preview, 0, session.getContextId());
+                    public Void call() {
+                        try {
+                            final CachedResource preview = new CachedResource(bytes, fileName, "image/jpeg", bytes.length);
+                            resourceCache.save(cacheKey, preview, 0, session.getContextId());
+                        } catch (OXException e) {
+                            LOG.warn("Could not cache preview.", e);
+                        }
+
                         return null;
                     }
                 };
@@ -268,7 +292,6 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
         "application/force-download",
         "application/binary",
         "application/x-download",
-        "application/octet-stream",
         "application/vnd",
         "application/vnd.ms-word.document.12n",
         "application/vnd.ms-word.document.12",

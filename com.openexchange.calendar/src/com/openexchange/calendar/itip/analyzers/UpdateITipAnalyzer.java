@@ -51,11 +51,13 @@ package com.openexchange.calendar.itip.analyzers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import com.openexchange.calendar.itip.ITipAction;
 import com.openexchange.calendar.itip.ITipAnalysis;
 import com.openexchange.calendar.itip.ITipAnnotation;
@@ -280,23 +282,33 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
                 return false;
             }
         }
-        Date originalLastTouched = null;
+        Calendar originalLastTouched = null;
         if (original.containsLastModified()) {
-            originalLastTouched = original.getLastModified();
+            originalLastTouched = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            originalLastTouched.setTime(original.getLastModified());
         } else if (original.containsCreationDate()) {
-            originalLastTouched = original.getCreationDate();
+            originalLastTouched = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            originalLastTouched.setTime(original.getCreationDate());
         }
-        Date updateLastTouched = null;
+        Calendar updateLastTouched = null;
         if (update.containsLastModified()) {
-            updateLastTouched = update.getLastModified();
+            updateLastTouched = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            updateLastTouched.setTime(update.getLastModified());
         } else if (original.containsCreationDate()) {
-            updateLastTouched = update.getCreationDate();
+            updateLastTouched = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            updateLastTouched.setTime(update.getCreationDate());
         }
         
-        if (originalLastTouched != null && updateLastTouched != null && originalLastTouched.compareTo(updateLastTouched) > 0) {
-            return true;
+        if (originalLastTouched != null && updateLastTouched != null) {
+            if (timeInMillisWithoutMillis(originalLastTouched) > timeInMillisWithoutMillis(updateLastTouched)) { //Remove millis, since ical accuracy is just of seconds.
+                return true;
+            }
         }
         return false;
+    }
+    
+    private long timeInMillisWithoutMillis(Calendar cal) {
+        return cal.getTimeInMillis() - cal.get(Calendar.MILLISECOND);
     }
 
     private boolean updateOrNew(final ITipAnalysis analysis) {

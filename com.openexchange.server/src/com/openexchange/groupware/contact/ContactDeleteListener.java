@@ -60,7 +60,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
@@ -69,7 +68,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
@@ -81,7 +79,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class ContactDeleteListener implements DeleteListener {
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactDeleteListener.class));
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactDeleteListener.class);
 
     /**
      * Initializes a new {@link ContactDeleteListener}
@@ -236,16 +234,7 @@ public final class ContactDeleteListener implements DeleteListener {
                     }
 
                 } catch (final Exception oe) {
-                    if (LOG.isWarnEnabled()) {
-                        final StringBuilder sb = new StringBuilder(128);
-                        sb.append("WARNING: During the delete process 'delete all contacts from one user', a contact was found who has no folder.");
-                        sb.append("This contact will be modified and can be found in the administrator address book.");
-                        sb.append(" Context=").append(contextId);
-                        sb.append(" Folder=").append(fid);
-                        sb.append(" User=").append(uid);
-                        sb.append(" Contact=").append(oid);
-                        LOG.warn(sb.toString());
-                    }
+                    LOG.warn("WARNING: During the delete process ''delete all contacts from one user'', a contact was found who has no folder.This contact will be modified and can be found in the administrator address book. Context={} Folder={} User={} Contact={}", contextId, fid, uid, oid);
                     folder_error = true;
                     delete = true;
                 }
@@ -261,7 +250,7 @@ public final class ContactDeleteListener implements DeleteListener {
                         final int admin_folder = xx.getObjectID();
                         iFgiveUserContacToAdmin(del, oid, admin_folder, ct);
                     } catch (final Exception oxee) {
-                        LOG.error("ERROR: It was not possible to move this contact (without paren folder) to the admin address book!." + "This contact will be deleted." + "Context " + contextId + " Folder " + fid + " User" + uid + " Contact" + oid, oxee);
+                        LOG.error("ERROR: It was not possible to move this contact (without paren folder) to the admin address book!.This contact will be deleted.Context {} Folder {} User{} Contact{}", contextId, fid, uid, oid, oxee);
 
                         folder_error = false;
                     }
@@ -309,9 +298,6 @@ public final class ContactDeleteListener implements DeleteListener {
             new StringBuilder("UPDATE prg_contacts SET changed_from = ").append(ct.getMailadmin()).append(", created_from = ").append(
                 ct.getMailadmin()).append(", changing_date = ").append(System.currentTimeMillis()).append(", fid = ").append(admin_fid).append(
                 " WHERE intfield01 = ").append(oid).append(" and cid = ").append(ct.getContextId());
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(tmp.toString());
-        }
         smt.execute(tmp.toString());
     }
 
@@ -321,31 +307,19 @@ public final class ContactDeleteListener implements DeleteListener {
 
         if (delete) {
             tmp.append("DELETE from prg_dlist where intfield01 = ").append(oid).append(" AND cid = ").append(cid);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(tmp.toString());
-            }
             del.execute(tmp.toString());
 
             tmp.setLength(0);
             tmp.append("DELETE from prg_contacts_linkage where (intfield01 = ").append(oid).append(" OR intfield02 = ").append(oid).append(
                 ") AND cid = ").append(cid);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(tmp.toString());
-            }
             del.execute(tmp.toString());
 
             tmp.setLength(0);
             tmp.append("DELETE from prg_contacts_image where intfield01 = ").append(oid).append(" AND cid = ").append(cid);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(tmp.toString());
-            }
             del.execute(tmp.toString());
 
             tmp.setLength(0);
             tmp.append("DELETE from prg_contacts WHERE cid = ").append(cid).append(" AND intfield01 = ").append(oid);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(tmp.toString());
-            }
             // FIXME quick fix. deleteRow doesn't work because del.execute
             // creates new resultset
             del.execute(tmp.toString());
@@ -372,9 +346,6 @@ public final class ContactDeleteListener implements DeleteListener {
             tmp.append("UPDATE prg_contacts SET changed_from = ").append(ctx.getMailadmin()).append(", created_from = ").append(
                 ctx.getMailadmin()).append(", changing_date = ").append(System.currentTimeMillis()).append(" WHERE intfield01 = ").append(
                 oid).append(" AND cid = ").append(cid);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(tmp.toString());
-            }
             del.execute(tmp.toString());
 
         }
@@ -383,9 +354,6 @@ public final class ContactDeleteListener implements DeleteListener {
     private static void iFtrashAllUserContactsDeletedEntriesFromAdmin(final Statement del, final int cid, final int uid) throws SQLException {
         final StringBuilder tmp =
             new StringBuilder("DELETE FROM del_contacts WHERE created_from = ").append(uid).append(" and cid = ").append(cid);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(tmp.toString());
-        }
         del.execute(tmp.toString());
     }
 
@@ -394,9 +362,6 @@ public final class ContactDeleteListener implements DeleteListener {
             new StringBuilder("UPDATE del_contacts SET changed_from = ").append(ct.getMailadmin()).append(", created_from = ").append(
                 ct.getMailadmin()).append(", changing_date = ").append(System.currentTimeMillis()).append(" WHERE created_from = ").append(
                 uid).append(" and cid = ").append(cid);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(tmp.toString());
-        }
         del.execute(tmp.toString());
     }
 

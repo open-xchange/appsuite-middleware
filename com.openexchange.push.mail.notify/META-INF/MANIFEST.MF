@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Mail Push Bundle
 Bundle-SymbolicName: com.openexchange.push.mail.notify
-Bundle-Version: 7.4.1
+Bundle-Version: 7.4.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
@@ -14,6 +14,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.delete,
  com.openexchange.groupware.ldap,
+ com.openexchange.java,
  com.openexchange.log,
  com.openexchange.mail,
  com.openexchange.mail.api,
@@ -31,6 +32,7 @@ Import-Package: com.openexchange.config,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.service.event,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Bundle-Activator: com.openexchange.push.mail.notify.osgi.PushActivator
 Bundle-ClassPath: .

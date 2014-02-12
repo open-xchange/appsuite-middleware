@@ -68,10 +68,16 @@ import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.json.JSONException;
+import org.json.JSONInputStream;
+import org.json.JSONObject;
+import org.json.JSONValue;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -80,6 +86,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -94,7 +101,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class OXFolderSQL {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OXFolderSQL.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXFolderSQL.class);
 
     /**
      * Initializes a new OXFolderSQL
@@ -471,8 +478,6 @@ public final class OXFolderSQL {
         return -1;
     }
 
-    private static final String SQL_EXISTS = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND fuid = ?";
-
     /**
      * Checks if underlying storage contains a folder whose ID matches given ID
      *
@@ -488,7 +493,7 @@ public final class OXFolderSQL {
                 readCon = DBPool.pickup(ctx);
                 closeReadCon = true;
             }
-            stmt = readCon.prepareStatement(SQL_EXISTS);
+            stmt = readCon.prepareStatement("SELECT 1 FROM oxfolder_tree WHERE cid = ? AND fuid = ?");
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             rs = executeQuery(stmt);
@@ -513,7 +518,7 @@ public final class OXFolderSQL {
                 readCon = DBPool.pickup(ctx);
                 closeReadCon = true;
             }
-            stmt = readCon.prepareStatement(new StringBuilder(40).append("SELECT fuid FROM ").append(table).append(
+            stmt = readCon.prepareStatement(new StringAllocator(40).append("SELECT 1 FROM ").append(table).append(
                 " WHERE cid = ? AND fuid = ?").toString());
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
@@ -776,15 +781,15 @@ public final class OXFolderSQL {
 
     private static final String SQL_UPDATE_PARENT_SUBFOLDER_FLAG = "UPDATE oxfolder_tree " + "SET subfolder_flag = 1, changing_date = ? WHERE cid = ? AND fuid = ?";
 
-    static void insertFolderSQL(final int newFolderID, final int userId, final FolderObject folderObj, final long creatingTime, final Context ctx, final Connection writeConArg) throws SQLException, OXException {
-        insertFolderSQL(newFolderID, userId, folderObj, creatingTime, false, ctx, writeConArg);
+    static void insertFolderSQL(final int newFolderID, final int userId, final FolderObject folder, final long creatingTime, final Context ctx, final Connection writeConArg) throws SQLException, OXException {
+        insertFolderSQL(newFolderID, userId, folder, creatingTime, false, ctx, writeConArg);
     }
 
-    static void insertDefaultFolderSQL(final int newFolderID, final int userId, final FolderObject folderObj, final long creatingTime, final Context ctx, final Connection writeConArg) throws SQLException, OXException {
-        insertFolderSQL(newFolderID, userId, folderObj, creatingTime, true, ctx, writeConArg);
+    static void insertDefaultFolderSQL(final int newFolderID, final int userId, final FolderObject folder, final long creatingTime, final Context ctx, final Connection writeConArg) throws SQLException, OXException {
+        insertFolderSQL(newFolderID, userId, folder, creatingTime, true, ctx, writeConArg);
     }
 
-    private static void insertFolderSQL(final int newFolderID, final int userId, final FolderObject folderObj, final long creatingTime, final boolean acceptDefaultFlag, final Context ctx, final Connection writeConArg) throws SQLException, OXException {
+    private static void insertFolderSQL(final int newFolderID, final int userId, final FolderObject folder, final long creatingTime, final boolean acceptDefaultFlag, final Context ctx, final Connection writeConArg) throws SQLException, OXException {
         Connection writeCon = writeConArg;
         /*
          * Insert Folder
@@ -793,13 +798,13 @@ public final class OXFolderSQL {
         /*
          * Set Permission Flag
          */
-        if (folderObj.getType() == FolderObject.PRIVATE) {
-            if (folderObj.getPermissions().size() == 1) {
+        if (folder.getType() == FolderObject.PRIVATE) {
+            if (folder.getPermissions().size() == 1) {
                 permissionFlag = FolderObject.PRIVATE_PERMISSION;
             }
-        } else if (folderObj.getType() == FolderObject.PUBLIC) {
-            final int permissionsSize = folderObj.getPermissions().size();
-            final Iterator<OCLPermission> iter = folderObj.getPermissions().iterator();
+        } else if (folder.getType() == FolderObject.PUBLIC) {
+            final int permissionsSize = folder.getPermissions().size();
+            final Iterator<OCLPermission> iter = folder.getPermissions().iterator();
             for (int i = 0; i < permissionsSize; i++) {
                 final OCLPermission oclPerm = iter.next();
                 if (oclPerm.getEntity() == OCLPermission.ALL_GROUPS_AND_USERS && oclPerm.getFolderPermission() > OCLPermission.NO_PERMISSIONS) {
@@ -821,26 +826,49 @@ public final class OXFolderSQL {
             try {
                 PreparedStatement stmt = null;
                 try {
-                    stmt = writeCon.prepareStatement(SQL_INSERT_NEW_FOLDER);
+                    stmt = writeCon.prepareStatement("INSERT INTO oxfolder_tree " +
+                        "(fuid,cid,parent,fname,module,type,creating_date,created_from,changing_date,changed_from,permission_flag,subfolder_flag," +
+                        "default_flag,meta) SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,? FROM DUAL " +
+                        "WHERE NOT EXISTS (SELECT 1 FROM oxfolder_tree WHERE cid=? AND parent=? AND fname=? AND parent>?);");
                     stmt.setInt(1, newFolderID);
                     stmt.setInt(2, ctx.getContextId());
-                    stmt.setInt(3, folderObj.getParentFolderID());
-                    stmt.setString(4, folderObj.getFolderName());
-                    stmt.setInt(5, folderObj.getModule());
-                    stmt.setInt(6, folderObj.getType());
+                    stmt.setInt(3, folder.getParentFolderID());
+                    stmt.setString(4, folder.getFolderName());
+                    stmt.setInt(5, folder.getModule());
+                    stmt.setInt(6, folder.getType());
                     stmt.setLong(7, creatingTime);
-                    stmt.setInt(8, folderObj.containsCreatedBy() ? folderObj.getCreatedBy() : userId);
+                    stmt.setInt(8, folder.containsCreatedBy() ? folder.getCreatedBy() : userId);
                     stmt.setLong(9, creatingTime);
                     stmt.setInt(10, userId);
                     stmt.setInt(11, permissionFlag);
                     stmt.setInt(12, 0); // new folder does not contain
                     // subfolders
                     if (acceptDefaultFlag) {
-                        stmt.setInt(13, folderObj.isDefaultFolder() ? 1 : 0); // default_flag
+                        stmt.setInt(13, folder.isDefaultFolder() ? 1 : 0); // default_flag
                     } else {
                         stmt.setInt(13, 0); // default_flag
                     }
-                    executeUpdate(stmt);
+                    {
+                        final Map<String, Object> meta = folder.getMeta();
+                        if (null == meta || meta.isEmpty()) {
+                            stmt.setNull(14, java.sql.Types.BLOB); // meta
+                        } else {
+                            final Object coerced = JSONCoercion.coerceToJSON(meta);
+                            if (null == coerced || JSONObject.NULL.equals(coerced)) {
+                                stmt.setNull(14, java.sql.Types.BLOB); // meta
+                            } else {
+                                stmt.setBinaryStream(14, new JSONInputStream((JSONValue) coerced, "US-ASCII")); // meta
+                            }
+                        }
+                    }
+                    stmt.setInt(15, ctx.getContextId());
+                    stmt.setInt(16, folder.getParentFolderID());
+                    stmt.setString(17, folder.getFolderName());
+                    stmt.setInt(18, FolderObject.MIN_FOLDER_ID);
+                    if (0 == executeUpdate(stmt)) {
+                        // due to already existing subfolder with the same name
+                        throw new SQLException("Entry not inserted");
+                    }
                     stmt.close();
                     stmt = null;
                     /*
@@ -849,7 +877,7 @@ public final class OXFolderSQL {
                     stmt = writeCon.prepareStatement(SQL_UPDATE_PARENT_SUBFOLDER_FLAG);
                     stmt.setLong(1, creatingTime);
                     stmt.setInt(2, ctx.getContextId());
-                    stmt.setInt(3, folderObj.getParentFolderID());
+                    stmt.setInt(3, folder.getParentFolderID());
                     executeUpdate(stmt);
                     stmt.close();
                     stmt = null;
@@ -857,7 +885,7 @@ public final class OXFolderSQL {
                      * Insert permissions
                      */
                     stmt = writeCon.prepareStatement(SQL_INSERT_NEW_PERMISSIONS);
-                    final OCLPermission[] permissions = folderObj.getNonSystemPermissionsAsArray();
+                    final OCLPermission[] permissions = folder.getNonSystemPermissionsAsArray();
                     for (final OCLPermission ocl : permissions) {
                         stmt.setInt(1, ctx.getContextId());
                         stmt.setInt(2, newFolderID);
@@ -874,14 +902,14 @@ public final class OXFolderSQL {
                     stmt.close();
                     stmt = null;
                     final Date creatingDate = new Date(creatingTime);
-                    folderObj.setObjectID(newFolderID);
-                    folderObj.setCreationDate(creatingDate);
-                    folderObj.setCreatedBy(userId);
-                    folderObj.setLastModified(creatingDate);
-                    folderObj.setModifiedBy(userId);
-                    folderObj.setSubfolderFlag(false);
+                    folder.setObjectID(newFolderID);
+                    folder.setCreationDate(creatingDate);
+                    folder.setCreatedBy(userId);
+                    folder.setLastModified(creatingDate);
+                    folder.setModifiedBy(userId);
+                    folder.setSubfolderFlag(false);
                     if (!acceptDefaultFlag) {
-                        folderObj.setDefaultFolder(false);
+                        folder.setDefaultFolder(false);
                     }
                 } finally {
                     if (stmt != null) {
@@ -895,6 +923,12 @@ public final class OXFolderSQL {
                     writeCon.setAutoCommit(true);
                 }
                 throw e;
+            } catch (final JSONException e) {
+                if (isAuto) {
+                    writeCon.rollback();
+                    writeCon.setAutoCommit(true);
+                }
+                throw OXFolderExceptionCode.JSON_ERROR.create(e, e.getMessage());
             }
             if (isAuto) {
                 writeCon.commit();
@@ -907,25 +941,21 @@ public final class OXFolderSQL {
         }
     }
 
-    private static final String SQL_UPDATE_WITH_FOLDERNAME = "UPDATE oxfolder_tree SET fname = ?, changing_date = ?, changed_from = ?, " + "permission_flag = ?, module = ? WHERE cid = ? AND fuid = ?";
-
-    private static final String SQL_UPDATE_WITHOUT_FOLDERNAME = "UPDATE oxfolder_tree SET changing_date = ?, changed_from = ?, " + "permission_flag = ?, module = ? WHERE cid = ? AND fuid = ?";
-
     private static final String SQL_DELETE_EXISTING_PERMISSIONS = "DELETE FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND system = 0";
 
-    static void updateFolderSQL(final int userId, final FolderObject folderObj, final long lastModified, final Context ctx, final Connection writeConArg) throws SQLException, OXException {
+    static void updateFolderSQL(final int userId, final FolderObject folder, final long lastModified, final Context ctx, final Connection writeConArg) throws SQLException, OXException {
         Connection writeCon = writeConArg;
         /*
          * Update Folder
          */
         int permissionFlag = FolderObject.CUSTOM_PERMISSION;
-        if (folderObj.getType() == FolderObject.PRIVATE) {
-            if (folderObj.getPermissions().size() == 1) {
+        if (folder.getType() == FolderObject.PRIVATE) {
+            if (folder.getPermissions().size() == 1) {
                 permissionFlag = FolderObject.PRIVATE_PERMISSION;
             }
-        } else if (folderObj.getType() == FolderObject.PUBLIC) {
-            final int permissionsSize = folderObj.getPermissions().size();
-            final Iterator<OCLPermission> iter = folderObj.getPermissions().iterator();
+        } else if (folder.getType() == FolderObject.PUBLIC) {
+            final int permissionsSize = folder.getPermissions().size();
+            final Iterator<OCLPermission> iter = folder.getPermissions().iterator();
             for (int i = 0; i < permissionsSize; i++) {
                 final OCLPermission oclPerm = iter.next();
                 if (oclPerm.getEntity() == OCLPermission.ALL_GROUPS_AND_USERS && oclPerm.getFolderPermission() > OCLPermission.NO_PERMISSIONS) {
@@ -947,26 +977,63 @@ public final class OXFolderSQL {
             PreparedStatement stmt = null;
             try {
                 int pos = 1;
-                if (folderObj.containsFolderName()) {
-                    stmt = writeCon.prepareStatement(SQL_UPDATE_WITH_FOLDERNAME);
-                    stmt.setString(pos++, folderObj.getFolderName());
+                final boolean containsMeta = folder.containsMeta();
+                if (folder.containsFolderName()) {
+                    stmt = writeCon.prepareStatement("UPDATE oxfolder_tree SET fname=?" + (containsMeta ? ",meta=?" : "") + ",changing_date=?,changed_from=?,permission_flag=?,module=? " +
+                    "WHERE cid=? AND fuid=? AND NOT EXISTS (SELECT 1 FROM (" +
+                    "SELECT fname,fuid FROM oxfolder_tree WHERE cid=? AND parent=? AND parent>?) AS ft WHERE ft.fname=? AND ft.fuid<>?);");
+                    stmt.setString(pos++, folder.getFolderName());
+                    if (containsMeta) {
+                        final Map<String, Object> meta = folder.getMeta();
+                        if (null == meta || meta.isEmpty()) {
+                            stmt.setNull(pos++, java.sql.Types.BLOB); // meta
+                        } else {
+                            final Object coerced = JSONCoercion.coerceToJSON(meta);
+                            if (null == coerced || JSONObject.NULL.equals(coerced)) {
+                                stmt.setNull(pos++, java.sql.Types.BLOB); // meta
+                            } else {
+                                stmt.setBinaryStream(pos++, new JSONInputStream((JSONValue) coerced, "US-ASCII")); // meta
+                            }
+                        }
+                    }
                     stmt.setLong(pos++, lastModified);
                     stmt.setInt(pos++, userId);
                     stmt.setInt(pos++, permissionFlag);
-                    stmt.setInt(pos++, folderObj.getModule());
+                    stmt.setInt(pos++, folder.getModule());
                     stmt.setInt(pos++, ctx.getContextId());
-                    stmt.setInt(pos++, folderObj.getObjectID());
-                    executeUpdate(stmt);
+                    stmt.setInt(pos++, folder.getObjectID());
+                    stmt.setInt(pos++, ctx.getContextId());
+                    stmt.setInt(pos++, folder.getParentFolderID());
+                    stmt.setInt(pos++, FolderObject.MIN_FOLDER_ID);
+                    stmt.setString(pos++, folder.getFolderName());
+                    stmt.setInt(pos++, folder.getObjectID());
+                    if (0 == executeUpdate(stmt)) {
+                        // due to already existing subfolder with the same name
+                        throw new SQLException("Entry not updated");
+                    }
                     stmt.close();
                     stmt = null;
                 } else {
-                    stmt = writeCon.prepareStatement(SQL_UPDATE_WITHOUT_FOLDERNAME);
+                    stmt = writeCon.prepareStatement("UPDATE oxfolder_tree SET " + (containsMeta ? "meta = ?, " : "") + "changing_date = ?, changed_from = ?, " + "permission_flag = ?, module = ? WHERE cid = ? AND fuid = ?");
+                    if (containsMeta) {
+                        final Map<String, Object> meta = folder.getMeta();
+                        if (null == meta || meta.isEmpty()) {
+                            stmt.setNull(pos++, java.sql.Types.BLOB); // meta
+                        } else {
+                            final Object coerced = JSONCoercion.coerceToJSON(meta);
+                            if (null == coerced || JSONObject.NULL.equals(coerced)) {
+                                stmt.setNull(pos++, java.sql.Types.BLOB); // meta
+                            } else {
+                                stmt.setBinaryStream(pos++, new JSONInputStream((JSONValue) coerced, "US-ASCII")); // meta
+                            }
+                        }
+                    }
                     stmt.setLong(pos++, lastModified);
                     stmt.setInt(pos++, userId);
                     stmt.setInt(pos++, permissionFlag);
-                    stmt.setInt(pos++, folderObj.getModule());
+                    stmt.setInt(pos++, folder.getModule());
                     stmt.setInt(pos++, ctx.getContextId());
-                    stmt.setInt(pos++, folderObj.getObjectID());
+                    stmt.setInt(pos++, folder.getObjectID());
                     executeUpdate(stmt);
                     stmt.close();
                     stmt = null;
@@ -977,7 +1044,7 @@ public final class OXFolderSQL {
                 stmt = writeCon.prepareStatement(SQL_DELETE_EXISTING_PERMISSIONS);
                 pos = 1;
                 stmt.setInt(pos++, ctx.getContextId());
-                stmt.setInt(pos++, folderObj.getObjectID());
+                stmt.setInt(pos++, folder.getObjectID());
                 executeUpdate(stmt);
                 stmt.close();
                 stmt = null;
@@ -985,11 +1052,11 @@ public final class OXFolderSQL {
                  * Insert new non-system-permissions
                  */
                 stmt = writeCon.prepareStatement(SQL_INSERT_NEW_PERMISSIONS);
-                final OCLPermission[] permissions = folderObj.getNonSystemPermissionsAsArray();
+                final OCLPermission[] permissions = folder.getNonSystemPermissionsAsArray();
                 for (final OCLPermission oclPerm : permissions) {
                     pos = 1;
                     stmt.setInt(pos++, ctx.getContextId());
-                    stmt.setInt(pos++, folderObj.getObjectID());
+                    stmt.setInt(pos++, folder.getObjectID());
                     stmt.setInt(pos++, oclPerm.getEntity());
                     stmt.setInt(pos++, oclPerm.getFolderPermission());
                     stmt.setInt(pos++, oclPerm.getReadPermission());
@@ -1008,6 +1075,12 @@ public final class OXFolderSQL {
                     writeCon.setAutoCommit(true);
                 }
                 throw e;
+            } catch (final JSONException e) {
+                if (isAuto) {
+                    writeCon.rollback();
+                    writeCon.setAutoCommit(true);
+                }
+                throw OXFolderExceptionCode.JSON_ERROR.create(e, e.getMessage());
             } finally {
                 if (stmt != null) {
                     stmt.close();
@@ -1025,7 +1098,10 @@ public final class OXFolderSQL {
         }
     }
 
-    private static final String SQL_MOVE_UPDATE = "UPDATE oxfolder_tree SET parent = ?, changing_date = ?, changed_from = ? WHERE cid = ? AND fuid = ?";
+    private static final String SQL_MOVE_UPDATE = "UPDATE oxfolder_tree SET parent=?,changing_date=?,changed_from=?,fname=? " +
+        "WHERE cid=? AND fuid=? AND NOT EXISTS (SELECT 1 FROM (" +
+        "SELECT fname,fuid FROM oxfolder_tree WHERE cid=? AND parent=? AND parent>?) AS ft WHERE ft.fname=? AND ft.fuid<>?);"
+    ;
 
     private static final String SQL_MOVE_SELECT = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND parent = ?";
 
@@ -1057,9 +1133,18 @@ public final class OXFolderSQL {
                 pst.setInt(1, dest.getObjectID());
                 pst.setLong(2, lastModified);
                 pst.setInt(3, src.getType() == FolderObject.SYSTEM_TYPE ? ctx.getMailadmin() : userId);
-                pst.setInt(4, ctx.getContextId());
-                pst.setInt(5, src.getObjectID());
-                executeUpdate(pst);
+                pst.setString(4, src.getFolderName());
+                pst.setInt(5, ctx.getContextId());
+                pst.setInt(6, src.getObjectID());
+                pst.setInt(7, ctx.getContextId());
+                pst.setInt(8, dest.getObjectID());
+                pst.setInt(9, dest.getObjectID());
+                pst.setString(10, src.getFolderName());
+                pst.setInt(11, src.getObjectID());
+                if (0 == executeUpdate(pst)) {
+                    // due to already existing subfolder with the same name
+                    throw new SQLException("Entry not updated");
+                }
                 pst.close();
                 pst = null;
                 /*
@@ -1716,7 +1801,7 @@ public final class OXFolderSQL {
                         FolderCacheManager.getInstance().removeFolderObject(iter.next(), ctx);
                     }
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
             /*
@@ -1752,10 +1837,7 @@ public final class OXFolderSQL {
          * Finally deliver it
          */
         eventAdmin.sendEvent(event);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder(64).append("Notified ").append("content-related").append(
-                "-wise changed folder \"").append(fuid).append(" in context ").append(contextId).toString());
-        }
+        LOG.debug("Notified content-related-wise changed folder \"{} in context {}", fuid, contextId);
     }
 
     private static final String SQL_DELETE_PERMS = "DELETE FROM " + TMPL_PERM_TABLE + " WHERE cid = ? AND fuid = ? AND permission_id = ?";
@@ -1843,7 +1925,7 @@ public final class OXFolderSQL {
                         deleteSingleEntityPermission(entity, fuid, permTable, wc, ctx);
                         updateSingleEntityPermission(mergedPerm, mailAdmin, fuid, permTable, wc, ctx);
                     } catch (final Exception e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                         continue Next;
                     }
                 } else {
@@ -1855,7 +1937,7 @@ public final class OXFolderSQL {
                     try {
                         executeUpdate(stmt);
                     } catch (final SQLException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                         continue Next;
                     } finally {
                         stmt.close();
@@ -2073,7 +2155,7 @@ public final class OXFolderSQL {
                         FolderCacheManager.getInstance().removeFolderObject(iterator.next(), ctx);
                     }
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
             /*
@@ -2120,7 +2202,7 @@ public final class OXFolderSQL {
                         FolderCacheManager.getInstance().removeFolderObject(iterator.next(), ctx);
                     }
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
             /*
@@ -2326,8 +2408,7 @@ public final class OXFolderSQL {
         } catch (final SQLException e) {
             if ("MySQLSyntaxErrorException".equals(e.getClass().getSimpleName())) {
                 final String sql = stmt.toString();
-                LOG.error(new StringBuilder().append("\nFollowing SQL query contains syntax errors:\n").append(
-                    sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.error("\nFollowing SQL query contains syntax errors:\n{}", sql.substring(sql.indexOf(": ") + 2));
             }
             throw e;
         }
@@ -2339,8 +2420,7 @@ public final class OXFolderSQL {
         } catch (final SQLException e) {
             if ("MySQLSyntaxErrorException".equals(e.getClass().getSimpleName())) {
                 final String sql = stmt.toString();
-                LOG.error(new StringBuilder().append("\nFollowing SQL query contains syntax errors:\n").append(
-                    sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.error("\nFollowing SQL query contains syntax errors:\n{}", sql.substring(sql.indexOf(": ") + 2));
             }
             throw e;
         }
@@ -2352,8 +2432,7 @@ public final class OXFolderSQL {
         } catch (final SQLException e) {
             if ("MySQLSyntaxErrorException".equals(e.getClass().getSimpleName())) {
                 final String sql = stmt.toString();
-                LOG.error(new StringBuilder().append("\nFollowing SQL query contains syntax errors:\n").append(
-                    sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.error("\nFollowing SQL query contains syntax errors:\n{}", sql.substring(sql.indexOf(": ") + 2));
             }
             throw e;
         }

@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
 
 public abstract class PermissionServlet extends SessionServlet {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PermissionServlet.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PermissionServlet.class);
 
     private static final long serialVersionUID = -1496492688713194989L;
 
@@ -83,7 +83,7 @@ public abstract class PermissionServlet extends SessionServlet {
             super.service(req, resp);
         } catch (final OXException e) {
             if (SessionExceptionCodes.getErrorPrefix().equals(e.getPrefix())) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 handleSessiondException(e, req, resp);
                 /*
                  * Return JSON response

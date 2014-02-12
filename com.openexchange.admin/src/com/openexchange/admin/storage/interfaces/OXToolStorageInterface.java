@@ -49,7 +49,6 @@
 package com.openexchange.admin.storage.interfaces;
 
 import java.sql.Connection;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -67,11 +66,10 @@ import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.log.LogFactory;
 
 public abstract class OXToolStorageInterface {
 
-    private static final Log log = LogFactory.getLog(OXToolStorageInterface.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXToolStorageInterface.class);
 
     protected static AdminCache cache = null;
 
@@ -82,7 +80,7 @@ public abstract class OXToolStorageInterface {
             cache = AdminDaemon.getCache();
             prop = cache.getProperties();
         } catch (OXGenericException e) {
-            log.warn(e.getMessage(), e);
+            log.warn("", e);
         }
     }
 

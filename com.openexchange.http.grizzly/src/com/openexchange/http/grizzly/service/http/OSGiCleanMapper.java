@@ -102,7 +102,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.servlet.Servlet;
-import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.osgi.service.http.HttpContext;
 
@@ -115,7 +114,7 @@ import org.osgi.service.http.HttpContext;
  */
 class OSGiCleanMapper {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(OSGiCleanMapper.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OSGiCleanMapper.class);
     private static final ReentrantLock lock = new ReentrantLock();
     private static final TreeSet<String> aliasTree = new TreeSet<String>();
     private static final Map<String, HttpHandler> registrations = new HashMap<String, HttpHandler>(16);
@@ -237,10 +236,7 @@ class OSGiCleanMapper {
      */
     public void addHttpHandler(String alias, HttpHandler handler) {
         if (containsAlias(alias)) {
-            // should not happend, alias should be checked before.
-            if(LOG.isWarnEnabled()){
-                LOG.warn("Alias \"" + alias + "\" already in use, this shouldn't happen");
-            }
+            LOG.warn("Alias \"{}\" already in use, this shouldn't happen", alias);
         } else {
             registerAliasHandler(alias, handler);
             if (handler instanceof OSGiServletHandler) {
@@ -318,10 +314,8 @@ class OSGiCleanMapper {
 
     public void addContext(HttpContext httpContext, ArrayList<OSGiServletHandler> servletHandlers) {
         contextServletHandlerMap.put(httpContext, servletHandlers);
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Adding another ServletHandler to the map. Now using "+contextServletHandlerMap.size()+" handlers");
-            LOG.debug(prettyPrintServletHandlerMap());
-        }
+        LOG.debug("Adding another ServletHandler to the map. Now using {} handlers", contextServletHandlerMap.size());
+        LOG.debug("{}", new Object() { @Override public String toString() { return prettyPrintServletHandlerMap();}});
     }
 
     private static boolean registerAliasHandler(String alias, HttpHandler httpHandler) {

@@ -131,7 +131,7 @@ public class ListenAction extends AbstractDriveAction {
                 try {
                     return Long.valueOf(value).longValue();
                 } catch (NumberFormatException e) {
-                    com.openexchange.log.Log.loggerFor(ListenAction.class).error(
+                    org.slf4j.LoggerFactory.getLogger(ListenAction.class).error(
                         "Invalid configuration value for \"com.openexchange.drive.listenTimeout\"", e);
                 }
             }

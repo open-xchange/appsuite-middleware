@@ -49,23 +49,22 @@
 
 package com.openexchange.oauth.facebook;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * Test suite for integrated unit tests in OAuth Facebook bundle.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
+@RunWith(Suite.class)
+@SuiteClasses({
+    FacebookServiceImplTest.class
+})
 public final class UnitTests {
 
     public UnitTests() {
         super();
-    }
-
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(FacebookConnectionTest.class);
-        return tests;
     }
 }

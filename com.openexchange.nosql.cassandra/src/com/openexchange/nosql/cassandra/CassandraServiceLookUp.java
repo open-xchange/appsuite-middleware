@@ -83,7 +83,7 @@ public final class CassandraServiceLookUp {
 	 *
 	 * @param clazz
 	 *            The service's class
-	 * @return The service or <code>null</code> is absent
+	 * @return The service or <code>null</code> if absent
 	 * @throws IllegalStateException
 	 *             If an error occurs while returning the demanded service
 	 */

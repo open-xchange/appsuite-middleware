@@ -111,7 +111,6 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailAccess;
@@ -167,7 +166,7 @@ import com.openexchange.version.Version;
  */
 public class MimeMessageFiller {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMessageFiller.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeMessageFiller.class);
 
     private static final String EMPTY_HTML_DOCUMENT =
         "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n" +
@@ -182,8 +181,6 @@ public class MimeMessageFiller {
     private static final String HDR_ORGANIZATION = MessageHeaders.HDR_ORGANIZATION;
     private static final String HDR_X_MAILER = MessageHeaders.HDR_X_MAILER;
     private static final String HDR_MIME_VERSION = MessageHeaders.HDR_MIME_VERSION;
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static final String PREFIX_PART = "part";
 
@@ -299,7 +296,7 @@ public class MimeMessageFiller {
                     try {
                         mfm.removeByID(iter.next());
                     } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }
@@ -313,7 +310,7 @@ public class MimeMessageFiller {
      * @param mimeMessage The MIME message
      * @throws MessagingException If headers cannot be set
      */
-    public void setCommonHeaders(final MimeMessage mimeMessage) throws MessagingException {
+    public void setCommonHeaders(final MimeMessage mimeMessage) throws MessagingException, OXException {
         /*
          * Set mailer
          */
@@ -333,11 +330,7 @@ public class MimeMessageFiller {
                     mimeMessage.setHeader(HDR_ORGANIZATION, encoded);
                 }
             } catch (final Exception e) {
-                if (DEBUG) { // Include stack trace as well
-                    LOG.warn("Header \"Organization\" could not be set", e);
-                } else {
-                    LOG.warn("Header \"Organization\" could not be set.");
-                }
+                LOG.warn("Header \"Organization\" could not be set", e);
             }
         }
         /*
@@ -368,12 +361,12 @@ public class MimeMessageFiller {
              */
             final String localIp = session.getLocalIp();
             if (isLocalhost(localIp)) {
-                if (DEBUG) {
-                    LOG.debug("Session provides localhost as client IP address: " + localIp);
-                }
+                LOG.debug("Session provides localhost as client IP address: {}", localIp);
                 // Prefer request's remote address if local IP seems to denote local host
-                final Props logProperties = LogProperties.optLogProperties();
-                final String clientIp = null == logProperties ? null : logProperties.<String> get(LogProperties.Name.AJP_REQUEST_IP);
+                String clientIp = LogProperties.getLogProperty(LogProperties.Name.AJP_REQUEST_IP);
+                if (null == clientIp) {
+                    clientIp = LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_REQUEST_IP);
+                }
                 mimeMessage.setHeader("X-Originating-IP", clientIp == null ? localIp : clientIp);
             } else {
                 mimeMessage.setHeader("X-Originating-IP", localIp);
@@ -481,7 +474,7 @@ public class MimeMessageFiller {
                         /*
                          * Conflict during look-up
                          */
-                        LOG.debug(e.getMessage(), e);
+                        LOG.debug("", e);
                     }
                 }
             }
@@ -680,7 +673,7 @@ public class MimeMessageFiller {
                     /*
                      * Cannot occur since default mime charset is supported by JVM
                      */
-                    LOG.error(e1.getMessage(), e1);
+                    LOG.error("", e1);
                 }
             }
         }
@@ -786,7 +779,7 @@ public class MimeMessageFiller {
              * Set default subject if none set
              */
             if (null == mimeMessage.getSubject()) {
-                mimeMessage.setSubject(StringHelper.valueOf(UserStorage.getStorageUser(session.getUserId(), ctx).getLocale()).getString(MailStrings.DEFAULT_SUBJECT));
+                mimeMessage.setSubject(StringHelper.valueOf(UserStorage.getInstance().getUser(session.getUserId(), ctx).getLocale()).getString(MailStrings.DEFAULT_SUBJECT));
             }
         } catch (final AddressException e) {
             throw MimeMailException.handleMessagingException(e);
@@ -1025,7 +1018,7 @@ public class MimeMessageFiller {
                     if (session instanceof ServerSession) {
                         displayName = ((ServerSession) session).getUser().getDisplayName();
                     } else {
-                        displayName = UserStorage.getStorageUser(session.getUserId(), ctx).getDisplayName();
+                        displayName = UserStorage.getInstance().getUser(session.getUserId(), ctx).getDisplayName();
                     }
                     final String saneDisplayName = Strings.replaceWhitespacesWith(displayName, "");
                     fileName = MimeUtility.encodeText(new StringAllocator(saneDisplayName).append(".vcf").toString(), charset, "Q");
@@ -1399,7 +1392,7 @@ public class MimeMessageFiller {
                         final byte[] bs = QuotedPrintableCodec.decodeQuotedPrintable(image.getData().getBytes());
                         dataSource = new MessageDataSource(bs, image.getContentType());
                     } catch (final DecoderException e) {
-                        LOG.warn("Couldn't decode " + image.getTransferEncoding() + " image data.", e);
+                        LOG.warn("Couldn't decode {} image data.", image.getTransferEncoding(), e);
                         continue NextImg;
                     }
                 }
@@ -1758,7 +1751,6 @@ public class MimeMessageFiller {
             final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class);
             final Session session = msgFiller.session;
-            final StringBuilder tmp = new StringBuilder(128);
             do {
                 final String imageTag = m.group();
                 if (MimeMessageUtility.isValidImageUri(imageTag)) {
@@ -1768,16 +1760,10 @@ public class MimeMessageFiller {
                         try {
                             imageProvider = new ManagedFileImageProvider(mfm.getByID(id));
                         } catch (final OXException e) {
-                            if (LOG.isWarnEnabled()) {
-                                tmp.setLength(0);
-                                LOG.warn(
-                                    tmp.append("Image with id \"").append(id).append("\" could not be loaded. Referenced image is skipped.").toString(),
-                                    e);
-                            }
+                            LOG.warn("Image with id \"{}\" could not be loaded. Referenced image is skipped.", id, e);
                             /*
                              * Anyway, replace image tag
                              */
-                            tmp.setLength(0);
                             m.appendLiteralReplacement(sb, blankSrc(imageTag));
                             continue;
                         }
@@ -1809,43 +1795,32 @@ public class MimeMessageFiller {
                             }
                         }
                         if (null == imageLocation) {
-                            if (LOG.isWarnEnabled()) {
-                                tmp.setLength(0);
-                                LOG.warn(tmp.append("No image found with id \"").append(m.getImageId()).append("\". Referenced image is skipped.").toString());
-                            }
+                            LOG.warn("Image with id \"{}\" could not be loaded. Referenced image is skipped.", m.getImageId());
                             /*
                              * Anyway, replace image tag
                              */
-                            tmp.setLength(0);
                             m.appendLiteralReplacement(sb, null == blankImageTag ? blankSrc(imageTag) : blankImageTag);
                             continue;
                         }
                         final ImageDataSource dataSource = (ImageDataSource) conversionService.getDataSource(imageLocation.getRegistrationName());
                         if (null == dataSource) {
-                            if (LOG.isWarnEnabled()) {
-                                tmp.setLength(0);
-                                LOG.warn(tmp.append("No image data source found with id \"").append(imageLocation.getRegistrationName()).append(
-                                    "\". Referenced image is skipped.").toString());
-                            }
+                            LOG.warn("No image data source found with id \"{}\". Referenced image is skipped.", imageLocation.getRegistrationName());
                             /*
                              * Anyway, replace image tag
                              */
-                            tmp.setLength(0);
                             m.appendLiteralReplacement(sb, blankSrc(imageTag));
                             continue;
                         }
                         try {
                             imageProvider = new ImageDataImageProvider(dataSource, imageLocation, session);
                         } catch (final OXException e) {
-                            if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e) || isFolderNotFound(e)) {
-                                tmp.setLength(0);
+                            if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e) || MailExceptionCode.ATTACHMENT_NOT_FOUND.equals(e) || isFolderNotFound(e)) {
                                 m.appendLiteralReplacement(sb, blankSrc(imageTag));
                                 continue;
                             }
                             throw e;
                         } catch (final RuntimeException rte) {
                             LOG.warn("Couldn't load image data", rte);
-                            tmp.setLength(0);
                             m.appendLiteralReplacement(sb, blankSrc(imageTag));
                             continue;
                         }
@@ -1864,7 +1839,7 @@ public class MimeMessageFiller {
                     /*
                      * Replace "src" attribute
                      */
-                    String iTag = imageTag.replaceFirst("(?i)src=\"[^\"]*\"", com.openexchange.java.Strings.quoteReplacement("src=\"cid:" + processLocalImage(imageProvider, iid, appendBodyPart, tmp, mp) + "\""));
+                    String iTag = imageTag.replaceFirst("(?i)src=\"[^\"]*\"", com.openexchange.java.Strings.quoteReplacement("src=\"cid:" + processLocalImage(imageProvider, iid, appendBodyPart, mp) + "\""));
                     iTag = iTag.replaceFirst("(?i)id=\"[^\"]*@" + VERSION_NAME + "\"", "");
                     m.appendLiteralReplacement(sb, iTag);
                 } else {
@@ -1914,7 +1889,7 @@ public class MimeMessageFiller {
      * @throws MessagingException If appending as body part fails
      * @throws OXException If a mail error occurs
      */
-    private final static String processLocalImage(final ImageProvider imageProvider, final String id, final boolean appendBodyPart, final StringBuilder tmp, final Multipart mp) throws MessagingException, OXException {
+    private final static String processLocalImage(final ImageProvider imageProvider, final String id, final boolean appendBodyPart, final Multipart mp) throws MessagingException, OXException {
         /*
          * Determine filename
          */
@@ -1944,6 +1919,7 @@ public class MimeMessageFiller {
         /*
          * ... and cid
          */
+        final StringBuilder tmp = new StringBuilder(32);
         final String cid;
         {
             if (imageProvider.isLocalFile()) {
@@ -2091,12 +2067,22 @@ public class MimeMessageFiller {
             super();
             this.data = imageData.getData(InputStream.class, imageData.generateDataArgumentsFrom(imageLocation), session);
             final DataProperties dataProperties = data.getDataProperties();
-            final String contentType = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
-            if (null != contentType && toLowerCase(contentType).indexOf("image/") < 0) {
-                throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(imageLocation.getImageId(), imageLocation.getId(), imageLocation.getFolder());
+            fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
+            String contentType = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
+            if (null != contentType) {
+                final String lcct = toLowerCase(contentType).trim();
+                final String defaultContentType = "application/octet-stream";
+                if (!lcct.startsWith("image/") && !lcct.startsWith(defaultContentType)) {
+                    throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(imageLocation.getImageId(), imageLocation.getId(), imageLocation.getFolder());
+                }
+                if (lcct.startsWith(defaultContentType) && !Strings.isEmpty(fileName)) {
+                    final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
+                    if (!defaultContentType.equals(contentTypeByFileName)) {
+                        contentType = contentTypeByFileName + (lcct.length() > defaultContentType.length() ? lcct.substring(defaultContentType.length()) : "");
+                    }
+                }
             }
             this.contentType = contentType;
-            fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
         }
 
         @Override

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Parallels Plugin
 Bundle-SymbolicName: com.openexchange.parallels
-Bundle-Version: 7.4.1
+Bundle-Version: 7.4.2
 Bundle-Activator: com.openexchange.custom.parallels.osgi.SoapParallelsActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -80,17 +80,16 @@ Import-Package: com.openexchange.admin.rmi,
  org.apache.commons.httpclient.methods,
  org.apache.commons.httpclient.params,
  org.apache.commons.logging,
- org.apache.commons.logging.impl,
  org.json,
  org.osgi.framework,
  org.osgi.service.http,
  org.osgi.util.tracker,
+ org.slf4j,
  org.w3c.dom,
  org.xml.sax,
  org.xml.sax.helpers
 Export-Package: com.openexchange.custom.parallels.impl
-Bundle-ClassPath: lib/commons-logging-1.1.jar,
- lib/ws-commons-util-1.0.2.jar,
+Bundle-ClassPath: lib/ws-commons-util-1.0.2.jar,
  lib/xmlrpc-client-3.1.3.jar,
  lib/xmlrpc-common-3.1.3.jar,
  lib/xmlrpc-server-3.1.3.jar,

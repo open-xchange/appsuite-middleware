@@ -61,8 +61,8 @@ import com.openexchange.server.ServiceHolder;
  */
 public class BundleServiceTracker<S> implements ServiceTrackerCustomizer<S, S> {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(BundleServiceTracker.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(BundleServiceTracker.class);
 
     protected final BundleContext context;
 
@@ -98,7 +98,7 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer<S, S> {
     public final S addingService(final ServiceReference<S> reference) {
         final S addedService = context.getService(reference);
         if (null == addedService) {
-            LOG.warn("added service is null! " + serviceClass.getName(), new Throwable());
+            LOG.warn("added service is null! {}", serviceClass.getName(), new Throwable());
         }
         if (serviceClass.isInstance(addedService)) {
             try {
@@ -108,7 +108,7 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer<S, S> {
                 }
                 addingServiceInternal(service);
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         return addedService;
@@ -120,9 +120,7 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer<S, S> {
      * @param service The service
      */
     protected void addingServiceInternal(final S service) {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("BundleServiceTracker.addingServiceInternal(): " + service);
-        }
+        LOG.trace("BundleServiceTracker.addingServiceInternal(): {}", service);
     }
 
     @Override
@@ -140,7 +138,7 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer<S, S> {
                     }
                     removedServiceInternal(serviceClass.cast(service));
                 } catch (final Exception e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         } finally {
@@ -157,9 +155,7 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer<S, S> {
      * @param service The service
      */
     protected void removedServiceInternal(final S service) {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("BundleServiceTracker.removedServiceInternal()");
-        }
+        LOG.trace("BundleServiceTracker.removedServiceInternal()");
     }
 
 }

@@ -119,10 +119,8 @@ public class VirtualTreeCreateTableTask implements UpdateTask {
         createTable("virtualBackupPermission", getDelTable2(), contextId);
         createTable("virtualBackupSubscription", getDelTable3(), contextId);
 
-        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(VirtualTreeCreateTableTask.class));
-        if (LOG.isInfoEnabled()) {
-            LOG.info("UpdateTask 'VirtualTreeCreateTableTask' successfully performed!");
-        }
+        final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(VirtualTreeCreateTableTask.class);
+        LOG.info("UpdateTask 'VirtualTreeCreateTableTask' successfully performed!");
     }
 
     private void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException {

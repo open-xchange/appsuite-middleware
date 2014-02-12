@@ -51,7 +51,6 @@ package com.openexchange.mail;
 
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.exception.OXException;
@@ -74,7 +73,7 @@ import com.openexchange.server.Initialization;
  */
 public final class MailInitialization implements Initialization, CacheAvailabilityListener {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MailInitialization.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailInitialization.class);
 
     private static final MailInitialization INSTANCE = new MailInitialization();
 

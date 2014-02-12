@@ -54,4 +54,4 @@ modules/tasks/notifyAcceptedDeclinedAsParticipant > io.ox/tasks//notifyAcceptedD
 modules/tasks/notifyNewModifiedDeleted > io.ox/tasks//notifyNewModifiedDeleted
 
 # Search
-minimumSearchCharacters > io.ox/core//search/minimumQueryLength
+minimumSearchCharacters > io.ox/contacts//search/minimumQueryLength

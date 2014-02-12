@@ -49,13 +49,11 @@
 
 package com.openexchange.oauth.json.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.OAuthHTTPClientFactory;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
@@ -73,7 +71,7 @@ import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
  */
 public class OAuthJSONActivator extends AJAXModuleActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OAuthJSONActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OAuthJSONActivator.class);
 
     private OSGiOAuthService oAuthService;
     private WhiteboardSecretService secretService;
@@ -85,17 +83,13 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         ServiceRegistry.getInstance().addService(clazz, getService(clazz));
     }
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
         ServiceRegistry.getInstance().removeService(clazz);
     }
 
@@ -142,7 +136,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
 
             getService(CapabilityService.class).declareCapability("oauth");
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -162,7 +156,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
             AbstractOAuthAJAXActionService.PREFIX.set(null);
             ServiceRegistry.getInstance().clearRegistry();
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OAuthJSONActivator.class)).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(OAuthJSONActivator.class).error("", e);
             throw e;
         }
     }

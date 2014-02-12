@@ -134,10 +134,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     private static final int MAX_SEARCH_RESULTS = 1 << 20;
 
-    protected static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ElasticSearchAdapter.class));
-
-    protected static final boolean DEBUG = LOG.isDebugEnabled();
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ElasticSearchAdapter.class);
 
     private static interface MailAccountLookup {
 

@@ -51,7 +51,6 @@ package com.openexchange.index.solr.internal.attachments.translators;
 
 import java.util.Iterator;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.groupware.attach.index.ANDTerm;
 import com.openexchange.groupware.attach.index.AttachmentIndexField;
 import com.openexchange.groupware.attach.index.ORTerm;
@@ -69,7 +68,7 @@ import com.openexchange.index.solr.internal.querybuilder.Configuration;
  */
 public class SolrAttachmentSearchTermVisitor implements SearchTermVisitor {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SolrAttachmentSearchTermVisitor.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SolrAttachmentSearchTermVisitor.class);
 
     private final String translatorName;
 
@@ -140,7 +139,7 @@ public class SolrAttachmentSearchTermVisitor implements SearchTermVisitor {
     private void appendStringTerm(AttachmentIndexField field, SearchTerm<String> term) {
         Set<String> solrFields = fieldConfig.getSolrFields(field);
         if (solrFields == null || solrFields.isEmpty()) {
-            LOG.warn("Did not find index fields for parameter " + field.toString() + ". Skipping this field in search query...");
+            LOG.warn("Did not find index fields for parameter {}. Skipping this field in search query...", field);
             return;
         }
 

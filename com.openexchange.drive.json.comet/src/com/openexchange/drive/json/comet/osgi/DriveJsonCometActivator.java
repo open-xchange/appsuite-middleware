@@ -49,7 +49,6 @@
 
 package com.openexchange.drive.json.comet.osgi;
 
-import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.comet.CometContext;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.events.DriveEvent;
@@ -65,7 +64,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class DriveJsonCometActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveJsonCometActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DriveJsonCometActivator.class);
     private static final String TOPIC = "/drive/listen";
 
     /**

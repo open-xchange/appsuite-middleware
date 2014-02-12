@@ -120,7 +120,7 @@ public final class HzDataUtility {
      * @return The message data container
      */
     public static <E> Map<String, Object> generateMapFor(final E e, final String senderId) {
-        final Map<String, Object> map = new LinkedHashMap<String, Object>(2);
+        final Map<String, Object> map = new LinkedHashMap<String, Object>(4);
         if (null != e) {
             map.put(MESSAGE_DATA_OBJECT, e);
         }

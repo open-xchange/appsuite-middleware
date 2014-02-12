@@ -62,7 +62,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -74,7 +73,6 @@ import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 
 public class OXUtilMySQLStorageCommon {
 
@@ -122,7 +120,7 @@ public class OXUtilMySQLStorageCommon {
         return isWhitespace;
     }
 
-    private static final Log LOG = LogFactory.getLog(OXUtilMySQLStorageCommon.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXUtilMySQLStorageCommon.class);
 
     private static AdminCache cache = ClientAdminThread.cache;
 

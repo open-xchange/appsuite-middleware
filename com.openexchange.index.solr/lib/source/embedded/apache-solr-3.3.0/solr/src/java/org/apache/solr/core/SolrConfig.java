@@ -66,7 +66,7 @@ import java.io.IOException;
  */
 public class SolrConfig extends Config {
 
-  public static final Logger log = LoggerFactory.getLogger(SolrConfig.class);
+  public static final org.slf4j.Logger log = LoggerFactory.getLogger(SolrConfig.class);
   
   public static final String DEFAULT_CONF_FILE = "solrconfig.xml";
 

@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.apache.commons.logging.Log;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
@@ -70,7 +69,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class SmalDeleteListenerImpl implements DeleteListener {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SmalDeleteListenerImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SmalDeleteListenerImpl.class);
 
 
     @Override
@@ -90,7 +89,7 @@ public class SmalDeleteListenerImpl implements DeleteListener {
             IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
             indexingService.unscheduleAllForContext(false, contextId);
         } catch (Throwable t) {
-            LOG.warn("Error while deleting jobs for context " + contextId + ".", t);
+            LOG.warn("Error while deleting jobs for context {}.", contextId, t);
         }
 
         PreparedStatement stmt = null;
@@ -114,7 +113,7 @@ public class SmalDeleteListenerImpl implements DeleteListener {
             IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
             indexingService.unscheduleAllForUser(false, contextId, userId);
         } catch (Throwable t) {
-            LOG.warn("Error while deleting jobs for user " + userId + " in context " + contextId + ".", t);
+            LOG.warn("Error while deleting jobs for user {} in context {}.", userId, contextId, t);
         }
 
         PreparedStatement stmt = null;

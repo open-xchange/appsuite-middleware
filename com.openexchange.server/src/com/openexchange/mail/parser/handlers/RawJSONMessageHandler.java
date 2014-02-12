@@ -99,7 +99,7 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
  */
 public final class RawJSONMessageHandler implements MailMessageHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RawJSONMessageHandler.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RawJSONMessageHandler.class);
 
     /**
      * The max. allowed body size of 16 KB.
@@ -536,7 +536,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                 final Throwable t =
                     new Throwable(
                         new com.openexchange.java.StringAllocator("Unable to fetch content/type for '").append(filename).append("': ").append(e).toString());
-                LOG.warn(t.getMessage(), t);
+                LOG.warn("", t);
             }
             jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), contentType);
             jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), filename);
@@ -590,7 +590,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                 }
             } catch (final JSONException e) {
                 // Cannot occur
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

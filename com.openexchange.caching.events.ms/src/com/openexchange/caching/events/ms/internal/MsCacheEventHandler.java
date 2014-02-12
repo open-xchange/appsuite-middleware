@@ -52,7 +52,6 @@ package com.openexchange.caching.events.ms.internal;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
@@ -70,7 +69,8 @@ import com.openexchange.server.ServiceExceptionCode;
  */
 public final class MsCacheEventHandler implements CacheListener, MessageListener<Map<String, Serializable>> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MsCacheEventHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MsCacheEventHandler.class);
+
     private static final String TOPIC_NAME = "cacheEvents-0";
     private static final AtomicReference<MsService> MS_REFERENCE = new AtomicReference<MsService>();
 
@@ -112,9 +112,7 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
     @Override
     public void onEvent(Object sender, CacheEvent cacheEvent, boolean fromRemote) {
         if (false == fromRemote) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Re-publishing locally received cache event to remote: " + cacheEvent + " [" + senderId + "]");
-            }
+            LOG.debug("Re-publishing locally received cache event to remote: {} [{}]", cacheEvent, senderId);
             try {
                 getTopic().publish(CacheEventWrapper.wrap(cacheEvent));
             } catch (OXException e) {
@@ -136,15 +134,11 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
         if (null != message && message.isRemote()) {
             Map<String, Serializable> cacheEvent = message.getMessageObject();
             if (null != cacheEvent) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Re-publishing remotely received cache event locally: "
-                        + message.getMessageObject() + " [" + message.getSenderId() + "]");
-                }
+                LOG.debug("Re-publishing remotely received cache event locally: {} [{}]", message.getMessageObject(), message.getSenderId());
                 cacheEvents.notify(this, CacheEventWrapper.unwrap(cacheEvent), true);
             } else {
                 LOG.warn("Discarding empty cache event message.");
             }
         }
     }
-
 }

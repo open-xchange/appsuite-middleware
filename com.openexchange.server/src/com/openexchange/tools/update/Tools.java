@@ -362,12 +362,18 @@ public final class Tools {
             sql.append(name);
             sql.append("` ");
         }
-        sql.append("(`");
+        sql.append("(");
         for (final String column : columns) {
-            sql.append(column);
-            sql.append("`,`");
+            if (column.startsWith("`")) {
+                sql.append(column);
+                sql.append(",");
+            } else {
+                sql.append("`");
+                sql.append(column);
+                sql.append("`,");
+            }
         }
-        sql.setLength(sql.length() - 2);
+        sql.setLength(sql.length() - 1);
         sql.append(')');
         Statement stmt = null;
         try {

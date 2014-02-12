@@ -1,14 +1,13 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.groupware.container.Appointment;
 
 public class Bug8836Test extends AppointmentTest {
 
-	private static final Log LOG = LogFactory.getLog(Bug8836Test.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug8836Test.class);
 
 	public Bug8836Test(final String name) {
 		super(name);

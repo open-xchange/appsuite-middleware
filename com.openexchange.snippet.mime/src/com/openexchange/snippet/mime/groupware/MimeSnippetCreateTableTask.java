@@ -54,7 +54,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
+import java.text.MessageFormat;
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -109,10 +109,8 @@ public final class MimeSnippetCreateTableTask extends AbstractCreateTableImpl im
         } finally {
             ds.backForUpdateTask(contextId, writeCon);
         }
-        final Log logger = com.openexchange.log.Log.loggerFor(MimeSnippetCreateTableTask.class);
-        if (logger.isInfoEnabled()) {
-            logger.info("UpdateTask '" + MimeSnippetCreateTableTask.class.getSimpleName() + "' successfully performed!");
-        }
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MimeSnippetCreateTableTask.class);
+        logger.info("UpdateTask ''{}'' successfully performed!", MimeSnippetCreateTableTask.class.getSimpleName());
     }
 
     private void createTable(final String tablename, final String sqlCreate, final Connection writeCon) throws OXException {

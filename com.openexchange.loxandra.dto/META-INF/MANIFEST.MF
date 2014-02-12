@@ -11,4 +11,5 @@ Import-Package: com.openexchange.groupware.contact,
  com.openexchange.groupware.contact.helpers,
  com.openexchange.groupware.container,
  org.apache.commons.logging,
- org.json
+ org.json,
+ org.slf4j

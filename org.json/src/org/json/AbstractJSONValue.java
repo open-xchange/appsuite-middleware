@@ -350,4 +350,14 @@ abstract class AbstractJSONValue implements JSONValue {
         return str.indexOf('\u2028') >= 0 || str.indexOf('\u2029') >= 0;
     }
 
+    /**
+     * Checks if passed value is either <code>null</code> or <code>JSONObject.NULL</code>.
+     *
+     * @param value The value
+     * @return <code>true</code> if value is either <code>null</code> or <code>JSONObject.NULL</code>; otherwise <code>false</code>
+     */
+    protected static boolean isNull(final Object value) {
+        return (value == null || value == JSONObject.NULL);
+    }
+
 }

@@ -51,8 +51,7 @@ import org.apache.cxf.staxutils.DepthXMLStreamReader;
 import org.apache.cxf.staxutils.StaxUtils;
 import org.apache.ws.commons.schema.XmlSchemaElement;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.CommonsLoggingLogger;
-import com.openexchange.log.Log;
+import com.openexchange.log.Slf4jLogger;
 
 /**
  * {@link DocLiteralInInterceptor} - A rewrite of {@code org.apache.cxf.interceptor.DocLiteralInInterceptor} class for less strict parsing
@@ -64,7 +63,7 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
     public static final String KEEP_PARAMETERS_WRAPPER = DocLiteralInInterceptor.class.getName()
         + ".DocLiteralInInterceptor.keep-parameters-wrapper";
 
-    private static final Logger LOG = new CommonsLoggingLogger(DocLiteralInInterceptor.class);
+    private static final Logger LOG = new Slf4jLogger(DocLiteralInInterceptor.class);
 
     public DocLiteralInInterceptor() {
         super(Phase.UNMARSHAL);
@@ -136,14 +135,7 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
                                 if (linkedException != null && linkedException.getClass().getName().indexOf("SAXParseException") >= 0) {
                                     {
                                         final StringAllocator sb = new StringAllocator(fault.getMessage());
-                                        if (Log.appendTraceToMessage()) {
-                                            final String lineSeparator = System.getProperty("line.separator");
-                                            sb.append(lineSeparator);
-                                            appendStackTrace(fault.getStackTrace(), sb, lineSeparator);
-                                            LOG.severe(sb.toString());
-                                        } else {
-                                            LOG.log(Level.SEVERE, sb.toString(), fault);
-                                        }
+                                        LOG.log(Level.SEVERE, sb.toString(), fault);
                                     }
                                     final String[] info = extractUnexpectedElement(linkedException.getMessage());
                                     if (null != info) {

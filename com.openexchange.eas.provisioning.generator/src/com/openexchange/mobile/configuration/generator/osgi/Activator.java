@@ -52,11 +52,9 @@ package com.openexchange.mobile.configuration.generator.osgi;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mobile.configuration.generator.MobileConfigServlet;
 import com.openexchange.mobile.configuration.generator.configuration.ConfigurationException;
 import com.openexchange.mobile.configuration.generator.configuration.MobileConfigProperties;
@@ -72,7 +70,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class Activator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
     public static final String ALIAS = "/servlet/mobileconfig";
 
@@ -91,18 +89,14 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         MobileConfigServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
         register();
     }
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
         MobileConfigServiceRegistry.getServiceRegistry().removeService(clazz);
         unregister();
     }
@@ -151,9 +145,9 @@ public class Activator extends HousekeepingActivator {
         try {
             service.registerServlet(ALIAS, new MobileConfigServlet(), null, null);
         } catch (ServletException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (NamespaceException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         LOG.info("MobileConfig servlet registered");
     }

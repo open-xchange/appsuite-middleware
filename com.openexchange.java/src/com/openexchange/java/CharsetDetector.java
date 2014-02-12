@@ -53,12 +53,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import javax.mail.MessagingException;
-import javax.mail.Part;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.mozilla.universalchardet.UniversalDetector;
 
 /**
@@ -69,7 +63,7 @@ import org.mozilla.universalchardet.UniversalDetector;
  */
 public final class CharsetDetector {
 
-    private static final Log LOG = LogFactory.getLog(CharsetDetector.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CharsetDetector.class);
 
     private static final String FALLBACK = "ISO-8859-1";
 
@@ -100,15 +94,15 @@ public final class CharsetDetector {
         try {
             return (null != charset && checkName(charset) && Charset.isSupported(charset));
         } catch (final RuntimeException rte) {
-            LOG.warn("RuntimeException while checking charset: " + charset, rte);
+            LOG.warn("RuntimeException while checking charset: {}", charset, rte);
             return false;
         } catch (final Error e) {
             handleThrowable(e);
-            LOG.warn("Error while checking charset: " + charset, e);
+            LOG.warn("Error while checking charset: {}", charset, e);
             return false;
         } catch (final Throwable t) {
             handleThrowable(t);
-            LOG.warn("Unexpected error while checking charset: " + charset, t);
+            LOG.warn("Unexpected error while checking charset: {}", charset, t);
             return false;
         }
     }
@@ -120,11 +114,11 @@ public final class CharsetDetector {
      */
     private static void handleThrowable(final Throwable t) {
         if (t instanceof ThreadDeath) {
-            LOG.fatal(" ---=== /!\\ ===--- Thread death ---=== /!\\ ===--- ", t);
+            LOG.error(" ---=== /!\\ ===--- Thread death ---=== /!\\ ===--- ", t);
             throw (ThreadDeath) t;
         }
         if (t instanceof VirtualMachineError) {
-            LOG.fatal(
+            LOG.error(
                 " ---=== /!\\ ===--- The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating. ---=== /!\\ ===--- ",
                 t);
             throw (VirtualMachineError) t;
@@ -174,36 +168,6 @@ public final class CharsetDetector {
             legal = false;
         }
         return legal;
-    }
-
-    /**
-     * Detects the charset of specified part.
-     *
-     * @param p The part whose charset shall be detected
-     * @return The detected part's charset
-     * @throws MessagingException If an error occurs in part's getter methods
-     */
-    public static String detectPartCharset(final Part p) throws MessagingException {
-        try {
-            return detectCharset(p.getInputStream());
-        } catch (final IOException e) {
-            /*
-             * Try to get data from raw input stream
-             */
-            final InputStream rawIn;
-            if (p instanceof MimeBodyPart) {
-                rawIn = ((MimeBodyPart) p).getRawInputStream();
-            } else if (p instanceof MimeMessage) {
-                rawIn = ((MimeMessage) p).getRawInputStream();
-            } else {
-                /*
-                 * Neither a MimeBodyPart nor a MimeMessage
-                 */
-                LOG.error(e.getMessage(), e);
-                return FALLBACK;
-            }
-            return detectCharset(rawIn);
-        }
     }
 
     /**
@@ -261,7 +225,7 @@ public final class CharsetDetector {
         try {
             return detectCharsetFailOnError(in);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return FALLBACK;
         }
     }
@@ -288,7 +252,7 @@ public final class CharsetDetector {
                 detector.handleData(buffer, 0, read);
             }
         } catch (IOException e) {
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
         } finally {
             Streams.close(in);
         }

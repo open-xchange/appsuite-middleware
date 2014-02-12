@@ -544,6 +544,12 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
         }
         if (update != null) {
             orig.copyFrom(update, modifiedFields.toArray(new File.Field[modifiedFields.size()]));
+            /*
+             * remove creation date of original file so that the current time will be assigned during creation
+             */
+            if (false == modifiedFields.contains(File.Field.CREATED)) {
+                orig.setCreated(null);
+            }
         }
         orig.setId(NEW);
         orig.setFolderId(destFolder);

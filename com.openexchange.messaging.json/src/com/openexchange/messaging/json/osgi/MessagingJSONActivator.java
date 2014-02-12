@@ -50,8 +50,6 @@
 package com.openexchange.messaging.json.osgi;
 
 import java.io.ByteArrayInputStream;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.caching.Cache;
@@ -77,7 +75,7 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
  */
 public class MessagingJSONActivator extends AJAXModuleActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MessagingJSONActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MessagingJSONActivator.class);
 
     private static final Class<?>[] NEEDED_SERVICES = new Class[] { MessagingServiceRegistry.class, HttpService.class, CacheService.class, ConfigViewFactory.class };
 
@@ -103,7 +101,7 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
         try {
             register();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -138,7 +136,7 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
 
             register();
         } catch (final Exception x) {
-            LOG.error(x.getMessage(), x);
+            LOG.error("", x);
             throw x;
         }
     }
@@ -195,7 +193,7 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
             }
             cleanUp();
         } catch (final Exception x) {
-            LOG.error(x.getMessage(), x);
+            LOG.error("", x);
             throw x;
         }
     }

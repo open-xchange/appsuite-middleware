@@ -49,15 +49,11 @@
 
 package com.openexchange.groupware.settings.tree;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
@@ -107,12 +103,9 @@ public final class SpellCheck implements PreferencesItemService {
                 return true;
             }
             @Override
-            protected void setValue(final UserImpl newUser, final String value, final User originalUser) {
-                final Map<String, Set<String>> clonedAttrs = new HashMap<String, Set<String>>(originalUser.getAttributes());
-                final Set<String> spellCheck = new HashSet<String>(1);
-                spellCheck.add(value);
-                clonedAttrs.put(NAME, Collections.unmodifiableSet(spellCheck));
-                newUser.setAttributes(Collections.unmodifiableMap(clonedAttrs));
+            public void writeValue(Session session, Context ctx, User user, Setting setting) throws OXException {
+                String value = setting.getSingleValue().toString();
+                UserStorage.getInstance().setAttribute(NAME, value, user.getId(), ctx);
             }
         };
     }

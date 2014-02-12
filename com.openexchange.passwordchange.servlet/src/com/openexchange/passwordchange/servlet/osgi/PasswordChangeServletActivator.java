@@ -68,7 +68,7 @@ import com.openexchange.passwordchange.servlet.PasswordChangeServlet;
  */
 public final class PasswordChangeServletActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PasswordChangeServletActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeServletActivator.class);
 
     private static final String PWC_SRVLT_ALIAS_APPENDIX = "passwordchange";
 
@@ -100,9 +100,9 @@ public final class PasswordChangeServletActivator extends HousekeepingActivator 
             try {
                 registerServlet();
             } catch (final ServletException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final NamespaceException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -138,7 +138,7 @@ public final class PasswordChangeServletActivator extends HousekeepingActivator 
              */
             registerServlet();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
 
@@ -156,7 +156,7 @@ public final class PasswordChangeServletActivator extends HousekeepingActivator 
              */
             getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
 
@@ -172,9 +172,7 @@ public final class PasswordChangeServletActivator extends HousekeepingActivator 
                  * Register servlet
                  */
                 httpService.registerServlet(getService(DispatcherPrefixService.class).getPrefix() + PWC_SRVLT_ALIAS_APPENDIX, new PasswordChangeServlet(), null, null);
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Password change servlet successfully registered");
-                }
+                LOG.info("Password change servlet successfully registered");
             }
         }
     }
@@ -192,9 +190,7 @@ public final class PasswordChangeServletActivator extends HousekeepingActivator 
                  * Unregister servlet
                  */
                 httpService.unregister(getService(DispatcherPrefixService.class).getPrefix() + PWC_SRVLT_ALIAS_APPENDIX);
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Password change servlet successfully unregistered");
-                }
+                LOG.info("Password change servlet successfully unregistered");
             }
         }
     }

@@ -37,5 +37,6 @@ Import-Package: com.openexchange.ajax.fields,
  org.apache.commons.logging,
  org.apache.log4j,
  org.json,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j
 Bundle-Activator: com.openexchange.loxandra.impl.osgi.LoxandraActivator

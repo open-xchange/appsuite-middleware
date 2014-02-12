@@ -50,7 +50,6 @@
 package com.openexchange.caldav.mixins;
 
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import com.openexchange.caldav.resources.CommonFolderCollection;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
@@ -70,7 +69,7 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  */
 public class CTag extends SingleXMLPropertyMixin {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CTag.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CTag.class);
 
 	private final CommonFolderCollection<?> collection;
     private String value = null;

@@ -63,7 +63,6 @@ import java.util.Map;
 import java.util.TimeZone;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
@@ -73,7 +72,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
@@ -95,7 +93,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     private static final Map<String, OXMFPublicationService> publishers = new HashMap<String, OXMFPublicationService>();
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MicroformatServlet.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MicroformatServlet.class);
 
     private static final String MODULE = "module";
 
@@ -103,7 +101,10 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     private static final String CONTEXTID = "ctx";
 
-    private static final String USE_WHITELISTING_PROPERTY_NAME = "com.openexchange.publish.microformats.usesWhitelisting";
+    /**
+     * Property to get the configured name of the hoster to be displayed in disclaimer of the default template
+     */
+    private static final String PROPERTY_LEGAL_HOSTER_NAME = "com.openexchange.publish.legalHosterName";
 
     private static PublicationDataLoaderService dataLoader = null;
 
@@ -210,7 +211,13 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             if (admin == null || admin.equals("")) {
                 admin = userService.getUser(ctx.getMailadmin(), ctx).getMail();
             }
-            final String privacyText = formatPrivacyText(getPrivacyText(user), admin, user, new Date());
+
+            String legalHosterName = configService.getProperty(MicroformatServlet.PROPERTY_LEGAL_HOSTER_NAME);
+            if (legalHosterName == null || legalHosterName.equals("")) {
+                legalHosterName = MicroformatStrings.DISCLAIMER_ALTERNATIV_HOSTER_NAME_WORDING;
+            }
+
+            final String privacyText = formatPrivacyText(getPrivacyText(user), legalHosterName, admin, user, new Date(publication.getCreated()));
             variables.put("privacy", privacyText); // TODO Use lastmodified once someone implements this.
             variables.put("userContact", userContact);
             variables.put("htmlService", new HTMLUtils(htmlService));
@@ -231,13 +238,13 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             writer.write(html);
             writer.flush();
         } catch (final OXException x) {
-            LOG.error(x.getMessage(), x);
+            LOG.error("", x);
             final PrintWriter writer = resp.getWriter();
             writer.println("Publishing failed. Please try again later. Exception ID: " + x.getExceptionId());
             writer.flush();
         } catch (final Throwable t) {
             ExceptionUtils.handleThrowable(t);
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             final PrintWriter writer = resp.getWriter();
             writer.println("Publishing failed. Please try again later.");
             writer.flush();
@@ -248,9 +255,9 @@ public class MicroformatServlet extends OnlinePublicationServlet {
         return contacts.getUser(publicationSession, publicationSession.getUserId());
     }
 
-    private String formatPrivacyText(final String privacyText, final String adminAddress, final User user, final Date creationDate) {
+    private String formatPrivacyText(final String privacyText, final String company, final String adminAddress, final User user, final Date creationDate) {
         final String date = new SimpleDateFormat("yyyy-MM-dd").format(creationDate);
-        final String retVal = String.format(privacyText, adminAddress, user.getMail(), date);
+        final String retVal = String.format(privacyText, company, adminAddress, user.getMail(), date);
         return "<p>" + retVal.replaceAll("\n", "</p><p>") + "</p>";
     }
 

@@ -53,7 +53,6 @@ import java.util.Collection;
 import java.util.Date;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import com.openexchange.log.LogFactory;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
@@ -132,7 +131,7 @@ public final class ReceivedDateTerm extends SearchTerm<ComparablePattern<java.ut
         try {
             receivedDate = msg.getReceivedDate();
         } catch (final MessagingException e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(ReceivedDateTerm.class)).warn("Error during search.", e);
+            org.slf4j.LoggerFactory.getLogger(ReceivedDateTerm.class).warn("Error during search.", e);
             return false;
         }
         if (null == receivedDate) {

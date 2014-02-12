@@ -68,7 +68,7 @@ import com.openexchange.search.SearchAttributeFetcher;
  */
 public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appointment> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AttributeGetter.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttributeGetter.class);
 
     private static interface AttributeGetter {
 
@@ -424,9 +424,7 @@ public class AppointmentAttributeFetcher implements SearchAttributeFetcher<Appoi
     public <T> T getAttribute(final String attributeName, final Appointment candidate) {
         final AttributeGetter getter = GETTERS.get(attributeName);
         if (null == getter) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("No getter for field: " + attributeName);
-            }
+            LOG.info("No getter for field: {}", attributeName);
             return null;
         }
         return (T) getter.getObject(candidate);

@@ -2,15 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Java Bundle
 Bundle-SymbolicName: com.openexchange.java
-Bundle-Version: 7.4.1
+Bundle-Version: 7.4.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: javax.activation;version="1.1.0",
  javax.crypto,
  javax.crypto.interfaces,
  javax.crypto.spec,
- javax.mail,
- javax.mail.internet,
  javax.naming,
  javax.net,
  javax.net.ssl,
@@ -19,6 +17,7 @@ Import-Package: javax.activation;version="1.1.0",
  org.apache.commons.logging,
  org.json,
  org.mozilla.universalchardet,
+ org.slf4j,
  sun.misc
 Export-Package: com.damienmiller,
  com.davekoelle,

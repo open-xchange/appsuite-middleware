@@ -6,7 +6,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import me.prettyprint.cassandra.connection.client.HClient;
 import me.prettyprint.cassandra.connection.factory.HClientFactory;
 import me.prettyprint.cassandra.service.CassandraHost;
@@ -14,13 +13,11 @@ import me.prettyprint.hector.api.exceptions.HInactivePoolException;
 import me.prettyprint.hector.api.exceptions.HPoolExhaustedException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
-
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ConcurrentHClientPool implements HClientPool {
 
-  private static final Logger log = LoggerFactory.getLogger(ConcurrentHClientPool.class);
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(ConcurrentHClientPool.class);
 
   private final ArrayBlockingQueue<HClient> availableClientQueue;
   private final AtomicInteger activeClientsCount;
@@ -53,12 +50,10 @@ public class ConcurrentHClientPool implements HClientPool {
       availableClientQueue.add(createClient());
     }
 
-    if ( log.isDebugEnabled() ) {
-      log.debug("Concurrent Host pool started with {} active clients; max: {} exhausted wait: {}",
+    log.debug("Concurrent Host pool started with {} active clients; max: {} exhausted wait: {}",
           new Object[]{getNumIdle(),
           cassandraHost.getMaxActive(),
           maxWaitTimeWhenExhausted});
-    }
   }
 
   @Override
@@ -100,10 +95,7 @@ public class ConcurrentHClientPool implements HClientPool {
     HClient cassandraClient = null;
     numBlocked.incrementAndGet();
 
-    // blocked take on the queue if we are configured to wait forever
-    if ( log.isDebugEnabled() ) {
-      log.debug("blocking on queue - current block count {}", numBlocked.get());
-    }
+    log.debug("blocking on queue - current block count {}", numBlocked.get());
 
     try {
       // wait and catch, creating a new one if the counts have changed. Infinite wait should just recurse.
@@ -250,9 +242,7 @@ public void releaseClient(HClient client) throws HectorException {
     realActiveClientsCount.decrementAndGet();
     activeClientsCount.decrementAndGet();
 
-    if ( log.isTraceEnabled() ) {
-      log.trace("Status of releaseClient {} to queue: {}", client.toString(), open);
-    }
+    log.trace("Status of releaseClient {} to queue: {}", client.toString(), open);
   }
 
   /**

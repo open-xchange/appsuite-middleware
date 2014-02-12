@@ -45,7 +45,7 @@ import org.apache.solr.response.SolrQueryResponse;
  */
 @Deprecated
 public class TestRequestHandler implements SolrRequestHandler {
-  private static Logger log = LoggerFactory.getLogger(SolrIndexSearcher.class);
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(SolrIndexSearcher.class);
 
   public void init(NamedList args) {
     SolrCore.log.info( "Unused request handler arguments:" + args);

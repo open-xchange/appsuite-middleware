@@ -87,7 +87,7 @@ public class ParameterList {
      * position of the first seen segment and orphan segments
      * will all move to the end.
      */
-    private Map list = new LinkedHashMap();	// keep parameters in order
+    private Map<String, Object> list = new LinkedHashMap<String, Object>();	// keep parameters in order
 
     /**
      * A set of names for multi-segment parameters that we
@@ -116,7 +116,7 @@ public class ParameterList {
      * the segment number.  For example, "title*0=part1; title*1=part2;
      * title*3=part4" appears as two parameters named "title" and "title*3".
      */
-    private Set multisegmentNames;
+    private Set<String> multisegmentNames;
 
     /**
      * A map containing the segments for all not-yet-processed
@@ -130,7 +130,7 @@ public class ParameterList {
      * to a String using the specified charset in the
      * combineMultisegmentNames method.
      */
-    private Map slist;
+    private Map<String, Object> slist;
 
     /**
      * MWB 3BView: The name of the last parameter added to the map.
@@ -167,6 +167,11 @@ public class ParameterList {
 	String value;
 	String charset;
 	String encodedValue;
+
+    Value() {
+        super();
+    }
+
     }
 
     /**
@@ -176,17 +181,22 @@ public class ParameterList {
      * method, the value field contains the combined and decoded value.
      * Until then the value field contains an empty string as a placeholder.
      */
-    private static class MultiValue extends ArrayList {
+    private static class MultiValue extends ArrayList<Object> {
 	String value;
+
+	MultiValue() {
+	    super();
+	}
+
     }
 
     /**
      * Map the LinkedHashMap's keySet iterator to an Enumeration.
      */
-    private static class ParamEnum implements Enumeration {
-	private Iterator it;
+    private static class ParamEnum<E> implements Enumeration<E> {
+	private Iterator<E> it;
 
-	ParamEnum(Iterator it) {
+	ParamEnum(Iterator<E> it) {
 	    this.it = it;
 	}
 
@@ -194,7 +204,7 @@ public class ParameterList {
 	    return it.hasNext();
 	}
 
-	public Object nextElement() {
+	public E nextElement() {
 	    return it.next();
 	}
     }
@@ -205,8 +215,8 @@ public class ParameterList {
     public ParameterList() { 
 	// initialize other collections only if they'll be needed
 	if (decodeParameters) {
-	    multisegmentNames = new HashSet();
-	    slist = new HashMap();
+	    multisegmentNames = new HashSet<String>();
+	    slist = new HashMap<String, Object>();
 	}
     }
 
@@ -381,10 +391,9 @@ public class ParameterList {
 				throws ParseException {
 	boolean success = false;
 	try {
-	    Iterator it = multisegmentNames.iterator();
+	    Iterator<String> it = multisegmentNames.iterator();
 	    while (it.hasNext()) {
-		String name = (String)it.next();
-		StringBuilder sb = new StringBuilder();
+		String name = it.next();
 		MultiValue mv = new MultiValue();
 		/*
 		 * Now find all the segments for this name and
@@ -452,7 +461,7 @@ public class ParameterList {
 		// but if we do, add it all to list
 		if (slist.size() > 0) {
 		    // first, decode any values that we'll add to the list
-		    Iterator sit = slist.values().iterator();
+		    Iterator<Object> sit = slist.values().iterator();
 		    while (sit.hasNext()) {
 			Object v = sit.next();
 			if (v instanceof Value) {
@@ -532,16 +541,18 @@ public class ParameterList {
 	    }
 	    return;
 	}
-	name = name.trim().toLowerCase(Locale.ENGLISH);
-	if (decodeParameters) {
-	    try {
-		putEncodedName(name, value);
-	    } catch (ParseException pex) {
-		// ignore it
-		list.put(name, value);
-	    }
-	} else
-	    list.put(name, value);
+	if (name != null) {
+	    name = name.trim().toLowerCase(Locale.ENGLISH);
+	    if (decodeParameters) {
+	        try {
+	            putEncodedName(name, value);
+	        } catch (ParseException pex) {
+	            // ignore it
+	            list.put(name, value);
+	        }
+	    } else
+	        list.put(name, value);
+    }
     }
 
     /**
@@ -584,8 +595,8 @@ public class ParameterList {
      *
      * @return Enumeration of all parameter names in this list.
      */
-    public Enumeration getNames() {
-	return new ParamEnum(list.keySet().iterator());
+    public Enumeration<String> getNames() {
+	return new ParamEnum<String>(list.keySet().iterator());
     }
 
     /**
@@ -614,10 +625,10 @@ public class ParameterList {
      */  
     public String toString(int used) {
         ToStringBuffer sb = new ToStringBuffer(used);
-        Iterator e = list.keySet().iterator();
+        Iterator<String> e = list.keySet().iterator();
  
         while (e.hasNext()) {
-            String name = (String)e.next();
+            String name = e.next();
 	    Object v = list.get(name);
 	    if (v instanceof MultiValue) {
 		MultiValue vv = (MultiValue)v;

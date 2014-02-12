@@ -62,7 +62,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.printing.blocks.CPFactory;
@@ -82,10 +81,10 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
@@ -102,7 +101,7 @@ public class CPServlet extends PermissionServlet {
 
     private static final long serialVersionUID = -5186422014968264569L;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CPServlet.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CPServlet.class);
 
     private static final String APPOINTMENTS = "appointments";
 
@@ -171,7 +170,8 @@ public class CPServlet extends PermissionServlet {
 
         final ServerSession session = getSessionObject(req);
         try {
-            final TimeZone zone = TimeZone.getTimeZone(session.getUser().getTimeZone());
+            final User user = session.getUser();
+            final TimeZone zone = TimeZone.getTimeZone(user.getTimeZone());
             final CPParameters params = new CPParameters(req, zone);
             if (params.hasUnparseableFields()) {
                 throw new ServletException("Could not parse the value of the following parameters: " + Strings.join(
@@ -209,7 +209,7 @@ public class CPServlet extends PermissionServlet {
             }
             final List<Appointment> idList = SearchIteratorAdapter.toList(iterator);
 
-            final Locale locale = session.getUser().getLocale();
+            final Locale locale = user.getLocale();
             final CPCalendar cal = CPCalendar.getCalendar(zone, locale);
             modifyCalendar(cal, params);
 
@@ -245,7 +245,7 @@ public class CPServlet extends PermissionServlet {
             variables.put(DAYS, perDayList);
             variables.put(I18N, new I18n(I18nServices.getInstance().getService(locale)));
             variables.put(DOCUMENT_TITLE, getDocumentTitle(session));
-            variables.put(DATE_FORMATTER, new DateFormatter(session.getUser().getLocale(), TimeZone.getTimeZone(session.getUser().getTimeZone())));
+            variables.put(DATE_FORMATTER, new DateFormatter(user.getLocale(), TimeZone.getTimeZone(user.getTimeZone())));
 
             for (final CPAppointment app : partitions.getAppointments()) {
                 debuggingItems.add(app.getTitle());
@@ -273,7 +273,7 @@ public class CPServlet extends PermissionServlet {
                 configView = configViewFactory.getView(session.getUserId(), session.getContextId());
                 retval = configView.get("ui/product/name", String.class);
             } catch (OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         if (null == retval) {
@@ -287,7 +287,7 @@ public class CPServlet extends PermissionServlet {
      * @throws IOException
      */
     private void writeException(final HttpServletResponse resp, final Throwable t) throws IOException {
-        LOG.error(t.getMessage(), t);
+        LOG.error("", t);
         final PrintWriter writer = resp.getWriter();
         writer.append(t.getMessage());
         // TODO Write HTML page as response

@@ -58,7 +58,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
@@ -80,7 +79,7 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public final class CachingJSlobStorage implements JSlobStorage, Runnable {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CachingJSlobStorage.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CachingJSlobStorage.class);
 
     private static final String REGION_NAME = Constants.REGION_NAME;
 
@@ -131,7 +130,7 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
     }
 
     /** The poison element */
-    private static final DelayedStoreOp POISON = new DelayedStoreOp(null, null, null, true);
+    private static final DelayedStoreOp POISON = DelayedStoreOp.POISON;
 
     /** Proxy attribute for the object implementing the persistent methods. */
     private final DBJSlobStorage delegate;
@@ -310,12 +309,9 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
             return delegate.store(id, t);
         }
 
-        // Explicitly invalidate cache entry
-        final String groupName = groupName(id);
-        cache.removeFromGroup(id.getId(), groupName);
-
         // Delay store operation
-        if (delayedStoreOps.offer(new DelayedStoreOp(id.getId(), groupName, id, false))) {
+        final String groupName = groupName(id);
+        if (delayedStoreOps.offer(new DelayedStoreOp(id.getId(), groupName, id))) {
             // Added to delay queue -- put current to cache
             cache.putInGroup(id.getId(), groupName, t.setId(id), false);
             return true;

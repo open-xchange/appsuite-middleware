@@ -52,8 +52,6 @@ package com.openexchange.configjump.generic;
 import java.util.Properties;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.configjump.ConfigJumpService;
@@ -64,11 +62,11 @@ import com.openexchange.configjump.ConfigJumpService;
  */
 public final class Services {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Services.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Services.class);
 
     private final BundleContext context;
 
-    private ServiceRegistration configJump;
+    private ServiceRegistration<ConfigJumpService> configJump;
 
     private final Lock registrationLock = new ReentrantLock();
 
@@ -89,8 +87,7 @@ public final class Services {
         registrationLock.lock();
         try {
             if (null == configJump) {
-                configJump = context.registerService(ConfigJumpService.class
-                    .getName(), new GenericImpl(url), null);
+                configJump = context.registerService(ConfigJumpService.class, new GenericImpl(url), null);
             }
         } finally {
             registrationLock.unlock();
@@ -100,9 +97,10 @@ public final class Services {
     public void unregisterService() {
         registrationLock.lock();
         try {
+            final ServiceRegistration<ConfigJumpService> configJump = this.configJump;
             if (null != configJump) {
                 configJump.unregister();
-                configJump = null;
+                this.configJump = null;
             }
         } finally {
             registrationLock.unlock();

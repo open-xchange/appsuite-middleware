@@ -51,7 +51,6 @@ package com.openexchange.http.grizzly.addon;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.filterchain.Filter;
 import org.glassfish.grizzly.filterchain.FilterChainBuilder;
 import org.glassfish.grizzly.http.server.AddOn;
@@ -69,7 +68,7 @@ import com.openexchange.http.grizzly.osgi.Services;
  */
 public class GrizzlOXAddOn implements AddOn {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(GrizzlOXAddOn.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GrizzlOXAddOn.class);
 
     private final List<Filter> filters = new ArrayList<Filter>();
 
@@ -86,15 +85,13 @@ public class GrizzlOXAddOn implements AddOn {
     public void setup(NetworkListener networkListener, FilterChainBuilder builder) {
         AddOn[] addOns = networkListener.getAddOns();
         for (AddOn addOn : addOns) {
-            LOG.info("Current Addon is: " + addOn.getClass());
+            LOG.info("Current Addon is: {}", addOn.getClass());
         }
         int httpServerFilterIdx = builder.indexOfType(OXHttpServerFilter.class);
         if (httpServerFilterIdx > 0) {
             builder.addAll(httpServerFilterIdx -1 , filters);
         }
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("FilterChain after adding Watchers:\n" + FilterChainUtils.formatFilterChainString(builder.build()));
-        }
+        LOG.debug("FilterChain after adding Watchers:\n{}", FilterChainUtils.formatFilterChainString(builder.build()));
     }
 
 }

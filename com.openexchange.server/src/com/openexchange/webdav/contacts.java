@@ -52,16 +52,11 @@ package com.openexchange.webdav;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.jdom2.output.XMLOutputter;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -91,7 +86,7 @@ public final class contacts extends XmlServlet<ContactService> {
 
     private static final long serialVersionUID = -3731372041610025543L;
 
-    private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(contacts.class));
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(contacts.class);
 
     /**
      * Initializes a new {@link contacts}.
@@ -157,9 +152,7 @@ public final class contacts extends XmlServlet<ContactService> {
                         lastModified, inFolder, session));
                 break;
             default:
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("invalid method: " + method);
-                }
+                LOG.debug("invalid method: {}", method);
             }
         } else {
             parser.next();
@@ -182,7 +175,7 @@ public final class contacts extends XmlServlet<ContactService> {
     @Override
     protected void startWriter(final Session sessionObj, final Context ctx, final int objectId, final int folderId,
             final OutputStream os) throws Exception {
-        final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+        final User userObj = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
         final ContactWriter contactwriter = new ContactWriter(userObj, ctx, sessionObj);
         contactwriter.startWriter(objectId, folderId, os);
     }
@@ -198,7 +191,7 @@ public final class contacts extends XmlServlet<ContactService> {
     protected void startWriter(final Session sessionObj, final Context ctx, final int folderId,
             final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync,
             final OutputStream os) throws Exception {
-        final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+        final User userObj = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
         final ContactWriter contactwriter = new ContactWriter(userObj, ctx, sessionObj);
         contactwriter.startWriter(bModified, bDelete, bList, folderId, lastsync, os);
     }

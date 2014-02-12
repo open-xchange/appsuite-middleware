@@ -55,6 +55,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.templating.TemplateHelperFactory;
 import com.openexchange.tools.session.ServerSession;
@@ -68,11 +69,11 @@ import com.openexchange.tools.session.ServerSession;
 public class CalendarTemplateHelperFactory implements TemplateHelperFactory {
 
     private final ServiceLookup services;
-    
+
     public CalendarTemplateHelperFactory(ServiceLookup services) {
         this.services = services;
     }
-    
+
     @Override
     public String getName() {
         return "calendar";
@@ -80,10 +81,9 @@ public class CalendarTemplateHelperFactory implements TemplateHelperFactory {
 
     @Override
     public Object create(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter, Map<String, Object> rootObject) throws OXException {
-        
-        TimeZone tz = TimeZone.getTimeZone( requestData.isSet("timezone") ? requestData.getParameter("timezone") : session.getUser().getTimeZone() );
-        
-        return new CalendarHelper((Map<String, Object>) result.getResultObject(), session.getUser().getLocale(), tz, session.getContext(), services);
+        User user = session.getUser();
+        TimeZone tz = TimeZone.getTimeZone( requestData.isSet("timezone") ? requestData.getParameter("timezone") : user.getTimeZone() );
+        return new CalendarHelper((Map<String, Object>) result.getResultObject(), user.getLocale(), tz, session.getContext(), services);
     }
 
 }

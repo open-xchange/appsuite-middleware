@@ -49,8 +49,6 @@
 
 package com.openexchange.subscribe.crawler;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
@@ -73,7 +71,7 @@ public class TextPageByMultiselectStep extends AbstractStep<TextPage, HtmlPage> 
 
     private int formNumber;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TextPageByMultiselectStep.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TextPageByMultiselectStep.class);
 
     public TextPageByMultiselectStep(){
 
@@ -115,7 +113,7 @@ public class TextPageByMultiselectStep extends AbstractStep<TextPage, HtmlPage> 
                 executedSuccessfully = true;
             }
             catch (final Exception e) {
-                LOG.error(e);
+                LOG.error(e.toString());
             }
             if (output != null) {
                 executedSuccessfully = true;

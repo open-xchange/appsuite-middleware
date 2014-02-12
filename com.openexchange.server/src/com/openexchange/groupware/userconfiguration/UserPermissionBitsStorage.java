@@ -114,6 +114,11 @@ public abstract class UserPermissionBitsStorage {
     /**
      * Retrieve the permission bits for the given user
      */
+    public abstract UserPermissionBits getUserPermissionBits( final int userId, final int contextId) throws OXException;
+
+    /**
+     * Retrieve the permission bits for the given user
+     */
     public abstract UserPermissionBits getUserPermissionBits( final int userId, final Context ctx) throws OXException;
 
     /**

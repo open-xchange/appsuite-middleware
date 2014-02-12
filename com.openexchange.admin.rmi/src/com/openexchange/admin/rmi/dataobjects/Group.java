@@ -282,7 +282,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
      */
     @Deprecated
     public final boolean removeExtension(final OXGroupExtensionInterface o) {
-        if (null == getAllExtensionsAsHash().remove(o)) {
+        if (null == getAllExtensionsAsHash().remove(o.getClass().getName())) {
             return false;
         } else {
             return true;

@@ -1,19 +1,31 @@
 package org.jolokia.http;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.management.*;
-
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
+import javax.management.ReflectionException;
+import javax.management.RuntimeMBeanException;
 import org.jolokia.backend.BackendManager;
-import org.jolokia.config.*;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.config.Configuration;
+import org.jolokia.config.ProcessingParameters;
 import org.jolokia.request.JmxRequest;
 import org.jolokia.request.JmxRequestFactory;
-import org.jolokia.util.LogHandler;
-import org.json.simple.*;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONAware;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
@@ -46,11 +58,10 @@ public class HttpRequestHandler {
     // handler for contacting the MBean server(s)
     private BackendManager backendManager;
 
-    // Logging abstraction
-    private LogHandler logHandler;
-
     // Global configuration
     private Configuration config;
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpRequestHandler.class);
 
     /**
      * Request handler for parsing HTTP request and dispatching to the appropriate
@@ -59,9 +70,8 @@ public class HttpRequestHandler {
      * @param pBackendManager backend manager to user
      * @param pLogHandler log handler to where to put out logging
      */
-    public HttpRequestHandler(Configuration pConfig, BackendManager pBackendManager, LogHandler pLogHandler) {
+    public HttpRequestHandler(Configuration pConfig, BackendManager pBackendManager) {
         backendManager = pBackendManager;
-        logHandler = pLogHandler;
         config = pConfig;
     }
 
@@ -79,9 +89,9 @@ public class HttpRequestHandler {
                 JmxRequestFactory.createGetRequest(pathInfo,getProcessingParameter(pParameterMap));
 
         if (backendManager.isDebug()) {
-            logHandler.debug("URI: " + pUri);
-            logHandler.debug("Path-Info: " + pathInfo);
-            logHandler.debug("Request: " + jmxReq.toString());
+            LOG.debug("URI: {}", pUri);
+            LOG.debug("Path-Info: {}", pathInfo);
+            LOG.debug("Request: {}", jmxReq.toString());
         }
         return executeRequest(jmxReq);
     }
@@ -115,7 +125,7 @@ public class HttpRequestHandler {
     public JSONAware handlePostRequest(String pUri, InputStream pInputStream, String pEncoding, Map<String, String[]>  pParameterMap)
             throws IOException {
         if (backendManager.isDebug()) {
-            logHandler.debug("URI: " + pUri);
+            LOG.debug("URI: {}", pUri);
         }
 
         Object jsonRequest = extractJsonRequest(pInputStream,pEncoding);
@@ -125,7 +135,7 @@ public class HttpRequestHandler {
             JSONArray responseList = new JSONArray();
             for (JmxRequest jmxReq : jmxRequests) {
                 if (backendManager.isDebug()) {
-                    logHandler.debug("Request: " + jmxReq.toString());
+                    LOG.debug("Request: {}", jmxReq.toString());
                 }
                 // Call handler and retrieve return value
                 JSONObject resp = executeRequest(jmxReq);
@@ -260,7 +270,7 @@ public class HttpRequestHandler {
         jsonObject.put("error_type", pExp.getClass().getName());
         addErrorInfo(jsonObject, pExp, pJmxReq);
         if (backendManager.isDebug()) {
-            backendManager.error("Error " + pErrorCode,pExp);
+            LOG.error("Error {}", pErrorCode,pExp);
         }
         if (pJmxReq != null) {
             jsonObject.put("request",pJmxReq.toJSON());

@@ -101,7 +101,7 @@ public class PropertyHandler {
 
     public static final String bundlename = "com.openexchange.spamhandler.spamassassin.";
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PropertyHandler.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PropertyHandler.class);
 
     private static PropertyHandler singleton = new PropertyHandler();
 
@@ -289,9 +289,7 @@ public class PropertyHandler {
 //        }
 
         this.loaded.set(true);
-        if (LOG.isInfoEnabled()) {
-            LOG.info(logBuilder.toString());
-        }
+        LOG.info(logBuilder.toString());
     }
 
     public void reloadProperties() {

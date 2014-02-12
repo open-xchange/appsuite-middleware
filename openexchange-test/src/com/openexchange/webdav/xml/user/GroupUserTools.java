@@ -88,7 +88,7 @@ public final class GroupUserTools {
             final SearchRequest request = new SearchRequest();
             final SearchResponse response = client.execute(host, request);
             for (final Contact contact : response) {
-                final Map<?, ?> map = contact.getMap();
+                final Map<String, Object> map = contact.getMap();
                 if (map != null && map.containsKey("myidentity")) {
                     userId = contact.getInternalUserId();
                     break;

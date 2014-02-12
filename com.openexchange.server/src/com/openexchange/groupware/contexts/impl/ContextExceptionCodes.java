@@ -51,51 +51,49 @@
 package com.openexchange.groupware.contexts.impl;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * Error codes for context exceptions.
  */
-public enum ContextExceptionCodes implements OXExceptionCode {
+public enum ContextExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Mailadmin for a context is missing.
      */
-    NO_MAILADMIN(ContextExceptionMessage.NO_MAILADMIN_MSG, Category.CATEGORY_CONFIGURATION, 1),
+    NO_MAILADMIN("Cannot resolve mailadmin for context %d.", OXExceptionStrings.MESSAGE, Category.CATEGORY_CONFIGURATION, 1),
     /**
      * Cannot find context %d.
      */
-    NOT_FOUND(ContextExceptionMessage.NOT_FOUND_MSG, Category.CATEGORY_CONFIGURATION, 2),
+    NOT_FOUND("Cannot find context %d.", ContextExceptionMessage.NOT_FOUND_MSG, Category.CATEGORY_CONFIGURATION, 2),
     /**
      * No connection to database.
      */
-    NO_CONNECTION(ContextExceptionMessage.NO_CONNECTION_MSG, Category.CATEGORY_SERVICE_DOWN, 5),
+    NO_CONNECTION("Cannot get connection to database.", ContextExceptionMessage.NO_CONNECTION_TO_CONTEXT_MSG, Category.CATEGORY_SERVICE_DOWN, 5),
     /**
      * SQL problem: %1$s.
      */
-    SQL_ERROR(ContextExceptionMessage.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 6),
+    SQL_ERROR("SQL problem: %1$s.", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 6),
     /**
      * Updating database ... Try again later.
      */
-    UPDATE(ContextExceptionMessage.UPDATE_MSG, Category.CATEGORY_TRY_AGAIN, 7),
-    /**
-     * Problem initializing the cache.
-     */
-    CACHE_INIT(ContextExceptionMessage.CACHE_INIT_MSG, Category.CATEGORY_CONFIGURATION, 8),
-    /**
-     * Cannot remove object %s from cache.
-     */
-    CACHE_REMOVE(ContextExceptionMessage.CACHE_REMOVE_MSG, Category.CATEGORY_ERROR, 9),
+    UPDATE("Updating database ... Try again later.", ContextExceptionMessage.UPDATE_MSG, Category.CATEGORY_TRY_AGAIN, 7),
     /**
      * Cannot find context "%s".
      */
-    NO_MAPPING(ContextExceptionMessage.NO_MAPPING_MSG, Category.CATEGORY_USER_INPUT, 10);
+    NO_MAPPING("Context \"%s\" cannot be found.", ContextExceptionMessage.NO_MAPPING_MSG, Category.CATEGORY_USER_INPUT, 10);
 
     /**
-     * Message of the exception.
+     * (Log) Message of the exception.
      */
     private final String message;
+
+    /**
+     * Display message of the exception.
+     */
+    private final String displayMessage;
 
     /**
      * Category of the exception.
@@ -114,8 +112,9 @@ public enum ContextExceptionCodes implements OXExceptionCode {
      * @param category category.
      * @param number detail number.
      */
-    private ContextExceptionCodes(final String message, final Category category, final int number) {
+    private ContextExceptionCodes(final String message, String displayMessage, final Category category, final int number) {
         this.message = message;
+        this.displayMessage = displayMessage;
         this.category = category;
         this.number = number;
     }
@@ -131,6 +130,11 @@ public enum ContextExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     /**
@@ -183,4 +187,5 @@ public enum ContextExceptionCodes implements OXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
+
 }

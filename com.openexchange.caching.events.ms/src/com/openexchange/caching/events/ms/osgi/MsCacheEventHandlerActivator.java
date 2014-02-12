@@ -49,7 +49,6 @@
 
 package com.openexchange.caching.events.ms.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
@@ -69,7 +68,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class MsCacheEventHandlerActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MsCacheEventHandlerActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MsCacheEventHandlerActivator.class);
 
     /**
      * Initializes a new {@link MsCacheEventHandlerActivator}.
@@ -85,7 +84,7 @@ public final class MsCacheEventHandlerActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("starting bundle: " + context.getBundle().getSymbolicName());
+        LOG.info("starting bundle: {}", context.getBundle().getSymbolicName());
         final BundleContext context = this.context;
         final CacheEventService cacheEventService = getService(CacheEventService.class);
         track(MsService.class, new ServiceTrackerCustomizer<MsService, MsService>() {
@@ -146,7 +145,7 @@ public final class MsCacheEventHandlerActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: " + context.getBundle().getSymbolicName());
+        LOG.info("stopping bundle: {}", context.getBundle().getSymbolicName());
         super.stopBundle();
     }
 

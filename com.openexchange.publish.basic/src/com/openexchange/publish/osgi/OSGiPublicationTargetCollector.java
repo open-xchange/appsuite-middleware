@@ -52,8 +52,6 @@ package com.openexchange.publish.osgi;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -75,7 +73,7 @@ import com.openexchange.publish.tools.PublicationTargetCollector;
  */
 public class OSGiPublicationTargetCollector implements ServiceTrackerCustomizer, PublicationTargetDiscoveryService {
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OSGiPublicationTargetCollector.class));
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OSGiPublicationTargetCollector.class);
 
     private final BundleContext context;
     private final ServiceTracker tracker;
@@ -105,7 +103,7 @@ public class OSGiPublicationTargetCollector implements ServiceTrackerCustomizer,
         try {
             return add(reference);
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return null;
     }
@@ -120,7 +118,7 @@ public class OSGiPublicationTargetCollector implements ServiceTrackerCustomizer,
         try {
             remove(reference, service);
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

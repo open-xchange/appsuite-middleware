@@ -624,6 +624,7 @@ public final class TaskLogic {
         task.setEndDate(newTaskDates[1]);
         task.setStatus(Task.NOT_STARTED);
         task.setPercentComplete(0);
+        task.removeDateCompleted();
         if (task.containsOccurrence()) {
             task.setOccurrence(task.getOccurrence() - 1);
         }

@@ -50,33 +50,51 @@
 package com.openexchange.tools.file.external;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * Error codes for the file storage exception.
  *
  * @author Steffen Templin
  */
-public enum QuotaFileStorageExceptionCodes implements OXExceptionCode {
-    /** Couldn't reach the filestore */
-    INSTANTIATIONERROR(QuotaFileStorageExceptionMessage.INSTANTIATIONERROR_MSG, Category.CATEGORY_SERVICE_DOWN, 21),
-    /** Database Query could not be realized */
-    SQLSTATEMENTERROR(QuotaFileStorageExceptionMessage.SQLSTATEMENTERROR_MSG, Category.CATEGORY_ERROR, 23),
-    /** The allowed Quota is reached. */
-    STORE_FULL(QuotaFileStorageExceptionMessage.STORE_FULL_MSG, Category.CATEGORY_USER_INPUT, 24),
-    /** Quota seems to be inconsistent. Please use consistency tool on context %1$d. */
-    QUOTA_UNDERRUN(QuotaFileStorageExceptionMessage.QUOTA_UNDERRUN_MSG, Category.CATEGORY_TRUNCATED, 25),
-    /** Quota usage is missing for context %1$d. */
-    NO_USAGE(QuotaFileStorageExceptionMessage.NO_USAGE_MSG, Category.CATEGORY_ERROR, 26),
-    /** Update of quota usage for context %1$d failed. */
-    UPDATE_FAILED(QuotaFileStorageExceptionMessage.UPDATE_FAILED_MSG, Category.CATEGORY_ERROR, 27);
+public enum QuotaFileStorageExceptionCodes implements DisplayableOXExceptionCode {
+    /**
+     * Couldn't reach the filestore
+     */
+    INSTANTIATIONERROR("File store could not be accessed.", OXExceptionStrings.MESSAGE, Category.CATEGORY_SERVICE_DOWN, 21),
+    /**
+     * Database Query could not be realized
+     */
+    SQLSTATEMENTERROR("Database query failed.", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 23),
+    /**
+     * The allowed Quota is reached.
+     */
+    STORE_FULL("The allowed Quota is reached.", QuotaFileStorageExceptionMessage.STORE_FULL_MSG, Category.CATEGORY_USER_INPUT, 24),
+    /**
+     * Quota seems to be inconsistent. Please use consistency tool on context %1$d.
+     */
+    QUOTA_UNDERRUN("Quota seems to be inconsistent. Please use consistency tool on context %1$d.", OXExceptionStrings.MESSAGE, Category.CATEGORY_TRUNCATED, 25),
+    /**
+     * Quota usage is missing for context %1$d.
+     */
+    NO_USAGE("Quota usage is missing for context %1$d.", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 26),
+    /**
+     * Update of quota usage for context %1$d failed.
+     */
+    UPDATE_FAILED("Updating quota usage for context %1$d failed.", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 27);
 
     /**
-     * Message of the exception.
+     * (Log-) Message of the exception.
      */
     private final String message;
+
+    /**
+     * (Log-) Message of the exception.
+     */
+    private final String displayMessage;
 
     /**
      * Category of the exception.
@@ -92,11 +110,13 @@ public enum QuotaFileStorageExceptionCodes implements OXExceptionCode {
      * Default constructor.
      *
      * @param message message.
+     * @param displayMessage The display message
      * @param category category.
      * @param detailNumber detail number.
      */
-    private QuotaFileStorageExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private QuotaFileStorageExceptionCodes(final String message, String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
+        this.displayMessage = displayMessage;
         this.category = category;
         this.number = detailNumber;
     }
@@ -119,6 +139,11 @@ public enum QuotaFileStorageExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override
@@ -155,4 +180,5 @@ public enum QuotaFileStorageExceptionCodes implements OXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
+
 }

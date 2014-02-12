@@ -54,8 +54,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -76,7 +74,7 @@ public class CalendarDataObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abs
 
     private PagePartSequence pageParts;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarDataObjectsByHTMLAnchorsAndPagePartSequenceStep.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarDataObjectsByHTMLAnchorsAndPagePartSequenceStep.class);
 
     public CalendarDataObjectsByHTMLAnchorsAndPagePartSequenceStep(String description, PagePartSequence pageParts){
         this.description = description;
@@ -94,14 +92,14 @@ public class CalendarDataObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abs
                 HtmlPage page = link.click();
                 final String pageString = StringEscapeUtils.unescapeHtml(page.getWebResponse().getContentAsString());
                 pageParts.setPage(pageString);
-                LOG.debug("Page evaluated is : "+pageString);
+                LOG.debug("Page evaluated is : {}", pageString);
                 final HashMap<String, String> map = pageParts.retrieveInformation();
 
                 final CalendarDataObject oxEvent = Mappings.translateMapToCalendarDataObject(map);
                 events.add(oxEvent);
 
             } catch (IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
 

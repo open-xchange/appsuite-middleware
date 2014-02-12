@@ -2,18 +2,30 @@ package org.jolokia.backend;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.util.*;
-
-import javax.management.*;
-
+import java.util.ArrayList;
+import java.util.List;
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.JMException;
+import javax.management.MBeanException;
+import javax.management.MBeanRegistration;
+import javax.management.MBeanRegistrationException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
 import org.jolokia.backend.executor.MBeanServerExecutor;
 import org.jolokia.backend.executor.NotChangedException;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.config.Configuration;
-import org.jolokia.detector.*;
+import org.jolokia.detector.AbstractServerDetector;
+import org.jolokia.detector.ServerDetector;
+import org.jolokia.detector.ServerHandle;
 import org.jolokia.handler.JsonRequestHandler;
 import org.jolokia.request.JmxRequest;
-import org.jolokia.util.*;
+import org.jolokia.util.ServiceObjectFactory;
 
 /*
  * Copyright 2009-2013 Roland Huss
@@ -53,33 +65,32 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
     // Handles remembered for unregistering
     private final List<MBeanHandle> mBeanHandles = new ArrayList<MBeanHandle>();
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MBeanServerHandler.class);
+
     /**
      * Create a new MBeanServer handler who is responsible for managing multiple intra VM {@link MBeanServer} at once
      * An optional qualifier used for registering this object as an MBean is taken from the given configuration as well
      *
      * @param pConfig configuration for this agent which is also given to the {@see ServerHandle#postDetect()} method for
      *                special initialization.
-     *
-     * @param pLogHandler log handler used for logging purposes
      */
-    public MBeanServerHandler(Configuration pConfig, LogHandler pLogHandler) {
+    public MBeanServerHandler(Configuration pConfig) {
         // A qualifier, if given, is used to add the MBean Name of this MBean
         qualifier = pConfig.get(ConfigKey.MBEAN_QUALIFIER);
         List<ServerDetector> detectors = lookupDetectors();
         mBeanServerManager = new MBeanServerExecutorLocal(detectors);
-        initServerHandle(pConfig, pLogHandler, detectors);
+        initServerHandle(pConfig, detectors);
         initMBean();
     }
 
     /**
      * Initialize the server handle.
      * @param pConfig configuration passed through to the server detectors
-     * @param pLogHandler used for putting out diagnostic messags
      * @param pDetectors all detectors known
      */
-    private void initServerHandle(Configuration pConfig, LogHandler pLogHandler, List<ServerDetector> pDetectors) {
-        serverHandle = detectServers(pDetectors, pLogHandler);
-        serverHandle.postDetect(mBeanServerManager, pConfig, pLogHandler);
+    private void initServerHandle(Configuration pConfig, List<ServerDetector> pDetectors) {
+        serverHandle = detectServers(pDetectors);
+        serverHandle.postDetect(mBeanServerManager, pConfig);
     }
 
     /**
@@ -221,7 +232,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
 
     // Detect the server by delegating it to a set of predefined detectors. These will be created
     // by a lookup mechanism, queried and thrown away after this method
-    private ServerHandle detectServers(List<ServerDetector> pDetectors, LogHandler pLogHandler) {
+    private ServerHandle detectServers(List<ServerDetector> pDetectors) {
         // Now detect the server
         for (ServerDetector detector : pDetectors) {
             try {
@@ -233,7 +244,7 @@ public class MBeanServerHandler implements MBeanServerHandlerMBean, MBeanRegistr
                 // We are defensive here and wont stop the servlet because
                 // there is a problem with the server detection. A error will be logged
                 // nevertheless, though.
-                pLogHandler.error("Error while using detector " + detector.getClass().getSimpleName() + ": " + exp,exp);
+                LOG.error("Error while using detector {}: {}",detector.getClass().getSimpleName(), exp,exp);
             }
         }
         return null;

@@ -54,8 +54,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link PushRegistryListenerThread}
@@ -67,7 +65,7 @@ public class PushRegistryListenerThread extends Thread {
 
     private static final AtomicInteger instances = new AtomicInteger(0);
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushRegistryListenerThread.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushRegistryListenerThread.class);
 
     private final DatagramSocket datagramSocket;
 
@@ -90,12 +88,12 @@ public class PushRegistryListenerThread extends Thread {
                     final PushRequest serverRegisterRequest = new PushRequest();
                     serverRegisterRequest.init(datagramPacket);
                 } else {
-                    LOG.warn("received empty udp package: " + datagramSocket);
+                    LOG.warn("received empty udp package: {}", datagramSocket);
                 }
             } catch (final SocketException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

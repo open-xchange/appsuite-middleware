@@ -75,7 +75,6 @@ import net.htmlparser.jericho.HTMLElements;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.StartTag;
 import net.htmlparser.jericho.Tag;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.jericho.JerichoHandler;
@@ -88,7 +87,6 @@ import com.openexchange.java.StringAllocator;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link FilterJerichoHandler}
@@ -722,7 +720,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
             builder.setLength(restoreLen);
             builder.append(url);
         } catch (final Exception e) {
-            final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HTMLURLReplacerHandler.class));
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HTMLURLReplacerHandler.class);
             log.warn("URL replacement failed.", e);
             builder.setLength(restoreLen);
             builder.append(url);
@@ -1102,16 +1100,14 @@ public final class FilterJerichoHandler implements JerichoHandler {
      */
     public static void loadWhitelist() {
         synchronized (HTMLFilterHandler.class) {
-            final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FilterJerichoHandler.class));
+            final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FilterJerichoHandler.class);
             if (null == staticHTMLMap) {
                 String mapStr = null;
                 {
                     final ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class);
                     final File whitelist = null == service ? null : service.getFileByName("whitelist.properties");
                     if (null == whitelist) {
-                        if (LOG.isWarnEnabled()) {
-                            LOG.warn("Using default white list");
-                        }
+                        LOG.warn("Using default white list");
                         mapStr = new String(DEFAULT_WHITELIST);
                     } else {
                         BufferedReader reader = null;
@@ -1129,9 +1125,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                             }
                             mapStr = sb.toString();
                         } catch (final Exception e) {
-                            if (LOG.isWarnEnabled()) {
-                                LOG.warn("Using default white list", e);
-                            }
+                            LOG.warn("Using default white list", e);
                             mapStr = new String(DEFAULT_WHITELIST);
                         } finally {
                             Streams.close(reader);

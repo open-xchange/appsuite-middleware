@@ -56,7 +56,6 @@ import java.io.InputStream;
 import java.util.Iterator;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,7 +68,6 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.java.Charsets;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -81,7 +79,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class ConfigMenu extends SessionServlet {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigMenu.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigMenu.class);
 
     /**
      * Size for the read buffer.
@@ -111,7 +109,7 @@ public class ConfigMenu extends SessionServlet {
             response.setException(e);
         } catch (final JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error(oje.getMessage(), oje);
+            LOG.error("", oje);
             response.setException(oje);
         }
         resp.setStatus(HttpServletResponse.SC_OK);
@@ -206,7 +204,7 @@ public class ConfigMenu extends SessionServlet {
             response.setException(e);
         } catch (final JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error(oje.getMessage(), oje);
+            LOG.error("", oje);
             response.setException(oje);
         }
         try {

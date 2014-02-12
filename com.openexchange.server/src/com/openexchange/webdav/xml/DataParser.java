@@ -52,11 +52,9 @@ package com.openexchange.webdav.xml;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import com.openexchange.groupware.container.DataObject;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.xml.fields.DataFields;
 
@@ -99,7 +97,7 @@ public class DataParser {
 
     private int inFolder;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DataParser.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DataParser.class);
 
     protected void parseElement(final DataObject dataobject, final XmlPullParser parser) throws XmlPullParserException, IOException {
         if (isTag(parser, DataFields.OBJECT_ID, XmlServlet.NAMESPACE)) {
@@ -122,9 +120,7 @@ public class DataParser {
                 }
             }
         } else {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("unknown xml tag: " + parser.getName());
-            }
+            LOG.trace("unknown xml tag: {}", parser.getName());
             getValue(parser);
         }
     }
@@ -169,9 +165,7 @@ public class DataParser {
             try {
                 return Integer.parseInt(s);
             } catch (final NumberFormatException e) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("Value is not a number: " + s, e);
-                }
+                LOG.warn("Value is not a number: {}", s, e);
             }
         }
         return 0;

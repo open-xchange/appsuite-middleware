@@ -69,8 +69,8 @@ import com.openexchange.session.Session;
  */
 public final class SmalProvider extends AllMailProvider {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SmalProvider.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(SmalProvider.class);
 
     /**
      * SMAL protocol.
@@ -131,7 +131,7 @@ public final class SmalProvider extends AllMailProvider {
         try {
             return SmalMailProviderRegistry.getMailProviderBySession(session, accountId).createNewMailPermission(session, accountId);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return new DefaultMailPermission();
         }
     }

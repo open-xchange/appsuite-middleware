@@ -50,7 +50,6 @@
 
 package com.openexchange.spamsettings.generic.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.osgi.DeferredActivator;
@@ -63,7 +62,7 @@ import com.openexchange.spamsettings.generic.service.SpamSettingService;
  */
 public class ServletActivator extends DeferredActivator {
 
-    private static transient final Log LOG = com.openexchange.log.Log.loggerFor(ServletActivator.class);
+    private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServletActivator.class);
 
     private SpamSettingsServletRegisterer servletRegisterer;
 
@@ -78,9 +77,7 @@ public class ServletActivator extends DeferredActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
 
         SpamSettingsServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
         servletRegisterer.registerServlet();
@@ -89,9 +86,7 @@ public class ServletActivator extends DeferredActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         servletRegisterer.unregisterServlet();
         SpamSettingsModulePreferences.setModule(false);
         SpamSettingsServiceRegistry.getServiceRegistry().removeService(clazz);

@@ -49,7 +49,6 @@
 
 package com.openexchange.documentation.internal;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.documentation.AnnotatedServices;
 import com.openexchange.documentation.DescriptionFactory;
 import com.openexchange.documentation.descriptions.ModuleDescription;
@@ -62,7 +61,7 @@ import com.openexchange.exception.OXException;
  */
 public class DocumentationProcessor {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DocumentationProcessor.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DocumentationProcessor.class);
 
 	private final DefaultDocumentationRegistry registry;
 	private final DescriptionFactory factory;
@@ -116,7 +115,7 @@ public class DocumentationProcessor {
         } else if (ModuleDescription.class.isInstance(service)) {
             this.remove(((ModuleDescription)service));
         } else {
-            LOG.warn("Unable to get extract documentation from " + service);
+            LOG.warn("Unable to get extract documentation from {}", service);
         }
 	}
 

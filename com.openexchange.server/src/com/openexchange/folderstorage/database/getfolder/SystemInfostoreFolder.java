@@ -60,8 +60,8 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.database.AltNameLocalizedDatabaseFolder;
 import com.openexchange.folderstorage.database.DatabaseFolder;
-import com.openexchange.folderstorage.database.LocalizedDatabaseFolder;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -101,7 +101,7 @@ public final class SystemInfostoreFolder {
         /*
          * The system infostore folder
          */
-        final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
+        final DatabaseFolder retval = new AltNameLocalizedDatabaseFolder(fo, FolderStrings.SYSTEM_FILES_FOLDER_NAME);
         retval.setName(altNames ? FolderStrings.SYSTEM_FILES_FOLDER_NAME : FolderStrings.SYSTEM_INFOSTORE_FOLDER_NAME);
         retval.setContentType(InfostoreContentType.getInstance());
         // Enforce getSubfolders() on storage
@@ -231,7 +231,7 @@ public final class SystemInfostoreFolder {
             }
             return b.booleanValue();
         } catch (final OXException e) {
-            com.openexchange.log.Log.loggerFor(SystemInfostoreFolder.class).warn(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(SystemInfostoreFolder.class).warn("", e);
             return false;
         }
     }
@@ -251,7 +251,7 @@ public final class SystemInfostoreFolder {
             }
             return id;
         } catch (final OXException e) {
-            com.openexchange.log.Log.loggerFor(SystemInfostoreFolder.class).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(SystemInfostoreFolder.class).error("", e);
             return -1;
         }
     }

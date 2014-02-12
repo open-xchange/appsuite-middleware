@@ -66,7 +66,8 @@ public class LocalizedDatabaseFolder extends DatabaseFolder {
 
     private static final long serialVersionUID = 3830248343115931304L;
 
-    private ConcurrentMap<Locale, String> localizedNames;
+    /** Cache for already translated names */
+    protected ConcurrentMap<Locale, String> localizedNames;
 
     /**
      * Initializes a new cacheable {@link LocalizedDatabaseFolder} from given database folder.
@@ -114,14 +115,24 @@ public class LocalizedDatabaseFolder extends DatabaseFolder {
 
     @Override
     public String getLocalizedName(final Locale locale) {
+        return translationFor(getName(), locale);
+    }
+
+    /**
+     * Gets the translation for specified name.
+     *
+     * @param toTranslate The name to translate
+     * @param locale The locale
+     * @return The translation or specified name
+     */
+    protected String translationFor(final String toTranslate, final Locale locale) {
         final Locale loc = null == locale ? LocaleTools.DEFAULT_LOCALE : locale;
         String translation = localizedNames.get(loc);
         if (null == translation) {
-            final String fname = getName();
-            if (null == fname) {
+            if (null == toTranslate) {
                 return null;
             }
-            final String ntranslation = StringHelper.valueOf(loc).getString(fname);
+            final String ntranslation = StringHelper.valueOf(loc).getString(toTranslate);
             translation = localizedNames.putIfAbsent(loc, ntranslation);
             if (null == translation) {
                 translation = ntranslation;

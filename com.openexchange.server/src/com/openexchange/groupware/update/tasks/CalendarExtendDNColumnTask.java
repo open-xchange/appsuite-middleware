@@ -69,7 +69,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public class CalendarExtendDNColumnTask implements UpdateTask {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CalendarExtendDNColumnTask.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarExtendDNColumnTask.class);
 
     /**
      * Desired size for display name taken from ContactsFieldSizeUpdateTask.
@@ -91,22 +91,16 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
 
     @Override
     public void perform(final Schema schema, final int contextId) throws OXException {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Starting " + CalendarExtendDNColumnTask.class.getSimpleName());
-        }
+        LOG.info("Starting {}", CalendarExtendDNColumnTask.class.getSimpleName());
         modifyColumnInTable("prg_date_rights", contextId);
         modifyColumnInTable("del_date_rights", contextId);
-        if (LOG.isInfoEnabled()) {
-            LOG.info(CalendarExtendDNColumnTask.class.getSimpleName() + " finished.");
-        }
+        LOG.info("{} finished.", CalendarExtendDNColumnTask.class.getSimpleName());
     }
 
     private static final String SQL_MODIFY = "ALTER TABLE #TABLE# MODIFY dn varchar(" + DESIRED_SIZE + ") collate utf8_unicode_ci default NULL";
 
     private void modifyColumnInTable(final String tableName, final int contextId) throws OXException {
-        if (LOG.isInfoEnabled()) {
-            LOG.info(CalendarExtendDNColumnTask.class.getSimpleName() + ": Going to extend size of column `dn` in table `" + tableName + "`.");
-        }
+        LOG.info("{}: Going to extend size of column `dn` in table `{}`.", CalendarExtendDNColumnTask.class.getSimpleName(), tableName);
         final Connection con = Database.getNoTimeout(contextId, true);
         try {
             // Check if size needs to be increased
@@ -121,7 +115,7 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
                         // A column whose VARCHAR size shall possibly be changed
                         final int size = rs.getInt("COLUMN_SIZE");
                         if (size >= DESIRED_SIZE) {
-                            LOG.info(CalendarExtendDNColumnTask.class.getSimpleName() + ": Column " + tableName + '.' + name + " with size " + size + " is already equal to/greater than " + DESIRED_SIZE);
+                            LOG.info("{}: Column {}.{} with size {} is already equal to/greater than {}", CalendarExtendDNColumnTask.class.getSimpleName(), tableName, name, size, DESIRED_SIZE);
                             return;
                         }
                     }
@@ -145,9 +139,7 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
         } finally {
             Database.backNoTimeout(contextId, true, con);
         }
-        if (LOG.isInfoEnabled()) {
-            LOG.info(CalendarExtendDNColumnTask.class.getSimpleName() + ": Size of column `dn` in table `" + tableName + "` successfully extended.");
-        }
+        LOG.info("{}: Size of column `dn` in table `{}` successfully extended.", CalendarExtendDNColumnTask.class.getSimpleName(), tableName);
     }
 
     private static OXException wrapSQLException(final SQLException e) {

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Client stub for Microsoft Exchange Web Services
 Bundle-SymbolicName: com.openexchange.ews
-Bundle-Version: 7.4.1
+Bundle-Version: 7.4.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.microsoft.schemas.exchange.services._2006.messages,
@@ -14,9 +14,10 @@ Import-Package: com.openexchange.exception,
  com.openexchange.osgi,
  com.openexchange.tools.ssl,
  javax.net.ssl,
- javax.xml.ws,
  javax.xml.namespace,
+ javax.xml.ws,
  org.apache.commons.codec,
  org.apache.commons.logging,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j
 Bundle-Activator: com.openexchange.ews.osgi.EWSActivator

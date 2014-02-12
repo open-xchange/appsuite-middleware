@@ -51,7 +51,6 @@ package com.openexchange.realtime.presence.publish;
 
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.directory.ChangeListener;
 import com.openexchange.realtime.directory.Resource;
@@ -65,12 +64,12 @@ import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 
 /**
  * {@link PresencePublisher} - Listen for Presence changes in the ResourceDirectory and publish these.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class PresencePublisher implements ChangeListener {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(PresencePublisher.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PresencePublisher.class);
 
     private ResourceDirectory resourceDirectory;
 
@@ -80,7 +79,7 @@ public class PresencePublisher implements ChangeListener {
 
     /**
      * Initializes a new {@link PresencePublisher}.
-     * 
+     *
      * @param resourceDirectory
      */
     public PresencePublisher(ResourceDirectory resourceDirectory) {
@@ -91,7 +90,7 @@ public class PresencePublisher implements ChangeListener {
 
     /**
      * Sets the ResourceDirectory to given value/reference.
-     * 
+     *
      * @param resourceDirectory The ResourceDirectory
      * @throws OXException
      */
@@ -108,9 +107,7 @@ public class PresencePublisher implements ChangeListener {
      */
     @Override
     public void added(ID id, Resource resource) {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug(String.format("Added: %1$s - %2$s", id, resource.getPresence()));
-        }
+        LOG.debug("Added: {} - {}", id, resource.getPresence());
         if (hasPresence(resource)) {
             // TODO: restore from expirer list if present
             Presence presence = resource.getPresence();
@@ -139,25 +136,21 @@ public class PresencePublisher implements ChangeListener {
     @Override
     public void updated(ID id, Resource currentResource, Resource previousResource) {
         if (hasPresence(currentResource)) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Resource has Presence");
-            }
+            LOG.debug("Resource has Presence");
             Presence currentPresence = currentResource.getPresence();
             if (!currentPresence.equals(previousResource.getPresence())) {
                 try {
                     PresenceSubscriptionService presenceSubscriptionService = getPresenceSubscriptionService();
                     List<ID> subscribers = presenceSubscriptionService.getSubscribers(currentPresence.getFrom());
                     if (!subscribers.isEmpty()) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Pushing Presence to " + subscribers.size() + "subscriber(s)");
-                        }
+                        LOG.debug("Pushing Presence to {}subscriber(s)", subscribers.size());
                         MessageDispatcher messageDispatcher = getMessageDispatcher();
                         for (ID subscriber : subscribers) {
                             Presence directedPresence = new Presence(currentPresence);
                             directedPresence.setTo(subscriber);
                             Map<ID, OXException> failures = messageDispatcher.send(directedPresence);
                             for (OXException oxe : failures.values()) {
-                                LOG.error(oxe);
+                                LOG.error(oxe.toString(), oxe);
                             }
                         }
                     }
@@ -165,22 +158,16 @@ public class PresencePublisher implements ChangeListener {
                     LOG.error("Couldn't send Presence", e);
                 }
             } else {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Resource's Presence didn't differ from previous");
-                }
+                LOG.debug("Resource's Presence didn't differ from previous");
             }
         } else {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Resource didn't carry Presence");
-            }
+            LOG.debug("Resource didn't carry Presence");
         }
     }
 
     @Override
     public void removed(ID id, Resource resource) {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug(String.format("Removed: %1$s - %2$s", id, resource.getPresence()));
-        }
+        LOG.debug("Removed: {} - {}", id, resource.getPresence());
 
         /*
          * Check if Resource contains Presence. Check if id is still registered in directory. If no longer registered - if Presence was

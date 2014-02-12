@@ -62,7 +62,6 @@ import javax.mail.Part;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
-import org.apache.commons.logging.Log;
 import com.openexchange.calendar.itip.generators.AttachmentMemory;
 import com.openexchange.calendar.itip.generators.NotificationConfiguration;
 import com.openexchange.calendar.itip.generators.NotificationMail;
@@ -88,7 +87,6 @@ import com.openexchange.groupware.userconfiguration.CapabilityUserConfigurationS
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.html.HtmlService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -110,19 +108,19 @@ import com.openexchange.user.UserService;
  */
 public class DefaultMailSenderService implements MailSenderService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DefaultMailSenderService.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultMailSenderService.class);
 
     private final ITipEmitter iTipEmitter;
 
     private final HtmlService htmlService;
 
-	private final AttachmentBase attachments;
+    private final AttachmentBase attachments;
 
-	private final ContextService contexts;
+    private final ContextService contexts;
 
-	private final UserService users;
+    private final UserService users;
 
-	private final UserConfigurationStorage userConfigurations;
+    private final UserConfigurationStorage userConfigurations;
 
     public DefaultMailSenderService(final ITipEmitter iTipEmitter, final HtmlService htmlService, AttachmentBase attachments, ContextService contexts, UserService users, UserConfigurationStorage userConfigs, AttachmentMemory attachmentMemory) {
         this.iTipEmitter = iTipEmitter;
@@ -151,16 +149,15 @@ public class DefaultMailSenderService implements MailSenderService {
             final String sType = type != null ? type.toString() : null;
             message = new MailObject(session, appointmentId, folderId, Types.APPOINTMENT, sType);
         }
-        message.setInternalRecipient(!mail.getRecipient().isExternal() && !mail.getRecipient().isResource());
-
-        message.setFromAddr(getSenderAddress(mail.getSender(), session));
-        message.addToAddr(getAddress(mail.getRecipient()));
-        message.setSubject(mail.getSubject());
-        message.setUid(app.getUid());
-        if (app.containsRecurrenceDatePosition()) {
-        	message.setRecurrenceDatePosition(app.getRecurrenceDatePosition().getTime());
-        }
         try {
+            message.setInternalRecipient(!mail.getRecipient().isExternal() && !mail.getRecipient().isResource());
+            message.setFromAddr(getSenderAddress(mail.getSender(), session));
+            message.addToAddr(getAddress(mail.getRecipient()));
+            message.setSubject(mail.getSubject());
+            message.setUid(app.getUid());
+            if (app.containsRecurrenceDatePosition()) {
+                message.setRecurrenceDatePosition(app.getRecurrenceDatePosition().getTime());
+            }
             addBody(mail, message, session);
             message.send();
         } catch (OXException e) {
@@ -176,8 +173,9 @@ public class DefaultMailSenderService implements MailSenderService {
     /**
      * @param message
      * @param sender
+     * @throws OXException
      */
-    private String getSenderAddress(NotificationParticipant sender, Session session) {
+    private String getSenderAddress(NotificationParticipant sender, Session session) throws OXException {
         if (sender.getUser() == null || sender.getUser().getId() != session.getUserId()) {
             return getAddress(sender);
         }
@@ -196,11 +194,11 @@ public class DefaultMailSenderService implements MailSenderService {
             try {
                 fromAddr = getUserSettingMail(session.getUserId(), serverSession.getContext()).getSendAddr();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
-                fromAddr = UserStorage.getStorageUser(session.getUserId(), serverSession.getContext()).getMail();
+                LOG.error("", e);
+                fromAddr = UserStorage.getInstance().getUser(session.getUserId(), serverSession.getContext()).getMail();
             }
         } else {
-            fromAddr = UserStorage.getStorageUser(session.getUserId(), serverSession.getContext()).getMail();
+            fromAddr = UserStorage.getInstance().getUser(session.getUserId(), serverSession.getContext()).getMail();
         }
 
         sender.setEmail(fromAddr);
@@ -333,9 +331,9 @@ public class DefaultMailSenderService implements MailSenderService {
 				multipart.addBodyPart(bodyPart);
 			}
 		} catch (IOException x) {
-			LOG.error(x.getMessage(), x);
+			LOG.error("", x);
 		} catch (MessagingException x) {
-			LOG.error(x.getMessage(), x);
+			LOG.error("", x);
 		}
 	}
 

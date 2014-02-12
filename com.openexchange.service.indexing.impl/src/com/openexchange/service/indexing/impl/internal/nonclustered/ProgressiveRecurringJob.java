@@ -52,7 +52,6 @@ package com.openexchange.service.indexing.impl.internal.nonclustered;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
-import org.apache.commons.logging.Log;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobDetail;
@@ -105,8 +104,8 @@ import com.openexchange.solr.SolrCoreIdentifier;
  */
 @DisallowConcurrentExecution
 public class ProgressiveRecurringJob implements Job {
-    
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ProgressiveRecurringJob.class);
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ProgressiveRecurringJob.class);
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -119,50 +118,46 @@ public class ProgressiveRecurringJob implements Job {
              */
             LOG.info("JobInfoWrapper was null. Exiting...");
             return;
-        } else {
-            long jobTimeout = infoWrapper.getJobTimeout();
-            long lastUpdate = infoWrapper.getLastUpdate();
-            if (System.currentTimeMillis() > (lastUpdate + jobTimeout)) {
-                LOG.info("Recurring job will be removed because of timeout: " + infoWrapper.getJobInfo().toString());
-                return;
-            }
-            
-            long interval = infoWrapper.getInterval();
-            if (interval <= 0) {
-                LOG.error("Interval was < 0. Exiting...");
-            }
-            
-            /*
-             * TODO: Maybe implement some intelligent error handling.
-             * Could be something like "if this job fails for the third time in succession
-             * and was not updated since X, then remove it...".
-             */
-            try {
-                if (perform(context, infoWrapper) && isProgressive(infoWrapper)) {
-                    long newInterval = infoWrapper.increaseInterval();
-                    infoWrapper.updateLastRun();
-                    long nextStartTime = infoWrapper.getLastRun() + newInterval;
-                    Trigger trigger = context.getTrigger();
-                    TriggerBuilder<? extends Trigger> triggerBuilder = trigger.getTriggerBuilder();
-                    triggerBuilder.startAt(new Date(nextStartTime));
-                    try {
-                        Scheduler scheduler = context.getScheduler();
-                        scheduler.rescheduleJob(trigger.getKey(), triggerBuilder.build());
-                        RecurringJobsManager.addOrUpdateJob(jobId, infoWrapper);
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Job was re-scheduled: " + infoWrapper.getJobInfo().toString() + ", nextStartTime: " +
-                                nextStartTime + ", newInterval: " + newInterval);
-                        }
-                    } catch (SchedulerException e) {
-                        LOG.error("Could not re-schedule job: " + infoWrapper.getJobInfo().toString(), e);
-                    }
+        }
+        long jobTimeout = infoWrapper.getJobTimeout();
+        long lastUpdate = infoWrapper.getLastUpdate();
+        if (System.currentTimeMillis() > (lastUpdate + jobTimeout)) {
+            LOG.info("Recurring job will be removed because of timeout: {}", infoWrapper.getJobInfo());
+            return;
+        }
+
+        long interval = infoWrapper.getInterval();
+        if (interval <= 0) {
+            LOG.error("Interval was < 0. Exiting...");
+        }
+
+        /*
+         * TODO: Maybe implement some intelligent error handling.
+         * Could be something like "if this job fails for the third time in succession
+         * and was not updated since X, then remove it...".
+         */
+        try {
+            if (perform(context, infoWrapper) && isProgressive(infoWrapper)) {
+                long newInterval = infoWrapper.increaseInterval();
+                infoWrapper.updateLastRun();
+                long nextStartTime = infoWrapper.getLastRun() + newInterval;
+                Trigger trigger = context.getTrigger();
+                TriggerBuilder<? extends Trigger> triggerBuilder = trigger.getTriggerBuilder();
+                triggerBuilder.startAt(new Date(nextStartTime));
+                try {
+                    Scheduler scheduler = context.getScheduler();
+                    scheduler.rescheduleJob(trigger.getKey(), triggerBuilder.build());
+                    RecurringJobsManager.addOrUpdateJob(jobId, infoWrapper);
+                    LOG.debug("Job was re-scheduled: {}, nextStartTime: {}, newInterval: {}", infoWrapper.getJobInfo(), nextStartTime, newInterval);
+                } catch (SchedulerException e) {
+                    LOG.error("Could not re-schedule job: {}", infoWrapper.getJobInfo(), e);
                 }
-            } catch (OXException e) {
-                LOG.error("Error during job execution.", e);
             }
+        } catch (OXException e) {
+            LOG.error("Error during job execution.", e);
         }
     }
-    
+
     protected boolean perform(JobExecutionContext context, JobInfoWrapper infoWrapper) throws OXException {
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         JobInfo jobInfo = infoWrapper.getJobInfo();
@@ -172,21 +167,19 @@ public class ProgressiveRecurringJob implements Job {
             LOG.error("Could not find a member for execution.");
             return false;
         }
-        
+
         if (executor.equals(hazelcast.getCluster().getLocalMember())) {
             if (!isExecutionAllowed(jobInfo)) {
-                LOG.info("Execution of job " + jobInfo.toString() + " was not allowed. Skipping...");
+                LOG.info("Execution of job {} was not allowed. Skipping...", jobInfo);
                 return false;
             }
-            
+
             executeJob(jobInfo);
             return true;
         }
-        
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Rescheduling job " + jobInfo.toString() + " at member " + executor.toString() + ".");
-        }
-        
+
+        LOG.debug("Rescheduling job {} at member {}.", jobInfo, executor);
+
         FutureTask<Object> task = new DistributedTask<Object>(new ScheduleProgressiveRecurringJobCallable(jobInfo, trigger.getPriority()), executor);
         ExecutorService executorService = hazelcast.getExecutorService();
         executorService.submit(task);
@@ -197,7 +190,7 @@ public class ProgressiveRecurringJob implements Job {
         }
         return false;
     }
-    
+
     private boolean isExecutionAllowed(JobInfo jobInfo) throws OXException {
         ConfigViewFactory config = Services.getService(ConfigViewFactory.class);
         ConfigView view = config.getView(jobInfo.userId, jobInfo.contextId);
@@ -206,7 +199,7 @@ public class ProgressiveRecurringJob implements Job {
         if (!modules.containsModule(jobInfo.getModule())) {
             if (LOG.isDebugEnabled()) {
                 OXException e = IndexExceptionCodes.INDEXING_NOT_ENABLED.create(jobInfo.getModule(), jobInfo.userId, jobInfo.contextId);
-                LOG.debug("Skipping job execution because: " + e.getMessage());
+                LOG.debug("Skipping job execution.", e);
             }
 
             return false;
@@ -214,19 +207,17 @@ public class ProgressiveRecurringJob implements Job {
 
         IndexManagementService managementService = Services.getService(IndexManagementService.class);
         if (managementService.isLocked(jobInfo.contextId, jobInfo.userId, jobInfo.getModule())) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Skipping job execution because corresponding index is locked. " + jobInfo.toString());
-            }
+            LOG.debug("Skipping job execution because corresponding index is locked. {}", jobInfo);
 
             return false;
         }
-        
+
         return true;
     }
-    
+
     private Member chooseExecutor(HazelcastInstance hazelcast, JobInfo jobInfo) throws OXException {
         SolrCoreIdentifier identifier = new SolrCoreIdentifier(jobInfo.contextId, jobInfo.userId, jobInfo.getModule());
-        
+
         // FIXME: This core handling stuff has to be centralized and hidden by a transparent layer.
         IMap<String, String> solrCores = hazelcast.getMap("solrCoreMap");
         String owner = solrCores.get(identifier.toString());
@@ -234,7 +225,7 @@ public class ProgressiveRecurringJob implements Job {
             startUpIndex(jobInfo);
             owner = solrCores.get(identifier.toString());
         }
-        
+
         if (owner == null) {
             LOG.error("Did not find a node holding this index.");
             return null;
@@ -246,10 +237,10 @@ public class ProgressiveRecurringJob implements Job {
                 break;
             }
         }
-        
+
         return executor;
     }
-    
+
     private void executeJob(JobInfo jobInfo) {
         Class<? extends IndexingJob> jobClass = jobInfo.jobClass;
         if (jobClass == null) {
@@ -268,9 +259,7 @@ public class ProgressiveRecurringJob implements Job {
         }
 
         try {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Executing job " + jobInfo.toString());
-            }
+            LOG.debug("Executing job {}", jobInfo);
             indexingJob.execute(jobInfo);
         } catch (Throwable t) {
             String msg = "Error during IndexingJob execution. " + jobInfo.toString();
@@ -287,7 +276,7 @@ public class ProgressiveRecurringJob implements Job {
         indexAccess.query(queryParameters, null);
         indexFacade.releaseIndexAccess(indexAccess);
     }
-    
+
     private boolean isProgressive(JobInfoWrapper infoWrapper) {
         return infoWrapper.getInterval() > 0 && infoWrapper.getProgressionRate() > 0;
     }

@@ -131,10 +131,11 @@ public class PushMsInit {
                 }
             }
         }
+        DelayPushQueue delayPushQueue = this.delayPushQueue;
         if (delayPushQueue == null) {
             synchronized (this) {
                 delayPushQueue = this.delayPushQueue;
-                if(delayPushQueue == null) {
+                if (delayPushQueue == null) {
                     ConfigurationService configService = Services.getService(ConfigurationService.class);
                     if (null == configService) {
                         throw MsExceptionCodes.ILLEGAL_STATE.create("Missing service: " + ConfigurationService.class.getName());
@@ -142,6 +143,7 @@ public class PushMsInit {
                     int delayDuration = configService.getIntProperty("com.openexchange.push.ms.delayDuration", 120000);
                     int maxDelays = configService.getIntProperty("com.openexchange.push.ms.maxDelayDuration", 600000);
                     delayPushQueue = new DelayPushQueue(publishTopic, delayDuration, maxDelays);
+                    this.delayPushQueue = delayPushQueue;
                 }
             }
         }
@@ -165,6 +167,7 @@ public class PushMsInit {
                 }
             }
         }
+        DelayPushQueue delayPushQueue = this.delayPushQueue;
         if (delayPushQueue != null) {
             synchronized (this) {
                 delayPushQueue = this.delayPushQueue;

@@ -56,37 +56,25 @@ import com.openexchange.session.Session;
 
 /**
  * {@link MailNotifyPushManagerService} - The {@link PushManagerService} for primary mail account.
- *
  */
 public final class MailNotifyPushManagerService implements PushManagerService {
 
     private final String name;
-
-    private final boolean useOXLogin;
-
-    private final boolean useEmailAddress;
+    private final MailNotifyPushListenerRegistry registry;
 
     /**
      * Initializes a new {@link MailNotifyPushManagerService}.
      */
-    public MailNotifyPushManagerService(final boolean useOXLogin, final boolean useEmailAddress) {
+    public MailNotifyPushManagerService(final MailNotifyPushListenerRegistry registry) {
         super();
         name = "Mail Push Manager";
-
-        this.useOXLogin = useOXLogin;
-        this.useEmailAddress = useEmailAddress;
+        this.registry = registry;
     }
 
     @Override
     public PushListener startListener(final Session session) throws OXException {
         final MailNotifyPushListener pushListener = MailNotifyPushListener.newInstance(session);
-        MailNotifyPushListenerRegistry listener = MailNotifyPushListenerRegistry.getInstance();
-        listener.setUseEmailAddress(useEmailAddress);
-        listener.setUseOXLogin(useOXLogin);
-        if (listener.addPushListener(
-            session.getContextId(),
-            session.getUserId(),
-            pushListener)) {
+        if (registry.addPushListener(session.getContextId(), session.getUserId(), pushListener)) {
             pushListener.open();
             return pushListener;
         }
@@ -95,9 +83,7 @@ public final class MailNotifyPushManagerService implements PushManagerService {
 
     @Override
     public boolean stopListener(final Session session) throws OXException {
-        return MailNotifyPushListenerRegistry.getInstance().removePushListener(
-            session.getContextId(),
-            session.getUserId());
+        return registry.removePushListener(session.getContextId(), session.getUserId());
     }
 
     @Override

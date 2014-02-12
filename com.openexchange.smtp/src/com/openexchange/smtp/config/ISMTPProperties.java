@@ -75,6 +75,13 @@ public interface ISMTPProperties extends ITransportProperties {
     public boolean isSmtpEnvelopeFrom();
 
     /**
+     * Gets the logTransport flag
+     *
+     * @return the logTransport flag
+     */
+    public boolean isLogTransport();
+
+    /**
      * Gets the smtpAuthEnc
      *
      * @return the smtpAuthEnc

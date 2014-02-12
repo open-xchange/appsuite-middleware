@@ -50,28 +50,29 @@
 package com.openexchange.conversion.servlet;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
-public enum ConversionServletExceptionCode implements OXExceptionCode {
+public enum ConversionServletExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * A JSON error occurred: %1$s
      */
-    JSON_ERROR(ConversionServletExceptionMessage.JSON_ERROR_MSG, Category.CATEGORY_ERROR, 1),
+    JSON_ERROR("A JSON error occurred: %1$s", Category.CATEGORY_ERROR, 1),
     /**
      * Missing parameter %1$s
      */
-    MISSING_PARAM(ConversionServletExceptionMessage.MISSING_PARAM_MSG, Category.CATEGORY_ERROR, 2),
+    MISSING_PARAM("Missing parameter %1$s", Category.CATEGORY_ERROR, 2),
     /**
      * Unsupported value in parameter %1$s: %2$s
      */
-    UNSUPPORTED_PARAM(ConversionServletExceptionMessage.UNSUPPORTED_PARAM_MSG, Category.CATEGORY_ERROR, 3),
+    UNSUPPORTED_PARAM("Unsupported value in parameter %1$s: %2$s", Category.CATEGORY_ERROR, 3),
     /**
      * Unsupported method %1$s
      */
-    UNSUPPORTED_METHOD(ConversionServletExceptionMessage.UNSUPPORTED_METHOD_MSG, Category.CATEGORY_ERROR, 4);
+    UNSUPPORTED_METHOD("Unsupported method %1$s", Category.CATEGORY_ERROR, 4);
 
     private final String message;
 
@@ -138,5 +139,10 @@ public enum ConversionServletExceptionCode implements OXExceptionCode {
      */
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return OXExceptionStrings.MESSAGE;
     }
 }

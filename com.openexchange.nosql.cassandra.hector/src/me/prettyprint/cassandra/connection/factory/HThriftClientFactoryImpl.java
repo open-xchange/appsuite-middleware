@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HThriftClientFactoryImpl implements HClientFactory {
 
-  private static final Logger log = LoggerFactory.getLogger(HThriftClientFactoryImpl.class);
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(HThriftClientFactoryImpl.class);
   private TSSLTransportParameters params;
 
   /**
@@ -35,7 +35,7 @@ public class HThriftClientFactoryImpl implements HClientFactory {
         log.debug("  ssl.protocol = {}", System.getProperty("ssl.protocol"));
         log.debug("  ssl.store.type = {}", System.getProperty("ssl.store.type"));
         log.debug("  ssl.cipher.suites = {}", System.getProperty("ssl.cipher.suites"));
-        log.debug("Creation of new client for host: " + ch.getIp());
+        log.debug("Creation of new client for host: {}", ch.getIp());
       }
     }
 

@@ -51,7 +51,6 @@ package com.openexchange.groupware.settings.extensions.osgi;
 
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -71,7 +70,6 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.extensions.ServicePublisher;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.strings.StringParser;
@@ -81,7 +79,7 @@ import com.openexchange.tools.strings.StringParser;
  */
 public class Activator extends HousekeepingActivator {
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
     private static final String PREFERENCE_PATH = "preferencePath";
 
@@ -129,7 +127,7 @@ public class Activator extends HousekeepingActivator {
                 }
             }
         } catch (final Throwable x) {
-            LOG.error(x.getMessage(), x);
+            LOG.error("", x);
         }
 
 
@@ -190,7 +188,7 @@ public class Activator extends HousekeepingActivator {
                             final String isProtected = property.get("protected");
                             return (finalScope == null || finalScope.equals("user")) && (isProtected == null || ! property.get("protected", boolean.class).booleanValue());
                         } catch (final OXException x) {
-                            LOG.error(x.getMessage(), x);
+                            LOG.error("", x);
                             return false;
                         }
                     }

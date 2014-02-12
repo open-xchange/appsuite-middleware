@@ -55,7 +55,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.RemoteException;
 import java.util.Arrays;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -68,7 +67,6 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
-import com.openexchange.log.LogFactory;
 
 /**
  * Implementation class for the RMI interface for util
@@ -78,7 +76,7 @@ import com.openexchange.log.LogFactory;
  */
 public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
-    private final static Log log = LogFactory.getLog(OXUtil.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXUtil.class);
 
     private final BasicAuthenticator basicauth;
 
@@ -102,7 +100,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         basicauth.doAuthentication(auth);
 
-        log.debug(fstore.getUrl() + " - " + fstore.getSize());
+        log.debug("{} - {}", fstore.getUrl(), fstore.getSize());
 
         if (!checkValidStoreURI(fstore.getUrl())) {
             throw new InvalidDataException("Invalid url sent");
@@ -143,7 +141,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         }
 
         final int response = oxutil.registerFilestore(fstore);
-        log.debug("RESPONSE " + response);
+        log.debug("RESPONSE {}", response);
         return new Filestore(response);
 
     }
@@ -159,7 +157,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         }
         basicauth.doAuthentication(auth);
 
-        log.debug(fstore.getUrl() + " " + fstore.getMaxContexts() + " " + fstore.getSize() + " " + fstore.getId());
+        log.debug("{} {} {} {}", fstore.getUrl(), fstore.getMaxContexts(), fstore.getSize(), fstore.getId());
 
         if (null != fstore.getUrl() && !checkValidStoreURI(fstore.getUrl())) {
             throw new InvalidDataException("Invalid store url " + fstore.getUrl());
@@ -212,7 +210,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         basicauth.doAuthentication(auth);
 
-        log.debug(store);
+        log.debug(store.toString());
 
         if (!tool.existsStore(store.getId())) {
             throw new InvalidDataException("No such store");
@@ -236,7 +234,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         }
         basicauth.doAuthentication(auth);
 
-        log.debug(reason);
+        log.debug(reason.toString());
 
         if (reason.getText() == null || reason.getText().trim().length() == 0) {
             throw new InvalidDataException("Invalid reason text!");
@@ -261,7 +259,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             doNullCheck(search_pattern);
         } catch (final InvalidDataException e) {
             final InvalidDataException invalidDataException = new InvalidDataException("The search_pattern is null");
-            log.error(invalidDataException.getMessage(), invalidDataException);
+            log.error("", invalidDataException);
             throw invalidDataException;
         }
 
@@ -286,7 +284,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         basicauth.doAuthentication(auth);
 
-        log.debug(db);
+        log.debug(db.toString());
 
         try {
             if (!db.mandatoryCreateMembersSet()) {
@@ -315,7 +313,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         basicauth.doAuthentication(auth);
 
-        log.debug(db);
+        log.debug(db.toString());
 
         try {
             if (!db.mandatoryDeleteMembersSet()) {
@@ -340,7 +338,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         basicauth.doAuthentication(auth);
 
-        log.debug(db);
+        log.debug(db.toString());
 
         try {
             if (!db.mandatoryRegisterMembersSet()) {
@@ -351,7 +349,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             }
 
         } catch (final EnforceableDataObjectException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new InvalidDataException(e);
         }
 
@@ -386,7 +384,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         }
 
         if (null == db.getUrl()) {
-            db.setUrl("jdbc:mysql://" + DEFAULT_HOSTNAME + "/?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&useUnicode=true&useServerPrepStmts=false&useTimezone=true&serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
+            db.setUrl("jdbc:mysql://" + DEFAULT_HOSTNAME + "/?useUnicode=true&characterEncoding=UTF-8&autoReconnect=false&useUnicode=true&useServerPrepStmts=false&useTimezone=true&serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
         }
 
         return new Database(oxutil.registerDatabase(db));
@@ -406,7 +404,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         basicauth.doAuthentication(auth);
 
-        log.debug(srv);
+        log.debug(srv.toString());
 
         if (srv.getName().trim().length() == 0) {
             throw new InvalidDataException("Invalid server name");
@@ -432,7 +430,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         }
         basicauth.doAuthentication(null == auth ? new Credentials("","") : auth);
 
-        log.debug(database);
+        log.debug(database.toString());
         try {
             setIdOrGetIDFromNameAndIdObject(null, database);
         } catch (NoSuchObjectException e) {
@@ -461,7 +459,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         basicauth.doAuthentication(auth);
 
-        log.debug(server);
+        log.debug(server.toString());
 
         try {
             setIdOrGetIDFromNameAndIdObject(null, server);
@@ -541,7 +539,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         basicauth.doAuthentication(auth);
 
-        log.debug(db);
+        log.debug(db.toString());
 
         try {
             setIdOrGetIDFromNameAndIdObject(null, db);

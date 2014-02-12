@@ -193,17 +193,9 @@ public final class ThreadPoolProperties {
             workQueue = "synchronous";
             refusedExecutionBehavior = "abort";
         }
-        final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ThreadPoolProperties.class));
-        if (LOG.isInfoEnabled()) {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512);
-            sb.append("Thread Pool Configuration:\n");
-            sb.append("\tcorePoolSize=").append(corePoolSize).append('\n');
-            sb.append("\tprestartAllCoreThreads=").append(prestartAllCoreThreads).append('\n');
-            sb.append("\tkeepAliveTime=").append(keepAliveTime).append("sec").append('\n');
-            sb.append("\tworkQueue=").append(workQueue).append('\n');
-            sb.append("\trefusedExecutionBehavior=").append(refusedExecutionBehavior);
-            LOG.info(sb.toString());
-        }
+        final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolProperties.class);
+        final String ls = System.getProperty("line.separator");
+        LOG.info("Thread Pool Configuration:\n\tcorePoolSize={}{}\tprestartAllCoreThreads={}{}\tkeepAliveTime={}sec{}\tworkQueue={}{}\trefusedExecutionBehavior={}", corePoolSize, ls, prestartAllCoreThreads, ls, keepAliveTime, ls, workQueue, ls, refusedExecutionBehavior);
         return this;
     }
 

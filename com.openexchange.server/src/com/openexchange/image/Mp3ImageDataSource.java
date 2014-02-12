@@ -58,7 +58,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
-import org.apache.commons.logging.Log;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
@@ -106,7 +105,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 public final class Mp3ImageDataSource implements ImageDataSource {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Mp3ImageDataSource.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Mp3ImageDataSource.class);
 
     private static final Mp3ImageDataSource INSTANCE = new Mp3ImageDataSource();
 
@@ -186,7 +185,7 @@ public final class Mp3ImageDataSource implements ImageDataSource {
                                     mimeType = (String) getObjectValue(DataTypes.OBJ_MIME_TYPE, imageFrameBody);
                                 }
                             } else {
-                                LOG.warn("Extracting cover image from MP3 failed. Unknown frame body class: " + body.getClass().getName());
+                                LOG.warn("Extracting cover image from MP3 failed. Unknown frame body class: {}", body.getClass().getName());
                             }
                         }
                     }
@@ -229,11 +228,7 @@ public final class Mp3ImageDataSource implements ImageDataSource {
         // Return
         final DataProperties properties = new DataProperties();
         if (imageBytes == null) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(new StringBuilder("Requested a non-existing image in MP3 file: file-id=").append(fileId).append(" folder=").append(
-                    folderId).append(" context=").append(session.getContextId()).append(" session-user=").append(session.getUserId()).append(
-                    "\nReturning an empty image as fallback.").toString());
-            }
+            LOG.debug("Requested a non-existing image in MP3 file: file-id={} folder={} context={} session-user={}\nReturning an empty image as fallback.", fileId, folderId, session.getContextId(), session.getUserId());
             properties.put(DataProperties.PROPERTY_CONTENT_TYPE, mimeType);
             properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
             return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);

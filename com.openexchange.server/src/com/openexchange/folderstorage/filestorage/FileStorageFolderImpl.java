@@ -229,7 +229,7 @@ public final class FileStorageFolderImpl extends AbstractFolder {
             }
             return b.booleanValue();
         } catch (final OXException e) {
-            com.openexchange.log.Log.loggerFor(SystemInfostoreFolder.class).warn(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(SystemInfostoreFolder.class).warn("", e);
             return false;
         }
     }

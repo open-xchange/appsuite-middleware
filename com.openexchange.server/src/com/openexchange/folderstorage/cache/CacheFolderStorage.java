@@ -69,7 +69,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
-import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -106,8 +105,6 @@ import com.openexchange.folderstorage.internal.performers.UpdatePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatesPerformer;
 import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -130,7 +127,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class CacheFolderStorage implements FolderStorage {
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CacheFolderStorage.class));
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheFolderStorage.class);
 
     private static final ThreadPools.ExpectedExceptionFactory<OXException> FACTORY =
         new ThreadPools.ExpectedExceptionFactory<OXException>() {
@@ -302,14 +299,11 @@ public final class CacheFolderStorage implements FolderStorage {
                     /*
                      * Traverse mail accounts in separate task
                      */
-                    final Log log = LOG;
-                    final boolean debugEnabled = log.isDebugEnabled();
                     final Runnable task = new Runnable() {
 
                         @Override
                         public void run() {
                             try {
-                                final long st = debugEnabled ? System.currentTimeMillis() : 0L;
                                 final StorageParameters params = newStorageParameters(storageParameters);
                                 params.putParameter(MailFolderType.getInstance(), StorageParameters.PARAM_ACCESS_FAST, Boolean.FALSE);
                                 if (session.getUserPermissionBits().isMultipleMailAccounts()) {
@@ -335,7 +329,6 @@ public final class CacheFolderStorage implements FolderStorage {
                                                     @Override
                                                     public void run() {
                                                         try {
-                                                            final long st2 = debugEnabled ? System.currentTimeMillis() : 0L;
                                                             /*
                                                              * Load it
                                                              */
@@ -349,17 +342,9 @@ public final class CacheFolderStorage implements FolderStorage {
                                                                     putFolder(folder, realTreeId, params, false);
                                                                 }
                                                             }
-                                                            if (debugEnabled) {
-                                                                final StringAllocator tmp = new StringAllocator(64);
-                                                                tmp.append("CacheFolderStorage.checkConsistency(): ");
-                                                                tmp.append("Loading external root folder \"");
-                                                                tmp.append(mailAccount.generateMailServerURL()).append("\" took ");
-                                                                tmp.append((System.currentTimeMillis() - st2)).append("msec");
-                                                                log.debug(tmp.toString());
-                                                            }
                                                         } catch (final Exception e) {
                                                             // Pre-Accessing external account folder failed.
-                                                            LOG.debug(e.getMessage(), e);
+                                                            LOG.debug("", e);
                                                         }
                                                     }
                                                 };
@@ -373,20 +358,14 @@ public final class CacheFolderStorage implements FolderStorage {
                                         }
                                     }
                                 }
-                                if (debugEnabled) {
-                                    final StringAllocator tmp = new StringAllocator(64);
-                                    tmp.append("CacheFolderStorage.checkConsistency(): Submitting loading external root folders took ");
-                                    tmp.append((System.currentTimeMillis() - st)).append("msec");
-                                    log.debug(tmp.toString());
-                                }
                             } catch (final Exception e) {
-                                LOG.debug(e.getMessage(), e);
+                                LOG.debug("", e);
                             }
                         }
                     };
                     threadPool.submit(ThreadPools.trackableTask(task), behavior);
                 } catch (final Exception e) {
-                    LOG.debug(e.getMessage(), e);
+                    LOG.debug("", e);
                 }
             }
         } finally {
@@ -525,11 +504,7 @@ public final class CacheFolderStorage implements FolderStorage {
                     putFolder(createdFolder, realTreeId, storageParameters, false);
                 }
             } catch (final OXException e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.warn("Newly created folder could not be loaded from appropriate storage.", e);
-                } else {
-                    LOG.warn("Newly created folder could not be loaded from appropriate storage.");
-                }
+                LOG.warn("Newly created folder could not be loaded from appropriate storage.", e);
             }
             /*
              * Remove parent from cache(s)
@@ -632,17 +607,13 @@ public final class CacheFolderStorage implements FolderStorage {
                     ids = Collections.singletonList(id);
                 }
             } catch (final Exception e) {
-                final org.apache.commons.logging.Log log =
-                    com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CacheFolderStorage.class));
-                if (log.isDebugEnabled()) {
-                    log.debug(e.getMessage(), e);
-                }
+                final org.slf4j.Logger log =
+                    org.slf4j.LoggerFactory.getLogger(CacheFolderStorage.class);
+                log.debug("", e);
                 try {
                     ids = new ArrayList<String>(Arrays.asList(pathPerformer.doForcePath(treeId, id, true)));
                 } catch (final Exception e1) {
-                    if (log.isDebugEnabled()) {
-                        log.debug(e1.getMessage(), e1);
-                    }
+                    log.debug("", e1);
                     ids = Collections.singletonList(id);
                 }
             }
@@ -880,9 +851,9 @@ public final class CacheFolderStorage implements FolderStorage {
             if (!ROOT_ID.equals(parentId)) {
                 removeFromCache(parentId, treeId, storageParameters.getSession(), newPathPerformer(storageParameters));
                 try {
-                    final Folder parentFolder = loadFolder(treeId, parentId, StorageType.WORKING, true, storageParameters);
+                    final Folder parentFolder = loadFolder(realTreeId, parentId, StorageType.WORKING, true, storageParameters);
                     if (parentFolder.isCacheable()) {
-                        putFolder(parentFolder, treeId, storageParameters, true);
+                        putFolder(parentFolder, realTreeId, storageParameters, true);
                     }
                 } catch (final Exception e) {
                     // Ignore
@@ -1144,9 +1115,7 @@ public final class CacheFolderStorage implements FolderStorage {
                         return null;
                     }
                 }
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Locally loaded folder " + folderId + " from context " + contextId + " for user " + params.getUserId());
-                }
+                LOG.debug("Locally loaded folder {} from context {} for user {}", folderId, contextId, params.getUserId());
                 return folder;
             }
         }
@@ -1820,7 +1789,7 @@ public final class CacheFolderStorage implements FolderStorage {
         if (null == session) {
             return new StorageParametersImpl(source.getUser(), source.getContext());
         }
-        return new StorageParametersImpl((ServerSession) session);
+        return new StorageParametersImpl((ServerSession) session, source.getUser(), source.getContext());
     }
 
     private static volatile Integer maxWaitMillis;

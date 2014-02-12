@@ -60,8 +60,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
@@ -79,9 +77,7 @@ import com.openexchange.server.ServiceHolderListener;
 
 public class I18nActivator extends HousekeepingActivator {
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(I18nActivator.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(I18nActivator.class);
 
     /**
      * {@link I18nServiceHolderListener} - Properly registers all I18n services defined through property <code>"i18n.language.path"</code>
@@ -129,9 +125,7 @@ public class I18nActivator extends HousekeepingActivator {
                 serviceRegistrations[i] = null;
             }
             serviceRegistrations = null;
-            if (LOG.isInfoEnabled()) {
-                LOG.info("All I18n services unregistered");
-            }
+            LOG.info("All I18n services unregistered");
         }
     }
 
@@ -147,7 +141,7 @@ public class I18nActivator extends HousekeepingActivator {
         final String value = config.getProperty("i18n.language.path");
         if (null == value) {
             final FileNotFoundException e = new FileNotFoundException("Configuration property 'i18n.language.path' is not defined.");
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
         final File dir = new File(value);
@@ -201,9 +195,7 @@ public class I18nActivator extends HousekeepingActivator {
 
         }
 
-        if (LOG.isInfoEnabled()) {
-            LOG.info("All I18n services registered");
-        }
+        LOG.info("All I18n services registered");
         return serviceRegistrations.toArray(new ServiceRegistration[serviceRegistrations.size()]);
     }
 
@@ -219,9 +211,7 @@ public class I18nActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        if (DEBUG) {
-            LOG.debug("I18n Starting");
-        }
+        LOG.debug("I18n Starting");
         try {
             csh = ConfigurationServiceHolder.newInstance();
 
@@ -235,16 +225,12 @@ public class I18nActivator extends HousekeepingActivator {
             throw e instanceof Exception ? (Exception) e : new Exception(e);
         }
 
-        if (DEBUG) {
-            LOG.debug("I18n Started");
-        }
+        LOG.debug("I18n Started");
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        if (DEBUG) {
-            LOG.debug("Stopping I18n");
-        }
+        LOG.debug("Stopping I18n");
 
         try {
             csh.removeServiceHolderListenerByName(listener.getClass().getName());
@@ -265,9 +251,7 @@ public class I18nActivator extends HousekeepingActivator {
             LOG.error("I18nActivator: stop: ", e);
             throw e instanceof Exception ? (Exception) e : new Exception(e);
         }
-        if (DEBUG) {
-            LOG.debug("I18n stopped");
-        }
+        LOG.debug("I18n stopped");
     }
 
 }

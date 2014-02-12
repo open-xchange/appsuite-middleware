@@ -60,7 +60,6 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.Log;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -82,8 +81,7 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "(not IMAP: with timestamp): An object containing all data of the requested mail. The fields of the object are listed in Detailed mail data. The fields id and attachment are not included.")
 public final class GetForwardAction extends AbstractMailAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        Log.valueOf(com.openexchange.log.LogFactory.getLog(GetForwardAction.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetForwardAction.class);
 
     /**
      * Initializes a new {@link GetForwardAction}.
@@ -112,7 +110,7 @@ public final class GetForwardAction extends AbstractMailAction {
             final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
             final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
             final String view = req.getParameter(Mail.PARAMETER_VIEW);
-            final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
+            final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
             /*
              * Deny saving for this request-specific settings
              */
@@ -156,7 +154,7 @@ public final class GetForwardAction extends AbstractMailAction {
                 ids[i] = folderAndID.getString(AJAXServlet.PARAMETER_ID);
             }
             final String view = req.getParameter(Mail.PARAMETER_VIEW);
-            final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
+            final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
             /*
              * Deny saving for this request-specific settings
              */
@@ -174,8 +172,7 @@ public final class GetForwardAction extends AbstractMailAction {
                     usmNoSave.setDisplayHtmlInlineContent(true);
                     usmNoSave.setAllowHTMLImages(false);
                 } else {
-                    LOG.warn(new com.openexchange.java.StringAllocator(64).append("Unknown value in parameter ").append(Mail.PARAMETER_VIEW).append(": ").append(
-                        view).append(". Using user's mail settings as fallback."));
+                    LOG.warn("Unknown value in parameter {}: {}. Using user's mail settings as fallback.", Mail.PARAMETER_VIEW, view);
                 }
             }
             final MailServletInterface mailInterface = getMailInterface(req);

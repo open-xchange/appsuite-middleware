@@ -84,7 +84,7 @@ public class FSFolderAccess extends  AbstractFileStorageFolderAccess{
         this.directory = file;
         this.session = session;
     }
-    
+
     private java.io.File toDirectory(String folderId) throws OXException {
         if (folderId.equals(FileStorageFolder.ROOT_FULLNAME)) {
             return directory;
@@ -105,17 +105,17 @@ public class FSFolderAccess extends  AbstractFileStorageFolderAccess{
         folder.setId(folderId);
         folder.setCreationDate(new Date(0));
         folder.setLastModifiedDate(new Date(dir.lastModified()));
-        
+
         folder.setExists(dir.exists() && dir.canRead() && dir.canExecute());
-        
+
         File[] contents = dir.listFiles(new OnlyFiles());
-        
+
         File[] directories = dir.listFiles(new OnlyDirectories());
-        
+
         if (contents == null) {
             contents = new File[0];
         }
-        
+
         folder.setFileCount(contents.length);
         folder.setHoldsFiles(contents.length > 0);
         folder.setHoldsFolders(directories.length > 0);
@@ -132,10 +132,10 @@ public class FSFolderAccess extends  AbstractFileStorageFolderAccess{
         } else {
             folder.setParentId(getFolderId(dir.getParentFile()));
         }
-        
+
         return folder;
     }
-    
+
     @Override
     public boolean exists(String folderId) throws OXException {
         File dir = toDirectory(folderId);
@@ -145,7 +145,7 @@ public class FSFolderAccess extends  AbstractFileStorageFolderAccess{
     @Override
     public FileStorageFolder getFolder(String folderId) throws OXException {
         return initFolder(folderId, toDirectory(folderId));
-        
+
     }
 
     @Override
@@ -169,7 +169,7 @@ public class FSFolderAccess extends  AbstractFileStorageFolderAccess{
             return new FileStorageFolder[0];
         }
         FileStorageFolder[] subfolders = new FileStorageFolder[dirs.length];
-        
+
         int i = 0;
         for (File file : dirs) {
             subfolders[i++] = initFolder(parentIdentifier + "/" + file.getName(), file);
@@ -198,18 +198,18 @@ public class FSFolderAccess extends  AbstractFileStorageFolderAccess{
             // Move
             dir.renameTo(dest);
         }
-        
+
         return identifier + "/" + toUpdate.getName();
     }
 
     @Override
-    public String moveFolder(String folderId, String newParentId) throws OXException {
+    public String moveFolder(String folderId, String newParentId, String newName) throws OXException {
         File dir = toDirectory(folderId);
         File dest = toDirectory(newParentId);
-        
-        dir.renameTo(new File(dest, dir.getName()));
-        
-        return newParentId + "/" + dir.getName();
+
+        dir.renameTo(new File(dest, null != newName ? newName : dir.getName()));
+
+        return newParentId + "/" + (null != newName ? newName : dir.getName());
     }
 
     @Override
@@ -217,7 +217,7 @@ public class FSFolderAccess extends  AbstractFileStorageFolderAccess{
         File dir = toDirectory(folderId);
         File dest = new File(dir.getParentFile(), newName);
         dir.renameTo(dest);
-        
+
         return dir.getParent() + "/" + newName;
     }
 
@@ -253,7 +253,7 @@ public class FSFolderAccess extends  AbstractFileStorageFolderAccess{
     public FileStorageFolder[] getPath2DefaultFolder(String folderId) throws OXException {
         File dir = toDirectory(folderId);
         List<FileStorageFolder> path = new ArrayList<FileStorageFolder>();
-        
+
         while(!dir.equals(directory)) {
             path.add(initFolder(getFolderId(dir), dir));
             dir = dir.getParentFile();
@@ -269,14 +269,14 @@ public class FSFolderAccess extends  AbstractFileStorageFolderAccess{
         }
         Collections.reverse(components);
         StringBuilder b = new StringBuilder();
-        
+
         for (String comp : components) {
             b.append(comp).append('/');
         }
         if (b.length() > 0) {
             b.setLength(b.length() - 1);
         }
-        
+
         return b.toString();
     }
 

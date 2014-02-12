@@ -75,8 +75,10 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Queue;
 import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -124,6 +126,7 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderBatchLoader;
@@ -145,8 +148,8 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DatabaseFolderStorage.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(DatabaseFolderStorage.class);
 
     private static final String PARAM_CONNECTION = DatabaseParameterConstants.PARAM_CONNECTION;
 
@@ -362,12 +365,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         try {
             con = optParameter(ConnectionMode.class, PARAM_CONNECTION, params);
         } catch (final OXException e) {
-            /*
-             * Already committed
-             */
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Storage already committed:\n" + params.getCommittedTrace(), e);
-            }
+            LOG.warn("Storage already committed:\n{}", params.getCommittedTrace(), e);
             return;
         }
         if (null == con) {
@@ -471,6 +469,13 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                     createMe.setType(getFolderType(createMe.getParentFolderID(), storageParameters.getContext(), con));
                 } else {
                     createMe.setType(getTypeByFolderType(t));
+                }
+            }
+            // Meta
+            {
+                final Map<String, Object> meta = folder.getMeta();
+                if (null != meta) {
+                    createMe.setMeta(meta);
                 }
             }
             // Permissions
@@ -1120,10 +1125,13 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                     /*
                      * Add global address book manually
                      */
-                    final FolderObject gab = getFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID, ctx, con);
-                    if (gab.isVisible(userId, userPermissionBits)) {
-                        gab.setFolderName(StringHelper.valueOf(user.getLocale()).getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME));
-                        list.add(gab);
+                    final CapabilityService capsService = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
+                    if (null == capsService || capsService.getCapabilities(user.getId(), ctx.getContextId()).contains("gab")) {
+                        final FolderObject gab = getFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID, ctx, con);
+                        if (gab.isVisible(userId, userPermissionBits)) {
+                            gab.setFolderName(StringHelper.valueOf(user.getLocale()).getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME));
+                            list.add(gab);
+                        }
                     }
                 } catch (final RuntimeException e) {
                     throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
@@ -1467,7 +1475,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         try {
             con = optParameter(ConnectionMode.class, PARAM_CONNECTION, params);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return;
         }
         if (null == con) {
@@ -1565,7 +1573,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 final int owner = Integer.parseInt(id.substring(FolderObject.SHARED_PREFIX.length()));
                 throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(
                     OXFolderUtility.getUserName(session.getUserId(), context),
-                    UserStorage.getStorageUser(owner, context).getDisplayName(),
+                    UserStorage.getInstance().getUser(owner, context).getDisplayName(),
                     Integer.valueOf(context.getContextId()));
             }
 
@@ -1618,6 +1626,13 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 final Type t = folder.getType();
                 if (null != t) {
                     updateMe.setType(getTypeByFolderType(t));
+                }
+            }
+            // Meta
+            {
+                final Map<String, Object> meta = folder.getMeta();
+                if (null != meta) {
+                    updateMe.setMeta(meta);
                 }
             }
             // Permissions
@@ -1972,9 +1987,19 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                         final int owner1 = o1.getCreatedBy();
                         final int owner2 = o2.getCreatedBy();
                         if (owner1 > 0 && owner2 > 0) {
-                            return collator.compare(
-                                UserStorage.getStorageUser(owner1, context).getDisplayName(),
-                                UserStorage.getStorageUser(owner2, context).getDisplayName());
+                            String d1;
+                            try {
+                                d1 = UserStorage.getInstance().getUser(owner1, context).getDisplayName();
+                            } catch (OXException e) {
+                                d1 = null;
+                            }
+                            String d2;
+                            try {
+                                d2 = UserStorage.getInstance().getUser(owner2, context).getDisplayName();
+                            } catch (OXException e) {
+                                d2 = null;
+                            };
+                            return collator.compare(d1, d2);
                         }
                     }
                     return compareById(o1.getObjectID(), o2.getObjectID());
@@ -2020,9 +2045,19 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 final int owner1 = o1.getCreatedBy();
                 final int owner2 = o2.getCreatedBy();
                 if (owner1 > 0 && owner2 > 0) {
-                    return collator.compare(
-                        UserStorage.getStorageUser(owner1, context).getDisplayName(),
-                        UserStorage.getStorageUser(owner2, context).getDisplayName());
+                    String d1;
+                    try {
+                        d1 = UserStorage.getInstance().getUser(owner1, context).getDisplayName();
+                    } catch (OXException e) {
+                        d1 = null;
+                    }
+                    String d2;
+                    try {
+                        d2 = UserStorage.getInstance().getUser(owner2, context).getDisplayName();
+                    } catch (OXException e) {
+                        d2 = null;
+                    };
+                    return collator.compare(d1, d2);
                 }
             }
             return collator.compare(folderName1, folderName2);

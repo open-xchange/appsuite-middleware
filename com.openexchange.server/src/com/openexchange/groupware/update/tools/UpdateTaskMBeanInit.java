@@ -61,7 +61,7 @@ import com.openexchange.server.Initialization;
  */
 public final class UpdateTaskMBeanInit implements Initialization {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UpdateTaskMBeanInit.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateTaskMBeanInit.class);
 
     private final ManagementService managementService;
 
@@ -78,7 +78,7 @@ public final class UpdateTaskMBeanInit implements Initialization {
         try {
             managementService.registerMBean(Constants.OBJECT_NAME, new UpdateTaskMBean());
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -87,7 +87,7 @@ public final class UpdateTaskMBeanInit implements Initialization {
         try {
             managementService.unregisterMBean(Constants.OBJECT_NAME);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

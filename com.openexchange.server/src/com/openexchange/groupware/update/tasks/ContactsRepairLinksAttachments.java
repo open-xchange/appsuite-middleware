@@ -55,8 +55,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -79,7 +77,7 @@ import com.openexchange.tools.update.Tools;
  */
 public class ContactsRepairLinksAttachments implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactsRepairLinksAttachments.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactsRepairLinksAttachments.class);
 
     public ContactsRepairLinksAttachments() {
         super();
@@ -145,18 +143,18 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
                         try {
                             moveContactToAdmin(con, ctx, id);
                         } catch (final OXException e) {
-                            LOG.info("Failed moving contact " + id + " to admin in context " + cid + ". Removing contact.", e);
+                            LOG.info("Failed moving contact {} to admin in context {}. Removing contact.", id, cid, e);
                             delete = true;
                         } catch (final Exception e) {
-                            LOG.info("Failed moving contact " + id + " to admin in context " + cid + ". Removing contact.", e);
+                            LOG.info("Failed moving contact {} to admin in context {}. Removing contact.", id, cid, e);
                             delete = true;
                         }
                     } else {
-                        LOG.info("Removing private contact " + id + " in context " + cid + " because its folder does not exist anymore.");
+                        LOG.info("Removing private contact {} in context {} because its folder does not exist anymore.", id, cid);
                         delete = true;
                     }
                 } catch (final OXException ce) {
-                    LOG.info("Removing contact " + id + " in context " + cid + " because context does not exist anymore.");
+                    LOG.info("Removing contact {} in context {} because context does not exist anymore.", id, cid);
                     delete = true;
                 }
                 if (delete) {
@@ -172,7 +170,7 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
         final int id) throws SQLException, OXException {
         Statement tmp = null;
         try {
-            LOG.info("Trying to move contact " + id+ " to admin in context " + ctx.getContextId() + ".");
+            LOG.info("Trying to move contact {} to admin in context {}.", id, ctx.getContextId());
             final int folderId = new OXFolderAccess(con, ctx).getDefaultFolder(ctx.getMailadmin(), FolderObject.CONTACT).getObjectID();
             final ContactSql cs = new ContactMySql(ctx, ctx.getMailadmin());
             tmp = con.createStatement();
@@ -257,7 +255,7 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
 
     private void deleteLink(final int cid, final Connection con,
         final int id1, final int id2, final int mod1, final int mod2) throws SQLException {
-        LOG.info("Deleting orphaned link in context " + cid + ".");
+        LOG.info("Deleting orphaned link in context {}.", cid);
         final String sql = "DELETE FROM prg_links WHERE firstid=? AND secondid=?"
             + " AND firstmodule=? AND secondmodule=? AND cid=?";
         PreparedStatement ps = null;
@@ -300,7 +298,7 @@ public class ContactsRepairLinksAttachments implements UpdateTask {
     }
 
     private final void deleteAttachments(final int cid, final Connection con, final int id, final String filename) throws SQLException {
-        LOG.info("Deleting orphaned attachment " + id + " in context " + cid + ".");
+        LOG.info("Deleting orphaned attachment {} in context {}.", id, cid);
         try {
             Tools.removeFile(cid, filename);
         } catch (final OXException e) {

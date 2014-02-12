@@ -93,10 +93,7 @@ public final class MessageUtility {
 
     private static final String STR_EMPTY = "";
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessageUtility.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MessageUtility.class);
 
     private static abstract class AbstractInputStreamProvider implements InputStreamProvider {
 
@@ -129,16 +126,12 @@ public final class MessageUtility {
     public static String checkCharset(final MailPart p, final ContentType ct) throws OXException {
         String cs = ct.getCharsetParameter();
         if (!CharsetDetector.isValid(cs)) {
-            com.openexchange.java.StringAllocator sb = null;
             if (cs != null) {
-                sb = new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(cs);
             }
+            final String prev = cs;
             cs = CharsetDetector.detectCharset(p.getInputStream());
-            if (null != sb && LOG.isWarnEnabled()) {
-                sb.append(" Using auto-detected encoding: \"").append(cs).append('"');
-                LOG.warn(sb.toString());
-            }
+            LOG.warn("Illegal or unsupported encoding \"{}\". Using auto-detected encoding: \"{}\"", prev, cs);
         }
         return cs;
     }
@@ -153,16 +146,12 @@ public final class MessageUtility {
     public static String checkCharset(final Part p, final ContentType ct) {
         String cs = ct.getCharsetParameter();
         if (!CharsetDetector.isValid(cs)) {
-            com.openexchange.java.StringAllocator sb = null;
             if (cs != null) {
-                sb = new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(cs);
             }
+            final String prev = cs;
             cs = CharsetDetector.detectCharset(getPartInputStream(p));
-            if (null != sb && LOG.isWarnEnabled()) {
-                sb.append(" Using auto-detected encoding: \"").append(cs).append('"');
-                LOG.warn(sb.toString());
-            }
+            LOG.warn("Illegal or unsupported encoding \"{}\". Using auto-detected encoding: \"{}\"", prev, cs);
         }
         return cs;
     }
@@ -299,7 +288,7 @@ public final class MessageUtility {
             try {
                 return readStream(streamProvider, charset);
             } catch (final IOException e1) {
-                LOG.error(e1.getMessage(), e1);
+                LOG.error("", e1);
                 return STR_EMPTY;
             }
         }
@@ -406,9 +395,7 @@ public final class MessageUtility {
              * Detect the charset
              */
             final String detectedCharset = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
-            if (DEBUG) {
-                LOG.debug("Mapped \"GB2312\" charset to \"" + detectedCharset + "\".");
-            }
+            LOG.debug("Mapped \"GB2312\" charset to \"{}\".", detectedCharset);
             if (isBig5(detectedCharset)) {
                 return readBig5Bytes(bytes);
             }
@@ -435,9 +422,7 @@ public final class MessageUtility {
         }
         final byte[] bytes = getBytesFrom(streamProvider.getInputStream());
         final String detectedCharset = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
-        if (DEBUG) {
-            LOG.debug("Mapped \"" + charset + "\" charset to \"" + detectedCharset + "\".");
-        }
+        LOG.debug("Mapped \"{}\" charset to \"{}\".", charset, detectedCharset);
         return new String(bytes, detectedCharset);
     }
 
@@ -485,9 +470,7 @@ public final class MessageUtility {
              * Detect the charset
              */
             final String detectedCharset = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
-            if (DEBUG) {
-                LOG.debug("Mapped \"GB2312\" charset to \"" + detectedCharset + "\".");
-            }
+            LOG.debug("Mapped \"GB2312\" charset to \"{}\".", detectedCharset);
             if (isBig5(detectedCharset)) {
                 return readBig5Bytes(bytes);
             }
@@ -523,9 +506,7 @@ public final class MessageUtility {
          * Detect the charset
          */
         final String detectedCharset = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
-        if (DEBUG) {
-            LOG.debug("Mapped \"GB18030\" charset to \"" + detectedCharset + "\".");
-        }
+        LOG.debug("Mapped \"GB18030\" charset to \"{}\".", detectedCharset);
         if (isBig5(detectedCharset)) {
             return readBig5Bytes(bytes);
         }
@@ -571,7 +552,7 @@ public final class MessageUtility {
             try {
                 return tmp.toString(charset);
             } catch (final UnsupportedCharsetException e) {
-                LOG.error("Unsupported encoding in a message detected and monitored: \"" + charset + '"', e);
+                LOG.error("Unsupported encoding in a message detected and monitored: \"{}\"", charset, e);
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(charset);
                 final byte[] bytes = tmp.toByteArray();
                 return new String(bytes, Charsets.forName(detectCharset(bytes)));

@@ -58,10 +58,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.database.provider.DBProvider;
-import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageErrorMessage;
+import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageExceptionCode;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -75,7 +73,7 @@ import com.openexchange.groupware.impl.IDGenerator;
  */
 public class MySQLGenericConfigurationStorage implements GenericConfigurationStorageService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MySQLGenericConfigurationStorage.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MySQLGenericConfigurationStorage.class);
 
     private DBProvider provider;
 
@@ -127,21 +125,19 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
             }
             return retval;
         } catch (final SQLException x) {
-            try {
-                if(connectionHandling) {
+            if (connectionHandling) {
+                try {
                     writeCon.rollback();
-                }
-            } catch (final SQLException e) {
+                } catch (final SQLException e) { /**/ }
             }
-            LOG.error(x.getMessage(), x);
-            throw GenericConfigStorageErrorMessage.SQLException.create(x, x.getMessage());
+            LOG.error("", x);
+            throw GenericConfigStorageExceptionCode.SQLException.create(x, x.getMessage());
         } finally {
             tx.close();
             if(connectionHandling) {
                 try {
                     writeCon.setAutoCommit(true);
-                } catch (final SQLException e) {
-                }
+                } catch (final SQLException e) { /**/ }
                 provider.releaseWriteConnection(ctx, writeCon);
             }
         }
@@ -186,7 +182,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
                 content.put(name, value);
             }
         } catch (final SQLException x) {
-            throw GenericConfigStorageErrorMessage.SQLException.create(x, null == stmt ? x.getMessage() : stmt.toString());
+            throw GenericConfigStorageExceptionCode.SQLException.create(x, null == stmt ? x.getMessage() : stmt.toString());
         } finally {
             if (stmt != null) {
                 try {
@@ -326,7 +322,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
             }
 
         } catch (final SQLException e) {
-            throw GenericConfigStorageErrorMessage.SQLException.create(e, null == stmt ? e.getMessage() : stmt.toString());
+            throw GenericConfigStorageExceptionCode.SQLException.create(e, null == stmt ? e.getMessage() : stmt.toString());
         } finally {
             if(stmt != null) {
                 try {

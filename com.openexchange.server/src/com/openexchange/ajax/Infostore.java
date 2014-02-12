@@ -62,7 +62,6 @@ import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -101,7 +100,6 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
 import com.openexchange.json.OXJSONWriter;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -148,7 +146,7 @@ public class Infostore extends PermissionServlet {
     // public static final Exception2Message OXEXCEPTION_HANDLER = new
     // InfostoreException2Message();
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Infostore.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Infostore.class);
 
     private final long maxUploadSize = -1;
 
@@ -224,9 +222,9 @@ public class Infostore extends PermissionServlet {
                  */
                 throw (IOException) e.getCause();
             }
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final OXException e) {
-            LOG.error("Not possible, obviously: " + e.getMessage(), e);
+            LOG.error("Not possible, obviously", e);
         } finally {
             ThreadLocalSessionHolder.getInstance().clear();
         }
@@ -262,11 +260,11 @@ public class Infostore extends PermissionServlet {
                  */
                 throw (IOException) e.getCause();
             }
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final OXException e) {
-            LOG.error("Not possible, obviously: " + e.getMessage(), e);
+            LOG.error("Not possible, obviously", e);
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
         } finally {
             ThreadLocalSessionHolder.getInstance().clear();
         }
@@ -369,7 +367,7 @@ public class Infostore extends PermissionServlet {
             } catch (final JSONException e) {
                 LOG.error("Giving up", e);
             }
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
         } finally {
             ThreadLocalSessionHolder.getInstance().clear();
         }
@@ -514,7 +512,7 @@ public class Infostore extends PermissionServlet {
             w.write(substituteJS("{}", ACTION_UPDATE));
             close(w);
         } catch (final IOException e) {
-            LOG.warn(e);
+            LOG.warn(e.toString());
         }
     }
 
@@ -645,7 +643,7 @@ public class Infostore extends PermissionServlet {
             os = null;
 
         } catch (final OXException x) {
-            LOG.debug(x.getMessage(), x);
+            LOG.debug("", x);
             handleOXException(res, x, STR_ERROR, true, session);
             return;
         } finally {
@@ -758,7 +756,7 @@ public class Infostore extends PermissionServlet {
                 sendErrorAsJSHTML(res, t.toString(), action);
                 LOG.error("Got non OXException", t);
             } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

@@ -53,7 +53,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.index.Attachment;
@@ -88,7 +87,7 @@ public class InfostoreFolderJob implements IndexingJob {
 
     private static final int CHUNK_SIZE = 100;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreFolderJob.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreFolderJob.class);
 
 
     public InfostoreFolderJob() {
@@ -103,9 +102,7 @@ public class InfostoreFolderJob implements IndexingJob {
 
         InfostoreJobInfo info = (InfostoreJobInfo) jobInfo;
         long start = System.currentTimeMillis();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(this.getClass().getSimpleName() + " started performing. " + info.toString());
-        }
+        LOG.debug("{} started performing. {}", this.getClass().getSimpleName(), info);
 
         checkJobInfo();
         if (info.force || !IndexFolderManager.isIndexed(
@@ -132,10 +129,7 @@ public class InfostoreFolderJob implements IndexingJob {
                 closeIndexAccess(infostoreIndex);
                 closeIndexAccess(attachmentIndex);
 
-                if (LOG.isDebugEnabled()) {
-                    long diff = System.currentTimeMillis() - start;
-                    LOG.debug(this.getClass().getSimpleName() + " lasted " + diff + "ms. " + info.toString());
-                }
+                LOG.debug("{} lasted {}ms. {}", this.getClass().getSimpleName(), System.currentTimeMillis() - start, info);
             }
         }
     }
@@ -199,9 +193,7 @@ public class InfostoreFolderJob implements IndexingJob {
         ChunkPerformer.perform(indexDocuments, 0, CHUNK_SIZE, new ListPerformable<IndexDocument<DocumentMetadata>>() {
             @Override
             public void perform(List<IndexDocument<DocumentMetadata>> subList) throws OXException {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Adding a chunk of files to the index.");
-                }
+                LOG.debug("Adding a chunk of files to the index.");
 
                 infostoreIndex.addDocuments(subList);
             }
@@ -210,9 +202,7 @@ public class InfostoreFolderJob implements IndexingJob {
         ChunkPerformer.perform(attachments, 0, CHUNK_SIZE, new ListPerformable<IndexDocument<Attachment>>() {
             @Override
             public void perform(List<IndexDocument<Attachment>> subList) throws OXException {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Adding a chunk of attachments to the index.");
-                }
+                LOG.debug("Adding a chunk of attachments to the index.");
 
                 attachmentIndex.addDocuments(subList);
             }

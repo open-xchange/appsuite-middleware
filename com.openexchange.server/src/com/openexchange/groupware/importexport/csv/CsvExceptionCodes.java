@@ -49,38 +49,48 @@
 
 package com.openexchange.groupware.importexport.csv;
 
-import static com.openexchange.groupware.importexport.csv.CsvExceptionMessages.*;
-
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
-public enum CsvExceptionCodes implements OXExceptionCode {
+public enum CsvExceptionCodes implements DisplayableOXExceptionCode {
 
     /** Broken CSV file: Lines have different number of cells, line #1 has %d, line #%d has %d. Is this really a CSV file? */
-    BROKEN_CSV(BROKEN_CSV_MSG, CATEGORY_USER_INPUT, 1000),
+    BROKEN_CSV("Broken CSV file: Lines have different number of cells, line #1 has %d, line #%d has %d. Is this really a CSV file?",
+        CsvExceptionMessages.BROKEN_CSV_MSG, CATEGORY_USER_INPUT, 1000),
+    
     /** Illegal state: Found data after presumed last line. */
-    DATA_AFTER_LAST_LINE(DATA_AFTER_LAST_LINE_MSG, CATEGORY_ERROR, 1001),
+    DATA_AFTER_LAST_LINE("Illegal state: Found data after presumed last line.", CATEGORY_ERROR, 1001),
+    
     /** Cannot find an importer for format %s into folders %s */
-    LOADING_FOLDER_FAILED(LOADING_FOLDER_FAILED_MSG, CATEGORY_ERROR, 204),
+    LOADING_FOLDER_FAILED("Could not load folder %s", CATEGORY_ERROR, 204),
+    
     /** Cannot load folder (not found, no rights, who knows? used to be I_E 204 */
-    UTF8_ENCODE_FAILED(UTF8_ENCODE_FAILED_MSG, CATEGORY_ERROR, 104),
+    UTF8_ENCODE_FAILED("Could not encode as UTF-8", CATEGORY_ERROR, 104),
+    
     /** Could not encode as UTF-8 */
-    IOEXCEPTION_WHILE_CONVERTING(IOEXCEPTION_WHILE_CONVERTING_MSG, CATEGORY_ERROR, 1002),
+    IOEXCEPTION_WHILE_CONVERTING("Encountered IO error while trying to read stream", CATEGORY_ERROR, 1002),
+    
     /** Parsing %1$s to a number failed. */
-    NUMBER_FAILED(NUMBER_FAILED_MSG, CATEGORY_ERROR, 207),
-;
+    NUMBER_FAILED("Parsing %1$s to a number failed.", CATEGORY_ERROR, 207);
 
 
-    public static final String PREFIX = "CSV";
+    public static String PREFIX = "CSV";
 
     private String message;
+    private String displayMessage;
     private Category category;
     private int number;
+    
+    private CsvExceptionCodes(String message, Category category, int number) {
+        this(message, null, category, number);
+    }
 
-    private CsvExceptionCodes(final String message, final Category category, final int number) {
+    private CsvExceptionCodes(String message, String displayMessage, Category category, int number) {
         this.message = message;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
         this.category = category;
         this.number = number;
     }
@@ -94,6 +104,11 @@ public enum CsvExceptionCodes implements OXExceptionCode {
     public String getMessage() {
         return message;
     }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
+    }
 
     @Override
     public String getPrefix() {
@@ -106,7 +121,7 @@ public enum CsvExceptionCodes implements OXExceptionCode {
     }
 
     @Override
-    public boolean equals(final OXException e) {
+    public boolean equals(OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
     }
 
@@ -125,7 +140,7 @@ public enum CsvExceptionCodes implements OXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Object... args) {
+    public OXException create(Object... args) {
         return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
@@ -136,7 +151,7 @@ public enum CsvExceptionCodes implements OXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Throwable cause, final Object... args) {
+    public OXException create(Throwable cause, Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

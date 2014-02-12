@@ -81,7 +81,7 @@ import com.openexchange.server.ServiceExceptionCode;
  */
 public final class JCSCacheServiceInit {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(JCSCacheServiceInit.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JCSCacheServiceInit.class);
 
     private static final String PROP_CACHE_CONF_FILE_NAME = "com.openexchange.caching.configfile";
 
@@ -201,13 +201,17 @@ public final class JCSCacheServiceInit {
             try {
                 in.close();
             } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         return props;
     }
 
     private void configure(final Properties properties) throws OXException {
+        configure(properties, false);
+    }
+
+    private void configure(final Properties properties, final boolean overwrite) throws OXException {
         synchronized (ccmInstance) {
             if (null == props) {
                 /*
@@ -243,13 +247,19 @@ public final class JCSCacheServiceInit {
                      */
                     addAuxProps |= checkAdditionalAuxiliary(key, value);
                     if (isDefault(key)) {
-                        LOG.warn(new com.openexchange.java.StringAllocator("Ignoring default cache configuration property: ").append(key).append('=').append(value).toString());
+                        LOG.warn("Ignoring default cache configuration property: {}={}", key, value);
                     } else if (overwritesExisting(key)) {
-                        LOG.warn(new com.openexchange.java.StringAllocator("Ignoring overwriting existing cache configuration property: ").append(key).append('=').append(
-                            value).toString());
+                        if (overwrite) {
+                            additionalProps.put(key, value);
+                        } else {
+                            LOG.warn("Ignoring overwriting existing cache configuration property: {}={}", key, value);
+                        }
                     } else if (props.containsKey(key)) {
-                        LOG.warn(new com.openexchange.java.StringAllocator("Ignoring overwriting existing cache configuration property: ").append(key).append('=').append(
-                            value).toString());
+                        if (overwrite) {
+                            additionalProps.put(key, value);
+                        } else {
+                            LOG.warn("Ignoring overwriting existing cache configuration property: {}={}", key, value);
+                        }
                     } else {
                         additionalProps.put(key, value);
                     }
@@ -314,7 +324,7 @@ public final class JCSCacheServiceInit {
     public void loadConfiguration(final String cacheConfigFile) throws OXException {
         initializeCompositeCacheManager(true);
         configure(loadProperties(cacheConfigFile.trim()));
-        LOG.info("JCS caching system successfully configured with property file: " + cacheConfigFile);
+        LOG.info("JCS caching system successfully configured with property file: {}", cacheConfigFile);
     }
 
     /**
@@ -323,9 +333,9 @@ public final class JCSCacheServiceInit {
      * @param inputStream The input stream
      * @throws OXException If configuration of JCS caching system fails
      */
-    public void loadConfiguration(final InputStream inputStream) throws OXException {
+    public void loadConfiguration(final InputStream inputStream, final boolean overwrite) throws OXException {
         initializeCompositeCacheManager(true);
-        configure(loadProperties(inputStream));
+        configure(loadProperties(inputStream), overwrite);
         LOG.info("JCS caching system successfully configured with properties from input stream.");
     }
 
@@ -380,7 +390,7 @@ public final class JCSCacheServiceInit {
             configureByPropertyFile(false, true);
         } catch (final OXException e) {
             // Cannot occur
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -394,7 +404,7 @@ public final class JCSCacheServiceInit {
             if (errorIfNull) {
                 throw ce;
             }
-            LOG.warn(ce.getMessage(), ce);
+            LOG.warn("", ce);
             return;
         }
         try {
@@ -543,7 +553,7 @@ public final class JCSCacheServiceInit {
                      * remember original default cache region type
                      */
                     String value = (String)property.getValue();
-                    LOG.debug("Original default cache region type: " + value);
+                    LOG.debug("Original default cache region type: {}", value);
                     defaultRegionType = value;
                     if (contains(value, auxiliaries)) {
                         propertiesToClear.add(property.getKey());
@@ -555,7 +565,7 @@ public final class JCSCacheServiceInit {
                          * remember original cache region type
                          */
                         String value = (String)property.getValue();
-                        LOG.debug("Original cache region type for '" + regionName + "': " + value);
+                        LOG.debug("Original cache region type for '{}': {}", regionName, value);
                         cacheRegionTypes.put(regionName, value);
                         if (contains(value, auxiliaries)) {
                             propertiesToClear.add(property.getKey());
@@ -567,7 +577,7 @@ public final class JCSCacheServiceInit {
              * clear properties referencing the auxiliaries
              */
             for (Object key : propertiesToClear) {
-                LOG.debug("Clearing cache region type property: " + key);
+                LOG.debug("Clearing cache region type property: {}", key);
                 properties.put(key, "");
             }
         }

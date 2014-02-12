@@ -49,24 +49,20 @@
 package com.openexchange.admin.console;
 
 import static org.junit.Assert.assertTrue;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
-
 import junit.framework.JUnit4TestAdapter;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
-
 import com.openexchange.admin.tools.ShellExecutor;
 import com.openexchange.admin.tools.ShellExecutor.ArrayOutput;
 
 public class UniqueCLTParameterTest {
 
     private String prefix = "/opt/open-xchange/sbin/";
-    
+
     public static junit.framework.Test suite() {
         return new JUnit4TestAdapter(UniqueCLTParameterTest.class);
     }
@@ -75,7 +71,7 @@ public class UniqueCLTParameterTest {
     @Test
     public void testUniqueCLTParameter() throws IOException, InterruptedException {
         final String envPrefix = System.getProperty("SBINPREFIX");
-        if( envPrefix.length() > 0 ) {
+        if ((envPrefix != null) && (envPrefix.length() > 0)) {
             System.out.println("Using " + envPrefix + "/ as path to commands to test...");
             this.prefix = envPrefix+"/";
         }
@@ -89,5 +85,5 @@ public class UniqueCLTParameterTest {
             assertTrue(command + " failed: " + result.errOutput, result.exitstatus==0);
         }
     }
-    
+
 }

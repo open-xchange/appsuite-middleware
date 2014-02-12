@@ -50,7 +50,6 @@
 package com.openexchange.jslob.json.osgi;
 
 import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
@@ -60,7 +59,6 @@ import com.openexchange.jslob.json.JSlobActionFactory;
 import com.openexchange.jslob.json.converter.JSlobJSONResultConverter;
 import com.openexchange.jslob.json.rest.jslob.JSlobRestServlet;
 import com.openexchange.jslob.registry.JSlobServiceRegistry;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -78,7 +76,7 @@ public class JSlobJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(JSlobJSONActivator.class));
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JSlobJSONActivator.class);
         registerModule(new JSlobActionFactory(this), "jslob");
         registerService(ResultConverter.class, new JSlobJSONResultConverter());
 
@@ -89,9 +87,9 @@ public class JSlobJSONActivator extends AJAXModuleActivator {
                 try {
                     service.registerServlet("/jslob", new JSlobRestServlet(), null, null);
                 } catch (final ServletException e) {
-                    log.error("Servlet registration failed: " + JSlobRestServlet.class.getName(), e);
+                    log.error("Servlet registration failed: {}", JSlobRestServlet.class.getName(), e);
                 } catch (final NamespaceException e) {
-                    log.error("Servlet registration failed: " + JSlobRestServlet.class.getName(), e);
+                    log.error("Servlet registration failed: {}", JSlobRestServlet.class.getName(), e);
                 }
             }
 
@@ -107,6 +105,6 @@ public class JSlobJSONActivator extends AJAXModuleActivator {
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
-        com.openexchange.log.Log.valueOf(LogFactory.getLog(JSlobJSONActivator.class)).info("Bundle stopped: com.openexchange.jslob.json");
+        org.slf4j.LoggerFactory.getLogger(JSlobJSONActivator.class).info("Bundle stopped: com.openexchange.jslob.json");
     }
 }

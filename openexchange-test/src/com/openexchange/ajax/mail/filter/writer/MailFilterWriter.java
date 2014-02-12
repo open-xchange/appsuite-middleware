@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.mail.filter.writer;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -72,7 +71,7 @@ import com.openexchange.ajax.writer.DataWriter;
 
 public class MailFilterWriter extends DataWriter {
 
-	private static final Log LOG = LogFactory.getLog(MailFilterWriter.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailFilterWriter.class);
 
 	public MailFilterWriter() {
 		super(null, null);

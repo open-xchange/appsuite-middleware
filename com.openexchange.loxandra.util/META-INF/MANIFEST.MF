@@ -9,4 +9,5 @@ Import-Package: com.openexchange.log,
  org.apache.cassandra.config,
  org.apache.cassandra.tools,
  org.apache.commons.logging,
- org.apache.log4j
+ org.apache.log4j,
+ org.slf4j

@@ -55,7 +55,6 @@ import static com.openexchange.authentication.kerberos.impl.ConfigurationPropert
 import java.util.List;
 import java.util.Map;
 import javax.security.auth.login.LoginException;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
@@ -82,7 +81,7 @@ import com.openexchange.user.UserService;
  */
 public class KerberosAuthentication implements AuthenticationService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(KerberosAuthentication.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(KerberosAuthentication.class);
 
     private final KerberosService kerberosService;
     private final ContextService contextService;
@@ -129,7 +128,7 @@ public class KerberosAuthentication implements AuthenticationService {
             try {
                 principal = kerberosService.authenticate(uid, loginInfo.getPassword());
             } catch (OXException e) {
-                LOG.error(e,e.getCause());
+                LOG.error("", e.getCause());
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
             }
         }

@@ -52,8 +52,6 @@ package com.openexchange.subscribe.json;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.i18n.I18nService;
 
 /**
@@ -63,7 +61,7 @@ import com.openexchange.i18n.I18nService;
  */
 public final class I18nServices {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(I18nServices.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(I18nServices.class);
     private static final I18nServices SINGLETON = new I18nServices();
 
     private final Map<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();
@@ -78,13 +76,13 @@ public final class I18nServices {
 
     public void addService(final I18nService service) {
         if (null != services.put(service.getLocale(), service)) {
-            LOG.warn("Another i18n translation service discovered for " + service.getLocale());
+            LOG.warn("Another i18n translation service discovered for {}", service.getLocale());
         }
     }
 
     public void removeService(final I18nService service) {
         if (null == services.remove(service.getLocale())) {
-            LOG.warn("Unknown i18n translation service shut down for " + service.getLocale());
+            LOG.warn("Unknown i18n translation service shut down for {}", service.getLocale());
         }
     }
 
@@ -94,7 +92,7 @@ public final class I18nServices {
         final Locale loc = null == locale ? DEFAULT_LOCALE : locale;
         final I18nService retval = services.get(loc);
         if (null == retval && !"en".equalsIgnoreCase(loc.getLanguage())) {
-            LOG.warn("No i18n service for locale " + loc + ".");
+            LOG.warn("No i18n service for locale {}.", loc);
         }
         return retval;
     }

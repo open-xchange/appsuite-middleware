@@ -52,7 +52,6 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 import java.util.Collection;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,7 +60,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.preview.PreviewDocument;
 
 /**
@@ -72,7 +70,7 @@ import com.openexchange.preview.PreviewDocument;
  */
 public class PreviewResponseRenderer implements ResponseRenderer {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(PreviewResponseRenderer.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PreviewResponseRenderer.class);
 
     @Override
     public boolean handles(final AJAXRequestData request, final AJAXRequestResult result) {

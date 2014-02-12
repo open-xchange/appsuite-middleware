@@ -53,7 +53,6 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import org.apache.commons.logging.Log;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.Trigger;
@@ -70,13 +69,13 @@ import com.openexchange.service.indexing.impl.internal.Tools;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class UnscheduleAllJobsCallable implements Callable<Object>, Serializable {
-    
+
     private static final long serialVersionUID = -3020268885605197578L;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(UnscheduleAllJobsCallable.class);
-    
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UnscheduleAllJobsCallable.class);
+
     private final int contextId;
-    
+
     private final int userId;
 
     public UnscheduleAllJobsCallable(int contextId, int userId) {
@@ -102,10 +101,8 @@ public class UnscheduleAllJobsCallable implements Callable<Object>, Serializable
                             scheduler.unscheduleJob(trigger.getKey());
                         }
                     }
-                    
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Unscheduled " + count + " triggers for " + jobKeys.size() + " jobs for user " + userId + " in context " + contextId + ".");
-                    }
+
+                    LOG.debug("Unscheduled {} triggers for {} jobs for user {} in context {}.", count, jobKeys.size(), userId, contextId);
                 } else {
                     String jobGroup = Tools.generateJobGroup(contextId);
                     Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupStartsWith(jobGroup));
@@ -117,16 +114,14 @@ public class UnscheduleAllJobsCallable implements Callable<Object>, Serializable
                             scheduler.unscheduleJob(trigger.getKey());
                         }
                     }
-                    
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Unscheduled " + count + " triggers for " + jobKeys.size() + " jobs for user " + userId + " in context " + contextId + ".");
-                    }
+
+                    LOG.debug("Unscheduled {} triggers for {} jobs for user {} in context {}.", count, jobKeys.size(), userId, contextId);
                 }
             }
         } catch (Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
         }
-        
+
         return null;
     }
 

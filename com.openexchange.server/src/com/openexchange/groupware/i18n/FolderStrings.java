@@ -101,7 +101,7 @@ public class FolderStrings implements LocalizableStrings {
 
     public static final String DEFAULT_FILES_FOLDER_NAME = "My files";
 
-    public static final String SYSTEM_FILES_FOLDER_NAME = "Files";
+    public static final String SYSTEM_FILES_FOLDER_NAME = "Drive";
 
     public static final String SYSTEM_USER_FILES_FOLDER_NAME = "Shared files";
 

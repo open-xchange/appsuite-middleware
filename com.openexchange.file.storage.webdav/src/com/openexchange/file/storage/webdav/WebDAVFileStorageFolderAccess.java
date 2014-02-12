@@ -418,6 +418,11 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
 
     @Override
     public String moveFolder(final String folderId, final String newParentId) throws OXException {
+        return moveFolder(folderId, newParentId, null);
+    }
+
+    @Override
+    public String moveFolder(final String folderId, final String newParentId, String newName) throws OXException {
         try {
             final String fid = checkFolderId(folderId, rootUri);
             if (rootUri.equalsIgnoreCase(fid)) {
@@ -441,7 +446,7 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
                 if (path.endsWith(SLASH)) {
                     path = path.substring(0, path.length() - 1);
                 }
-                uri.setPath(new StringBuilder(path).append('/').append(name).toString());
+                uri.setPath(new StringBuilder(path).append('/').append(null != newName ? newName : name).toString());
                 newUri = checkFolderId(uri.toString());
             }
             /*

@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.templating.TemplateHelperFactory;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -64,36 +65,37 @@ import com.openexchange.tools.session.ServerSession;
 
 public class ContactTemplateHelperFactory implements TemplateHelperFactory {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ContactTemplateHelperFactory.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactTemplateHelperFactory.class);
 
 	private final ServiceLookup services;
-	
+
     public ContactTemplateHelperFactory(ServiceLookup services) {
         this.services = services;
     }
-    
+
 	@Override
 	public String getName() {
 		return "contacts";
 	}
 
 	@Override
-	public Object create(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter, Map<String, Object> rootObject) throws OXException {			
+	public Object create(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter, Map<String, Object> rootObject) throws OXException {
 		try {
-            TimeZone tz = TimeZone.getTimeZone( requestData.isSet("timezone") ? requestData.getParameter("timezone") : session.getUser().getTimeZone() );			    
+            User user = session.getUser();
+            TimeZone tz = TimeZone.getTimeZone( requestData.isSet("timezone") ? requestData.getParameter("timezone") : user.getTimeZone() );
             final Map<String, Object> map;
             {
                 final Object resultObject = result.getResultObject();
                 if (!(resultObject instanceof Map)) {
                     map = Collections.emptyMap();
-                    LOG.warn(resultObject.getClass().getName() + " is not a " + Map.class.getName() + "!");
+                    LOG.warn("{} is not a {}!", null == resultObject ? "null" : resultObject.getClass().getName(), Map.class.getName());
                 } else {
                     @SuppressWarnings("unchecked")
                     Map<String, Object> tmp = (Map<String, Object>) resultObject;
                     map = tmp;
                 }
             }
-            return new ContactHelper(map, session.getUser().getLocale(), tz, session.getContext(), services);
+            return new ContactHelper(map, user.getLocale(), tz, session.getContext(), services);
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

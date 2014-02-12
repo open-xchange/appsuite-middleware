@@ -84,8 +84,8 @@ import com.openexchange.langdetect.LanguageDetectionService;
  */
 public class Lc4jLanguageDetectionService implements LanguageDetectionService {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Lc4jLanguageDetectionService.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(Lc4jLanguageDetectionService.class);
 
     /**
      * The singleton instance.
@@ -147,7 +147,7 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
     public void loadLanguageCodes(final File languageCodesFile) throws OXException {
         BufferedInputStream inputStream = null;
         try {
-            inputStream = new BufferedInputStream(new FileInputStream(languageCodesFile));
+            inputStream = new BufferedInputStream(new FileInputStream(languageCodesFile), 65536);
             final Properties properties = new Properties();
             properties.load(inputStream);
             languageCodes.clear();
@@ -199,8 +199,7 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
             Locale locale = languageCodes.get(pos < 0 ? lang : lang.substring(0, pos));
             if (null == locale) {
                 if (warnAboutUnknownModel) {
-					LOG.warn("No language code for model: " + language
-							+ ". Using default " + defaultLocale);
+					LOG.warn("No language code for model: {}. Using default {}", language, defaultLocale);
 				}
 				locale = defaultLocale;
             }
@@ -246,7 +245,7 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
                     Locale locale = languageCodes.get(lang);
                     if (null == locale) {
                         if (warnAboutUnknownModel) {
-                            LOG.warn("No language code for model: " + language + ". Using default \"" + defaultLocale + '"');
+                            LOG.warn("No language code for model: {}. Using default \"{}{}", language, defaultLocale, '"');
                         }
                         locale = defaultLocale;
                     }

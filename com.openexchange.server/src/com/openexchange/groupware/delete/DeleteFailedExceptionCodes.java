@@ -50,28 +50,35 @@
 package com.openexchange.groupware.delete;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * Error code for failed delete events.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum DeleteFailedExceptionCodes implements OXExceptionCode {
+public enum DeleteFailedExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Unknown delete event type: %1$d
      */
-    UNKNOWN_TYPE(DeleteFailedExceptionMessage.UNKNOWN_TYPE_MSG, Category.CATEGORY_ERROR, 1),
+    UNKNOWN_TYPE(DeleteFailedExceptionCodes.UNKNOWN_TYPE_MSG, Category.CATEGORY_ERROR, 1),
     /**
      * A SQL error occurred: %1$s
      */
-    SQL_ERROR(DeleteFailedExceptionMessage.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 2),
+    SQL_ERROR(DeleteFailedExceptionCodes.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 2, OXExceptionStrings.SQL_ERROR_MSG),
     /**
      * An error occurred: %1$s
      */
-    ERROR(DeleteFailedExceptionMessage.ERROR_MSG, Category.CATEGORY_ERROR, 3);
+    ERROR(DeleteFailedExceptionCodes.ERROR_MSG, Category.CATEGORY_ERROR, 3);
+
+    private final static String SQL_ERROR_MSG = "A SQL error occurred: %1$s";
+
+    private final static String ERROR_MSG = "An error occurred: %1$s";
+
+    private final static String UNKNOWN_TYPE_MSG = "Unknown delete event type: %1$d";
 
     private final String message;
 
@@ -79,10 +86,35 @@ public enum DeleteFailedExceptionCodes implements OXExceptionCode {
 
     private final int detailNumber;
 
+    /**
+     * Message displayed to the user
+     */
+    private String displayMessage;
+
+    /**
+     * Initializes a new {@link DeleteFailedExceptionCodes}.
+     * 
+     * @param message
+     * @param category
+     * @param detailNumber
+     */
     private DeleteFailedExceptionCodes(final String message, final Category category, final int detailNumber) {
+        this(message, category, detailNumber, null);
+    }
+
+    /**
+     * Default constructor.
+     * 
+     * @param message
+     * @param category
+     * @param number
+     * @param displayMessage
+     */
+    private DeleteFailedExceptionCodes(final String message, final Category category, final int detailNumber, final String displayMessage) {
         this.message = message;
         this.category = category;
         this.detailNumber = detailNumber;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -108,6 +140,14 @@ public enum DeleteFailedExceptionCodes implements OXExceptionCode {
     @Override
     public boolean equals(final OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDisplayMessage() {
+        return this.displayMessage;
     }
 
     /**

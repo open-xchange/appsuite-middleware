@@ -53,13 +53,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.RealtimeConfig;
+import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
 import com.openexchange.realtime.directory.DefaultResource;
+import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
@@ -69,16 +70,17 @@ import com.openexchange.realtime.json.protocol.NextSequence;
 import com.openexchange.realtime.json.protocol.TracingDemand;
 import com.openexchange.realtime.json.util.RTResultFormatter;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.util.IDMap;
 import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link EnrolAction} - Enrols a realtime client when he contacts a backend node for the first time.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class EnrolAction extends RTAction {
 
-    private final static Log LOG = com.openexchange.log.Log.loggerFor(EnrolAction.class);
+    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EnrolAction.class);
 
     private final StateManager stateManager;
 
@@ -90,11 +92,9 @@ public class EnrolAction extends RTAction {
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         final Map<String, Object> enrolActionResults = new HashMap<String, Object>();
         ID constructedId = constructID(requestData, session);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Enroling ID: " + constructedId);
-        }
+        LOG.debug("Enroling ID: {}", constructedId);
         List<JSONObject> stanzas = new ArrayList<JSONObject>();
-        
+
         String userAtContext = constructedId.getUser() + "@" + constructedId.getContext();
         RealtimeConfig realtimeConfig = RealtimeConfig.getInstance();
         if(realtimeConfig.isTraceAllUsersEnabled() || realtimeConfig.getUsersToTrace().contains(userAtContext)) {
@@ -109,20 +109,30 @@ public class EnrolAction extends RTAction {
         NextSequence nextSequence = new NextSequence(constructedId, constructedId, 0);
         JSONObject nextSequenceJSON = stanzaToJSON(nextSequence);
         stanzas.add(nextSequenceJSON);
-        
+
         enrolActionResults.put(STANZAS, stanzas);
-        
+
         ResourceDirectory resourceDirectory = JSONServiceRegistry.getInstance().getService(ResourceDirectory.class);
+
+        /*
+         * The user might have been migrated from another node where he was active and created states on multiple nodes e.g.
+         * StanzaSequenceGate of LocalMessageDispatchers during remote delivery of Stanzas. We have to clean those states or otherwise
+         * StanzaSequenceGates will drop Stanzas due to the NextSequence Stanza that will be returned by this Action.
+         */
+        IDMap<Resource> idMap = resourceDirectory.get(constructedId);
+        if (!idMap.isEmpty()) {
+            GlobalRealtimeCleanup globalRealtimeCleanup = JSONServiceRegistry.getInstance().getService(GlobalRealtimeCleanup.class);
+            globalRealtimeCleanup.cleanForId(constructedId);
+        }
+
         try {
             resourceDirectory.set(constructedId, new DefaultResource());
         } catch (OXException e) {
             RealtimeException enrolException = RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage());
-            LOG.error(enrolException.getMessage(), enrolException);
+            LOG.error("", enrolException);
             enrolActionResults.put(ERROR, exceptionToJSON(enrolException, session));
         }
-        if(LOG.isDebugEnabled()) {
-            LOG.debug(RTResultFormatter.format(enrolActionResults));
-        }
+        LOG.debug(RTResultFormatter.format(enrolActionResults));
         return new AJAXRequestResult(enrolActionResults, "native");
     }
 

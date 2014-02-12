@@ -52,7 +52,6 @@ package com.openexchange.sessionstorage.hazelcast.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
@@ -67,7 +66,6 @@ import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -84,7 +82,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class HazelcastSessionStorageActivator extends HousekeepingActivator {
 
-    private static Log LOG = LogFactory.getLog(HazelcastSessionStorageActivator.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastSessionStorageActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -209,7 +207,7 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator {
         if (null != mapConfigs && 0 < mapConfigs.size()) {
             for (String mapName : mapConfigs.keySet()) {
                 if (mapName.startsWith("sessions-")) {
-                    LOG.info("Using distributed map '" + mapName + "'.");
+                    LOG.info("Using distributed map '{}'.", mapName);
                     return mapName;
                 }
             }

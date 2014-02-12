@@ -107,10 +107,13 @@ public class VCardResource {
 
 	public List<ExtendedType> getExtendedTypes(String extendedName) {
 		List<ExtendedType> xTypes = new ArrayList<ExtendedType>();
-		for (ExtendedType xType : this.vCard.getExtendedTypes()) {
-            if (extendedName.equals(xType.getExtendedName())) {
-                xTypes.add(xType);
-            }
+		List<ExtendedType> extendedTypes = this.vCard.getExtendedTypes();
+		if (null != extendedTypes) {
+    		for (ExtendedType xType : extendedTypes) {
+                if (extendedName.equals(xType.getExtendedName())) {
+                    xTypes.add(xType);
+                }
+    		}
 		}
 		return xTypes;
 	}

@@ -140,7 +140,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class MailFolderStorage implements FolderStorage {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailFolderStorage.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailFolderStorage.class);
 
     private static final String PRIVATE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
 
@@ -396,7 +396,7 @@ public final class MailFolderStorage implements FolderStorage {
                 } else {
                     final MailFolder parent = mailAccess.getFolderStorage().getFolder(parentFullName);
                     final MailPermission[] parentPermissions = parent.getPermissions();
-                    final MailPermission[] mailPermissions = new MailPermission[1];
+                    final List<MailPermission> mailPermissions = new ArrayList<MailPermission>();
                     final MailProvider provider = MailProviderRegistry.getMailProviderBySession(session, accountId);
                     for (int i = 0; i < parentPermissions.length; i++) {
                         final MailPermission parentPerm = parentPermissions[i];
@@ -409,7 +409,7 @@ public final class MailFolderStorage implements FolderStorage {
                             parentPerm.getDeletePermission());
                         mailPerm.setFolderAdmin(parentPerm.isFolderAdmin());
                         mailPerm.setGroupPermission(parentPerm.isGroupPermission());
-                        mailPermissions[i] = mailPerm;
+                        mailPermissions.add(mailPerm);
                     }
                     mfd.addPermissions(mailPermissions);
                 }
@@ -458,7 +458,7 @@ public final class MailFolderStorage implements FolderStorage {
                     storageParameters.getUserId(),
                     storageParameters.getContextId());
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             if (fullname.startsWith(trashFullname)) {
                 // Special handling
@@ -508,7 +508,7 @@ public final class MailFolderStorage implements FolderStorage {
                     storageParameters.getUserId(),
                     storageParameters.getContextId());
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             if (!hardDelete) {
                 // New folder in trash folder
@@ -707,6 +707,7 @@ public final class MailFolderStorage implements FolderStorage {
         final boolean hasSubfolders;
         if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
             if (MailAccount.DEFAULT_ID == accountId) {
+                mailAccess.connect(false);
                 final MailFolder rootFolder = mailAccess.getRootFolder();
                 retval = new MailFolderImpl(rootFolder, accountId, mailAccess.getMailConfig(), storageParameters, null, mailAccess);
                 addWarnings(mailAccess, storageParameters);

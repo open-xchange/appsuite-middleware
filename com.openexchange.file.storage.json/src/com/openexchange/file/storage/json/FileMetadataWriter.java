@@ -52,7 +52,6 @@ package com.openexchange.file.storage.json;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,7 +62,6 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.meta.FileFieldGet;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -77,7 +75,7 @@ public class FileMetadataWriter {
     /**
      * The logger constant.
      */
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FileMetadataWriter.class));
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileMetadataWriter.class);
 
     /**
      * The {@link JSONHandler} constant.
@@ -159,7 +157,7 @@ public class FileMetadataWriter {
                     }
                     return JSONCoercion.coerceToJSON(value);
                 } catch (JSONException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     return null;
                 }
             default: // do nothing;
@@ -202,7 +200,7 @@ public class FileMetadataWriter {
                 try {
                     o.put(field.getName(), JSON.handle(field, file, timezone));
                 } catch (final JSONException e) {
-                    LOG.error("Error writing field: "+field.getName()+": "+e.getMessage(), e);
+                    LOG.error("Error writing field: {}", field.getName(), e);
                 }
                 return o;
             }

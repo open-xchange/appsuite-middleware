@@ -51,12 +51,10 @@ package com.openexchange.report.appsuite.jobs;
 
 import java.io.Serializable;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.log.LogFactory;
 import com.openexchange.report.appsuite.ContextReport;
 import com.openexchange.report.appsuite.ReportContextHandler;
 import com.openexchange.report.appsuite.ReportUserHandler;
@@ -76,7 +74,7 @@ public class AnalyzeContextBatch implements Runnable, Serializable {
     
     private static final long serialVersionUID = -578253218760102061L;
 
-    private static final Log LOG = LogFactory.getLog(AnalyzeContextBatch.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AnalyzeContextBatch.class);
     
     private final String uuid;
     private String reportType;
@@ -98,6 +96,8 @@ public class AnalyzeContextBatch implements Runnable, Serializable {
 
     @Override
     public void run() {
+        int previousPriority = Thread.currentThread().getPriority();
+        Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
         try {
             
             if (reportType == null) {
@@ -140,7 +140,7 @@ public class AnalyzeContextBatch implements Runnable, Serializable {
                     Orchestration.getInstance().done(contextReport);
                 } catch (Throwable t) {
                     Orchestration.getInstance().abort(uuid, reportType, ctxId);
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
 
             }
@@ -151,7 +151,9 @@ public class AnalyzeContextBatch implements Runnable, Serializable {
             for (Integer ctxId: contextIds) {
                 Orchestration.getInstance().abort(uuid, reportType, ctxId);
             }
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
+        } finally {
+            Thread.currentThread().setPriority(previousPriority);
         }
         
     }

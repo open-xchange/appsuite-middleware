@@ -5,7 +5,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.apache.commons.logging.Log;
 
 /*
  *
@@ -61,7 +60,7 @@ import org.apache.commons.logging.Log;
  */
 public class TokenUtils {
 
-	private static final Log log = com.openexchange.log.Log.loggerFor(TokenUtils.class);
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TokenUtils.class);
 
 	/**
 	 * Method for calculating unique tokens for each node
@@ -81,7 +80,7 @@ public class TokenUtils {
 			BigInteger pow = BigInteger.valueOf(2).pow(127);
             BigInteger token = pow.divide(n).multiply(BigInteger.valueOf(i));
             tokens[i] = token;
-            log.info("Node " + i + ": " + token);
+            log.info("Node {}: {}", i, token);
 
             i++;
 		}
@@ -119,14 +118,14 @@ public class TokenUtils {
 
 			if (future.compareTo(current) == 0) {
 				p = pending(p);
-				log.debug("Node " + c + " stays at " + current );
+				log.debug("Node {} stays at {}", c, current );
 				tokens[f] = current;
 				c++;
 			}
 
 			if (future.compareTo(current) == 1) {
 				p = pending(p);
-				log.debug("Node " + c + " ===> " + future);
+				log.debug("Node {} ===> {}", c, future);
 				tokens[f] = future;
 				c++;
 			}
@@ -142,7 +141,7 @@ public class TokenUtils {
 		}
 
 		while (f < fn.length) {
-			log.debug("New node at: " + fn[f]);
+			log.debug("New node at: {}", fn[f]);
 			tokens[f] = fn[f];
 			f++;
 		}
@@ -202,17 +201,14 @@ public class TokenUtils {
 		int r = realSize(replicationFactor, readLevel);
 		int w = realSize(replicationFactor, writeLevel);
 
-		log.info("Reads are " + ((r + w > replicationFactor) ? "consistent." : "eventually consistent."));
-		log.info("Reading from " + ((r > 1) ? r + " nodes" : 1 + " node"));
-		log.info("Writing to " + ((w > 1) ? w + " nodes" : 1 + " node"));
+		log.info("Reads are {}", ((r + w > replicationFactor) ? "consistent." : "eventually consistent."));
+		log.info("Reading from {}", ((r > 1) ? r + " nodes" : 1 + " node"));
+		log.info("Writing to {}", ((w > 1) ? w + " nodes" : 1 + " node"));
 
 		int survival = replicationFactor - Math.max(r, w);
 
-		log.info("The cluster can survive the loss of " +
-				((survival > 1) ? survival + " nodes" : survival == 1 ? "1 node" : "no nodes"));
-		log.info("Every node holds "
-				+ (((float) replicationFactor / (float) clusterSize) * 100)
-				+ " % of data");
+		log.info("The cluster can survive the loss of {}", ((survival > 1) ? survival + " nodes" : survival == 1 ? "1 node" : "no nodes"));
+		log.info("Every node holds {} % of data", (((float) replicationFactor / (float) clusterSize) * 100));
 	}
 
 	/** Simple enum mapping the Levels of R/W in Cassandra */

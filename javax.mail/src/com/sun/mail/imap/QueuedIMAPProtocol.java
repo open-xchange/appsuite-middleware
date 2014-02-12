@@ -52,7 +52,6 @@ package com.sun.mail.imap;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.logging.Level;
-import org.apache.commons.logging.Log;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.QueuingIMAPStore.CountingQueue;
 import com.sun.mail.imap.protocol.IMAPProtocol;
@@ -65,7 +64,7 @@ import com.sun.mail.util.MailLogger;
  */
 public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<QueuedIMAPProtocol> {
 
-    private static final Log LOG = QueuingIMAPStore.getLog();
+    private static final org.slf4j.Logger LOG = QueuingIMAPStore.getLog();
 
     /** The associated queuing IMAP store */
     protected volatile QueuingIMAPStore store;

@@ -117,8 +117,8 @@ public class UserJSONActivator extends AJAXModuleActivator {
                 DatabaseService.class));
             openTrackers();
         } catch (final Exception e) {
-            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UserJSONActivator.class));
-            LOG.error(e.getMessage(), e);
+            final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserJSONActivator.class);
+            LOG.error("", e);
             throw e;
         }
     }

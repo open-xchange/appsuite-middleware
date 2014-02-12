@@ -60,92 +60,23 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class FileStorageExceptionMessages implements LocalizableStrings {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
+    // The folder you requested does not exist.
+    public static final String FOLDER_NOT_EXISTS_MSG = "The folder you requested does not exist.";
 
-    // A SQL error occurred: %1$s
-    public static final String SQL_ERROR_MSG = "A SQL error occurred: %1$s";
+    // The file you requested does not exist.
+    public static final String FILE_NOT_EXISTS_MSG = "The file you requested does not exist.";
 
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
+    // A folder named "%1$s" already exists below the parent folder "%2$s".
+    public static final String DUPLICATE_FOLDER_MSG = "A folder named \"%1$s\" already exists below the parent folder \"%2$s\".";
 
-    // A JSON error occurred: %1$s
-    public static final String JSON_ERROR_MSG = "A JSON error occurred: %1$s";
-
-    // File storage account %1$s of service "%2$s" could not be found for user %3$s in context %4$s.
-    public static final String ACCOUNT_NOT_FOUND_MSG = "File storage account %1$s of service \"%2$s\" could not be found for user %3$s in context %4$s.";
-
-    // The operation is not supported by service %1$s.
-    public static final String OPERATION_NOT_SUPPORTED_MSG = "The operation is not supported by service %1$s.";
-
-    // The folder "%1$s" cannot be found in account %2$s of service "%3$s" of user %4$s in context %5$s.
-    public static final String FOLDER_NOT_FOUND_MSG = "The folder \"%1$s\" cannot be found in account %2$s of service \"%3$s\" of user %4$s in context %5$s.";
-
-    // Invalid file identifier: %1$s
-    public static final String INVALID_FILE_IDENTIFIER_MSG = "Invalid file identifier: %1$s";
-
-    // Invalid header "%1$s": %2$s
-    public static final String INVALID_HEADER_MSG = "Invalid header \"%1$s\": %2$s";
-
-    // Unknown action to perform: %1$s.
-    public static final String UNKNOWN_ACTION_MSG = "Unknown action to perform: %1$s.";
-
-    // A file error occurred: %1$s
-    public static final String FILE_ERROR_MSG = "A file error occurred: %1$s";
-
-    // Wrongly formatted address: %1$s.
-    public static final String ADDRESS_ERROR_MSG = "Wrongly formatted address: %1$s.";
-
-    // Unknown file content: %1$s.
-    public static final String UNKNOWN_FILE_CONTENT_MSG = "Unknown file content: %1$s.";
-
-    // Unknown file storage service: %1$s.
-    public static final String UNKNOWN_FILE_STORAGE_SERVICE_MSG = "Unknown file storage service: %1$s.";
-
-    //  Missing parameter: %1$s
-    public static final String MISSING_PARAMETER_MSG = "Missing parameter: %1$s.";
-
-    // Invalid parameter: %1$s with type '%2$s'. Expected '%3$s'.
-    public static final String INVALID_PARAMETER_MSG = "Invalid parameter: %1$s with type '%2$s'. Expected '%3$s'.";
-
-    // File part is read-only: %1$s
-    public static final String READ_ONLY_MSG = "File part is read-only: %1$s";
-
-    // Unknown color label index: %1$s
-    public static final String UNKNOWN_COLOR_LABEL_MSG = "Unknown color label index: %1$s";
-
-    // A duplicate folder named "%1$s" already exists below parent folder "%2$s".
-    public static final String DUPLICATE_FOLDER_MSG = "A duplicate folder named \"%1$s\" already exists below parent folder \"%2$s\".";
-
-    // No create access on folder %1$s.
-    public static final String NO_CREATE_ACCESS_MSG = "No create access on folder %1$s.";
-
-    // Not connected
-    public static final String NOT_CONNECTED_MSG = "Not connected";
-
-    // Invalid sorting column. Cannot sort by %1$s.
-    public static final String INVALID_SORTING_COLUMN_MSG = "Invalid sorting column. Cannot sort by %1$s.";
-
-    // No attachment found with section identifier %1$s in file %2$s in folder %3$s.
-    public static final String ATTACHMENT_NOT_FOUND_MSG = "No attachment found with section identifier %1$s in file %2$s in folder %3$s.";
-
-    // File %1$s not found in folder %2$s.
-    public static final String FILE_NOT_FOUND_MSG = "File %1$s not found in folder %2$s.";
-
-    // No account manager could be found for service: %1$s.
-    public static final String NO_ACCOUNT_MANAGER_FOR_SERVICE_MSG = "No account manager could be found for service: %1$s.";
-
-    // Invalid URL "%1$s". Error: %2$s.
-    public static final String INVALID_URL_MSG = "Invalid URL \"%1$s\". Error: %2$s.";
-
-    // No such folder.
-    public static final String NO_SUCH_FOLDER_MSG = "No such folder.";
-
-    // Authentication failed for login %1$s to server %2$s (service: %3$s).
-    public static final String LOGIN_FAILED_MSG = "Authentication failed for login %1$s to server %2$s (service: %3$s).";
+    // You do not have the appropriate permissions to create a subfolder below the folder "%1$s".
+    public static final String NO_CREATE_ACCESS_MSG = "You do not have the appropriate permissions to create a subfolder below the folder \"%1$s\".";
 
     // In order to accomplish the search, %1$d or more characters are required.
     public static final String PATTERN_NEEDS_MORE_CHARACTERS_MSG = "In order to accomplish the search, %1$d or more characters are required.";
+
+    // Invalid URL \"%1$s\". Please correct the value and try again.
+    public static final String INVALID_URL_MSG = "Invalid URL \"%1$s\". Please correct the value and try again.";
 
     /**
      * Initializes a new {@link OXExceptionMessages}.

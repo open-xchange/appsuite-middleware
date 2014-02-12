@@ -51,8 +51,6 @@ package com.openexchange.groupware.tasks;
 
 import java.sql.Connection;
 import java.util.Date;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentEvent;
 import com.openexchange.groupware.attach.AttachmentListener;
@@ -66,7 +64,7 @@ public class TaskAttachmentListener implements AttachmentListener {
 
     private static final int[] UPDATE_FIELDS = new int[] { Task.LAST_MODIFIED, Task.MODIFIED_BY, Task.NUMBER_OF_ATTACHMENTS };
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TaskAttachmentListener.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TaskAttachmentListener.class);
 
     public TaskAttachmentListener() {
         super();
@@ -92,11 +90,7 @@ public class TaskAttachmentListener implements AttachmentListener {
         } catch (final OXException e) {
             throw e;
         }
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Increased number of attachments for task "
-                + event.getAttachedId() + " in context " + ctx.getContextId()
-                + " to " + task.getNumberOfAttachments());
-        }
+        LOG.trace("Increased number of attachments for task {} in context {} to {}", event.getAttachedId(), ctx.getContextId(), task.getNumberOfAttachments());
         return lastModified.getTime();
     }
 
@@ -125,11 +119,7 @@ public class TaskAttachmentListener implements AttachmentListener {
         } catch (final OXException e) {
             throw e;
         }
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Decreased number of attachments for task "
-                + event.getAttachedId() + " in context " + ctx.getContextId()
-                + " to " + task.getNumberOfAttachments());
-        }
+        LOG.trace("Decreased number of attachments for task {} in context {} to {}", event.getAttachedId(), ctx.getContextId(), task.getNumberOfAttachments());
         return lastModified.getTime();
     }
 }

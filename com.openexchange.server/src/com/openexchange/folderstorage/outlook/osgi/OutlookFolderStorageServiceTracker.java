@@ -63,8 +63,8 @@ import com.openexchange.folderstorage.FolderStorage;
  */
 public final class OutlookFolderStorageServiceTracker implements ServiceTrackerCustomizer<FolderStorage,FolderStorage> {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OutlookFolderStorageServiceTracker.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(OutlookFolderStorageServiceTracker.class);
 
     private final BundleContext context;
 
@@ -81,8 +81,7 @@ public final class OutlookFolderStorageServiceTracker implements ServiceTrackerC
         {
             final Object obj = reference.getProperty("tree");
             if (null == obj) {
-                LOG.error(new StringBuilder(32).append("Missing tree identifier property \"tree\" for ").append(
-                    addedService.getClass().getName()).toString());
+                LOG.error("Missing tree identifier property \"tree\" for {}", addedService.getClass().getName());
                 // Nothing to track, return null
                 context.ungetService(reference);
                 return null;
@@ -112,8 +111,7 @@ public final class OutlookFolderStorageServiceTracker implements ServiceTrackerC
                 {
                     final Object obj = reference.getProperty("tree");
                     if (null == obj) {
-                        LOG.error(new StringBuilder(32).append("Missing tree identifier property \"tree\" for ").append(
-                            service.getClass().getName()).toString());
+                        LOG.error("Missing tree identifier property \"tree\" for {}", service.getClass().getName());
                         return;
                     }
                     treeId = obj.toString();

@@ -142,9 +142,18 @@
                 <#--Check, that the file is not hidden-->
                 <#if item.fileName?? && !item.fileName!?starts_with('_') && !item.fileName!?starts_with('.') >
                     <#--Check for the correct file type-->
-                    <#if (item.fileName!?last_index_of('.') >= 0) && item.fileName!?substring(item.fileName!?last_index_of('.') + 1)?matches('(gif|bmp|tiff|jpe?g|png)')>
+                    <#if (item.fileName!?last_index_of('.') >= 0) && (item.fileName!?substring(item.fileName!?last_index_of('.') + 1)?lower_case)?matches('(gif|bmp|tiff|jpe?g|png)')>
                         {url: '${utils.getScheme(request)!"http"}${request.serverName}${utils.getFileURL(publication, item)!?html}',
-                        name: '${item.fileName!?substring(0, item.fileName!?last_index_of('.'))}'}<#if item_has_next>,</#if>
+                        name: '${item.fileName!?substring(0, item.fileName!?last_index_of('.'))}',
+                        fileName: '${item.fileName!""}',
+                        title: '${item.title!""}',
+                        creationDate: '${timeFormat.format(item.creationDate)}',
+                        lastModified: '${timeFormat.format(item.lastModified)}',
+                        tags: '${item.categories!""}',
+                        comment: '${htmlService.htmlFormat(item.description!"")}',
+                        fileSize: '${item.fileSize!""}',
+                        MIMEType: '${item.fileMIMEType!""}',
+                        version: '${item.version!""}'}<#if item_has_next>,</#if>
                     </#if>
                 </#if>
             </#list>
@@ -341,9 +350,35 @@
              */
             var Thumbnails = function () {
                 var thumbnailContainer = $('#content'),
+                	dataContainer = $('<div class="data-container">').css('display','none'),
                     imageCache = [],
                     lastMetrics,
                     numSites = 1;
+                    
+                /**
+                 * Adds the data, so subscriptions are able to find the files
+                 */
+                function appendDataContainer () {
+                	dataContainer.empty();
+                	for(var i = 0;i < list.length; i++) {
+                		dataContainer.append(
+                			$('<div class="oxmf-information ox_infoitem">').append(
+                			$('<span class="ox_file">').text(list[i].url),
+                			$('<span class="ox_title">').text(list[i].fileName),
+                			$('<span class="ox_url">').text(list[i].url),
+                			$('<span class="ox_version">').text(list[i].version),
+                			$('<span class="ox_creationDate">').text(list[i].creationDate),
+                			$('<span class="ox_lastModified">').text(list[i].lastModified),
+                			$('<span class="ox_tags">').text(list[i].tags),
+                			$('<span class="ox_comment">').text(list[i].comment),
+                			$('<span class="ox_fileName">').text(list[i].fileName),
+                			$('<span class="ox_fileSize">').text(list[i].fileSize),
+                			$('<span class="ox_MIMEType">').text(list[i].MIMEType)
+                			)
+                		);
+                	}
+                    thumbnailContainer.append(dataContainer);
+                }
 
                 /**
                  * @param {integer} The index within the list of the image to be displayed.
@@ -493,6 +528,9 @@
 
                     //clear the old image container
                     thumbnailContainer.children().detach();
+
+                    //append dataContainer;
+                    appendDataContainer();
 
                     //append the new content
                     appendImages(metrics);

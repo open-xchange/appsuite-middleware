@@ -53,7 +53,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
@@ -71,7 +70,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  */
 public abstract class CommonCollection extends AbstractCollection {
 
-    protected static Log LOG = com.openexchange.log.Log.loggerFor(CommonCollection.class);
+    protected static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CommonCollection.class);
 
     private final WebdavFactory factory;
     private final WebdavPath url;
@@ -85,7 +84,7 @@ public abstract class CommonCollection extends AbstractCollection {
         super();
         this.factory = factory;
         this.url = url;
-        LOG.debug(getUrl() + ": initialized.");
+        LOG.debug("{}: initialized.", getUrl());
     }
 
     protected WebdavProtocolException protocolException(Throwable t) {
@@ -93,7 +92,7 @@ public abstract class CommonCollection extends AbstractCollection {
     }
 
     protected WebdavProtocolException protocolException(Throwable t, int statusCode) {
-        LOG.error(this.getUrl() + ": " + t.getMessage(), t);
+        LOG.error("{}", this.getUrl(), t);
         return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), statusCode, t);
     }
 

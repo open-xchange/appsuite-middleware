@@ -51,8 +51,6 @@ package com.openexchange.subscribe.crawler;
 
 import java.util.ArrayList;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -70,7 +68,7 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class TasksByICalFileStep extends AbstractStep<Task[], Page> {
-private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TasksByICalFileStep.class));
+private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TasksByICalFileStep.class);
 
     public TasksByICalFileStep(){
 
@@ -82,7 +80,7 @@ private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLo
         ArrayList<Task> tasks = new ArrayList<Task>();
 
         try {
-            LOG.debug("This should be an iCal-File : \n" + input.getWebResponse().getContentAsString());
+            LOG.debug("This should be an iCal-File : \n{}", input.getWebResponse().getContentAsString());
             String iCalFile = input.getWebResponse().getContentAsString();
             ICalParser iCalParser = workflow.getActivator().getICalParser();
 
@@ -99,9 +97,9 @@ private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLo
             tasks.addAll(tempTasks);
 
         } catch (ConversionError e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (FailingHttpStatusCodeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
 
         output = new Task[tasks.size()];

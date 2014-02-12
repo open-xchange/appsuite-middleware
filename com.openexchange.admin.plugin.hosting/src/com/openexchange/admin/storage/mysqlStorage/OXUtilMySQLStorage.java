@@ -69,7 +69,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import org.apache.commons.collections.keyvalue.MultiKey;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
@@ -80,7 +79,6 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.sqlStorage.OXUtilSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -93,7 +91,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
-    private final static Log LOG = LogFactory.getLog(OXUtilMySQLStorage.class);
+    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXUtilMySQLStorage.class);
 
     private static final ThreadPools.ExpectedExceptionFactory<StorageException> EXCEPTION_FACTORY = new ThreadPools.ExpectedExceptionFactory<StorageException>() {
 

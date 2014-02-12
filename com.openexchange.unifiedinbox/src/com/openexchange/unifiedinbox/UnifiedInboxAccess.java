@@ -71,7 +71,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
 
     private static final long serialVersionUID = 6666321725945931657L;
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UnifiedInboxAccess.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UnifiedInboxAccess.class);
 
     /**
      * Full name of INBOX.
@@ -217,7 +217,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
             try {
                 folderStorage.releaseResources();
             } catch (final OXException e) {
-                LOG.error(new StringBuilder("Error while closing Unified Mail folder storage: ").append(e.getMessage()).toString(), e);
+                LOG.error("Error while closing Unified Mail folder storage", e);
             } finally {
                 folderStorage = null;
             }
@@ -226,7 +226,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
             try {
                 messageStorage.releaseResources();
             } catch (final OXException e) {
-                LOG.error(new StringBuilder("Error while closing Unified Mail message storage: ").append(e.getMessage()).toString(), e);
+                LOG.error("Error while closing Unified Mail message storage", e);
             } finally {
                 messageStorage = null;
 

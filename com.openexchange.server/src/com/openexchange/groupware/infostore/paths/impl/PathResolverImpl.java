@@ -60,7 +60,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
@@ -72,14 +71,13 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.Resolved;
 import com.openexchange.groupware.infostore.WebdavFolderAliases;
 import com.openexchange.groupware.infostore.webdav.URLCache;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.webdav.protocol.WebdavPath;
 
 public class PathResolverImpl extends AbstractPathResolver implements URLCache {
     private Mode MODE;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PathResolverImpl.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PathResolverImpl.class);
 
     private final ThreadLocal<Map<WebdavPath,Resolved>> resolveCache = new ThreadLocal<Map<WebdavPath,Resolved>>();
     private final ThreadLocal<TIntObjectMap<WebdavPath>> docPathCache = new ThreadLocal<TIntObjectMap<WebdavPath>>();

@@ -53,7 +53,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link CryptoExceptionMessage}
- *
+ * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class CryptoExceptionMessage implements LocalizableStrings {
@@ -65,32 +65,6 @@ public class CryptoExceptionMessage implements LocalizableStrings {
         super();
     }
 
-    /**
-     * Bad password.
-     */
-    public final static String BAD_PASSWORD_HELP = "Provide correct password.";
-
-    public final static String BAD_PASSWORD_MSG = "Wrong Password.";
-
-    /**
-     * Encoding error.
-     */
-    public final static String ENCODING_ERROR_HELP = "Check the encoding.";
-
-    public final static String ENCODING_ERROR_MSG = "Error during encoding operation.";
-
-    /**
-     * Security Exception.
-     */
-    public final static String SECURITY_EXCEPTION_HELP = "Check cipher initialization";
-
-    public final static String SECURITY_EXCEPTION_MSG = "General Security Exception occurred.";
-
-    /**
-     * Arbitrary byte sequence is missing to generate a secure key.
-     */
-    public final static String NO_SALT_HELP = "Provide arbitrary byte sequence to generate a secure key.";
-
-    public final static String NO_SALT_MSG = "Arbitrary byte sequence is missing to generate a secure key.";
+    public final static String BAD_PASSWORD_DISPLAY = "The provided password seems to be wrong or something bad happened.";
 
 }

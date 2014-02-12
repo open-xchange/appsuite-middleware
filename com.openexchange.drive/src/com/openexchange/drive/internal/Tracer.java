@@ -50,7 +50,6 @@
 package com.openexchange.drive.internal;
 
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.java.StringAllocator;
 
@@ -61,7 +60,7 @@ import com.openexchange.java.StringAllocator;
  */
 public class Tracer {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Tracer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Tracer.class);
     private static final int MAX_SIZE = 20000;
 
     private final StringAllocator traceLog;
@@ -69,11 +68,11 @@ public class Tracer {
     /**
      * Initializes a new {@link Tracer}.
      *
-     * @param diagnostics Whether to write a diagnostics log or not.
+     * @param clientDiagnostics Whether to write a diagnostics log or not.
      */
-    public Tracer(Boolean diagnostics) {
+    public Tracer(Boolean clientDiagnostics) {
         super();
-        this.traceLog = null != diagnostics && diagnostics.booleanValue() ? new StringAllocator() : null;
+        this.traceLog = null != clientDiagnostics && clientDiagnostics.booleanValue() ? new StringAllocator() : null;
     }
 
     /**
@@ -84,9 +83,7 @@ public class Tracer {
     public void trace(Object message) {
         if (isTraceEnabled()) {
             String msg = String.valueOf(message);
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(msg);
-            }
+            LOG.trace(msg);
             if (null != traceLog) {
                 int remainingCapacity = MAX_SIZE - traceLog.length();
                 if (0 < remainingCapacity) {
@@ -98,17 +95,6 @@ public class Tracer {
                         traceLog.append(msg.substring(0, remainingCapacity)).append("\n... (truncated)");
                     }
                 }
-//                if (traceLog.length() + msg.length() < MAX_SIZE) {
-//                    traceLog
-//                        .append(DriveConstants.LOG_DATE_FORMAT.get().format(new Date()))
-//                        .append(" [").append(Thread.currentThread().getId()).append("] : ")
-//                        .append(msg.trim()).append("\n\n");
-//                } else {
-//                    String end = traceLog.substring(traceLog.length() - 20, traceLog.length());
-//                    if (false == end.endsWith("\n... (truncated)")) {
-//                        traceLog.append("\n... (truncated)");
-//                    }
-//                }
             }
         }
     }

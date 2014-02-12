@@ -53,8 +53,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -75,7 +73,7 @@ import com.openexchange.subscribe.crawler.internal.LoginStep;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class LoginPageByFormActionRegexVerifiedByStringStep extends AbstractStep<HtmlPage, Object> implements LoginStep, HasLoginPage{
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginPageByFormActionStep.class));
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LoginPageByFormActionStep.class);
 
     private String url, username, password, actionOfLoginForm, nameOfUserField, nameOfPasswordField, stringAvailableAfterLogin, baseUrl;
 
@@ -100,7 +98,7 @@ public class LoginPageByFormActionRegexVerifiedByStringStep extends AbstractStep
             for (final HtmlForm form : loginPage.getForms()) {
                 Pattern pattern = Pattern.compile(actionOfLoginForm);
                 Matcher matcher = pattern.matcher(form.getActionAttribute());
-                LOG.info("Forms action attribute / number is : " + form.getActionAttribute() + " / " + numberOfFormCounter + ", should be " + actionOfLoginForm + " / "+numberOfForm);
+                LOG.info("Forms action attribute / number is : {} / {}, should be {} / {}", form.getActionAttribute(), numberOfFormCounter, actionOfLoginForm, numberOfForm);
                 if (matcher.matches() && numberOfForm == numberOfFormCounter && form.getInputsByName(nameOfUserField) != null) {
                     loginForm = form;
                 }
@@ -119,7 +117,7 @@ public class LoginPageByFormActionRegexVerifiedByStringStep extends AbstractStep
                 Pattern pattern = Pattern.compile(stringAvailableAfterLogin);
                 Matcher matcher = pattern.matcher(pageString);
                 if (!matcher.find()) {
-                    LOG.debug("Page that does not have the link to imply a successful login : " + output.getWebResponse().getContentAsString());
+                    LOG.debug("Page that does not have the link to imply a successful login : {}", output.getWebResponse().getContentAsString());
 //                    if (isDebuggingEnabled()){
 //                        openPageInBrowser(output);
 //                    }

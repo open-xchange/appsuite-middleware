@@ -53,6 +53,7 @@ import static com.openexchange.java.Strings.toLowerCase;
 import java.sql.Connection;
 import java.util.EnumSet;
 import java.util.Set;
+import org.slf4j.LoggerFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -60,7 +61,6 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.StorageUtility;
-import com.openexchange.mailaccount.json.actions.AbstractMailAccountAction;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -114,7 +114,7 @@ public final class Tools {
         int digit;
 
         if (i < max) {
-            digit = Character.digit(s.charAt(i++), RADIX);
+            digit = digit(s.charAt(i++));
             if (digit < 0) {
                 return -1;
             }
@@ -124,7 +124,7 @@ public final class Tools {
             /*
              * Accumulating negatively avoids surprises near MAX_VALUE
              */
-            digit = Character.digit(s.charAt(i++), RADIX);
+            digit = digit(s.charAt(i++));
             if (digit < 0) {
                 return -1;
             }
@@ -138,6 +138,33 @@ public final class Tools {
             result -= digit;
         }
         return -result;
+    }
+
+    private static int digit(final char c) {
+        switch (c) {
+        case '0':
+            return 0;
+        case '1':
+            return 1;
+        case '2':
+            return 2;
+        case '3':
+            return 3;
+        case '4':
+            return 4;
+        case '5':
+            return 5;
+        case '6':
+            return 6;
+        case '7':
+            return 7;
+        case '8':
+            return 8;
+        case '9':
+            return 9;
+        default:
+            return -1;
+        }
     }
 
     /**
@@ -219,7 +246,7 @@ public final class Tools {
                 mad.setConfirmedHamFullname((tmp = new StringBuilder(prefix)).append(name).toString());
                 attributes.add(Attribute.CONFIRMED_HAM_FULLNAME_LITERAL);
             }
-            // Confirmed-Ham
+            // Confirmed-Spam
             fullName = account.getConfirmedSpamFullname();
             if (null == fullName) {
                 if (null == prefix) {
@@ -262,7 +289,7 @@ public final class Tools {
                     }
                     name = getName(StorageUtility.INDEX_DRAFTS, primaryAccount);
                 }
-                if ("Drafts".equals(name) && account.getMailServer().endsWith("yahoo.com")) {
+                if ("Drafts".equalsIgnoreCase(name) && account.getMailServer().endsWith("yahoo.com")) {
                     name = "Draft";
                     mad.setDrafts(name);
                     attributes.add(Attribute.DRAFTS_LITERAL);
@@ -290,7 +317,7 @@ public final class Tools {
                     }
                     name = getName(StorageUtility.INDEX_SENT, primaryAccount);
                 }
-                if ("Sent Items".equals(name) && account.getMailServer().endsWith("yahoo.com")) {
+                if ("Sent Items".equalsIgnoreCase(name) && account.getMailServer().endsWith("yahoo.com")) {
                     name = "Sent";
                     mad.setSent(name);
                     attributes.add(Attribute.SENT_LITERAL);
@@ -318,7 +345,7 @@ public final class Tools {
                     }
                     name = getName(StorageUtility.INDEX_SPAM, primaryAccount);
                 }
-                if ("Spam".equals(name) && account.getMailServer().endsWith("yahoo.com")) {
+                if ("Spam".equalsIgnoreCase(name) && account.getMailServer().endsWith("yahoo.com")) {
                     name = "Bulk Mail";
                     mad.setDrafts(name);
                     attributes.add(Attribute.DRAFTS_LITERAL);
@@ -389,7 +416,7 @@ public final class Tools {
             final StringBuilder sb = new StringBuilder("Checking default folder full names for account ");
             sb.append(account.getId()).append(" failed with user ").append(userId);
             sb.append(" in context ").append(contextId);
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractMailAccountAction.class)).warn(sb.toString(), e);
+            LoggerFactory.getLogger(Tools.class).warn(sb.toString(), e);
             return account;
         }
     }

@@ -83,7 +83,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class AppointmentResultConverter extends AbstractCalendarJSONResultConverter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AppointmentResultConverter.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppointmentResultConverter.class);
 
     private static final String INPUT_FORMAT = "appointment";
 
@@ -117,7 +117,7 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
             timeZone = null == timeZoneId ? userTimeZone : getTimeZone(timeZoneId);
         }
         final JSONArray jsonResponseArray = new JSONArray();
-        final AppointmentWriter writer = new AppointmentWriter(timeZone);
+        final AppointmentWriter writer = new AppointmentWriter(timeZone).setSession(req.getSession());
 
         for (final Appointment appointment : appointmentList) {
             try {
@@ -149,8 +149,8 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
             timeZone = null == timeZoneId ? userTimeZone : getTimeZone(timeZoneId);
         }
 
-        final JSONArray jsonResponseArray = new JSONArray();
-        final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone);
+        final JSONArray jsonResponseArray = new JSONArray(appointmentList.size());
+        final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone).setSession(req.getSession());
         for (final Appointment appointment : appointmentList) {
             final JSONObject jsonAppointmentObj = new JSONObject();
             try {
@@ -177,8 +177,8 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
             final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
             timeZone = null == timeZoneId ? userTimeZone : getTimeZone(timeZoneId);
         }
-        final JSONArray jsonResponseArray = new JSONArray();
-        final AppointmentWriter writer = new AppointmentWriter(timeZone);
+        final JSONArray jsonResponseArray = new JSONArray(appointmentList.size());
+        final AppointmentWriter writer = new AppointmentWriter(timeZone).setSession(req.getSession());
 
         for (final Appointment appointment : appointmentList) {
             try {
@@ -227,7 +227,7 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
             final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
             timeZone = null == timeZoneId ? userTimeZone : getTimeZone(timeZoneId);
         }
-        final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
+        final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone).setSession(request.getSession());
         appointmentwriter.setSession(session);
 
         if (appointmentobject.getRecurrenceType() != CalendarObject.NONE && recurrencePosition > 0) {
@@ -241,9 +241,7 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
                 CalendarCollectionService.MAX_OCCURRENCESE,
                 true);
             if (recuResults.size() == 0) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn(new com.openexchange.java.StringAllocator(32).append("No occurrence at position ").append(recurrencePosition));
-                }
+                LOG.warn("No occurrence at position {}", recurrencePosition);
                 throw OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION.create(Integer.valueOf(recurrencePosition));
             }
             final RecurringResultInterface resultInterface = recuResults.getRecurringResult(0);

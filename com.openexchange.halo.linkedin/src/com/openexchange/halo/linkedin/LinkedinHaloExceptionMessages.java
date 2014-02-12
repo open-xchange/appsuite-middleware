@@ -59,17 +59,11 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class LinkedinHaloExceptionMessages implements LocalizableStrings {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
     // No Linked-In account available.
-    public static final String NO_ACCOUNT_MSG = "No Linked-In account available.";
+    public static final String NO_ACCOUNT_DISPLAY = "No Linked-In account available.";
 
     // Need an e-mail address to look up Linked-In data
-    public static final String MISSING_EMAIL_ADDR_MSG = "Need an e-mail address to look up Linked-In data.";
+    public static final String MISSING_EMAIL_ADDR_DISPLAY = "Need an e-mail address to look up Linked-In data.";
 
     /**
      * Initializes a new {@link LinkedinHaloExceptionMessages}.

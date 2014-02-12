@@ -81,12 +81,9 @@ public final class PushActivator extends HousekeepingActivator {
 
     @Override
     public void startBundle() throws Exception {
-        final org.apache.commons.logging.Log log =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PushActivator.class))));
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PushActivator.class);
         try {
-            if (log.isInfoEnabled()) {
-                log.info("starting bundle: com.openexchange.push");
-            }
+            log.info("starting bundle: com.openexchange.push");
             /*
              * Initialize and open service tracker for push manager services
              */
@@ -109,19 +106,16 @@ public final class PushActivator extends HousekeepingActivator {
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
             registerService(EventHandler.class, new PushEventHandler(), serviceProperties);
         } catch (final Exception e) {
-            log.error("Failed start-up of bundle com.openexchange.push: " + e.getMessage(), e);
+            log.error("Failed start-up of bundle com.openexchange.push", e);
             throw e;
         }
     }
 
     @Override
     public void stopBundle() throws Exception {
-        final org.apache.commons.logging.Log log =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PushActivator.class))));
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PushActivator.class);
         try {
-            if (log.isInfoEnabled()) {
-                log.info("stopping bundle: com.openexchange.push");
-            }
+            log.info("stopping bundle: com.openexchange.push");
             /*
              * Unregister event handler
              */
@@ -132,14 +126,13 @@ public final class PushActivator extends HousekeepingActivator {
             closeTrackers();
             PushManagerRegistry.shutdown();
         } catch (final Exception e) {
-            log.error("Failed shut-down of bundle com.openexchange.push: " + e.getMessage(), e);
+            log.error("Failed shut-down of bundle com.openexchange.push", e);
             throw e;
         }
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // Nothing to do
         return null;
     }
 

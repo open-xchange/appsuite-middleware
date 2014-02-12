@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.database.provider.DBPoolProvider;
@@ -158,10 +159,10 @@ public class PermissionTest extends TestCase implements SessionHolder {
             resource.save();
             fail("Shouldn't be able to save this, as user2 doesn't have write permissions");
         } catch(final WebdavProtocolException x) {
-            if(x.getStatus() != 403) {
+            if(x.getStatus() != HttpServletResponse.SC_UNAUTHORIZED) {
                 x.printStackTrace();
             }
-            assertEquals("Expected Forbidden Status", 403, x.getStatus());
+            assertEquals("Expected Unauthorized Status", HttpServletResponse.SC_UNAUTHORIZED, x.getStatus());
         }
     }
 
@@ -181,10 +182,10 @@ public class PermissionTest extends TestCase implements SessionHolder {
             collection.save();
             fail("Shouldn't be able to save this, as user2 doesn't have write permissions");
         } catch(final WebdavProtocolException x) {
-            if (x.getStatus() != 403) {
+            if (x.getStatus() != HttpServletResponse.SC_FORBIDDEN) {
                 x.printStackTrace();
             }
-            assertEquals("Expected Forbidden Status", 403, x.getStatus());
+            assertEquals("Expected Forbidden Status", HttpServletResponse.SC_FORBIDDEN, x.getStatus());
         }
     }
 
@@ -298,10 +299,10 @@ public class PermissionTest extends TestCase implements SessionHolder {
             resource.save();
             fail("Could update document even without write permissions to it");
         } catch (final WebdavProtocolException x) {
-            if(x.getStatus() != 403) {
+            if(x.getStatus() != HttpServletResponse.SC_UNAUTHORIZED) {
                 x.printStackTrace();
             }
-            assertEquals(403,x.getStatus());
+            assertEquals(HttpServletResponse.SC_UNAUTHORIZED, x.getStatus());
         }
     }
 
@@ -313,10 +314,10 @@ public class PermissionTest extends TestCase implements SessionHolder {
             res.save();
             fail("Shouldn't be able to save in root folder");
         } catch (final WebdavProtocolException x) {
-            if(x.getStatus() != 403) {
+            if(x.getStatus() != HttpServletResponse.SC_UNAUTHORIZED) {
                 x.printStackTrace();
             }
-            assertEquals(403,x.getStatus());
+            assertEquals(HttpServletResponse.SC_UNAUTHORIZED, x.getStatus());
         }
 
     }

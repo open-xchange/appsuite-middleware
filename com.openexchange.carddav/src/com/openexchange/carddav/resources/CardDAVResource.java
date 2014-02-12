@@ -57,7 +57,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.java.Streams;
@@ -82,7 +81,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  */
 public abstract class CardDAVResource extends AbstractResource {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CardDAVResource.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CardDAVResource.class);
 
     /**
      * The prefix to be applied to all OX CardDAV entities
@@ -97,7 +96,7 @@ public abstract class CardDAVResource extends AbstractResource {
         super();
         this.factory = factory;
         this.url = url;
-        LOG.debug(getUrl() + ": initialized.");
+        LOG.debug("{}: initialized.", getUrl());
     }
 
     protected WebdavProtocolException protocolException(Throwable t) {
@@ -112,7 +111,7 @@ public abstract class CardDAVResource extends AbstractResource {
     	if (null == t) {
     		t = new Throwable();
     	}
-        LOG.error(t.getMessage(), t);
+        LOG.error("", t);
         return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), statusCode, t);
     }
 
@@ -218,9 +217,7 @@ public abstract class CardDAVResource extends AbstractResource {
 	@Override
 	public InputStream getBody() throws WebdavProtocolException {
 	    String body = this.getVCard();
-	    if (LOG.isTraceEnabled()) {
-	        LOG.trace(body);
-	    }
+	    LOG.trace(body);
         return null != body ? new ByteArrayInputStream(body.getBytes()) : null;
 	}
 

@@ -127,7 +127,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionConstants {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OXFolderManagerImpl.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXFolderManagerImpl.class);
 
     /**
      * No options.
@@ -215,7 +215,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         } else {
             ctx = ContextStorage.getStorageContext(session.getContextId());
             userPerms = UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), ctx);
-            user = UserStorage.getStorageUser(session.getUserId(), ctx);
+            user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
         }
         this.readCon = readCon;
         this.writeCon = writeCon;
@@ -381,7 +381,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
             if (throwException) {
                 throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(OXFolderUtility.getFolderName(parentFolder),
-                    Integer.valueOf(ctx.getContextId()));
+                    Integer.valueOf(ctx.getContextId()), folderName);
             }
 
             OXFolderUtility.checki18nString(parentFolderID, folderName, user.getLocale(), ctx);
@@ -558,25 +558,32 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             }
         }
         final boolean performMove = fo.containsParentFolderID();
-        if (fo.containsPermissions() || fo.containsModule()) {
-            if (performMove) {
-                move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), getFolderFromMaster(fo.getObjectID()), lastModified);
+        if (fo.containsPermissions() || fo.containsModule() || fo.containsMeta()) {
+            FolderObject storageObject = getFolderFromMaster(fo.getObjectID());
+            final int newParentFolderID = fo.getParentFolderID();
+            if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
+                move(fo.getObjectID(), newParentFolderID, fo.getCreatedBy(), fo.getFolderName(), storageObject, lastModified);
+                // Reload storage's folder
+                storageObject = getFolderFromMaster(fo.getObjectID());
             }
             if (isRenameOnly) {
-                rename(fo, getFolderFromMaster(fo.getObjectID()), lastModified);
+                rename(fo, storageObject, lastModified);
             } else {
-                update(fo, OPTION_NONE, getFolderFromMaster(fo.getObjectID()), lastModified, handDown);
+                update(fo, OPTION_NONE, storageObject, lastModified, handDown);
             }
         } else if (fo.containsFolderName()) {
-            if (performMove) {
-                move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), getFolderFromMaster(fo.getObjectID()), lastModified);
+            final FolderObject storageObject = getFolderFromMaster(fo.getObjectID());
+            final int newParentFolderID = fo.getParentFolderID();
+            if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
+                move(fo.getObjectID(), newParentFolderID, fo.getCreatedBy(), fo.getFolderName(), storageObject, lastModified);
+            } else {
+                rename(fo, storageObject, lastModified);
             }
-            rename(fo, getFolderFromMaster(fo.getObjectID()), lastModified);
         } else if (performMove) {
             /*
              * Perform move
              */
-            move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), getFolderFromMaster(fo.getObjectID()), lastModified);
+            move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), null, getFolderFromMaster(fo.getObjectID()), lastModified);
         }
         /*
          * Finally update cache
@@ -770,7 +777,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                      */
                     throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(OXFolderUtility.getFolderName(new OXFolderAccess(
                         readCon,
-                        ctx).getFolderObject(storageObj.getParentFolderID())), Integer.valueOf(ctx.getContextId()));
+                        ctx).getFolderObject(storageObj.getParentFolderID())), Integer.valueOf(ctx.getContextId()), folderName);
                 }
                 /*
                  * Check i18n strings, too
@@ -899,24 +906,18 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     }
 
     private FolderObject getFolderFromMaster(final int folderId, final boolean withSubfolders) throws OXException {
-        try {
-            /*
-             * Use writable connection to ensure to fetch from master database
-             */
-            Connection wc = writeCon;
-            if (wc == null) {
-                try {
-                    wc = DBPool.pickupWriteable(ctx);
-                    return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
-                } finally {
-                    if (wc != null) {
-                        DBPool.closeWriterAfterReading(ctx, wc);
-                    }
-                }
-            }
+        // Use writable connection to ensure to fetch from master database
+        Connection wc = writeCon;
+        if (wc != null) {
             return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
-        } catch (final OXException e) {
-            throw e;
+        }
+
+        // Fetch new writable connection
+        wc = DBPool.pickupWriteable(ctx);
+        try {
+            return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
+        } finally {
+            DBPool.closeWriterAfterReading(ctx, wc);
         }
     }
 
@@ -1011,7 +1012,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
             if (throwException) {
                 throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(OXFolderUtility.getFolderName(new OXFolderAccess(readCon, ctx).getFolderObject(storageObj.getParentFolderID())),
-                    Integer.valueOf(ctx.getContextId()));
+                    Integer.valueOf(ctx.getContextId()), folderName);
             }
 
             /*
@@ -1072,11 +1073,11 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         return Arrays.binarySearch(a, key) >= 0;
     }
 
-    private void move(final int folderId, final int targetFolderId, final int createdBy, final FolderObject storageSrc, final long lastModified) throws OXException {
+    private void move(final int folderId, final int targetFolderId, final int createdBy, String newName, final FolderObject storageSrc, final long lastModified) throws OXException {
         /*
-         * Folder is already in target folder
+         * Folder is already in target folder and does not need to be renamed
          */
-        if (storageSrc.getParentFolderID() == targetFolderId) {
+        if (storageSrc.getParentFolderID() == targetFolderId && (null == newName || newName.equals(storageSrc.getFolderName()))) {
             return;
         }
         /*
@@ -1095,7 +1096,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
          */
         try {
             final int parentFolderID = storageDest.getObjectID();
-            final String folderName = storageSrc.getFolderName();
+            final String folderName = null == newName ? storageSrc.getFolderName() : newName;
             boolean throwException = false;
 
             /*
@@ -1126,8 +1127,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             }
 
             if (throwException) {
-                throw OXFolderExceptionCode.TARGET_FOLDER_CONTAINS_DUPLICATE.create(OXFolderUtility.getFolderName(storageDest),
-                    Integer.valueOf(ctx.getContextId()));
+                throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(OXFolderUtility.getFolderName(storageDest),
+                    Integer.valueOf(ctx.getContextId()), folderName);
             }
 
             /*
@@ -1218,6 +1219,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
          * Call SQL move
          */
         try {
+            storageSrc.setFolderName(newName);
             OXFolderSQL.moveFolderSQL(user.getId(), storageSrc, storageDest, lastModified, ctx, readCon, writeCon);
         } catch (final DataTruncation e) {
             throw parseTruncated(e, storageSrc, TABLE_OXFOLDER_TREE);
@@ -1606,9 +1608,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 try {
                     next.onFolderDelete(folderID, ctx);
                 } catch (final OXException e) {
-                    LOG.error(
-                        new StringBuilder(128).append("Folder delete listener \"").append(next.getClass().getName()).append(
-                            "\" failed for folder ").append(folderID).append(" int context ").append(ctx.getContextId()),
+                    LOG.error("Folder delete listener \"{}\" failed for folder {} int context {}", next.getClass().getName(), folderID, ctx.getContextId(),
                         e);
                     throw e;
                 }
@@ -1651,7 +1651,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             try {
                 FolderCacheManager.getInstance().removeFolderObject(folderID, ctx);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         /*
@@ -1944,11 +1944,11 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     try {
                         FolderCacheManager.getInstance().removeFolderObject(fuids[i], ctx);
                     } catch (final OXException e) {
-                        LOG.warn(e.getMessage(), e);
+                        LOG.warn("", e);
                     }
                 }
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
@@ -2027,7 +2027,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             try {
                 tmp2 = DBUtils.getColumnSize(readCon, tableName, fields[i]);
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 tmp2 = -1;
             } finally {
                 if (closeReadCon) {
@@ -2057,10 +2057,17 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         final OXException fe;
         if (truncateds.length > 0) {
             final OXException.Truncated truncated = truncateds[0];
-            fe = OXFolderExceptionCode.TRUNCATED.create(exc,
-                sFields.toString(),
-                Integer.valueOf(truncated.getMaxSize()),
-                Integer.valueOf(truncated.getLength()));
+            if (1 == truncateds.length && FolderObject.FOLDER_NAME == truncated.getId()) {
+                fe =  OXFolderExceptionCode.TRUNCATED_FOLDERNAME.create(exc,
+                    sFields.toString(),
+                    Integer.valueOf(truncated.getMaxSize()),
+                    Integer.valueOf(truncated.getLength()));
+            } else {
+                fe = OXFolderExceptionCode.TRUNCATED.create(exc,
+                    sFields.toString(),
+                    Integer.valueOf(truncated.getMaxSize()),
+                    Integer.valueOf(truncated.getLength()));
+            }
         } else {
             fe = OXFolderExceptionCode.TRUNCATED.create(exc,
                 sFields.toString(),

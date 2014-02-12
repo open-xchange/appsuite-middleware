@@ -58,113 +58,48 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class FolderExceptionMessages implements LocalizableStrings {
 
-    // Unexpected error: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s";
+    // You do not have a valid session. Please login again.
+    public static final String MISSING_SESSION_MSG_DISPLAY = "You do not have a valid session. Please login again.";
 
-    // I/O error: %1$s
-    public static final String IO_ERROR_MSG = "I/O error: %1$s";
+    // You do not have appropriate permissions to view the folder \"%1$s\".
+    public static final String FOLDER_NOT_VISIBLE_MSG_DISPLAY = "You do not have appropriate permissions to view the folder \"%1$s\".";
 
-    // SQL error: %1$s
-    public static final String SQL_ERROR_MSG = "SQL error: %1$s";
-
-    // No appropriate folder storage for tree identifier "%1$s" and folder identifier "%2$s".
-    public static final String NO_STORAGE_FOR_ID_MSG =
-        "No appropriate folder storage for tree identifier \"%1$s\" and folder identifier \"%2$s\".";
-
-    // No appropriate folder storage for tree identifier "%1$s" and content type "%2$s".
-    public static final String NO_STORAGE_FOR_CT_MSG =
-        "No appropriate folder storage for tree identifier \"%1$s\" and content type \"%2$s\".";
-
-    // Missing session.
-    public static final String MISSING_SESSION_MSG = "Missing session.";
-
-    // Folder "%1$s" is not visible to user "%2$s" in context "%3$s"
     public static final String FOLDER_NOT_VISIBLE_MSG = "Folder \"%1$s\" is not visible to user \"%2$s\" in context \"%3$s\"";
 
-    // JSON error: %1$s
-    public static final String JSON_ERROR_MSG = "JSON error: %1$s";
 
-    // Missing tree identifier.
-    public static final String MISSING_TREE_ID_MSG = "Missing tree identifier.";
+    // "The content type you provided is not allowed for the given folder \"%1$s\".";
+    public static final String INVALID_CONTENT_TYPE_MSG_DISPLAY = "The content type you provided is not allowed for the given folder \"%1$s\".";
 
-    // Missing parent folder identifier.
-    public static final String MISSING_PARENT_ID_MSG = "Missing parent folder identifier.";
+    // Move of the folder \"%1$s\" is not supported.
+    public static final String MOVE_NOT_PERMITTED_MSG_DISPLAY = "Move of the folder \"%1$s\" is not permitted.";
 
-    // Missing folder identifier.
-    public static final String MISSING_FOLDER_ID_MSG = "Missing folder identifier.";
+    // A folder named "%1$s" already exists below the parent folder "%2$s".
+    public static final String EQUAL_NAME_MSG_DISPLAY = "A folder named \"%1$s\" already exists below the parent folder \"%2$s\".";
 
-    // Parent folder "%1$s" does not allow folder content type "%2$s" in tree "%3$s" for user %4$s in context %5$s.
-    public static final String INVALID_CONTENT_TYPE_MSG =
-        "Parent folder \"%1$s\" does not allow folder content type \"%2$s\" in tree \"%3$s\" for user %4$s in context %5$s.";
+    // The folder you requested does not exist.
+    public static final String NOT_FOUND_MSG_DISPLAY = "The folder you requested does not exist.";
 
-    // Move operation not permitted.
-    public static final String MOVE_NOT_PERMITTED_MSG = "Move operation not permitted.";
+    // You do not have the appropriate permissions to delete the folder \"%1$s\".
+    public static final String FOLDER_NOT_DELETEABLE_MSG_DISPLAY = "You do not have the appropriate permissions to delete the folder \"%1$s\".";
 
-    // A folder named "%1$s" already exists below parent folder "%2$s" in tree "%3$s".
-    public static final String EQUAL_NAME_MSG = "A folder named \"%1$s\" already exists below parent folder \"%2$s\" in tree \"%3$s\".";
+    // You do not have the appropriate permissions to move the folder \"%1$s\".
+    public static final String FOLDER_NOT_MOVEABLE_MSG_DISPLAY = "You do not have the appropriate permissions to move the folder \"%1$s\".";
 
-    // Subscribe operation not permitted on tree "%1$s".
-    public static final String NO_REAL_SUBSCRIBE_MSG = "Subscribe operation not permitted on tree \"%1$s\".";
+    // You do not have the appropriate permissions to create a subfolder below the folder \"%1$s\".
+    public static final String NO_CREATE_SUBFOLDERS_MSG_DISPLAY = "You do not have the appropriate permissions to create a subfolder below the folder \"%1$s\".";
 
-    // Unsubscribe operation not permitted on tree "%1$s".
-    public static final String NO_REAL_UNSUBSCRIBE_MSG = "Unsubscribe operation not permitted on tree \"%1$s\".";
-
-    // Unsubscribe operation not permitted on folder "%1$s" in tree "%2$s". Delete subfolders first.
-    public static final String NO_UNSUBSCRIBE_MSG = "Unsubscribe operation not permitted on folder \"%1$s\" in tree \"%2$s\". Unsubscribe subfolders first.";
-
-    // Unknown content type: %1$s.
-    public static final String UNKNOWN_CONTENT_TYPE_MSG = "Unknown content type: %1$s.";
-
-    // Missing parameter: %1$s.
-    public static final String MISSING_PARAMETER_MSG = "Missing parameter: %1$s.";
-
-    // Missing property: %1$s.
-    public static final String MISSING_PROPERTY_MSG = "Missing property: %1$s.";
-
-    // Unsupported storage type: %1$s.
-    public static final String UNSUPPORTED_STORAGE_TYPE_MSG = "Unsupported storage type: %1$s.";
-
-    // The object has been changed in the meantime.
-    public static final String CONCURRENT_MODIFICATION_MSG = "The object has been changed in the meantime.";
-
-    // Folder "%1$s" could not be found in tree "%2$s".
-    public static final String NOT_FOUND_MSG = "Folder \"%1$s\" could not be found in tree \"%2$s\".";
-
-    // No default folder available for content type "%1$s" in tree "%2$s".
-    public static final String NO_DEFAULT_FOLDER_MSG = "No default folder available for content type \"%1$s\" in tree \"%2$s\".";
-
-    // Invalid folder identifier: %1$s.
-    public static final String INVALID_FOLDER_ID_MSG = "Invalid folder identifier: %1$s.";
-
-    // Folder "%1$s" must not be deleted by user "%2$s" in context "%3$s".
-    public static final String FOLDER_NOT_DELETEABLE_MSG = "Folder \"%1$s\" must not be deleted by user \"%2$s\" in context \"%3$s\".";
-
-    // Folder "%1$s" must not be moved by user "%2$s" in context "%3$s".
-    public static final String FOLDER_NOT_MOVEABLE_MSG = "Folder \"%1$s\" must not be moved by user \"%2$s\" in context \"%3$s\".";
-
-    // A temporary error occurred. Please retry.
-    public static final String TEMPORARY_ERROR_MSG = "A temporary error occurred. Please retry.";
-
-    // User "%2$s" must not create subfolders below folder "%2$s" in context "%3$s".
-    public static final String NO_CREATE_SUBFOLDERS_MSG = "User \"%2$s\" must not create subfolders below folder \"%2$s\" in context \"%3$s\".";
-
-    // No mail folder allowed below a public folder.
-    public static final String NO_PUBLIC_MAIL_FOLDER_MSG = "No mail folder allowed below a public folder.";
-
-    // No such tree with identifier "%1$s".
-    public static final String TREE_NOT_FOUND_MSG = "No such tree with identifier \"%1$s\".";
-
-    // A tree with identifier "%1$s" already exists.
-    public static final String DUPLICATE_TREE_MSG = "A tree with identifier \"%1$s\" already exists.";
+    // It is not allowed to create a mail folder allowed below a public folder.
+    public static final String NO_PUBLIC_MAIL_FOLDER_MSG_DISPLAY = "It is not allowed to create a mail folder below a public folder.";
 
     // The folder name "%1$s" is reserved. Please choose another name.
-    public static final String RESERVED_NAME_MSG = "The folder name \"%1$s\" is reserved. Please choose another name.";
+    public static final String RESERVED_NAME_MSG_DISPLAY = "The folder name \"%1$s\" is reserved. Please choose another name.";
 
-    // Found two folders named "%1$s" located below the parent folder "%2$s". Please rename one of the folders. There should be no two folders with the same name.
-    public static final String DUPLICATE_NAME_MSG = "Found two folders named \"%1$s\" located below the parent folder \"%2$s\". Please rename one of the folders. There should be no two folders with the same name.";
+    // Found two folders named "%1$s" located below the parent folder "%2$s". Please rename one of the folders. There should be no two
+    // folders with the same name.
+    public static final String DUPLICATE_NAME_MSG_DISPLAY = "Found two folders named \"%1$s\" located below the parent folder \"%2$s\". Please rename one of the folders. There should be no two folders with the same name.";
 
-    // An unexpected error occurred: %1$s. Please try again.
-    public static final String TRY_AGAIN_MSG = "An unexpected error occurred: %1$s. Please try again.";
+    // Failed to delete following folder/s: %1$s
+    public static final String FOLDER_DELETION_FAILED_MSG_DISPLAY = "Failed to delete following folder/s: %1$s";
 
     /**
      * Initializes a new {@link FolderExceptionMessages}

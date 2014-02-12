@@ -49,6 +49,10 @@
 
 package com.openexchange.tools;
 
+import java.io.IOException;
+import java.io.InputStream;
+import com.openexchange.java.Streams;
+
 /**
  * {@link ImageTypeDetector} - Detects MIME type of passed image bytes.
  *
@@ -193,7 +197,37 @@ public final class ImageTypeDetector {
      * @return The image's MIME type or <code>"application/octet-stream"</code> if unknown
      */
     public static String getMimeType(final byte[] bytes) {
+        if (null == bytes) {
+            return "application/octet-stream";
+        }
         return com.openexchange.java.ImageTypeDetector.getMimeType(bytes);
     }
 
+    /**
+     * Detects MIME type of passed image bytes.
+     *
+     * @param binary The image bytes
+     * @return The image's MIME type or <code>"application/octet-stream"</code> if unknown
+     * @throws IOException If an I/O error occurs
+     */
+    public static String getMimeType(final InputStream binary) throws IOException {
+        if (null == binary) {
+            return "application/octet-stream";
+        }
+        try {
+            byte[] buf = new byte[32];
+            final int read = binary.read(buf, 0, 32);
+            if (0 >= read) {
+                return "application/octet-stream";
+            }
+            if (read < 32) {
+                byte[] tmp = new byte[read];
+                System.arraycopy(buf, 0, tmp, 0, read);
+                buf = tmp;
+            }
+            return com.openexchange.java.ImageTypeDetector.getMimeType(buf);
+        } finally {
+            Streams.close(binary);
+        }
+    }
 }

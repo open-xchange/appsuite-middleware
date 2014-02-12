@@ -61,8 +61,6 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -74,7 +72,7 @@ import com.openexchange.hostname.ldap.services.HostnameLDAPServiceRegistry;
 
 public class LDAPHostnameService implements HostnameService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LDAPHostnameService.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LDAPHostnameService.class);
 
     private static final String PLACEHOLDER = "%i";
 
@@ -110,37 +108,18 @@ public class LDAPHostnameService implements HostnameService {
                 context.reconnect(null);
             }
 
-            if (LOG.isDebugEnabled()) {
-                final StringBuilder sb = new StringBuilder(128).append('\n');
-                sb.append("LDAP search triggered with:\n");
-                sb.append("Filter: ");
-                sb.append(ownFilter);
-                sb.append('\n');
-                sb.append("BaseDN: ");
-                sb.append(ownBaseDN);
-                sb.append('\n');
-                sb.append("Scope: ");
-                sb.append(scope);
-                sb.append('\n');
-                sb.append("ldapReturnField: ");
-                sb.append(ldapReturnField);
-                sb.append('\n');
-                LOG.debug(sb.toString());
-            }
+            LOG.debug("\nLDAP search triggered with:\nFilter: {}BaseDN: {}Scope: {}ldapReturnField: {}\n", ownFilter, ownBaseDN, scope, ldapReturnField);
+
             final NamingEnumeration<SearchResult> search = context.search(ownBaseDN, ownFilter, getSearchControls(ldapReturnField, scope));
             // We will only catch the first element...
             while (null != search && search.hasMoreElements()) {
                 final SearchResult next = search.next();
                 final Attributes attributes = next.getAttributes();
                 final String attribute = getAttribute(ldapReturnField, attributes);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Found result: " + attribute);
-                }
+                LOG.debug("Found result: {}", attribute);
                 return attribute;
             }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("No result found");
-            }
+            LOG.debug("No result found");
             return null;
         } finally {
             if( context != null ) {
@@ -155,12 +134,10 @@ public class LDAPHostnameService implements HostnameService {
             if (1 < attribute.size()) {
                 // If we have multi-value attributes we only pick up the first one
                 return (String) attribute.get(0);
-            } else {
-                return (String) attribute.get();
             }
-        } else {
-            return null;
+            return (String) attribute.get();
         }
+        return null;
     }
 
     private static Hashtable<String, String> getBasicLDAPProperties(String uri) {
@@ -219,29 +196,25 @@ public class LDAPHostnameService implements HostnameService {
         try {
             final String hostnameFromCache = instance.getHostnameFromCache(contextId);
             if (null == hostnameFromCache) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Hostname for context " + contextId + " is not contained in the cache any more, fetching from LDAP");
-                }
+                LOG.debug("Hostname for context {} is not contained in the cache any more, fetching from LDAP", contextId);
                 final String hostname = fetchFromLdap(contextId);
                 if (null != hostname) {
                     instance.addHostnameToCache(contextId, hostname);
                 }
                 return hostname;
             }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Using hostname for context " + contextId + " from cache");
-            }
+            LOG.debug("Using hostname for context {} from cache", contextId);
             return hostnameFromCache;
         } catch (final InvalidNameException e) {
-            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
+            LOG.error("Failed to fetch hostname for context id {}:", contextId, e);
         } catch (final AuthenticationException e) {
-            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
+            LOG.error("Failed to fetch hostname for context id {}:", contextId, e);
         } catch (final NamingException e) {
-            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
+            LOG.error("Failed to fetch hostname for context id {}:", contextId, e);
         } catch (final OXException e) {
-            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
+            LOG.error("Failed to fetch hostname for context id {}:", contextId, e);
         } catch (final RuntimeException e) {
-            LOG.error("Failed to fetch hostname for context id " + contextId + ":", e);
+            LOG.error("Failed to fetch hostname for context id {}:", contextId, e);
         }
         return null;
     }

@@ -53,8 +53,6 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,7 +70,7 @@ public class Reminder extends DataServlet {
 	 */
 	private static final long serialVersionUID = 7117849531568676025L;
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Reminder.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Reminder.class);
 
 	@Override
 	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
@@ -85,7 +83,7 @@ public class Reminder extends DataServlet {
 			try {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
 			} catch (final JSONException e) {
-				LOG.error(e.getMessage(), e);
+				LOG.error("", e);
 	            response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
 	            writeResponse(response, httpServletResponse, session);
 	            return;
@@ -96,11 +94,11 @@ public class Reminder extends DataServlet {
 			response.setTimestamp(reminderRequest.getTimestamp());
 			response.setData(responseObj);
 		} catch (final OXException e) {
-			LOG.error(e.getMessage(), e);
+			LOG.error("", e);
 			response.setException(e);
 		} catch (final JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error(oje.getMessage(), oje);
+            LOG.error("", oje);
             response.setException(oje);
 		}
 
@@ -120,7 +118,7 @@ public class Reminder extends DataServlet {
 			try {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
 			} catch (final JSONException e) {
-				LOG.error(e.getMessage(), e);
+				LOG.error("", e);
 	            response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
 	            writeResponse(response, httpServletResponse, session);
 	            return;
@@ -143,11 +141,11 @@ public class Reminder extends DataServlet {
 				response.setData(responseObj);
 			}
 		} catch (final OXException exc) {
-            LOG.error(exc.getMessage(), exc);
+            LOG.error("", exc);
             response.setException(exc);
 		} catch (final JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error(oje.getMessage(), oje);
+            LOG.error("", oje);
             response.setException(oje);
 		}
 

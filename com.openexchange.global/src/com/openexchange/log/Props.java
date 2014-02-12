@@ -54,45 +54,32 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TreeMap;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
+import org.slf4j.MDC;
 import com.openexchange.log.LogProperties.Name;
 
 /**
  * {@link Props} - The log properties associated with a certain {@link Thread thread}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @deprecated Please use slf4j MDC to manage log properties
  */
+@Deprecated
 public final class Props {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Props.class);
-    private final EnumMap<LogProperties.Name, Object> map;
-    private final Set<LogProperties.Name> keys;
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(Props.class);
 
     /**
      * Initializes a new {@link Props}.
      */
     protected Props() {
         super();
-        map = new EnumMap<LogProperties.Name, Object>(LogProperties.Name.class);
-        keys = map.keySet();
-    }
-
-    /**
-     * Initializes a new {@link Props}.
-     *
-     * @param other The source properties
-     */
-    protected Props(final Props other) {
-        super();
-        map = new EnumMap<LogProperties.Name, Object>(other.map);
-        keys = map.keySet();
     }
 
     @Override
     public String toString() {
-        return map.toString();
+        return MDC.getCopyOfContextMap().toString();
     }
 
     /**
@@ -101,7 +88,18 @@ public final class Props {
      * @return The backing map
      */
     public Map<LogProperties.Name, Object> getMap() {
-        return map;
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> map = MDC.getCopyOfContextMap();
+
+        final Map<LogProperties.Name, Object> retval = new EnumMap<LogProperties.Name, Object>(LogProperties.Name.class);
+        for (Entry<String, Object> entry : map.entrySet()) {
+            final LogProperties.Name name = LogProperties.Name.nameFor(entry.getKey());
+            if (null != name) {
+                retval.put(name, entry.getValue());
+            }
+        }
+
+        return retval;
     }
 
     /**
@@ -120,9 +118,11 @@ public final class Props {
      * @return The map
      */
     public Map<String, Object> asMap(final boolean sorted) {
+        @SuppressWarnings("unchecked")
+        final Map<String, Object> map = MDC.getCopyOfContextMap();
         final Map<String, Object> m = sorted ? new TreeMap<String, Object>() : new HashMap<String, Object>(map.size());
-        for (final Entry<Name, Object> entry : map.entrySet()) {
-            m.put(entry.getKey().getName(), entry.getValue());
+        for (final Entry<String, Object> entry : map.entrySet()) {
+            m.put(entry.getKey(), entry.getValue());
         }
         return m;
     }
@@ -134,7 +134,7 @@ public final class Props {
      * @return <code>true</code> if present; otherwise <code>false</code>
      */
     public boolean contains(final LogProperties.Name name) {
-        return map.containsKey(name);
+        return null == name ? false : null != MDC.get(name.getName());
     }
 
     /**
@@ -150,7 +150,7 @@ public final class Props {
             return null;
         }
         try {
-            return (V) get(name);
+            return (V) MDC.get(name.toString());
         } catch (final ClassCastException e) {
             LOG.warn("Type mismatch", e);
             return null;
@@ -165,8 +165,11 @@ public final class Props {
      */
     @SuppressWarnings("unchecked")
     public <V> V get(final LogProperties.Name name) {
+        if (null == name) {
+            return null;
+        }
         try {
-            return (V) map.get(name);
+            return (V) MDC.get(name.toString());
         } catch (final ClassCastException e) {
             LOG.warn("Type mismatch", e);
             return null;
@@ -184,22 +187,21 @@ public final class Props {
         if (null == name) {
             return false;
         }
+        final String prev = MDC.get(name.getName());
         if (null == value) {
-            return (null != map.remove(name));
+            MDC.remove(name.getName());
+            return (null != prev);
         }
-        return (null != map.put(name, value));
+
+        MDC.put(name.getName(), value.toString());
+        return (null != prev);
     }
 
     /**
-     * Puts specified mappings. Any existing mappings are replaced.
-     *
-     * @param props The properties to put
+     * Throws an UnsupportedOperationException!!!
      */
     public <V> void putAll(final Props props) {
-        if (null == props) {
-            return;
-        }
-        this.map.putAll(props.map);
+        throw new UnsupportedOperationException("Props.putAll()");
     }
 
     /**
@@ -209,7 +211,7 @@ public final class Props {
      */
     public void remove(final Name name) {
         if (null != name) {
-            map.remove(name.getName());
+            MDC.remove(name.getName());
         }
     }
 
@@ -220,17 +222,17 @@ public final class Props {
      */
     public void remove(final Collection<Name> names) {
         if (null != names) {
-            keys.removeAll(names);
+            for (final LogProperties.Name name : names) {
+                MDC.remove(name.getName());
+            }
         }
     }
 
 	/**
-	 * Creates a shallow copy of this log properties.
-	 *
-	 * @return The shallow copy
+	 * Throws an UnsupportedOperationException!!!
 	 */
 	public Props copy() {
-		return new Props(this);
+	    throw new UnsupportedOperationException("Props.copy()");
 	}
 
 }

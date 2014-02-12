@@ -56,7 +56,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.groupware.EnumComponent;
@@ -73,7 +72,6 @@ import com.openexchange.groupware.infostore.utils.SetSwitch;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.session.SessionHolder;
@@ -91,8 +89,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
 public class DocumentMetadataResource extends AbstractResource implements
 		OXWebdavResource, OXExceptionConstants {
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory
-			.getLog(DocumentMetadataResource.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DocumentMetadataResource.class);
 
 	private final InfostoreWebdavFactory factory;
 
@@ -260,8 +257,7 @@ public class DocumentMetadataResource extends AbstractResource implements
 			} catch (final OXException x) {
 				if (com.openexchange.exception.Category.CATEGORY_PERMISSION_DENIED == x
 						.getCategory()) {
-					throw WebdavProtocolException.Code.GENERAL_ERROR.create(
-							getUrl(), HttpServletResponse.SC_FORBIDDEN, x);
+					throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_UNAUTHORIZED, x);
 				}
 				throw WebdavProtocolException.Code.GENERAL_ERROR.create(
 						getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
@@ -487,8 +483,7 @@ public class DocumentMetadataResource extends AbstractResource implements
 				final Context ctx = session.getContext();
 				final EffectiveInfostorePermission perm = security.getInfostorePermission(getId(), ctx, session.getUser(), session.getUserPermissionBits());
 				if (!perm.canWriteObject()) {
-					throw WebdavProtocolException.Code.NO_WRITE_PERMISSION
-							.create(getUrl(), HttpServletResponse.SC_FORBIDDEN);
+					throw WebdavProtocolException.Code.NO_WRITE_PERMISSION.create(getUrl(), HttpServletResponse.SC_UNAUTHORIZED);
 				}
 			}
 			propertyHelper.dumpPropertiesToDB();
@@ -766,14 +761,13 @@ public class DocumentMetadataResource extends AbstractResource implements
 					throw x;
 				} catch (final OXException x) {
 					if (CATEGORY_PERMISSION_DENIED == x.getCategory()) {
-						throw WebdavProtocolException.Code.GENERAL_ERROR
-								.create(url, HttpServletResponse.SC_FORBIDDEN);
+						throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_UNAUTHORIZED);
 					}
 					throw WebdavProtocolException.Code.GENERAL_ERROR.create(
-							url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+							url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, x, new Object[0]);
 				} catch (final Exception x) {
 					throw WebdavProtocolException.Code.GENERAL_ERROR.create(
-							url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+							url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, x, new Object[0]);
 				}
 			} else {
 				// UPDATE
@@ -801,11 +795,8 @@ public class DocumentMetadataResource extends AbstractResource implements
 								throw WebdavProtocolException.Code.GENERAL_ERROR
 										.create(getUrl(), Protocol.SC_LOCKED);
 							}
-							if (CATEGORY_PERMISSION_DENIED == iStoreException
-									.getCategory()) {
-								throw WebdavProtocolException.Code.GENERAL_ERROR
-										.create(url,
-												HttpServletResponse.SC_FORBIDDEN);
+							if (CATEGORY_PERMISSION_DENIED == iStoreException.getCategory()) {
+								throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_UNAUTHORIZED);
 							}
 						}
 					}
@@ -842,8 +833,7 @@ public class DocumentMetadataResource extends AbstractResource implements
 				throw WebdavProtocolException.Code.GENERAL_ERROR.create(
 						getUrl(), HttpServletResponse.SC_CONFLICT);
 			} else if (parent.isRoot()) {
-				throw WebdavProtocolException.Code.GENERAL_ERROR.create(
-						getUrl(), HttpServletResponse.SC_FORBIDDEN);
+				throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_UNAUTHORIZED);
 			}
 		} catch (final ClassCastException x) {
 			throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(),
@@ -1010,8 +1000,7 @@ public class DocumentMetadataResource extends AbstractResource implements
 	}
 
 	private ServerSession getSession() {
-		return ServerSessionAdapter.valueOf(sessionHolder.getSessionObject(),
-				sessionHolder.getContext());
+		return ServerSessionAdapter.valueOf(sessionHolder.getSessionObject(), sessionHolder.getContext());
 	}
 
 	@Override

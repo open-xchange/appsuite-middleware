@@ -55,7 +55,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,7 +63,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.user.json.comparator.Comparators;
@@ -81,7 +79,7 @@ public class UserContact {
 
 	public static final String ALL_ATTRIBUTES = "*";
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UserContact.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserContact.class);
 
 	private final User user;
 	private final Contact contact;
@@ -170,7 +168,7 @@ public class UserContact {
     				continue;
     			}
 			}
-            LOG.warn("Unknown field: " + columnID, new Throwable());
+            LOG.warn("Unknown field: {}", columnID, new Throwable());
 			jsonArray.put(JSONObject.NULL);
 		}
 		if (null != attributeParameters && 0 < attributeParameters.size()) {

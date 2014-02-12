@@ -50,7 +50,6 @@
 package com.openexchange.admin.rmi.impl;
 
 import java.rmi.RemoteException;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.rmi.OXPublicationInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -63,7 +62,6 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
@@ -73,7 +71,7 @@ import com.openexchange.publish.PublicationTargetDiscoveryService;
  */
 public class OXPublication extends OXCommonImpl implements OXPublicationInterface {
 
-    private final static Log log = LogFactory.getLog(OXPublication.class);
+    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXPublication.class);
 
     private final BasicAuthenticator basicauth;
 
@@ -95,10 +93,11 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             basicauth.doAuthentication(auth, ctx);
+            final com.openexchange.groupware.contexts.Context oxCtx = contexts.getContext(ctx.getId());
             for (PublicationTarget pubTar : discovery.listTargets()) {
                 final PublicationService publicationService = pubTar.getPublicationService();
                 if (null != publicationService) {
-                    com.openexchange.publish.Publication currentPublication = publicationService.resolveUrl(contexts, url);
+                    com.openexchange.publish.Publication currentPublication = publicationService.resolveUrl(oxCtx, url);
                     if (null != currentPublication) {
                         String description = publicationService.getInformation(currentPublication);
                         return parsePublication(currentPublication, description);
@@ -106,7 +105,7 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
                 }
             }
         } catch (OXException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
         } catch (InvalidCredentialsException e) {
             throw new RemoteException(e.getMessage());
         } catch (StorageException e) {
@@ -130,10 +129,11 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             basicauth.doAuthentication(auth, ctx);
+            final com.openexchange.groupware.contexts.Context oxCtx = contexts.getContext(ctx.getId());
             for (PublicationTarget pubTar : discovery.listTargets()) {
                 final PublicationService publicationService = pubTar.getPublicationService();
                 if (null != publicationService) {
-                    com.openexchange.publish.Publication currentPublication = publicationService.resolveUrl(contexts, url);
+                    com.openexchange.publish.Publication currentPublication = publicationService.resolveUrl(oxCtx, url);
                     if (null != currentPublication) {
                         publicationService.delete(currentPublication);
                         return true;
@@ -141,7 +141,7 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
                 }
             }
         } catch (OXException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
         } catch (InvalidCredentialsException e) {
             throw new RemoteException(e.getMessage());
         } catch (StorageException e) {

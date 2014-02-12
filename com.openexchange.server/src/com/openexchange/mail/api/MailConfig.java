@@ -284,7 +284,7 @@ public abstract class MailConfig {
         mailConfig.accountId = accountId;
         mailConfig.session = session;
         mailConfig.applyStandardNames(mailAccount);
-        fillLoginAndPassword(mailConfig, session, UserStorage.getStorageUser(userId, contextId).getLoginInfo(), mailAccount);
+        fillLoginAndPassword(mailConfig, session, UserStorage.getInstance().getUser(userId, contextId).getLoginInfo(), mailAccount);
         String serverURL = MailConfig.getMailServerURL(mailAccount);
         if (serverURL == null) {
             if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
@@ -339,7 +339,7 @@ public abstract class MailConfig {
                 return QuotedInternetAddress.toACE(mailAccount.getPrimaryAddress());
             } catch (final AddressException e) {
                 final String primaryAddress = mailAccount.getPrimaryAddress();
-                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailConfig.class)).warn(
+                org.slf4j.LoggerFactory.getLogger(MailConfig.class).warn(
                     "Login source primary email address \"" + primaryAddress + "\" could not be converted to ASCII. Using unicode representation.",
                     e);
                 return primaryAddress;

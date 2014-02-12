@@ -64,7 +64,7 @@ import com.googlecode.concurrentlinkedhashmap.Weighers;
  */
 public final class SmbFileMap {
 
-    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(SmbFileMap.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SmbFileMap.class);
 
     private final ConcurrentMap<String, Wrapper> map;
     private final int maxLifeMillis;

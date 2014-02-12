@@ -51,7 +51,6 @@ package com.openexchange.tools.images;
 
 import static com.openexchange.java.Strings.toLowerCase;
 import javax.imageio.ImageIO;
-import org.apache.commons.logging.Log;
 
 
 /**
@@ -61,7 +60,7 @@ import org.apache.commons.logging.Log;
  */
 public class ImageTransformationUtility {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ImageTransformationUtility.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ImageTransformationUtility.class);
 
     /**
      * Initializes a new {@link ImageTransformationUtility}.
@@ -93,15 +92,15 @@ public class ImageTransformationUtility {
             val = val.substring(0, idx);
         }
         if ("pjpeg".equals(val)) {
-            LOG.debug("Assuming 'jpeg' for image format " + val);
+            LOG.debug("Assuming 'jpeg' for image format {}", val);
             return "jpeg";
         }
         if ("x-png".equals(val)) {
-            LOG.debug("Assuming 'png' for image format " + val);
+            LOG.debug("Assuming 'png' for image format {}", val);
             return "png";
         }
         if ("x-ms-bmp".equals(val)) {
-            LOG.debug("Assuming 'bmp' for image format " + val);
+            LOG.debug("Assuming 'bmp' for image format {}", val);
             return "bmp";
         }
         return val;

@@ -52,7 +52,6 @@ package com.openexchange.realtime.handle.impl.message;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.directory.ChangeListener;
 import com.openexchange.realtime.directory.Resource;
@@ -69,8 +68,8 @@ import com.openexchange.realtime.packet.ID;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ResourceListener implements ChangeListener {
-    
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ResourceListener.class);
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResourceListener.class);
 
     public ResourceListener() {
         super();
@@ -89,22 +88,22 @@ public class ResourceListener implements ChangeListener {
             LOG.error("Could not handle added resource.",t);
         }
     }
-    
+
     private void retrySendOrRestoreMessage(ID receiver, TimedStanza stanza, int retryCount, OXException exception) {
         if (retryCount == 0) {
             if (exception == null) {
-                LOG.warn("Could not send message to " + receiver.toString() + ". Message was put back to the store.");
+                LOG.warn("Could not send message to {}. Message was put back to the store.", receiver);
             } else {
-                LOG.warn("Could not send message to " + receiver.toString() + ". Message was put back to the store.", exception);
+                LOG.warn("Could not send message to {}. Message was put back to the store.", receiver, exception);
             }
-            
+
             StanzaStorage stanzaStorage = Services.getService(StanzaStorage.class);
             try {
                 stanzaStorage.pushStanza(receiver.toGeneralForm(), stanza);
             } catch (OXException e) {
                 LOG.error("Could not put message back to store.", e);
             }
-            
+
             return;
         }
 
@@ -121,15 +120,13 @@ public class ResourceListener implements ChangeListener {
 
     @Override
     public void updated(ID id, Resource value, Resource previousValue) {
-       if(LOG.isDebugEnabled()) {
-            LOG.debug("Updated called for ResourceListener.");
-        }
+        LOG.debug("Updated called for ResourceListener.");
         added(id, previousValue);
     }
 
     @Override
     public void removed(ID id, Resource value) {
-
+        // Nothing to do here
     }
 
 }

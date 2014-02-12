@@ -57,7 +57,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
@@ -79,7 +78,7 @@ import com.openexchange.server.Initialization;
  */
 public class RealtimeConfig implements Initialization, ManagementAware<RealtimeConfigMBean> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RealtimeConfig.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RealtimeConfig.class);
 
     private static final RealtimeConfig instance = new RealtimeConfig();
 
@@ -166,7 +165,7 @@ public class RealtimeConfig implements Initialization, ManagementAware<RealtimeC
     @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
-            LOG.error(this.getClass().getName() + " already started");
+            LOG.error("{} already started", this.getClass().getName());
             return;
         }
         init();
@@ -175,7 +174,7 @@ public class RealtimeConfig implements Initialization, ManagementAware<RealtimeC
     @Override
     public void stop() {
         if (!started.compareAndSet(true, false)) {
-            LOG.error(this.getClass().getName() + " cannot be stopped since it has no been started before");
+            LOG.error("{} cannot be stopped since it has no been started before", this.getClass().getName());
             return;
         }
         ConfigurationService configService = RealtimeServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -268,7 +267,7 @@ public class RealtimeConfig implements Initialization, ManagementAware<RealtimeC
                 }
                 doUpdate(RealtimeConfig.getInstance(), configService);
             } catch (OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
 

@@ -61,6 +61,7 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.LoggerFactory;
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.exception.OXException;
@@ -84,7 +85,7 @@ public class TrackingProvider extends ServiceTracker<ConfigProviderService, Conf
         try {
             return context.createFilter("(& (objectclass="+ConfigProviderService.class.getName()+") (scope="+scope+"))");
         } catch (final InvalidSyntaxException e) {
-            com.openexchange.log.Log.loggerFor(TrackingProvider.class).fatal(e.getMessage(), e);
+            LoggerFactory.getLogger(TrackingProvider.class).error("", e);
         }
         return null;
     }

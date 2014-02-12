@@ -50,8 +50,6 @@
 package com.openexchange.authorization.standard;
 
 import java.lang.reflect.UndeclaredThrowableException;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.authorization.AuthorizationExceptionCodes;
 import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.context.ContextExceptionCodes;
@@ -66,7 +64,7 @@ import com.openexchange.groupware.ldap.User;
  */
 public final class DefaultAuthorizationImpl implements AuthorizationService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DefaultAuthorizationImpl.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultAuthorizationImpl.class);
 
     private static final DefaultAuthorizationImpl INSTANCE = new DefaultAuthorizationImpl();
 
@@ -95,9 +93,8 @@ public final class DefaultAuthorizationImpl implements AuthorizationService {
     public void authorizeUser(final Context ctx, final User user) throws OXException {
         try {
             if (!ctx.isEnabled()) {
-                final OXException e = ContextExceptionCodes.CONTEXT_DISABLED.create();
-                LOG.debug(e.getMessage(), e);
-                throw AuthorizationExceptionCodes.USER_DISABLED.create(e);
+                LOG.debug("Context {} ({}) is disabled.", Integer.valueOf(ctx.getContextId()), ctx.getName());
+                throw AuthorizationExceptionCodes.USER_DISABLED.create(ContextExceptionCodes.CONTEXT_DISABLED.create(Integer.valueOf(ctx.getContextId()), ctx.getName()));
             }
         } catch (final UndeclaredThrowableException e) {
             throw AuthorizationExceptionCodes.UNKNOWN.create(e);

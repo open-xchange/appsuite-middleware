@@ -114,7 +114,7 @@ import com.sun.mail.pop3.POP3Store;
  */
 public class MailAccountPOP3Storage implements POP3Storage {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccountPOP3Storage.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccountPOP3Storage.class);
 
     /*-
      * Member section
@@ -143,7 +143,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
             if (null == tmp) {
                 final OXException e = POP3ExceptionCode.MISSING_PATH.create(Integer.valueOf(session.getUserId()),
                     Integer.valueOf(session.getContextId()));
-                LOG.debug("Path is null. Error: " + e.getMessage(), e);
+                LOG.debug("Path is null.", e);
                 // Try to compose path
                 tmp = composeUniquePath(pop3Access.getAccountId(), session.getUserId(), session.getContextId());
                 // Add to properties
@@ -261,7 +261,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 } catch (final OXException e) {
                     if (MimeMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
                         // Ignore
-                        LOG.trace(e.getMessage(), e);
+                        LOG.trace("", e);
                     } else {
                         throw e;
                     }
@@ -273,7 +273,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                 } catch (final OXException e) {
                     if (MimeMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
                         // Ignore
-                        LOG.trace(e.getMessage(), e);
+                        LOG.trace("", e);
                     } else {
                         throw e;
                     }
@@ -476,12 +476,12 @@ public class MailAccountPOP3Storage implements POP3Storage {
         try {
             getFolderStorage().releaseResources();
         } catch (final OXException e) {
-            LOG.debug(new StringBuilder("Error while closing POP3 folder storage: ").append(e.getMessage()).toString(), e);
+            LOG.debug("Error while closing POP3 folder storage", e);
         }
         try {
             getMessageStorage().releaseResources();
         } catch (final OXException e) {
-            LOG.debug(new StringBuilder("Error while closing POP3 message storage: ").append(e.getMessage()).toString(), e);
+            LOG.debug("Error while closing POP3 message storage", e);
         }
         /*-
          * TODO:
@@ -561,8 +561,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         // Start sync process
         POP3Store pop3Store = null;
         try {
-            final POP3StoreResult result =
-                POP3StoreConnector.getPOP3Store(pop3Access.getPOP3Config(), pop3Access.getMailProperties(), false, session, !expunge);
+            final POP3StoreResult result = POP3StoreConnector.getPOP3Store(pop3Access.getPOP3Config(), pop3Access.getMailProperties(), false, session, !expunge);
             pop3Store = result.getPop3Store();
             final boolean containsWarnings = result.containsWarnings();
             if (containsWarnings) {
@@ -659,9 +658,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                     }
                 } catch (final Exception e) {
                     final POP3Config pop3Config = pop3Access.getPOP3Config();
-                    LOG.warn(
-                        "POP3 mailbox " + pop3Config.getServer() + " could not be expunged/closed for login " + pop3Config.getLogin(),
-                        e);
+                    LOG.warn("POP3 mailbox " + pop3Config.getServer() + " could not be expunged/closed for login " + pop3Config.getLogin(), e);
                 }
                 // Trashed UIDLs not needed anymore
                 if (doExpunge) {
@@ -671,17 +668,17 @@ public class MailAccountPOP3Storage implements POP3Storage {
         } catch (final MessagingException e) {
             final Exception nested = e.getNextException();
             if (nested instanceof IOException) {
-                LOG.warn("Connect to POP3 account failed: " + nested.getMessage(), nested);
+                LOG.warn("Connect to POP3 account failed", nested);
                 warnings.add(MailExceptionCode.IO_ERROR.create(nested, nested.getMessage()));
             } else {
-                LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
+                LOG.warn("Connect to POP3 account failed", e);
                 warnings.add(MimeMailException.handleMessagingException(e, pop3Access.getPOP3Config(), session));
             }
         } catch (final OXException e) {
             if (MimeMailExceptionCode.LOGIN_FAILED.equals(e) || MimeMailExceptionCode.INVALID_CREDENTIALS.equals(e)) {
                 throw e;
             }
-            LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
+            LOG.warn("Connect to POP3 account failed", e);
             warnings.add(e);
         } finally {
             try {
@@ -689,7 +686,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                     pop3Store.close();
                 }
             } catch (final MessagingException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             releaseLock(session);
         }
@@ -908,7 +905,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                     try {
                         msgs[i] = inbox.getMessage(msgno);
                     } catch (final MessagingException inner) {
-                        LOG.warn(MessageFormat.format("Retrieval of POP3 message {0} failed.", msgno), inner);
+                        LOG.warn("Retrieval of POP3 message {} failed.", msgno, inner);
                         msgs[i] = null;
                     }
                 }
@@ -926,7 +923,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                         mm.setMailId(seqnum2uidl.get(msgno));
                         toAppend.add(mm);
                     } catch (final Exception e) {
-                        LOG.warn(MessageFormat.format("POP3 message #{0} could not be fetched from POP3 server.", msgno), e);
+                        LOG.warn("POP3 message #{} could not be fetched from POP3 server.", msgno, e);
                     }
                 }
             }

@@ -64,7 +64,6 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.Log;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -94,8 +93,7 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "(not IMAP: with timestamp): An object containing all data of the requested mail. The fields of the object are listed in Detailed mail data. The fields id and attachment are not included.")
 public final class ResendAction extends AbstractMailAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        Log.valueOf(com.openexchange.log.LogFactory.getLog(ResendAction.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResendAction.class);
 
     /**
      * Initializes a new {@link ResendAction}.
@@ -128,7 +126,7 @@ public final class ResendAction extends AbstractMailAction {
              * Read in parameters
              */
             final String view = req.getParameter(Mail.PARAMETER_VIEW);
-            final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
+            final UserSettingMail usmNoSave = session.getUserSettingMail().clone();
             /*
              * Deny saving for this request-specific settings
              */

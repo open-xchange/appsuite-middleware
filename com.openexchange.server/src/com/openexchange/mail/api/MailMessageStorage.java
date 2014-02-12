@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.api;
 
-import org.apache.commons.logging.Log;
+import java.text.MessageFormat;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
@@ -75,7 +75,7 @@ import com.openexchange.mail.text.TextFinder;
  */
 public abstract class MailMessageStorage implements IMailMessageStorage {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MailMessageStorage.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailMessageStorage.class);
 
     /**
      * The fields containing {@link MailField#FULL}.
@@ -167,7 +167,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
             try {
                text = textFinder.getText(getMessage(folder, mailIds[i], false));
             } catch (Throwable t) {
-                LOG.warn("Error while getting primary content for mail '" + mailIds[i] + "' in folder '" + folder + "'. Returning null.", t);
+                LOG.warn("Error while getting primary content for mail ''{}'' in folder ''{}''. Returning null.", mailIds[i], folder, t);
             }
 
             retval[i] = text;

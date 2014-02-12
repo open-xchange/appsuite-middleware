@@ -63,8 +63,7 @@ import com.openexchange.passwordchange.service.PasswordChange;
  */
 public final class PasswordChangeCustomizer implements ServiceTrackerCustomizer<PasswordChangeService,PasswordChangeService> {
 
-	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
-			.getLog(PasswordChangeCustomizer.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeCustomizer.class);
 
 	private final BundleContext context;
 
@@ -92,9 +91,7 @@ public final class PasswordChangeCustomizer implements ServiceTrackerCustomizer<
 
 	@Override
     public void modifiedService(final ServiceReference<PasswordChangeService> reference, final PasswordChangeService service) {
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("UserPasswordChangeCustomizer.modifiedService()");
-		}
+		LOG.trace("UserPasswordChangeCustomizer.modifiedService()");
 	}
 
 	@Override

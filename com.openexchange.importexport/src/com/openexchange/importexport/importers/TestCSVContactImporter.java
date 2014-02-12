@@ -65,8 +65,8 @@ import com.openexchange.java.Streams;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class TestCSVContactImporter extends CSVContactImporter {
-    
-    
+
+
     public TestCSVContactImporter() throws Exception {
         super(null);
         final ConfigurationService conf = ImportExportServices.getConfigurationService();
@@ -85,7 +85,7 @@ public class TestCSVContactImporter extends CSVContactImporter {
                 continue;
             }
             final Properties props = new Properties();
-            final InputStream in = new BufferedInputStream(new FileInputStream(file));
+            final InputStream in = new BufferedInputStream(new FileInputStream(file), 65536);
             try {
                 props.load(in);
             } finally {

@@ -64,8 +64,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class HostnameServiceCustomizer implements ServiceTrackerCustomizer<HostnameService,HostnameService> {
 
-	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
-			.getLog(HostnameServiceCustomizer.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HostnameServiceCustomizer.class);
 
 	private final BundleContext context;
 
@@ -94,9 +93,7 @@ public final class HostnameServiceCustomizer implements ServiceTrackerCustomizer
 
 	@Override
     public void modifiedService(final ServiceReference<HostnameService> reference, final HostnameService service) {
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("HostnameURLCustomizer.modifiedService()");
-		}
+		LOG.trace("HostnameURLCustomizer.modifiedService()");
 	}
 
 	@Override

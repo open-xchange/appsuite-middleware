@@ -54,10 +54,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.RejectedExecutionException;
-import org.apache.commons.logging.Log;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.checksum.ChecksumStore;
+import com.openexchange.drive.management.DriveConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -73,7 +72,6 @@ import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
  * {@link TempCleaner}
@@ -82,7 +80,7 @@ import com.openexchange.tools.strings.TimeSpanParser;
  */
 public class TempCleaner implements Runnable {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(TempCleaner.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TempCleaner.class);
     private static final long MILLIS_PER_HOUR = 1000 * 60 * 60;
     private static final String PARAM_LAST_CLEANER_RUN = "com.openexchange.drive.lastCleanerRun";
 
@@ -92,60 +90,39 @@ public class TempCleaner implements Runnable {
      * @param session The sync session
      */
     public static void cleanUpIfNeeded(SyncSession session) {
-        ConfigurationService configService = DriveServiceLookup.getService(ConfigurationService.class);
-        if (null == configService) {
-            LOG.warn("Unable to access config service, skipping cleanup-thread initialization.");
-            return;
-        }
         Object parameter = session.getServerSession().getParameter(PARAM_LAST_CLEANER_RUN);
         if (null != parameter && Long.class.isInstance(parameter)) {
             long lastCleanerRun = ((Long)parameter).longValue();
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Last cleaner run for session " + session + " at: " +
-                    DriveConstants.LOG_DATE_FORMAT.get().format(new Date(lastCleanerRun)));
-            }
-            String intervalValue = configService.getProperty("com.openexchange.drive.cleaner.interval", "1D");
-            long interval = TimeSpanParser.parseTimespan(intervalValue);
+            LOG.debug("Last cleaner run for session {} at: {}", session, DriveConstants.LOG_DATE_FORMAT.get().format(new Date(lastCleanerRun)));
+            long interval = DriveConfig.getInstance().getCleanerInterval();
             if (MILLIS_PER_HOUR > interval) {
-                LOG.warn("The configured interval of '" + intervalValue +
-                    "' is smaller than the allowed minimum of one hour. Falling back to '1h' instead.");
+                LOG.warn("The configured interval of '{}' is smaller than the allowed minimum of one hour. Falling back to '1h' instead.", interval);
                 interval = MILLIS_PER_HOUR;
             }
             if (System.currentTimeMillis() - lastCleanerRun < interval) {
-                LOG.debug("Cleaner interval time of '" + intervalValue +
-                    "' not yet exceeded, not starting new run for session " + session);
+                LOG.debug("Cleaner interval time of '{}' not yet exceeded, not starting new run for session {}", interval, session);
                 return;
             }
         } else {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("No previous cleaner run detected for session " + session + '.');
-            }
+            LOG.debug("No previous cleaner run detected for session {}{}", session, '.');
         }
         try {
             final FileStorageFolder tempFolder = session.getStorage().optFolder(DriveConstants.TEMP_PATH, false);
             if (null == tempFolder) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("No '.drive' folder found, nothing to do.");
-                }
+                LOG.debug("No '.drive' folder found, nothing to do.");
                 return;
             }
-            String maxAgeValue = configService.getProperty("com.openexchange.drive.cleaner.maxAge", "1D");
-            long maxAge = TimeSpanParser.parseTimespan(maxAgeValue);
+            long maxAge = DriveConfig.getInstance().getCleanerMaxAge();
             if (MILLIS_PER_HOUR > maxAge) {
-                LOG.warn("The configured maximum age of '" + maxAgeValue +
-                    "' is smaller than the allowed minimum of one hour. Falling back to '1h' instead.");
+                LOG.warn("The configured maximum age of '{}' is smaller than the allowed minimum of one hour. Falling back to '1h' instead.", maxAge);
                 maxAge = MILLIS_PER_HOUR;
             }
             long minimumTimestamp = System.currentTimeMillis() - maxAge;
             if (null != tempFolder.getCreationDate() &&  minimumTimestamp <= tempFolder.getCreationDate().getTime()) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("'.drive' was created within 'max age' interval, nothing to do.");
-                }
+                LOG.debug("'.drive' was created within 'max age' interval, nothing to do.");
                 return;
             }
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Starting cleaner run for session " + session + '.');
-            }
+            LOG.info("Starting cleaner run for session {}{}", session, '.');
             TempCleaner tempCleaner = new TempCleaner(
                 session.getServerSession(), session.getChecksumStore(), tempFolder, minimumTimestamp);
             ThreadPoolService threadPoolService = DriveServiceLookup.getService(ThreadPoolService.class);
@@ -237,13 +214,7 @@ public class TempCleaner implements Runnable {
                 }
             }
             if (deleteAll) {
-                /*
-                 * cleanup whole '.drive' folder, invalidate checksums
-                 */
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Detected all folders (" + foldersToDelete.size() + ") and files (" + filesToDelete.size() +
-                        ") in temp folder being outdated, removing '.drive' folder completely.");
-                }
+                LOG.debug("Detected all folders ({}) and files ({}) in temp folder being outdated, removing '.drive' folder completely.", foldersToDelete.size(), filesToDelete.size());
                 String folderID = folderAccess.deleteFolder(tempFolder.getId());
                 checksumStore.removeFileChecksumsInFolder(new FolderID(folderID));
                 for (FileStorageFolder folder : foldersToDelete) {
@@ -252,13 +223,7 @@ public class TempCleaner implements Runnable {
                     checksumStore.removeDirectoryChecksum(id);
                 }
             } else if (0 < foldersToDelete.size() || 0 < filesToDelete.size()) {
-                /*
-                 * cleanup selected files and folders, invalidate checksums
-                 */
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Detected " + foldersToDelete.size() + " folder(s) and " + filesToDelete.size() +
-                        " file(s) in temp folder being outdated, cleaning up.");
-                }
+                LOG.debug("Detected {} folder(s) and {} file(s) in temp folder being outdated, cleaning up.", foldersToDelete.size(), filesToDelete.size());
                 for (FileStorageFolder folder : foldersToDelete) {
                     FolderID id = new FolderID(folder.getId());
                     folderAccess.deleteFolder(folder.getId());

@@ -77,7 +77,7 @@ public class SaveAsTest extends InfostoreAJAXTest {
 			clean.add(id);
 			fail("Expected IOException when trying to save attachment in virtual infostore folder");
 		} catch (final JSONException x) {
-			assertTrue(x.getMessage(), x.getMessage().contains("virt"));
+			assertTrue(x.getMessage(), x.getMessage().contains("IFO-1700"));
 		}
 
 	}

@@ -49,6 +49,7 @@
 
 package com.openexchange.server.osgi;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.nio.charset.spi.CharsetProvider;
 import java.util.ArrayList;
@@ -56,10 +57,10 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import javax.activation.MailcapCommandMap;
+import javax.management.ObjectName;
 import javax.servlet.ServletException;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
-import org.apache.commons.logging.Log;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.osgi.framework.BundleActivator;
@@ -77,8 +78,12 @@ import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.Infostore;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.osgi.FolderFieldCollector;
+import com.openexchange.ajax.meta.MetaContributorRegistry;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.ajax.requesthandler.Dispatcher;
+import com.openexchange.auth.Authenticator;
+import com.openexchange.auth.mbean.AuthenticatorMBean;
+import com.openexchange.auth.mbean.impl.AuthenticatorMBeanImpl;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
@@ -143,8 +148,9 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.index.IndexFacadeService;
-import com.openexchange.log.CommonsLoggingLogger;
-import com.openexchange.log.LogFactory;
+import com.openexchange.lock.LockService;
+import com.openexchange.lock.impl.LockServiceImpl;
+import com.openexchange.log.Slf4jLogger;
 import com.openexchange.login.BlockingLoginHandlerService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.MailCounterImpl;
@@ -171,12 +177,14 @@ import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.CreateMailAccountTables;
 import com.openexchange.mailaccount.internal.DeleteListenerServiceTracker;
 import com.openexchange.management.ManagementService;
+import com.openexchange.management.Managements;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
 import com.openexchange.osgi.BundleServiceTracker;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
@@ -188,6 +196,7 @@ import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.impl.Starter;
+import com.openexchange.server.services.MetaContributors;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
@@ -246,7 +255,8 @@ public final class ServerActivator extends HousekeepingActivator {
         }
     }
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServerActivator.class));
+    /** The logger */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServerActivator.class);
 
     /**
      * Constant for string: "identifier"
@@ -303,19 +313,14 @@ public final class ServerActivator extends HousekeepingActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        /*
-         * Never stop the server even if a needed service is absent
-         */
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
         if (CacheService.class.equals(clazz)) {
             final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
             if (null != reg) {
                 try {
                     reg.notifyAbsence();
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -324,9 +329,7 @@ public final class ServerActivator extends HousekeepingActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         ServerServiceRegistry.getInstance().addService(clazz, getService(clazz));
         if (CacheService.class.equals(clazz)) {
             final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
@@ -334,7 +337,7 @@ public final class ServerActivator extends HousekeepingActivator {
                 try {
                     reg.notifyAvailability();
                 } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -354,7 +357,7 @@ public final class ServerActivator extends HousekeepingActivator {
         try {
             return Integer.parseInt(toParse.trim());
         } catch (NumberFormatException e) {
-            LOG.error("Not an integer: " + toParse, e);
+            LOG.error("Not an integer: {}", toParse, e);
             return defaultValue;
         }
     }
@@ -365,7 +368,7 @@ public final class ServerActivator extends HousekeepingActivator {
         CONTEXT = context;
         {
             // Set logger
-            JSONObject.setLogger(new CommonsLoggingLogger(JSONValue.class));
+            JSONObject.setLogger(new Slf4jLogger(JSONValue.class));
             // JSON configuration
             final ConfigurationService service = getService(ConfigurationService.class);
             JSONObject.setMaxSize(service.getIntProperty("com.openexchange.json.maxSize", 2500));
@@ -443,6 +446,55 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // CapabilityService
         track(CapabilityService.class, new CapabilityRegistrationListener());
+
+        // Authenticator
+        track(Authenticator.class, new RegistryCustomizer<Authenticator>(context, Authenticator.class));
+        track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
+
+            @Override
+            public void added(final ServiceReference<ManagementService> ref, final ManagementService management) {
+                try {
+                    final ObjectName objectName = Managements.getObjectName(AuthenticatorMBean.class.getName(), AuthenticatorMBean.DOMAIN);
+                    management.registerMBean(objectName, new AuthenticatorMBeanImpl());
+                } catch (final Exception e) {
+                    LOG.warn("Could not register MBean {}", AuthenticatorMBean.class.getName());
+                }
+            }
+
+            @Override
+            public void removed(final ServiceReference<ManagementService> ref, final ManagementService management) {
+                try {
+                    management.unregisterMBean(Managements.getObjectName(AuthenticatorMBean.class.getName(), AuthenticatorMBean.DOMAIN));
+                } catch (final Exception e) {
+                    LOG.warn("Could not un-register MBean {}", AuthenticatorMBean.class.getName());
+                }
+            }
+        });
+
+        // MetaContributors
+        {
+            class MetaContributorRegistryCustomizer extends RegistryCustomizer<MetaContributorRegistry> {
+
+                public MetaContributorRegistryCustomizer(final BundleContext context) {
+                    super(context, MetaContributorRegistry.class);
+                }
+
+                @Override
+                public MetaContributorRegistry addingService(final ServiceReference<MetaContributorRegistry> serviceReference) {
+                    final MetaContributorRegistry registry = super.addingService(serviceReference);
+                    MetaContributors.setRegistry(registry);
+                    return registry;
+                }
+
+                @Override
+                public void removedService(final ServiceReference<MetaContributorRegistry> serviceReference, final MetaContributorRegistry o) {
+                    MetaContributors.setRegistry(null);
+                    super.removedService(serviceReference, o);
+                }
+            }
+            track(MetaContributorRegistry.class, new MetaContributorRegistryCustomizer(context));
+        }
+
         /*
          * Register EventHandler
          */
@@ -682,6 +734,29 @@ public final class ServerActivator extends HousekeepingActivator {
         ServerServiceRegistry.getInstance().addService(SecretService.class, secretService = new WhiteboardSecretService(context));
         secretService.open();
 
+        // Cache for generic volatile locks
+        {
+            final String regionName = "GenLocks";
+            final byte[] ccf = ("jcs.region."+regionName+"=\n" +
+                "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                "jcs.region."+regionName+".cacheattributes.MaxObjects=1000000\n" +
+                "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
+                "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=150\n" +
+                "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=30\n" +
+                "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
+                "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=-1\n" +
+                "jcs.region."+regionName+".elementattributes.IdleTime=150\n" +
+                "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
+                "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
+                "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+            getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf), true);
+            final LockService lockService = new LockServiceImpl();
+            ServerServiceRegistry.getInstance().addService(LockService.class, lockService);
+            registerService(LockService.class, lockService);
+        }
+
         /*
          * Register servlets
          */
@@ -738,6 +813,7 @@ public final class ServerActivator extends HousekeepingActivator {
     private void registerServlets(final HttpService http) throws ServletException, NamespaceException {
         http.registerServlet("/infostore", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/files", new com.openexchange.webdav.Infostore(), null, null);
+        http.registerServlet("/drive", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/servlet/webdav.ical", new com.openexchange.webdav.ical(), null, null);
         http.registerServlet("/servlet/webdav.vcard", new com.openexchange.webdav.vcard(), null, null);
         http.registerServlet("/servlet/webdav.version", new com.openexchange.webdav.version(), null, null);

@@ -49,68 +49,68 @@
 
 package com.openexchange.tools.iterator;
 
-import static com.openexchange.tools.iterator.SearchIteratorExceptionMessages.CALCULATION_ERROR_MSG;
-import static com.openexchange.tools.iterator.SearchIteratorExceptionMessages.CLOSED_MSG;
-import static com.openexchange.tools.iterator.SearchIteratorExceptionMessages.DBPOOLING_ERROR_MSG;
-import static com.openexchange.tools.iterator.SearchIteratorExceptionMessages.INVALID_CONSTRUCTOR_ARG_MSG;
-import static com.openexchange.tools.iterator.SearchIteratorExceptionMessages.NOT_IMPLEMENTED_MSG;
-import static com.openexchange.tools.iterator.SearchIteratorExceptionMessages.NO_SUCH_ELEMENT_MSG;
-import static com.openexchange.tools.iterator.SearchIteratorExceptionMessages.SQL_ERROR_MSG;
-import static com.openexchange.tools.iterator.SearchIteratorExceptionMessages.UNEXPECTED_ERROR_MSG;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * The {@link SearchIterator} error code enumeration.
  */
-public enum SearchIteratorExceptionCodes implements OXExceptionCode {
+public enum SearchIteratorExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * A SQL error occurred: %1$s
      */
-    SQL_ERROR(SQL_ERROR_MSG, Category.CATEGORY_ERROR, 1),
+    SQL_ERROR("A SQL error occurred: %1$s", Category.CATEGORY_ERROR, 1),
     /**
      * A DBPool error occurred: %1$s
      */
-    DBPOOLING_ERROR(DBPOOLING_ERROR_MSG, Category.CATEGORY_ERROR, 2),
+    DBPOOLING_ERROR("A DBPool error occurred: 1$%s", Category.CATEGORY_ERROR, 2),
     /**
      * Operation not allowed on a closed SearchIterator
      */
-    CLOSED(CLOSED_MSG, Category.CATEGORY_ERROR, 3),
+    CLOSED("Operation not allowed on a closed SearchIterator", Category.CATEGORY_ERROR, 3),
     /**
      * Mapping for %1$d not implemented
      */
-    NOT_IMPLEMENTED(NOT_IMPLEMENTED_MSG, Category.CATEGORY_ERROR, 4),
+    NOT_IMPLEMENTED("Mapping for %1$d not implemented", Category.CATEGORY_ERROR, 4),
 
     /**
      * FreeBusyResults calculation problem with oid: %1$d
      */
-    CALCULATION_ERROR(CALCULATION_ERROR_MSG, Category.CATEGORY_ERROR, 5),
+    CALCULATION_ERROR("FreeBusyResults calculation problem with oid: %1$d", Category.CATEGORY_ERROR, 5),
     /**
      * Invalid constructor argument. Instance of %1$s not supported
      */
-    INVALID_CONSTRUCTOR_ARG(INVALID_CONSTRUCTOR_ARG_MSG, Category.CATEGORY_ERROR, 6),
+    INVALID_CONSTRUCTOR_ARG("Invalid constructor argument. Instance of %1$s not supported", Category.CATEGORY_ERROR, 6),
     /**
      * No such element.
      */
-    NO_SUCH_ELEMENT(NO_SUCH_ELEMENT_MSG, Category.CATEGORY_ERROR, 7),
+    NO_SUCH_ELEMENT("No such element.", Category.CATEGORY_ERROR, 7),
     /**
      * An unexpected error occurred: %1$s
      */
-    UNEXPECTED_ERROR(UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 8);
+    UNEXPECTED_ERROR("An unexpected error occurred: %1$s", Category.CATEGORY_ERROR, 8);
 
     private final String message;
+
+    private final String displayMessage;
 
     private final int detailNumber;
 
     private final Category category;
 
     private SearchIteratorExceptionCodes(final String message, final Category category, final int detailNumber) {
+        this(message, category, detailNumber, null);
+    }
+
+    private SearchIteratorExceptionCodes(final String message, final Category category, final int detailNumber, final String displayMessage) {
         this.message = message;
         this.category = category;
         this.detailNumber = detailNumber;
+        this.displayMessage = displayMessage == null ? OXExceptionStrings.MESSAGE : displayMessage;
     }
 
     private static final String PREFIX = "FLD";
@@ -133,6 +133,11 @@ public enum SearchIteratorExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

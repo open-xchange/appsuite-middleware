@@ -50,9 +50,10 @@
 package com.openexchange.solr;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 
 /**
@@ -61,77 +62,76 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum SolrExceptionCodes implements OXExceptionCode {
+public enum SolrExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    ERROR(SolrExceptionMessages.ERROR_MSG, Category.CATEGORY_ERROR, 1000),
+    ERROR("An error occurred: %1$s", Category.CATEGORY_ERROR, 1000),
     /**
      * Could not find solr core entry for user %1$s and module %2$s in context %3$s.
      */
-    CORE_ENTRY_NOT_FOUND(SolrExceptionMessages.CORE_ENTRY_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 1001),
+    CORE_ENTRY_NOT_FOUND("Did not find Apache Solr Core entry for user %1$s and module %2$s in context %3$s.", Category.CATEGORY_ERROR, 1001),
     /**
      * Could not find solr core store for given attributes. %1$s.
      */
-    CORE_STORE_ENTRY_NOT_FOUND(SolrExceptionMessages.CORE_STORE_ENTRY_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 1002),
+    CORE_STORE_ENTRY_NOT_FOUND("Could not find Apache Solr Core store for given attributes. %1$s.", Category.CATEGORY_ERROR, 1002),
     /**
      * All core stores seem to be full.
      */
-    NO_FREE_CORE_STORE(SolrExceptionMessages.NO_FREE_CORE_STORE_MSG, Category.CATEGORY_ERROR, 1003),
+    NO_FREE_CORE_STORE("All core stores seem to be full.", Category.CATEGORY_ERROR, 1003),
     /**
      * This cores instance directory (%1$s) already exists and its structure is inconsistent.
      */
-    INSTANCE_DIR_EXISTS(SolrExceptionMessages.INSTANCE_DIR_EXISTS_MSG, Category.CATEGORY_ERROR, 1004),
+    INSTANCE_DIR_EXISTS("This Apache Solr Core's instance directory (%1$s) already exists and its structure is inconsistent.", Category.CATEGORY_ERROR, 1004),
     /**
      * Could neither delegate solr request to a local nor to a remote server instance.
      */
-    DELEGATION_ERROR(SolrExceptionMessages.DELEGATION_ERROR_MSG, CATEGORY_ERROR, 1005),
+    DELEGATION_ERROR("Could neither delegate Apache Solr request to a local nor to a remote server instance.", CATEGORY_ERROR, 1005),
     /**
      * Could not parse URI: %1$s.
      */
-    URI_PARSE_ERROR(SolrExceptionMessages.URI_PARSE_ERROR_MSG, Category.CATEGORY_ERROR, 1006),
+    URI_PARSE_ERROR("Could not parse URI: %1$s.", Category.CATEGORY_ERROR, 1006),
     /**
      * Remote error: %1$s.
      */
-    REMOTE_ERROR(SolrExceptionMessages.REMOTE_ERROR_MSG, Category.CATEGORY_ERROR, 1007),
+    REMOTE_ERROR("Remote error: %1$s.", Category.CATEGORY_ERROR, 1007),
     /**
      * Could not parse solr core identifier %1$s.
      */
-    IDENTIFIER_PARSE_ERROR(SolrExceptionMessages.IDENTIFIER_PARSE_ERROR_MSG, Category.CATEGORY_ERROR, 1008),
+    IDENTIFIER_PARSE_ERROR("Could not parse Apache Solr Core identifier %1$s.", Category.CATEGORY_ERROR, 1008),
     /**
      * Unknown module: %1$s.
      */
-    UNKNOWN_MODULE(SolrExceptionMessages.UNKNOWN_MODULE_MSG, Category.CATEGORY_ERROR, 1009),
+    UNKNOWN_MODULE("Unknown module: %1$s.", Category.CATEGORY_ERROR, 1009),
     /**
      * Can not reach solr core store. URI %1$s does not lead to an existing directory.
      */
-    CORE_STORE_NOT_EXISTS_ERROR(SolrExceptionMessages.CORE_STORE_NOT_EXISTS_ERROR_MSG, Category.CATEGORY_ERROR, 1010),
+    CORE_STORE_NOT_EXISTS_ERROR("Can not reach Apache Solr Core Store. URI %1$s does not lead to an existing directory.", Category.CATEGORY_ERROR, 1010),
     /**
      * The affected solr core %1$s is not started up yet. Please try again later.
      */
-    CORE_NOT_STARTED(SolrExceptionMessages.CORE_NOT_STARTED_MSG, Category.CATEGORY_ERROR, 1011),
-    /**
-     * The document with uuid %1$s could not be found.
-     */
-    DOCUMENT_NOT_FOUND(SolrExceptionMessages.DOCUMENT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 1012),
-    /**
-     * %1$s is not a valid field for sorting.
-     */
-    INVALID_SORT_FIELD(SolrExceptionMessages.INVALID_SORT_FIELD_MSG, Category.CATEGORY_ERROR, 1013);
+    CORE_NOT_STARTED("The affected Apache Solr Core %1$s is not started up yet. Please try again later.", Category.CATEGORY_ERROR, 1011),
 
     ;
 
     private final String message;
 
+    private final String displayMessage;
+
     private final int number;
 
     private final Category category;
 
-    private SolrExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private SolrExceptionCodes(final String message, final Category category, final int number) {
+        this(message, category, number, null);
+    }
+
+    private SolrExceptionCodes(final String message, final Category category, final int number, final String displayMessage) {
         this.message = message;
-        number = detailNumber;
+        this.number = number;
         this.category = category;
+        this.displayMessage = displayMessage == null ? OXExceptionStrings.MESSAGE : displayMessage;
     }
 
     /**
@@ -181,12 +181,17 @@ public enum SolrExceptionCodes implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "SOL";
+        return "SOLR";
     }
 
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
 }

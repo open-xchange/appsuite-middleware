@@ -52,6 +52,7 @@ package com.openexchange.push.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.internal.PushManagerRegistry;
 
@@ -78,8 +79,8 @@ public final class PushManagerServiceTracker implements ServiceTrackerCustomizer
     public PushManagerService addingService(final ServiceReference<PushManagerService> reference) {
         final PushManagerService service = context.getService(reference);
         if (PushManagerRegistry.getInstance().addPushManager(service)) {
-            final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PushManagerServiceTracker.class))));
-            log.info("Registered push manager: " + service.getClass().getName());
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PushManagerServiceTracker.class);
+            log.info("Registered push manager: {}", service.getClass().getName());
             return service;
         }
         /*

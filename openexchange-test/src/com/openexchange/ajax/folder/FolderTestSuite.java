@@ -61,6 +61,7 @@ import com.openexchange.ajax.folder.api2.Bug16284Test;
 import com.openexchange.ajax.folder.api2.Bug16303Test;
 import com.openexchange.ajax.folder.api2.Bug17225Test;
 import com.openexchange.ajax.folder.api2.Bug17261Test;
+import com.openexchange.ajax.folder.api2.Bug29853Test;
 import com.openexchange.ajax.folder.api2.ClearTest;
 import com.openexchange.ajax.folder.api2.CreateTest;
 import com.openexchange.ajax.folder.api2.GetTest;
@@ -74,7 +75,7 @@ import com.openexchange.ajax.infostore.test.InfostoreObjectCountTest;
 
 /**
  * Suite for all folder tests.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class FolderTestSuite {
@@ -88,7 +89,7 @@ public final class FolderTestSuite {
 
     /**
      * Generates the task test suite.
-     * 
+     *
      * @return the task tests suite.
      */
     public static Test suite() {
@@ -141,6 +142,7 @@ public final class FolderTestSuite {
         tests.addTestSuite(Bug17027Test.class);
         tests.addTestSuite(Bug17225Test.class);
         tests.addTestSuite(Bug17261Test.class);
+        tests.addTestSuite(Bug29853Test.class);
 
         return tests;
     }

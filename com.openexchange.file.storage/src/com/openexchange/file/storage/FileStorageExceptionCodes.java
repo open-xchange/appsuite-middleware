@@ -50,9 +50,10 @@
 package com.openexchange.file.storage;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link FileStorageExceptionCodes} - Enumeration of all {@link OXException}s.
@@ -60,124 +61,128 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
-public enum FileStorageExceptionCodes implements OXExceptionCode {
+public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(FileStorageExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An error occurred: %1$s", Category.CATEGORY_ERROR, 1),
     /**
      * A SQL error occurred: %1$s
      */
-    SQL_ERROR(FileStorageExceptionMessages.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 2),
+    SQL_ERROR("A SQL error occurred: %1$s", Category.CATEGORY_ERROR, 2, OXExceptionStrings.SQL_ERROR_MSG),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(FileStorageExceptionMessages.IO_ERROR_MSG, Category.CATEGORY_ERROR, 3),
+    IO_ERROR("An I/O error occurred: %1$s", Category.CATEGORY_ERROR, 3),
     /**
      * An I/O error occurred: %1$s
      */
-    JSON_ERROR(FileStorageExceptionMessages.JSON_ERROR_MSG, Category.CATEGORY_ERROR, 14),
+    JSON_ERROR("A JSON error occurred: %1$s", Category.CATEGORY_ERROR, 14),
     /**
      * File storage account %1$s of service "%2$s" could not be found for user %3$s in context %4$s.
      */
-    ACCOUNT_NOT_FOUND(FileStorageExceptionMessages.ACCOUNT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 4),
+    ACCOUNT_NOT_FOUND("File storage account %1$s of service \"%2$s\" could not be found for user %3$s in context %4$s.", Category.CATEGORY_ERROR, 4),
     /**
      * The operation is not supported by service %1$s.
      */
-    OPERATION_NOT_SUPPORTED(FileStorageExceptionMessages.OPERATION_NOT_SUPPORTED_MSG, Category.CATEGORY_ERROR, 6),
+    OPERATION_NOT_SUPPORTED("The operation is not supported by service %1$s.", Category.CATEGORY_ERROR, 6),
     /**
      * The folder "%1$s" cannot be found in account %2$s of service "%3$s" of user %4$s in context %5$s.
      */
-    FOLDER_NOT_FOUND(FileStorageExceptionMessages.FOLDER_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 7),
+    FOLDER_NOT_FOUND("The folder \"%1$s\" cannot be found in account %2$s of service \"%3$s\" of user %4$s in context %5$s.", Category.CATEGORY_ERROR, 7, FileStorageExceptionMessages.FOLDER_NOT_EXISTS_MSG),
     /**
      * Invalid file identifier: %1$s
      */
-    INVALID_FILE_IDENTIFIER(FileStorageExceptionMessages.INVALID_FILE_IDENTIFIER_MSG, Category.CATEGORY_ERROR, 8),
+    INVALID_FILE_IDENTIFIER("Invalid file identifier: %1$s", Category.CATEGORY_ERROR, 8, FileStorageExceptionMessages.FILE_NOT_EXISTS_MSG),
     /**
      * Invalid header "%1$s": %2$s
      */
-    INVALID_HEADER(FileStorageExceptionMessages.INVALID_HEADER_MSG, Category.CATEGORY_ERROR, 9),
+    INVALID_HEADER("Invalid header \"%1$s\": %2$s", Category.CATEGORY_ERROR, 9),
     /**
      * Unknown action to perform: %1$s.
      */
-    UNKNOWN_ACTION(FileStorageExceptionMessages.UNKNOWN_ACTION_MSG, Category.CATEGORY_ERROR, 10),
+    UNKNOWN_ACTION("Unknown action to perform: %1$s.", Category.CATEGORY_ERROR, 10),
     /**
      * A file error occurred: %1$s
      */
-    FILE_ERROR(FileStorageExceptionMessages.FILE_ERROR_MSG, Category.CATEGORY_ERROR, 11),
+    FILE_ERROR("A file error occurred: %1$s", Category.CATEGORY_ERROR, 11),
     /**
      * Wrongly formatted address: %1$s.
      */
-    ADDRESS_ERROR(FileStorageExceptionMessages.ADDRESS_ERROR_MSG, Category.CATEGORY_ERROR, 12),
+    ADDRESS_ERROR("Wrongly formatted address: %1$s.", Category.CATEGORY_ERROR, 12),
     /**
      * Unknown file content: %1$s.
      */
-    UNKNOWN_FILE_CONTENT(FileStorageExceptionMessages.UNKNOWN_FILE_CONTENT_MSG, Category.CATEGORY_ERROR, 15),
+    UNKNOWN_FILE_CONTENT("Unknown file content: %1$s.", Category.CATEGORY_ERROR, 15),
     /**
      * Unknown file storage service: %1$s.
      */
-    UNKNOWN_FILE_STORAGE_SERVICE(FileStorageExceptionMessages.UNKNOWN_FILE_STORAGE_SERVICE_MSG, Category.CATEGORY_SERVICE_DOWN, 16),
+    UNKNOWN_FILE_STORAGE_SERVICE("Unknown file storage service: %1$s.", Category.CATEGORY_SERVICE_DOWN, 16),
     /**
      * Missing parameter: %1$s.
      */
-    MISSING_PARAMETER(FileStorageExceptionMessages.MISSING_PARAMETER_MSG, Category.CATEGORY_USER_INPUT, 17),
+    MISSING_PARAMETER("Missing parameter: %1$s.", Category.CATEGORY_USER_INPUT, 17),
     /**
      * Invalid parameter: %1$s with type '%2$s'. Expected '%3$s'.
      */
-    INVALID_PARAMETER(FileStorageExceptionMessages.INVALID_PARAMETER_MSG, Category.CATEGORY_USER_INPUT, 18),
+    INVALID_PARAMETER("Invalid parameter: %1$s with type '%2$s'. Expected '%3$s'.", Category.CATEGORY_USER_INPUT, 18),
     /**
      * File part is read-only: %1$s
      */
-    READ_ONLY(FileStorageExceptionMessages.READ_ONLY_MSG, Category.CATEGORY_USER_INPUT, 19),
+    READ_ONLY("File part is read-only: %1$s", Category.CATEGORY_USER_INPUT, 19),
     /**
      * Unknown color label index: %1$s
      */
-    UNKNOWN_COLOR_LABEL(FileStorageExceptionMessages.UNKNOWN_COLOR_LABEL_MSG, Category.CATEGORY_USER_INPUT, 20),
+    UNKNOWN_COLOR_LABEL("Unknown color label index: %1$s", Category.CATEGORY_USER_INPUT, 20),
     /**
      * A duplicate folder named "%1$s" already exists below parent folder "%2$s".
      */
-    DUPLICATE_FOLDER(FileStorageExceptionMessages.DUPLICATE_FOLDER_MSG, Category.CATEGORY_ERROR, 21),
+    DUPLICATE_FOLDER("A duplicate folder named \"%1$s\" already exists below parent folder \"%2$s\".", Category.CATEGORY_ERROR, 21, FileStorageExceptionMessages.DUPLICATE_FOLDER_MSG),
     /**
      * No create access on folder %1$s.
      */
-    NO_CREATE_ACCESS(FileStorageExceptionMessages.NO_CREATE_ACCESS_MSG, Category.CATEGORY_PERMISSION_DENIED, 22),
+    NO_CREATE_ACCESS("No create access on folder %1$s.", Category.CATEGORY_PERMISSION_DENIED, 22, FileStorageExceptionMessages.NO_CREATE_ACCESS_MSG),
     /**
      * Not connected
      */
-    NOT_CONNECTED(FileStorageExceptionMessages.NOT_CONNECTED_MSG, Category.CATEGORY_PERMISSION_DENIED, 23),
+    NOT_CONNECTED("Not connected", Category.CATEGORY_PERMISSION_DENIED, 23),
     /**
      * Invalid sorting column. Cannot sort by %1$s.
      */
-    INVALID_SORTING_COLUMN(FileStorageExceptionMessages.INVALID_SORTING_COLUMN_MSG, Category.CATEGORY_USER_INPUT, 24),
+    INVALID_SORTING_COLUMN("Invalid sorting column. Cannot sort by %1$s.", Category.CATEGORY_USER_INPUT, 24),
     /**
      * No attachment found with section identifier %1$s in file %2$s in folder %3$s.
      */
-    ATTACHMENT_NOT_FOUND(FileStorageExceptionMessages.ATTACHMENT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 25),
+    ATTACHMENT_NOT_FOUND("No attachment found with section identifier %1$s in file %2$s in folder %3$s.", Category.CATEGORY_USER_INPUT, 25, FileStorageExceptionMessages.FILE_NOT_EXISTS_MSG),
     /**
      * File %1$s not found in folder %2$s.
      */
-    FILE_NOT_FOUND(FileStorageExceptionMessages.FILE_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 26),
+    FILE_NOT_FOUND("File %1$s not found in folder %2$s.", Category.CATEGORY_USER_INPUT, 26, FileStorageExceptionMessages.FILE_NOT_EXISTS_MSG),
     /**
      * No account manager could be found for service: %1$s.
      */
-    NO_ACCOUNT_MANAGER_FOR_SERVICE(FileStorageExceptionMessages.NO_ACCOUNT_MANAGER_FOR_SERVICE_MSG, Category.CATEGORY_ERROR, 27),
+    NO_ACCOUNT_MANAGER_FOR_SERVICE("No account manager could be found for service: %1$s.", Category.CATEGORY_ERROR, 27),
     /**
      * Invalid URL "%1$s". Error: %2$s.
      */
-    INVALID_URL(FileStorageExceptionMessages.INVALID_URL_MSG, Category.CATEGORY_USER_INPUT, 28),
+    INVALID_URL("Invalid URL \"%1$s\". Error: %2$s.", Category.CATEGORY_USER_INPUT, 28, FileStorageExceptionMessages.INVALID_URL_MSG),
     /**
      * No such folder.
      */
-    NO_SUCH_FOLDER(FileStorageExceptionMessages.NO_SUCH_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 29),
+    NO_SUCH_FOLDER("No such folder.", Category.CATEGORY_USER_INPUT, 29, FileStorageExceptionMessages.FOLDER_NOT_EXISTS_MSG),
     /**
      * Authentication failed for login %1$s to server %2$s (service: %3$s).
      */
-    LOGIN_FAILED(FileStorageExceptionMessages.LOGIN_FAILED_MSG, Category.CATEGORY_CONFIGURATION, 30),
+    LOGIN_FAILED("Authentication failed for login %1$s to server %2$s (service: %3$s).", Category.CATEGORY_CONFIGURATION, 30),
     /**
      * In order to accomplish the search, %1$d or more characters are required.
      */
-    PATTERN_NEEDS_MORE_CHARACTERS(FileStorageExceptionMessages.PATTERN_NEEDS_MORE_CHARACTERS_MSG, CATEGORY_USER_INPUT, 602)
+    PATTERN_NEEDS_MORE_CHARACTERS(FileStorageExceptionMessages.PATTERN_NEEDS_MORE_CHARACTERS_MSG, CATEGORY_USER_INPUT, 602, FileStorageExceptionMessages.PATTERN_NEEDS_MORE_CHARACTERS_MSG),
+    /**
+     * Invalid folder identifier: %1$s
+     */
+    INVALID_FOLDER_IDENTIFIER("Invalid folder identifier: %1$s", Category.CATEGORY_ERROR, 31, FileStorageExceptionMessages.FOLDER_NOT_EXISTS_MSG),
 
     ;
 
@@ -192,10 +197,17 @@ public enum FileStorageExceptionCodes implements OXExceptionCode {
 
     private final String message;
 
+    private final String displayMessage;
+
     private FileStorageExceptionCodes(final String message, final Category category, final int detailNumber) {
+        this(message, category, detailNumber, null);
+    }
+
+    private FileStorageExceptionCodes(final String message, final Category category, final int detailNumber, final String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -218,8 +230,9 @@ public enum FileStorageExceptionCodes implements OXExceptionCode {
         return PREFIX;
     }
 
-    public String getHelp() {
-        return null;
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

@@ -74,6 +74,7 @@ public class DriveActionFactory implements AJAXActionServiceFactory {
         actions.put("download", new DownloadAction());
         actions.put("listen", new ListenAction());
         actions.put("quota", new QuotaAction());
+        actions.put("settings", new SettingsAction());
         actions.put("subscribe", new SubscribeAction());
         actions.put("unsubscribe", new UnsubscribeAction());
         actions.put("updateToken", new UpdateTokenAction());

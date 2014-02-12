@@ -57,7 +57,6 @@ import java.util.Locale;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.logging.Log;
 import org.xml.sax.SAXException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
@@ -75,7 +74,6 @@ import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexManagementService;
 import com.openexchange.index.IndexProperties;
 import com.openexchange.index.solr.ModuleSet;
-import com.openexchange.index.solr.SolrIndexExceptionCodes;
 import com.openexchange.index.solr.internal.attachments.SolrAttachmentIndexAccess;
 import com.openexchange.index.solr.internal.config.FieldConfiguration;
 import com.openexchange.index.solr.internal.config.XMLBasedFieldConfiguration;
@@ -84,7 +82,6 @@ import com.openexchange.index.solr.internal.mail.SolrMailIndexAccess;
 import com.openexchange.index.solr.internal.querybuilder.BuilderException;
 import com.openexchange.index.solr.internal.querybuilder.SimpleQueryBuilder;
 import com.openexchange.index.solr.internal.querybuilder.SolrQueryBuilder;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.session.Session;
 import com.openexchange.solr.SchemaAndConfigStore;
@@ -101,7 +98,7 @@ import com.openexchange.user.UserService;
  */
 public class SolrIndexFacadeService implements IndexFacadeService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrIndexFacadeService.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SolrIndexFacadeService.class);
 
     private final ConcurrentHashMap<SolrCoreIdentifier, AbstractSolrIndexAccess<?>> accessMap;
 
@@ -169,7 +166,7 @@ public class SolrIndexFacadeService implements IndexFacadeService {
                         LOG.debug(sb.toString());
                     }
                 } catch (Throwable e) {
-                    LOG.error("Exception during timer task execution: " + e.getMessage(), e);
+                    LOG.error("Exception during timer task execution: {}", e.getMessage(), e);
                 }
 
             }
@@ -318,7 +315,7 @@ public class SolrIndexFacadeService implements IndexFacadeService {
                 if (mailBuilder == null) {
                     throw new IllegalStateException("QueryBuilder for module mail is not initialized.");
                 }
-                
+
                 ContextService contextService = Services.getService(ContextService.class);
                 UserService userService = Services.getService(UserService.class);
                 Context context = contextService.getContext(identifier.getContextId());
@@ -339,7 +336,7 @@ public class SolrIndexFacadeService implements IndexFacadeService {
                 return new SolrAttachmentIndexAccess(identifier, attachmentBuilder, attachmentFieldConfig);
 
             default:
-                throw SolrIndexExceptionCodes.MISSING_ACCESS_FOR_MODULE.create(module);
+                throw new IllegalArgumentException("No 'IndexAccess' implementation exists for module '" + module + "'");
 
         }
     }

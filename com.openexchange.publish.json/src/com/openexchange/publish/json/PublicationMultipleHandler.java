@@ -174,8 +174,8 @@ public class PublicationMultipleHandler implements MultipleHandler {
         }
         final String[] basicColumns = getBasicColumns(request);
         final Map<String, String[]> dynamicColumns = getDynamicColumns(request);
-        final List<String> dynamicColumnOrder = getDynamicColumnOrder(request); 
-        
+        final List<String> dynamicColumnOrder = getDynamicColumnOrder(request);
+
         TimeZone tz = null;
         String sTimeZone = request.optString("timezone");
         if (sTimeZone != null) {
@@ -188,40 +188,40 @@ public class PublicationMultipleHandler implements MultipleHandler {
     }
 
     private Object loadAllPublications(final JSONObject request, final ServerSession session) throws OXException, JSONException, OXException {
-    	final Context context = session.getContext();
-    	final int userId = session.getUserId();
-    	boolean containsFolderOrId = false;
+        final Context context = session.getContext();
+        final int userId = session.getUserId();
+        boolean containsFolderOrId = false;
 
-    	if (request.has("folder") || request.has("id")) {
-    		if (!request.has("entityModule")) {
-    			throw MISSING_PARAMETER.create("entityModule");
-    		}
-    		containsFolderOrId = true;
+        if (request.has("folder") || request.has("id")) {
+            if (!request.has("entityModule")) {
+                throw MISSING_PARAMETER.create("entityModule");
+            }
+            containsFolderOrId = true;
         }
 
-    	String module = null;
-    	if (request.has("entityModule")) {
-    		module = request.optString("entityModule");
-    	}
+        String module = null;
+        if (request.has("entityModule")) {
+            module = request.optString("entityModule");
+        }
 
         // Check if request contains folder attribute. If not assume a request for all publications of the session user.
-    	// If module is set in this case, fetch all publications of a user in that module.
+        // If module is set in this case, fetch all publications of a user in that module.
         final List<Publication> publications;
         if (containsFolderOrId) {
-        	final EntityType entityType = entities.get(module);
+            final EntityType entityType = entities.get(module);
             if (null == entityType) {
                 throw UNKOWN_ENTITY_MODULE.create(module);
             }
             final String entityId = entityType.toEntityID(request);
-        	publications = loadAllPublicationsForEntity(context, entityId, module);
+            publications = loadAllPublicationsForEntity(context, entityId, module);
         } else {
-        	publications = loadAllPublicationsForUser(context, userId, module);
+            publications = loadAllPublicationsForUser(context, userId, module);
         }
 
         final String[] basicColumns = getBasicColumns(request);
         final Map<String, String[]> dynamicColumns = getDynamicColumns(request);
         final List<String> dynamicColumnOrder = getDynamicColumnOrder(request);
-        
+
         TimeZone tz = null;
         String sTimeZone = request.optString("timezone");
         if (sTimeZone != null) {
@@ -229,7 +229,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
         } else {
             tz = TimeZone.getTimeZone(session.getUser().getTimeZone());
         }
-        
+
         return createList(publications, basicColumns, dynamicColumns, dynamicColumnOrder, tz);
     }
 
@@ -281,24 +281,24 @@ public class PublicationMultipleHandler implements MultipleHandler {
     }
 
     private List<Publication> loadAllPublicationsForUser(final Context context, final int userId, final String module) throws OXException {
-    	final List<Publication> publications = new LinkedList<Publication>();
-    	final Collection<PublicationTarget> targets = discovery.listTargets();
+        final List<Publication> publications = new LinkedList<Publication>();
+        final Collection<PublicationTarget> targets = discovery.listTargets();
 
         for (final PublicationTarget target : targets) {
-        	Collection<Publication> allPublicationsForUser = null;
+            Collection<Publication> allPublicationsForUser = null;
 
-        	if (module == null) {
-        		final PublicationService publicationService = target.getPublicationService();
-        		allPublicationsForUser = publicationService.getAllPublications(context, userId, target.getModule());
-        	} else {
-        		if (target.isResponsibleFor(module)) {
-        			final PublicationService publicationService = target.getPublicationService();
-        			allPublicationsForUser = publicationService.getAllPublications(context, userId, module);
-        		}
-        	}
-        	if (allPublicationsForUser != null) {
+            if (module == null) {
+                final PublicationService publicationService = target.getPublicationService();
+                allPublicationsForUser = publicationService.getAllPublications(context, userId, target.getModule());
+            } else {
+                if (target.isResponsibleFor(module)) {
+                    final PublicationService publicationService = target.getPublicationService();
+                    allPublicationsForUser = publicationService.getAllPublications(context, userId, module);
+                }
+            }
+            if (allPublicationsForUser != null) {
                 publications.addAll(allPublicationsForUser);
-        	}
+            }
         }
 
         return publications;
@@ -324,7 +324,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
         final String target = request.optString("target");
         final Context context = session.getContext();
         final Publication publication = loadPublication(id, context, target);
-        
+
         String sTimeZone = request.optString("timezone");
         TimeZone tz = null;
         if (sTimeZone != null) {
@@ -332,7 +332,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
         } else {
             tz = TimeZone.getTimeZone(session.getUser().getTimeZone());
         }
-        
+
         return createResponse(publication, getURLPrefix(request, publication), tz);
     }
 
@@ -375,15 +375,15 @@ public class PublicationMultipleHandler implements MultipleHandler {
         PublicationService service = null;
         if (target != null && !target.equals("")) {
             PublicationTarget t = discovery.getTarget(target);
-			if (t == null) {
-				return null;
-			}
+            if (t == null) {
+                return null;
+            }
             service = t.getPublicationService();
         } else {
             PublicationTarget t = discovery.getTarget(context, id);
-			if (t == null) {
-				return null;
-			}
+            if (t == null) {
+                return null;
+            }
             service = t.getPublicationService();
         }
         if(service == null) {
@@ -399,7 +399,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
             final int id = ids.getInt(i);
             final PublicationTarget target = discovery.getTarget(context, id);
             if (target == null) {
-                throw PublicationErrorMessage.PublicationNotFound.create();
+                throw PublicationErrorMessage.PUBLICATION_NOT_FOUND_EXCEPTION.create();
             }
             final PublicationService publisher = target.getPublicationService();
             final Publication publication = new Publication();

@@ -54,8 +54,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.database.CreateTableService;
 
 
@@ -66,7 +64,7 @@ import com.openexchange.database.CreateTableService;
  */
 public class CreateTableRegistry {
 
-    private static final Log LOG = LogFactory.getLog(CreateTableRegistry.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CreateTableRegistry.class);
 
     private static final CreateTableRegistry SINGLETON = new CreateTableRegistry();
 
@@ -85,13 +83,13 @@ public class CreateTableRegistry {
 
     public void addCreateTable(CreateTableService service) {
         if (!createTables.add(service)) {
-            LOG.warn("CreateTableService " + service.getClass().getName() + " found twice.");
+            LOG.warn("CreateTableService {} found twice.", service.getClass().getName());
         }
     }
 
     public void removeCreateTable(CreateTableService service) {
         if (!createTables.remove(service)) {
-            LOG.warn("Unkown CreateTableService " + service.getClass().getName() + " removed.");
+            LOG.warn("Unkown CreateTableService {} removed.", service.getClass().getName());
         }
     }
 

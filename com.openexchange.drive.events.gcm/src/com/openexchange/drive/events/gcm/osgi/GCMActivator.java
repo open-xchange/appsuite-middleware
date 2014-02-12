@@ -49,7 +49,6 @@
 
 package com.openexchange.drive.events.gcm.osgi;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.drive.events.DriveEventService;
@@ -66,7 +65,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class GCMActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(GCMActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GCMActivator.class);
 
     /**
      * Initializes a new {@link GCMActivator}.

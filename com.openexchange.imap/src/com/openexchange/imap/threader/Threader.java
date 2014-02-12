@@ -52,7 +52,6 @@ package com.openexchange.imap.threader;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 
 /**
  * {@link Threader} - This is an implementation of a message threading algorithm, as originally devised by Zamie Zawinski. See <a
@@ -64,8 +63,7 @@ import org.apache.commons.logging.Log;
  */
 public class Threader {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(Threader.class);
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Threader.class);
 
     private ThreadContainer rootNode; // has kids, and no next
     private Map<String, ThreadContainer> idMap; // maps message IDs to ThreadContainers
@@ -123,7 +121,6 @@ public class Threader {
         if (threadableRoot == null) {
             return null;
         }
-        final long st = DEBUG ? System.currentTimeMillis() : 0L;
 
         idMap = new HashMap<String, ThreadContainer>();
 
@@ -164,11 +161,6 @@ public class Threader {
         // their underlying threadables.
         rootNode.flush();
         rootNode = null;
-
-        if (DEBUG && null != result) {
-            final long dur = System.currentTimeMillis() - st;
-            LOG.debug("Threader.thread() took " + dur + "msec for " + result.fullName);
-        }
 
         return result;
     }

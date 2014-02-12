@@ -42,7 +42,7 @@ import java.lang.ref.WeakReference;
  * @since solr 1.4
  */
 public class ConcurrentLRUCache<K,V> {
-  private static Logger log = LoggerFactory.getLogger(ConcurrentLRUCache.class);
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(ConcurrentLRUCache.class);
 
   private final ConcurrentHashMap<Object, CacheEntry<K,V>> map;
   private final int upperWaterMark, lowerWaterMark;

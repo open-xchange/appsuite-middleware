@@ -63,7 +63,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
@@ -87,7 +86,6 @@ import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.formats.csv.ContactFieldMapper;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.Collections;
@@ -102,13 +100,13 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class CSVContactImporter extends AbstractImporter {
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CSVContactImporter.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVContactImporter.class);
 
 	private LinkedList<ContactFieldMapper> mappers;
 
 	private ContactFieldMapper currentMapper;
-	
-	
+
+
 	public CSVContactImporter(ServiceLookup services) {
 	    super(services);
 	}
@@ -136,9 +134,7 @@ public class CSVContactImporter extends AbstractImporter {
             return false;
         }
         if (fo == null) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Folder does not exist: " + folder);
-            }
+            LOG.info("Folder does not exist: {}", folder);
             return false;
         }
         // check format of folder
@@ -204,7 +200,7 @@ public class CSVContactImporter extends AbstractImporter {
                 intentions.add(intention);
             }
         }
-        
+
         int limit = getLimit(sessObj);
         int count = 0;
         // Build a list of contacts to insert
@@ -239,7 +235,7 @@ public class CSVContactImporter extends AbstractImporter {
 
         // Build result list
         final List<ImportResult> results = new ArrayList<ImportResult>(intentions.size());
-        
+
         boolean exceeds = false;
         for (final ImportIntention intention : intentions) {
             final boolean notNull = intention.contact != null;
@@ -267,7 +263,7 @@ public class CSVContactImporter extends AbstractImporter {
                 results.add(intention.result);
             }
         }
-        
+
         if (exceeds) {
             throw ImportExportExceptionCodes.LIMIT_EXCEEDED.create(limit);
         }

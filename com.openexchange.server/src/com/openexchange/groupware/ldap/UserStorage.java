@@ -54,15 +54,14 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.damienmiller.BCrypt;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 /**
  * This interface provides methods to read data from users in the directory
@@ -71,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class UserStorage {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UserStorage.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserStorage.class);
 
     /**
      * The instance
@@ -94,6 +93,18 @@ public abstract class UserStorage {
      * user doesn't exist.
      */
     public abstract int getUserId(String loginInfo, Context context) throws OXException;
+
+    /**
+     * Reads the data from a user from the underlying persistent data storage.
+     *
+     * @param userId User identifier.
+     * @param contextId The context identifier.
+     * @return a user object.
+     * @throws OXException if an error occurs while reading from the persistent storage or the user doesn't exist.
+     */
+    public User getUser(final int userId, final int contextId) throws OXException {
+        return getUser(userId, ContextStorage.getInstance().getContext(contextId));
+    }
 
     /**
      * Reads the data from a user from the underlying persistent data storage.
@@ -128,6 +139,9 @@ public abstract class UserStorage {
     /**
      * This method updates some values of a user. In the given user object just set the user identifier and the attributes you want to
      * change. Every attribute with value <code>null</code> will not be touched.
+     * <p>
+     * WARNING: Do not use this method to update user attributes. It happens under high load situations that too old user attributes are
+     * used to generate the new attributes for this method call causing wrong attributes to be written.
      * <p>
      * Currently supported values for update:
      * <ul>
@@ -355,24 +369,33 @@ public abstract class UserStorage {
      * @throws OXException if initialization of contexts fails.
      */
     public static void start() throws OXException {
-        if (null != instance) {
-            LOG.error("Duplicate initialization of UserStorage.");
-            return;
+        UserStorage tmp = instance;
+        if (null == tmp) {
+            synchronized (UserStorage.class) {
+                tmp = instance;
+                if (null == tmp) {
+                    tmp = new CachingUserStorage(new RdbUserStorage());
+                    tmp.startInternal();
+                    instance = tmp;
+                }
+            }
         }
-        instance = new CachingUserStorage(new RdbUserStorage());
-        instance.startInternal();
     }
 
     /**
      * Shutdown.
      */
     public static void stop() throws OXException {
-        if (null == instance) {
-            LOG.error("Duplicate shutdown of UserStorage.");
-            return;
+        UserStorage tmp = instance;
+        if (null != tmp) {
+            synchronized (UserStorage.class) {
+                tmp = instance;
+                if (null != tmp) {
+                    tmp.stopInternal();
+                    instance = null;
+                }
+            }
         }
-        instance.stopInternal();
-        instance = null;
     }
 
     /**
@@ -391,7 +414,7 @@ public abstract class UserStorage {
                         instance = tmp;
                     } catch (final OXException e) {
                         // Cannot occur
-                        LOG.warn(e.getMessage(), e);
+                        LOG.warn("", e);
                     }
                 }
             }
@@ -399,47 +422,51 @@ public abstract class UserStorage {
         return tmp;
     }
 
+    /*
+     * ==========================================================================================================
+     *
+     * FIXME: The whole service model is bypassed by the methods underneath.
+     * Calls to these methods can even be found in Comparators and the like!
+     * They should be removed and all of their (many) callers have to be refactored accordingly.
+     */
+
     /**
+     * Use {@link UserService} instead!
      * Reads the data from a user from the underlying persistent data storage.
      *
      * @param uid
      *            User identifier.
      * @param context
      *            Context.
-     * @return a user object or <code>null</code> on exception.
+     * @return a user object.
      */
-    public static User getStorageUser(final int uid, final Context context) {
-        try {
-            return getInstance().getUser(uid, context);
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-            return null;
-        }
+    @Deprecated
+    public static User getStorageUser(final int uid, final Context context) throws OXException {
+        return getInstance().getUser(uid, context);
     }
 
     /**
+     * Use {@link UserService} instead!
      * Reads the data from a user from the underlying persistent data storage.
      *
      * @param uid User identifier.
      * @param contextId Context ID.
-     * @return a user object or <code>null</code> on exception.
+     * @return a user object.
      */
-    public static User getStorageUser(final int uid, final int contextId) {
-        try {
-            return getInstance().getUser(uid, ContextStorage.getStorageContext(contextId));
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-            return null;
-        }
+    @Deprecated
+    public static User getStorageUser(final int uid, final int contextId) throws OXException {
+        return getInstance().getUser(uid, ContextStorage.getStorageContext(contextId));
     }
 
     /**
+     * Use {@link UserService} instead!
      * Reads the data from a user from the underlying persistent data storage.
      *
      * @param session The associated session
-     * @return A user or <code>null</code> on exception.
+     * @return A user.
      */
-    public static User getStorageUser(final Session session) {
+    @Deprecated
+    public static User getStorageUser(final Session session) throws OXException {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getUser();
         }

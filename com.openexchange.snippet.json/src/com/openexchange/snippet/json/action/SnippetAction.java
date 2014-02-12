@@ -52,14 +52,13 @@ package com.openexchange.snippet.json.action;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceExceptionCode;
@@ -160,10 +159,10 @@ public abstract class SnippetAction implements AJAXActionService {
                 // Either no capabilities signaled or service is absent (thus not able to check)
                 return snippetService;
             }
-            final Set<Capability> capabilities = capabilityService.getCapabilities(serverSession);
+            final CapabilitySet capabilities = capabilityService.getCapabilities(serverSession);
             boolean contained = true;
             for (int i = neededCapabilities.size(); contained && i-- > 0;) {
-                contained = capabilities.contains(new Capability(neededCapabilities.get(i)));
+                contained = capabilities.contains(neededCapabilities.get(i));
             }
             if (contained) {
                 return snippetService;

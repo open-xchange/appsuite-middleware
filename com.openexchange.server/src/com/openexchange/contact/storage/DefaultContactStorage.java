@@ -58,7 +58,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.internal.SearchAdapter;
@@ -90,7 +89,7 @@ public abstract class DefaultContactStorage implements ContactStorage {
     /**
      * Named logger instance.
      */
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(DefaultContactStorage.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultContactStorage.class);
 
     /**
      * Initializes a new {@link DefaultContactStorage}.

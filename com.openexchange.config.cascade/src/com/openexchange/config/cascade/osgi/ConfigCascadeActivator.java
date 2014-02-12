@@ -49,8 +49,6 @@
 
 package com.openexchange.config.cascade.osgi;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -72,7 +70,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
 
     // private static final Class<?>[] NEEDED = {ConfigProviderService.class, StringParser.class};
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigCascadeActivator.class));
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigCascadeActivator.class);
 
     private boolean configured = false;
 
@@ -97,7 +95,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
             public <T> T parse(final String s, final Class<T> t) {
                 final StringParser parser = stringParsers.getService();
                 if(parser == null) {
-                    LOG.fatal("Could not find suitable string parser in OSGi system");
+                    LOG.error("Could not find suitable string parser in OSGi system");
                     return null;
                 }
                 return parser.parse(s, t);
@@ -154,7 +152,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
         try {
             return config.get("com.openexchange.config.cascade.scopes", ConfigProviderService.NO_CONTEXT, ConfigProviderService.NO_USER).get();
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return null;
     }

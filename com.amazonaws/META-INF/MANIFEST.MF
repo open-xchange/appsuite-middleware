@@ -173,4 +173,5 @@ Import-Package: javax.crypto,
  org.osgi.framework,
  org.w3c.dom,
  org.xml.sax,
- org.xml.sax.helpers
+ org.xml.sax.helpers,
+ org.slf4j

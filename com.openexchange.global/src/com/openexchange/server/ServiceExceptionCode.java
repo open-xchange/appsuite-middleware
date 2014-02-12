@@ -50,28 +50,29 @@
 package com.openexchange.server;
 
 import com.openexchange.exception.Category;
-import com.openexchange.exception.LogLevel;
-import com.openexchange.exception.LogLevelAwareOXExceptionCode;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * The error code enumeration for service errors.
  */
-public enum ServiceExceptionCode implements LogLevelAwareOXExceptionCode {
+public enum ServiceExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * The required service %1$s is temporary not available. Please try again later.
      */
-    SERVICE_UNAVAILABLE(ServiceExceptionMessage.SERVICE_UNAVAILABLE_MSG, Category.CATEGORY_TRY_AGAIN, 1, LogLevel.ERROR),
+    SERVICE_UNAVAILABLE("The required service %1$s is temporary not available. Please try again later.",
+        ServiceExceptionMessage.SERVICE_UNAVAILABLE_MSG, Category.CATEGORY_TRY_AGAIN, 1),
     /**
      * An I/O error occurred
      */
-    IO_ERROR(ServiceExceptionMessage.IO_ERROR_MSG, Category.CATEGORY_ERROR, 2, LogLevel.ERROR),
+    IO_ERROR("An I/O error occurred", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 2),
     /**
      * Service initialization failed
      */
-    SERVICE_INITIALIZATION_FAILED(ServiceExceptionMessage.SERVICE_INITIALIZATION_FAILED_MSG, Category.CATEGORY_ERROR, 3, LogLevel.ERROR);
+    SERVICE_INITIALIZATION_FAILED("Service initialization failed", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 3);
 
     /**
      * Creates a new <code>"SRV-0001"</code> (SERVICE_UNAVAILABLE) exception for specified class
@@ -102,25 +103,25 @@ public enum ServiceExceptionCode implements LogLevelAwareOXExceptionCode {
     }
 
     private final String message;
+    private final String displayMessage;
     private final int detailNumber;
     private final Category category;
-    private final LogLevel logLevel;
 
-    private ServiceExceptionCode(final String message, final Category category, final int detailNumber, final LogLevel logLevel) {
+    private ServiceExceptionCode(final String message, String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
+        this.displayMessage = displayMessage;
         this.detailNumber = detailNumber;
         this.category = category;
-        this.logLevel = logLevel;
-    }
-
-    @Override
-    public LogLevel getLogLevel() {
-        return logLevel;
     }
 
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override

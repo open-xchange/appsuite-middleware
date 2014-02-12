@@ -65,14 +65,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.json.JSONValue;
+import org.slf4j.Logger;
 import com.openexchange.ajax.tools.JSONUtil;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -95,11 +97,12 @@ import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.shared.SharedJSlobService;
 import com.openexchange.jslob.storage.JSlobStorage;
 import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
-import com.openexchange.log.LogFactory;
 import com.openexchange.preferences.ServerUserSettingLoader;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.threadpool.ThreadPoolCompletionService;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link ConfigJSlobService}
@@ -108,7 +111,8 @@ import com.openexchange.sessiond.SessiondService;
  */
 public final class ConfigJSlobService implements JSlobService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ConfigJSlobService.class);
+    /** The logger */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigJSlobService.class);
 
     private static final List<String> ALIASES = Arrays.asList("config");
 
@@ -278,7 +282,7 @@ public final class ConfigJSlobService implements JSlobService {
         final ConfigView view = getConfigViewFactory().getView();
         final Map<String, ComposedConfigProperty<String>> all = view.all();
         // Logger
-        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigJSlobService.class));
+        final Logger logger = org.slf4j.LoggerFactory.getLogger(ConfigJSlobService.class);
         // Initialize resulting map
         final int initialCapacity = all.size() >> 1;
         final Map<String, Map<String, AttributedProperty>> preferenceItems = new HashMap<String, Map<String, AttributedProperty>>(
@@ -301,7 +305,7 @@ public final class ConfigJSlobService implements JSlobService {
                     try {
                         attributes.put(preferencePath, new AttributedProperty(preferencePath, entry.getKey(), property));
                     } catch (final Exception e) {
-                        logger.warn("Couldn't initialize preference path: " + preferencePath, e);
+                        logger.warn("Couldn''t initialize preference path: {}", preferencePath, e);
                     }
                 }
             }
@@ -537,13 +541,9 @@ public final class ConfigJSlobService implements JSlobService {
                     final Setting setting = configTree.getSettingByPath(configTreePath);
                     stor.readValues(setting);
 
-                    jObject.put(lobPath, convert2JS(setting));
+                    putToJsonObject(lobPath, convert2JS(setting), jObject);
                 } catch (final OXException e) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.warn("Illegal config-tree path: " + configTreePath + ". Please check paths.perfMap file (JSlob ID: " + lobPath + ") OR if path-associatd bundle has been started.", e);
-                    } else {
-                        LOG.warn("Illegal config-tree path: " + configTreePath + ". Please check paths.perfMap file (JSlob ID: " + lobPath + ") OR if path-associatd bundle has been started.");
-                    }
+                    LOG.warn("Illegal config-tree path: {}. Please check paths.perfMap file (JSlob ID: {}) OR if path-associatd bundle has been started.", configTreePath, lobPath, e);
                 }
             }
 
@@ -553,6 +553,24 @@ public final class ConfigJSlobService implements JSlobService {
             throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException rte) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
+        }
+    }
+
+    private void putToJsonObject(final String lobPath, final Object setting, final JSONObject jObject) throws JSONException {
+        final int pos = lobPath.indexOf('/');
+        if (pos <= 0) {
+            jObject.put(lobPath, setting);
+        } else {
+            final String fieldName = lobPath.substring(0, pos);
+            final String subLobPath = lobPath.substring(pos + 1);
+
+            JSONObject jChild = jObject.optJSONObject(fieldName);
+            if (null == jChild) {
+                jChild = new JSONObject(2);
+                jObject.put(fieldName, jChild);
+            }
+
+            putToJsonObject(subLobPath, setting, jChild);
         }
     }
 
@@ -626,47 +644,26 @@ public final class ConfigJSlobService implements JSlobService {
             final List<List<JSONPathElement>> pathsToPurge = new LinkedList<List<JSONPathElement>>();
             // Config Tree Values first
 
-            final ConfigTreeEquivalent equiv = configTreeEquivalents.get(id);
-            if (equiv != null) {
-                session.setParameter("__serverUserSetting", ServerUserSettingLoader.getInstance().loadFor(session.getUserId(), session.getContextId()));
-                try {
-                    final SettingStorage stor = SettingStorage.getInstance(session);
-                    final ConfigTree configTree = ConfigTree.getInstance();
-                    final Map<String, String> attribute2ConfigTreeMap = equiv.lob2config;
-                    for (final Entry<String, Object> entry : jObject.entrySet()) {
-                        String path = attribute2ConfigTreeMap.get(entry.getKey());
-                        if (path != null) {
-                            pathsToPurge.add(Arrays.asList(new JSONPathElement(entry.getKey())));
-                            if (path.length() > 0 && path.charAt(0) == '/') {
-                                path = path.substring(1);
-                            }
-                            if (path.endsWith("/")) {
-                                path = path.substring(0, path.length() - 1);
-                            }
-                            try {
-                                final Setting setting = configTree.getSettingByPath(path);
-                                setting.setSingleValue(entry.getValue());
-                                saveSettingWithSubs(stor, setting);
-                            } catch (OXException x) {
-                                if (SettingExceptionCodes.UNKNOWN_PATH.equals(x)) {
-                                    LOG.error("Ignoring update to unmappable path", x);
-                                } else {
-                                    throw x;
-                                }
-                            }
-                        }
+            final CompletionServiceReference cr = new CompletionServiceReference();
+            {
+                final ConfigTreeEquivalent equiv = configTreeEquivalents.get(id);
+                if (equiv != null) {
+                    session.setParameter("__serverUserSetting", ServerUserSettingLoader.getInstance().loadFor(session.getUserId(), session.getContextId()));
+                    try {
+                        final SettingStorage stor = SettingStorage.getInstance(session);
+                        final ConfigTree configTree = ConfigTree.getInstance();
+                        final Map<String, String> attribute2ConfigTreeMap = equiv.lob2config;
+                        // Update setting
+                        updateConfigTreeSetting("", jObject, configTree, attribute2ConfigTreeMap, stor, pathsToPurge, cr);
+                    } finally {
+                        session.setParameter("__serverUserSetting", null);
                     }
-                } finally {
-                    session.setParameter("__serverUserSetting", null);
                 }
             }
 
             // Set (or replace) JSlob
             final Map<String, AttributedProperty> attributes = preferenceItems.get(id);
-            if (null == attributes) {
-                // Store JSlob in common storage
-                getStorage().store(new JSlobId(SERVICE_ID, id, userId, contextId), jsonJSlob);
-            } else {
+            if (null != attributes) {
                 // A config cascade change because identifier refers to a preference item
                 final ConfigView view = getConfigViewFactory().getView(userId, contextId);
                 for (final AttributedProperty attributedProperty : attributes.values()) {
@@ -687,8 +684,58 @@ public final class ConfigJSlobService implements JSlobService {
                 JSONPathElement.remove(path, jObject);
             }
             jsonJSlob.setJsonObject(jObject);
+
             // Finally store JSlob
             getStorage().store(new JSlobId(SERVICE_ID, id, userId, contextId), jsonJSlob);
+
+            // Check completion service
+            if (cr.num > 0) {
+                ThreadPools.<Void, OXException> awaitCompletionService(cr.completionService, cr.num, ThreadPools.DEFAULT_EXCEPTION_FACTORY);
+            }
+        }
+    }
+
+    private void updateConfigTreeSetting(final String prefix, final JSONObject jObject, final ConfigTree configTree, final Map<String, String> attribute2ConfigTreeMap, final SettingStorage stor, final List<List<JSONPathElement>> pathsToPurge, final CompletionServiceReference cr) {
+        for (final Entry<String, Object> entry : jObject.entrySet()) {
+            final String key = prefix + entry.getKey();
+            final Object value = entry.getValue();
+            String path = attribute2ConfigTreeMap.get(key);
+            if (path != null) {
+                pathsToPurge.add(Arrays.asList(new JSONPathElement(key)));
+                if (path.length() > 0 && path.charAt(0) == '/') {
+                    path = path.substring(1);
+                }
+                if (path.endsWith("/")) {
+                    path = path.substring(0, path.length() - 1);
+                }
+                final String _path = path;
+                final Callable<Void> task = new Callable<Void>() {
+
+                    @Override
+                    public Void call() throws Exception {
+                        try {
+                            final Setting setting = configTree.getSettingByPath(_path);
+                            setting.setSingleValue(value);
+                            saveSettingWithSubs(stor, setting);
+                        } catch (OXException x) {
+                            if (!SettingExceptionCodes.UNKNOWN_PATH.equals(x)) {
+                                throw x;
+                            }
+                            LOG.error("Ignoring update to unmappable path", x);
+                        }
+                        return null;
+                    }
+                };
+
+                if (null == cr.completionService) {
+                    cr.completionService = new ThreadPoolCompletionService<Void>(ThreadPools.getThreadPool());
+                }
+                cr.completionService.submit(task);
+                cr.num++;
+            } else if (value instanceof JSONObject) {
+                // Recursive
+                updateConfigTreeSetting(key + "/", (JSONObject) value, configTree, attribute2ConfigTreeMap, stor, pathsToPurge, cr);
+            }
         }
     }
 
@@ -708,7 +755,7 @@ public final class ConfigJSlobService implements JSlobService {
      * @param setting actual setting.
      * @throws OXException If an error occurs.
      */
-    private void saveSettingWithSubs(final SettingStorage storage, final Setting setting) throws OXException {
+    protected void saveSettingWithSubs(final SettingStorage storage, final Setting setting) throws OXException {
         try {
             if (setting.isLeaf()) {
                 final String value = setting.getSingleValue().toString();
@@ -1145,6 +1192,20 @@ public final class ConfigJSlobService implements JSlobService {
             isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    private static final class CompletionServiceReference {
+
+        CompletionService<Void> completionService = null;
+        int num = 0;
+
+        /**
+         * Initializes a new {@link ConfigJSlobService.CompletionServiceReference}.
+         */
+        public CompletionServiceReference() {
+            super();
+        }
+
     }
 
 }

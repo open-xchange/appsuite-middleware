@@ -53,14 +53,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
-import com.openexchange.log.LogFactory;
 import com.openexchange.report.appsuite.ContextReport;
 import com.openexchange.report.appsuite.ContextReportCumulator;
 import com.openexchange.report.appsuite.Report;
@@ -81,15 +79,15 @@ import com.openexchange.tools.file.QuotaFileStorage;
  */
 public class CapabilityHandler implements ReportUserHandler, ReportContextHandler, UserReportCumulator, ContextReportCumulator, ReportFinishingTouches {
 
-    private static final Log LOG = LogFactory.getLog(CapabilityHandler.class);
-    
-    
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CapabilityHandler.class);
+
+
     @Override
     public boolean appliesTo(String reportType) {
         // This is the cornerstone of the default report
         return "default".equals(reportType);
     }
-    
+
     @Override
     public void runContextReport(ContextReport contextReport) {
         // Grab the file store quota from the context and save them in the report
@@ -97,9 +95,9 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         try {
             long quota = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx).getQuota();
             contextReport.set("macdetail-quota", "quota", quota);
-            
+
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -108,7 +106,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     public void runUserReport(UserReport userReport) {
         try {
             // First look up the capabilities for this user
-            Set<Capability> capabilities = Services.getService(CapabilityService.class).getCapabilities(userReport.getUser().getId(), userReport.getContext().getContextId());
+            CapabilitySet capabilities = Services.getService(CapabilityService.class).getCapabilities(userReport.getUser().getId(), userReport.getContext().getContextId());
 
             // Next, turn them into a list of strings
             ArrayList<String> c = new ArrayList<String>(capabilities.size());
@@ -116,49 +114,49 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             for (Capability capability : capabilities) {
                 c.add(capability.getId().toLowerCase());
             }
-            
+
             // Sort them alphabetically so we can more easily find the same list of capabilities again
             Collections.sort(c);
-            
+
             StringBuilder cString = new StringBuilder();
             for(String cap: c) {
                 cString.append(cap).append(",");
             }
-            
+
             cString.setLength(cString.length() - 1);
-            
+
             // Remember both the list and the identifying comma-separated String in the userReport
             userReport.set("macdetail", "capabilities", cString.toString());
             userReport.set("macdetail", "capabilityList", c);
-            
+
             // Determine if the user is disabled
             if (!userReport.getUser().isMailEnabled()) {
                 userReport.set("macdetail", "disabled", Boolean.TRUE);
             } else {
                 userReport.set("macdetail", "disabled", Boolean.FALSE);
             }
-            
+
             // Determine if the user is the admin user
             if (userReport.getContext().getMailadmin() == userReport.getUser().getId()) {
                 userReport.set("macdetail", "mailadmin", Boolean.TRUE);
             } else {
                 userReport.set("macdetail", "mailadmin", Boolean.FALSE);
             }
-            
+
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
-    
+
     // In the context report we keep a count of users/disabled users/admins that share the same capabilities
     // So we have to count every unique combination of capabilities
     @Override
     public void merge(UserReport userReport, ContextReport contextReport) {
-        
+
         // Retrieve the capabilities String and List from the userReport
         String capString = userReport.get("macdetail", "capabilities", String.class);
         ArrayList capSet = userReport.get("macdetail", "capabilityList", ArrayList.class);
-        
+
         // The context report maintains a mapping of unique capabilities set -> a map of counts for admins / disabled users  and regular users
         HashMap<String, Long> counts = contextReport.get("macdetail", capString, HashMap.class);
         if (counts == null) {
@@ -172,7 +170,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         }
         // Always increase the total count
         incCount(counts, "total");
-        
+
         // For the given set of capabilities, remember the counts and a plain old array list of capabilities
         contextReport.set("macdetail", capString, counts);
         contextReport.set("macdetail-lists", capString, capSet);
@@ -185,25 +183,25 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         }
         counts.put(count, value + 1);
     }
-    
-    // The system report contains an overall count of unique capability and quota combinations 
+
+    // The system report contains an overall count of unique capability and quota combinations
     // So the numbers from the context report have to be added to the numbers already in the report
     @Override
     public void merge(ContextReport contextReport, Report report) {
         // Retrieve the quota
         long quota = contextReport.get("macdetail-quota", "quota", 0l, Long.class);
-        
+
         // Retrieve all capabilities combinations
         Map<String, Object> macdetail = contextReport.getNamespace("macdetail");
-        
+
         String quotaSpec = "fileQuota[" + quota + "]";
-                
+
         for(Map.Entry<String, Object> entry: macdetail.entrySet()) {
             // The report contains a count of unique capablities + quotas, so our identifier is the
             // alphabetically sorted and comma separated String of capabilities combined with a quota specification
             String capSpec = entry.getKey() + "," + quotaSpec;
             HashMap<String, Object> counts = (HashMap) entry.getValue();
-            
+
             // Retrieve or create (if this is the first merge) the total counts for the system thusfar
             HashMap<String, Object> savedCounts = report.get("macdetail", capSpec, HashMap.class);
             if (savedCounts == null) {
@@ -211,26 +209,26 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
                 savedCounts.put("admin", 0l);
                 savedCounts.put("disabled", 0l);
                 savedCounts.put("total", 0l);
-                savedCounts.put("capabilities", contextReport.get("macdetail-lists", entry.getKey(), ArrayList.class)); 
+                savedCounts.put("capabilities", contextReport.get("macdetail-lists", entry.getKey(), ArrayList.class));
                 savedCounts.put("quota", quota);
             }
             // And add our counts to it
             add(savedCounts, counts);
-            
+
             // Save it back to the report
             report.set("macdetail", capSpec, savedCounts);
         }
     }
-    
+
     // A little cleanup. We don't need the unwieldly mapping of capability String + quota to counts anymore.
     @Override
     public void finish(Report report) {
         Map<String, Object> macdetail = report.getNamespace("macdetail");
-        
+
         ArrayList values = new ArrayList(macdetail.values());
-        
+
         report.clearNamespace("macdetail");
-        
+
         report.set("macdetail", "capabilitySets", values);
     }
 
@@ -242,10 +240,10 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
                 if (value == null) {
                     value = Long.valueOf(0);
                 }
-                savedCounts.put(entry.getKey(), value + (Long) entry.getValue());                
+                savedCounts.put(entry.getKey(), value + (Long) entry.getValue());
             }
         }
-    }    
+    }
 
 
 

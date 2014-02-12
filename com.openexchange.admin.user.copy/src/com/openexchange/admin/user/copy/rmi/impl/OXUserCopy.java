@@ -50,7 +50,6 @@
 package com.openexchange.admin.user.copy.rmi.impl;
 
 import static com.openexchange.java.Autoboxing.i;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -68,14 +67,13 @@ import com.openexchange.admin.rmi.impl.OXCommonImpl;
 import com.openexchange.admin.rmi.impl.OXUser;
 import com.openexchange.admin.user.copy.rmi.OXUserCopyInterface;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.user.copy.UserCopyService;
 
 public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
 
     private static final String THE_GIVEN_SOURCE_USER_OBJECT_IS_NULL = "The given source user object is null";
 
-    private final static Log LOG = LogFactory.getLog(OXUser.class);
+    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXUser.class);
 
     private final BundleContext context;
 
@@ -134,18 +132,17 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
             throw e1;
         }
 
-
         final int newUserId;
         try {
             newUserId = service.copyUser(i(src.getId()), i(dest.getId()), i(user.getId()));
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final StorageException storageException = new StorageException(e.getMessage());
             setStackTraceSafe(storageException, e);
             throw new StorageException(e.getMessage());
         }
 
-        LOG.info("User " + user.getId() + " successfully copied to Context " + dest.getId() + " from Context " + src.getId());
+        LOG.info("User {} successfully copied to Context {} from Context {}", user.getId(), dest.getId(), src.getId());
 
         return new User(newUserId);
     }
@@ -161,7 +158,7 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
     private final void contextcheck(final Context ctx, final String type) throws InvalidDataException {
         if (null == ctx || null == ctx.getId()) {
             final InvalidDataException e = new InvalidDataException("Client sent invalid " + type + " context data object");
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

@@ -172,11 +172,12 @@ public class Publication {
     }
 
     public boolean isEnabled() {
-        return enabled != null ? enabled : true;
+        final Boolean enabled = this.enabled;
+        return enabled != null ? enabled.booleanValue() : true;
     }
 
     public void setEnabled(final boolean enabled) {
-        this.enabled = enabled;
+        this.enabled = Boolean.valueOf(enabled);
     }
 
     public boolean containsEnabled() {

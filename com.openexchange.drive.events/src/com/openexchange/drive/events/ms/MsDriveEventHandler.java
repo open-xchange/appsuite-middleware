@@ -52,7 +52,6 @@ package com.openexchange.drive.events.ms;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.internal.DriveEventServiceImpl;
@@ -70,7 +69,7 @@ import com.openexchange.server.ServiceExceptionCode;
  */
 public final class MsDriveEventHandler implements DriveEventPublisher, MessageListener<Map<String, Serializable>> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(MsDriveEventHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MsDriveEventHandler.class);
     private static final String TOPIC_NAME = "driveEvents-0";
     private static final AtomicReference<MsService> MS_REFERENCE = new AtomicReference<MsService>();
 
@@ -112,12 +111,7 @@ public final class MsDriveEventHandler implements DriveEventPublisher, MessageLi
     @Override
     public void publish(DriveEvent event) {
         if (null != event && false == event.isRemote()) {
-            /*
-             * publish at distributed topic
-             */
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("publishing drive event: " + event + " [" + senderId + "]");
-            }
+            LOG.debug("publishing drive event: {} [{}]", event, senderId);
             try {
                 getTopic().publish(DriveEventWrapper.wrap(event));
             } catch (OXException e) {
@@ -131,9 +125,7 @@ public final class MsDriveEventHandler implements DriveEventPublisher, MessageLi
         if (null != message && message.isRemote()) {
             Map<String, Serializable> driveEvent = message.getMessageObject();
             if (null != driveEvent) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("onMessage: " + message.getMessageObject() + " [" + message.getSenderId() + "]");
-                }
+                LOG.debug("onMessage: {} [{}]", message.getMessageObject(), message.getSenderId());
                 driveEventService.notifyPublishers(DriveEventWrapper.unwrap(driveEvent));
             } else {
                 LOG.warn("Discarding empty drive event message.");

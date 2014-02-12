@@ -67,7 +67,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class SpamAssassin {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SpamAssassin.class));
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamAssassin.class);
 
     private static final String STR_SPAMASSASSIN = "SpamAssassin result: ";
 
@@ -148,9 +148,7 @@ public class SpamAssassin {
              * Read its result
              */
             final String result = cmdExec.getOutputString();
-            if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder(STR_SPAMASSASSIN).append(result).toString());
-            }
+            LOG.info("{}{}", STR_SPAMASSASSIN, result);
             if (result != null && exitCode == 1) {
                 /*
                  * Spam found
@@ -159,13 +157,13 @@ public class SpamAssassin {
             }
             return false;
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final MessagingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final InterruptedException e) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return false;
     }
@@ -196,9 +194,9 @@ public class SpamAssassin {
         try {
             new TrainMessageThread(getRawMessageInputStream(msg), isSpam).start();
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final MessagingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -212,7 +210,7 @@ public class SpamAssassin {
 
         private static final String NAME = "TrainMessageThread";
 
-        private static final String ERR_PREFIX = "Invocation of " + CMD_SA_LEARN + " failed: ";
+        private static final String ERR_PREFIX = "Invocation of " + CMD_SA_LEARN + " failed ";
 
         private final InputStream msgSrc;
 
@@ -249,15 +247,13 @@ public class SpamAssassin {
                  * Read its result
                  */
                 final String res = cmdExec.getOutputString();
-                if (LOG.isInfoEnabled()) {
-                    LOG.info(new StringBuilder(STR_SPAMASSASSIN).append(isSpam ? STR_SPAM : STR_HAM).append(res).toString());
-                }
+                LOG.info("{}{}{}", STR_SPAMASSASSIN, isSpam ? STR_SPAM : STR_HAM, res);
             } catch (final IOException e) {
-                LOG.error(new StringBuilder(150).append(ERR_PREFIX).append(e.getMessage()).toString(), e);
+                LOG.error(ERR_PREFIX, e);
             } catch (final InterruptedException e) {
                 // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
                 Thread.currentThread().interrupt();
-                LOG.error(new StringBuilder(150).append(ERR_PREFIX).append(e.getMessage()).toString(), e);
+                LOG.error(ERR_PREFIX, e);
             }
         }
 

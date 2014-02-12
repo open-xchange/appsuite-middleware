@@ -63,7 +63,6 @@ import java.util.Map;
 import java.util.Properties;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.html.HtmlService;
@@ -72,7 +71,6 @@ import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.proxy.ProxyRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -85,7 +83,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 public class HTMLServiceActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HTMLServiceActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HTMLServiceActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -124,7 +122,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
             Config.LoggerProvider = LoggerProvider.DISABLED;
             HTMLFilterHandler.loadWhitelist();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -146,7 +144,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
             restore();
             HTMLImageFilterHandler.PREFIX.set(null);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -184,7 +182,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
             in = new FileInputStream(htmlEntityFile);
             htmlEntities.load(in);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return getDefaultHTMLEntityMaps();
         } finally {
             Streams.close(in);
@@ -408,7 +406,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
             /*
              * Cannot occur
              */
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         /*
          * Build up map
@@ -437,15 +435,13 @@ public class HTMLServiceActivator extends HousekeepingActivator {
                     Streams.close(in);
                 }
             } catch (final FileNotFoundException e) {
-                LOG.warn("Missing JTidy configuration file \"" + tidyConfigFilename + "\"");
+                LOG.warn("Missing JTidy configuration file \"{}\"", tidyConfigFilename);
             } catch (final IOException e) {
-                LOG.warn("I/O error while reading JTidy configuration from file \"" + tidyConfigFilename + "\"");
+                LOG.warn("I/O error while reading JTidy configuration from file \"{}\"", tidyConfigFilename);
             }
         }
         if (useDefaultConfig) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn("Using default JTidy configuration");
-            }
+            LOG.warn("Using default JTidy configuration");
             try {
                 final StringBuilder defaultConfig = new StringBuilder(512);
                 defaultConfig.append("indent=no\n");
@@ -471,12 +467,12 @@ public class HTMLServiceActivator extends HousekeepingActivator {
                 /*
                  * Cannot occur
                  */
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } catch (final IOException e) {
                 /*
                  * Cannot occur
                  */
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         return properties;
@@ -499,19 +495,12 @@ public class HTMLServiceActivator extends HousekeepingActivator {
          */
         if (null != tidyMessagesFilename) {
             try {
-                return new BufferedInputStream(new FileInputStream(tidyMessagesFilename));
+                return new BufferedInputStream(new FileInputStream(tidyMessagesFilename), 65536);
             } catch (final IOException e) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("File providing JTidy messages could not be found: " + tidyMessagesFilename, e);
-                }
+                LOG.warn("File providing JTidy messages could not be found: {}", tidyMessagesFilename, e);
             }
         }
-        /*
-         * File not found or file name is null
-         */
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Using default JTidy messages");
-        }
+        LOG.warn("Using default JTidy messages");
         final StringBuilder tidyMsgs = new StringBuilder(4096);
         tidyMsgs.append("anchor_not_unique={0} Anchor \"{1}\" already defined\n");
         tidyMsgs.append("apos_undefined=Named Entity &apos; only defined in XML/XHTML\n");

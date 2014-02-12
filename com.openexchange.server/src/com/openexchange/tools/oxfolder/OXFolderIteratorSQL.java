@@ -97,6 +97,7 @@ import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 import com.openexchange.tools.oxfolder.memory.Condition;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMap;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * This class provides SQL related methods to fill instances of <code>com.openexchange.tools.iterator.FolderObjectIterator</code>
@@ -105,10 +106,8 @@ import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
  */
 public final class OXFolderIteratorSQL {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OXFolderIteratorSQL.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(OXFolderIteratorSQL.class);
 
     private static final String OXFOLDER_PERMISSIONS = "oxfolder_permissions";
 
@@ -610,6 +609,7 @@ public final class OXFolderIteratorSQL {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         final int contextId = ctx.getContextId();
+        boolean closeResources = true;
         try {
             readCon = DBPool.pickup(ctx);
             stmt = readCon.prepareStatement(sqlSelectStr);
@@ -622,18 +622,16 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
-            }
-
             rs = executeQuery(stmt);
+            closeResources = false;
         } catch (final SQLException e) {
-            closeResources(rs, stmt, readCon, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException t) {
-            closeResources(rs, stmt, readCon, true, ctx);
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(contextId));
+        } finally {
+            if (closeResources) {
+                closeResources(rs, stmt, readCon, true, ctx);
+            }
         }
         try {
             return new FolderObjectIterator(rs, stmt, true, ctx, readCon, true);
@@ -692,7 +690,7 @@ public final class OXFolderIteratorSQL {
                 final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, con);
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 ConditionTreeMapManagement.dropFor(ctx.getContextId());
                 final ThreadPoolService threadPool = ThreadPools.getThreadPool();
                 final Runnable task = new Runnable() {
@@ -748,11 +746,6 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
-
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
-            }
 
             rs = executeQuery(stmt);
             /*
@@ -852,11 +845,6 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
-            }
-
             rs = executeQuery(stmt);
             return new SQLStuff(stmt, rs, readCon, closeCon);
         } catch (final SQLException e) {
@@ -899,7 +887,7 @@ public final class OXFolderIteratorSQL {
                 final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, con);
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 ConditionTreeMapManagement.dropFor(ctx.getContextId());
                 final ThreadPoolService threadPool = ThreadPools.getThreadPool();
                 final Runnable task = new Runnable() {
@@ -958,12 +946,10 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
-            }
-
             rs = executeQuery(stmt);
+        } catch (final OXException e) {
+            closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
+            throw e;
         } catch (final SQLException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -997,7 +983,7 @@ public final class OXFolderIteratorSQL {
             try {
                 return treeMap.isVisibleFolder(userId, memberInGroups, accessibleModules, folderId);
             } catch (final Exception e) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 ConditionTreeMapManagement.dropFor(ctx.getContextId());
                 final ThreadPoolService threadPool = ThreadPools.getThreadPool();
                 final Runnable task = new Runnable() {
@@ -1052,11 +1038,6 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
-            }
-
             rs = executeQuery(stmt);
             return rs.next();
         } catch (final SQLException e) {
@@ -1087,7 +1068,7 @@ public final class OXFolderIteratorSQL {
                 final List<Condition> conditions = Collections.<Condition> singletonList(new ConditionTreeMap.ParentCondition(parent));
                 return new TIntArrayList(treeMap.getVisibleForUser(userId, memberInGroups, accessibleModules, conditions));
             } catch (final Exception e) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 ConditionTreeMapManagement.dropFor(ctx.getContextId());
                 final ThreadPoolService threadPool = ThreadPools.getThreadPool();
                 final Runnable task = new Runnable() {
@@ -1142,11 +1123,6 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
-            }
-
             rs = executeQuery(stmt);
             if (!rs.next()) {
                 return new TIntArrayList(0);
@@ -1200,7 +1176,7 @@ public final class OXFolderIteratorSQL {
                 final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, con);
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 ConditionTreeMapManagement.dropFor(ctx.getContextId());
                 final ThreadPoolService threadPool = ThreadPools.getThreadPool();
                 final Runnable task = new Runnable() {
@@ -1227,7 +1203,7 @@ public final class OXFolderIteratorSQL {
         final SQLStuff stuff = getVisibleSharedFolders0(userId, memberInGroups, accessibleModules, owner, ctx, since, con);
         try {
             return new FolderObjectIterator(stuff.rs, stuff.stmt, false, ctx, stuff.readCon, stuff.closeCon);
-        } catch (final SearchIteratorException e) {
+        } catch (final OXException e) {
             closeResources(stuff.rs, stuff.stmt, stuff.closeCon ? stuff.readCon : null, true, ctx);
             throw e;
         } catch (final Exception e) {
@@ -1272,12 +1248,10 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
-            }
-
             rs = executeQuery(stmt);
+        } catch (final OXException e) {
+            closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
+            throw e;
         } catch (final SQLException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -1379,11 +1353,6 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
-            }
-
             rs = executeQuery(stmt);
             if (!rs.next()) {
                 closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
@@ -1418,16 +1387,12 @@ public final class OXFolderIteratorSQL {
     }
 
     private static SearchIterator<FolderObject> getVisibleFoldersNotSeenInTreeViewNew(final Integer module, final int userId, final int[] groups, final UserPermissionBits permissionBits, final Context ctx, final Connection readCon) throws OXException {
-        final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.type = ").append(PUBLIC);
-        if (null != module) {
-            condBuilder.append(") AND (ot.module = ").append(module.intValue());
-        }
-        condBuilder.append(')');
         Connection rc = readCon;
         boolean closeReadCon = false;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         final int contextId = ctx.getContextId();
+        boolean closeResources = true;
         try {
             if (readCon == null) {
                 rc = DBPool.pickup(ctx);
@@ -1436,11 +1401,18 @@ public final class OXFolderIteratorSQL {
             /*
              * Statement to select all user-visible public folders
              */
-            stmt = rc.prepareStatement(getSQLUserVisibleFolders("ot.fuid, ot.parent", // fuid, parent, ...
-                permissionIds(userId, groups, ctx),
-                StringCollection.getSqlInString(permissionBits.getAccessibleModules()),
-                condBuilder.toString(),
-                getSubfolderOrderBy(STR_OT)));
+            {
+                final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.type = ").append(PUBLIC);
+                if (null != module) {
+                    condBuilder.append(") AND (ot.module = ").append(module.intValue());
+                }
+                condBuilder.append(')');
+                stmt = rc.prepareStatement(getSQLUserVisibleFolders("ot.fuid, ot.parent", // fuid, parent, ...
+                    permissionIds(userId, groups, ctx),
+                    StringCollection.getSqlInString(permissionBits.getAccessibleModules()),
+                    condBuilder.toString(),
+                    getSubfolderOrderBy(STR_OT)));
+            }
             int pos = 1;
             // stmt.setInt(pos++, contextId);
             // stmt.setInt(pos++, userId);
@@ -1450,14 +1422,8 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
-            }
-
             rs = executeQuery(stmt);
             if (!rs.next()) {
-                closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
                 return FolderObjectIterator.EMPTY_FOLDER_ITERATOR;
             }
             final TIntIntMap fuid2parent = new TIntIntHashMap(128);
@@ -1467,7 +1433,9 @@ public final class OXFolderIteratorSQL {
                 fuid2parent.put(fuid, rs.getInt(2));
                 fuids.add(fuid);
             } while (rs.next());
-            closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
+            DBUtils.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
             /*
              * Remove those fuids with a parent contained as a key
              */
@@ -1482,19 +1450,20 @@ public final class OXFolderIteratorSQL {
              * Remaining entries have a non-visible parent
              */
             if (fuid2parent.isEmpty()) {
-                closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
                 return FolderObjectIterator.EMPTY_FOLDER_ITERATOR;
             }
-            stmt =
-                rc.prepareStatement("SELECT " + FolderObjectIterator.getFieldsForSQL(STR_OT) + " FROM oxfolder_tree AS ot WHERE ot.cid = ? AND ot.fuid IN " + StringCollection.getSqlInString(fuid2parent.keys()) + ' ' + getSubfolderOrderBy(STR_OT));
+            stmt = rc.prepareStatement("SELECT " + FolderObjectIterator.getFieldsForSQL(STR_OT) + " FROM oxfolder_tree AS ot WHERE ot.cid = ? AND ot.fuid IN " + StringCollection.getSqlInString(fuid2parent.keys()) + ' ' + getSubfolderOrderBy(STR_OT));
             stmt.setInt(1, contextId);
             rs = executeQuery(stmt);
+            closeResources = false;
         } catch (final SQLException e) {
-            closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException t) {
-            closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(contextId));
+        } finally {
+            if (closeResources) {
+                closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
+            }
         }
         try {
             return new FolderObjectIterator(rs, stmt, false, ctx, readCon, closeReadCon);
@@ -1589,11 +1558,6 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
-
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
-            }
 
             rs = executeQuery(stmt);
             /*
@@ -1764,8 +1728,6 @@ public final class OXFolderIteratorSQL {
             }
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw e;
         } catch (final RuntimeException t) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(contextId));
         }
@@ -1898,7 +1860,7 @@ public final class OXFolderIteratorSQL {
                 final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, con);
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 ConditionTreeMapManagement.dropFor(ctx.getContextId());
                 final ThreadPoolService threadPool = ThreadPools.getThreadPool();
                 final Runnable task = new Runnable() {
@@ -1970,12 +1932,10 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
-            }
-
             rs = executeQuery(stmt);
+        } catch (final OXException e) {
+            closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
+            throw e;
         } catch (final SQLException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -2009,7 +1969,7 @@ public final class OXFolderIteratorSQL {
                 final List<FolderObject> list = ConditionTreeMap.asList(set, ctx, readConArg);
                 return new FolderObjectIterator(list, false);
             } catch (final OXException e) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
                 ConditionTreeMapManagement.dropFor(ctx.getContextId());
                 final ThreadPoolService threadPool = ThreadPools.getThreadPool();
                 final Runnable task = new Runnable() {
@@ -2062,11 +2022,6 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
-
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
-            }
 
             rs = executeQuery(stmt);
         } catch (final SQLException e) {
@@ -2147,11 +2102,6 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
 
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
-            }
-
             rs = executeQuery(stmt);
         } catch (final SQLException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
@@ -2210,11 +2160,6 @@ public final class OXFolderIteratorSQL {
             stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
-
-            if (DEBUG) {
-                final String sql = stmt.toString();
-                LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
-            }
 
             rs = executeQuery(stmt);
         } catch (final SQLException e) {
@@ -2344,8 +2289,7 @@ public final class OXFolderIteratorSQL {
         } catch (final SQLException e) {
             if ("MySQLSyntaxErrorException".equals(e.getClass().getSimpleName())) {
                 final String sql = stmt.toString();
-                LOG.error(new StringBuilder().append("\nFollowing SQL query contains syntax errors:\n").append(
-                    sql.substring(sql.indexOf(": ") + 2)).toString());
+                LOG.error("\nFollowing SQL query contains syntax errors:\n{}", sql.substring(sql.indexOf(": ") + 2));
             }
             throw e;
         }

@@ -50,7 +50,6 @@
 package com.openexchange.groupware.contexts.impl;
 
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
@@ -68,7 +67,7 @@ public abstract class ContextStorage {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ContextStorage.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContextStorage.class);
 
     /**
      * Singleton implementation.
@@ -97,7 +96,7 @@ public abstract class ContextStorage {
                         impl = tmp;
                     } catch (final OXException e) {
                         // Cannot occur
-                        LOG.warn(e.getMessage(), e);
+                        LOG.warn("", e);
                     }
                 }
             }
@@ -152,9 +151,7 @@ public abstract class ContextStorage {
      * @throws OXException if invalidating the context fails
      */
     public void invalidateContext(final int contextId) throws OXException {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("invalidateContext not implemented in " + this.getClass().getCanonicalName());
-        }
+        LOG.trace("invalidateContext not implemented in {}", this.getClass().getCanonicalName());
     }
 
     /**
@@ -164,9 +161,7 @@ public abstract class ContextStorage {
      * @throws OXException if invalidating the login information fails.
      */
     public void invalidateLoginInfo(final String loginContextInfo) throws OXException {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("invalidateLoginInfo not implemented in " + this.getClass().getCanonicalName());
-        }
+        LOG.trace("invalidateLoginInfo not implemented in {}", this.getClass().getCanonicalName());
     }
 
     /**

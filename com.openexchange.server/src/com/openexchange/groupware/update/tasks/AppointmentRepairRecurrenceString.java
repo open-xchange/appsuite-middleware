@@ -54,8 +54,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -71,7 +69,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class AppointmentRepairRecurrenceString implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AppointmentRepairRecurrenceString.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppointmentRepairRecurrenceString.class);
 
     public AppointmentRepairRecurrenceString() {
         super();
@@ -99,10 +97,7 @@ public final class AppointmentRepairRecurrenceString implements UpdateTask {
     @Override
     public void perform(final Schema schema, final int contextId)
         throws OXException, OXException {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Performing update task to repair the recurrence string in"
-                + " appointment change exceptions.");
-        }
+        LOG.info("Performing update task to repair the recurrence string in appointment change exceptions.");
         final String findBroken = "SELECT cid,intfield01,intfield02 "
             + "FROM prg_dates WHERE intfield01!=intfield02 AND field06 IS NULL";
         final Connection con = Database.get(contextId, true);
@@ -120,11 +115,9 @@ public final class AppointmentRepairRecurrenceString implements UpdateTask {
                 final String recurrenceString = getRecurrenceString(con, cid,
                     recurrenceId);
                 if (null == recurrenceString) {
-                    LOG.info("Series is missing for appointment " + id
-                        + " in context " + cid + ".");
+                    LOG.info("Series is missing for appointment {} in context {}.", id, cid);
                 } else {
-                    LOG.info("Repairing appointment " + id + " in context "
-                        + cid + ".");
+                    LOG.info("Repairing appointment {} in context {}.", id, cid);
                     fixRecurrenceString(con, cid, id, recurrenceString);
                 }
             }
@@ -139,10 +132,7 @@ public final class AppointmentRepairRecurrenceString implements UpdateTask {
                 Database.back(contextId, true, con);
             }
         }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Update task to repair the recurrence string in "
-                + "appointments performed.");
-        }
+        LOG.info("Update task to repair the recurrence string in appointments performed.");
     }
 
     private String getRecurrenceString(final Connection con, final int cid,
@@ -161,7 +151,7 @@ public final class AppointmentRepairRecurrenceString implements UpdateTask {
                 retval = result.getString(1);
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -180,10 +170,10 @@ public final class AppointmentRepairRecurrenceString implements UpdateTask {
             stmt.setInt(pos++, id);
             int updated = stmt.executeUpdate();
             if (1 != updated) {
-                LOG.error("Strangely updated " + updated + " appointments instead of 1.");
+                LOG.error("Strangely updated {} appointments instead of 1.", updated);
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             closeSQLStuff(null, stmt);
         }

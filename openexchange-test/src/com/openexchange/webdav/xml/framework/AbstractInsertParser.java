@@ -49,7 +49,6 @@
 
 package com.openexchange.webdav.xml.framework;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom2.Document;
 import com.openexchange.groupware.container.DataObject;
@@ -61,7 +60,7 @@ import com.openexchange.webdav.xml.types.Response;
  */
 public abstract class AbstractInsertParser<T extends CommonInsertResponse> extends AbstractWebDAVParser<T> {
 
-    private static final Log LOG = LogFactory.getLog(AbstractInsertParser.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractInsertParser.class);
 
     protected AbstractInsertParser() {
         super();

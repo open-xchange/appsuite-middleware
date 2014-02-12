@@ -76,8 +76,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class Link extends DataServlet {
 
-	private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
-			.getLog(Link.class);
+	private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Link.class);
 
 	/**
 	 * For serialization.
@@ -98,7 +97,7 @@ public class Link extends DataServlet {
 			try {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
 			} catch (final JSONException e) {
-				LOG.error(e.getMessage(), e);
+				LOG.error("", e);
 				response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
 				writeResponse(response, httpServletResponse, session);
 				return;
@@ -111,11 +110,11 @@ public class Link extends DataServlet {
 
 			response.setData(new JSONArray(sw.toString()));
 		} catch (final OXException exc) {
-			LOG.error(exc.getMessage(), exc);
+			LOG.error("", exc);
 			response.setException(exc);
 		} catch (final JSONException e) {
 			final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-			LOG.error(oje.getMessage(), oje);
+			LOG.error("", oje);
 			response.setException(oje);
 		}
 
@@ -151,7 +150,7 @@ public class Link extends DataServlet {
 				try {
 					jsonObj = convertParameter2JSONObject(httpServletRequest);
 				} catch (final JSONException e) {
-					LOG.error(e.getMessage(), e);
+					LOG.error("", e);
 					response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
 					writeResponse(response, httpServletResponse, session);
 					return;
@@ -169,11 +168,11 @@ public class Link extends DataServlet {
 				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "no data found");
 			}
 		} catch (final OXException exc) {
-			LOG.error(exc.getMessage(), exc);
+			LOG.error("", exc);
 			response.setException(exc);
 		} catch (final JSONException e) {
 			final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-			LOG.error(oje.getMessage(), oje);
+			LOG.error("", oje);
 			response.setException(oje);
 		}
 

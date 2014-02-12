@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -81,7 +80,8 @@ import com.openexchange.server.ServiceLookup;
  */
 public abstract class DeferredActivator implements BundleActivator, ServiceLookup {
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(DeferredActivator.class);
+    /** The logger. */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeferredActivator.class);
 
     private static final DeferredActivatorServiceStateLookup STATE_LOOKUP = new DeferredActivatorServiceStateLookup();
 
@@ -360,17 +360,14 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                     }
                     final Bundle bundle = context.getBundle();
                     final StringBuilder errorBuilder = new StringBuilder(64);
-                    final boolean errorEnabled = LOG.isErrorEnabled();
-                    if (errorEnabled) {
-                        errorBuilder.append("\nStart-up of bundle \"").append(bundle.getSymbolicName()).append("\" failed: ");
-                        final String errorMsg = t.getMessage();
-                        if (null == errorMsg || "null".equals(errorMsg)) {
-                            errorBuilder.append(t.getClass().getName());
-                        } else {
-                            errorBuilder.append(errorMsg);
-                        }
-                        LOG.error(errorBuilder.toString(), t);
+                    errorBuilder.append("\nStart-up of bundle \"").append(bundle.getSymbolicName()).append("\" failed: ");
+                    final String errorMsg = t.getMessage();
+                    if (null == errorMsg || "null".equals(errorMsg)) {
+                        errorBuilder.append(t.getClass().getName());
+                    } else {
+                        errorBuilder.append(errorMsg);
                     }
+                    LOG.error(errorBuilder.toString(), t);
                     /*
                      * Shut-down
                      */
@@ -383,11 +380,11 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
 
                             @Override
                             public void run() {
-                                shutDownBundle(bundle, errorEnabled ? errorBuilder : null);
+                                shutDownBundle(bundle, errorBuilder);
                             }
                         }).start();
                     } else {
-                        shutDownBundle(bundle, errorEnabled ? errorBuilder : null);
+                        shutDownBundle(bundle, errorBuilder);
                     }
                 }
             }
@@ -406,15 +403,11 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
              * Stop with Bundle.STOP_TRANSIENT set to zero
              */
             bundle.stop();
-            if (null != errorBuilder) {
-                errorBuilder.setLength(0);
-                LOG.error(errorBuilder.append("\n\nBundle \"").append(bundle.getSymbolicName()).append("\" stopped.\n"));
-            }
+            errorBuilder.setLength(0);
+            LOG.error(errorBuilder.append("\n\nBundle \"").append(bundle.getSymbolicName()).append("\" stopped.\n").toString());
         } catch (final BundleException e) {
-            if (null != errorBuilder) {
-                errorBuilder.setLength(0);
-                LOG.error(errorBuilder.append("\n\nBundle \"").append(bundle.getSymbolicName()).append("\" could not be stopped.\n"));
-            }
+            errorBuilder.setLength(0);
+            LOG.error(errorBuilder.append("\n\nBundle \"").append(bundle.getSymbolicName()).append("\" could not be stopped.\n").toString());
         }
     }
 
@@ -438,10 +431,10 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             this.context = context;
             init();
         } catch (final org.osgi.framework.ServiceException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             // Do not re-throw!
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -456,7 +449,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                         startBundle();
                     } catch (final Throwable t) {
                         ExceptionUtils.handleThrowable(t);
-                        LOG.error(t.getMessage(), t);
+                        LOG.error("", t);
                     }
                 }
             };
@@ -484,7 +477,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             stopBundle();
             started.set(false);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } finally {
             reset();

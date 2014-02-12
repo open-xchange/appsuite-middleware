@@ -2,11 +2,11 @@
 package com.openexchange.custom.parallels.osgi;
 
 import java.rmi.Remote;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import com.openexchange.admin.rmi.OXLoginInterface;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.config.ConfigurationService;
@@ -25,7 +25,7 @@ import com.openexchange.user.UserService;
 
 public class SoapParallelsActivator extends HousekeepingActivator {
 
-    private static transient final Log LOG = com.openexchange.log.Log.loggerFor(SoapParallelsActivator.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SoapParallelsActivator.class);
 
     public SoapParallelsActivator() {
         super();
@@ -38,18 +38,13 @@ public class SoapParallelsActivator extends HousekeepingActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
-
+        LOG.warn("Absent service: {}", clazz.getName());
         ParallelsServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
     }
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         ParallelsServiceRegistry.getServiceRegistry().removeService(clazz);
 
     }
@@ -70,9 +65,7 @@ public class SoapParallelsActivator extends HousekeepingActivator {
         }
 
         // register the http info/sso servlet
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Trying to register POA info servlet");
-        }
+        LOG.debug("Trying to register POA info servlet");
         rememberTracker(new HTTPServletRegistration(
             context,
             new com.openexchange.custom.parallels.impl.ParallelsInfoServlet(),
@@ -83,7 +76,7 @@ public class SoapParallelsActivator extends HousekeepingActivator {
             getFromConfig(ParallelsOptions.PROPERTY_OPENAPI_SERVLET)));
         final BundleContext context = this.context;
         final ServiceTrackerCustomizer<Remote, Remote> trackerCustomizer = new ServiceTrackerCustomizer<Remote, Remote>() {
-            
+
             @Override
             public void removedService(final ServiceReference<Remote> reference, final Remote service) {
                 if (null != service) {
@@ -91,12 +84,12 @@ public class SoapParallelsActivator extends HousekeepingActivator {
                     context.ungetService(reference);
                 }
             }
-            
+
             @Override
             public void modifiedService(final ServiceReference<Remote> reference, final Remote service) {
                 // Ignore
             }
-            
+
             @Override
             public Remote addingService(final ServiceReference<Remote> reference) {
                 final Remote service = context.getService(reference);
@@ -110,26 +103,16 @@ public class SoapParallelsActivator extends HousekeepingActivator {
         };
         track(Remote.class, trackerCustomizer);
         openTrackers();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Successfully registered POA info servlet");
-        }
+        LOG.debug("Successfully registered POA info servlet");
 
         // register auth plugin
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Trying to register POA authentication plugin");
-        }
+        LOG.debug("Trying to register POA authentication plugin");
         registerService(AuthenticationService.class.getName(), new ParallelsOXAuthentication(), null);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Successfully registered POA authentication plugin");
-        }
+        LOG.debug("Successfully registered POA authentication plugin");
         // regitser hostname service to modify hostnames in directlinks
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Trying to register POA hostname/directlinks plugin");
-        }
+        LOG.debug("Trying to register POA hostname/directlinks plugin");
         registerService(HostnameService.class.getName(), new ParallelsHostnameService(), null);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Successfully registered POA hostname/directlinks plugin");
-        }
+        LOG.debug("Successfully registered POA hostname/directlinks plugin");
         // Register SOAP service
         final OXServerServicePortTypeImpl soapService = new OXServerServicePortTypeImpl();
         registerService(OXServerServicePortType.class, soapService);

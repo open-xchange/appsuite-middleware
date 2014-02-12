@@ -1,7 +1,6 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import com.openexchange.ajax.AppointmentTest;
@@ -13,7 +12,7 @@ import com.openexchange.groupware.container.Appointment;
 
 public class Bug10733Test extends AppointmentTest {
 
-	private static final Log LOG = LogFactory.getLog(Bug10733Test.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug10733Test.class);
 
 	public Bug10733Test(final String name) {
 		super(name);

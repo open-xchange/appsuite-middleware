@@ -49,7 +49,6 @@
 
 package com.openexchange.oauth.yahoo.osgi;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthService;
@@ -68,7 +67,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class YahooOAuthActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(YahooOAuthActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(YahooOAuthActivator.class);
 
     private volatile OAuthService oauthService;
     private volatile OAuthServiceMetaDataYahooImpl oAuthMetaData;

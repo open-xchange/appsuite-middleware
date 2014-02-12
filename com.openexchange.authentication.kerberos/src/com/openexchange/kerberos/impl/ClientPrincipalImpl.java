@@ -50,7 +50,6 @@
 package com.openexchange.kerberos.impl;
 
 import javax.security.auth.Subject;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
@@ -64,7 +63,7 @@ import com.openexchange.kerberos.KerberosUtils;
  */
 public final class ClientPrincipalImpl implements ClientPrincipal {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ClientPrincipalImpl.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ClientPrincipalImpl.class);
 
     private Subject clientSubject;
     private Subject delegateSubject;
@@ -122,7 +121,7 @@ public final class ClientPrincipalImpl implements ClientPrincipal {
                 try {
                     credential.dispose();
                 } catch (GSSException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -131,7 +130,7 @@ public final class ClientPrincipalImpl implements ClientPrincipal {
                 try {
                     credential.dispose();
                 } catch (GSSException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }

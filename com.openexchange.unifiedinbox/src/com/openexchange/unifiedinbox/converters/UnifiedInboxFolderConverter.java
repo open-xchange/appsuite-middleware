@@ -79,8 +79,8 @@ public final class UnifiedInboxFolderConverter {
 
     static final int[] EMPTY_COUNTS = new int[] { 0, 0, 0, 0 };
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UnifiedInboxFolderConverter.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(UnifiedInboxFolderConverter.class);
 
     private static final MailFolder ROOT_UNIFIED_INBOX_FOLDER;
 
@@ -262,14 +262,7 @@ public final class UnifiedInboxFolderConverter {
      */
     public static int[][] getAccountDefaultFolders(final int accountId, final Session session, final String[] fullnames) throws OXException {
         final int[][] retval;
-        if (LOG.isDebugEnabled()) {
-            final long s = System.currentTimeMillis();
-            retval = getAccountDefaultFolders0(accountId, session, fullnames);
-            LOG.debug(new StringBuilder(64).append("Getting account ").append(accountId).append(" default folders took ").append(
-                (System.currentTimeMillis() - s)).append("msec").toString());
-        } else {
-            retval = getAccountDefaultFolders0(accountId, session, fullnames);
-        }
+        retval = getAccountDefaultFolders0(accountId, session, fullnames);
         return retval;
     }
 
@@ -286,13 +279,12 @@ public final class UnifiedInboxFolderConverter {
                     final MailFolder mf = mailAccess.getFolderStorage().getFolder(accountFullname);
                     retval[i] =
                         new int[] { mf.getMessageCount(), mf.getUnreadMessageCount(), mf.getDeletedMessageCount(), mf.getNewMessageCount() };
-                } else if (LOG.isDebugEnabled()) {
-                    LOG.debug(new StringBuilder(32).append("Missing folder \"").append(fullnames[i]).append("\" in account ").append(
-                        accountId).toString());
+                } else {
+                    LOG.debug("Missing folder \"{}\" in account {}", fullnames[i], accountId);
                 }
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return new int[0][];
         } finally {
             if (null != mailAccess) {

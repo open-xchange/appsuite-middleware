@@ -50,21 +50,27 @@
 package com.openexchange.sessiond.osgi;
 
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
+import com.openexchange.event.CommonEvent;
+import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessiondService;
@@ -86,7 +92,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class SessiondActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessiondActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondActivator.class);
 
     private volatile ServiceRegistration<EventHandler> eventHandlerRegistration;
 
@@ -105,17 +111,13 @@ public final class SessiondActivator extends HousekeepingActivator {
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
         // Don't stop the sessiond
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
+        LOG.warn("Absent service: " + clazz.getName());
         getServiceRegistry().removeService(clazz);
     }
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
+        LOG.info("Re-available service: " + clazz.getName());
         getServiceRegistry().addService(clazz, getService(clazz));
     }
 
@@ -134,9 +136,7 @@ public final class SessiondActivator extends HousekeepingActivator {
                     }
                 }
             }
-            if (LOG.isInfoEnabled()) {
-                LOG.info("starting bundle: com.openexchange.sessiond");
-            }
+            LOG.info("starting bundle: com.openexchange.sessiond");
             final BundleContext context = this.context;
             SessiondInit.getInstance().start();
             final SessiondService serviceImpl = /*new InvalidatedAwareSessiondService*/(new SessiondServiceImpl());
@@ -178,6 +178,31 @@ public final class SessiondActivator extends HousekeepingActivator {
             eventHandlerRegistration = eventHandler.registerSessiondEventHandler(context);
 
             registerService(SessionSpecificContainerRetrievalService.class, retrievalService);
+            /*
+             * clear other sessions of user on (remote) password change event
+             */
+            Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties.put(EventConstants.EVENT_TOPIC, "com/openexchange/passwordchange");
+            EventHandler passwordChangeEventHandler = new EventHandler() {
+
+                @Override
+                public void handleEvent(Event event) {
+                    if (event.containsProperty(CommonEvent.REMOTE_MARKER)) {
+                        int contextId = ((Integer) event.getProperty("com.openexchange.passwordchange.contextId")).intValue();
+                        int userId = ((Integer) event.getProperty("com.openexchange.passwordchange.userId")).intValue();
+                        Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
+                        if (null != session && false == Strings.isEmpty(session.getSessionID())) {
+                            Collection<Session> sessions = serviceImpl.getSessions(userId, contextId);
+                            for (Session userSession : sessions) {
+                                if (false == session.getSessionID().equals(userSession.getSessionID())) {
+                                    serviceImpl.removeSession(userSession.getSessionID());
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            registerService(EventHandler.class, passwordChangeEventHandler, serviceProperties);
         } catch (final Exception e) {
             LOG.error("SessiondActivator: start: ", e);
             // Try to stop what already has been started.
@@ -188,9 +213,7 @@ public final class SessiondActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("stopping bundle: com.openexchange.sessiond");
-        }
+        LOG.info("stopping bundle: com.openexchange.sessiond");
         try {
             final SessionStorageService storageService = getServiceRegistry().getOptionalService(SessionStorageService.class);
             final ServiceRegistration<EventHandler> eventHandlerRegistration = this.eventHandlerRegistration;
@@ -213,13 +236,11 @@ public final class SessiondActivator extends HousekeepingActivator {
                                     SessionHandler.postSessionStored(session, eventAdmin);
                                 }
                             } catch (final Exception e) {
-                                LOG.warn("Active session " + session.getSessionID() + " could not be put into session storage.", e);
+                                LOG.warn("Active session {} could not be put into session storage.", session.getSessionID(), e);
                             }
                         }
                     }
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("stopping bundle: com.openexchange.sessiond.\nRemaining active sessions were put into central session storage\n");
-                    }
+                    LOG.info("stopping bundle: com.openexchange.sessiond.\nRemaining active sessions were put into central session storage\n");
                 } catch (final RuntimeException e) {
                     LOG.warn("Remaining active sessions could not be put into central session storage.", e);
                 }
@@ -229,7 +250,7 @@ public final class SessiondActivator extends HousekeepingActivator {
             // Clear service registry
             getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            LOG.error("SessiondActivator: stop: ", e);
+            LOG.error("SessiondActivator: stop", e);
             throw e;
         }
     }

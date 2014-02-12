@@ -55,23 +55,20 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.GetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.java.Charsets;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.exceptions.SimpleTruncatedAttribute;
 import com.openexchange.tools.sql.DBUtils;
 
 public class CheckSizeSwitch {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CheckSizeSwitch.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CheckSizeSwitch.class);
 
     private static Map<Metadata, Integer> SIZES = new HashMap<Metadata, Integer>();
     private final DBProvider provider;
@@ -93,12 +90,8 @@ public class CheckSizeSwitch {
     }
 
     public static void checkSizes(final DocumentMetadata metadata, final DBProvider provider, final Context ctx) throws OXException {
-        boolean error = false;
-
         final CheckSizeSwitch checkSize = new CheckSizeSwitch(provider, ctx);
         final GetSwitch get = new GetSwitch(metadata);
-
-        final OXException x = InfostoreExceptionCodes.TOO_LONG_VALUES.create();
 
         for(final Metadata m : Metadata.VALUES) {
             if(!FIELDS_TO_CHECK.contains(m)) {
@@ -113,18 +106,12 @@ public class CheckSizeSwitch {
                 valueLength = 0;
             }
             if(maxSize < valueLength) {
-                final ProblematicAttribute attr = new SimpleTruncatedAttribute(m.getId(), maxSize, valueLength);
-                x.addProblematic(attr);
-                error = true;
+                final OXException x = InfostoreExceptionCodes.TOO_LONG_VALUES.create();
+                x.addProblematic(new SimpleTruncatedAttribute(m.getId(), maxSize, valueLength));
+                throw x;
             }
         }
-
-        if(error) {
-            throw x;
-        }
     }
-
-
 
     public int getSize(final Metadata field) {
         if(SIZES.containsKey(field)) {
@@ -139,10 +126,10 @@ public class CheckSizeSwitch {
             SIZES.put(field, size);
             return size;
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return 0;
         } catch (final OXException e) {
-            LOG.error(e.getMessage(),  e);
+            LOG.error("",  e);
             return 0;
         } finally {
             provider.releaseWriteConnectionAfterReading(ctx, con);

@@ -67,7 +67,7 @@ import com.openexchange.concurrent.Synchronizer;
  */
 public final class AJPv13ServletOutputStream extends ServletOutputStream implements Synchronizable {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13ServletOutputStream.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AJPv13ServletOutputStream.class);
 
     private static final String ERR_OUTPUT_CLOSED = "OutputStream is closed";
 
@@ -170,7 +170,7 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
         final Lock l = synchronizer.acquire();
         try {
             /*
-             * try { byteBuffer.flush(); } catch (IOException e) { LOG.error(e.getMessage(), e); }
+             * try { byteBuffer.flush(); } catch (IOException e) { LOG.error("", e); }
              */
             final byte[] retval = new byte[count];
             System.arraycopy(buf, 0, retval, 0, count);
@@ -297,9 +297,9 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
             }
         } catch (final SocketException e) {
             if (e.getMessage().indexOf(ERR_BROKEN_PIPE) == -1) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } else {
-                LOG.warn(new StringBuilder("Underlying (TCP) protocol communication aborted: ").append(e.getMessage()).toString(), e);
+                LOG.warn("Underlying (TCP) protocol communication aborted", e);
             }
             // Treat a socket exception as fatal; meaning to close this servlet output stream since socket connection is broken
             isClosed = true;
@@ -307,10 +307,10 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
             ioexc.initCause(e);
             throw ioexc;
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final IOException ioexc = new IOException(e.getMessage());
             ioexc.initCause(e);
             throw ioexc;
@@ -341,9 +341,9 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
             }
         } catch (final SocketException e) {
             if (e.getMessage().indexOf(ERR_BROKEN_PIPE) == -1) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } else {
-                LOG.warn(new StringBuilder("Underlying (TCP) protocol communication aborted: ").append(e.getMessage()).toString(), e);
+                LOG.warn("Underlying (TCP) protocol communication aborted", e);
             }
             // Treat a socket exception as fatal; meaning to close this servlet output stream since socket connection is broken
             isClosed = true;
@@ -351,10 +351,10 @@ public final class AJPv13ServletOutputStream extends ServletOutputStream impleme
             ioexc.initCause(e);
             throw ioexc;
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             final IOException ioexc = new IOException(e.getMessage());
             ioexc.initCause(e);
             throw ioexc;

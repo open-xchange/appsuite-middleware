@@ -55,14 +55,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -129,7 +127,7 @@ public final class EventQueue {
                     }
                 }
             } catch (final Throwable t) {
-                LOG.error(t.getMessage(), t);
+                LOG.error("", t);
             }
         }
 
@@ -152,7 +150,7 @@ public final class EventQueue {
 
     private static volatile boolean isEnabled;
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EventQueue.class));
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventQueue.class);
 
     /*
      * +++++++++++++++ Appointment Event Lists +++++++++++++++
@@ -223,9 +221,7 @@ public final class EventQueue {
         delay = config.getEventQueueDelay();
 
         if (config.isEventQueueEnabled()) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Starting EventQueue");
-            }
+            LOG.info("Starting EventQueue");
 
             queue1 = new ArrayList<EventObject>();
             queue2 = new ArrayList<EventObject>();
@@ -251,9 +247,7 @@ public final class EventQueue {
             }
             isEnabled = true;
         } else {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("EventQueue is disabled");
-            }
+            LOG.info("EventQueue is disabled");
         }
         isInit = true;
         shuttingDown.set(false);
@@ -264,9 +258,7 @@ public final class EventQueue {
             LOG.info("Shutting down event system, so no events are accepted. Throwing Invalid State Exception");
             throw new OXException().setLogMessage("Event system is being shut down and therefore does not accept new events.");
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(new com.openexchange.java.StringAllocator("add EventObject: ").append(eventObj));
-        }
+        LOG.debug("add EventObject: {}", eventObj);
 
         if (!isEnabled) {
             return;
@@ -330,7 +322,7 @@ public final class EventQueue {
 //            infostore(eventObj, noDelay ? noDelayInfostoreEventList : infostoreEventList);
 //            break;
         default:
-            LOG.error("invalid module: " + module);
+            LOG.error("invalid module: {}", module);
         }
     }
 
@@ -347,7 +339,7 @@ public final class EventQueue {
                 try {
                     next.appointmentCreated(appointment, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -356,7 +348,7 @@ public final class EventQueue {
                 try {
                     next.appointmentModified(appointment, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -365,7 +357,7 @@ public final class EventQueue {
                 try {
                     next.appointmentDeleted(appointment, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -374,7 +366,7 @@ public final class EventQueue {
                 try {
                     next.appointmentAccepted(appointment, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -383,7 +375,7 @@ public final class EventQueue {
                 try {
                     next.appointmentDeclined(appointment, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -392,12 +384,12 @@ public final class EventQueue {
                 try {
                     next.appointmentTentativelyAccepted(appointment, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
         default:
-            LOG.error("invalid action for appointment: " + action);
+            LOG.error("invalid action for appointment: {}", action);
         }
     }
 
@@ -414,7 +406,7 @@ public final class EventQueue {
                 try {
                     next.contactCreated(contact, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -423,7 +415,7 @@ public final class EventQueue {
                 try {
                     next.contactModified(contact, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -432,12 +424,12 @@ public final class EventQueue {
                 try {
                     next.contactDeleted(contact, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
         default:
-            LOG.error("invalid action for contact: " + action);
+            LOG.error("invalid action for contact: {}", action);
         }
     }
 
@@ -454,7 +446,7 @@ public final class EventQueue {
                 try {
                     next.taskCreated(task, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -463,7 +455,7 @@ public final class EventQueue {
                 try {
                     next.taskModified(task, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -472,7 +464,7 @@ public final class EventQueue {
                 try {
                     next.taskDeleted(task, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -481,7 +473,7 @@ public final class EventQueue {
                 try {
                     next.taskAccepted(task, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -490,7 +482,7 @@ public final class EventQueue {
                 try {
                     next.taskDeclined(task, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -499,12 +491,12 @@ public final class EventQueue {
                 try {
                     next.taskTentativelyAccepted(task, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
         default:
-            LOG.error("invalid action for task: " + action);
+            LOG.error("invalid action for task: {}", action);
         }
     }
 
@@ -521,7 +513,7 @@ public final class EventQueue {
                 try {
                     next.folderCreated(folderObject, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -530,7 +522,7 @@ public final class EventQueue {
                 try {
                     next.folderModified(folderObject, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
@@ -539,12 +531,12 @@ public final class EventQueue {
                 try {
                     next.folderDeleted(folderObject, session);
                 } catch (final Throwable t) {
-                    LOG.error(t.getMessage(), t);
+                    LOG.error("", t);
                 }
             }
             break;
         default:
-            LOG.error("invalid action for folder: " + action);
+            LOG.error("invalid action for folder: {}", action);
         }
     }
 
@@ -561,7 +553,7 @@ public final class EventQueue {
 //                try {
 //                    next.infoitemCreated(documentMetadata, session);
 //                } catch (final Throwable t) {
-//                    LOG.error(t.getMessage(), t);
+//                    LOG.error("", t);
 //                }
 //            }
 //            break;
@@ -570,7 +562,7 @@ public final class EventQueue {
 //                try {
 //                    next.infoitemModified(documentMetadata, session);
 //                } catch (final Throwable t) {
-//                    LOG.error(t.getMessage(), t);
+//                    LOG.error("", t);
 //                }
 //            }
 //            break;
@@ -579,12 +571,12 @@ public final class EventQueue {
 //                try {
 //                    next.infoitemDeleted(documentMetadata, session);
 //                } catch (final Throwable t) {
-//                    LOG.error(t.getMessage(), t);
+//                    LOG.error("", t);
 //                }
 //            }
 //            break;
 //        default:
-//            LOG.error("invalid action for infostore: " + action);
+//            LOG.error("invalid action for infostore: {}", action);
 //        }
 //    }
 
@@ -712,7 +704,7 @@ public final class EventQueue {
         } catch (final InterruptedException e) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             // Just in case another Thread also stopped the queue, we have to
             // wake that one up as well

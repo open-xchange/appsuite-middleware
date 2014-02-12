@@ -68,7 +68,7 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
  */
 public final class ExtendedMimeMessage extends MimeMessage {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ExtendedMimeMessage.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExtendedMimeMessage.class);
 
     private final String fullname;
 
@@ -150,13 +150,13 @@ public final class ExtendedMimeMessage extends MimeMessage {
                 hasAttachment =
                     Boolean.valueOf(ct.startsWith(MULTI) && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType()) || deepAttachmentCheck(ct.getSubType())));
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 hasAttachment = Boolean.valueOf(ct.isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
             } catch (final MessagingException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 hasAttachment = Boolean.valueOf(ct.isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
             } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 hasAttachment = Boolean.valueOf(ct.isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
             }
         }
@@ -249,9 +249,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
                     priority = parsePriority(getHeader(MessageHeaders.HDR_X_PRIORITY, null));
                 }
             } catch (final MessagingException e) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn(e.getMessage(), e);
-                }
+                LOG.warn("", e);
                 priority = MailMessage.PRIORITY_NORMAL;
             }
         }
@@ -264,9 +262,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
             try {
                 return Integer.parseInt(tmp[0]);
             } catch (final NumberFormatException nfe) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Strange X-Priority header: " + tmp[0], nfe);
-                }
+                LOG.debug("Strange X-Priority header: {}", tmp[0], nfe);
                 return MailMessage.PRIORITY_NORMAL;
             }
         }
@@ -302,9 +298,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
             try {
                 size = Integer.valueOf(super.getSize());
             } catch (final MessagingException e) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn(e.getMessage(), e);
-                }
+                LOG.warn("", e);
                 size = Integer.valueOf(-1);
             }
         }
@@ -325,17 +319,13 @@ public final class ExtendedMimeMessage extends MimeMessage {
             try {
                 contentType = new ContentType(getHeader(MessageHeaders.HDR_CONTENT_TYPE, null));
             } catch (final MessagingException e) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn(e.getMessage(), e);
-                }
+                LOG.warn("", e);
                 contentType = new ContentType();
                 contentType.setPrimaryType("text");
                 contentType.setSubType("plain");
                 contentType.setCharsetParameter("us-ascii");
             } catch (final OXException e) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn(e.getMessage(), e);
-                }
+                LOG.warn("", e);
                 contentType = new ContentType();
                 contentType.setPrimaryType("text");
                 contentType.setSubType("plain");

@@ -57,7 +57,6 @@ import net.fortuna.ical4j.model.TimeZoneRegistry;
 import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
 import net.fortuna.ical4j.util.TimeZones;
 import net.fortuna.ical4j.zoneinfo.outlook.OutlookTimeZoneRegistryFactory;
-import org.apache.commons.logging.Log;
 import com.openexchange.data.conversion.ical.ZoneInfo;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -72,7 +71,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 
@@ -82,7 +80,7 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
  */
 public final class EmitterTools {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EmitterTools.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EmitterTools.class);
     private static volatile CalendarCollectionService calendarCollection;
 
     private final TimeZoneRegistry registry;
@@ -199,7 +197,7 @@ public final class EmitterTools {
                 retval = new java.util.Date(rrs.getRecurringResultByPosition(recurrencePosition).getStart());
             }
         } catch (final OXException e) {
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
         }
         return retval;
     }

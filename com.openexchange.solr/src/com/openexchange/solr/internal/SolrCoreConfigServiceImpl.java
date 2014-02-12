@@ -54,9 +54,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.solr.SolrCore;
 import com.openexchange.solr.SolrCoreConfigService;
 import com.openexchange.solr.SolrCoreConfiguration;
@@ -72,7 +70,7 @@ import com.openexchange.solr.SolrExceptionCodes;
  */
 public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrCoreConfigServiceImpl.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SolrCoreConfigServiceImpl.class);
 
     private final SolrIndexMysql indexMysql;
 
@@ -123,9 +121,9 @@ public class SolrCoreConfigServiceImpl implements SolrCoreConfigService {
             final String coreDirPath = coreConfig.getCoreDirPath();
             final File coreDir = new File(coreDirPath);
             if (coreDir.exists()) {
-                LOG.warn("Core directory " + coreDir.getPath() + " already exists. Checking consistency...");
+                LOG.warn("Core directory {} already exists. Checking consistency...", coreDir.getPath());
                 if (structureIsConsistent(coreConfig, identifier.getModule())) {
-                    LOG.warn("Core directory " + coreDir.getPath() + " seems to be consistent.");
+                    LOG.warn("Core directory {} seems to be consistent.", coreDir.getPath());
                     return true;
                 }
                 /*

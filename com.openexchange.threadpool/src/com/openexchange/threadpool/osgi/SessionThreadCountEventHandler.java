@@ -50,7 +50,6 @@
 package com.openexchange.threadpool.osgi;
 
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
@@ -69,7 +68,7 @@ import com.openexchange.sessiond.SessiondService;
  */
 public final class SessionThreadCountEventHandler extends ServiceTracker<SessiondService, SessiondService> implements EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SessionThreadCountEventHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionThreadCountEventHandler.class);
 
     private final SessionThreadCounterImpl counterImpl;
 

@@ -60,8 +60,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.threadpool.internal.CustomThreadFactory;
 import com.openexchange.threadpool.osgi.ThreadPoolActivator;
 import com.openexchange.timer.TimerService;
@@ -73,7 +71,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class ThreadPools {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ThreadPools.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPools.class);
 
     /**
      * Initializes a new {@link ThreadPools}.
@@ -204,9 +202,8 @@ public final class ThreadPools {
                 final Future<R> f = completionService.poll(timeoutMillis, TimeUnit.MILLISECONDS);
                 if (null != f) {
                     ret.add(f.get());
-                } else if (LOG.isWarnEnabled()) {
-                    LOG.warn(new StringBuilder(32).append("Completion service's task elapsed time-out of ").append(timeoutMillis).append(
-                        "msec").toString());
+                } else {
+                    LOG.warn("Completion service's task elapsed time-out of {}msec", timeoutMillis);
                 }
             }
             return ret;
@@ -236,6 +233,24 @@ public final class ThreadPools {
     };
 
     /**
+     * Takes from given completion service using {@link #DEFAULT_EXCEPTION_FACTORY} and returns its results as a list.
+     *
+     * @param <R> The result type
+     * @param completionService The completion service to take from
+     * @param size The number of tasks performed by completion service
+     * @return A list of results taken from completion service
+     * @throws OXException If taking from completion service fails
+     * @throws IllegalStateException If cause is neither a {@link RuntimeException} nor an {@link Error} but a checked exception
+     * @throws RuntimeException If cause is an unchecked {@link RuntimeException}
+     * @throws Error If cause is an unchecked {@link Error}
+     * @see #launderThrowable(ExecutionException, Class)
+     * @see #DEFAULT_EXCEPTION_FACTORY
+     */
+    public static <R> java.util.List<R> takeCompletionService(final CompletionService<R> completionService, final int size) throws OXException {
+        return takeCompletionService(completionService, size, DEFAULT_EXCEPTION_FACTORY);
+    }
+
+    /**
      * Takes from given completion service and returns its results as a list.
      *
      * @param <R> The result type
@@ -261,6 +276,54 @@ public final class ThreadPools {
                 ret.add(completionService.take().get());
             }
             return ret;
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw factory.newUnexpectedError(e);
+        } catch (final ExecutionException e) {
+            throw launderThrowable(e, factory.getType());
+        }
+    }
+
+    /**
+     * Awaits completion of given completion service using {@link #DEFAULT_EXCEPTION_FACTORY}, ignoring its results.
+     *
+     * @param <R> The result type
+     * @param completionService The completion service to take from
+     * @param size The number of tasks performed by completion service
+     * @throws OXException If taking from completion service fails
+     * @throws IllegalStateException If cause is neither a {@link RuntimeException} nor an {@link Error} but a checked exception
+     * @throws RuntimeException If cause is an unchecked {@link RuntimeException}
+     * @throws Error If cause is an unchecked {@link Error}
+     * @see #launderThrowable(ExecutionException, Class)
+     * @see #DEFAULT_EXCEPTION_FACTORY
+     */
+    public static <R> void awaitCompletionService(final CompletionService<R> completionService, final int size) throws OXException {
+        awaitCompletionService(completionService, size, DEFAULT_EXCEPTION_FACTORY);
+    }
+
+    /**
+     * Awaits completion of given completion service, ignoring its results.
+     *
+     * @param <R> The result type
+     * @param <E> The exception type
+     * @param completionService The completion service to take from
+     * @param size The number of tasks performed by completion service
+     * @param factory The exception factory to launder a possible {@link ExecutionException} or {@link InterruptedException}
+     * @throws E If taking from completion service fails
+     * @throws IllegalStateException If cause is neither a {@link RuntimeException} nor an {@link Error} but a checked exception
+     * @throws RuntimeException If cause is an unchecked {@link RuntimeException}
+     * @throws Error If cause is an unchecked {@link Error}
+     * @see #launderThrowable(ExecutionException, Class)
+     * @see #DEFAULT_EXCEPTION_FACTORY
+     */
+    public static <R, E extends Exception> void awaitCompletionService(final CompletionService<R> completionService, final int size, final ExpectedExceptionFactory<E> factory) throws E {
+        /*
+         * Wait for completion
+         */
+        try {
+            for (int i = 0; i < size; i++) {
+                completionService.take().get();
+            }
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
             throw factory.newUnexpectedError(e);
@@ -305,6 +368,43 @@ public final class ThreadPools {
             throw (Error) t;
         } else {
             throw new IllegalStateException("Not unchecked", t);
+        }
+    }
+
+    /**
+     * Gets the result from passed {@link Future} instance.
+     *
+     * @param f The future
+     * @return The future's result
+     * @throws OXException If an error occurs
+     */
+    public static <V> V getFrom(final Future<V> f) throws OXException {
+        return getFrom(f, DEFAULT_EXCEPTION_FACTORY);
+    }
+
+    /**
+     * Gets the result from passed {@link Future} instance.
+     *
+     * @param f The future
+     * @param factory The exception factory to launder possible exceptions
+     * @return The future's result
+     * @throws E If an error occurs
+     */
+    public static <V, E extends Exception> V getFrom(final Future<V> f, final ExpectedExceptionFactory<E> factory) throws E {
+        if (null == f) {
+            return null;
+        }
+        ExpectedExceptionFactory<E> fac = factory;
+        if (null == fac) {
+            fac = (ExpectedExceptionFactory<E>) DEFAULT_EXCEPTION_FACTORY;
+        }
+        try {
+            return f.get();
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw factory.newUnexpectedError(e);
+        } catch (final ExecutionException e) {
+            throw launderThrowable(e, factory.getType());
         }
     }
 
@@ -539,16 +639,8 @@ public final class ThreadPools {
 
     private static class TrackableTaskAdapter<V> extends TaskAdapter<V> implements Trackable {
 
-        private final Props props;
-
         TrackableTaskAdapter(final Callable<V> callable) {
             super(callable);
-            this.props = LogProperties.optLogProperties(Thread.currentThread());
-        }
-
-        @Override
-        public Props optLogProperties() {
-            return props;
         }
     }
 
@@ -594,20 +686,6 @@ public final class ThreadPools {
 
     }
 
-    private static class TrackableRenamingTaskAdapter<V> extends RenamingTaskAdapter<V> implements Trackable {
-
-        private final Props props;
-        TrackableRenamingTaskAdapter(final Callable<V> callable, final String prefix) {
-            super(callable, prefix);
-            this.props = LogProperties.optLogProperties(Thread.currentThread());
-        }
-
-        @Override
-        public Props optLogProperties() {
-            return props;
-        }
-    }
-
     private static class CurrentThreadExecutorService extends java.util.concurrent.AbstractExecutorService {
 
         public CurrentThreadExecutorService() {
@@ -650,29 +728,11 @@ public final class ThreadPools {
      */
     public static abstract class TrackableCallable<V> implements Callable<V>, Trackable {
 
-        /** The properties */
-        protected final Props props;
-
         /**
          * Initializes a new {@link TrackableCallable}.
          */
         protected TrackableCallable() {
-            this(LogProperties.optLogProperties(Thread.currentThread()));
-        }
-
-        /**
-         * Initializes a new {@link TrackableCallable}.
-         *
-         * @param props The properties
-         */
-        protected TrackableCallable(final Props props) {
             super();
-            this.props = props;
-        }
-
-        @Override
-        public Props optLogProperties() {
-            return props;
         }
     }
 

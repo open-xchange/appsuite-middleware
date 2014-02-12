@@ -89,7 +89,7 @@ import com.openexchange.tools.oxfolder.permissionLoader.PermissionLoaderService;
  */
 public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
-    protected static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FolderObjectIterator.class));
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderObjectIterator.class);
 
     /**
      * The empty folder iterator
@@ -558,9 +558,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             try {
                 rs.close();
             } catch (final SQLException e) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(e.getMessage(), e);
-                }
+                LOG.error("", e);
                 error = SearchIteratorExceptionCodes.SQL_ERROR.create(e, e.getMessage()).setPrefix("FLD");
             }
             rs = null;
@@ -572,9 +570,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             try {
                 stmt.close();
             } catch (final SQLException e) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(e.getMessage(), e);
-                }
+                LOG.error("", e);
                 if (error == null) {
                     error = SearchIteratorExceptionCodes.SQL_ERROR.create(e, e.getMessage()).setPrefix("FLD");
                 }
@@ -661,7 +657,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             try {
                 cache.putIfAbsent(fo, ctx, resideInCache ? getEternalAttributes() : null);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         /*
@@ -695,7 +691,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         try {
             closeResources();
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         /*
          * Close other stuff
@@ -795,7 +791,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             try {
                 closeResources();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             /*
              * Close other stuff

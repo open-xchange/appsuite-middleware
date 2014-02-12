@@ -56,8 +56,6 @@ import static com.openexchange.tools.update.Tools.tableExists;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
@@ -73,10 +71,10 @@ import com.openexchange.tools.update.Tools;
  */
 public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExtendCalendarForIMIPHandlingTask.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExtendCalendarForIMIPHandlingTask.class);
 
     private final String[] TABLES = { "prg_dates", "del_dates" };
-    private final Column[] COLUMNS = { new Column("uid", "VARCHAR(255)"), new Column("organizer", "VARCHAR(255)"), new Column("sequence", "INT4 UNSIGNED") };
+    private final Column[] COLUMNS = { new Column("uid", "VARCHAR(1024)"), new Column("organizer", "VARCHAR(255)"), new Column("sequence", "INT4 UNSIGNED") };
 
     private static final String DATES_EXTERNAL_CREATE =
         "CREATE TABLE dateExternal (" +
@@ -129,7 +127,7 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
             try {
                 Tools.checkAndAddColumns(con, tableName, COLUMNS);
             } catch (SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 if (null == toThrow) {
                     toThrow = e;
                 }
@@ -146,7 +144,7 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
                 }
             }
         } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             if (null == toThrow) {
                 toThrow = e;
             }
@@ -162,7 +160,7 @@ public class ExtendCalendarForIMIPHandlingTask extends UpdateTaskAdapter {
                 }
             }
         } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             if (null == toThrow) {
                 toThrow = e;
             }

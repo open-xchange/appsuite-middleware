@@ -36,7 +36,7 @@ import org.apache.solr.util.SolrPluginUtils;
 
 public abstract class SolrHighlighter
 {
-  public static Logger log = LoggerFactory.getLogger(SolrHighlighter.class);
+  public static org.slf4j.Logger log = LoggerFactory.getLogger(SolrHighlighter.class);
 
   // Thread safe registry
   protected final Map<String,SolrFormatter> formatters =

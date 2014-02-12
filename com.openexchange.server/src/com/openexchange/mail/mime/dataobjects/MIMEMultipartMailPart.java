@@ -62,6 +62,7 @@ import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
@@ -88,8 +89,8 @@ public final class MIMEMultipartMailPart extends MailPart {
 
     private static final long serialVersionUID = -3130161956976376243L;
 
-    private static final transient org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MIMEMultipartMailPart.class));
+    private static final transient org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(MIMEMultipartMailPart.class);
 
     private static final int BUFSIZE = 8192; // 8K
 
@@ -870,7 +871,7 @@ public final class MIMEMultipartMailPart extends MailPart {
                 try {
                     in.close();
                 } catch (final IOException e) {
-                    com.openexchange.log.LogFactory.getLog(MIMEMultipartMailPart.DataSourceDataAccess.class).error(e.getMessage(), e);
+                    LoggerFactory.getLogger(MIMEMultipartMailPart.DataSourceDataAccess.class).error("", e);
                 }
             }
         }

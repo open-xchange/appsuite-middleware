@@ -63,7 +63,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -78,7 +77,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -93,7 +91,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class Links {
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Links.class));
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Links.class);
 
     private static interface ModuleAccess {
 
@@ -419,10 +417,7 @@ public class Links {
         final LinksSql lms = new LinksMySql();
         final List<int[]> resp = new ArrayList<int[]>();
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(new StringBuilder("Fetching rights for Module: " + type + " id:" + id + " folder:" + folder
-                    + " user:" + user + " group:" + Arrays.toString(group)));
-        }
+        LOG.debug("Fetching rights for Module: {} id:{} folder:{} user:{} group:{}", type, id, folder, user, Arrays.toString(group));
 
         if (!modules.get(Integer.valueOf(type)).isReadable(id, folder, user, group, so)) {
             for (final int[] tmp : data) {

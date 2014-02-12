@@ -55,8 +55,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
@@ -83,7 +81,7 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
 
     private String identifyingCriteria;
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AnchorsByLinkRegexStep.class));
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AnchorsByLinkRegexStep.class);
 
     private boolean mayHaveEmptyOutput;
 
@@ -122,7 +120,7 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
         try {
             // add the first page as there should always be results there
             subpages.add(input);
-            LOG.debug("Input page is : " + input.getWebResponse().getContentAsString());
+            LOG.debug("Input page is : {}", input.getWebResponse().getContentAsString());
             // search for subpages
             for (final HtmlAnchor link : input.getAnchors()) {
                 // get the subpages
@@ -132,7 +130,7 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
                         subpagesHref.add(link.getHrefAttribute());
                         // remember its page for later
                         subpages.add((HtmlPage) link.click());
-                        LOG.debug("Subpage added : " + link.getHrefAttribute());
+                        LOG.debug("Subpage added : {}", link.getHrefAttribute());
                     }
 
                 }
@@ -145,7 +143,7 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
                         if (identifyingCriteria.equals("")){
                             output.add(possibleLinkToResultpage);
                             outputHref.add(possibleLinkToResultpage.getHrefAttribute());
-                            LOG.debug("Added this link to the list : " + possibleLinkToResultpage.getHrefAttribute());
+                            LOG.debug("Added this link to the list : {}", possibleLinkToResultpage.getHrefAttribute());
                         // if differentiating by href alone is not enough to prevent double links
                         } else {
                             final Pattern pattern = Pattern.compile(identifyingCriteria);
@@ -156,7 +154,7 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
                                     output.add(possibleLinkToResultpage);
                                     outputHref.add(possibleLinkToResultpage.getHrefAttribute());
                                     uniqueIds.add(uniqueId);
-                                    LOG.debug("Added this link to the list : " + possibleLinkToResultpage.getHrefAttribute());
+                                    LOG.debug("Added this link to the list : {}", possibleLinkToResultpage.getHrefAttribute());
                                 }
                             }
                         }
@@ -170,7 +168,7 @@ public class AnchorsByLinkRegexStep extends AbstractStep<List<HtmlAnchor>, HtmlP
                 LOG.error("No links matching the criteria were found.");
                 LOG.info(input.getWebResponse().getContentAsString());
                 for (HtmlAnchor link : input.getAnchors()){
-                    LOG.info("Link available on the first page : " + link.getHrefAttribute());
+                    LOG.info("Link available on the first page : {}", link.getHrefAttribute());
                 }
             }
         } catch (final FailingHttpStatusCodeException e) {

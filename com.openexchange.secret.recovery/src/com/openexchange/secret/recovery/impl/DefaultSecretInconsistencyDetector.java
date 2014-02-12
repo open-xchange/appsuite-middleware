@@ -51,9 +51,7 @@ package com.openexchange.secret.recovery.impl;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.recovery.SecretConsistencyCheck;
 import com.openexchange.secret.recovery.SecretInconsistencyDetector;
@@ -66,9 +64,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DefaultSecretInconsistencyDetector implements SecretInconsistencyDetector {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DefaultSecretInconsistencyDetector.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultSecretInconsistencyDetector.class);
 
     private final List<SecretConsistencyCheck> checks;
     private volatile SecretService secretService;
@@ -86,9 +82,7 @@ public class DefaultSecretInconsistencyDetector implements SecretInconsistencyDe
         for (final SecretConsistencyCheck secretConsistencyCheck : getChecks()) {
             final String reason = secretConsistencyCheck.checkSecretCanDecryptStrings(session, getSecretService().getSecret(session));
             if (reason != null) {
-                if (DEBUG) {
-                    LOG.debug(SecretConsistencyCheck.class.getSimpleName() + " \"" + secretConsistencyCheck.getClass().getName() + "\" indicates need for re-decryption: " + reason);
-                }
+                LOG.debug("{} \"{}\" indicates need for re-decryption: {}", SecretConsistencyCheck.class.getSimpleName(), secretConsistencyCheck.getClass().getName(), reason);
                 return reason;
             }
         }

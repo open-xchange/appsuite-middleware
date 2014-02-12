@@ -55,16 +55,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
-import org.apache.commons.logging.Log;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 
 /**
  * Template that reads the template content from a file.
  */
 public class FileTemplate extends CompiledLineParserTemplate {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CompiledLineParserTemplate.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CompiledLineParserTemplate.class);
 
     private final File file;
 
@@ -98,7 +96,7 @@ public class FileTemplate extends CompiledLineParserTemplate {
             }
             return collect.toString();
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return e.toString();
         } finally {
             Streams.close(reader);

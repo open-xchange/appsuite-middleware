@@ -32,8 +32,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.java.StringAllocator;
 
 /**
@@ -56,7 +56,7 @@ import com.openexchange.java.StringAllocator;
  */
 public class AlphanumComparator implements Comparator<String> {
 
-    private static final Log LOG = LogFactory.getLog(AlphanumComparator.class);
+    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(AlphanumComparator.class);
 
     private static final Map<Locale, Collator> COLLATOR_OVERRIDES;
 

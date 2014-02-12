@@ -54,7 +54,6 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -69,7 +68,7 @@ import com.openexchange.loxandra.helpers.EAVContactHelper;
  */
 public class EAVContactParser {
 
-	private static Log log = com.openexchange.log.Log.loggerFor(EAVContactParser.class);
+	private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EAVContactParser.class);
 
 	/**
 	 * Parse a {@link JSONObject} and creates an {@link EAVContact}

@@ -60,12 +60,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 public class ResourceBundleDiscoverer extends FileDiscoverer {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ResourceBundleDiscoverer.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResourceBundleDiscoverer.class);
 
     public ResourceBundleDiscoverer(final File dir) throws FileNotFoundException {
         super(dir);
@@ -89,10 +87,10 @@ public class ResourceBundleDiscoverer extends FileDiscoverer {
                 list.add(rc);
 
             } catch (final java.util.MissingResourceException mr) {
-                LOG.error("Unable to init Language Bundle! This file seems to be broken: " + file);
+                LOG.error("Unable to init Language Bundle! This file seems to be broken: {}", file);
                 throw mr;
             } catch (final MalformedURLException e) {
-                LOG.error("Cannot load file: " + file);
+                LOG.error("Cannot load file: {}", file);
             }
         }
         return list;

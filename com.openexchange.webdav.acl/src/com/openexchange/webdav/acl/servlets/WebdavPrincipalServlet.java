@@ -53,7 +53,6 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.login.Interface;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -72,7 +71,7 @@ public class WebdavPrincipalServlet extends OXServlet {
 
     private static final long serialVersionUID = 4646903712578496388L;
 
-    private static final transient Log LOG = com.openexchange.log.Log.loggerFor(WebdavPrincipalServlet.class);
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavPrincipalServlet.class);
 
     @Override
     protected Interface getInterface() {

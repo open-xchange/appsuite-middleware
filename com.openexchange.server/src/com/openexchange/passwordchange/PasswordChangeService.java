@@ -64,6 +64,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserExceptionCode;
@@ -83,7 +84,7 @@ import com.openexchange.sessiond.SessiondService;
  */
 public abstract class PasswordChangeService {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PasswordChangeService.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeService.class);
 
     /**
      * Initializes a new {@link PasswordChangeService}
@@ -220,6 +221,9 @@ public abstract class PasswordChangeService {
             LOG.error("Updating password in user session failed", e);
             throw e;
         }
+        /*
+         * post event
+         */
         final EventAdmin eventAdmin = serviceRegistry.getService(EventAdmin.class);
         final int contextId = session.getContextId();
         if (null != eventAdmin) {
@@ -229,6 +233,7 @@ public abstract class PasswordChangeService {
             properties.put("com.openexchange.passwordchange.session", session);
             properties.put("com.openexchange.passwordchange.oldPassword", event.getOldPassword());
             properties.put("com.openexchange.passwordchange.newPassword", event.getNewPassword());
+            properties.put(CommonEvent.PUBLISH_MARKER, null);
             eventAdmin.postEvent(new Event("com/openexchange/passwordchange", properties));
         }
         /*

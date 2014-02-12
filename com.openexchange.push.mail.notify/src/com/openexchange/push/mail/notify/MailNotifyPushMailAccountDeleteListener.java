@@ -61,11 +61,14 @@ import com.openexchange.mailaccount.MailAccountDeleteListener;
  */
 public final class MailNotifyPushMailAccountDeleteListener implements MailAccountDeleteListener {
 
+    private final MailNotifyPushListenerRegistry registry;
+
     /**
      * Initializes a new {@link MailNotifyPushMailAccountDeleteListener}.
      */
-    public MailNotifyPushMailAccountDeleteListener() {
+    public MailNotifyPushMailAccountDeleteListener(final MailNotifyPushListenerRegistry registry) {
         super();
+        this.registry = registry;
     }
 
     @Override
@@ -76,7 +79,7 @@ public final class MailNotifyPushMailAccountDeleteListener implements MailAccoun
     @Override
     public void onBeforeMailAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
         if (MailNotifyPushListener.getAccountId() == id) {
-            MailNotifyPushListenerRegistry.getInstance().purgeUserPushListener(cid, user);
+            registry.purgeUserPushListener(cid, user);
         }
     }
 

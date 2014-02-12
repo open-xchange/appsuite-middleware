@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Spamexperts Integration Plugin
 Bundle-SymbolicName: com.openexchange.spamhandler.spamexperts
-Bundle-Version: 7.4.1
+Bundle-Version: 7.4.2
 Bundle-Activator: com.openexchange.spamhandler.spamexperts.osgi.MyActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -52,10 +52,10 @@ Import-Package: com.openexchange.ajax,
  org.apache.commons.httpclient.params,
  org.apache.commons.io,
  org.apache.commons.logging,
- org.apache.commons.logging.impl,
  org.json,
  org.osgi.framework,
  org.osgi.service.http,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Bundle-ClassPath: .
 

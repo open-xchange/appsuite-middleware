@@ -50,6 +50,7 @@
 package com.openexchange.capabilities.internal;
 
 import static com.openexchange.java.Strings.isEmpty;
+import static com.openexchange.java.Strings.toLowerCase;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -63,13 +64,13 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityExceptionCodes;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.capabilities.DependentCapabilityChecker;
 import com.openexchange.capabilities.osgi.PermissionAvailabilityServiceRegistry;
 import com.openexchange.config.ConfigurationService;
@@ -83,7 +84,6 @@ import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
 import com.openexchange.java.ConcurrentEnumMap;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -98,13 +98,13 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public abstract class AbstractCapabilityService implements CapabilityService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractCapabilityService.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractCapabilityService.class);
 
     private static final Object PRESENT = new Object();
 
     private static final String REGION_NAME_CONTEXT = "CapabilitiesContext";
-
     private static final String REGION_NAME_USER = "CapabilitiesUser";
+    private static final String REGION_NAME = "Capabilities";
 
     private static final String PERMISSION_PROPERTY = "permissions".intern();
 
@@ -114,7 +114,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     private static interface PropertyHandler {
 
-        void handleProperty(String propValue, Set<Capability> capabilities) throws OXException;
+        void handleProperty(String propValue, CapabilitySet capabilities) throws OXException;
     }
 
     /** The property handlers for special config-cascade properties */
@@ -126,11 +126,11 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         map.put("com.openexchange.caldav.enabled", new PropertyHandler() {
 
             @Override
-            public void handleProperty(final String propValue, final Set<Capability> capabilities) throws OXException {
+            public void handleProperty(final String propValue, final CapabilitySet capabilities) throws OXException {
                 if (Boolean.parseBoolean(propValue)) {
                     capabilities.add(getCapability(Permission.CALDAV));
                 } else {
-                    capabilities.remove(getCapability(Permission.CALDAV));
+                    capabilities.remove(toLowerCase(Permission.CALDAV.name()));
                 }
             }
         });
@@ -138,11 +138,11 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         map.put("com.openexchange.carddav.enabled", new PropertyHandler() {
 
             @Override
-            public void handleProperty(final String propValue, final Set<Capability> capabilities) throws OXException {
+            public void handleProperty(final String propValue, final CapabilitySet capabilities) throws OXException {
                 if (Boolean.parseBoolean(propValue)) {
                     capabilities.add(getCapability(Permission.CARDDAV));
                 } else {
-                    capabilities.remove(getCapability(Permission.CARDDAV));
+                    capabilities.remove(toLowerCase(Permission.CARDDAV.name()));
                 }
             }
         });
@@ -190,7 +190,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         if (capability != null) {
             return capability;
         }
-        final Capability existingCapability = capabilities.putIfAbsent(id, capability = new Capability(id, false));
+        final Capability existingCapability = capabilities.putIfAbsent(id, capability = new Capability(id));
         return existingCapability == null ? capability : existingCapability;
     }
 
@@ -227,7 +227,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         try {
             return service.getCache(REGION_NAME_CONTEXT);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
     }
@@ -240,9 +240,31 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         try {
             return service.getCache(REGION_NAME_USER);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
+    }
+
+    private Cache optCache() {
+        final CacheService service = services.getOptionalService(CacheService.class);
+        if (null == service) {
+            return null;
+        }
+        try {
+            return service.getCache(REGION_NAME);
+        } catch (final OXException e) {
+            LOG.error("", e);
+            return null;
+        }
+    }
+
+    private CapabilitySet optCachedCapabilitySet(final int userId, final int contextId) {
+        final Cache cache = optCache();
+        if (null == cache) {
+            return null;
+        }
+        final Object object = cache.getFromGroup(Integer.valueOf(userId), Integer.toString(contextId));
+        return (object instanceof CapabilitySet) ? ((CapabilitySet) object).clone() : null;
     }
 
     private boolean autologin() {
@@ -264,23 +286,38 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         return tmp.booleanValue();
     }
 
+    private static final Capability CAP_AUTO_LOGIN = new Capability("autologin");
+
     @Override
-    public Set<Capability> getCapabilities(final int userId, final int contextId, final boolean computeCapabilityFilters) throws OXException {
+    public CapabilitySet getCapabilities(final int userId, final int contextId, final boolean computeCapabilityFilters) throws OXException {
+        // Initialize server session
         ServerSession serverSession = ServerSessionAdapter.valueOf(userId, contextId);
 
-        Set<Capability> capabilities = new HashSet<Capability>(64);
+        // Create capability set
+        CapabilitySet capabilities = new CapabilitySet(64);
 
         // What about autologin?
         if (autologin()) {
-            capabilities.add(new Capability("autologin", true));
+            capabilities.add(CAP_AUTO_LOGIN);
         }
 
         // ------------- Combined capabilities/permissions ------------ //
         if (!serverSession.isAnonymous()) {
+            // Check cache
+            final CapabilitySet cachedCapabilitySet = optCachedCapabilitySet(userId, contextId);
+            if (null != cachedCapabilitySet) {
+                capabilities = cachedCapabilitySet;
+                if (computeCapabilityFilters) {
+                    applyUIFilter(capabilities);
+                }
+                return capabilities;
+            }
             // Obtain user permissions
-            final UserPermissionBits userPermissionBits = services.getService(UserPermissionService.class).getUserPermissionBits(serverSession.getUserId(), serverSession.getContext());
+            final UserPermissionBits userPermissionBits = services.getService(UserPermissionService.class).getUserPermissionBits(
+                serverSession.getUserId(),
+                serverSession.getContext());
             // Capabilities by user permission bits
-            for (final Permission p: Permission.byBits(userPermissionBits.getPermissionBits())) {
+            for (final Permission p : Permission.byBits(userPermissionBits.getPermissionBits())) {
                 capabilities.add(getCapability(p));
             }
             // Apply capabilities for non-transient sessions
@@ -289,52 +326,52 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 // Portal
                 if (userPermissionBits.hasPortal()) {
                     capabilities.add(getCapability("portal"));
-                    capabilities.remove(getCapability("deniedPortal"));
+                    capabilities.remove("deniedPortal");
                 } else {
-                    capabilities.remove(getCapability("portal"));
+                    capabilities.remove("portal");
                     capabilities.add(getCapability("deniedPortal"));
                 }
                 // Free-Busy
                 if (userPermissionBits.hasFreeBusy()) {
                     capabilities.add(getCapability("freebusy"));
                 } else {
-                    capabilities.remove(getCapability("freebusy"));
+                    capabilities.remove("freebusy");
                 }
                 // Conflict-Handling
                 if (userPermissionBits.hasConflictHandling()) {
                     capabilities.add(getCapability("conflict_handling"));
                 } else {
-                    capabilities.remove(getCapability("conflict_handling"));
+                    capabilities.remove("conflict_handling");
                 }
                 // Participants-Dialog
                 if (userPermissionBits.hasParticipantsDialog()) {
                     capabilities.add(getCapability("participants_dialog"));
                 } else {
-                    capabilities.remove(getCapability("participants_dialog"));
+                    capabilities.remove("participants_dialog");
                 }
                 // Group-ware
                 if (userPermissionBits.hasGroupware()) {
                     capabilities.add(getCapability("groupware"));
                 } else {
-                    capabilities.remove(getCapability("groupware"));
+                    capabilities.remove("groupware");
                 }
                 // PIM
                 if (userPermissionBits.hasPIM()) {
                     capabilities.add(getCapability("pim"));
                 } else {
-                    capabilities.remove(getCapability("pim"));
+                    capabilities.remove("pim");
                 }
                 // Spam
                 if (serverSession.getUserSettingMail().isSpamEnabled()) {
                     capabilities.add(getCapability("spam"));
                 } else {
-                    capabilities.remove(getCapability("spam"));
+                    capabilities.remove("spam");
                 }
                 // Global Address Book
                 if (userPermissionBits.isGlobalAddressBookEnabled(serverSession)) {
                     capabilities.add(getCapability("gab"));
                 } else {
-                    capabilities.remove(getCapability("gab"));
+                    capabilities.remove("gab");
                 }
                 // Permission properties
                 final ConfigViewFactory configViews = services.getService(ConfigViewFactory.class);
@@ -349,7 +386,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                                     permissionModifier = permissionModifier.trim();
                                     final char firstChar = permissionModifier.charAt(0);
                                     if ('-' == firstChar) {
-                                        capabilities.remove(getCapability(permissionModifier.substring(1)));
+                                        capabilities.remove(permissionModifier.substring(1));
                                     } else {
                                         if ('+' == firstChar) {
                                             capabilities.add(getCapability(permissionModifier.substring(1)));
@@ -371,7 +408,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                             if (value) {
                                 capabilities.add(getCapability(name));
                             } else {
-                                capabilities.remove(getCapability(name));
+                                capabilities.remove(name);
                             }
                         } else {
                             // Check for a property handler
@@ -433,7 +470,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                 }
                 // Merge them into result set
                 for (final String sCap : removees) {
-                    capabilities.remove(getCapability(sCap));
+                    capabilities.remove(sCap);
                 }
                 for (final String sCap : set) {
                     capabilities.add(getCapability(sCap));
@@ -445,6 +482,14 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         for (String cap : declaredCapabilities.keySet()) {
             if (check(cap, serverSession, capabilities)) {
                 capabilities.add(getCapability(cap));
+            }
+        }
+
+        // Put in cache
+        if (!serverSession.isAnonymous() && !serverSession.isTransient()) {
+            final Cache cache = optCache();
+            if (null != cache) {
+                cache.putInGroup(Integer.valueOf(userId), Integer.toString(contextId), capabilities.clone(), false);
             }
         }
 
@@ -465,13 +510,13 @@ public abstract class AbstractCapabilityService implements CapabilityService {
      *
      * @param capabilitiesToFilter - the capabilities the filter should be applied on
      */
-    protected void applyUIFilter(Set<Capability> capabilitiesToFilter) {
+    protected void applyUIFilter(CapabilitySet capabilitiesToFilter) {
         final PermissionAvailabilityServiceRegistry registry = this.registry;
         if (registry != null) {
             final Map<Permission, PermissionAvailabilityService> serviceList = registry.getServiceMap();
             for (final Permission p : PermissionAvailabilityService.CONTROLLED_PERMISSIONS) {
                 if (!serviceList.containsKey(p)) {
-                    capabilitiesToFilter.remove(getCapability(toLowerCase(p.name())));
+                    capabilitiesToFilter.remove(toLowerCase(p.name()));
                 }
             }
         } else {
@@ -480,21 +525,21 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     }
 
     @Override
-    public Set<Capability> getCapabilities(final int userId, final int contextId) throws OXException {
+    public CapabilitySet getCapabilities(final int userId, final int contextId) throws OXException {
         return getCapabilities(userId, contextId, false);
     }
 
     @Override
-    public Set<Capability> getCapabilities(final Session session) throws OXException {
+    public CapabilitySet getCapabilities(final Session session) throws OXException {
         return getCapabilities(session.getUserId(), session.getContextId());
     }
 
     @Override
-    public Set<Capability> getCapabilities(final Session session, final boolean computeCapabilityFilters) throws OXException {
+    public CapabilitySet getCapabilities(final Session session, final boolean computeCapabilityFilters) throws OXException {
         return getCapabilities(session.getUserId(), session.getContextId(), computeCapabilityFilters);
     }
 
-    private boolean check(String cap, ServerSession session, Set<Capability> allCapabilities) throws OXException {
+    private boolean check(String cap, ServerSession session, CapabilitySet allCapabilities) throws OXException {
         final Map<String, List<CapabilityChecker>> checkers = getCheckers();
 
         List<CapabilityChecker> list = checkers.get(cap);
@@ -510,7 +555,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
                         return false;
                     }
                 } catch (final Exception e) {
-                    LOG.warn("Could not check availability for capability '" + cap + "'. Assuming as absent this time.", e);
+                    LOG.warn("Could not check availability for capability '{}'. Assuming as absent this time.", cap, e);
                 }
             }
         }
@@ -543,8 +588,21 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     }
 
     @Override
-    public void declareCapability(String capability) {
-        declaredCapabilities.put(capability, PRESENT);
+    public boolean declareCapability(String capability) {
+        final boolean added = null == declaredCapabilities.putIfAbsent(capability, PRESENT);
+
+        if (added) {
+            final Cache optCache = optCache();
+            if (null != optCache) {
+                try {
+                    optCache.clear();
+                } catch (final Exception e) {
+                    // ignore
+                }
+            }
+        }
+
+        return added;
     }
 
     /**
@@ -651,20 +709,6 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             Databases.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(contextId, con);
         }
-    }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 
 }

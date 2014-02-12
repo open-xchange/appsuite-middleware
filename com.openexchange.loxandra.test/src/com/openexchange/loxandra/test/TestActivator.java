@@ -48,9 +48,7 @@
  */
 package com.openexchange.loxandra.test;
 
-import org.apache.commons.logging.Log;
 
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -59,7 +57,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class TestActivator extends HousekeepingActivator {
 
-	private static Log log = LogFactory.getLog(TestActivator.class);
+	private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TestActivator.class);
 
 	public TestActivator() {}
 

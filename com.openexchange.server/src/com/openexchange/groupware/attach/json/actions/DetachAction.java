@@ -81,7 +81,7 @@ import com.openexchange.tools.session.ServerSession;
 responseDescription = "Nothing, except the standard response object with empty data, the timestamp of the updated object, and maybe errors.")
 public final class DetachAction extends AbstractAttachmentAction {
 
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(com.openexchange.log.LogFactory.getLog(DetachAction.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DetachAction.class);
 
     /**
      * Initializes a new {@link DetachAction}.
@@ -144,7 +144,7 @@ public final class DetachAction extends AbstractAttachmentAction {
             try {
                 ATTACHMENT_BASE.finish();
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
         return new Date(timestamp);

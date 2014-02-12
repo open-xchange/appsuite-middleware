@@ -348,10 +348,7 @@ public final class MessageBytes {
         }
         switch (type) {
         case T_STR:
-            if (strValue == null && s != null) {
-                return false;
-            }
-            return strValue.equals(s);
+            return strValue == null ? null == s : strValue.equals(s);
         case T_CHARS:
             return charC.equals(s);
         case T_BYTES:
@@ -370,10 +367,7 @@ public final class MessageBytes {
     public boolean equalsIgnoreCase(final String s) {
         switch (type) {
         case T_STR:
-            if (strValue == null && s != null) {
-                return false;
-            }
-            return strValue.equalsIgnoreCase(s);
+            return strValue == null ? null == s : strValue.equalsIgnoreCase(s);
         case T_CHARS:
             return charC.equalsIgnoreCase(s);
         case T_BYTES:
@@ -381,6 +375,17 @@ public final class MessageBytes {
         default:
             return false;
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof MessageBytes)) {
+            return false;
+        }
+        return equals((MessageBytes) obj);
     }
 
     public boolean equals(final MessageBytes mb) {

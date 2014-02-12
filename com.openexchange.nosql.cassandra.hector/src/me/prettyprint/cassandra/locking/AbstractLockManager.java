@@ -26,7 +26,7 @@ public abstract class AbstractLockManager implements HLockManager {
   
   protected static final String DUMMY_VALUE = "v";
 
-  private static final Logger log = LoggerFactory.getLogger(AbstractLockManager.class);
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(AbstractLockManager.class);
 
   protected Cluster cluster;
   protected Keyspace keyspace;
@@ -82,8 +82,7 @@ public abstract class AbstractLockManager implements HLockManager {
       KeyspaceDefinition newKeyspace = HFactory.createKeyspaceDefinition(keyspace.getKeyspaceName(),
           ThriftKsDef.DEF_STRATEGY_CLASS, lockManagerConfigurator.getReplicationFactor(), Arrays.asList(cfDef));
 
-      log.info("Creating Keyspace and Column Family for LockManager with name (KSPS/CF): (" + newKeyspace.getName()
-          + " / " + cfDef.getName());
+      log.info("Creating Keyspace and Column Family for LockManager with name (KSPS/CF): ({} / {}", newKeyspace.getName(), cfDef.getName());
       cluster.addKeyspace(newKeyspace, true);
     } else {
       log.info("Keyspace for LockManager already exists. Skipping creation.");
@@ -92,7 +91,7 @@ public abstract class AbstractLockManager implements HLockManager {
       if (!doesLockCFExist(keyspaceDef)) {
         // create it
         ColumnFamilyDefinition cfDef = createColumnFamilyDefinition();
-        log.info("Creating Column Family for LockManager with name: " + cfDef.getName());
+        log.info("Creating Column Family for LockManager with name: {}", cfDef.getName());
         cluster.addColumnFamily(cfDef, true);
       } else {
         log.info("Column Family for LockManager already exists. Skipping creation.");

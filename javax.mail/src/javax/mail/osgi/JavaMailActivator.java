@@ -118,6 +118,7 @@ public final class JavaMailActivator implements BundleActivator {
         } catch (final Exception e) {
             final MailLogger logger = new MailLogger(JavaMailActivator.class, "JavaMail Activator", true, System.out);
             logger.log(Level.SEVERE, "Error starting JavaMail bundle.", e);
+            throw e;
         }
     }
 
@@ -128,6 +129,7 @@ public final class JavaMailActivator implements BundleActivator {
         } catch (final Exception e) {
             final MailLogger logger = new MailLogger(JavaMailActivator.class, "JavaMail Activator", true, System.out);
             logger.log(Level.SEVERE, "Error stopping JavaMail bundle.", e);
+            throw e;
         }
     }
 

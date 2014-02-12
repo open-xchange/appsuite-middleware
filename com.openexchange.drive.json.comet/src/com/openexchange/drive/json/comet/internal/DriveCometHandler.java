@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.comet.CometContext;
 import org.glassfish.grizzly.comet.CometEvent;
 import org.glassfish.grizzly.comet.DefaultCometHandler;
@@ -74,7 +73,7 @@ import com.openexchange.java.Streams;
  */
 public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveCometHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DriveCometHandler.class);
     private static final List<DriveAction<? extends DriveVersion>> EMPTY_ACTIONS = Collections.emptyList();
 
     private final DriveSession session;
@@ -97,18 +96,13 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
     @Override
     public void onInitialize(CometEvent event) throws IOException {
         initializationTime = System.currentTimeMillis();
-        if (LOG.isTraceEnabled()) {
-            LOG.trace(this + ": initialized.");
-        }
+        LOG.trace("{}: initialized.", this);
     }
 
     @Override
     public void onEvent(CometEvent event) throws IOException {
         try {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(this + ": Got EVENT after " + String.valueOf(System.currentTimeMillis() - initializationTime) + "ms: " +
-                    event.getType() + " [" + event.attachment() + "]");
-            }
+            LOG.debug("{}: Got EVENT after {}ms: {} [{}]", this, String.valueOf(System.currentTimeMillis() - initializationTime), event.getType(), event.attachment());
             /*
              * create and return resulting actions if available
              */
@@ -131,9 +125,7 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
     @Override
     public void onTerminate(CometEvent event) throws IOException {
         try {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(this + ": Got TERMINATE after " + String.valueOf(System.currentTimeMillis() - initializationTime) + "ms.");
-            }
+            LOG.trace("{}: Got TERMINATE after {}ms.", this, String.valueOf(System.currentTimeMillis() - initializationTime));
         } finally {
             resume(event.getCometContext());
         }
@@ -146,12 +138,10 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
     @Override
     public void onInterrupt(CometEvent event) throws IOException {
         try {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(this + ": Got INTERRUPT after " + String.valueOf(System.currentTimeMillis() - initializationTime) + "ms.");
-            }
+            LOG.trace("{}: Got INTERRUPT after {}ms.", this, String.valueOf(System.currentTimeMillis() - initializationTime));
             CometContext cometContext = event.getCometContext();
             if (null != cometContext && cometContext.isActive(this)) {
-                LOG.debug(this + ": Comet context still active, returning empty drive actions.");
+                LOG.debug("{}: Comet context still active, returning empty drive actions.", this);
                 write(EMPTY_ACTIONS);
             }
         } finally {
@@ -167,7 +157,7 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
     private void write(List<DriveAction<? extends DriveVersion>> actions) {
         Writer responseWriter = null != getResponse() ? getResponse().getWriter() : null;
         if (null == responseWriter) {
-            LOG.warn(this + ": Unable to access response writer, unable to write JSON result");
+            LOG.warn("{}: Unable to access response writer, unable to write JSON result", this);
         }
         try {
             JSONObject jsonObject = new JSONObject();
@@ -199,11 +189,11 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
          * resume comet request
          */
         if (null == cometContext) {
-            LOG.warn(this + ": Unable to access comet context, unable to resume request.");
+            LOG.warn("{}: Unable to access comet context, unable to resume request.", this);
             return;
         }
-        if (cometContext.resumeCometHandler(this) && LOG.isDebugEnabled()) {
-            LOG.debug(this + ": Resumed successfully.");
+        if (cometContext.resumeCometHandler(this)) {
+            LOG.debug("{}: Resumed successfully.", this);
         }
     }
 

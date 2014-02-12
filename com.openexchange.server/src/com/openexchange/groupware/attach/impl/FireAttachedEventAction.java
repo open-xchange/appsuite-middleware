@@ -51,15 +51,13 @@ package com.openexchange.groupware.attach.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 
 public class FireAttachedEventAction extends AttachmentEventAction {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FireAttachedEventAction.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FireAttachedEventAction.class);
 
     @Override
     protected void undoAction() throws OXException {
@@ -78,11 +76,11 @@ public class FireAttachedEventAction extends AttachmentEventAction {
         try {
             fireAttached(getAttachments(), processed, getUser(), getUserConfiguration(), getSession(), getContext(), getProvider());
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             try {
                 fireDetached(processed, getUser(), getUserConfiguration(), getSession(), getContext(), getProvider());
             } catch (final Exception e1) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw AttachmentExceptionCodes.UNDONE_FAILED.create(e1);
             }
             if (e instanceof OXException) {

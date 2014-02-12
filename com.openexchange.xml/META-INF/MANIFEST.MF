@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: JDOM Parser
 Bundle-SymbolicName: com.openexchange.xml
-Bundle-Version: 7.4.1
+Bundle-Version: 7.4.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.osgi,
@@ -27,6 +27,7 @@ Import-Package: com.openexchange.osgi,
  javax.xml.xpath,
  org.apache.commons.logging,
  org.osgi.framework,
+ org.slf4j,
  org.w3c.dom,
  org.w3c.dom.events,
  org.w3c.dom.ranges,

@@ -177,10 +177,8 @@ public final class Delete {
                  * Backup failed
                  */
                 debugSQL(stmt);
-                final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Delete.class));
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Backup failed.", e);
-                }
+                final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Delete.class);
+                log.debug("Backup failed.", e);
             } finally {
                 DBUtils.closeSQLStuff(stmt);
             }
@@ -199,10 +197,8 @@ public final class Delete {
                 stmt.executeUpdate();
             } catch (final SQLException e) {
                 debugSQL(stmt);
-                final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Delete.class));
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Backup failed.", e);
-                }
+                final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Delete.class);
+                log.debug("Backup failed.", e);
             } finally {
                 DBUtils.closeSQLStuff(stmt);
             }
@@ -221,10 +217,8 @@ public final class Delete {
                 stmt.executeUpdate();
             } catch (final SQLException e) {
                 debugSQL(stmt);
-                final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Delete.class));
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Backup failed.", e);
-                }
+                final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Delete.class);
+                log.debug("Backup failed.", e);
             } finally {
                 DBUtils.closeSQLStuff(stmt);
             }

@@ -200,6 +200,34 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
 
     }
 
+    enum PGPEncryptActionFields {
+        KEYS("keys",":keys");
+
+        private final String fieldname;
+
+        private final String tagname;
+
+        private PGPEncryptActionFields(final String fieldname, final String tagname) {
+            this.fieldname = fieldname;
+            this.tagname = tagname;
+        }
+
+        /**
+         * @return the fieldname
+         */
+        public final String getFieldname() {
+            return fieldname;
+        }
+
+        /**
+         * @return the tagname
+         */
+        public final String getTagname() {
+            return tagname;
+        }
+
+    }
+
     static class AddFlagsActionFields {
         final static String FLAGS = "flags";
     }
@@ -242,6 +270,12 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         return new TagArgument(token);
     }
 
+    static TagArgument createTagArg(final PGPEncryptActionFields fields) {
+        final Token token = new Token();
+        token.image = fields.getTagname();
+        return new TagArgument(token);
+    }
+    
     public static TagArgument createTagArg(final String string) {
         final Token token = new Token();
         token.image = ":" + string;

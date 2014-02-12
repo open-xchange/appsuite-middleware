@@ -17,8 +17,6 @@
 package org.xmpp.component;
 
 import java.text.MessageFormat;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.dom4j.Element;
 import org.xmpp.packet.IQ;
 
@@ -60,7 +58,7 @@ import org.xmpp.packet.IQ;
  */
 public class SlowRespondingThreadNameComponent extends DummyAbstractComponent {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SlowRespondingThreadNameComponent.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SlowRespondingThreadNameComponent.class);
 
 	public static final String DEBUG_NAMESPACE = "tinder:debug";
 	public static final String ELEMENTNAME_SLOWRESPONSE = "slowresponse";

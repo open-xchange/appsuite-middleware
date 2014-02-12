@@ -51,7 +51,6 @@ package com.openexchange.realtime.json.impl;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.exception.RealtimeException;
@@ -76,7 +75,7 @@ import com.openexchange.realtime.util.StanzaSequenceGate;
  */
 public class RTProtocolImpl implements RTProtocol {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RTProtocol.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RTProtocol.class);
 
     private static final AtomicReference<RTProtocolImpl> PROTOCOL = new AtomicReference<RTProtocolImpl>();
 
@@ -92,7 +91,7 @@ public class RTProtocolImpl implements RTProtocol {
      */
     @Override
     public void getReceived(RTClientState state, StanzaTransmitter transmitter) {
-        LOG.debug("Get received from " + state.getId());
+        LOG.debug("Get received from {}", state.getId());
         emptyBuffer(state, transmitter);
     }
 
@@ -183,7 +182,7 @@ public class RTProtocolImpl implements RTProtocol {
                 stanza.trace("We have no state about this client " + stanza.getFrom()+ " sending nextSequence message");
                 enqueueNextSequence(stanza.getFrom(), state, transmitter);
             }
-            //Remember the original sequence as it might get changed for local or remote delivery 
+            //Remember the original sequence as it might get changed for local or remote delivery
             long sequenceNumber = stanza.getSequenceNumber();
             if (gate.handle(stanza, stanza.getTo())) {
                 stanza.trace("Adding receipt for client message " + sequenceNumber + " to acknowledgement list");
@@ -209,17 +208,15 @@ public class RTProtocolImpl implements RTProtocol {
 
             List<Stanza> stanzasToSend = state.getStanzasToSend();
             if (stanzasToSend.isEmpty()) {
-                LOG.debug("No stanzas to send for " + state.getId() + ". Suspending transmitter.");
+                LOG.debug("No stanzas to send for {}. Suspending transmitter.", state.getId());
                 transmitter.suspend();
                 return;
             }
             try {
-                LOG.debug("Trying to send " + stanzasToSend.size() + " stanzas to " + state.getId() + ".");
+                LOG.debug("Trying to send {} stanzas to {}.", stanzasToSend.size(), state.getId());
                 transmitter.send(stanzasToSend);
             } catch (OXException e) {
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("Error while trying to send Stanza(s) to client: " + state.getId(), e);
-                }
+                LOG.debug("Error while trying to send Stanza(s) to client: {}", state.getId(), e);
             }
         } finally {
             //Increment TTL count even after failure as offending stanza might cause sending to fail. Incrementing will get rid of it.
@@ -272,14 +269,14 @@ public class RTProtocolImpl implements RTProtocol {
             }
             try {
                 MessageDispatcher messageDispatcher = JSONServiceRegistry.getInstance().getService(MessageDispatcher.class);
-                LOG.debug("Sending error message to client: "+ stanza);
+                LOG.debug("Sending error message to client: {}", stanza);
                 messageDispatcher.send(stanza);
             } catch (Exception e) {
-                LOG.error("Error while handling RealtimeException: " + stanza, e);
+                LOG.error("Error while handling RealtimeException: {}", stanza, e);
             }
 
         }
-        LOG.error(exception.getMessage(), exception);
+        LOG.error("", exception);
     }
 
 }

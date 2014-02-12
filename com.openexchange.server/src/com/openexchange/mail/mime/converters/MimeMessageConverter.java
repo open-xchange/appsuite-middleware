@@ -60,6 +60,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -137,9 +138,7 @@ import com.sun.mail.util.MessageRemovedIOException;
  */
 public final class MimeMessageConverter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MimeMessageConverter.class);
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeMessageConverter.class);
 
     private static final EnumSet<MailField> ENUM_SET_FULL = EnumSet.complementOf(EnumSet.of(
         MailField.BODY,
@@ -182,8 +181,8 @@ public final class MimeMessageConverter {
         public static final String[] ALREADY_INSERTED_HEADERS = {
             MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_REFERENCES };
 
-        public static final org.apache.commons.logging.Log LOG1 =
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailMessageFieldFiller.class));
+        public static final org.slf4j.Logger LOG1 =
+            org.slf4j.LoggerFactory.getLogger(MailMessageFieldFiller.class);
 
         /**
          * Fills a fields from source instance of {@link Message} in given destination instance of {@link MailMessage}.
@@ -576,11 +575,11 @@ public final class MimeMessageConverter {
                 MimeMessageConverter.saveChanges(message);
             } catch (final Exception x) {
                 // Content-Type cannot be sanitized
-                com.openexchange.log.Log.loggerFor(MimeFilter.class).debug("Content-Type cannot be sanitized.", x);
+                org.slf4j.LoggerFactory.getLogger(MimeFilter.class).debug("Content-Type cannot be sanitized.", x);
                 throw MimeMailException.handleMessagingException(e);
             }
             return multipartFor(message, contentType, false);
-        } catch (MessagingException e) {
+        } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -619,9 +618,21 @@ public final class MimeMessageConverter {
         if (content instanceof InputStream) {
             try {
                 return new MimeMultipart(new MessageDataSource((InputStream) content, contentType));
-            } catch (MessagingException e) {
+            } catch (final MessagingException e) {
                 throw MimeMailException.handleMessagingException(e);
-            } catch (IOException e) {
+            } catch (final IOException e) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                }
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+            }
+        }
+        if (content instanceof String) {
+            try {
+                return new MimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(((String) content).getBytes(Charsets.ISO_8859_1)), contentType));
+            } catch (final MessagingException e) {
+                throw MimeMailException.handleMessagingException(e);
+            } catch (final IOException e) {
                 if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
                     throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                 }
@@ -723,7 +734,7 @@ public final class MimeMessageConverter {
             if (null != sContentType && sContentType.startsWith("multipart/")) {
                 final Object o = part.getContent();
                 if (o instanceof MimeMultipart) {
-                    MimeMultipart multipart = (MimeMultipart) o;
+                    final MimeMultipart multipart = (MimeMultipart) o;
                     final int count = multipart.getCount();
                     for (int i = 0; i < count; i++) {
                         if (!sanitizeMultipartContent((MimePart) multipart.getBodyPart(i))) {
@@ -744,7 +755,7 @@ public final class MimeMessageConverter {
             return true;
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -951,7 +962,7 @@ public final class MimeMessageConverter {
     private static final EnumMap<MailField, ExistenceChecker> CHECKER_MAP;
 
     static {
-        final org.apache.commons.logging.Log logger = LOG;
+        final org.slf4j.Logger logger = LOG;
 
         CHECKER_MAP = new EnumMap<MailField, ExistenceChecker>(MailField.class);
         final InternetAddress empty = null;
@@ -1243,7 +1254,7 @@ public final class MimeMessageConverter {
                     try {
                         mailMessage.addHeader(h.getName(), h.getValue());
                     } catch (final Exception exc) {
-                        logger.warn(exc.getMessage(), exc);
+                        logger.warn("", exc);
                     }
                 }
             }
@@ -1273,7 +1284,7 @@ public final class MimeMessageConverter {
                     /*
                      * Cannot occur
                      */
-                    LOG1.error(e.getMessage(), e);
+                    LOG1.error("", e);
                 }
                 mailMessage.setHasAttachment(((ExtendedMimeMessage) msg).hasAttachment());
             }
@@ -1420,9 +1431,7 @@ public final class MimeMessageConverter {
             final MailMessageFieldFiller filler = FILLER_MAP_EXT.get(field);
             if (filler == null) {
                 if (MailField.BODY.equals(field) || MailField.FULL.equals(field) || MailField.ACCOUNT_NAME.equals(field)) {
-                    if (DEBUG) {
-                        LOG.debug("Ignoring mail field " + field);
-                    }
+                    LOG.debug("Ignoring mail field {}", field);
                     fillers[i] = null;
                 } else {
                     throw MailExceptionCode.INVALID_FIELD.create(field.toString());
@@ -1438,7 +1447,7 @@ public final class MimeMessageConverter {
         MailField.class);
 
     static {
-        final org.apache.commons.logging.Log logger = LOG;
+        final org.slf4j.Logger logger = LOG;
         FILLER_MAP.put(MailField.HEADERS, new MailMessageFieldFiller() {
 
             @Override
@@ -1566,7 +1575,7 @@ public final class MimeMessageConverter {
                     try {
                         mailMessage.addHeader(h.getName(), h.getValue());
                     } catch (final Exception exc) {
-                        logger.warn(exc.getMessage(), exc);
+                        logger.warn("", exc);
                     }
                 }
             }
@@ -1591,14 +1600,14 @@ public final class MimeMessageConverter {
                     /*
                      * Cannot occur
                      */
-                    LOG1.error("Invalid content type: " + msg.getContentType(), e);
+                    LOG1.error(MessageFormat.format("Invalid content type: {0}", msg.getContentType()), e);
                     try {
                         ct = new ContentType(MimeTypes.MIME_DEFAULT);
                     } catch (final OXException e1) {
                         /*
                          * Cannot occur
                          */
-                        LOG1.error(e1.getMessage(), e1);
+                        LOG1.error("", e1);
                         return;
                     }
                 }
@@ -1818,9 +1827,7 @@ public final class MimeMessageConverter {
                         }
                     };
                 } else if (MailField.BODY.equals(field) || MailField.FULL.equals(field) || MailField.ACCOUNT_NAME.equals(field)) {
-                    if (DEBUG) {
-                        LOG.debug("Ignoring mail field " + field);
-                    }
+                    LOG.debug("Ignoring mail field {}", field);
                     fillers[i] = null;
                 } else {
                     throw MailExceptionCode.INVALID_FIELD.create(field.toString());
@@ -1990,24 +1997,15 @@ public final class MimeMessageConverter {
                                     throw e;
                                 }
                                 // A messaging error occurred
-                                LOG.debug(new com.openexchange.java.StringAllocator(256).append(
-                                    "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
-                                    e.getMessage()).append(
-                                    ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString(), e);
+                                LOG.debug("Parsing message's multipart/* content to check for file attachments caused a messaging error.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.", e);
                                 mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                             } catch (final ClassCastException e) {
                                 // Cast to javax.mail.Multipart failed
-                                LOG.debug(new com.openexchange.java.StringAllocator(256).append(
-                                    "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
-                                    content.getClass().getName()).append(
-                                    ".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
+                                LOG.debug("Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but {}.\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.", content.getClass().getName());
                                 mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                             } catch (final MessagingException e) {
                                 // A messaging error occurred
-                                LOG.debug(new com.openexchange.java.StringAllocator(256).append(
-                                    "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
-                                    e.getMessage()).append(
-                                    ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
+                                LOG.debug("Parsing message's multipart/* content to check for file attachments caused a messaging error: {}.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.", e.getMessage());
                                 mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                             }
                         }
@@ -2053,7 +2051,7 @@ public final class MimeMessageConverter {
                         msg.removeHeader(MessageHeaders.HDR_X_OXMSGREF);
                     } catch (final Exception e) {
                         // Ignore...
-                        LOG.debug(e.getMessage(), e);
+                        LOG.debug("", e);
                     }
                 }
             }
@@ -2297,7 +2295,7 @@ public final class MimeMessageConverter {
                         part.removeHeader(MessageHeaders.HDR_X_OXMSGREF);
                     } catch (final Exception e) {
                         // Ignore...
-                        LOG.debug(e.getMessage(), e);
+                        LOG.debug("", e);
                     }
                 } else {
                     mailPart.setMsgref(null);
@@ -2326,17 +2324,14 @@ public final class MimeMessageConverter {
                         } else if (part instanceof MimeMessage) {
                             size = estimateSize(((MimeMessage) part).getRawInputStream(), tansferEnc);
                         } else {
-                            LOG.warn(
-                                new com.openexchange.java.StringAllocator(256).append(part.getClass().getCanonicalName()).append("'s size cannot be determined").toString(),
+                            LOG.warn("{}'s size cannot be determined", part.getClass().getCanonicalName(),
                                 e);
                         }
                     } catch (final IOException e1) {
-                        LOG.warn(
-                            new com.openexchange.java.StringAllocator(256).append(part.getClass().getCanonicalName()).append("'s size cannot be determined").toString(),
+                        LOG.warn("{}'s size cannot be determined", part.getClass().getCanonicalName(),
                             e1);
                     } catch (final MessagingException e1) {
-                        LOG.warn(
-                            new com.openexchange.java.StringAllocator(256).append(part.getClass().getCanonicalName()).append("'s size cannot be determined").toString(),
+                        LOG.warn("{}'s size cannot be determined", part.getClass().getCanonicalName(),
                             e1);
                     }
                 }
@@ -2520,9 +2515,7 @@ public final class MimeMessageConverter {
             }
             throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e, new Object[0]);
         } catch (final MessagingException e) {
-            if (DEBUG) {
-                LOG.debug("JavaMail API failed to load part's headers. Using own routine.", e);
-            }
+            LOG.debug("JavaMail API failed to load part's headers. Using own routine.", e);
             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_MESSAGE_SIZE);
             try {
                 part.writeTo(out);
@@ -2542,9 +2535,7 @@ public final class MimeMessageConverter {
                 headers = new HeaderCollection(0);
             }
         } catch (final RuntimeException e) {
-            if (DEBUG) {
-                LOG.debug("JavaMail API failed to load part's headers. Using own routine.", e);
-            }
+            LOG.debug("JavaMail API failed to load part's headers. Using own routine.", e);
             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_MESSAGE_SIZE);
             try {
                 part.writeTo(out);
@@ -2866,12 +2857,7 @@ public final class MimeMessageConverter {
             }
             return addressList.toArray(new InternetAddress[addressList.size()]);
         } catch (final AddressException e) {
-            if (DEBUG) {
-                LOG.debug(
-                    new com.openexchange.java.StringAllocator(128).append("Internet addresses could not be properly parsed: \"").append(e.getMessage()).append(
-                        "\". Using plain addresses' string representation instead.").toString(),
-                    e);
-            }
+            LOG.debug("Internet addresses could not be properly parsed. Using plain addresses' string representation instead.", e);
             return getAddressesOnParseError(addressArray);
         }
     }
@@ -2886,12 +2872,7 @@ public final class MimeMessageConverter {
         try {
             return QuotedInternetAddress.parseHeader(addresses, true);
         } catch (final AddressException e) {
-            if (DEBUG) {
-                LOG.debug(
-                    new com.openexchange.java.StringAllocator(128).append("Internet addresses could not be properly parsed: \"").append(e.getMessage()).append(
-                        "\". Using plain addresses' string representation instead.").toString(),
-                    e);
-            }
+            LOG.debug("Internet addresses could not be properly parsed. Using plain addresses' string representation instead.", e);
             return new InternetAddress[] { new PlainTextAddress(addresses) };
         }
     }
@@ -2959,9 +2940,7 @@ public final class MimeMessageConverter {
             try {
                 priority = Integer.parseInt(tmp[0]);
             } catch (final NumberFormatException nfe) {
-                if (DEBUG) {
-                    LOG.debug("Assuming priority NORMAL due to strange X-Priority header: " + priorityStr);
-                }
+                LOG.debug("Assuming priority NORMAL due to strange X-Priority header: {}", priorityStr);
                 priority = MailMessage.PRIORITY_NORMAL;
             }
         }
@@ -2984,9 +2963,7 @@ public final class MimeMessageConverter {
             } else if ("High".equalsIgnoreCase(imp)) {
                 priority = MailMessage.PRIORITY_HIGHEST;
             } else {
-                if (DEBUG) {
-                    LOG.debug("Assuming priority NORMAL due to strange Importance header: " + importance);
-                }
+                LOG.debug("Assuming priority NORMAL due to strange Importance header: {}", importance);
                 priority = MailMessage.PRIORITY_NORMAL;
             }
         }

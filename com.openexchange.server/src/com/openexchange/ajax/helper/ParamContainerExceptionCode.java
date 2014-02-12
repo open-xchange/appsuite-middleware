@@ -50,77 +50,111 @@
 package com.openexchange.ajax.helper;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  *
  * The error code enumeration for missing or invalid request parameters.
  */
-public enum ParamContainerExceptionCode implements OXExceptionCode {
+public enum ParamContainerExceptionCode implements DisplayableOXExceptionCode {
 
-	/**
-	 * Bad value %1$s in parameter %2$s
-	 */
-	BAD_PARAM_VALUE(ParamContainerExceptionMessage.BAD_PARAM_VALUE_MSG, CATEGORY_USER_INPUT, 1),
-	/**
-	 * Missing parameter %1$s
-	 */
-	MISSING_PARAMETER(ParamContainerExceptionMessage.MISSING_PARAMETER_MSG, CATEGORY_ERROR, 2);
+    /**
+     * Bad value %1$s in parameter %2$s
+     */
+    BAD_PARAM_VALUE(CATEGORY_USER_INPUT, 1, ParamContainerExceptionCode.BAD_PARAM_VALUE_MSG, ParamContainerExceptionMessage.BAD_PARAM_VALUE_MSG_DISPLAY),
+    /**
+     * Missing parameter %1$s
+     */
+    MISSING_PARAMETER(CATEGORY_ERROR, 2, ParamContainerExceptionCode.MISSING_PARAMETER_MSG, ParamContainerExceptionMessage.MISSING_PARAMETER_MSG_DISPLAY);
 
-	/**
-	 * Message of the exception.
-	 */
-	private final String message;
+    /**
+     * Bad value %1$s in parameter %2$s
+     */
+    private final static String BAD_PARAM_VALUE_MSG = "Bad value %1$s in parameter %2$s";
 
-	/**
-	 * Category of the exception.
-	 */
-	private final Category category;
+    /**
+     * Missing parameter %1$s
+     */
+    private final static String MISSING_PARAMETER_MSG = "Missing parameter %1$s";
 
-	/**
-	 * Detail number of the exception.
-	 */
-	private final int detailNumber;
+    /**
+     * Message of the exception.
+     */
+    private final String message;
 
-	/**
-	 * Default constructor.
-	 *
-	 * @param message
-	 *            message.
-	 * @param category
-	 *            category.
-	 * @param detailNumber
-	 *            detail number.
-	 */
-	private ParamContainerExceptionCode(final String message, final Category category, final int detailNumber) {
-		this.message = message;
-		this.category = category;
-		this.detailNumber = detailNumber;
-	}
+    /**
+     * Category of the exception.
+     */
+    private final Category category;
 
-	@Override
+    /**
+     * Detail number of the exception.
+     */
+    private final int detailNumber;
+
+    /**
+     * Message displayed to the user
+     */
+    private String displayMessage;
+
+    /**
+     * Default constructor.
+     * 
+     * @param message message.
+     * @param category category.
+     * @param detailNumber detail number.
+     * @param displayMessage the message to display the user.
+     */
+    private ParamContainerExceptionCode(final Category category, final int detailNumber, final String message, String displayMessage) {
+        this.category = category;
+        this.detailNumber = detailNumber;
+        this.message = message;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
+    }
+
+    /**
+     * Default constructor.
+     * 
+     * @param message message.
+     * @param category category.
+     * @param detailNumber detail number.
+     */
+    private ParamContainerExceptionCode(final Category category, final int detailNumber, final String message) {
+        this(category, detailNumber, message, null);
+    }
+
+    @Override
     public int getNumber() {
-		return detailNumber;
-	}
+        return detailNumber;
+    }
 
-	@Override
+    @Override
     public String getMessage() {
-		return message;
-	}
+        return message;
+    }
 
-	@Override
+    @Override
     public Category getCategory() {
-		return category;
-	}
+        return category;
+    }
 
-	@Override
+    @Override
     public String getPrefix() {
-	    return "REQ_PARAM";
-	}
+        return "REQ_PARAM";
+    }
 
-	@Override
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDisplayMessage() {
+        return this.displayMessage;
+    }
+
+    @Override
     public boolean equals(final OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
     }

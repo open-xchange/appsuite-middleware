@@ -109,17 +109,13 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         final IMAPStoreWrapper imapStoreWrapper = availableQueue.poll();
         if (null == imapStoreWrapper) {
             imapStore = newStore(server, port, login, pw, imapSession);
-            if (DEBUG) {
-                LOG.debug("UnboundedIMAPStoreContainer.getStore(): Returning newly established IMAPStore instance. " + imapStore.toString() + " -- " + imapStore.hashCode());
-            }
+            LOG.debug("UnboundedIMAPStoreContainer.getStore(): Returning newly established IMAPStore instance. {} -- {}", imapStore.toString(), imapStore.hashCode());
         } else {
             imapStore = imapStoreWrapper.imapStore;
             // Should we set properties from passed session?
             // imapStore.getServiceSession().getProperties().putAll(imapSession.getProperties());
             // imapStore.setPropagateClientIpAddress(imapSession.getProperty("mail.imap.propagate.clientipaddress"));
-            if (DEBUG) {
-                LOG.debug("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance. " + imapStore.toString() + " -- " + imapStore.hashCode());
-            }
+            LOG.debug("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance. {} -- {}", imapStore.toString(), imapStore.hashCode());
         }
 
         inUseCount.incrementAndGet();
@@ -138,17 +134,13 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         } else {
             // System.out.println("IMAPStoreContainer.backStore(): Added IMAPStore instance to cache." + imapStore.toString() + " -- " +
             // imapStore.hashCode());
-            if (DEBUG) {
-                LOG.debug("IMAPStoreContainer.backStore(): Added IMAPStore instance to cache. " + imapStore.toString() + " -- " + imapStore.hashCode());
-            }
+            LOG.debug("IMAPStoreContainer.backStore(): Added IMAPStore instance to cache. {} -- {}", imapStore.toString(), imapStore.hashCode());
         }
     }
 
     @Override
     public void closeElapsed(final long stamp, final StringBuilder debugBuilder) {
-        if (DEBUG) {
-            LOG.debug("IMAPStoreContainer.closeElapsed(): " + availableQueue.size() + " IMAPStore instances in queue for " + server + ":" + port);
-        }
+        LOG.debug("IMAPStoreContainer.closeElapsed(): {} IMAPStore instances in queue for {}:{}", availableQueue.size(), server, port);
         IMAPStoreWrapper imapStoreWrapper;
         do {
             imapStoreWrapper = availableQueue.pollIfElapsed(stamp);
@@ -174,6 +166,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
 
     @Override
     public void clear() {
+        final InheritedPriorityBlockingQueue availableQueue = this.availableQueue;
         if (null == availableQueue) {
             return;
         }
@@ -182,7 +175,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
             closeSafe(wrapper.imapStore);
         }
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.imap.storecache.IMAPStoreContainer#hasElapsed(long)
      */
@@ -209,7 +202,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
             lock = new ReentrantLock(true);
             notEmpty = lock.newCondition();
         }
-        
+
         public boolean hasElapsed(long millis) {
             final ReentrantLock lock = this.lock;
             lock.lock();

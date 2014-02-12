@@ -71,8 +71,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class GetStructureAction extends AbstractMailAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        Log.valueOf(com.openexchange.log.LogFactory.getLog(GetStructureAction.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetStructureAction.class);
 
     /**
      * Initializes a new {@link GetStructureAction}.
@@ -160,10 +159,7 @@ public final class GetStructureAction extends AbstractMailAction {
             return data;
         } catch (final OXException e) {
             if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
-                LOG.warn(
-                    new com.openexchange.java.StringAllocator("Requested mail could not be found. ").append(
-                        "Most likely this is caused by concurrent access of multiple clients ").append(
-                        "while one performed a delete on affected mail.").toString(),
+                LOG.warn("Requested mail could not be found. Most likely this is caused by concurrent access of multiple clients while one performed a delete on affected mail.",
                     e);
                 try {
                     final Object[] args = e.getDisplayArgs();
@@ -175,7 +171,7 @@ public final class GetStructureAction extends AbstractMailAction {
                     // ignore
                 }
             } else {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
             throw e;
         } catch (final RuntimeException e) {

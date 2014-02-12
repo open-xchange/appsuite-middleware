@@ -50,47 +50,56 @@
 package com.openexchange.secret;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link SecretExceptionCodes} - Enumeration of all {@link OXException}s known in secret module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum SecretExceptionCodes implements OXExceptionCode {
+public enum SecretExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(SecretExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An error occurred: %1$s", CATEGORY_ERROR, 1),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(SecretExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 2),
+    IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 2),
     /**
      * Secret is empty. Please check configuration and set a valid secret source in file 'secret.properties'.
      */
-    EMPTY_SECRET(SecretExceptionMessages.EMPTY_SECRET_MSG, CATEGORY_CONFIGURATION, 3),
+    EMPTY_SECRET("Secret is empty. Please check configuration and set a valid secret source in file 'secret.properties'.",
+        CATEGORY_CONFIGURATION, 3),
 
     ;
 
     /**
      * The error code prefix for secret module.
      */
-    public static final String PREFIX = "SCR";
+    public static String PREFIX = "SCR";
 
-    private final Category category;
+    private String displayMessage;
+    
+    private Category category;
 
-    private final int detailNumber;
+    private int detailNumber;
 
-    private final String message;
+    private String message;
 
-    private SecretExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private SecretExceptionCodes(String message, String displayMessage, Category category, int detailNumber) {
         this.message = message;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
         this.detailNumber = detailNumber;
         this.category = category;
+    }
+    
+    private SecretExceptionCodes(String message, Category category, int detailNumber) {
+        this(message, null, category, detailNumber);
     }
 
     @Override
@@ -101,6 +110,11 @@ public enum SecretExceptionCodes implements OXExceptionCode {
     @Override
     public String getMessage() {
         return message;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override
@@ -114,7 +128,7 @@ public enum SecretExceptionCodes implements OXExceptionCode {
     }
 
     @Override
-    public boolean equals(final OXException e) {
+    public boolean equals(OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
     }
 
@@ -133,7 +147,7 @@ public enum SecretExceptionCodes implements OXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Object... args) {
+    public OXException create(Object... args) {
         return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
@@ -144,7 +158,7 @@ public enum SecretExceptionCodes implements OXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Throwable cause, final Object... args) {
+    public OXException create(Throwable cause, Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

@@ -50,13 +50,11 @@
 package com.openexchange.groupware.tasks;
 
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 
 /**
@@ -68,7 +66,7 @@ public final class Task2Links {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Task2Links.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Task2Links.class);
 
     /**
      * Prevent instantiation
@@ -96,7 +94,7 @@ public final class Task2Links {
             task = storage.selectTask(ctx, taskId, StorageType.ACTIVE);
             folders = FolderStorage.getInstance().selectFolder(ctx, taskId, StorageType.ACTIVE);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return false;
         }
         for (final Folder folder : folders) {
@@ -117,7 +115,7 @@ public final class Task2Links {
             task = storage.selectTask(ctx, taskId, StorageType.ACTIVE);
             folder = FolderStorage.getInstance().selectFolderById(ctx, taskId, folderId, StorageType.ACTIVE);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return false;
         }
         return null == folder ? false : mayRead(ctx, user, permissionBits, task, folder);
@@ -128,7 +126,7 @@ public final class Task2Links {
         try {
             folder2 = Tools.getFolder(ctx, folder.getIdentifier());
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return false;
         }
         try {

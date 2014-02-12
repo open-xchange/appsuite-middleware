@@ -122,12 +122,14 @@ public final class MailNotifyPushListener implements PushListener {
      * @throws OXException If listener cannot be opened
      */
     public void open() throws OXException {
+        // Nothing to do
     }
 
     /**
      * Closes this listener.
      */
     public void close() {
+        // NOthing to do
     }
 
     @Override

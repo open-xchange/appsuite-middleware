@@ -56,8 +56,10 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.Closeable;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -65,17 +67,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
 import com.openexchange.ajax.customizer.folder.BulkFolderField;
+import com.openexchange.ajax.meta.MetaContributor;
+import com.openexchange.ajax.meta.MetaContributorRegistry;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.folder.json.FolderFieldRegistry;
+import com.openexchange.folder.json.Tools;
+import com.openexchange.folder.json.services.MetaContributors;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderProperty;
@@ -84,7 +89,7 @@ import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogProperties;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -94,8 +99,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class FolderWriter {
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(FolderWriter.class);
-    static final boolean WARN = LOG.isWarnEnabled();
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderWriter.class);
 
     /**
      * The default locale: en_US.
@@ -366,7 +370,11 @@ public final class FolderWriter {
             @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final Locale locale = folder.getLocale();
-                jsonPutter.put(FolderField.FOLDER_NAME.getName(), folder.getLocalizedName(locale == null ? DEFAULT_LOCALE : locale));
+                if (folder.supportsAltName()) {
+                    jsonPutter.put(FolderField.FOLDER_NAME.getName(), folder.getLocalizedName(locale == null ? DEFAULT_LOCALE : locale, folder.isAltNames()));
+                } else {
+                    jsonPutter.put(FolderField.FOLDER_NAME.getName(), folder.getLocalizedName(locale == null ? DEFAULT_LOCALE : locale));
+                }
             }
         });
         m.put(FolderField.MODULE.getColumn(), new FolderFieldWriter() {
@@ -391,7 +399,7 @@ public final class FolderWriter {
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final String[] obj = folder.getSubfolderIDs();
                 if (null == obj) {
-                    LOG.warn("Got null as subfolders for folder " + folder.getID() + ". Marking this folder to hold subfolders...");
+                    LOG.warn("Got null as subfolders for folder {}. Marking this folder to hold subfolders...", folder.getID());
                     jsonPutter.put(FolderField.SUBFOLDERS.getName(), Boolean.TRUE);
                 } else {
                     jsonPutter.put(FolderField.SUBFOLDERS.getName(), Boolean.valueOf(obj.length > 0));
@@ -467,7 +475,6 @@ public final class FolderWriter {
 
             @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
-                LogProperties.putLogProperty(LogProperties.Name.SESSION_SESSION, folder.getSession());
                 final int obj = folder.getTotal();
                 jsonPutter.put(FolderField.TOTAL.getName(), -1 == obj ? JSONObject.NULL : Integer.valueOf(obj));
             }
@@ -515,6 +522,7 @@ public final class FolderWriter {
                 jsonPutter.put(FolderField.SUBSCR_SUBFLDS.getName(), Boolean.valueOf(folder.hasSubscribedSubfolders()));
             }
         });
+        // Capabilities
         m.put(FolderField.CAPABILITIES.getColumn(), new FolderFieldWriter() {
 
             @Override
@@ -523,14 +531,20 @@ public final class FolderWriter {
                 jsonPutter.put(FolderField.CAPABILITIES.getName(), -1 == caps ? JSONObject.NULL : Integer.valueOf(caps));
             }
         });
+        // Meta
         m.put(FolderField.META.getColumn(), new FolderFieldWriter() {
             @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
-                Map<String, Object> meta =  folder.getMeta();
-                jsonPutter.put(FolderField.META.getName(), JSONCoercion.coerceToJSON(meta));
+                // Get meta map
+                Map<String, Object> map = folder.getMeta();
+                // Invoke contribution service
+                map = contributeTo(map, folder, folder.getSession());
+
+                jsonPutter.put(FolderField.META.getName(), null == map || map.isEmpty() ? JSONObject.NULL : JSONCoercion.coerceToJSON(map));
             }
 
         });
+        // Supported capabilities
         m.put(FolderField.SUPPORTED_CAPABILITIES.getColumn(), new FolderFieldWriter() {
 
             @Override
@@ -552,6 +566,28 @@ public final class FolderWriter {
         }
         ALL_FIELDS = new int[j];
         System.arraycopy(allFields, 0, ALL_FIELDS, 0, j);
+    }
+
+    protected static Map<String, Object> contributeTo(final Map<String, Object> map, final UserizedFolder folder, final Session session) {
+        final String topic = "ox/common/folder";
+        final MetaContributorRegistry registry = MetaContributors.getRegistry();
+        if (null == registry) {
+            return map;
+        }
+        final Set<MetaContributor> contributors = registry.getMetaContributors(topic);
+        if (null != contributors && !contributors.isEmpty()) {
+            final Map<String, Object> m = null == map ? new LinkedHashMap<String, Object>(2) : map;
+            final String id = folder.getID();
+            for (final MetaContributor contributor : contributors) {
+                try {
+                    contributor.contributeTo(m, id, session);
+                } catch (final Exception e) {
+                    LOG.warn(MessageFormat.format("Cannot contribute to entity (contributor={0}, entity={1})", contributor.getClass().getName(), id), e);
+                }
+            }
+            return m;
+        }
+        return map;
     }
 
     private static List<FolderObject> turnIntoFolderObjects(final UserizedFolder[] folders) {
@@ -718,9 +754,7 @@ public final class FolderWriter {
     private static FolderFieldWriter getPropertyByField(final int field, final TIntObjectMap<com.openexchange.folderstorage.FolderField> fields) {
         final com.openexchange.folderstorage.FolderField fieldNamePair = fields.get(field);
         if (null == fieldNamePair) {
-            if (WARN) {
-                LOG.warn("Unknown field: " + field, new Throwable());
-            }
+            LOG.warn("Unknown field: {}", field, new Throwable());
             return UNKNOWN_FIELD_FFW;
         }
         PropertyFieldWriter pw = PROPERTY_WRITERS.get(field);
@@ -772,62 +806,13 @@ public final class FolderWriter {
     }
 
     /**
-     * The radix for base <code>10</code>.
-     */
-    private static final int RADIX = 10;
-
-    /**
      * Parses a positive <code>int</code> value from passed {@link String} instance.
      *
      * @param s The string to parse
      * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
      */
     static final int getUnsignedInteger(final String s) {
-        if (s == null) {
-            return -1;
-        }
-
-        final int max = s.length();
-
-        if (max <= 0) {
-            return -1;
-        }
-        if (s.charAt(0) == '-') {
-            return -1;
-        }
-
-        int result = 0;
-        int i = 0;
-
-        final int limit = -Integer.MAX_VALUE;
-        final int multmin = limit / RADIX;
-        int digit;
-
-        if (i < max) {
-            digit = Character.digit(s.charAt(i++), RADIX);
-            if (digit < 0) {
-                return -1;
-            }
-            result = -digit;
-        }
-        while (i < max) {
-            /*
-             * Accumulating negatively avoids surprises near MAX_VALUE
-             */
-            digit = Character.digit(s.charAt(i++), RADIX);
-            if (digit < 0) {
-                return -1;
-            }
-            if (result < multmin) {
-                return -1;
-            }
-            result *= RADIX;
-            if (result < limit + digit) {
-                return -1;
-            }
-            result -= digit;
-        }
-        return -result;
+        return Tools.getUnsignedInteger(s);
     }
 
 }

@@ -58,10 +58,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.Log;
 import com.openexchange.management.ManagementAware;
 import com.openexchange.management.ManagementObject;
+import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.management.StanzaSequenceGateMBean;
@@ -78,9 +79,9 @@ import com.openexchange.realtime.packet.Stanza;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequenceGateMBean> {
+public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequenceGateMBean>, RealtimeJanitor {
 
-    private static org.apache.commons.logging.Log LOG = Log.loggerFor(StanzaSequenceGate.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(StanzaSequenceGate.class);
 
     /* Max. number of stanzas that will be buffered if one stanza is missing in the sequence */
     protected static final int BUFFER_SIZE = 20;
@@ -112,7 +113,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
 
     /**
      * Ensures a correct order of sequence numbers of incoming Stanzas.
-     * 
+     *
      * <ul>
      *   <li>Stanzas that don't carry a sequence number are directly handed over to the specific
      *   {@link StanzaSequenceGate#handleInternal(Stanza, ID)} implementation of the components that makes use of this StanzaSequenceGate
@@ -124,7 +125,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
      *       <li>If the buffer for creating a valid sequence is full Stanzas are discarded.</li>
      *     </ul>
      * </ul>
-     * 
+     *
      * @param stanza the incoming stanza
      * @param recipient the recipient of the incoming Stanza
      * @return If <code>false</code> an ACK shouldn't be sent to the client as the Stanza wasn't handled properly
@@ -138,7 +139,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
 
     /**
      * Ensures a correct order of sequence numbers of incoming Stanzas.
-     * 
+     *
      * <ul>
      *   <li>Stanzas that don't carry a sequence number are directly handed over to the specific
      *   {@link StanzaSequenceGate#handleInternal(Stanza, ID)} implementation of the components that makes use of this StanzaSequenceGate
@@ -150,7 +151,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
      *       <li>If the buffer for creating a valid sequence is full Stanzas are discarded.</li>
      *     </ul>
      * </ul>
-     * 
+     *
      * @param stanza the incoming stanza
      * @param recipient the recipient of the incoming Stanza
      * @param customAction a custom action that (if not null) should be used instead of the using component's handleInternal.
@@ -169,7 +170,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
                 //TODO: for 7.4 this shouldn't throw Exceptions at all. The class implementing the method has to handle it
                 try {
                     handleInternal(stanza, recipient);
-                    
+
                 } catch (Exception ex) {
                     throw RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(ex, ex.getMessage());
                 }
@@ -193,23 +194,22 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
 
                         @Override
                         public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-                            freeRessourcesFor(id);
+                            freeResourcesFor(id);
                         }
                     });
                 } else {
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Found another number: " + meantime + "in the meantime for the SequencePrincipal: " + stanza.getSequencePrincipal());
+                    }
                     threshold = meantime;
                 }
             }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Stanza Gate (" + name + ") : " + stanza.getSequencePrincipal() + ":" + stanza.getSequenceNumber() + ":" + threshold);
-            }
+            LOG.debug("Stanza Gate ({}) : {}:{}:{}", name, stanza.getSequencePrincipal(), stanza.getSequenceNumber(), threshold);
             if (stanza.getSequenceNumber() == -1) {
                 threshold.set(-1);
             }
             if (threshold.compareAndSet(stanza.getSequenceNumber(), stanza.getSequenceNumber() + 1)) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Best case, Threshold: " + threshold.get());
-                }
+                LOG.debug("Best case, Threshold: {}", threshold.get());
                 notifyManagementSequenceNumbers();
                 stanza.trace("Passing gate " + name);
                 if (customAction != null) {
@@ -251,15 +251,11 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
 
                 return true;
             } else { // We didn't hit the best case, either the Stanza was already received or the sequence number is too high
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug(String.format("Expected sequence %d but got %d", threshold.get(), stanza.getSequenceNumber()));
-                }
+                LOG.debug(String.format("Expected sequence %d but got %d", threshold.get(), stanza.getSequenceNumber()));
                 /* Stanzas got out of sync, enqueue until we receive the Stanza matching threshold */
                 if (threshold.get() > stanza.getSequenceNumber()) {
                     stanza.trace("Discarded as this sequence number has already successfully passed this gate: " + stanza.getSequenceNumber());
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("Discarded as this sequence number has already successfully passed this gate: " + stanza.getSequenceNumber());
-                    }
+                    LOG.debug("Discarded as this sequence number has already successfully passed this gate: {}", stanza.getSequenceNumber());
                     return true;
                 }
 
@@ -275,9 +271,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
                     //We see no reason to buffer if the gap in the sequence numbers is too big. instruct the client to reset the sequence
                     if(stanza.getSequenceNumber() > threshold.get() + BUFFER_SIZE) {
                         stanza.trace("Threshold == 0 and stanza not in sequence, instructing client to reset sequence.");
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Threshold == 0 and stanza not in sequence, instructing client to reset sequence.");
-                        }
+                        LOG.debug("Threshold == 0 and stanza not in sequence, instructing client to reset sequence.");
                         throw RealtimeExceptionCodes.SEQUENCE_INVALID.create();
                     }
                     //Try to buffer up a valid sequence of Stanzas
@@ -290,25 +284,18 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
                     }
                     if(!alreadyContained) {
                         stanza.trace("Not in sequence, enqueing");
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Stanzas not in sequence, Threshold: " + threshold.get() + " SequenceNumber: " + stanza.getSequenceNumber());
-                        }
+                            LOG.debug("Stanzas not in sequence, Threshold: {} SequenceNumber: {}", threshold.get(), stanza.getSequenceNumber());
                         inbox.add(new StanzaWithCustomAction(stanza, customAction));
                         notifyManagementInboxes();
                         return true;
                     } else {
                         stanza.trace("Not in sequence but already enqueued, discarding.");
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Stanzas not in sequence, Threshold: " + threshold.get() + " SequenceNumber: " + stanza.getSequenceNumber() + " but already buffered, discarding.");
-                        }
+                            LOG.debug("Stanzas not in sequence, Threshold: {} SequenceNumber: {} but already buffered, discarding.", threshold.get(), stanza.getSequenceNumber());
                         return true;
                     }
                 } else {
                     stanza.trace("Buffer full, instructing client to reset sequence");
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Instructing client to reset sequence because stanza's not in sequence, but buffer is full. Threshold: "
-                            + threshold.get() + " SequenceNumber: " + stanza.getSequenceNumber());
-                    }
+                        LOG.debug("Instructing client to reset sequence because stanza's not in sequence, but buffer is full. Threshold: {} SequenceNumber: {}", threshold.get(), stanza.getSequenceNumber());
                     throw RealtimeExceptionCodes.SEQUENCE_INVALID.create();
                 }
             }
@@ -317,7 +304,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
         }
 
     }
-    
+
     /**
      * Resets the current threshold for the given ID and empties the buffer of Stanzas with now incorrect sequence numbers
      * @param constructedId The ID for that we want to reset the threshold
@@ -338,7 +325,10 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
     }
 
 
-    public void freeRessourcesFor(ID sequencePrincipal) {
+    public void freeResourcesFor(ID sequencePrincipal) {
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Freeing Ressources for SequencePrincipal: " + sequencePrincipal);
+        }
         sequenceNumbers.remove(sequencePrincipal);
         inboxes.remove(sequencePrincipal);
         notifyManagementSequenceNumbers();
@@ -370,14 +360,20 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
         }
 
     }
-    
+
+    @Override
+    public void cleanupForId(ID id) {
+        LOG.debug("StanzasequenceGate-{}: Cleanup for ID: {}", name, id);
+        freeResourcesFor(id);
+    }
+
     // Management calls
     //======================================================================================================================================
-    
+
     private void notifyManagementNumberOfInboxes() {
         managementObject.setNumberOfInboxes(inboxes.size());
     }
-    
+
     private void notifyManagementSequenceNumbers() {
         HashMap<String, Long> basicSequenceNumbers = new HashMap<String, Long>(sequenceNumbers.size());
         for (Entry<ID, AtomicLong> entry : sequenceNumbers.entrySet()) {
@@ -388,7 +384,7 @@ public abstract class StanzaSequenceGate implements ManagementAware<StanzaSequen
 
     private void notifyManagementInboxes() {
         notifyManagementNumberOfInboxes();
-        
+
         Map<String, List<Long>> clientSequenceMap = new HashMap<String, List<Long>>();
         for (Entry<ID, List<StanzaWithCustomAction>> entry : inboxes.entrySet()) {
             String client = entry.getKey().toString();

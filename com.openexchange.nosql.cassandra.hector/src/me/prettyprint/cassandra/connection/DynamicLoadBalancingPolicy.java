@@ -11,33 +11,29 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 import me.prettyprint.cassandra.connection.factory.HClientFactory;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.utils.DaemonThreadPoolFactory;
-
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 /**
  * This LB Algorithm has the Phi algo which Dynamic snitch uses, LB is based on the probablity of failure of the node.
  * TODO: Make cassandra code abstracted enough so we can inherit from the same.
- * 
+ *
  * @author Vijay Parthasarathy
  */
 public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy {
 
   private static final long serialVersionUID = -1044985880174118325L;
-  private static final Logger log = LoggerFactory.getLogger(DynamicLoadBalancingPolicy.class);
-  
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(DynamicLoadBalancingPolicy.class);
+
   private final ScheduledExecutorService tasks = new ScheduledThreadPoolExecutor(1, new DaemonThreadPoolFactory(getClass()));
 
   // references which is used to make the real time requests faster.
-  private Map<HClientPool, Double> scores = Maps.newConcurrentMap();
-  private List<LatencyAwareHClientPool> allPools = new CopyOnWriteArrayList<LatencyAwareHClientPool>();
+  private final Map<HClientPool, Double> scores = Maps.newConcurrentMap();
+  private final List<LatencyAwareHClientPool> allPools = new CopyOnWriteArrayList<LatencyAwareHClientPool>();
 
   // default values this can be changed by the Client.
   private int UPDATE_INTERVAL = 100;
@@ -48,7 +44,8 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy {
 
     // Pre-calculate the scores so as we can compare it fast.
     Runnable updateThread = new Runnable() {
-      public void run() {
+      @Override
+    public void run() {
         try {
           updateScores();
         } catch(Exception e) {
@@ -59,7 +56,8 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy {
 
     // Clear Stats.
     Runnable resetThread = new Runnable() {
-      public void run() {
+      @Override
+    public void run() {
         try {
           for (LatencyAwareHClientPool pool : allPools) {
             pool.clear();
@@ -90,8 +88,7 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy {
       Double next = scores.get(np);
       if ((first - next) / first > DYNAMIC_BADNESS_THRESHOLD) {
         Collections.sort(poolList, new SortByScoreComparator());
-        if (log.isDebugEnabled())
-          log.debug("According to score we have chosen {} vs first {}", poolList.get(0), fp);
+        log.debug("According to score we have chosen {} vs first {}", poolList.get(0), fp);
         break;
       }
     }
@@ -101,20 +98,25 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy {
   private void filter(List<HClientPool> from, Set<CassandraHost> subList) {
     Iterator<HClientPool> it = from.iterator();
     while (it.hasNext()) {
-      if (subList.contains(it.next().getCassandraHost()))
+      if (subList.contains(it.next().getCassandraHost())) {
         it.remove();
+    }
     }
   }
 
   private class SortByScoreComparator implements Comparator<HClientPool> {
+    @Override
     public int compare(HClientPool p1, HClientPool p2) {
       Double scored1 = scores.get(p1);
       Double scored2 = scores.get(p2);
-      if (scored1.equals(scored2))
+      if (scored1.equals(scored2)) {
         return 0;
-      if (scored1 < scored2)
+    }
+      if (scored1 < scored2) {
         return -1;
-      else return 1;
+    } else {
+        return 1;
+    }
     }
   }
 
@@ -146,7 +148,7 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy {
 
   /**
    * Set the configured interval for the stats to be recalculated (until this time it is been cached.
-   * 
+   *
    * @param updateInterval
    *          In ms.
    */
@@ -161,7 +163,7 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy {
   /**
    * Set the configured interval for the stats to be reset so that the new stats are allowed and we can get rid of bad
    * nodes value. This is under the assumption that the bad nodes will eventually get better....
-   * 
+   *
    * @param resetInterval
    *          in ms
    */
@@ -175,9 +177,9 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy {
 
   /**
    * This is the percentage of badness which is acceptable...
-   * 
+   *
    * Example: A should be 0.20 (20%) bad than B before B is choosen rathar than A.
-   * 
+   *
    * @param badness
    *          in %
    */

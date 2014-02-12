@@ -82,14 +82,18 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Header;
+import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
 import javax.mail.internet.MimeUtility;
@@ -97,7 +101,6 @@ import javax.mail.internet.ParseException;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
-import org.apache.commons.logging.Log;
 import org.apache.james.mime4j.io.LineReaderInputStream;
 import org.apache.james.mime4j.io.LineReaderInputStreamAdaptor;
 import org.apache.james.mime4j.stream.DefaultFieldBuilder;
@@ -106,6 +109,7 @@ import org.apache.james.mime4j.stream.RawField;
 import org.apache.james.mime4j.util.ByteArrayBuffer;
 import org.apache.james.mime4j.util.CharsetUtil;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -132,6 +136,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.utils.CP932EmojiMapping;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -152,10 +157,7 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
  */
 public final class MimeMessageUtility {
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(MimeMessageUtility.class);
-    private static final boolean TRACE = LOG.isTraceEnabled();
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-    private static final boolean WARN = LOG.isWarnEnabled();
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MimeMessageUtility.class);
 
     private static final Set<HeaderName> ENCODINGS;
 
@@ -251,7 +253,7 @@ public final class MimeMessageUtility {
         if (session instanceof ServerSession) {
             user = ((ServerSession) session).getUser();
         } else {
-            user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
+            user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
         }
         return getMailDateFormat(user.getTimeZone());
     }
@@ -572,7 +574,7 @@ public final class MimeMessageUtility {
         try {
             return new ContentType(hdr).getParameter(PARAM_NAME);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
     }
@@ -870,9 +872,7 @@ public final class MimeMessageUtility {
                      */
                     lastMatch = m.end();
                 } catch (final UnsupportedEncodingException e) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Unsupported character-encoding in encoded-word: " + m.group(), e);
-                    }
+                    LOG.debug("Unsupported character-encoding in encoded-word: {}", m.group(), e);
                     sb.append(handleUnsupportedEncoding(m));
                     lastMatch = m.end();
                 } catch (final ParseException e) {
@@ -898,7 +898,7 @@ public final class MimeMessageUtility {
                     /*
                      * Invalid quoted-printable
                      */
-                    LOG.warn("Cannot decode quoted-printable: " + e.getMessage(), e);
+                    LOG.warn("Cannot decode quoted-printable", e);
                     return asciiText;
                 }
             } else if ("B".equalsIgnoreCase(transferEncoding)) {
@@ -907,7 +907,7 @@ public final class MimeMessageUtility {
                 /*
                  * Unknown transfer-encoding; just return current match
                  */
-                LOG.warn("Unknown transfer-encoding: " + transferEncoding);
+                LOG.warn("Unknown transfer-encoding: {}", transferEncoding);
                 return asciiText;
             }
             detectedCharset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(rawBytes));
@@ -918,7 +918,7 @@ public final class MimeMessageUtility {
             /*
              * Even detected charset is unknown... giving up
              */
-            LOG.warn("Unknown character-encoding: " + detectedCharset);
+            LOG.warn("Unknown character-encoding: {}", detectedCharset);
             return asciiText;
         }
     }
@@ -1009,11 +1009,11 @@ public final class MimeMessageUtility {
                     }
                     lastMatch = m.end();
                 } catch (final UnsupportedEncodingException e) {
-                    LOG.warn("Unsupported character-encoding in encoded-word: " + m.group(), e);
+                    LOG.warn("Unsupported character-encoding in encoded-word: {}", m.group(), e);
                     sb.append(m.group());
                     lastMatch = m.end();
                 } catch (final ParseException e) {
-                    LOG.warn("String is not an encoded-word as per RFC 2047: " + m.group(), e);
+                    LOG.warn("String is not an encoded-word as per RFC 2047: {}", m.group(), e);
                     sb.append(m.group());
                     lastMatch = m.end();
                 }
@@ -1101,7 +1101,7 @@ public final class MimeMessageUtility {
             }
         } catch (final java.io.UnsupportedEncodingException e) {
             // Cannot occur
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return retval.toString();
     }
@@ -1219,9 +1219,7 @@ public final class MimeMessageUtility {
                 final List<InternetAddress> addrList = new ArrayList<InternetAddress>(sAddrs.size());
                 for (final String sAddr : sAddrs) {
                     final QuotedInternetAddress tmp = new QuotedInternetAddress(sAddr, strict);
-                    if (TRACE) {
-                        LOG.trace(tmp);
-                    }
+                    LOG.trace(tmp.toString());
                     addrList.add(tmp);
                 }
                 // Hm... single parse did not fail, throw original exception instead
@@ -1230,19 +1228,12 @@ public final class MimeMessageUtility {
                 if (failOnError) {
                     for (final String sAddr : sAddrs) {
                         final QuotedInternetAddress tmp = new QuotedInternetAddress(sAddr, strict);
-                        if (TRACE) {
-                            LOG.trace(tmp);
-                        }
+                        LOG.trace(tmp.toString());
                     }
                     // Hm... single parse did not fail, throw original exception instead
                     throw e;
                 }
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(
-                        new com.openexchange.java.StringAllocator(128).append("Internet addresses could not be properly parsed, ").append(
-                            "using plain addresses' string representation instead.").toString(),
-                        e);
-                }
+                LOG.debug("Internet addresses could not be properly parsed, using plain addresses' string representation instead.", e);
                 addrs = PlainTextAddress.getAddresses(splitAddrs(al).toArray(new String[0]));
             }
         }
@@ -1257,27 +1248,50 @@ public final class MimeMessageUtility {
             /*
              * Cannot occur since default charset is checked on global mail configuration initialization
              */
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return addrs;
     }
 
-    private static final Pattern PATTERN_REPLACE = Pattern.compile("([^\"]\\S+?)(\\s*)([;])(\\s*)");
+    private static volatile Boolean checkReplaceWithComma;
+    private static boolean checkReplaceWithComma() {
+        Boolean b = checkReplaceWithComma;
+        if (null == b) {
+            synchronized (MimeMessageUtility.class) {
+                b = checkReplaceWithComma;
+                if (null == b) {
+                    final boolean fallback = false;
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        return fallback;
+                    }
+                    b = Boolean.valueOf(service.getBoolProperty("com.openexchange.mail.replaceWithComma", fallback));
+                    checkReplaceWithComma = b;
+                }
+            }
+        }
+        return b.booleanValue();
+    }
+
+    private static final Pattern PATTERN_REPLACE = Pattern.compile("(\\.\\w+>?)(\\s*);(\\s*)");
 
     private static String replaceWithComma(final String addressList) {
-        final Matcher m = PATTERN_REPLACE.matcher(addressList);
-        if (m.find()) {
-            final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(addressList.length());
-            int lastMatch = 0;
-            do {
-                sb.append(addressList.substring(lastMatch, m.start()));
-                sb.append(m.group(1)).append(m.group(2)).append(',').append(m.group(4));
-                lastMatch = m.end();
-            } while (m.find());
-            sb.append(addressList.substring(lastMatch));
-            return sb.toString();
+        if (!checkReplaceWithComma()) {
+            return addressList;
         }
-        return addressList;
+        final Matcher m = PATTERN_REPLACE.matcher(addressList);
+        if (!m.find()) {
+            return addressList;
+        }
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(addressList.length());
+        int lastMatch = 0;
+        do {
+            sb.append(addressList.substring(lastMatch, m.start()));
+            sb.append(m.group(1)).append(m.group(2)).append(',').append(m.group(3));
+            lastMatch = m.end();
+        } while (m.find());
+        sb.append(addressList.substring(lastMatch));
+        return sb.toString();
     }
 
     /**
@@ -1392,7 +1406,7 @@ public final class MimeMessageUtility {
             return new com.openexchange.java.StringAllocator(len + 2).append('"').append(
                 encode ? MimeUtility.encodeWord(replaced) : replaced).append('"').toString();
         } catch (final UnsupportedEncodingException e) {
-            LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
+            LOG.error("Unsupported encoding in a message detected and monitored", e);
             mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             return phrase;
         }
@@ -1926,8 +1940,8 @@ public final class MimeMessageUtility {
         InputStream in = null;
         BufferedOutputStream out = null;
         try {
-            in = new BufferedInputStream(new FileInputStream(file));
-            out = new BufferedOutputStream(new FileOutputStream(newTempFile));
+            in = new BufferedInputStream(new FileInputStream(file), 65536);
+            out = new BufferedOutputStream(new FileOutputStream(newTempFile), 65536);
             {
                 @SuppressWarnings("resource") final LineReaderInputStream instream = new LineReaderInputStreamAdaptor(in, -1);
                 int lineCount = 0;
@@ -2003,13 +2017,14 @@ public final class MimeMessageUtility {
      * @throws OXException If detecting charset fails
      */
     public static String getCharset(final MailPart mailPart, final ContentType contentType) throws OXException {
+        if (null == mailPart) {
+            return null;
+        }
         final String charset;
         if (mailPart.containsHeader(HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();
             if (!CharsetDetector.isValid(cs)) {
-                com.openexchange.java.StringAllocator sb = null;
                 if (null != cs) {
-                    sb = new com.openexchange.java.StringAllocator(64).append("Illegal or unsupported encoding: \"").append(cs).append("\".");
                     mailInterfaceMonitor.addUnsupportedEncodingExceptions(cs);
                 }
                 if (contentType.startsWith(PRIMARY_TEXT)) {
@@ -2017,16 +2032,8 @@ public final class MimeMessageUtility {
                     if ("US-ASCII".equalsIgnoreCase(cs)) {
                         cs = "ISO-8859-1";
                     }
-                    if (DEBUG && null != sb) {
-                        sb.append(" Using auto-detected encoding: \"").append(cs).append('"');
-                        LOG.warn(sb.toString());
-                    }
                 } else {
                     cs = MailProperties.getInstance().getDefaultMimeCharset();
-                    if (DEBUG && null != sb) {
-                        sb.append(" Using fallback encoding: \"").append(cs).append('"');
-                        LOG.warn(sb.toString());
-                    }
                 }
             }
             charset = cs;
@@ -2055,6 +2062,9 @@ public final class MimeMessageUtility {
      * @throws IOException If reading content fails with an I/O error
      */
     public static String readContent(final MailPart mailPart, final ContentType contentType) throws OXException, IOException {
+        if (null == mailPart) {
+            return null;
+        }
         /*
          * Read content
          */
@@ -2068,12 +2078,7 @@ public final class MimeMessageUtility {
         } catch (final java.io.CharConversionException e) {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "ISO-8859-1";
-            if (WARN) {
-                LOG.warn(
-                    new com.openexchange.java.StringAllocator("Character conversion exception while reading content with charset \"").append(
-                        charset).append("\". Using fallback charset \"").append(fallback).append("\" instead."),
-                    e);
-            }
+            LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback, e);
             return MessageUtility.readMailPart(mailPart, fallback);
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
@@ -2106,8 +2111,11 @@ public final class MimeMessageUtility {
      * @throws IOException If an I/O error occurs
      */
     public static InputStream getStreamFromPart(final Part part) throws IOException {
+        if (null == part) {
+            return null;
+        }
         final PipedOutputStream pos = new PipedOutputStream();
-        final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos);
+        final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
 
         final Runnable r = new Runnable() {
 
@@ -2140,9 +2148,12 @@ public final class MimeMessageUtility {
      * @throws OXException If an I/O error occurs
      */
     public static InputStream getStreamFromMailPart(final MailPart part) throws OXException {
+        if (null == part) {
+            return null;
+        }
         try {
             final PipedOutputStream pos = new PipedOutputStream();
-            final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos);
+            final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
 
             final Runnable r = new Runnable() {
 
@@ -2189,6 +2200,25 @@ public final class MimeMessageUtility {
         if (null == contentType || !toLowerCase(contentType).startsWith("multipart/")) {
             return null;
         }
+        return getMultipartContentFrom(part, contentType);
+    }
+
+    /**
+     * Gets the multipart content from specified part.
+     *
+     * @param part The part
+     * @param contentType The <code>Content-Type</code> header value
+     * @return The multipart or <code>null</code>
+     * @throws MessagingException If a messaging error occurs
+     * @throws IOException If an I/O error occurs
+     */
+    public static Multipart getMultipartContentFrom(final Part part, final String contentType) throws MessagingException, IOException {
+        if (null == part) {
+            return null;
+        }
+        if (null == contentType || !toLowerCase(contentType).startsWith("multipart/")) {
+            return null;
+        }
         final Object content = part.getContent();
         if (content instanceof Multipart) {
             return (Multipart) content;
@@ -2196,7 +2226,78 @@ public final class MimeMessageUtility {
         if (content instanceof InputStream) {
             return new MimeMultipart(new MessageDataSource((InputStream) content, contentType));
         }
+        if (content instanceof Message) {
+            return getMultipartContentFrom((Message) content);
+        }
+        if (content instanceof String) {
+            return new MimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(((String) content).getBytes(Charsets.ISO_8859_1)), contentType));
+        }
+        LOG.warn("Unable to retrieve multipart content fromt part with Content-Type={}. Content signals to be {}.", contentType, null == content ? "null" : content.getClass().getName());
         return null;
     }
+
+    /**
+     * Detects the charset of specified part.
+     *
+     * @param p The part whose charset shall be detected
+     * @return The detected part's charset
+     * @throws MessagingException If an error occurs in part's getter methods
+     */
+    public static String detectPartCharset(final Part p) throws MessagingException {
+        if (null == p) {
+            return null;
+        }
+        try {
+            return CharsetDetector.detectCharset(p.getInputStream());
+        } catch (final IOException e) {
+            /*
+             * Try to get data from raw input stream
+             */
+            final InputStream rawIn;
+            if (p instanceof MimeBodyPart) {
+                rawIn = ((MimeBodyPart) p).getRawInputStream();
+            } else if (p instanceof MimeMessage) {
+                rawIn = ((MimeMessage) p).getRawInputStream();
+            } else {
+                /*
+                 * Neither a MimeBodyPart nor a MimeMessage
+                 */
+                LOG.error("", e);
+                return CharsetDetector.getFallback();
+            }
+            return CharsetDetector.detectCharset(rawIn);
+        }
+    }
+
+    /**
+     * The special poison address that denies a message being sent via
+     * {@link MailTransport#sendMailMessage(com.openexchange.mail.dataobjects.compose.ComposedMailMessage, com.openexchange.mail.dataobjects.compose.ComposeType, Address[])}
+     * .
+     */
+    public static final InternetAddress POISON_ADDRESS = new InternetAddress() {
+
+        private static final long serialVersionUID = -6860515616722560896L;
+
+        {
+            address = "poison@unknown-domain.invalid";
+            personal = "Poison";
+            encodedPersonal = "Poison";
+        }
+
+        @Override
+        public String toString() {
+            return "poison";
+        }
+
+        @Override
+        public String getType() {
+            return "rfc822";
+        }
+
+        @Override
+        public boolean equals(final Object address) {
+            return (this == address);
+        }
+    };
 
 }

@@ -50,14 +50,12 @@
 package com.openexchange.admin.storage.sqlStorage;
 
 import java.sql.Connection;
-import org.apache.commons.logging.Log;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 
 public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXAdminPoolInterfaceExtension {
 
-    private static final Log LOG = LogFactory.getLog(OXAdminPoolDBPoolExtension.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXAdminPoolDBPoolExtension.class);
 
     public OXAdminPoolDBPoolExtension() {
         super();
@@ -86,7 +84,7 @@ public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXA
         try {
             getService().back(poolId, con);
         } catch (PoolException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -104,7 +102,7 @@ public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXA
         try {
             getService().backNoTimeoout(poolId, con);
         } catch (PoolException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

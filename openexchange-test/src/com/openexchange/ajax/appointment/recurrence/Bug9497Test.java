@@ -2,7 +2,6 @@ package com.openexchange.ajax.appointment.recurrence;
 
 import java.util.Calendar;
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.container.Appointment;
 
@@ -15,7 +14,7 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug9497Test extends AbstractRecurrenceTest {
 
-	private static final Log LOG = LogFactory.getLog(Bug9497Test.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug9497Test.class);
     private int objectId = -1;
 
 	public Bug9497Test(final String name) {

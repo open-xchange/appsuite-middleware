@@ -50,24 +50,26 @@
 package com.openexchange.realtime.hazelcast.osgi;
 
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
+import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
+import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
+import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.handle.StanzaStorage;
 import com.openexchange.realtime.hazelcast.Services;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
+import com.openexchange.realtime.hazelcast.cleanup.GlobalRealtimeCleanupImpl;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
 import com.openexchange.realtime.hazelcast.impl.GlobalMessageDispatcherImpl;
 import com.openexchange.realtime.hazelcast.impl.HazelcastStanzaStorage;
@@ -82,16 +84,17 @@ import com.openexchange.timer.TimerService;
  */
 public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
-    private static Log LOG = LogFactory.getLog(HazelcastRealtimeActivator.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastRealtimeActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastInstance.class, LocalMessageDispatcher.class, ManagementService.class, TimerService.class };
+        return new Class<?>[] { HazelcastInstance.class, LocalMessageDispatcher.class, ManagementService.class, TimerService.class,
+            LocalRealtimeCleanup.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("Starting bundle: " + getClass().getCanonicalName());
+        LOG.info("Starting bundle: {}", getClass().getCanonicalName());
         Services.setServiceLookup(this);
         
         ManagementHouseKeeper managementHouseKeeper = ManagementHouseKeeper.getInstance();
@@ -125,6 +128,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         managementHouseKeeper.addManagementObject(directory.getManagementObject());
         
         GlobalMessageDispatcherImpl globalDispatcher = new GlobalMessageDispatcherImpl(directory);
+        GlobalRealtimeCleanup globalCleanup = new GlobalRealtimeCleanupImpl(directory);
         
         track(Channel.class, new SimpleRegistryListener<Channel>() {
 
@@ -142,8 +146,10 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         openTrackers();
         registerService(ResourceDirectory.class, directory, null);
         registerService(MessageDispatcher.class, globalDispatcher);
+        registerService(RealtimeJanitor.class, globalDispatcher);
         registerService(StanzaStorage.class, new HazelcastStanzaStorage());
         registerService(Channel.class, globalDispatcher.getChannel());
+        registerService(GlobalRealtimeCleanup.class, globalCleanup);
         
         directory.addChannel(globalDispatcher.getChannel());
         managementHouseKeeper.exposeManagementObjects();
@@ -151,7 +157,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
     @Override
     public void stopBundle() throws Exception {
-        LOG.info("Stopping bundle: " + getClass().getCanonicalName());
+        LOG.info("Stopping bundle: {}", getClass().getCanonicalName());
         super.stopBundle();
         Services.setServiceLookup(null);
         ManagementHouseKeeper.getInstance().cleanup();

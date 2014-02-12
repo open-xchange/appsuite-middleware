@@ -65,13 +65,19 @@ public final class SetAttributeRequest extends AbstractUserRequest<SetAttributeR
     private final String name;
     private final Object value;
     private final boolean setIfAbsent;
+    private final boolean failOnError;
 
     public SetAttributeRequest(int userId, String name, Object value, boolean setIfAbsent) {
+        this(userId, name, value, setIfAbsent, true);
+    }
+
+    public SetAttributeRequest(int userId, String name, Object value, boolean setIfAbsent, boolean failOnError) {
         super();
         this.userId = userId;
         this.name = name;
         this.value = value;
         this.setIfAbsent = setIfAbsent;
+        this.failOnError = failOnError;
     }
 
     @Override
@@ -90,7 +96,7 @@ public final class SetAttributeRequest extends AbstractUserRequest<SetAttributeR
 
     @Override
     public SetAttributeParser getParser() {
-        return new SetAttributeParser(true);
+        return new SetAttributeParser(failOnError);
     }
 
     @Override

@@ -59,8 +59,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -74,7 +72,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public class CorrectCharsetAndCollationTask implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CorrectCharsetAndCollationTask.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CorrectCharsetAndCollationTask.class);
 
     public CorrectCharsetAndCollationTask() {
         super();
@@ -144,14 +142,14 @@ public class CorrectCharsetAndCollationTask implements UpdateTask {
     }
 
     private void correctTable(final Connection con, final String table) {
-        LOG.info("Correcting table " + table + ".");
+        LOG.info("Correcting table {}.", table);
         Statement stmt = null;
         try {
             stmt = con.createStatement();
             stmt.execute("ALTER TABLE `" + table + "` CONVERT TO CHARSET utf8 "
                 + "COLLATE utf8_unicode_ci;");
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             closeSQLStuff(stmt);
         }

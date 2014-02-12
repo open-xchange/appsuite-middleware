@@ -51,7 +51,6 @@ package com.openexchange.drive.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -69,6 +68,7 @@ import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.drive.internal.throttle.BucketInputStream;
 import com.openexchange.drive.internal.throttle.DriveTokenBucket;
 import com.openexchange.drive.internal.throttle.ThrottlingDriveService;
+import com.openexchange.drive.management.DriveConfig;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -86,7 +86,7 @@ import com.openexchange.timer.TimerService;
  */
 public class DriveActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DriveActivator.class);
 
     /**
      * Initializes a new {@link DriveActivator}.
@@ -103,13 +103,23 @@ public class DriveActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("starting bundle: " + context.getBundle().getSymbolicName());
+        LOG.info("starting bundle: \"com.openexchange.drive\"");
+        /*
+         * set references
+         */
         DriveServiceLookup.set(this);
+        DriveConfig.getInstance().start();
         BucketInputStream.setTokenBucket(new DriveTokenBucket());
+        /*
+         * register services
+         */
         registerService(DriveService.class, new ThrottlingDriveService(new DriveServiceImpl()));
         registerService(CreateTableService.class, new DriveCreateTableService());
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DriveCreateTableTask()));
         registerService(DeleteListener.class, new DriveDeleteListener());
+        /*
+         * register event handler
+         */
         Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
         serviceProperties.put(EventConstants.EVENT_TOPIC, ChecksumEventListener.getHandledTopics());
         registerService(EventHandler.class, new ChecksumEventListener(), serviceProperties);
@@ -117,9 +127,10 @@ public class DriveActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: " + context.getBundle().getSymbolicName());
-        DriveServiceLookup.set(null);
+        LOG.info("stopping bundle: \"com.openexchange.drive\"");
         BucketInputStream.setTokenBucket(null);
+        DriveConfig.getInstance().stop();
+        DriveServiceLookup.set(null);
         super.stopBundle();
     }
 

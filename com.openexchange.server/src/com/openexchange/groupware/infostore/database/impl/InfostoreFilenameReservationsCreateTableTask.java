@@ -54,6 +54,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -123,10 +124,8 @@ public class InfostoreFilenameReservationsCreateTableTask extends AbstractCreate
     public void perform(final PerformParameters params) throws OXException {
         final int contextId = params.getContextId();
         createTable(INFOSTORE_RESERVED_PATHS, getTableSQL(), contextId);
-        final org.apache.commons.logging.Log logger = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(InfostoreFilenameReservationsCreateTableTask.class));
-        if (logger.isInfoEnabled()) {
-            logger.info("UpdateTask '" + InfostoreFilenameReservationsCreateTableTask.class.getSimpleName() + "' successfully performed!");
-        }
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(InfostoreFilenameReservationsCreateTableTask.class);
+            logger.info("UpdateTask ''{}'' successfully performed!", InfostoreFilenameReservationsCreateTableTask.class.getSimpleName());
     }
 
     @Override

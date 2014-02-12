@@ -56,8 +56,8 @@ import com.openexchange.exception.OXException;
  */
 public final class MALPollPushListenerRunnable implements Runnable {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MALPollPushListenerRunnable.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(MALPollPushListenerRunnable.class);
 
     private final MALPollPushListener listener;
 
@@ -71,7 +71,7 @@ public final class MALPollPushListenerRunnable implements Runnable {
         try {
             listener.checkNewMail();
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

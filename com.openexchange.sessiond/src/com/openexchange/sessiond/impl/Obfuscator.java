@@ -51,7 +51,6 @@ package com.openexchange.sessiond.impl;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
@@ -68,7 +67,7 @@ import com.openexchange.sessionstorage.StoredSession;
  */
 public class Obfuscator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionImpl.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionImpl.class);
     private static final String[] WRAPPED_PARMETERS = { Session.PARAM_ALTERNATIVE_ID, Session.PARAM_CAPABILITIES };
 
     private final String obfuscationKey;

@@ -55,7 +55,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
@@ -64,6 +63,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.framework.ServiceException;
+import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.custom.parallels.osgi.ParallelsServiceRegistry;
 import com.openexchange.exception.OXException;
@@ -74,15 +74,16 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * 
+ *
  * Handles requests to the OpenAPI interface of POA.
- * 
+ *
  * Currently the management of Black/White Lists is implemented
- * 
+ *
  */
 public final class ParallelsOpenApiServletRequest  {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ParallelsOpenApiServletRequest.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ParallelsOpenApiServletRequest.class);
+
     private User user;
     private final ConfigurationService configservice;
 
@@ -99,7 +100,7 @@ public final class ParallelsOpenApiServletRequest  {
         try {
             this.user = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw new OXException(e);
         }
 
@@ -213,9 +214,7 @@ public final class ParallelsOpenApiServletRequest  {
                     retval.put(addy.toString());
                 }
             }
-            if(LOG.isDebugEnabled()){
-                LOG.debug("Got the following items from openapi for list \""+list+"\" "+retval.toString());
-            }
+            LOG.debug("Got the following items from openapi for list \"{}\" {}", list, retval);
             json_response.put("items", retval);
             return json_response;
         } catch (final XmlRpcException e) {
@@ -238,9 +237,7 @@ public final class ParallelsOpenApiServletRequest  {
         config.setServerURL(new URL(getOpenAPIInterfaceURL()));
         config.setUserAgent("Open-Xchange Paralles Plugin");
         if(isOpenAPIAuthEnabled()){
-            if(LOG.isDebugEnabled()){
-                LOG.debug("Using HTTP BASIC AUTH (Username: "+getOpenAPIAuthID()+") for sending XML-RPC requests to OpenAPI...");
-            }
+            LOG.debug("Using HTTP BASIC AUTH (Username: {}) for sending XML-RPC requests to OpenAPI...", getOpenAPIAuthID());
             config.setBasicUserName(getOpenAPIAuthID());
             config.setBasicPassword(getOpenAPIAuthPassword());
         }

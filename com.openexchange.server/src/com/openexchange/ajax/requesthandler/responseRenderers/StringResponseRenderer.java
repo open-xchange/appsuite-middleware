@@ -64,8 +64,8 @@ import com.openexchange.ajax.requesthandler.ResponseRenderer;
  */
 public class StringResponseRenderer implements ResponseRenderer {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(StringResponseRenderer.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(StringResponseRenderer.class);
 
     /**
      * Initializes a new {@link StringResponseRenderer}.
@@ -100,9 +100,9 @@ public class StringResponseRenderer implements ResponseRenderer {
             final Object resultObject = result.getResultObject();
             resp.getWriter().write(resultObject == null ? "" : resultObject.toString());
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

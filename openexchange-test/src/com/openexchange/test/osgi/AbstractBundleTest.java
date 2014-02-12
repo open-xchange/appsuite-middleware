@@ -59,6 +59,7 @@ import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.HttpUnitOptions;
@@ -82,7 +83,7 @@ import com.openexchange.test.JMXInit;
  */
 public abstract class AbstractBundleTest extends TestCase {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AbstractBundleTest.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractBundleTest.class);
 
     protected static final String PROTOCOL = "http://";
 

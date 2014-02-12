@@ -49,20 +49,24 @@
 
 package com.openexchange.log;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.slf4j.spi.MDCAdapter;
+import ch.qos.logback.classic.util.LogbackMDCAdapter;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.session.Session;
 
@@ -89,6 +93,10 @@ public final class LogProperties {
          * com.openexchange.ajax.module
          */
         AJAX_MODULE("com.openexchange.ajax.module"),
+        /**
+         * threadId
+         */
+        THREAD_ID("__threadId"),
         /**
          * com.openexchange.ajpv13.requestURI
          */
@@ -134,6 +142,10 @@ public final class LogProperties {
          */
         AJP_USER_AGENT("com.openexchange.ajp13.userAgent"),
         /**
+         * com.openexchange.session.authId
+         */
+        SESSION_AUTH_ID("com.openexchange.session.authId"),
+        /**
          * com.openexchange.session.sessionId
          */
         SESSION_SESSION_ID("com.openexchange.session.sessionId"),
@@ -141,6 +153,10 @@ public final class LogProperties {
          * com.openexchange.session.userId
          */
         SESSION_USER_ID("com.openexchange.session.userId"),
+        /**
+         * com.openexchange.session.userName
+         */
+        SESSION_USER_NAME("com.openexchange.session.userName"),
         /**
          * com.openexchange.session.contextId
          */
@@ -188,11 +204,15 @@ public final class LogProperties {
         /**
          * com.openexchange.http.grizzly.session
          */
-        GRIZZLY_HTTP_SESSION("com.openexchange.http.grizzly.session"),
+        GRIZZLY_HTTP_SESSION("com.openexchange.grizzly.session"),
         /**
          * com.openexchange.http.grizzly.userAgent
          */
-        GRIZZLY_USER_AGENT("com.openexchange.http.grizzly.userAgent"),
+        GRIZZLY_USER_AGENT("com.openexchange.grizzly.userAgent"),
+        /**
+         * com.openexchange.request.trackingId
+         */
+        REQUEST_TRACKING_ID("com.openexchange.request.trackingId"),
         /**
          * javax.servlet.servletPath
          */
@@ -269,6 +289,7 @@ public final class LogProperties {
         ;
 
         private final String name;
+
         private Name(final String name) {
             this.name = name;
         }
@@ -310,150 +331,85 @@ public final class LogProperties {
         super();
     }
 
-    /**
-     * The copy-on-write list containing sorted property names.
-     */
-    private static final List<LogPropertyName> PROPERTY_NAMES = new CopyOnWriteArrayList<LogPropertyName>();
+    private static final ConcurrentMap<Class<? extends MDCAdapter>, Field> FIELD_CACHE = new ConcurrentHashMap<Class<? extends MDCAdapter>, Field>(4);
 
-    /**
-     * Sets the configured log property names.
-     *
-     * @param propertyNames The log property names
-     */
-    public static void configuredProperties(final Collection<LogPropertyName> propertyNames) {
-        PROPERTY_NAMES.clear();
-        ENABLED.set(false);
-        if (null != propertyNames && !propertyNames.isEmpty()) {
-            PROPERTY_NAMES.addAll(new TreeSet<LogPropertyName>(propertyNames));
-            ENABLED.set(true);
+    @SuppressWarnings("unchecked")
+    private static InheritableThreadLocal<Map<String, String>> getPropertiesMap(final MDCAdapter mdcAdapter) throws OXException {
+        try {
+            final Class<? extends MDCAdapter> clazz = mdcAdapter.getClass();
+            Field field = FIELD_CACHE.get(clazz);
+            if (null == field) {
+                for (final Field f : clazz.getDeclaredFields()) {
+                    final Class<?> fieldClazz = f.getType();
+                    if (InheritableThreadLocal.class.isAssignableFrom(fieldClazz)) {
+                        field = f;
+                        break;
+                    }
+                }
+                if (null == field) {
+                    throw new NoSuchFieldException("InheritableThreadLocal");
+                }
+            }
+            return (InheritableThreadLocal<Map<String, String>>) field.get(mdcAdapter);
+        } catch (final SecurityException e) {
+            throw OXException.general(e.getMessage(), e);
+        } catch (final IllegalArgumentException e) {
+            throw OXException.general(e.getMessage(), e);
+        } catch (final NoSuchFieldException e) {
+            throw OXException.general(e.getMessage(), e);
+        } catch (final IllegalAccessException e) {
+            throw OXException.general(e.getMessage(), e);
         }
     }
 
     /**
-     * Gets the list containing sorted property names.
+     * Gets the properties for current thread.
+     * <p>
+     * <b>Be careful!</b> Returned map is a read-only reference, not a copy.
      *
-     * @return The list containing sorted property names
+     * @return The unmodifiable properties
      */
-    public static List<LogPropertyName> getPropertyNames() {
-        return PROPERTY_NAMES;
-    }
-
-    private static final AtomicBoolean ENABLED = new AtomicBoolean(false);
-
-    /**
-     * Checks if thread-local log properties are enabled.
-     *
-     * @return <code>true</code> if thread-local log properties are enabled; otherwise <code>false</code>
-     */
-    public static boolean isEnabled() {
-        return ENABLED.get();
-    }
-
-    /**
-     * The {@link ThreadLocal} variable.
-     */
-    private static final ConcurrentMap<Thread, Props> THREAD_LOCAL = new ConcurrentHashMap<Thread, Props>();
-
-    /**
-     * Gets the thread-local log properties.
-     *
-     * @return The log properties or <code>null</code>
-     * @see #isEnabled()
-     */
-    public static Props optLogProperties() {
-        return optLogProperties(Thread.currentThread());
-    }
-
-    /**
-     * Gets the thread-local log properties for specified thread.
-     *
-     * @param thread The thread
-     * @return The log properties or <code>null</code>
-     * @see #isEnabled()
-     */
-    public static Props optLogProperties(final Thread thread) {
-        if (null == thread) {
+    public static Map<String, String> getPropertyMap() {
+        try {
+            final MDCAdapter mdcAdapter = MDC.getMDCAdapter();
+            if (mdcAdapter instanceof LogbackMDCAdapter) {
+                return ((LogbackMDCAdapter) mdcAdapter).getPropertyMap();
+            }
+            final org.slf4j.Logger logger = LoggerFactory.getLogger(LogProperties.class);
+            logger.warn("Unexpected MDC adapter: {}", mdcAdapter.getClass().getName());
+            return Collections.unmodifiableMap(getPropertiesMap(mdcAdapter).get());
+        } catch (Exception e) {
             return null;
         }
-        final Props props = THREAD_LOCAL.get(thread);
-        if (props == null) {
-            return null;
-        }
-        return props;
     }
 
     /**
-     * Removes the log properties for calling thread.
+     * Removes all log properties associated with current thread.
      */
     public static void removeLogProperties() {
-        removeLogProperties(Thread.currentThread());
+        MDC.clear();
     }
 
     /**
-     * Removes the log properties for specified thread.
+     * Puts given (<code>LogProperties.Name</code> + value) pairs to properties.
      *
-     * @param thread The thread
+     * @param args The arguments
      */
-    public static void removeLogProperties(final Thread thread) {
-        THREAD_LOCAL.remove(thread);
-    }
-
-    /**
-     * Gets the thread-local log properties.
-     *
-     * @return The log properties
-     * @see #isEnabled()
-     */
-    public static Props getLogProperties() {
-        return getLogProperties(Thread.currentThread());
-    }
-
-    /**
-     * Gets the log properties for given thread.
-     *
-     * @param thread The thread
-     * @return The log properties
-     * @see #isEnabled()
-     */
-    public static Props getLogProperties(final Thread thread) {
-        if (null == thread) {
-            return null;
-        }
-        Props props = THREAD_LOCAL.get(thread);
-        if (null == props) {
-            final Props newprops = new Props();
-            props = THREAD_LOCAL.putIfAbsent(thread, newprops);
-            if (null == props) {
-                props = newprops;
-            }
-        }
-        return props;
-    }
-
-    /**
-     * Removes denoted log properties.
-     *
-     * @param names The log properties to remove
-     */
-    public static void removeLogProperties(final Collection<LogProperties.Name> names) {
-        final Props props = optLogProperties();
-        if (null != props) {
-            props.remove(names);
-        }
-    }
-
-    /**
-     * Clones the thread-local log properties.
-     *
-     * @param other The other thread
-     */
-    public static void cloneLogProperties(final Thread other) {
-        final Thread thread = Thread.currentThread();
-        final Props props = THREAD_LOCAL.get(thread);
-        if (null == props) {
+    public static void putProperties(final Object... args) {
+        if (null == args) {
             return;
         }
-        THREAD_LOCAL.put(other, new Props(props));
+        final int length = args.length;
+        if ((length % 2) != 0) {
+            return;
+        }
+        for (int i = 0; i < length; i+=2) {
+            final LogProperties.Name name = (LogProperties.Name) args[i];
+            final Object arg = args[i + 1];
+            if (null != arg) {
+                MDC.put(name.getName(), arg.toString());
+            }
+        }
     }
 
     /**
@@ -465,27 +421,27 @@ public final class LogProperties {
         if (null == session) {
             return;
         }
-        final Props props = LogProperties.getLogProperties();
-        props.put(LogProperties.Name.SESSION_SESSION_ID, session.getSessionID());
-        props.put(LogProperties.Name.SESSION_USER_ID, ForceLog.valueOf(Integer.valueOf(session.getUserId())));
-        props.put(LogProperties.Name.SESSION_CONTEXT_ID, ForceLog.valueOf(Integer.valueOf(session.getContextId())));
+        MDC.put(LogProperties.Name.SESSION_SESSION_ID.getName(), session.getSessionID());
+        MDC.put(LogProperties.Name.SESSION_AUTH_ID.getName(), session.getAuthId());
+        MDC.put(LogProperties.Name.SESSION_USER_ID.getName(), Integer.toString(session.getUserId()));
+        MDC.put(LogProperties.Name.SESSION_USER_NAME.getName(), session.getLogin());
+        MDC.put(LogProperties.Name.SESSION_CONTEXT_ID.getName(), Integer.toString(session.getContextId()));
         final String client  = session.getClient();
-        props.put(LogProperties.Name.SESSION_CLIENT_ID, client == null ? "unknown" : ForceLog.valueOf(client));
-        props.put(LogProperties.Name.SESSION_SESSION, session);
+        MDC.put(LogProperties.Name.SESSION_CLIENT_ID.getName(), client == null ? "unknown" : client);
+        // MDC.put(LogProperties.Name.SESSION_SESSION.getName(), session.toString());
     }
 
     /**
      * Removes session properties.
      */
     public static void removeSessionProperties() {
-        final Props props = LogProperties.optLogProperties();
-        if (null != props) {
-            props.remove(LogProperties.Name.SESSION_SESSION_ID);
-            props.remove(LogProperties.Name.SESSION_USER_ID);
-            props.remove(LogProperties.Name.SESSION_CONTEXT_ID);
-            props.remove(LogProperties.Name.SESSION_CLIENT_ID);
-            props.remove(LogProperties.Name.SESSION_SESSION);
-        }
+        MDC.remove(LogProperties.Name.SESSION_SESSION_ID.getName());
+        MDC.remove(LogProperties.Name.SESSION_AUTH_ID.getName());
+        MDC.remove(LogProperties.Name.SESSION_USER_ID.getName());
+        MDC.remove(LogProperties.Name.SESSION_USER_NAME.getName());
+        MDC.remove(LogProperties.Name.SESSION_CONTEXT_ID.getName());
+        MDC.remove(LogProperties.Name.SESSION_CLIENT_ID.getName());
+        // MDC.remove(LogProperties.Name.SESSION_SESSION.getName());
     }
 
     /**
@@ -494,10 +450,67 @@ public final class LogProperties {
      * @param name The property name
      * @return The log property or <code>null</code> if absent
      */
-    public static <V> V getLogProperty(final LogProperties.Name name) {
-        final Thread thread = Thread.currentThread();
-        final Props props = THREAD_LOCAL.get(thread);
-        return null == props ? null : props.<V>get(name);
+    public static String get(final LogProperties.Name name) {
+        return getLogProperty(name);
+    }
+
+    /**
+     * Gets the thread-local log property associated with specified name.
+     *
+     * @param name The property name
+     * @return The log property or <code>null</code> if absent
+     */
+    public static String getLogProperty(final LogProperties.Name name) {
+        if (null == name) {
+            return null;
+        }
+        return MDC.get(name.getName());
+    }
+
+    /**
+     * Removes denoted property
+     *
+     * @param name The name
+     */
+    public static void remove(final LogProperties.Name name) {
+        removeProperty(name);
+    }
+
+    /**
+     * Removes denoted property
+     *
+     * @param name The name
+     */
+    public static void removeProperty(final LogProperties.Name name) {
+        if (null != name) {
+            MDC.remove(name.getName());
+        }
+    }
+
+    /**
+     * Removes denoted properties
+     *
+     * @param names The names
+     */
+    public static void removeProperties(final LogProperties.Name... names) {
+        if (null != names) {
+            for (final Name name : names) {
+                MDC.remove(name.getName());
+            }
+        }
+    }
+
+    /**
+     * Removes denoted properties
+     *
+     * @param names The names
+     */
+    public static void removeProperties(final Collection<LogProperties.Name> names) {
+        if (null != names) {
+            for (final Name name : names) {
+                MDC.remove(name.getName());
+            }
+        }
     }
 
     /**
@@ -505,13 +518,25 @@ public final class LogProperties {
      *
      * @param name The property name
      * @param value The property value
-     * @see #isEnabled()
      */
-    public static void putLogProperty(final LogProperties.Name name, final Object value) {
+    public static void put(final LogProperties.Name name, final Object value) {
+        putProperty(name, value);
+    }
+
+    /**
+     * Puts specified log property. A <code>null</code> value removes the property.
+     *
+     * @param name The property name
+     * @param value The property value
+     */
+    public static void putProperty(final LogProperties.Name name, final Object value) {
+        if (null == name) {
+            return;
+        }
         if (null == value) {
-            getLogProperties().remove(name);
+            MDC.remove(name.getName());
         } else {
-            getLogProperties().put(name, value);
+            MDC.put(name.getName(), value.toString());
         }
     }
 
@@ -574,31 +599,56 @@ public final class LogProperties {
      * @param nonMatching The property names to ignore
      */
     public static String getAndPrettyPrint(final Collection<LogProperties.Name> nonMatching) {
-        String logString = "";
-        final Props logProperties = optLogProperties();
+        final Set<String> nonMatchingNames;
+        if (null == nonMatching) {
+            nonMatchingNames = null;
+        } else {
+            nonMatchingNames = new HashSet<String>(nonMatching.size());
+            for (final LogProperties.Name name : nonMatching) {
+                nonMatchingNames.add(name.getName());
+            }
+        }
         // If we have additional log properties from the ThreadLocal add it to the logBuilder
-        if (logProperties != null) {
-            final StringAllocator logBuilder = new StringAllocator(1024);
-            final Map<LogProperties.Name, Object> propertyMap = logProperties.getMap();
-            // Sort the properties for readability
-            final Map<String, String> sorted = new TreeMap<String, String>();
-            final String sep = System.getProperty("line.separator");
-            for (final Entry<LogProperties.Name, Object> propertyEntry : propertyMap.entrySet()) {
-                final LogProperties.Name propertyName = propertyEntry.getKey();
-                if (null == nonMatching || !nonMatching.contains(propertyName)) {
-                    final Object value = propertyEntry.getValue();
-                    if (null != value) {
-                        sorted.put(propertyName.getName(), value.toString());
-                    }
+        final StringAllocator logBuilder = new StringAllocator(1024);
+        // Sort the properties for readability
+        final Map<String, String> sorted = new TreeMap<String, String>();
+        final String sep = System.getProperty("line.separator");
+        for (final Entry<String, String> propertyEntry : getPropertyMap().entrySet()) {
+            final String propertyName = propertyEntry.getKey();
+            if (null == nonMatchingNames || !nonMatchingNames.contains(propertyName)) {
+                final String value = propertyEntry.getValue();
+                if (null != value) {
+                    sorted.put(propertyName, value);
                 }
             }
-            // And add them to the logBuilder
-            for (final Map.Entry<String, String> propertyEntry : sorted.entrySet()) {
-                logBuilder.append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue()).append(sep);
-            }
-            logString = logBuilder.toString();
         }
-        return logString;
+        // And add them to the logBuilder
+        for (final Map.Entry<String, String> propertyEntry : sorted.entrySet()) {
+            logBuilder.append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue()).append(sep);
+        }
+        return logBuilder.toString();
+    }
+
+    /**
+     * For convenience.
+     *
+     * @return Always <code>true</code>
+     * @deprecated Use slf4j logging
+     */
+    @Deprecated
+    public static boolean isEnabled() {
+        return true;
+    }
+
+    /**
+     * For convenience.
+     *
+     * @return The log properties
+     * @deprecated Please use slf4j MDC to manage log properties
+     */
+    @Deprecated
+    public static Props getLogProperties() {
+        return new Props();
     }
 
 }

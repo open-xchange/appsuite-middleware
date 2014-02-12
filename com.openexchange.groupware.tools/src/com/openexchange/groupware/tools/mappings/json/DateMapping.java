@@ -51,7 +51,6 @@ package com.openexchange.groupware.tools.mappings.json;
 
 import java.util.Date;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
@@ -65,7 +64,7 @@ import com.openexchange.session.Session;
  */
 public abstract class DateMapping<O> extends DefaultJsonMapping<Date, O> {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DateMapping.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DateMapping.class);
 
 	/**
 	 * Initializes a new {@link DateMapping}.

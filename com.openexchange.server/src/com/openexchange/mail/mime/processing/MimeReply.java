@@ -129,8 +129,8 @@ import com.openexchange.tools.regex.MatcherReplacer;
  */
 public final class MimeReply {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeReply.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(MimeReply.class);
 
     private static final String PREFIX_RE = "Re: ";
 
@@ -312,15 +312,18 @@ public final class MimeReply {
                         fromAdded = false;
                     }
                 }
-                if (replyAll) {
-                    /*-
+                if (checkSender(originalMsg)) {
+                    /*
                      * Check 'Sender', too
-                     *
+                     */
                     final String[] hdr = originalMsg.getHeader("Sender");
-                    if (!MIMEMessageUtility.isEmptyHeader(hdr)) {
+                    if (!MimeMessageUtility.isEmptyHeader(hdr)) {
                         tmpSet.addAll(Arrays.asList(QuotedInternetAddress.parseHeader(unfold(hdr[0]), true)));
                     }
-                     *
+                }
+                if (replyAll) {
+                    /*-
+                     * Check 'From' has been added
                      */
                     if (!fromAdded) {
                         tmpSet.addAll(Arrays.asList(origMsg.getFrom()));
@@ -349,7 +352,7 @@ public final class MimeReply {
                 /*
                  * Add user's aliases to filter
                  */
-                final String[] userAddrs = UserStorage.getStorageUser(session.getUserId(), ctx).getAliases();
+                final String[] userAddrs = UserStorage.getInstance().getUser(session.getUserId(), ctx).getAliases();
                 if (userAddrs != null && userAddrs.length > 0) {
                     final com.openexchange.java.StringAllocator addrBuilder = new com.openexchange.java.StringAllocator();
                     addrBuilder.append(userAddrs[0]);
@@ -493,7 +496,7 @@ public final class MimeReply {
             {
                 final List<String> list = new LinkedList<String>();
                 {
-                    final User user = UserStorage.getStorageUser(session.getUserId(), ctx);
+                    final User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
                     final Locale locale = user.getLocale();
                     final LocaleAndTimeZone ltz = new LocaleAndTimeZone(locale, user.getTimeZone());
                     generateReplyText(origMsg, retvalContentType, StringHelper.valueOf(locale), ltz, usm, mailSession, session, accountId, list);
@@ -574,6 +577,18 @@ public final class MimeReply {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
 
+    }
+
+    /**
+     * Checks whether to consider "Sender" header on reply to specified message.
+     *
+     * @param originalMsg The original message
+     * @return <code>true</code> to consider "Sender" header on reply; otherwise <code>false</code>
+     */
+    private static boolean checkSender(final MailMessage originalMsg) {
+        // Check if folder has "hasOnBehalfOf" flag set
+        final String fullName = originalMsg.getFolder();
+        return false;
     }
 
     private static void appendInlineContent(final MailMessage originalMail, final CompositeMailMessage replyMail, final List<String> cids) throws OXException {
@@ -670,9 +685,7 @@ public final class MimeReply {
                                 ltz.locale,
                                 ltz.timeZone)));
                 } catch (final Exception e) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn(e.getMessage(), e);
-                    }
+                    LOG.warn("", e);
                     replyPrefix = PATTERN_DATE.matcher(replyPrefix).replaceFirst("");
                 }
 
@@ -685,9 +698,7 @@ public final class MimeReply {
                                 ltz.locale,
                                 ltz.timeZone)));
                 } catch (final Exception e) {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn(e.getMessage(), e);
-                    }
+                    LOG.warn("", e);
                     replyPrefix = PATTERN_TIME.matcher(replyPrefix).replaceFirst("");
                 }
             }

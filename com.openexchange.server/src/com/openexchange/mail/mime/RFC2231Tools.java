@@ -68,7 +68,7 @@ import com.openexchange.java.Charsets;
  */
 public final class RFC2231Tools {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RFC2231Tools.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RFC2231Tools.class);
 
     private static final Locale ENGLISH = Locale.ENGLISH;
 
@@ -164,10 +164,7 @@ public final class RFC2231Tools {
         try {
             return cs.decode(bb).toString();
         } catch (final java.nio.BufferOverflowException e) {
-            LOG.warn(
-                new com.openexchange.java.StringAllocator(96).append("Decoding with charset \"").append(charset).append("\" failed for input string: \"").append(
-                    encoded).append('"').toString(),
-                e);
+            LOG.warn("Decoding with charset \"{}\" failed for input string: \"{}\"", charset, encoded, e);
             /*
              * Retry with own allocated char buffer
              */
@@ -293,7 +290,7 @@ public final class RFC2231Tools {
             /*
              * Cannot occur
              */
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return retval.toString();
     }

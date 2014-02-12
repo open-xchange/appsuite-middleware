@@ -58,7 +58,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.parser.generated.Node;
 import org.apache.jsieve.parser.generated.ParseException;
@@ -74,7 +73,6 @@ import com.openexchange.jsieve.commands.RuleComment;
 import com.openexchange.jsieve.visitors.InternalVisitor;
 import com.openexchange.jsieve.visitors.Visitor;
 import com.openexchange.jsieve.visitors.Visitor.OwnType;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mailfilter.ajax.Credentials;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
 
@@ -194,7 +192,7 @@ public final class SieveTextFilter {
 
     private static final String LEGAL_FLAG_CHARS = "[a-zA-Z1-9]";
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SieveTextFilter.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SieveTextFilter.class);
 
     private static final String RULENAME_TAG = "Rulename: ";
 
@@ -329,9 +327,8 @@ public final class SieveTextFilter {
         }
         if (error) {
             return new ClientRulesAndRequire(retval, requires);
-        } else {
-            return new ClientRulesAndRequire(retval, new HashSet<String>());
         }
+        return new ClientRulesAndRequire(retval, new HashSet<String>());
     }
 
 
@@ -348,14 +345,10 @@ public final class SieveTextFilter {
             final Rule rule = finalrules.get(i);
             final RuleComment ruleComment = rule.getRuleComment();
             if (null != ruleComment) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Added line number " + linenumber + " to comment " + ruleComment);
-                }
+                LOG.debug("Added line number {} to comment {}", linenumber, ruleComment);
                 ruleComment.setLine(linenumber++);
             }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Added line number " + linenumber + " to rule " + rule);
-            }
+            LOG.debug("Added line number {} to rule {}", linenumber, rule);
             rule.setLinenumber(linenumber);
             // Here we add one because a space between two rules looks better
             final ArrayList<Command> commands = rule.getCommands();
@@ -800,7 +793,7 @@ public final class SieveTextFilter {
     }
 
     private void printErrorForUser(final OXException mailfilterException) {
-        LOG.error("Error in mailfilter rules of user " + this.username + ": " + mailfilterException.getMessage(), mailfilterException);
+        LOG.error("Error in mailfilter rules of user {}", this.username, mailfilterException);
     }
 
     /**

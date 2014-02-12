@@ -17,7 +17,7 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
-CRAWLERCONFFILES="crawler.properties"
+CRAWLERCONFFILES="crawlers/gmx.com.yml crawlers/gmx.de.yml crawlers/GoogleCalendar.yml crawlers/GoogleMail.yml 'crawlers/Sun Calendar.yml' 'crawlers/Sun Contacts.yml' 'crawlers/Sun Tasks.yml' crawlers/t-online.de.yml crawlers/web.de.yml crawlers/XING.yml crawlers/yahoo.com.yml crawler.properties"
 
 for FILE in ${CRAWLERCONFFILES}; do
     dpkg-maintscript-helper mv_conffile "/opt/open-xchange/etc/groupware/${FILE}" "/opt/open-xchange/etc/${FILE}" 6.20.99 \
@@ -39,6 +39,9 @@ dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/msnsubscribe
 dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/yahoosubscribe.properties \
     /opt/open-xchange/etc/yahoosubscribe.properties 6.20.99 open-xchange-subscribe-yahoo -- $1 \
     $(dpkg-query -W -f='${Config-Version}' open-xchange-subscribe-yahoo)
+
+#SoftwareChange_Request-1847
+dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/crawlers/XING.yml /opt/open-xchange/etc/crawlers/xing.yml 7.4.2~ -- "$@"
 
 . /opt/open-xchange/lib/oxfunctions.sh
 
@@ -110,6 +113,14 @@ postFix() {
         if ox_exists_property ${prop}.autorunInterval $pfile; then
             ox_remove_property ${prop}.autorunInterval $pfile
         fi
+        if ox_exists_property $prop $pfile; then
+            ox_remove_property $prop $pfile
+        fi
+    done
+
+    #SoftwareChange_Request-1800
+    pfile=/opt/open-xchange/etc/crawler.properties
+    for prop in com.openexchange.subscribe.crawler.updatepath com.openexchange.subscribe.crawler.updatedfile com.openexchange.subscribe.crawler.updateinterval com.openexchange.subscribe.crawler.enableautoupdate com.openexchange.subscribe.crawler.onlyupdatealreadyinstalled; do
         if ox_exists_property $prop $pfile; then
             ox_remove_property $prop $pfile
         fi

@@ -54,7 +54,7 @@ import junit.framework.TestSuite;
 
 /**
  * {@link CalDAVTestSuite} - Testsuite for the CalDAV interface.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public final class CalDAVTestSuite {
@@ -64,7 +64,8 @@ public final class CalDAVTestSuite {
         suite.addTestSuite(NewTest.class);
         suite.addTestSuite(FreeBusyTest.class);
         suite.addTestSuite(MkCalendarTest.class);
+        suite.addTestSuite(CookieTest.class);
         return suite;
     }
-    
+
 }

@@ -51,8 +51,6 @@ package com.openexchange.push.ms.osgi;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -102,27 +100,27 @@ public class ManagementRegisterer implements ServiceTrackerCustomizer<Management
 
     private void registerPushMsMBean(final ManagementService management) {
         if (objectName == null) {
-            final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementRegisterer.class));
+            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ManagementRegisterer.class);
             try {
                 objectName = getObjectName(PushMsMBeanImpl.class.getName(), PushMsMBean.PUSH_MS_DOMAIN);
                 management.registerMBean(objectName, new PushMsMBeanImpl());
             } catch (final MalformedObjectNameException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
             } catch (final OXException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
             } catch (final Exception e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
             }
         }
     }
 
     private void unregisterPushMsMBean(final ManagementService management) {
         if (objectName != null) {
-            final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementRegisterer.class));
+            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ManagementRegisterer.class);
             try {
                 management.unregisterMBean(objectName);
             } catch (final OXException e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
             } finally {
                 objectName = null;
             }

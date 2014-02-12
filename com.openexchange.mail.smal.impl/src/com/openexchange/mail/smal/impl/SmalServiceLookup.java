@@ -85,7 +85,7 @@ public final class SmalServiceLookup implements ServiceLookup {
      * Gets the service of specified type
      *
      * @param clazz The service's class
-     * @return The service or <code>null</code> is absent
+     * @return The service or <code>null</code> if absent
      * @throws IllegalStateException If an error occurs while returning the demanded service
      */
     public static <S> S getServiceStatic(final Class<? extends S> clazz) {
@@ -106,7 +106,7 @@ public final class SmalServiceLookup implements ServiceLookup {
      * Gets the service of specified type
      *
      * @param clazz The service's class
-     * @return The service or <code>null</code> is absent
+     * @return The service or <code>null</code> if absent
      * @throws IllegalStateException If an error occurs while returning the demanded service
      */
     @Override

@@ -63,7 +63,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class PublicationTargetDiscoveryServiceTrackerCustomizer implements ServiceTrackerCustomizer<PublicationTargetDiscoveryService,PublicationTargetDiscoveryService> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(PublicationTargetDiscoveryServiceTrackerCustomizer.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PublicationTargetDiscoveryServiceTrackerCustomizer.class);
 
     private final BundleContext context;
 
@@ -119,7 +119,7 @@ public final class PublicationTargetDiscoveryServiceTrackerCustomizer implements
         try {
             return Integer.parseInt(property.toString());
         } catch (final NumberFormatException e) {
-            LOG.error("Service ranking cannot be parsed to an integer: " + property.toString(), e);
+            LOG.error("Service ranking cannot be parsed to an integer: {}", property, e);
             return 0;
         }
     }

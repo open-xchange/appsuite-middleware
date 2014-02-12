@@ -51,7 +51,6 @@ package com.openexchange.mail.json.actions;
 
 import static com.openexchange.mail.json.parser.MessageParser.parseAddressKey;
 import java.io.Closeable;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -74,7 +73,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
@@ -102,7 +100,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractMailAction implements AJAXActionService, MailActionConstants {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractMailAction.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractMailAction.class);
 
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 
@@ -131,7 +129,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * Gets the service of specified type
      *
      * @param clazz The service's class
-     * @return The service or <code>null</code> is absent
+     * @return The service or <code>null</code> if absent
      */
     protected <S> S getService(final Class<? extends S> clazz) {
         return services.getService(clazz);
@@ -206,14 +204,8 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } finally {
             requestData.cleanUploads();
-            if (LogProperties.isEnabled()) {
-                final Props logProperties = LogProperties.optLogProperties();
-                if (null != logProperties) {
-                    for (final LogProperties.Name name : ALL_LOG_PROPERTIES) {
-                        logProperties.remove(name);
-                    }
-                }
-            }
+
+            LogProperties.removeProperties(ALL_LOG_PROPERTIES);
         }
     }
 
@@ -232,8 +224,9 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      *
      * @param session The session
      * @param mail The mail
+     * @throws OXException
      */
-    public static void triggerContactCollector(final ServerSession session, final MailMessage mail) {
+    public static void triggerContactCollector(final ServerSession session, final MailMessage mail) throws OXException {
         final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (null != ccs) {
             final Set<InternetAddress> addrs = new HashSet<InternetAddress>();
@@ -248,7 +241,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                 if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
                     validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
                 }
-                final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
+                final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
                 validAddrs.add(new QuotedInternetAddress(user.getMail()));
                 final String[] aliases = user.getAliases();
                 for (final String alias : aliases) {
@@ -256,7 +249,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                 }
                 addrs.removeAll(validAddrs);
             } catch (final AddressException e) {
-                LOG.warn("Collected contacts could not be stripped by user's email aliases: " + e.getMessage(), e);
+                LOG.warn("Collected contacts could not be stripped by user's email aliases", e);
 
             }
             if (!addrs.isEmpty()) {
@@ -271,8 +264,9 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      *
      * @param session The session
      * @param mail The JSON mail
+     * @throws OXException
      */
-    protected static void triggerContactCollector(final ServerSession session, final JSONObject mail) {
+    protected static void triggerContactCollector(final ServerSession session, final JSONObject mail) throws OXException {
         final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (null != ccs) {
             final Set<InternetAddress> addrs = new HashSet<InternetAddress>();
@@ -287,7 +281,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                 if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
                     validAddrs.add(new QuotedInternetAddress(usm.getSendAddr()));
                 }
-                final User user = UserStorage.getStorageUser(session.getUserId(), session.getContextId());
+                final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
                 validAddrs.add(new QuotedInternetAddress(user.getMail()));
                 final String[] aliases = user.getAliases();
                 for (final String alias : aliases) {
@@ -295,9 +289,9 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                 }
                 addrs.removeAll(validAddrs);
             } catch (final AddressException e) {
-                LOG.warn(MessageFormat.format("Contact collector could not be triggered: {0}", e.getMessage()), e);
+                LOG.warn("Contact collector could not be triggered", e);
             } catch (final JSONException e) {
-                LOG.warn(MessageFormat.format("Contact collector could not be triggered: {0}", e.getMessage()), e);
+                LOG.warn("Contact collector could not be triggered", e);
             }
             if (!addrs.isEmpty()) {
                 // Add addresses
@@ -339,8 +333,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                 usm.setAllowHTMLImages(false);
                 displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
             } else {
-                LOG.warn(new com.openexchange.java.StringAllocator(64).append("Unknown value in parameter ").append(Mail.PARAMETER_VIEW).append(
-                    ": ").append(view).append(". Using user's mail settings as fallback."));
+                LOG.warn("Unknown value in parameter {}: {}. Using user's mail settings as fallback.", Mail.PARAMETER_VIEW, view);
                 displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
             }
         } else {

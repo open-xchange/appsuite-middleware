@@ -60,7 +60,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.dataretention.DataRetentionExceptionMessages;
+import com.openexchange.dataretention.DataRetentionExceptionCodes;
 import com.openexchange.dataretention.RetentionData;
 import com.openexchange.dataretention.csv.CSVFile;
 import com.openexchange.exception.OXException;
@@ -79,9 +79,7 @@ import com.openexchange.java.StringAllocator;
  */
 public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>, Runnable {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractWriteTask.class));
-
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractWriteTask.class);
 
     /**
      * The character indicating a header record.
@@ -197,15 +195,15 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
             Thread.currentThread().interrupt();
         } catch (final CancellationException e) {
             REFERENCE.set(null);
-            throw DataRetentionExceptionMessages.ERROR.create(e, e.getMessage());
+            throw DataRetentionExceptionCodes.ERROR.create(e, e.getMessage());
         } catch (final ExecutionException e) {
             REFERENCE.set(null);
             final Throwable cause = e.getCause();
             if (cause instanceof IOException) {
-                throw DataRetentionExceptionMessages.IO.create(cause, cause.getMessage());
+                throw DataRetentionExceptionCodes.IO.create(cause, cause.getMessage());
             }
             if (cause instanceof RuntimeException) {
-                throw DataRetentionExceptionMessages.ERROR.create(cause, cause.getMessage());
+                throw DataRetentionExceptionCodes.ERROR.create(cause, cause.getMessage());
             }
             if (cause instanceof Error) {
                 throw (Error) cause;
@@ -221,13 +219,13 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
             // Write CSV line to file
             writeCSVLine(getCSVLine());
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final FileNotFoundException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -252,9 +250,7 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
         // Write CSV line to file
         final FileOutputStream fos = new FileOutputStream(csvFile.getFile(), true);
         try {
-            if (DEBUG_ENABLED) {
-                LOG.debug(new StringBuilder("Writing CSV line: ").append(csvLine).toString());
-            }
+            LOG.debug("Writing CSV line: {}", csvLine);
             fos.write(Charsets.toAsciiBytes(csvLine));
             fos.flush();
         } finally {

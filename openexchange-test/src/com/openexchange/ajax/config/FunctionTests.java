@@ -53,7 +53,6 @@ import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import java.util.Map.Entry;
 import java.util.Random;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import com.openexchange.ajax.config.actions.GetRequest;
@@ -71,7 +70,7 @@ import com.openexchange.tools.RandomString;
  */
 public class FunctionTests extends AbstractAJAXSession {
 
-    private static final Log LOG = LogFactory.getLog(FunctionTests.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FunctionTests.class);
 
     private AJAXClient client;
 

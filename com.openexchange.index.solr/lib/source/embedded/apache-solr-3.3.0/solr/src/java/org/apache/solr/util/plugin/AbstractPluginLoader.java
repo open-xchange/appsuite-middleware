@@ -37,7 +37,7 @@ import org.w3c.dom.NodeList;
  */
 public abstract class AbstractPluginLoader<T>
 {
-  public static Logger log = LoggerFactory.getLogger(AbstractPluginLoader.class);
+  public static org.slf4j.Logger log = LoggerFactory.getLogger(AbstractPluginLoader.class);
   
   private final String type;
   private final boolean preRegister;

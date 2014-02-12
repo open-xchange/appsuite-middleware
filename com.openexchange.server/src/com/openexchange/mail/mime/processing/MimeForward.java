@@ -121,8 +121,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class MimeForward {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeForward.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(MimeForward.class);
 
     private static final String PREFIX_FWD = "Fwd: ";
 
@@ -510,11 +510,11 @@ public final class MimeForward {
         return forwardMail;
     }
 
-    private static User getUser(final Session session, final Context ctx) {
+    private static User getUser(final Session session, final Context ctx) throws OXException {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getUser();
         }
-        return UserStorage.getStorageUser(session.getUserId(), ctx);
+        return UserStorage.getInstance().getUser(session.getUserId(), ctx);
     }
 
     private static MailMessage asAttachmentForward(final MailMessage[] originalMsgs, final MimeMessage forwardMsg) throws MessagingException, OXException {
@@ -730,9 +730,7 @@ public final class MimeForward {
                             ltz.locale,
                             ltz.timeZone)));
             } catch (final Exception t) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn(t.getMessage(), t);
-                }
+                LOG.warn("", t);
                 forwardPrefix = PATTERN_DATE.matcher(forwardPrefix).replaceFirst("");
             }
             try {
@@ -744,9 +742,7 @@ public final class MimeForward {
                             ltz.locale,
                             ltz.timeZone)));
             } catch (final Exception t) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn(t.getMessage(), t);
-                }
+                LOG.warn("", t);
                 forwardPrefix = PATTERN_TIME.matcher(forwardPrefix).replaceFirst("");
             }
 
@@ -903,7 +899,7 @@ public final class MimeForward {
                 return ((ServerSession) session).getUser();
             }
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-            return UserStorage.getStorageUser(session.getUserId(), ctx);
+            return UserStorage.getInstance().getUser(session.getUserId(), ctx);
         } catch (final Exception e) {
             // Ignore
             return null;

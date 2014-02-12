@@ -49,7 +49,6 @@
 
 package com.openexchange.capabilities;
 
-import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -62,7 +61,7 @@ public interface CapabilityService {
 
     /**
      * Gets the capabilities associated with given user.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param computeCapabilityFilters boolean to indicate if filters should be computed. Use <code>false</code> to retrieve all available
@@ -70,18 +69,18 @@ public interface CapabilityService {
      * @return The capabilities
      * @throws OXException If capabilities cannot be determined
      */
-    Set<Capability> getCapabilities(int userId, int contextId, boolean computeCapabilityFilters) throws OXException;
+    CapabilitySet getCapabilities(int userId, int contextId, boolean computeCapabilityFilters) throws OXException;
 
     /**
      * Gets the capabilities associated with given session.
-     * 
+     *
      * @param session The session
      * @param computeCapabilityFilters boolean to indicate if filters should be computed. Use <code>false</code> to retrieve all available
      *            capabilities
      * @return The capabilities
      * @throws OXException If capabilities cannot be determined
      */
-    Set<Capability> getCapabilities(Session session, boolean computeCapabilityFilters) throws OXException;
+    CapabilitySet getCapabilities(Session session, boolean computeCapabilityFilters) throws OXException;
 
     /**
      * Gets the capabilities associated with given user.
@@ -91,7 +90,7 @@ public interface CapabilityService {
      * @return The capabilities
      * @throws OXException If capabilities cannot be determined
      */
-    Set<Capability> getCapabilities(int userId, int contextId) throws OXException;
+    CapabilitySet getCapabilities(int userId, int contextId) throws OXException;
 
     /**
      * Gets the capabilities associated with given session.
@@ -100,13 +99,14 @@ public interface CapabilityService {
      * @return The capabilities
      * @throws OXException If capabilities cannot be determined
      */
-    Set<Capability> getCapabilities(Session session) throws OXException;
+    CapabilitySet getCapabilities(Session session) throws OXException;
 
     /**
      * Declares specified capability.
      *
      * @param capability The capability to declare
+     * @return <code>true</code> if capability has not been declared before; otherwise <code>false</code> if already declared (no-op)
      */
-    void declareCapability(String capability);
+    boolean declareCapability(String capability);
 
 }

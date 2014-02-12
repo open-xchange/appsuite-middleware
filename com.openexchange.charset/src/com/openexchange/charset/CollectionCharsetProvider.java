@@ -69,7 +69,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public final class CollectionCharsetProvider extends CharsetProvider {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CollectionCharsetProvider.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CollectionCharsetProvider.class);
 
     private final Map<String, Charset> charsetMap;
 
@@ -191,9 +191,7 @@ public final class CollectionCharsetProvider extends CharsetProvider {
 
     private void putCharset(final String name, final Charset charset) {
         if (charsetMap.containsKey(name)) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Discarding duplicate charset: " + name);
-            }
+            LOG.debug("Discarding duplicate charset: {}", name);
             return;
         }
         charsetMap.put(name, charset);

@@ -138,7 +138,7 @@ import com.openexchange.tools.TimeZoneUtils;
  */
 public final class MessageParser {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessageParser.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MessageParser.class);
 
     private static final String CONTENT_TYPE = MailJSONField.CONTENT_TYPE.getKey();
     private static final String CONTENT = MailJSONField.CONTENT.getKey();
@@ -324,7 +324,7 @@ public final class MessageParser {
                     final String key = elem.keys().next();
                     dataArguments.put(key, elem.getString(key));
                 } else {
-                    LOG.warn("Corrupt data argument in JSON object: " + elem.toString());
+                    LOG.warn("Corrupt data argument in JSON object: {}", elem);
                 }
             }
             return dataArguments;
@@ -345,7 +345,7 @@ public final class MessageParser {
         parse(
             jsonObj,
             transportMail,
-            TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone()),
+            TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone()),
             provider,
             session,
             accountId,
@@ -367,7 +367,7 @@ public final class MessageParser {
         parse(
             jsonObj,
             mail,
-            TimeZoneUtils.getTimeZone(UserStorage.getStorageUser(
+            TimeZoneUtils.getTimeZone(UserStorage.getInstance().getUser(
                 session.getUserId(),
                 ContextStorage.getStorageContext(session.getContextId())).getTimeZone()),
             session,
@@ -578,7 +578,8 @@ public final class MessageParser {
                 /*
                  * Boolean value "true"
                  */
-                mail.setDispositionNotification(mail.getFrom().length > 0 ? mail.getFrom()[0] : null);
+                final InternetAddress[] from = mail.getFrom();
+                mail.setDispositionNotification(from.length > 0 ? from[0] : null);
             } else {
                 final InternetAddress ia = getEmailAddress(dispVal);
                 if (ia == null) {
@@ -878,7 +879,7 @@ public final class MessageParser {
         try {
             managedFile = management.getByID(seqId.substring(FILE_PREFIX.length()));
         } catch (final OXException e) {
-            LOG.error("No temp file found for ID: " + seqId.substring(FILE_PREFIX.length()), e);
+            LOG.error("No temp file found for ID: {}", seqId.substring(FILE_PREFIX.length()), e);
             return;
         }
         // Create wrapping upload file
@@ -957,7 +958,7 @@ public final class MessageParser {
                 }
                 return parseAdressArray(jsonArr, length);
             } catch (final JSONException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 /*
                  * Reset
                  */
@@ -1006,11 +1007,11 @@ public final class MessageParser {
     }
 
     private static InternetAddress getEmailAddress(final String addrStr) {
-        if (addrStr == null || addrStr.length() == 0) {
+        if (isEmpty(addrStr)) {
             return null;
         }
         try {
-            return QuotedInternetAddress.parse(addrStr, true)[0];
+            return new QuotedInternetAddress(addrStr, false);
         } catch (final AddressException e) {
             return null;
         }

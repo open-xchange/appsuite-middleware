@@ -55,7 +55,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.imap.notify.IMAPNotifierRegistryService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.push.malpoll.MALPollPushListener;
 import com.openexchange.push.malpoll.MALPollPushListenerRegistry;
 
@@ -94,7 +93,7 @@ public final class IMAPNotifierTracker implements ServiceTrackerCustomizer<IMAPN
                     registryService.addTaskFor(MALPollPushListener.getAccountId(), listener.getSession());
                 }
                 listenerRegistry.purgeAllPushListener();
-                com.openexchange.log.Log.valueOf(LogFactory.getLog(IMAPNotifierTracker.class)).warn(
+                org.slf4j.LoggerFactory.getLogger(IMAPNotifierTracker.class).warn(
                     "\n\t----- /!\\ Orderly dropped MAL-Poll mail push because poll-based recent-notifier is enabled. /!\\ -----\n");
             }
             return service;

@@ -51,14 +51,14 @@ package com.openexchange.publish;
 
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 
-
 /**
- * {@link PublicationTarget}
+ * {@link PublicationTarget} - A publication target.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public class PublicationTarget {
+
     private String id;
     private String displayName;
     private String icon;
@@ -67,67 +67,128 @@ public class PublicationTarget {
     private DynamicFormDescription description;
     private PublicationService publicationService;
 
+    /**
+     * Initializes a new {@link PublicationTarget}.
+     */
+    public PublicationTarget() {
+        super();
+    }
 
+    /**
+     * Gets the identifier
+     *
+     * @return The identifier
+     */
     public String getId() {
         return id;
     }
 
-
-    public void setId(String id) {
+    /**
+     * Sets the identifier
+     *
+     * @param id The identifier to set
+     */
+    public void setId(final String id) {
         this.id = id;
     }
 
-
+    /**
+     * Gets the display name
+     *
+     * @return The display name
+     */
     public String getDisplayName() {
         return displayName;
     }
 
-
-    public void setDisplayName(String displayName) {
+    /**
+     * Sets the display name
+     *
+     * @param displayName The display name to set
+     */
+    public void setDisplayName(final String displayName) {
         this.displayName = displayName;
     }
 
-
+    /**
+     * Gets the icon
+     *
+     * @return The icon
+     */
     public String getIcon() {
         return icon;
     }
 
-
-    public void setIcon(String icon) {
+    /**
+     * Sets the icon
+     *
+     * @param icon The icon to set
+     */
+    public void setIcon(final String icon) {
         this.icon = icon;
     }
 
-
+    /**
+     * Gets the module
+     *
+     * @return The module
+     */
     public String getModule() {
         return module;
     }
 
-
-    public void setModule(String module) {
+    /**
+     * Sets the module
+     *
+     * @param module The module to set
+     */
+    public void setModule(final String module) {
         this.module = module;
     }
 
-
+    /**
+     * Gets the form description
+     *
+     * @return The form description
+     */
     public DynamicFormDescription getFormDescription() {
         return description;
     }
 
-
-    public void setFormDescription(DynamicFormDescription description) {
+    /**
+     * Sets the form description
+     *
+     * @param description The form description to set
+     */
+    public void setFormDescription(final DynamicFormDescription description) {
         this.description = description;
     }
 
-
+    /**
+     * Gets the publication service
+     *
+     * @return The publication service
+     */
     public PublicationService getPublicationService() {
-        return this.publicationService;
+        return publicationService;
     }
 
-    public void setPublicationService(PublicationService publicationService) {
+    /**
+     * Sets the publication service
+     *
+     * @param publicationService The publication service to set
+     */
+    public void setPublicationService(final PublicationService publicationService) {
         this.publicationService = publicationService;
     }
 
-
-    public boolean isResponsibleFor(String module) {
+    /**
+     * Checks if this publication target is responsible for given module.
+     *
+     * @param module The module to check
+     * @return <code>true</code> if responsible for given module; otherwise <code>false</code>
+     */
+    public boolean isResponsibleFor(final String module) {
         return this.module.equals(module);
     }
 

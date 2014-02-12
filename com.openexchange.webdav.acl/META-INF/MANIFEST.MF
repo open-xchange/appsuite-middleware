@@ -2,23 +2,30 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: WebDAV ACL
 Bundle-SymbolicName: com.openexchange.webdav.acl
-Bundle-Version: 7.4.1
+Bundle-Version: 7.4.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.authentication,
+ com.openexchange.contact,
  com.openexchange.exception,
  com.openexchange.folderstorage,
  com.openexchange.groupware,
+ com.openexchange.groupware.contact.helpers,
+ com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.ldap,
+ com.openexchange.java,
  com.openexchange.log,
  com.openexchange.login,
  com.openexchange.login.internal,
  com.openexchange.osgi,
+ com.openexchange.search,
+ com.openexchange.search.internal.operands,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.sessiond.impl,
+ com.openexchange.tools.iterator,
  com.openexchange.tools.service,
  com.openexchange.tools.servlet.http,
  com.openexchange.tools.session,
@@ -38,6 +45,7 @@ Import-Package: com.openexchange.authentication,
  org.jdom2.output,
  org.osgi.framework,
  org.osgi.service.http,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Export-Package: com.openexchange.webdav.acl.mixins
 Bundle-Activator: com.openexchange.webdav.acl.osgi.WebdavACLActivator

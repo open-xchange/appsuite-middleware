@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
 
   private final Logger queryLogger = LoggerFactory.getLogger("HColumnFamilyLogger");
-  private final Logger log = LoggerFactory.getLogger(HColumnFamily.class);
+  private final org.slf4j.Logger log = LoggerFactory.getLogger(HColumnFamily.class);
   
   private final ExecutingKeyspace keyspace;
   private final String columnFamilyName;

@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.acl;
 
+import com.openexchange.contact.ContactService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.user.UserService;
@@ -70,11 +71,13 @@ public class PrincipalWebdavFactory extends AbstractWebdavFactory {
     private static final Protocol PROTOCOL = new PrincipalProtocol();
 
     private final UserService userService;
+    private final ContactService contactService;
     private final SessionHolder sessionHolder;
 
 
-    public PrincipalWebdavFactory(final UserService userService, final SessionHolder sessionHolder) {
+    public PrincipalWebdavFactory(final UserService userService, ContactService contactService, final SessionHolder sessionHolder) {
         super();
+        this.contactService = contactService;
         this.userService = userService;
         this.sessionHolder = sessionHolder;
     }
@@ -103,6 +106,10 @@ public class PrincipalWebdavFactory extends AbstractWebdavFactory {
 
     public UserService getUserService() {
         return userService;
+    }
+
+    public ContactService getContactService() {
+        return contactService;
     }
 
     public Context getContext() {

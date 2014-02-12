@@ -52,8 +52,6 @@ package com.openexchange.monitoring.internal;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.monitoring.services.MonitoringServiceRegistry;
@@ -73,7 +71,7 @@ public final class MonitoringInit implements Initialization {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MonitoringInit.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MonitoringInit.class);
 
     /**
      * Prevent instantiation.
@@ -102,7 +100,7 @@ public final class MonitoringInit implements Initialization {
     @Override
     public void start() throws OXException {
         if (started.get()) {
-            LOG.error(MonitoringInit.class.getName() + " already started");
+            LOG.error("{} already started", MonitoringInit.class.getName());
             return;
         }
         /*
@@ -113,15 +111,13 @@ public final class MonitoringInit implements Initialization {
         try {
             managementAgent.registerMBean(getObjectName(), generalMonitorBean);
         } catch (final MalformedObjectNameException exc) {
-            LOG.error(exc.getMessage(), exc);
+            LOG.error("", exc);
         } catch (final NullPointerException exc) {
-            LOG.error(exc.getMessage(), exc);
+            LOG.error("", exc);
         } catch (final Exception exc) {
-            LOG.error(exc.getMessage(), exc);
+            LOG.error("", exc);
         }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("JMX Monitor applied");
-        }
+        LOG.info("JMX Monitor applied");
 
         started.set(true);
     }
@@ -132,7 +128,7 @@ public final class MonitoringInit implements Initialization {
     @Override
     public void stop() throws OXException {
         if (!started.get()) {
-            LOG.error(MonitoringInit.class.getName() + " has not been started");
+            LOG.error("{} has not been started", MonitoringInit.class.getName());
             return;
         }
         final ManagementService managementAgent = MonitoringServiceRegistry.getServiceRegistry().getService(ManagementService.class);
@@ -140,15 +136,13 @@ public final class MonitoringInit implements Initialization {
             try {
                 managementAgent.unregisterMBean(getObjectName());
             } catch (final MalformedObjectNameException exc) {
-                LOG.error(exc.getMessage(), exc);
+                LOG.error("", exc);
             } catch (final NullPointerException exc) {
-                LOG.error(exc.getMessage(), exc);
+                LOG.error("", exc);
             } catch (final Exception exc) {
-                LOG.error(exc.getMessage(), exc);
+                LOG.error("", exc);
             }
-            if (LOG.isInfoEnabled()) {
-                LOG.info("JMX Monitor removed");
-            }
+            LOG.info("JMX Monitor removed");
         }
         started.set(false);
     }

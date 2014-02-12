@@ -60,14 +60,13 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-import org.apache.commons.logging.Log;
 
 /**
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  *
  */
 public class FileUtils {
-	private static final Log log = com.openexchange.log.Log.loggerFor(FileUtils.class);
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileUtils.class);
 
 	/**
 	 * Read data from a file and convert it to a byte array.
@@ -75,15 +74,15 @@ public class FileUtils {
 	 * @return the byte array representation of the file
 	 */
 	public static byte[] binToByteArray(String aInputFileName) {
-		log.info("Reading in binary file named : " + aInputFileName);
+		log.info("Reading in binary file named : {}", aInputFileName);
 		File file = new File(aInputFileName);
-		log.info("File size: " + file.length());
+		log.info("File size: {}", file.length());
 		byte[] result = new byte[(int) file.length()];
 		try {
 			InputStream input = null;
 			try {
 				int totalBytesRead = 0;
-				input = new BufferedInputStream(new FileInputStream(file));
+				input = new BufferedInputStream(new FileInputStream(file), 65536);
 				while (totalBytesRead < result.length) {
 					int bytesRemaining = result.length - totalBytesRead;
 					int bytesRead = input.read(result, totalBytesRead, bytesRemaining);
@@ -91,7 +90,7 @@ public class FileUtils {
 						totalBytesRead = totalBytesRead + bytesRead;
 					}
 				}
-				log.info("Num bytes read: " + totalBytesRead);
+				log.info("Num bytes read: {}", totalBytesRead);
 			} finally {
 				log.info("Closing input stream.");
 				if (input != null) {
@@ -101,7 +100,7 @@ public class FileUtils {
 		} catch (FileNotFoundException ex) {
 			log.error("File not found.");
 		} catch (IOException ex) {
-			log.error(ex);
+			log.error("", ex);
 		}
 
 		return result;
@@ -115,7 +114,7 @@ public class FileUtils {
 	        InputStream input = null;
 	        try {
 
-	            input = new BufferedInputStream(new FileInputStream(file));
+	            input = new BufferedInputStream(new FileInputStream(file), 65536);
 
 	        } finally {
 	            log.info("Closing input stream.");
@@ -126,7 +125,7 @@ public class FileUtils {
 	    } catch (FileNotFoundException ex) {
 	        log.error("File not found.");
 	    } catch (IOException ex) {
-	        log.error(ex);
+	        log.error("", ex);
 	    }
 
 	    return result;
@@ -163,7 +162,7 @@ public class FileUtils {
 		} catch (FileNotFoundException ex) {
 			log.error("File not found.");
 		} catch (IOException ex) {
-			log.error(ex);
+			log.error("", ex);
 		}
 	}
 

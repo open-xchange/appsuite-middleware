@@ -51,7 +51,6 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import java.util.Date;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -72,7 +71,7 @@ import com.openexchange.groupware.container.Appointment;
  */
 public final class Bug10836Test extends AbstractAJAXSession {
 
-	private static final Log LOG = LogFactory.getLog(Bug10836Test.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug10836Test.class);
 
 	/**
 	 * Default constructor.

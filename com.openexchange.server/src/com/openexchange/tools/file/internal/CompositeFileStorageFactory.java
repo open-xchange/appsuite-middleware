@@ -70,7 +70,7 @@ import com.openexchange.tools.file.external.FileStorageFactoryCandidate;
  */
 public class CompositeFileStorageFactory implements FileStorageFactory, ServiceTrackerCustomizer<FileStorageFactoryCandidate, FileStorageFactoryCandidate> {
 
-    private static final List<FileStorageFactoryCandidate> facs = new CopyOnWriteArrayList<FileStorageFactoryCandidate>();
+    protected static final List<FileStorageFactoryCandidate> facs = new CopyOnWriteArrayList<FileStorageFactoryCandidate>();
 
     /**
      * Initializes a new {@link CompositeFileStorageFactory}.
@@ -103,20 +103,24 @@ public class CompositeFileStorageFactory implements FileStorageFactory, ServiceT
     }
 
     @Override
-    public FileStorage getInternalFileStorage(URI uri) {
+    public FileStorage getInternalFileStorage(URI uri) throws OXException {
         if (null== uri) {
             return null;
         }
 
-        final LocalFileStorage standardFS = new LocalFileStorage(uri);
-        final HashingFileStorage hashedFS = new HashingFileStorage(new File(new File(uri), "hashed"));
-        final CompositingFileStorage cStorage = new CompositingFileStorage();
+        try {
+            final LocalFileStorage standardFS = new LocalFileStorage(uri);
+            final HashingFileStorage hashedFS = new HashingFileStorage(new File(new File(uri), "hashed"));
+            final CompositingFileStorage cStorage = new CompositingFileStorage();
 
-        cStorage.addStore(standardFS);
-        cStorage.addStore("hashed", hashedFS);
-        cStorage.setSavePrefix("hashed");
+            cStorage.addStore(standardFS);
+            cStorage.addStore("hashed", hashedFS);
+            cStorage.setSavePrefix("hashed");
 
-        return cStorage;
+            return cStorage;
+        } catch (final IllegalArgumentException e) {
+            throw OXException.general("Cannot create file storage for URI: " + uri, e);
+        }
     }
 
     @Override

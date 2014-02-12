@@ -54,8 +54,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.openexchange.exception.OXException;
@@ -80,7 +78,7 @@ public class ContactObjectsByPageAndPagePartSequenceStep extends AbstractStep<Co
 
     private PagePartSequence pageParts;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactObjectsByPageAndPagePartSequenceStep.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactObjectsByPageAndPagePartSequenceStep.class);
 
     public ContactObjectsByPageAndPagePartSequenceStep() {
 
@@ -100,7 +98,7 @@ public class ContactObjectsByPageAndPagePartSequenceStep extends AbstractStep<Co
             try {
                 final String pageString = StringEscapeUtils.unescapeHtml(input.getWebResponse().getContentAsString());
                 pageParts.setPage(pageString);
-                LOG.debug("Page evaluated is : "+pageString);
+                LOG.debug("Page evaluated is : {}", pageString);
                 final Collection<HashMap<String, String>> maps = pageParts.retrieveMultipleInformation();
 
                 for (HashMap<String, String> map : maps){
@@ -110,10 +108,7 @@ public class ContactObjectsByPageAndPagePartSequenceStep extends AbstractStep<Co
                 }
 
             } catch (final ConverterException e) {
-                LOG.error(e.getMessage()
-                    + " for Context : " + workflow.getSubscription().getContext().getContextId()
-                    + ", User : " + workflow.getSubscription().getUserId()
-                    + ", Folder : " + workflow.getSubscription().getFolderId() + ".");
+                LOG.error("{} for Context : {}, User : {}, Folder : {}.", e.getMessage(), workflow.getSubscription().getContext().getContextId(), workflow.getSubscription().getUserId(), workflow.getSubscription().getFolderId());
 
                 exception = e;
             }

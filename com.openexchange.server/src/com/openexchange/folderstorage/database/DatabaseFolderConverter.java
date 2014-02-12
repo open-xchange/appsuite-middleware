@@ -132,7 +132,7 @@ public final class DatabaseFolderConverter {
 
             @Override
             public DatabaseFolder convert(final FolderObject fo, final boolean altNames) throws OXException {
-                final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
+                final DatabaseFolder retval = new AltNameLocalizedDatabaseFolder(fo, FolderStrings.SYSTEM_PUBLIC_FILES_FOLDER_NAME);
                 retval.setName(altNames ? FolderStrings.SYSTEM_PUBLIC_FILES_FOLDER_NAME : FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME);
                 return retval;
             }
@@ -141,7 +141,7 @@ public final class DatabaseFolderConverter {
 
             @Override
             public DatabaseFolder convert(final FolderObject fo, final boolean altNames) throws OXException {
-                final DatabaseFolder retval = new LocalizedDatabaseFolder(fo);
+                final DatabaseFolder retval = new AltNameLocalizedDatabaseFolder(fo, FolderStrings.SYSTEM_USER_FILES_FOLDER_NAME);
                 retval.setName(altNames ? FolderStrings.SYSTEM_USER_FILES_FOLDER_NAME : FolderStrings.SYSTEM_USER_INFOSTORE_FOLDER_NAME);
                 return retval;
             }
@@ -333,8 +333,12 @@ public final class DatabaseFolderConverter {
                     retval = new DatabaseFolder(fo);
                 }
             } else if (folderId == getContactCollectorFolder(session, con)) {
+                // "Collected addresses" folder
                 retval = new LocalizedDatabaseFolder(fo);
                 retval.setName(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
+                retval.setDefault(true);
+                retval.setCacheable(true);
+                retval.setGlobal(false);
             } else if (folderId == getPublishedMailAttachmentsFolder(session)) {
                 retval = new LocalizedDatabaseFolder(fo);
                 retval.setName(FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME);

@@ -90,17 +90,16 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UpdatesPerformer.class));
-
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdatesPerformer.class);
 
     /**
      * Initializes a new {@link UpdatesPerformer}.
      *
      * @param session The session
      * @param decorator The optional folder service decorator
+     * @throws OXException If passed session is invalid
      */
-    public UpdatesPerformer(final ServerSession session, final FolderServiceDecorator decorator) {
+    public UpdatesPerformer(final ServerSession session, final FolderServiceDecorator decorator) throws OXException {
         super(session, decorator);
     }
 
@@ -121,8 +120,9 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
      * @param session The session
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
+     * @throws OXException If passed session is invalid
      */
-    public UpdatesPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public UpdatesPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(session, decorator, folderStorageDiscoverer);
     }
 
@@ -156,7 +156,6 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
         for (final FolderStorage folderStorage : realFolderStorages) {
             checkOpenedStorage(folderStorage, false, openedStorages);
         }
-        final long start = DEBUG_ENABLED ? System.currentTimeMillis() : 0L;
         try {
             final UserPermissionBits userPermissionBits;
             {
@@ -218,10 +217,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                                         modifiedFolderID,
                                         storageParameters));
                                 } catch (final OXException ee) {
-                                    LOG.error(
-                                        new StringBuilder(128).append("Updated folder \"").append(modifiedFolderID).append(
-                                            "\" could not be fetched from storage \"").append(folderStorage.getClass().getName()).append(
-                                            "\":\n").append(ee.getMessage()).toString(),
+                                    LOG.error("Updated folder \"{}\" could not be fetched from storage \"{}\":\n{}", modifiedFolderID, folderStorage.getClass().getName(), ee.getMessage(),
                                         ee);
                                 }
                             }
@@ -249,10 +245,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                                                 modifiedFolderID,
                                                 storageParameters));
                                         } catch (final OXException ee) {
-                                            LOG.error(
-                                                new StringBuilder(128).append("Updated folder \"").append(modifiedFolderID).append(
-                                                    "\" could not be fetched from storage \"").append(storage.getClass().getName()).append(
-                                                    "\":\n").append(ee.getMessage()).toString(),
+                                            LOG.error("Updated folder \"{}\" could not be fetched from storage \"{}\":\n{}", modifiedFolderID, storage.getClass().getName(), ee.getMessage(),
                                                 ee);
                                         }
                                     }
@@ -446,10 +439,6 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
              */
             for (final FolderStorage folderStorage : openedStorages) {
                 folderStorage.commitTransaction(storageParameters);
-            }
-            if (DEBUG_ENABLED) {
-                final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new StringBuilder().append("Updates.doUpdates() took ").append(duration).append("msec.").toString());
             }
             /*
              * Return result

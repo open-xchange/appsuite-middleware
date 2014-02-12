@@ -62,7 +62,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import org.apache.commons.logging.Log;
 import org.quartz.Calendar;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -101,7 +100,7 @@ import com.openexchange.quartz.hazelcast.predicates.TriggersForCalendarPredicate
  */
 public class ImprovedHazelcastJobStore implements JobStore {
 
-    protected static Log LOG = com.openexchange.log.Log.loggerFor(ImprovedHazelcastJobStore.class);
+    protected static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ImprovedHazelcastJobStore.class);
 
     private SchedulerSignaler signaler;
 
@@ -195,15 +194,13 @@ public class ImprovedHazelcastJobStore implements JobStore {
             consistencyTimer = new Timer(true);
             consistencyTimer.schedule(new ConsistencyTask(this, locallyAcquiredTriggers, locallyExecutingTriggers), new Date(System.currentTimeMillis() + 60000L * 5), 60000L * 5);
         } catch (IllegalStateException e) {
-            LOG.warn("Could not schedule consistency task: " + e.getMessage(), e);
+            LOG.warn("Could not schedule consistency task", e);
         }
     }
 
     @Override
     public void schedulerPaused() {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Scheduler was paused. Cancelling consistency task...");
-        }
+        LOG.debug("Scheduler was paused. Cancelling consistency task...");
 
         if (consistencyTimer != null) {
             consistencyTimer.cancel();
@@ -213,9 +210,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
 
     @Override
     public void schedulerResumed() {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Scheduler was resumed. Starting consistency task...");
-        }
+        LOG.debug("Scheduler was resumed. Starting consistency task...");
 
         try {
             if (consistencyTimer != null) {
@@ -225,15 +220,13 @@ public class ImprovedHazelcastJobStore implements JobStore {
             consistencyTimer = new Timer(true);
             consistencyTimer.schedule(new ConsistencyTask(this, locallyAcquiredTriggers, locallyExecutingTriggers), new Date(System.currentTimeMillis() + 60000L * 5), 60000L * 5);
         } catch (IllegalStateException e) {
-            LOG.warn("Could not schedule consistency task: " + e.getMessage(), e);
+            LOG.warn("Could not schedule consistency task", e);
         }
     }
 
     @Override
     public void shutdown() {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Scheduler was stopped. Cancelling consistency task...");
-        }
+        LOG.debug("Scheduler was stopped. Cancelling consistency task...");
 
         if (consistencyTimer != null) {
             consistencyTimer.cancel();
@@ -741,13 +734,15 @@ public class ImprovedHazelcastJobStore implements JobStore {
         long startTime = System.currentTimeMillis();
         long lastTime = startTime;
         StringBuilder logBuilder = null;
-        if (LOG.isTraceEnabled()) {
+
+        final boolean traceEnabled = LOG.isTraceEnabled();
+        if (traceEnabled) {
             logBuilder = new StringBuilder();
             logBuilder.append("Acquiring triggers at ");
             logBuilder.append(startTime);
             logBuilder.append("\n");
         }
-        
+
         List<OperableTrigger> returnList = new ArrayList<OperableTrigger>();
         lock.lock();
         if (logBuilder != null) {
@@ -787,10 +782,10 @@ public class ImprovedHazelcastJobStore implements JobStore {
             Set<JobKey> excluded = new HashSet<JobKey>();
             for (TriggerStateWrapper stateWrapper : triggers) {
                 if (stateWrapper.getTrigger().getNextFireTime() == null || stateWrapper.getState() == TriggerStateWrapper.STATE_COMPLETE) {
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("Removing trigger " + stateWrapper.getTrigger().getKey().getName());
+                    if (traceEnabled) {
+                        LOG.trace("Removing trigger {}", stateWrapper.getTrigger().getKey().getName());
                     }
-                    
+
                     removeTrigger(stateWrapper.getTrigger().getKey());
                     continue;
                 }
@@ -833,7 +828,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
                     break;
                 }
             }
-            
+
             if (logBuilder != null) {
                 logBuilder.append("    Processing triggers took ");
                 long now = System.currentTimeMillis();
@@ -861,7 +856,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
                 for (OperableTrigger trigger : returnList) {
                     logBuilder.append("\n        Trigger: ").append(trigger.getKey().getName());
                 }
-                
+
                 LOG.trace(logBuilder.toString());
             }
         }
@@ -876,8 +871,10 @@ public class ImprovedHazelcastJobStore implements JobStore {
     @Override
     public void releaseAcquiredTrigger(OperableTrigger trigger) throws JobPersistenceException {
         lock.lock();
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Got lock. " + System.nanoTime());
+
+        final boolean traceEnabled = LOG.isTraceEnabled();
+        if (traceEnabled) {
+            LOG.trace("Got lock. {}", System.nanoTime());
         }
 
         try {
@@ -893,7 +890,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
         } finally {
             lock.unlock();
 
-            if (LOG.isTraceEnabled()) {
+            if (traceEnabled) {
                 StringBuilder sb = new StringBuilder("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
                 sb.append("\n    Trigger: ").append(trigger.getKey().getName());
@@ -907,8 +904,10 @@ public class ImprovedHazelcastJobStore implements JobStore {
     public List<TriggerFiredResult> triggersFired(List<OperableTrigger> firedTriggers) throws JobPersistenceException {
         List<TriggerFiredResult> results = new ArrayList<TriggerFiredResult>();
         lock.lock();
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Got lock. " + System.nanoTime());
+
+        final boolean traceEnabled = LOG.isTraceEnabled();
+        if (traceEnabled) {
+            LOG.trace("Got lock. {}", System.nanoTime());
         }
 
         try {
@@ -980,7 +979,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
             return results;
         } finally {
             lock.unlock();
-            if (LOG.isTraceEnabled()) {
+            if (traceEnabled) {
                 StringBuilder sb = new StringBuilder("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
                 for (OperableTrigger trigger : firedTriggers) {
@@ -995,8 +994,10 @@ public class ImprovedHazelcastJobStore implements JobStore {
     @Override
     public void triggeredJobComplete(OperableTrigger trigger, JobDetail jobDetail, CompletedExecutionInstruction triggerInstCode) throws JobPersistenceException {
         lock.lock();
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Got lock. " + System.nanoTime());
+
+        final boolean traceEnabled = LOG.isTraceEnabled();
+        if (traceEnabled) {
+            LOG.trace("Got lock. {}", System.nanoTime());
         }
 
         try {
@@ -1094,7 +1095,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
             }
         } finally {
             lock.unlock();
-            if (LOG.isTraceEnabled()) {
+            if (traceEnabled) {
                 StringBuilder sb = new StringBuilder("Releasing lock. ");
                 sb.append(System.nanoTime()).append(". ");
                 sb.append("\n    Trigger: ").append(trigger.getKey().getName());
@@ -1170,9 +1171,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
             triggersByKey.set(stateWrapper.getTrigger().getKey(), stateWrapper, 0, TimeUnit.SECONDS);
         }
 
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Applied misfire on trigger: " + stateWrapper.getTrigger().getKey().getName());
-        }
+        LOG.trace("Applied misfire on trigger: {}", stateWrapper.getTrigger().getKey().getName());
         return true;
     }
 

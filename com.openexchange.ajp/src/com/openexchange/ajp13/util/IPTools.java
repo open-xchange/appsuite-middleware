@@ -63,7 +63,7 @@ import com.google.common.net.InetAddresses;
  */
 public class IPTools {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(IPTools.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IPTools.class);
 
     public final static String COMMA_SEPARATOR = ",";
 
@@ -98,9 +98,7 @@ public class IPTools {
         }
         // Don't return invalid IPs
         if (!InetAddresses.isInetAddress(remoteIP)) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(remoteIP + " is not a valid IP. Discarding candidate for remote IP.");
-            }
+            LOG.debug("{} is not a valid IP. Discarding candidate for remote IP.", remoteIP);
             return "";
         }
         return remoteIP;

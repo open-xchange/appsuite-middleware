@@ -60,8 +60,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.microformats.objectparser.OXMFVisitor;
 import com.openexchange.tools.ImageTypeDetector;
@@ -80,7 +78,7 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
 
     private static final String OXMF_PREFIX = OXMFVisitor.OXMF_PREFIX;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MapToContactObjectTransformer.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MapToContactObjectTransformer.class);
 
 	@Override
     public List<Contact> transform (List<Map<String, String>> inlist){
@@ -164,7 +162,7 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
                 try {
                     contact.setBirthday(DATE.parse(map.get(OXMF_PREFIX + "birthday")));
                 } catch (ParseException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -188,7 +186,7 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
                 try {
                     contact.setAnniversary(DATE.parse(map.get(OXMF_PREFIX + "anniversary")));
                 } catch (ParseException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         }
@@ -325,7 +323,7 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
             try {
                 loadImageFromURL(contact, new URL(map.get(OXMF_PREFIX + "image")));
             } catch (MalformedURLException e) {
-                LOG.warn(e.getMessage(), e);
+                LOG.warn("", e);
                 // Discard image. This is all best effort, nothing more, maybe next time.
             }
         }
@@ -405,7 +403,7 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
             urlCon.setReadTimeout(2500);
             urlCon.connect();
             mimeType = urlCon.getContentType();
-            final BufferedInputStream in = new BufferedInputStream(urlCon.getInputStream());
+            final BufferedInputStream in = new BufferedInputStream(urlCon.getInputStream(), 65536);
             try {
                 final ByteArrayOutputStream buffer = new UnsynchronizedByteArrayOutputStream();
                 final byte[] bbuf = new byte[8192];
@@ -427,16 +425,15 @@ public class MapToContactObjectTransformer implements MapToObjectTransformer{
                 try {
                     in.close();
                 } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
         } catch (final java.net.SocketTimeoutException e) {
             final String uri = url.toString();
-            LOG.warn(new StringBuilder(64 + uri.length()).append("Either connecting to or reading from an image's URI timed out: ").append(
-                uri).toString(), e);
+            LOG.warn("Either connecting to or reading from an image's URI timed out: {}", uri, e);
         } catch (final IOException e) {
             final String uri = url.toString();
-            LOG.warn(new StringBuilder(32 + uri.length()).append("Image  URI could not be loaded: ").append(uri).toString(), e);
+            LOG.warn("Image URI could not be loaded: {}", uri, e);
         }
         if (bytes != null) {
             contactContainer.setImage1(bytes);

@@ -85,7 +85,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class OXFolderUtility {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(OXFolderUtility.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXFolderUtility.class);
 
     private static final String STR_EMPTY = "";
 
@@ -145,7 +145,7 @@ public final class OXFolderUtility {
                  * A duplicate folder exists
                  */
                 throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(parentFolderName,
-                    Integer.valueOf(ctx.getContextId()));
+                    Integer.valueOf(ctx.getContextId()), folderName);
             }
             if (!OXFolderProperties.isIgnoreSharedAddressbook() && FolderObject.getFolderString(
                 FolderObject.SYSTEM_GLOBAL_FOLDER_ID,
@@ -156,7 +156,7 @@ public final class OXFolderUtility {
                  * A duplicate folder exists
                  */
                 throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(parentFolderName,
-                    Integer.valueOf(ctx.getContextId()));
+                    Integer.valueOf(ctx.getContextId()), folderName);
             }
         }
     }
@@ -222,7 +222,7 @@ public final class OXFolderUtility {
                             }
                         }
                     } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 } else {
                     /*
@@ -857,7 +857,7 @@ public final class OXFolderUtility {
                     retval.add(members[j]);
                 }
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         } else {
             retval.add(permission.getEntity());

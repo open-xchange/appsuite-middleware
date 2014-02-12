@@ -71,7 +71,7 @@ import com.openexchange.session.Session;
  */
 public final class MailProviderRegistry {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailProviderRegistry.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailProviderRegistry.class);
 
     /**
      * Concurrent map used as set for mail providers
@@ -119,11 +119,7 @@ public final class MailProviderRegistry {
         final String mailServerURL = MailConfig.getMailServerURL(session, accountId);
         final String protocol;
         if (mailServerURL == null) {
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(new StringBuilder(128).append("Missing mail server URL. Mail server URL not set in account ").append(accountId)
-                        .append(" for user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).append(
-                                ". Using fallback protocol ").append(MailProperties.getInstance().getDefaultMailProvider()));
-            }
+            LOG.warn("Missing mail server URL. Mail server URL not set in account {} for user {} in context {}. Using fallback protocol {}", accountId, session.getUserId(), session.getContextId(), MailProperties.getInstance().getDefaultMailProvider());
             protocol = MailProperties.getInstance().getDefaultMailProvider();
         } else {
             protocol = extractProtocol(mailServerURL, MailProperties.getInstance().getDefaultMailProvider());
@@ -164,7 +160,7 @@ public final class MailProviderRegistry {
      * Gets the mail provider appropriate for specified protocol.
      *
      * @param protocolName The mail protocol; e.g. <code>"imap"</code>
-     * @return The appropriate mail provider
+     * @return The appropriate mail provider or <code>null</code>
      */
     public static MailProvider getMailProvider(final String protocolName) {
         if (null == protocolName) {
@@ -244,7 +240,7 @@ public final class MailProviderRegistry {
         } catch (final OXException e) {
             throw e;
         } catch (final RuntimeException t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             return false;
         }
     }
@@ -314,7 +310,7 @@ public final class MailProviderRegistry {
             } catch (final OXException e) {
                 throw e;
             } catch (final RuntimeException t) {
-                LOG.error(t.getMessage(), t);
+                LOG.error("", t);
             }
             return all;
         }
@@ -335,7 +331,7 @@ public final class MailProviderRegistry {
         } catch (final OXException e) {
             throw e;
         } catch (final RuntimeException t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             return removed;
         }
     }
@@ -366,7 +362,7 @@ public final class MailProviderRegistry {
             } catch (final OXException e) {
                 throw e;
             } catch (final RuntimeException t) {
-                LOG.error(t.getMessage(), t);
+                LOG.error("", t);
             }
             return all;
         }

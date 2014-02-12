@@ -61,7 +61,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
  */
 public final class MailFolderType implements FolderType {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailFolderType.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailFolderType.class);
 
     private static final int LEN = MailFolder.DEFAULT_FOLDER_ID.length();
 
@@ -111,7 +111,7 @@ public final class MailFolderType implements FolderType {
             } catch (final NumberFormatException e) {
                 final IllegalArgumentException err = new IllegalArgumentException("Mail account is not a number: " + folderId);
                 err.initCause(e);
-                LOG.error(err.getMessage(), err);
+                LOG.error("", err);
                 return false;
             }
         }
@@ -142,7 +142,7 @@ public final class MailFolderType implements FolderType {
             } catch (final NumberFormatException e) {
                 final IllegalArgumentException err = new IllegalArgumentException("Mail account is not a number: " + folderId);
                 err.initCause(e);
-                LOG.error(err.getMessage(), err);
+                LOG.error("", err);
                 return false;
             }
         }

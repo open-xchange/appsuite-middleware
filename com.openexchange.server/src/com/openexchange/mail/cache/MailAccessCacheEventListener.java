@@ -52,7 +52,6 @@ package com.openexchange.mail.cache;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
@@ -60,7 +59,6 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.event.impl.osgi.EventHandlerRegistration;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -72,7 +70,7 @@ import com.openexchange.sessiond.SessiondEventConstants;
  */
 public final class MailAccessCacheEventListener implements EventHandlerRegistration {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailAccessCacheEventListener.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccessCacheEventListener.class);
 
     private volatile ServiceRegistration<EventHandler> serviceRegistration;
 
@@ -101,7 +99,7 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
                         mac.clearUserEntries(session);
                         // AttachmentTokenRegistry.getInstance().dropFor(session);
                     } catch (final OXException e) {
-                        LOG.error("Unable to clear cached mail access for session: " + session.getSessionID(), e);
+                        LOG.error("Unable to clear cached mail access for session: {}", session.getSessionID(), e);
                     }
                 }
             }
@@ -121,7 +119,7 @@ public final class MailAccessCacheEventListener implements EventHandlerRegistrat
                 mac.clearUserEntries(session);
                 // AttachmentTokenRegistry.getInstance().dropFor(session);
             } catch (final OXException e) {
-                LOG.error("Unable to clear cached mail access for session: " + session.getSessionID(), e);
+                LOG.error("Unable to clear cached mail access for session: {}", session.getSessionID(), e);
             }
         }
     }

@@ -50,32 +50,35 @@
 package com.openexchange.passwordchange;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link PasswordChangeExceptionCodes} - Enumeration of all {@link OXException}s known in password-change module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum PasswordChangeExceptionCodes implements OXExceptionCode {
+public enum PasswordChangeExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(PasswordChangeExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR(PasswordChangeExceptionCodes.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(PasswordChangeExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 2),
-
-    ;
+    IO_ERROR(PasswordChangeExceptionCodes.IO_ERROR_MSG, CATEGORY_ERROR, 2);
 
     /**
      * The error code prefix for password-change module.
      */
     public static final String PREFIX = "PWCHANGE";
+
+    private static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
+
+    private static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
 
     private final Category category;
 
@@ -83,10 +86,35 @@ public enum PasswordChangeExceptionCodes implements OXExceptionCode {
 
     private final String message;
 
+    /**
+     * Message displayed to the user
+     */
+    private String displayMessage;
+
+    /**
+     * Initializes a new {@link PasswordChangeExceptionCodes}.
+     * 
+     * @param message
+     * @param category
+     * @param detailNumber
+     */
     private PasswordChangeExceptionCodes(final String message, final Category category, final int detailNumber) {
+        this(message, category, detailNumber, null);
+    }
+
+    /**
+     * Initializes a new {@link PasswordChangeExceptionCodes}.
+     * 
+     * @param message
+     * @param category
+     * @param detailNumber
+     * @param displayMessage
+     */
+    private PasswordChangeExceptionCodes(final String message, final Category category, final int detailNumber, final String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage == null ? OXExceptionStrings.MESSAGE : displayMessage;
     }
 
     @Override
@@ -115,8 +143,16 @@ public enum PasswordChangeExceptionCodes implements OXExceptionCode {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDisplayMessage() {
+        return this.displayMessage;
+    }
+
+    /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {

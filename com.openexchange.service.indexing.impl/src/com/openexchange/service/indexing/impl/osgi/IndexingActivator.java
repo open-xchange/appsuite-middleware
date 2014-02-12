@@ -52,7 +52,6 @@ package com.openexchange.service.indexing.impl.osgi;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
 import org.quartz.Scheduler;
 import org.quartz.service.QuartzService;
@@ -65,7 +64,6 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexManagementService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -89,7 +87,7 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public class IndexingActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IndexingActivator.class);
 
     private IndexingServiceImpl serviceImpl;
 
@@ -165,7 +163,7 @@ public class IndexingActivator extends HousekeepingActivator {
                     try {
                         service.registerMBean(monitoringMBeanName, monitoringMBean);
                     } catch (OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
 
@@ -174,12 +172,12 @@ public class IndexingActivator extends HousekeepingActivator {
                     try {
                         service.unregisterMBean(monitoringMBeanName);
                     } catch (OXException e) {
-                        LOG.warn(e.getMessage(), e);
+                        LOG.warn("", e);
                     }
                 }
             });
         } catch (MalformedObjectNameException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 }

@@ -71,7 +71,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public final class ContactsAddIndex4AutoCompleteSearch implements UpdateTask {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ContactsAddIndex4AutoCompleteSearch.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactsAddIndex4AutoCompleteSearch.class);
 
     public ContactsAddIndex4AutoCompleteSearch() {
         super();
@@ -143,8 +143,7 @@ public final class ContactsAddIndex4AutoCompleteSearch implements UpdateTask {
                     }
                 }
             } catch (final SQLException e) {
-                LOG.error(
-                    new StringBuilder("Problem adding index ").append(name).append(" on table ").append(table).append('.').toString(),
+                LOG.error("Problem adding index {} on table {}{}", name, table, '.',
                     e);
             }
         }

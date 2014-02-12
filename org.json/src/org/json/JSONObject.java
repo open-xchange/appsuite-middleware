@@ -365,6 +365,75 @@ public class JSONObject extends AbstractJSONValue {
         }
     }
 
+    @Override
+    public boolean isEqualTo(final JSONValue jsonValue) {
+        if (jsonValue == this) {
+            return true;
+        }
+        if ((null == jsonValue) || !jsonValue.isObject()) {
+            return false;
+        }
+        final Map<String, Object> m = jsonValue.toObject().myHashMap;
+        if (myHashMap.size() != m.size()) {
+            return false;
+        }
+        try {
+            final Iterator<Entry<String, Object>> i = myHashMap.entrySet().iterator();
+            while (i.hasNext()) {
+                final Entry<String, Object> e = i.next();
+                final String key = e.getKey();
+                final Object value = e.getValue();
+                if (isNull(value)) {
+                    if (!m.containsKey(key)) {
+                        return false;
+                    }
+                    if (!isNull(m.get(key))) {
+                        return false;
+                    }
+                } else {
+                    if (value instanceof JSONValue) {
+                        final Object object = m.get(key);
+                        if (!(object instanceof JSONValue)) {
+                            return false;
+                        } else if (!((JSONValue) value).isEqualTo((JSONValue) object)) {
+                            return false;
+                        }
+                    } else if (!value.equals(m.get(key))) {
+                        return false;
+                    }
+                }
+            }
+        } catch (final ClassCastException unused) {
+            return false;
+        } catch (final NullPointerException unused) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Gets the {@link Map map} view for this JSON object.
+     *
+     * @return The map
+     */
+    public Map<String, Object> asMap() {
+        final Map<String, Object> retval = new HashMap<String, Object>(myHashMap.size());
+        for (final Map.Entry<String, ? extends Object> entry : myHashMap.entrySet()) {
+            final Object value = entry.getValue();
+            if (value instanceof JSONValue) {
+                final JSONValue jsonValue = (JSONValue) value;
+                if (jsonValue.isArray()) {
+                    retval.put(entry.getKey(), jsonValue.toArray().asList());
+                } else {
+                    retval.put(entry.getKey(), jsonValue.toObject().asMap());
+                }
+            } else {
+                retval.put(entry.getKey(), value);
+            }
+        }
+        return retval;
+    }
+
     /**
      * Fills JSONObject with the given source string. This method is dedicated for <b>re-using</b> a JSONObject in combination with the
      * <code>reset()</code> method, since it gives the same possibility as the common-used <code>JSONObject(String string)</code> constructor

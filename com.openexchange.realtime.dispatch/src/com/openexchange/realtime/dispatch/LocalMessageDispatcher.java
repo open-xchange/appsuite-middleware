@@ -53,6 +53,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.Channel;
+import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 
@@ -87,5 +88,11 @@ public interface LocalMessageDispatcher {
      * @param channel a Channel that can be used to send Stanzas
      */
     public void removeChannel(final Channel channel);
+
+    /**
+     * Get the gate associated with this MessageDispatcher
+     * @return the gate associated with this MessageDispatcher
+     */
+    public RealtimeJanitor getGate();
 
 }

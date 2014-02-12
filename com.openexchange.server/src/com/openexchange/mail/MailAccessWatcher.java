@@ -51,7 +51,6 @@ package com.openexchange.mail;
 
 import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.log.Log;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.watcher.MailAccessDelayElement;
@@ -68,7 +67,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class MailAccessWatcher {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccessWatcher.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccessWatcher.class);
 
     private static final MailAccessDelayQueue MAIL_ACCESSES = new MailAccessDelayQueue();
 
@@ -92,9 +91,7 @@ public final class MailAccessWatcher {
                 final int frequencyMillis = MailProperties.getInstance().getWatcherFrequency();
                 watcherTask = timer.scheduleWithFixedDelay(new WatcherTask(MAIL_ACCESSES, LOG), 1000, frequencyMillis);
             }
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Mail connection watcher successfully established and ready for tracing");
-            }
+            LOG.info("Mail connection watcher successfully established and ready for tracing");
         }
         initialized = true;
     }
@@ -116,9 +113,7 @@ public final class MailAccessWatcher {
                     timer.purge();
                 }
             }
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Mail connection watcher successfully stopped");
-            }
+            LOG.info("Mail connection watcher successfully stopped");
         }
         MAIL_ACCESSES.clear();
         initialized = false;
@@ -185,18 +180,17 @@ public final class MailAccessWatcher {
     private static class WatcherTask implements Runnable {
 
         private final MailAccessDelayQueue queue;
-        private final org.apache.commons.logging.Log logger;
+        private final org.slf4j.Logger logger;
         private final String lineSeparator;
         private final MailAccessDelayQueue.ElementFilter filter;
 
-        public WatcherTask(final MailAccessDelayQueue mailAccesses, final org.apache.commons.logging.Log logger) {
+        public WatcherTask(final MailAccessDelayQueue mailAccesses, final org.slf4j.Logger logger) {
             super();
             queue = mailAccesses;
             this.logger = logger;
             final String lineSeparator = System.getProperty("line.separator");
             this.lineSeparator = lineSeparator;
             // Specify filter expression
-            final boolean traceEnabled = logger.isTraceEnabled();
             filter = new MailAccessDelayQueue.ElementFilter() {
 
                 @Override
@@ -206,9 +200,7 @@ public final class MailAccessWatcher {
                         return true;
                     }
                     if (mailAccess.isWaiting()) {
-                        if (traceEnabled) {
-                            logger.trace(new com.openexchange.java.StringAllocator("Idling/waiting mail connection:").append(lineSeparator).append(mailAccess.getTrace()).toString());
-                        }
+                        logger.trace("Idling/waiting mail connection:{}{}", lineSeparator, mailAccess.getTrace());
                         return false;
                     }
                     // Connected and not idle...
@@ -237,13 +229,7 @@ public final class MailAccessWatcher {
                             sb.setLength(0);
                             sb.append("UNCLOSED MAIL CONNECTION AFTER ");
                             sb.append(duration).append("msec:");
-                            if (Log.appendTraceToMessage()) {
-                                sb.append(lineSeparator);
-                                sb.append(mailAccess.getTrace());
-                                logger.info(sb.toString());
-                            } else {
-                                mailAccess.logTrace(sb, logger);
-                            }
+                            mailAccess.logTrace(sb, logger);
                             exceededAcesses.add(mailAccess);
                         }
                     } while ((expired = queue.poll(filter)) != null);
@@ -266,18 +252,12 @@ public final class MailAccessWatcher {
                             sb.setLength(0);
                             sb.append("UNCLOSED MAIL CONNECTION AFTER ");
                             sb.append(duration).append("msec:");
-                            if (Log.appendTraceToMessage()) {
-                                sb.append(lineSeparator);
-                                sb.append(mailAccess.getTrace());
-                                logger.info(sb.toString());
-                            } else {
-                                mailAccess.logTrace(sb, logger);
-                            }
+                            mailAccess.logTrace(sb, logger);
                         }
                     } while ((expired = queue.poll(filter)) != null);
                 }
             } catch (final Exception e) {
-                logger.error(e.getMessage(), e);
+                logger.error("", e);
             }
         }
     } // End of WatcherTask class

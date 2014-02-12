@@ -49,8 +49,6 @@
 
 package com.openexchange.hostname.ldap.osgi;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -65,7 +63,7 @@ import com.openexchange.osgi.ServiceRegistry;
 
 public class Activator extends HousekeepingActivator {
 
-    private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
+    private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
     private LDAPHostnameService hostnameservice;
 
@@ -80,18 +78,14 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
 
         HostnameLDAPServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
     }
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
 
         HostnameLDAPServiceRegistry.getServiceRegistry().removeService(clazz);
     }
@@ -123,7 +117,7 @@ public class Activator extends HousekeepingActivator {
             registerService(HostnameService.class, hostnameservice, null);
 
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
 
@@ -139,7 +133,7 @@ public class Activator extends HousekeepingActivator {
 
             HostnameLDAPServiceRegistry.getServiceRegistry().clearRegistry();
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
     }
@@ -160,7 +154,7 @@ public class Activator extends HousekeepingActivator {
             try {
                 cacheService.freeCache(LDAPHostnameCache.REGION_NAME);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
 

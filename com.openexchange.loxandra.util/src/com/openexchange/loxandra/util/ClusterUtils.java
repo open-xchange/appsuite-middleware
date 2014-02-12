@@ -54,8 +54,6 @@ import java.math.BigInteger;
 import java.util.concurrent.ExecutionException;
 import org.apache.cassandra.config.ConfigurationException;
 import org.apache.cassandra.tools.NodeProbe;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -65,7 +63,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class ClusterUtils {
 
-    private static Log log = LogFactory.getLog(ClusterUtils.class);
+    private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ClusterUtils.class);
 
     /**
      * Re-Balance the cluster by assigning a new token to each node.
@@ -100,7 +98,7 @@ public class ClusterUtils {
 
         for (int i = 0; i < tokens.length; i++) {
             try {
-                log.info("Cleaning up " + nodes[i]);
+                log.info("Cleaning up {}", nodes[i]);
                 np = new NodeProbe(nodes[i], 7199);
                 np.forceTableCleanup("OX", new String[0]);
                 np.forceTableCleanup("OpsCenter", new String[0]);
@@ -121,7 +119,7 @@ public class ClusterUtils {
 
         for (int i = 0; i < tokens.length; i++) {
             try {
-                log.info("Cleaning up " + nodes[i]);
+                log.info("Cleaning up {}", nodes[i]);
                 np = new NodeProbe(nodes[i], 7199);
                 np.forceTableFlush("OX", new String[0]);
                 np.forceTableCleanup("OpsCenter", new String[0]);

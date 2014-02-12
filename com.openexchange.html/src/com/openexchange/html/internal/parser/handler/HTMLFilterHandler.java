@@ -85,7 +85,7 @@ public final class HTMLFilterHandler implements HtmlHandler {
 
     private static final String WARN_USING_DEFAULT_WHITE_LIST = "Using default white list";
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HTMLFilterHandler.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HTMLFilterHandler.class);
 
     private static final String CRLF = "\r\n";
 
@@ -278,9 +278,7 @@ public final class HTMLFilterHandler implements HtmlHandler {
                 {
                     final File whitelist = ServiceRegistry.getInstance().getService(ConfigurationService.class).getFileByName("whitelist.properties");
                     if (null == whitelist) {
-                        if (LOG.isWarnEnabled()) {
-                            LOG.warn(WARN_USING_DEFAULT_WHITE_LIST);
-                        }
+                        LOG.warn(WARN_USING_DEFAULT_WHITE_LIST);
                         mapStr = new String(DEFAULT_WHITELIST);
                     } else {
                         BufferedReader reader = null;
@@ -298,9 +296,7 @@ public final class HTMLFilterHandler implements HtmlHandler {
                             }
                             mapStr = sb.toString();
                         } catch (final Exception e) {
-                            if (LOG.isWarnEnabled()) {
-                                LOG.warn(WARN_USING_DEFAULT_WHITE_LIST, e);
-                            }
+                            LOG.warn(WARN_USING_DEFAULT_WHITE_LIST, e);
                             mapStr = new String(DEFAULT_WHITELIST);
                         } finally {
                             Streams.close(reader);

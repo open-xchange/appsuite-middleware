@@ -72,7 +72,7 @@ public interface MailAccountStorageService {
      * @param cid The context ID
      * @throws OXException If invalidation fails
      */
-    public void invalidateMailAccount(int id, int user, int cid) throws OXException;
+    void invalidateMailAccount(int id, int user, int cid) throws OXException;
 
     /**
      * Invalidates user mail accounts.
@@ -81,7 +81,7 @@ public interface MailAccountStorageService {
      * @param cid The context ID
      * @throws OXException If invalidation fails
      */
-    public void invalidateMailAccounts(int user, int cid) throws OXException;
+    void invalidateMailAccounts(int user, int cid) throws OXException;
 
     /**
      * Clears full names for specified mail account.
@@ -91,7 +91,18 @@ public interface MailAccountStorageService {
      * @param cid The context ID
      * @throws OXException If invalidation fails
      */
-    public void clearFullNamesForMailAccount(int id, int user, int cid) throws OXException;
+    void clearFullNamesForMailAccount(int id, int user, int cid) throws OXException;
+
+    /**
+     * Clears specified full names for specified mail account.
+     *
+     * @param id The account ID
+     * @param indexes The indexes of the full names to clear
+     * @param user The user ID
+     * @param cid The context ID
+     * @throws OXException If invalidation fails
+     */
+    void clearFullNamesForMailAccount(int id, int[] indexes, int user, int cid) throws OXException;
 
     /**
      * Gets the mail account identified by specified ID.
@@ -102,7 +113,7 @@ public interface MailAccountStorageService {
      * @return The mail account
      * @throws OXException If the mail account cannot be returned
      */
-    public MailAccount getMailAccount(int id, int user, int cid) throws OXException;
+    MailAccount getMailAccount(int id, int user, int cid) throws OXException;
 
     /**
      * Gets the mail accounts belonging to specified user in given context.
@@ -112,7 +123,7 @@ public interface MailAccountStorageService {
      * @return The user's mail accounts
      * @throws OXException If the mail accounts cannot be returned
      */
-    public MailAccount[] getUserMailAccounts(int user, int cid) throws OXException;
+    MailAccount[] getUserMailAccounts(int user, int cid) throws OXException;
 
     /**
      * Gets the mail accounts belonging to specified user in given context.
@@ -123,7 +134,7 @@ public interface MailAccountStorageService {
      * @return The user's mail accounts
      * @throws OXException If the mail accounts cannot be returned
      */
-    public MailAccount[] getUserMailAccounts(int user, int cid, Connection con) throws OXException;
+    MailAccount[] getUserMailAccounts(int user, int cid, Connection con) throws OXException;
 
     /**
      * Gets the default mail account belonging to specified user in given context.
@@ -133,7 +144,7 @@ public interface MailAccountStorageService {
      * @return The user's default mail account
      * @throws OXException If the default mail account cannot be returned
      */
-    public MailAccount getDefaultMailAccount(int user, int cid) throws OXException;
+    MailAccount getDefaultMailAccount(int user, int cid) throws OXException;
 
     /**
      * Updates mail account's value taken from specified mail account.
@@ -145,7 +156,7 @@ public interface MailAccountStorageService {
      * @param session The session
      * @throws OXException If the mail account cannot be updated
      */
-    public void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int user, int cid, Session session) throws OXException;
+    void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int user, int cid, Session session) throws OXException;
 
     /**
      * Updates mail account's value taken from specified mail account.
@@ -170,7 +181,7 @@ public interface MailAccountStorageService {
      * @param session The session
      * @throws OXException If the mail account cannot be updated
      */
-    public void updateMailAccount(MailAccountDescription mailAccount, int user, int cid, Session session) throws OXException;
+    void updateMailAccount(MailAccountDescription mailAccount, int user, int cid, Session session) throws OXException;
 
     /**
      * Inserts mail account's value taken from specified mail account.
@@ -182,7 +193,7 @@ public interface MailAccountStorageService {
      * @return The ID of the newly created mail account
      * @throws OXException If the mail account cannot be updated
      */
-    public int insertMailAccount(MailAccountDescription mailAccount, int user, Context ctx, Session session) throws OXException;
+    int insertMailAccount(MailAccountDescription mailAccount, int user, Context ctx, Session session) throws OXException;
 
     /**
      * Inserts mail account's value taken from specified mail account.
@@ -206,7 +217,7 @@ public interface MailAccountStorageService {
      * @param cid The context ID
      * @throws OXException If the mail account cannot be deleted
      */
-    public void deleteMailAccount(int id, Map<String, Object> properties, int user, int cid) throws OXException;
+    void deleteMailAccount(int id, Map<String, Object> properties, int user, int cid) throws OXException;
 
     /**
      * Deletes the mail account identified by specified ID.
@@ -218,7 +229,7 @@ public interface MailAccountStorageService {
      * @param deletePrimary <code>true</code> to delete also the primary mail account if the user is deleted.
      * @throws OXException If the mail account cannot be deleted
      */
-    public void deleteMailAccount(int id, Map<String, Object> properties, int user, int cid, boolean deletePrimary) throws OXException;
+    void deleteMailAccount(int id, Map<String, Object> properties, int user, int cid, boolean deletePrimary) throws OXException;
 
     /**
      * Deletes the mail account identified by specified ID.
@@ -231,7 +242,7 @@ public interface MailAccountStorageService {
      * @param con The connection to use
      * @throws OXException If the mail account cannot be deleted
      */
-    public void deleteMailAccount(int id, Map<String, Object> properties, int user, int cid, boolean deletePrimary, Connection con) throws OXException;
+    void deleteMailAccount(int id, Map<String, Object> properties, int user, int cid, boolean deletePrimary, Connection con) throws OXException;
 
     /**
      * Gets the mail accounts of the users whose login matches specified login.
@@ -241,7 +252,7 @@ public interface MailAccountStorageService {
      * @return The mail accounts of the users whose login matches specified login
      * @throws OXException If resolving the login fails
      */
-    public MailAccount[] resolveLogin(String login, int cid) throws OXException;
+    MailAccount[] resolveLogin(String login, int cid) throws OXException;
 
     /**
      * Gets the mail accounts of the users whose login matches specified login on specified server.
@@ -252,7 +263,7 @@ public interface MailAccountStorageService {
      * @return The mail accounts of the users whose login matches specified login on specified server
      * @throws OXException If resolving the login fails
      */
-    public MailAccount[] resolveLogin(String login, String serverUrl, int cid) throws OXException;
+    MailAccount[] resolveLogin(String login, String serverUrl, int cid) throws OXException;
 
     /**
      * Gets the mail accounts of the users whose primary email address matches specified email on specified server.
@@ -262,7 +273,7 @@ public interface MailAccountStorageService {
      * @return The mail accounts of the users whose login matches specified login on specified server
      * @throws OXException If resolving the primary address fails
      */
-    public MailAccount[] resolvePrimaryAddr(String primaryAddress, int cid) throws OXException;
+    MailAccount[] resolvePrimaryAddr(String primaryAddress, int cid) throws OXException;
 
     /**
      * Gets the mail account matching specified primary email address of given user in given context.
@@ -273,7 +284,7 @@ public interface MailAccountStorageService {
      * @return The ID of the mail account matching specified primary email address or <code>-1</code> if none found
      * @throws OXException If look-up by primary address caused a conflict
      */
-    public int getByPrimaryAddress(String primaryAddress, int user, int cid) throws OXException;
+    int getByPrimaryAddress(String primaryAddress, int user, int cid) throws OXException;
 
     /**
      * Gets those mail accounts of given user in given context whose host name occurs in specified collection of host names.
@@ -284,7 +295,7 @@ public interface MailAccountStorageService {
      * @return The binary-sorted identifiers of matching mail accounts
      * @throws OXException If look-up by host names caused an error
      */
-    public int[] getByHostNames(Collection<String> hostNames, int user, int cid) throws OXException;
+    int[] getByHostNames(Collection<String> hostNames, int user, int cid) throws OXException;
 
     /**
      * Gets the transport account for specified account ID.
@@ -295,7 +306,7 @@ public interface MailAccountStorageService {
      * @return The mail account providing the information for the appropriate transport account.
      * @throws OXException If transport look-up fails
      */
-    public MailAccount getTransportAccountForID(int id, int user, int cid) throws OXException;
+    MailAccount getTransportAccountForID(int id, int user, int cid) throws OXException;
 
     /**
      * Decodes stored encrypted strings using the old secret and encode them again using the new secret.
@@ -305,12 +316,12 @@ public interface MailAccountStorageService {
      * @param session The session
      * @throws OXException If migrate attempt fails
      */
-    public void migratePasswords(String oldSecret, String newSecret, Session session) throws OXException;
+    void migratePasswords(String oldSecret, String newSecret, Session session) throws OXException;
 
     /**
      * Finds out whether the user has items that are encrypted
      */
-    public boolean hasAccounts(Session session) throws OXException;
+    boolean hasAccounts(Session session) throws OXException;
 
     /**
      * Cleans-up accounts that could no more be decrypted with given secret
@@ -319,7 +330,7 @@ public interface MailAccountStorageService {
      * @param session The session providing user information
      * @throws OXException If operation fails
      */
-    public void cleanUp(String secret, Session session) throws OXException;
+    void cleanUp(String secret, Session session) throws OXException;
 
     /**
      * Removes accounts that could no more be decrypted with given secret
@@ -328,5 +339,6 @@ public interface MailAccountStorageService {
      * @param session The session providing user information
      * @throws OXException If operation fails
      */
-    public void removeUnrecoverableItems(String secret, Session session) throws OXException;
+    void removeUnrecoverableItems(String secret, Session session) throws OXException;
+
 }

@@ -50,11 +50,15 @@
 package com.openexchange.oauth.facebook;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -67,25 +71,30 @@ import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.log.LogFactory;
+import com.openexchange.java.Strings;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.session.Session;
-import com.openexchange.tools.versit.converter.ConverterException;
+import com.openexchange.threadpool.ThreadPoolCompletionService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * {@link FacebookServiceImpl}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FacebookServiceImpl implements FacebookService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookServiceImpl.class));
+    /** The logger constant */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FacebookServiceImpl.class);
 
     private final com.openexchange.oauth.OAuthService oAuthService;
     private final OAuthServiceMetaDataFacebookImpl facebookMetaData;
 
     public FacebookServiceImpl(final com.openexchange.oauth.OAuthService oAuthService, final OAuthServiceMetaDataFacebookImpl facebookMetaData) {
+        super();
         this.oAuthService = oAuthService;
         this.facebookMetaData = facebookMetaData;
     }
@@ -93,7 +102,7 @@ public class FacebookServiceImpl implements FacebookService {
     @Override
     public List<Contact> getContacts(final Session session, final int user, final int contextId, final int accountId) throws OXException {
 
-        List<Contact> contacts = new ArrayList<Contact>();
+        List<Contact> contacts = Collections.emptyList();
         final OAuthService service = new ServiceBuilder().provider(FacebookApi.class).apiKey(facebookMetaData.getAPIKey(session)).apiSecret(
             facebookMetaData.getAPISecret(session)).build();
 
@@ -102,7 +111,7 @@ public class FacebookServiceImpl implements FacebookService {
         try {
             account = oAuthService.getAccount(accountId, session, user, contextId);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         if (null != account) {
             // get the users own profile (for his id) with the given access token
@@ -116,18 +125,35 @@ public class FacebookServiceImpl implements FacebookService {
                 final JSONObject object = new JSONObject(ownProfileResponse.getBody());
                 myuid = object.getString("id");
             } catch (final JSONException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
 
             // get the users connections
             final OAuthRequest connectionsRequest = new OAuthRequest(
                 Verb.GET,
-                "https://api.facebook.com/method/fql.query?query=SELECT%20name,first_name,last_name,email,birthday_date,pic_big,hometown_location%20from%20user%20where%20uid%20in%20%28SELECT%20uid2%20from%20friend%20where%20uid1=" + myuid + "%29&format=JSON");
+                "https://api.facebook.com/method/fql.query?query=SELECT%20name,first_name,last_name,email,birthday_date,pic_big,current_location,profile_url%20from%20user%20where%20uid%20in%20%28SELECT%20uid2%20from%20friend%20where%20uid1=" + myuid + "%29&format=JSON");
             service.signRequest(accessToken, connectionsRequest);
             final Response connectionsResponse = connectionsRequest.send();
 
             // parse the returned JSON into neat little contacts
-            contacts = parseIntoContacts(connectionsResponse.getBody());
+            String jsonString = connectionsResponse.getBody();
+            try {
+                final JSONArray allConnections = new JSONArray(jsonString);
+                jsonString = null;
+                contacts = parseIntoContacts(allConnections);
+            } catch (JSONException e) {
+                // Maybe this is a JSONObject with an error
+                try {
+                    final JSONObject obj = new JSONObject(jsonString);
+                    if (obj.has("error")) {
+                        LOG.error(obj.get("error").toString());
+                        throw OXException.general(obj.getJSONObject("error").getString("message"));
+                    }
+                } catch (final JSONException x) {
+                    // Give up
+                }
+                LOG.error("", e);
+            }
         }
 
         return contacts;
@@ -149,75 +175,85 @@ public class FacebookServiceImpl implements FacebookService {
         return sb.toString();
     }
 
-    public List<Contact> parseIntoContacts(final String jsonString) throws OXException {
-        final List<Contact> contacts = new ArrayList<Contact>();
+    public List<Contact> parseIntoContacts(final JSONArray allConnections) throws OXException {
+        final int length = allConnections.length();
+        if (length <= 0) {
+            return Collections.emptyList();
+        }
 
-        try {
-            final JSONArray allConnections = new JSONArray(jsonString);
-            for (int i = 0; i < allConnections.length(); i++) {
-                final JSONObject connection = allConnections.getJSONObject(i);
+        final List<Contact> contacts = new ArrayList<Contact>(length);
+        final CompletionService<Void> completionService = new ThreadPoolCompletionService<Void>(ThreadPools.getThreadPool());
+        int taskCount = 0;
+
+        for (int i = 0; i < length; i++) {
+            final JSONObject connection = allConnections.optJSONObject(i);
+            if (null != connection) {
                 final Contact contact = new Contact();
-                if (JSONObject.NULL != connection.get("first_name") && !"".equals(connection.get("first_name")) && !"nil".equals(connection.get("first_name"))) {
-                    contact.setGivenName((String) connection.get("first_name"));
-                }
-                if (JSONObject.NULL != connection.get("last_name") && !"".equals(connection.get("last_name")) && !"nil".equals(connection.get("last_name"))) {
-                    contact.setSurName((String) connection.get("last_name"));
-                }
-
-                // TODO: this should be parallelized. It is these request that take longest
-                if (JSONObject.NULL != connection.get("pic_big") && !"".equals(connection.get("pic_big")) && !"nil".equals(connection.get("pic_big"))) {
-                    try {
-                        OXContainerConverter.loadImageFromURL(contact, (String) connection.get("pic_big"));
-                    } catch (final ConverterException e) {
-                        LOG.error(e.getMessage(), e);
+                {
+                    final String profileUrl = connection.optString("profile_url", null);
+                    if (isValid(profileUrl)) {
+                        contact.setURL(profileUrl);
                     }
                 }
-
-                // No email-addresses available yet via API, sorry
-                // System.out.println(connection.get("email"));
-
-                if (JSONObject.NULL != connection.get("birthday_date") && !"".equals(connection.get("birthday_date")) && !"nil".equals(connection.get("birthday_date"))) {
-                    final String dateString = (String) connection.get("birthday_date");
-                    final Integer month = Integer.parseInt(dateString.substring(0, 2)) - 1;
-                    final Integer day = Integer.parseInt(dateString.substring(3, 5));
-                    Integer year = 0;
-                    // year is available
-                    if (dateString.length() == 10) {
-                        year = Integer.parseInt(dateString.substring(6, 10)) - 1900;
-                    }
-                    // only set the birthday if there is a year given as well (Bug 23009 - Facebook birthday stored as "0000-00-00" in the database)
-                    if (year != 0){
-                    	contact.setBirthday(new Date(year, month, day));
+                {
+                    final String givenName = connection.optString("first_name", null);
+                    if (isValid(givenName)) {
+                        contact.setGivenName(givenName);
                     }
                 }
-                // System.out.println();
+                {
+                    final String surName = connection.optString("last_name", null);
+                    if (isValid(surName)) {
+                        contact.setSurName(surName);
+                    }
+                }
+                {
+                    final String email = connection.optString("email", null);
+                    setEmail(contact, email);
+                }
+                {
+                    final String imageUrl = connection.optString("pic_big", null);
+                    if (isValid(imageUrl)) {
+                        completionService.submit(new Callable<Void>() {
 
-                if (JSONObject.NULL != connection.get("hometown_location")) {
-                    final JSONObject hometownLocation = (JSONObject) connection.get("hometown_location");
-                    if (JSONObject.NULL != hometownLocation.get("city") && !"".equals(hometownLocation.get("city")) && !"nil".equals(hometownLocation.get("city"))) {
-                        contact.setCityHome((String) hometownLocation.get("city"));
+                            @Override
+                            public Void call() throws Exception {
+                                try {
+                                    OXContainerConverter.loadImageFromURL(contact, imageUrl);
+                                } catch (final Exception e) {
+                                    LOG.error("", e);
+                                }
+                                return null;
+                            }
+                        });
+                        taskCount++;
                     }
-                    if (JSONObject.NULL != hometownLocation.get("country") && !"".equals(hometownLocation.get("country")) && !"nil".equals(hometownLocation.get("country"))) {
-                        contact.setCountryHome((String) hometownLocation.get("country"));
+                }
+                {
+                    final String birthdayString = connection.optString("birthday_date", null);
+                    setBirthday(contact, birthdayString);
+                }
+                final JSONObject currentLocation = connection.optJSONObject("current_location");
+                if (null != currentLocation) {
+                    String tmp = connection.optString("city", null);
+                    if (isValid(tmp)) {
+                        contact.setCityHome(tmp);
                     }
-                    if (JSONObject.NULL != hometownLocation.get("zip") && !"".equals(hometownLocation.get("zip")) && !"nil".equals(hometownLocation.get("zip"))) {
-                        contact.setPostalCodeHome((String) hometownLocation.get("zip"));
+                    tmp = connection.optString("country", null);
+                    if (isValid(tmp)) {
+                        contact.setCountryHome(tmp);
+                    }
+                    tmp = connection.optString("zip", null);
+                    if (isValid(tmp)) {
+                        contact.setPostalCodeHome(tmp);
                     }
                 }
                 contacts.add(contact);
             }
-        } catch (final JSONException e) {
-        	// Maybe this is a JSONObject with an error
-        	try {
-        		final JSONObject obj = new JSONObject(jsonString);
-        		if (obj.has("error")) {
-        			LOG.error(obj.get("error").toString());
-        			throw OXException.general(obj.getJSONObject("error").getString("message"));
-        		}
-        	} catch (final JSONException x) {
-        		// Give up
-        	}
-            LOG.error(e.getMessage(), e);
+        }
+
+        if (taskCount > 0) {
+            ThreadPools.awaitCompletionService(completionService, taskCount);
         }
 
         return contacts;
@@ -230,9 +266,69 @@ public class FacebookServiceImpl implements FacebookService {
             final OAuthAccount account = oAuthService.getAccount(accountId, session, user, contextId);
             displayName = account.getDisplayName();
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return displayName;
     }
 
+    private static boolean isValid(final String toCheck) {
+        return !Strings.isEmpty(toCheck) && !"nil".equals(toCheck);
+    }
+
+    /**
+     * Sets the birthday for the contact based on the facebook information
+     * 
+     * @param contact - the {@link Contact} to set the birthday for
+     * @param birthday - the string the birthday is included in
+     */
+    protected void setBirthday(Contact contact, String birthdayString) {
+        if (isValid(birthdayString) && !"00/00/0000".equals(birthdayString)) {
+
+            final String regex = "([0-9]{2})/([0-9]{2})/([0-9]{4})";
+            if (birthdayString.matches(regex)) {
+                final Pattern pattern = Pattern.compile(regex);
+                final Matcher matcher = pattern.matcher(birthdayString);
+                if (matcher.matches() && matcher.groupCount() == 3) {
+                    final int month = Integer.parseInt(matcher.group(1));
+                    final int day = Integer.parseInt(matcher.group(2));
+                    final int year = Integer.parseInt(matcher.group(3));
+                    final Calendar cal = Calendar.getInstance(TimeZones.UTC);
+                    cal.clear();
+                    cal.set(Calendar.DAY_OF_MONTH, day);
+                    cal.set(Calendar.MONTH, month - 1);
+                    cal.set(Calendar.YEAR, year);
+                    contact.setBirthday(cal.getTime());
+                }
+            }
+            else {
+                LOG.info(
+                    "Unable to parse birthday string for facebook user '{} {}' because pattern did not match! Tried to parse {}.",
+                    contact.getGivenName(),
+                    contact.getSurName(),
+                    birthdayString);
+            }
+        }
+    }
+
+    /**
+     * Sets the email address for the contact based on the facebook information
+     * 
+     * @param contact - the {@link Contact} to set the birthday for
+     * @param email - the string the email is included in
+     */
+    protected void setEmail(Contact contact, String email) {
+        try {
+            InternetAddress emailAddr = new InternetAddress(email);
+            emailAddr.validate();
+
+            contact.setEmail1(email);
+        } catch (AddressException addressException) {
+            LOG.info(
+                "Email address for facebook user '{} {}' is not valid and cannot be imported! Tried to import {}.",
+                contact.getGivenName(),
+                contact.getSurName(),
+                email,
+                addressException);
+        }
+    }
 }

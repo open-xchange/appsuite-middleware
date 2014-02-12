@@ -70,7 +70,7 @@ import com.openexchange.java.Streams;
  */
 public class JCSCacheInformation extends StandardMBean implements CacheInformationMBean {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(JCSCacheInformation.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JCSCacheInformation.class);
 
     private final CompositeCacheManager cacheHub;
 
@@ -113,7 +113,7 @@ public class JCSCacheInformation extends StandardMBean implements CacheInformati
         try {
             out = new ObjectOutputStream(counter);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return 0;
         }
         try {
@@ -123,7 +123,7 @@ public class JCSCacheInformation extends StandardMBean implements CacheInformati
             }
             out.flush();
         } catch (final Exception e) {
-            LOG.info("Problem getting byte count. Likely cause is a non serializable object." + e.getMessage());
+            LOG.info("Problem getting byte count. Likely cause is a non serializable object.{}", e.getMessage());
         } finally {
             Streams.close(out);
         }

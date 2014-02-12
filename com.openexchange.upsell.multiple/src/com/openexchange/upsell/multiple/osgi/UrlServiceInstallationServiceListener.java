@@ -52,6 +52,7 @@ package com.openexchange.upsell.multiple.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import com.openexchange.upsell.multiple.api.UpsellURLService;
 
 /**
@@ -62,7 +63,7 @@ import com.openexchange.upsell.multiple.api.UpsellURLService;
  */
 public class UrlServiceInstallationServiceListener implements ServiceTrackerCustomizer<UpsellURLService,UpsellURLService> {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UrlServiceInstallationServiceListener.class));
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(UrlServiceInstallationServiceListener.class);
 
     private final BundleContext context;
 
@@ -77,7 +78,7 @@ public class UrlServiceInstallationServiceListener implements ServiceTrackerCust
             if (null == MyServiceRegistry.getServiceRegistry().getService(UpsellURLService.class)) {
                 MyServiceRegistry.getServiceRegistry().addService(UpsellURLService.class, service);
             } else {
-                LOG.error("Duplicate URL GENERATOR Service detected: " + serviceReference.getClass().getName());
+                LOG.error("Duplicate URL GENERATOR Service detected: {}", serviceReference.getClass().getName());
             }
         }
         return service;

@@ -103,10 +103,7 @@ public class CheckForDeletedFoldersJob extends AbstractMailJob {
             }
 
             final MailJobInfo info = (MailJobInfo) jobInfo;
-            long start = System.currentTimeMillis();
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(this.getClass().getSimpleName() + " started performing. " + info.toString());
-            }
+            LOG.debug("{} started performing. {}", this.getClass().getSimpleName(), info);
 
             checkJobInfo();
             IndexFacadeService indexFacade = SmalServiceLookup.getServiceStatic(IndexFacadeService.class);
@@ -132,9 +129,7 @@ public class CheckForDeletedFoldersJob extends AbstractMailJob {
                     ChunkPerformer.perform(idsToDelete, 0, CHUNK_SIZE, new ListPerformable<MailUUID>() {
                         @Override
                         public void perform(List<MailUUID> subList) throws OXException {
-                            if (LOG.isTraceEnabled()) {
-                                LOG.trace("Deleting a chunk of mails in folder " + info.folder + ": " + info.toString());
-                            }
+                            LOG.trace("Deleting a chunk of mails in folder {}: {}", info.folder, info);
 
                             Set<String> uuidStrings = new HashSet<String>();
                             Map<String, List<String>> deletedFullNames = new HashMap<String, List<String>>();
@@ -201,7 +196,7 @@ public class CheckForDeletedFoldersJob extends AbstractMailJob {
                  */
                 if (e.getCategory().equals(Category.CATEGORY_TRY_AGAIN)
                     && e.getCode() == 2058) {
-                    LOG.warn("Could not connect mail access for job " + info + ". Rescheduling job to run again in 60 seconds.");
+                    LOG.warn("Could not connect mail access for job {}. Rescheduling job to run again in 60 seconds.", info);
                     IndexingService indexingService = SmalServiceLookup.getServiceStatic(IndexingService.class);
                     indexingService.scheduleJob(false, info, new Date(System.currentTimeMillis() + 60000), -1L, IndexingService.DEFAULT_PRIORITY);
                     return;
@@ -211,11 +206,6 @@ public class CheckForDeletedFoldersJob extends AbstractMailJob {
             } finally {
                 closeIndexAccess(mailIndex);
                 closeIndexAccess(attachmentIndex);
-
-                if (LOG.isDebugEnabled()) {
-                    long diff = System.currentTimeMillis() - start;
-                    LOG.debug(this.getClass().getSimpleName() + " lasted " + diff + "ms. " + info.toString());
-                }
             }
         } catch (Exception e) {
             throw new OXException(e);

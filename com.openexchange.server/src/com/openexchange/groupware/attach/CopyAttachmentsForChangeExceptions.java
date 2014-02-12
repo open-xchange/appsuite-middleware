@@ -78,7 +78,7 @@ public class CopyAttachmentsForChangeExceptions implements CalendarListener {
         try {
             attachmentBase.startTransaction();
             final Context ctx = session.getContext();
-            final User userObject = UserStorage.getStorageUser(session.getUserId(), ctx);
+            final User userObject = UserStorage.getInstance().getUser(session.getUserId(), ctx);
             final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx);
             final TimedResult<AttachmentMetadata> result = attachmentBase.getAttachments(session, master.getParentFolderID(), master.getObjectID(), Types.APPOINTMENT, ctx, userObject, userConfig);
             final SearchIterator<AttachmentMetadata> iterator = result.results();

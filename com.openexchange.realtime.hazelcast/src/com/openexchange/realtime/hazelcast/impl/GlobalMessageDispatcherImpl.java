@@ -65,12 +65,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import org.apache.commons.logging.Log;
 import com.hazelcast.core.DistributedTask;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
@@ -88,23 +88,23 @@ import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link GlobalMessageDispatcherImpl}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class GlobalMessageDispatcherImpl implements MessageDispatcher {
+public class GlobalMessageDispatcherImpl implements MessageDispatcher, RealtimeJanitor {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(GlobalMessageDispatcherImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GlobalMessageDispatcherImpl.class);
 
     private final ResourceDirectory directory;
-    
+
     private ResponseChannel channel = null;
-    
+
     public GlobalMessageDispatcherImpl(ResourceDirectory directory) {
         super();
         this.directory = directory;
         this.channel = new ResponseChannel(directory);
     }
-    
+
     @Override
     public Stanza sendSynchronously(Stanza stanza, long timeout, TimeUnit unit) throws OXException {
         String uuid = UUIDs.getUnformattedString(UUID.randomUUID());
@@ -113,12 +113,12 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
         send(stanza);
         return channel.waitFor(uuid, timeout, unit);
     }
-    
+
     @Override
     public Map<ID, OXException> send(Stanza stanza) throws OXException {
         return send(stanza, directory.get(stanza.getTo()));
     }
-    
+
     public ResponseChannel getChannel() {
         return channel;
     }
@@ -181,7 +181,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
         List<FutureTask<Map<ID, OXException>>> futures = new ArrayList<FutureTask<Map<ID, OXException>>>();
         for (Member receiver : targets.keySet()) {
             Set<ID> ids = targets.get(receiver);
-            LOG.debug("Sending to '" + stanza.getTo() + "' @ " + receiver);
+            LOG.debug("Sending to '{}' @ {}", stanza.getTo(), receiver);
             stanza.trace("Sending to '" + stanza.getTo() + "' @ " + receiver);
             ensureSequence(stanza, receiver);
             FutureTask<Map<ID, OXException>> task = new DistributedTask<Map<ID, OXException>>(new StanzaDispatcher(stanza, ids) , receiver);
@@ -189,7 +189,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
             futures.add(task);
         }
         // Await completion of send requests and extract their exceptions (if any)
-       
+
         for (FutureTask<Map<ID, OXException>> future : futures) {
             try {
                 exceptions.putAll(future.get());
@@ -206,11 +206,11 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
         }
         return exceptions;
     }
-    
+
     /**
      * The Stanza wasn't delivered locally/remotely. If the addressed Resource isn't available anylonger we remove it from the ResourceDirectory and
      * try to send the Stanza again. This will succeed if the Channel can conjure the Resource.
-     * 
+     *
      * @param stanza The Stanza to resend
      * @throws OXException
      */
@@ -219,7 +219,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
         send(stanza);
     }
 
-    
+
 
     private final ConcurrentHashMap<ID, ConcurrentHashMap<String, AtomicLong>> peerMapPerID = new ConcurrentHashMap<ID, ConcurrentHashMap<String, AtomicLong>>();
 
@@ -232,8 +232,8 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
      * Seq 2 delivered via node 2
      * Seq 3 delivered via node 1
      * Seq 4 delivered via node 2
-     * </pre> 
-     * 
+     * </pre>
+     *
      * Node 2 only sees messages 2 and 4 and would indefinetly wait for messages 0, 1 and 3. Therefore the system recasts sequence numbers:
      * <pre>
      * Seq 0 is recast as Seq 0 for node 1
@@ -242,13 +242,17 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
      * Seq 3 is recast as Seq 2 for node 1
      * Seq 4 is recast as Seq 1 for node 2
      * </pre>
-     * 
+     *
      * @param stanza The Stanza to deliver to another node of the cluster
      * @param receiver The receiving node of the cluster
-     * @throws OXException 
+     * @throws OXException
      */
     private void ensureSequence(Stanza stanza, Member receiver) throws OXException {
         if (stanza.getSequenceNumber() != -1) {
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("peerMapsPerID before ensuring Sequence: " + peerMapPerID);
+                LOG.debug("SequencePrincipal for peerMapPerID lookup is: " + stanza.getSequencePrincipal());
+            }
             ConcurrentHashMap<String, AtomicLong> peerMap = peerMapPerID.get(stanza.getSequencePrincipal());
             if (peerMap == null) {
                 peerMap = new ConcurrentHashMap<String, AtomicLong>();
@@ -258,11 +262,17 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
 
                         @Override
                         public void handle(String event, ID id, Object source, Map<String, Object> properties) {
+                            if(LOG.isDebugEnabled()) {
+                                LOG.debug("Removing SequencePrincipal from peerMapPerID lookup table: " + id);
+                            }
                             peerMapPerID.remove(id);
                         }
-                        
+
                     });
                 } else {
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Found other peerMap for SequencePrincipal: {} with value {}", stanza.getSequencePrincipal(), otherPeerMap);
+                    }
                     peerMap = otherPeerMap;
                 }
             }
@@ -271,16 +281,32 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
                 nextNumber = new AtomicLong(0);
                 AtomicLong otherNextNumber = peerMap.putIfAbsent(receiver.getUuid(), nextNumber);
                 nextNumber = (otherNextNumber != null) ? otherNextNumber : nextNumber;
+                if(otherNextNumber != null) {
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Found other nextNumber to use for receiver: {}, nextNumber {}", receiver.getUuid(), otherNextNumber);
+                    }
+                    nextNumber = otherNextNumber;
+                }
                 if(LOG.isDebugEnabled()) {
-                    LOG.debug("nextNumber for receiver " + receiver.getUuid() + " was null, adding nextNumber: " + nextNumber);
+                    LOG.debug("nextNumber for receiver {} was null, adding nextNumber: {}", receiver.getUuid(), nextNumber);
                 }
             }
             Long ensuredSequence = nextNumber.incrementAndGet() - 1;
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Updating sequence number for " + receiver + ": " + ensuredSequence);
+                LOG.debug("Updating sequence number for {}: {}", receiver.getUuid(), ensuredSequence);
             }
             stanza.setSequenceNumber(ensuredSequence);
-            stanza.trace("Updating sequence number for " + receiver + ": " + ensuredSequence);
+            stanza.trace("Updating sequence number for " + receiver.getUuid() + ": " + ensuredSequence);
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("peerMapsPerID after ensuring Sequence: {}", peerMapPerID);
+            }
         }
     }
+
+    @Override
+    public void cleanupForId(ID id) {
+        LOG.debug("Removing SequencePrincipal {} from peerMapPerID lookup table.", id);
+        peerMapPerID.remove(id);
+    }
+
 }

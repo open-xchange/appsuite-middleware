@@ -301,6 +301,15 @@ public final class StringAllocator extends AbstractStringAllocator implements ja
      * @throws StringIndexOutOfBoundsException {@inheritDoc}
      */
     @Override
+    public StringAllocator deleteLastChar() {
+        super.deleteLastChar();
+        return this;
+    }
+
+    /**
+     * @throws StringIndexOutOfBoundsException {@inheritDoc}
+     */
+    @Override
     public StringAllocator replace(final int start, final int end, final String str) {
         super.replace(start, end, str);
         return this;
@@ -503,6 +512,9 @@ public final class StringAllocator extends AbstractStringAllocator implements ja
 
     @Override
     public String toString() {
+        if (0 == count) {
+            return "";
+        }
         final Constructor<String> stringConstructor = STRING_CONSTRUCTOR;
         if (null == stringConstructor) {
             // Create a copy, don't share the array

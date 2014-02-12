@@ -59,11 +59,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.context.ContextService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
@@ -72,6 +70,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.helpers.AbstractPublicationService;
 import com.openexchange.publish.helpers.SecurityStrategy;
@@ -109,7 +108,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
 
     private String defaultTemplateName;
 
-	private FormElement templateChooser;
+    private FormElement templateChooser;
 
     public OXMFPublicationService() {
         super();
@@ -157,7 +156,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
     }
 
     public void setFolderType(final String string) {
-    	templateChooser.setOption("only", "publish,"+string);
+        templateChooser.setOption("only", "publish,"+string);
         target.setModule(string);
     }
 
@@ -251,7 +250,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
             siteName = normalizeSiteName(siteName);
             final Publication oldPub = getPublication(publication.getContext(), siteName);
             if (oldPub != null && oldPub.getId() != publication.getId()) {
-                throw uniquenessConstraintViolation(SITE, siteName);
+                throw PublicationErrorMessage.UNIQUENESS_CONSTRAINT_VIOLATION_EXCEPTION.create(SITE, siteName);
             }
             publication.getConfiguration().put(SITE, siteName);
         }
@@ -336,26 +335,29 @@ public class OXMFPublicationService extends AbstractPublicationService {
     }
 
     @Override
-    public Publication resolveUrl(final ContextService service, String URL) throws OXException {
-        String re1=".*?";   // Non-greedy match on filler
-        String re2="("+rootURL+")";    // Word 1
-        String re3="(\\/)"; // Any Single Character 2
-        String re4="(\\d+)";    // Integer Number 1
-        String re5="(\\/)"; // Any Single Character 3
-        String re6="((?:[a-z][a-z]+))"; // Word 3
-
-        Pattern p = Pattern.compile(re1+re2+re3+re4+re5+re6,Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-        Matcher m = p.matcher(URL);
-        if (m.find())
-        {
-            String contextId=m.group(3);
-            String site=m.group(5);
-
-            final Context ctx = service.getContext(Integer.parseInt(contextId));
-            return getPublication(ctx, site);
+    public Publication resolveUrl(final Context ctx, final String URL) throws OXException {
+        final String tmpRootUrl = getRootURL();
+        if (getRootURL() == null) {
+            return null;
         }
+        if(!URL.contains(tmpRootUrl)){
+            return null;
+        }
+        final Pattern SPLIT = Pattern.compile("/");
+        final String[] path = SPLIT.split(URL, 0);
+        final String site = getSite(path);
+        if (site == null) {
+            return null;
+        }
+        return getPublication(ctx, site);
+    }
 
-        return null;
+    private String getSite(final String[] path) {
+        String tmpPath = path[path.length-1];
+        if (tmpPath.contains("?secret")){
+            return tmpPath.split("\\?secret",0)[0];
+        }
+        return tmpPath;
     }
 
     @Override

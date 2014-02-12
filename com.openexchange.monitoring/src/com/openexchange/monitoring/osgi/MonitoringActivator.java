@@ -67,7 +67,7 @@ import com.openexchange.sessiond.SessiondService;
  */
 public final class MonitoringActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MonitoringActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MonitoringActivator.class);
 
     /**
      * Initializes a new {@link MonitoringActivator}
@@ -83,20 +83,13 @@ public final class MonitoringActivator extends HousekeepingActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        /*
-         * Never stop the server even if a needed service is absent
-         */
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
         MonitoringServiceRegistry.getServiceRegistry().removeService(clazz);
     }
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Re-available service: " + clazz.getName());
-        }
+        LOG.warn("Re-available service: {}", clazz.getName());
         MonitoringServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
     }
 
@@ -124,7 +117,7 @@ public final class MonitoringActivator extends HousekeepingActivator {
              */
             registerService(MonitorService.class, new MonitorImpl(), null);
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
     }
@@ -134,7 +127,7 @@ public final class MonitoringActivator extends HousekeepingActivator {
         try {
             cleanUp();
         } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
     }

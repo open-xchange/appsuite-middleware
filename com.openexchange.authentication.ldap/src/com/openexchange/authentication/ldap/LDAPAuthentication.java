@@ -62,13 +62,11 @@ import javax.naming.directory.SearchResult;
 import javax.naming.ldap.InitialLdapContext;
 import javax.naming.ldap.LdapContext;
 import javax.security.auth.login.LoginException;
-import org.apache.commons.logging.Log;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
@@ -118,7 +116,7 @@ public class LDAPAuthentication implements AuthenticationService {
         }
     }
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LDAPAuthentication.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LDAPAuthentication.class);
 
     /**
      * Properties for the JNDI context.
@@ -156,7 +154,7 @@ public class LDAPAuthentication implements AuthenticationService {
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
         }
         final String returnstring = bind(uid, password);
-        LOG.info("User " + uid + " successful authenticated.");
+        LOG.info("User {} successful authenticated.", uid);
         return new AuthenticatedImpl(returnstring, splitted);
     }
 
@@ -196,7 +194,7 @@ public class LDAPAuthentication implements AuthenticationService {
                 final Properties aprops = (Properties)props.clone();
                 aprops.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
                 if( bindDN != null && bindDN.length() > 0 ) {
-                    LOG.debug("Using bindDN=" + bindDN);
+                    LOG.debug("Using bindDN={}", bindDN);
                     aprops.put(Context.SECURITY_PRINCIPAL, bindDN);
                     aprops.put(Context.SECURITY_CREDENTIALS, bindDNPassword);
                 } else {
@@ -204,8 +202,8 @@ public class LDAPAuthentication implements AuthenticationService {
                 }
                 context = new InitialLdapContext(aprops, null);
                 final String filter = "(&" + searchFilter + "(" + uidAttribute + "=" + uid + "))";
-                LOG.debug("Using filter=" + filter);
-                LOG.debug("BaseDN      =" + baseDN);
+                LOG.debug("Using filter={}", filter);
+                LOG.debug("BaseDN      ={}", baseDN);
                 SearchControls cons = new SearchControls();
                 cons.setSearchScope(SearchControls.SUBTREE_SCOPE);
                 cons.setCountLimit(0);
@@ -272,7 +270,7 @@ public class LDAPAuthentication implements AuthenticationService {
                             puser = (String)searchProxy.next().getAttributes().get(ldapReturnField).get();
                         }
                     } else {
-                        LOG.error("No user with displayname " + uid + " found.");
+                        LOG.error("No user with displayname {} found.", uid);
                         throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                     }
                 } else {
@@ -287,13 +285,13 @@ public class LDAPAuthentication implements AuthenticationService {
             }
             return null;
         } catch (InvalidNameException e) {
-            LOG.error("Login failed for dn " + dn + ":",e);
+            LOG.error("Login failed for dn {}:", dn,e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
         } catch (AuthenticationException e) {
-            LOG.error("Login failed for dn " + dn + ":",e);
+            LOG.error("Login failed for dn {}:", dn,e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
         } catch (NamingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw LoginExceptionCodes.COMMUNICATION.create(e);
         } finally {
             try {
@@ -301,7 +299,7 @@ public class LDAPAuthentication implements AuthenticationService {
                     context.close();
                 }
             } catch (NamingException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

@@ -49,8 +49,6 @@
 
 package com.openexchange.subscribe.crawler;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.FrameWindow;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -64,13 +62,10 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class PageByFrameNumberStep extends AbstractStep<HtmlPage, HtmlPage> {
-    private Exception exception;
 
-    protected boolean executedSuccessfully;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PageByFrameNumberStep.class);
 
     private int frameNumber;
-
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PageByFrameNumberStep.class));
 
     public PageByFrameNumberStep() {
         super();
@@ -90,7 +85,7 @@ public class PageByFrameNumberStep extends AbstractStep<HtmlPage, HtmlPage> {
         for (FrameWindow frame : input.getFrames()){
             if (index == frameNumber){
                 output = (HtmlPage) frame.getEnclosedPage();
-                LOG.debug("Frame selected : " + frame.getName()+ "\n" + ((HtmlPage) frame.getEnclosedPage()).getWebResponse().getContentAsString());
+                LOG.debug("Frame selected : {}\n{}", frame.getName(), ((HtmlPage) frame.getEnclosedPage()).getWebResponse().getContentAsString());
             }
             index ++;
         }

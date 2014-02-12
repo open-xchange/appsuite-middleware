@@ -62,7 +62,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.realtime.util.ElementPath;
 
-
 /**
  * {@link PayloadTreeTest}
  *
@@ -70,33 +69,55 @@ import com.openexchange.realtime.util.ElementPath;
  */
 /**
  * {@link PayloadTreeTest}
- *
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class PayloadTreeTest {
 
     private PayloadTreeNode payloadTreeNode1;
+
     private PayloadTreeNode payloadTreeNode2;
+
     private PayloadTreeNode payloadTreeNode3;
+
     private PayloadElement payloadElement1;
+
     private PayloadElement payloadElement2;
+
     private PayloadElement payloadElement3;
+
     private List<PayloadTreeNode> emptyPayloadTreeNodeList;
+
     private List<PayloadTreeNode> filledPayloadTreeNodeList;
+
     private PayloadTree emptyTree;
+
     private PayloadTree treeWithRootNode;
+
     private PayloadElement filledTreePayloadElement1;
+
     private PayloadElement filledTreePayloadElement2;
+
     private PayloadElement filledTreePayloadElement3;
+
     private PayloadElement filledTreePayloadElement4;
+
     private PayloadElement filledTreePayloadElement5;
+
     private PayloadElement filledTreePayloadElement6;
+
     private PayloadTreeNode filledTreePayloadTreeNode1;
+
     private PayloadTreeNode filledTreePayloadTreeNode2;
+
     private PayloadTreeNode filledTreePayloadTreeNode3;
+
     private PayloadTreeNode filledTreePayloadTreeNode4;
+
     private PayloadTreeNode filledTreePayloadTreeNode5;
+
     private PayloadTreeNode filledTreePayloadTreeNode6;
+
     private PayloadTree filledTree;
 
     /**
@@ -136,13 +157,7 @@ public class PayloadTreeTest {
         treeWithRootNode = new PayloadTree(payloadTreeNode1);
 
         /*
-         *          tree
-         *            |
-         *            1
-         *           /\
-         *          2  4
-         *         /   /\
-         *        3   5  6
+         * tree | 1 /\ 2 4 / /\ 3 5 6
          */
         filledTree = new PayloadTree(filledTreePayloadTreeNode1);
 
@@ -213,7 +228,8 @@ public class PayloadTreeTest {
     }
 
     /**
-     * Test method for {@link com.openexchange.realtime.payload.PayloadTree#recursiveGetNumberOfNodes(com.openexchange.realtime.payload.PayloadTreeNode)}.
+     * Test method for
+     * {@link com.openexchange.realtime.payload.PayloadTree#recursiveGetNumberOfNodes(com.openexchange.realtime.payload.PayloadTreeNode)}.
      */
     @Test
     public void testRecursiveGetNumberOfNodes() {
@@ -239,11 +255,12 @@ public class PayloadTreeTest {
     }
 
     /**
-     * Test method for {@link com.openexchange.realtime.payload.PayloadTree#recursivelyGetNamespaces(com.openexchange.realtime.payload.PayloadTreeNode)}.
+     * Test method for
+     * {@link com.openexchange.realtime.payload.PayloadTree#recursivelyGetNamespaces(com.openexchange.realtime.payload.PayloadTreeNode)}.
      */
     @Test
     public void testRecursivelyGetElementPaths() {
-        Set<ElementPath> expectedElementpaths= new HashSet<ElementPath>();
+        Set<ElementPath> expectedElementpaths = new HashSet<ElementPath>();
         expectedElementpaths.add(filledTreePayloadTreeNode2.getElementPath());
         expectedElementpaths.add(filledTreePayloadTreeNode3.getElementPath());
         Set<ElementPath> retrievedNamespaces = new HashSet<ElementPath>(filledTree.recursivelyGetElementPaths(filledTreePayloadTreeNode2));
@@ -274,4 +291,15 @@ public class PayloadTreeTest {
         System.out.println(filledTreePayloadTreeNode4.recursiveToString(0));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testPayloadCreateWithNull() {
+        PayloadTreeNode nullElement = null;
+        new PayloadTreeNode(nullElement);
+    }
+
+    @Test
+    public void testPayloadCreateWithoutElement() {
+        PayloadTreeNode nullElement = new PayloadTreeNode();
+        new PayloadTreeNode(nullElement);
+    }
 }

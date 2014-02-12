@@ -68,8 +68,8 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
     /**
      * The logger.
      */
-    protected static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AttachmentTokenRegistry.class));
+    protected static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(AttachmentTokenRegistry.class);
 
     private static volatile AttachmentTokenRegistry singleton;
 
@@ -158,10 +158,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
 
             }
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned user-sensitive attachment tokens for user ").append(userId).append(" in context ").append(
-                contextId).toString());
-        }
+        LOG.debug("Cleaned user-sensitive attachment tokens for user {} in context {}", userId, contextId);
     }
 
     /**
@@ -314,7 +311,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
                     }
                 }
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
 

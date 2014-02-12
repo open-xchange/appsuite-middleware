@@ -51,7 +51,6 @@
 
 package com.openexchange.authentication.ucs.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -60,7 +59,7 @@ import com.openexchange.authentication.ucs.impl.UCSAuthentication;
 
 public class Activator implements BundleActivator {
 
-    private static transient final Log LOG = com.openexchange.log.Log.loggerFor(Activator.class);
+    private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
     /**
      * Reference to the service registration.

@@ -54,7 +54,6 @@ import gnu.trove.list.array.TIntArrayList;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -977,9 +976,9 @@ public class UserPermissionBits implements Serializable, Cloneable {
             return false;
         }
         try {
-            return new OXFolderAccess(context).isVisibleFor(FolderObject.SYSTEM_LDAP_FOLDER_ID, userId, groups, this);
+            return new OXFolderAccess(context).isReadFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID, userId, groups, this);
         } catch (final OXException e) {
-            final Log logger = com.openexchange.log.Log.loggerFor(UserPermissionBits.class);
+            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(UserPermissionBits.class);
             logger.warn("Cannot check availability of Global Address Book.", e);
             return false;
         }
@@ -1002,7 +1001,11 @@ public class UserPermissionBits implements Serializable, Cloneable {
     public int[] getGroups() {
         int[] thisGroups = groups;
         if (null == thisGroups) {
-            thisGroups = groups = UserStorage.getStorageUser(userId, contextId).getGroups();
+            try {
+                thisGroups = groups = UserStorage.getInstance().getUser(userId, contextId).getGroups();
+            } catch (OXException e) {
+                thisGroups = groups = new int[0];
+            }
         }
         return thisGroups;
     }

@@ -52,7 +52,6 @@ package com.openexchange.http.grizzly;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -68,7 +67,7 @@ import com.openexchange.server.Initialization;
  */
 public class GrizzlyConfig implements Initialization {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(GrizzlyConfig.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GrizzlyConfig.class);
 
     private static final GrizzlyConfig instance = new GrizzlyConfig();
 
@@ -167,7 +166,7 @@ public class GrizzlyConfig implements Initialization {
     @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
-            LOG.error(this.getClass().getName() + " already started");
+            LOG.error("{} already started", this.getClass().getName());
             return;
         }
         init();
@@ -176,7 +175,7 @@ public class GrizzlyConfig implements Initialization {
     @Override
     public void stop() {
         if (!started.compareAndSet(true, false)) {
-            LOG.error(this.getClass().getName() + " cannot be stopped since it has no been started before");
+            LOG.error("{} cannot be stopped since it has no been started before", this.getClass().getName());
             return;
         }
     }
@@ -378,9 +377,7 @@ public class GrizzlyConfig implements Initialization {
             List<String> proxyCandidates = IPTools.splitAndTrim(ipList, IPTools.COMMA_SEPARATOR);
             List<String> erroneousIPs = IPTools.filterErroneousIPs(proxyCandidates);
             if(!erroneousIPs.isEmpty()) {
-                if(LOG.isWarnEnabled()) {
-                    LOG.warn("Falling back to empty list as com.openexchange.server.knownProxies contains malformed IPs: "+erroneousIPs);
-                }
+                LOG.warn("Falling back to empty list as com.openexchange.server.knownProxies contains malformed IPs: {}", erroneousIPs);
             } else {
                 this.knownProxies = proxyCandidates;
             }

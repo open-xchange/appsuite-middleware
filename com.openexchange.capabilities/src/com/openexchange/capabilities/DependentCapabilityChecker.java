@@ -49,8 +49,6 @@
 
 package com.openexchange.capabilities;
 
-import java.util.HashSet;
-import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -73,14 +71,15 @@ public abstract class DependentCapabilityChecker implements CapabilityChecker {
      *
      * @param capability The capability to check
      * @param session Provides the users session for which to check
+     * @param declaredCapabilities The capabilities
      * @return Whether to award this capability or not
      * @throws OXException If check fails
      */
-    public abstract boolean isEnabled(String capability, Session session, Set<Capability> declaredCapabilities) throws OXException;
+    public abstract boolean isEnabled(String capability, Session session, CapabilitySet declaredCapabilities) throws OXException;
 
     @Override
     public boolean isEnabled(String capability, Session session) throws OXException {
-        return isEnabled(capability, session, new HashSet<Capability>());
+        return isEnabled(capability, session, new CapabilitySet(2));
     }
 
 }

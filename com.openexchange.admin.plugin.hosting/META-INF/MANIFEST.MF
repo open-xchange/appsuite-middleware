@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Hosting Plugin for Administration Daemon
 Bundle-SymbolicName: com.openexchange.admin.plugin.hosting
-Bundle-Version: 7.4.1
+Bundle-Version: 7.4.2
 Bundle-Activator: com.openexchange.admin.osgi.Activator
 Import-Package: com.openexchange.admin.rmi,
  com.openexchange.admin.rmi.dataobjects,
@@ -13,6 +13,8 @@ Import-Package: com.openexchange.admin.rmi,
  com.openexchange.context,
  com.openexchange.database,
  com.openexchange.databaseold,
+ com.openexchange.eventsystem,
+ com.openexchange.eventsystem.provisioning,
  com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
@@ -43,7 +45,8 @@ Import-Package: com.openexchange.admin.rmi,
  org.apache.commons.io,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Export-Package: com.openexchange.admin.rmi.impl,
  com.openexchange.admin.storage.interfaces
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

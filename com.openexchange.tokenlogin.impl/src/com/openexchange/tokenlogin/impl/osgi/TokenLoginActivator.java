@@ -52,7 +52,6 @@ package com.openexchange.tokenlogin.impl.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
@@ -66,6 +65,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
+import com.openexchange.lock.LockService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -82,7 +82,7 @@ import com.openexchange.tokenlogin.impl.TokenLoginServiceImpl;
 public final class TokenLoginActivator extends HousekeepingActivator {
 
     /** The logger */
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(TokenLoginActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TokenLoginActivator.class);
 
     /**
      * Initializes a new {@link TokenLoginActivator}.
@@ -93,7 +93,7 @@ public final class TokenLoginActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, HazelcastConfigurationService.class, SessiondService.class, ContextService.class };
+        return new Class<?>[] { ConfigurationService.class, HazelcastConfigurationService.class, SessiondService.class, ContextService.class, LockService.class };
     }
 
     @Override
@@ -215,7 +215,7 @@ public final class TokenLoginActivator extends HousekeepingActivator {
         if (null != mapConfigs && !mapConfigs.isEmpty()) {
             for (final String mapName : mapConfigs.keySet()) {
                 if (mapName.startsWith("tokenlogin-")) {
-                    LOG.info("Using distributed token-login '" + mapName + "'.");
+                    LOG.info("Using distributed token-login '{}'.", mapName);
                     return mapName;
                 }
             }

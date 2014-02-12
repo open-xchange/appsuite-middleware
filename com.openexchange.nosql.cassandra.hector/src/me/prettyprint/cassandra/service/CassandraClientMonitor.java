@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 public class CassandraClientMonitor implements CassandraClientMonitorMBean {
 
-  private static final Logger log = LoggerFactory.getLogger(CassandraClientMonitor.class);
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(CassandraClientMonitor.class);
   private final Map<Counter, AtomicLong> counters;
 
   private final HConnectionManager connectionManager;
@@ -243,7 +243,7 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
         return false;
       }
     } catch (NumberFormatException e) {
-      log.error("Invalid number entered: " + retryDelay);
+      log.error("Invalid number entered: {}", retryDelay);
       return false;
     }
   }

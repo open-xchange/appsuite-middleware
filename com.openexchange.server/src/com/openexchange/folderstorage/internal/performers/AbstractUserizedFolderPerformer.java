@@ -66,6 +66,7 @@ import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.StorageParametersUtility;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
@@ -106,8 +107,9 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      *
      * @param session The session
      * @param decorator The optional folder service decorator
+     * @throws OXException If passed session is invalid
      */
-    public AbstractUserizedFolderPerformer(final ServerSession session, final FolderServiceDecorator decorator) {
+    public AbstractUserizedFolderPerformer(final ServerSession session, final FolderServiceDecorator decorator) throws OXException {
         super(session);
         this.decorator = decorator;
         storageParameters.setDecorator(decorator);
@@ -132,8 +134,9 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param session The session
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
+     * @throws OXException If passed session is invalid
      */
-    public AbstractUserizedFolderPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public AbstractUserizedFolderPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(session, folderStorageDiscoverer);
         this.decorator = decorator;
         storageParameters.setDecorator(decorator);
@@ -343,6 +346,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
          * Set locale
          */
         userizedFolder.setLocale(getLocale());
+        userizedFolder.setAltNames(StorageParametersUtility.getBoolParameter("altNames", storageParameters));
         /*
          * Permissions
          */

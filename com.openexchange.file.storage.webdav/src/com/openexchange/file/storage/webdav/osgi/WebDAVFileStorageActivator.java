@@ -49,7 +49,6 @@
 
 package com.openexchange.file.storage.webdav.osgi;
 
-import com.openexchange.log.LogFactory;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
@@ -86,7 +85,7 @@ public final class WebDAVFileStorageActivator extends HousekeepingActivator {
                 new WebDAVServiceRegisterer(context)));
             openTrackers();
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(WebDAVFileStorageActivator.class)).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(WebDAVFileStorageActivator.class).error("", e);
             throw e;
         }
     }
@@ -105,7 +104,7 @@ public final class WebDAVFileStorageActivator extends HousekeepingActivator {
              */
             WebDAVServices.setServices(null);
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(WebDAVFileStorageActivator.class)).error(e.getMessage(), e);
+            org.slf4j.LoggerFactory.getLogger(WebDAVFileStorageActivator.class).error("", e);
             throw e;
         }
     }

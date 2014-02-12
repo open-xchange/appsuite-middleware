@@ -143,12 +143,8 @@ public class OSGiChatServiceRegistry implements ChatServiceRegistry {
             if (null == map.putIfAbsent(service.getId(), service)) {
                 return service;
             }
-            final org.apache.commons.logging.Log logger =
-                com.openexchange.log.LogFactory.getLog(OSGiChatServiceRegistry.Customizer.class);
-            if (logger.isWarnEnabled()) {
-                logger.warn(new StringBuilder(128).append("Chat service ").append(service.getDisplayName()).append(
-                    " could not be added to registry. Another service is already registered with identifier: ").append(service.getId()).toString());
-            }
+            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OSGiChatServiceRegistry.Customizer.class);
+            logger.warn("Chat service {} could not be added to registry. Another service is already registered with identifier: {}", service.getDisplayName(), service.getId());
             context.ungetService(reference);
             return null;
         }

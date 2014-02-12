@@ -53,7 +53,6 @@ import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import java.util.Date;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -83,7 +82,6 @@ import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -92,7 +90,7 @@ import com.openexchange.tools.session.ServerSession;
 
 public class TaskRequest extends CalendarRequest {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TaskRequest.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TaskRequest.class);
 
     protected final static int[] _taskFields = {
         DataObject.OBJECT_ID,
@@ -242,7 +240,7 @@ public class TaskRequest extends CalendarRequest {
             internalColumns[columnsToLoad.length] = DataObject.LAST_MODIFIED;
 
             final TasksSQLInterface taskssql = new TasksSQLImpl(session);
-            final TaskWriter taskWriter = new TaskWriter(timeZone);
+            final TaskWriter taskWriter = new TaskWriter(timeZone).setSession(session);
 
             it = taskssql.getModifiedTasksInFolder(folderId, internalColumns, requestedTimestamp);
             while (it.hasNext()) {
@@ -318,7 +316,7 @@ public class TaskRequest extends CalendarRequest {
 
         try {
             final TasksSQLInterface taskssql = new TasksSQLImpl(session);
-            final TaskWriter taskwriter = new TaskWriter(timeZone);
+            final TaskWriter taskwriter = new TaskWriter(timeZone).setSession(session);
             it = taskssql.getObjectsById(objectIdAndFolderId, internalColumns);
 
             while (it.hasNext()) {
@@ -362,7 +360,7 @@ public class TaskRequest extends CalendarRequest {
         SearchIterator<Task> it = null;
         try {
 
-            final TaskWriter taskwriter = new TaskWriter(timeZone);
+            final TaskWriter taskwriter = new TaskWriter(timeZone).setSession(session);
 
             final TasksSQLInterface taskssql = new TasksSQLImpl(session);
             if (leftHandLimit == 0) {
@@ -397,7 +395,7 @@ public class TaskRequest extends CalendarRequest {
 
         final TasksSQLInterface sqlinterface = new TasksSQLImpl(session);
         final Task task = sqlinterface.getTaskById(id, inFolder);
-        final TaskWriter taskWriter = new TaskWriter(timeZone);
+        final TaskWriter taskWriter = new TaskWriter(timeZone).setSession(session);
 
         final JSONObject jsonResponseObject = new JSONObject();
         taskWriter.writeTask(task, jsonResponseObject);
@@ -486,7 +484,7 @@ public class TaskRequest extends CalendarRequest {
         SearchIterator<Task> it = null;
 
         try {
-            final TaskWriter taskWriter = new TaskWriter(timeZone);
+            final TaskWriter taskWriter = new TaskWriter(timeZone).setSession(session);
 
             final TasksSQLInterface taskssql = new TasksSQLImpl(session);
             it = taskssql.getTasksByExtendedSearch(searchObj, orderBy, order, internalColumns);

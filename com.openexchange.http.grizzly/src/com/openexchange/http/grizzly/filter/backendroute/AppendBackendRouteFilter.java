@@ -51,7 +51,6 @@ package com.openexchange.http.grizzly.filter.backendroute;
 
 import java.io.IOException;
 import java.util.Iterator;
-import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.filterchain.BaseFilter;
 import org.glassfish.grizzly.filterchain.FilterChainContext;
 import org.glassfish.grizzly.filterchain.NextAction;
@@ -70,7 +69,7 @@ import org.glassfish.grizzly.memory.ByteBufferWrapper;
  */
 public class AppendBackendRouteFilter extends BaseFilter {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AppendBackendRouteFilter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppendBackendRouteFilter.class);
     private String backendRoute;
 
     /**
@@ -243,9 +242,7 @@ public class AppendBackendRouteFilter extends BaseFilter {
      * @param logValue the String that should be logged
      */
     private static void writeToInfoLog(String logValue) {
-        if(LOG.isInfoEnabled()) {
-            LOG.info(logValue);
-        }
+        LOG.info(logValue);
     }
 
     /**
@@ -253,8 +250,6 @@ public class AppendBackendRouteFilter extends BaseFilter {
      * @param logValue the String that should be logged
      */
     private static void writeToDebugLog(String logValue) {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug(logValue);
-        }
+        LOG.debug(logValue);
     }
 }

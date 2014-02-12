@@ -58,7 +58,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -96,6 +95,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -114,7 +114,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public final class ICalJSONDataHandler implements DataHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ICalJSONDataHandler.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalJSONDataHandler.class);
 
     private static final Class<?>[] TYPES = { InputStream.class };
 
@@ -163,7 +163,7 @@ public final class ICalJSONDataHandler implements DataHandler {
         {
             final String timeZoneId = dataArguments.get("com.openexchange.groupware.calendar.timezone");
             timeZone =
-                TimeZoneUtils.getTimeZone(null == timeZoneId ? UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone() : timeZoneId);
+                TimeZoneUtils.getTimeZone(null == timeZoneId ? UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone() : timeZoneId);
         }
         try {
             /*
@@ -202,7 +202,7 @@ public final class ICalJSONDataHandler implements DataHandler {
              * Insert parsed appointments into denoted calendar folder
              */
             try {
-                final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
+                final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone).setSession(ServerSessionAdapter.valueOf(session));
                 final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
                 /*
                  * Get recurrence position
@@ -218,7 +218,7 @@ public final class ICalJSONDataHandler implements DataHandler {
                         try {
                             tmp = Integer.parseInt(recPosStr.trim());
                         } catch (final NumberFormatException e) {
-                            LOG.error(MessageFormat.format("Data argument \"{0}\" is not a number: {1}", recPosArg, recPosStr), e);
+                            LOG.error("Data argument \"{}\" is not a number: {}", recPosArg, recPosStr, e);
                             tmp = 0;
                         }
                         recurrencePosition = tmp;
@@ -240,9 +240,7 @@ public final class ICalJSONDataHandler implements DataHandler {
                                 CalendarCollectionService.MAX_OCCURRENCESE,
                                 true);
                         if (recuResults.size() == 0) {
-                            if (LOG.isWarnEnabled()) {
-                                LOG.warn(new StringBuilder(32).append("No occurrence at position ").append(recurrencePosition));
-                            }
+                            LOG.warn("No occurrence at position {}", recurrencePosition);
                             OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION.create(Integer.valueOf(recurrencePosition));
                         }
                         final RecurringResultInterface result = recuResults.getRecurringResult(0);
@@ -269,7 +267,7 @@ public final class ICalJSONDataHandler implements DataHandler {
              */
             try {
                 for (final Task task : tasks) {
-                    final TaskWriter taskWriter = new TaskWriter(timeZone);
+                    final TaskWriter taskWriter = new TaskWriter(timeZone).setSession(session);
                     final JSONObject jsonTask = new JSONObject();
                     taskWriter.writeTask(task, jsonTask);
                     objects.put(jsonTask);

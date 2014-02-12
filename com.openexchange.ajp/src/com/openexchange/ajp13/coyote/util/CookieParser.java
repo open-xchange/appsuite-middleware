@@ -67,10 +67,8 @@ import com.openexchange.tools.regex.RFC2616Regex;
  */
 public final class CookieParser {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CookieParser.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(CookieParser.class);
 
     /**
      * Initializes a new {@link CookieParser}.
@@ -105,9 +103,7 @@ public final class CookieParser {
                         version = Integer.parseInt(versionStr);
                     } catch (final NumberFormatException e) {
                         version = 0;
-                        if (DEBUG) {
-                            LOG.debug("Version set to 0. No number value in $Version cookie: " + versionStr);
-                        }
+                        LOG.debug("Version set to 0. No number value in $Version cookie: {}", versionStr);
                     }
                 }
             }
@@ -123,9 +119,7 @@ public final class CookieParser {
                      */
                     continue;
                 }
-                if (LOG.isInfoEnabled()) {
-                    LOG.info(new com.openexchange.java.StringAllocator(32).append("Special cookie ").append(name).append(" not handled, yet!"));
-                }
+                LOG.info("Special cookie {} not handled, yet!", name);
             }
             if (prevEnd != -1) {
                 final int start = m.start();
@@ -146,9 +140,7 @@ public final class CookieParser {
                  * Cookie name contains illegal characters (for example, a comma, space, or semicolon) or it is one of the tokens reserved
                  * for use by the cookie protocol
                  */
-                if (DEBUG) {
-                    LOG.debug("Invalid cookie name detected. Ignoring...", e);
-                }
+                LOG.debug("Invalid cookie name detected. Ignoring...", e);
                 continue;
             }
             c.setVersion(version);
@@ -182,13 +174,13 @@ public final class CookieParser {
         if ((headerValue.length() > 0) && cookieList.isEmpty()) {
             throw new AJPv13Exception(AJPv13Exception.AJPCode.INVALID_COOKIE_HEADER, true, headerValue);
         }
-        if (DEBUG) {
+        LOG.debug("{}", new Object() { @Override public String toString() {
             final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256).append("Parsed Cookies:\n");
             for (final Cookie cookie : cookieList) {
                 sb.append('\'').append(cookie.getName()).append("'='").append(cookie.getValue()).append("'\n");
             }
-            LOG.debug(sb.toString());
-        }
+            return sb.toString();
+        }});
         return cookieList.toArray(new Cookie[cookieList.size()]);
     }
 

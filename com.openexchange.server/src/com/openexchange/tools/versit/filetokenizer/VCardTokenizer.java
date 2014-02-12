@@ -49,16 +49,13 @@
 
 package com.openexchange.tools.versit.filetokenizer;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.ICalendar;
 import com.openexchange.tools.versit.VCard;
@@ -73,7 +70,7 @@ import com.openexchange.tools.versit.old.VCard21;
  */
 public class VCardTokenizer {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(VCardTokenizer.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(VCardTokenizer.class);
 
     public static final String VCARD_V3 = "3.0";
 
@@ -103,7 +100,7 @@ public class VCardTokenizer {
      */
     public VCardTokenizer(final InputStream is) throws IOException {
         streamAsBytes = new UnsynchronizedByteArrayOutputStream();
-        vcard = new BufferedInputStream(is);
+        vcard = Streams.bufferedInputStreamFor(is);
     }
 
     /**

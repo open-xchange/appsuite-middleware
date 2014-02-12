@@ -62,7 +62,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CompletionService;
-import org.apache.commons.logging.Log;
 import com.openexchange.concurrent.CallerRunsCompletionService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -80,7 +79,6 @@ import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -98,9 +96,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class ListPerformer extends AbstractUserizedFolderPerformer {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ListPerformer.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ListPerformer.class);
 
     protected static final FolderType FOLDER_TYPE_MAIL = MailFolderType.getInstance();
 
@@ -109,8 +105,9 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
      *
      * @param session The session
      * @param decorator The optional folder service decorator
+     * @throws OXException If passed session is invalid
      */
-    public ListPerformer(final ServerSession session, final FolderServiceDecorator decorator) {
+    public ListPerformer(final ServerSession session, final FolderServiceDecorator decorator) throws OXException {
         super(session, decorator);
     }
 
@@ -131,8 +128,9 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
      * @param session The session
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
+     * @throws OXException If passed session is invalid
      */
-    public ListPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public ListPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(session, decorator, folderStorageDiscoverer);
     }
 
@@ -177,7 +175,6 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, parentId);
         }
-        final long start = DEBUG ? System.currentTimeMillis() : 0L;
         final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
         if (folderStorage.startTransaction(storageParameters, false)) {
             openedStorages.add(folderStorage);
@@ -192,11 +189,6 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
              */
             for (final FolderStorage fs : openedStorages) {
                 fs.commitTransaction(storageParameters);
-            }
-            if (DEBUG) {
-                final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new com.openexchange.java.StringAllocator().append("List.doList() took ").append(duration).append("msec for parent folder: ").append(
-                    parentId).toString());
             }
             return ret;
         } catch (final OXException e) {
@@ -303,7 +295,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 for (final Entry<FolderStorage, TIntList> entry : map.entrySet()) {
                     final FolderStorage tmp = entry.getKey();
                     final int[] indexes = entry.getValue().toArray();
-                    final Log log = LOG;
+                    final org.slf4j.Logger log = LOG;
                     completionService.submit(new ThreadPools.TrackableCallable<Object>() {
 
                         @Override
@@ -329,12 +321,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                         addWarning(warnings.iterator().next());
                                     }
                                 } catch (final OXException e) {
-                                    /*
-                                     * Batch-load failed...
-                                     */
-                                    if (log.isWarnEnabled()) {
-                                        log.warn("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
-                                    }
+                                    log.warn("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
                                     folders = null;
                                 }
                                 if (null == folders) {
@@ -350,10 +337,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                         try {
                                             subfolder = tmp.getFolder(treeId, id, newParameters);
                                         } catch (final OXException e) {
-                                            log.warn(
-                                                new com.openexchange.java.StringAllocator(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(treeId).append(
-                                                    "\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append('"').toString(),
-                                                e);
+                                            log.warn("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, tmp.getClass().getSimpleName(), e);
                                             addWarning(e);
                                             continue NextIndex;
                                         }
@@ -569,7 +553,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         for (final Entry<FolderStorage, TIntList> entry : map.entrySet()) {
             final FolderStorage tmp = entry.getKey();
             final int[] indexes = entry.getValue().toArray();
-            final Log log = LOG;
+            final org.slf4j.Logger log = LOG;
             completionService.submit(new ThreadPools.TrackableCallable<Object>() {
 
                 @Override
@@ -595,12 +579,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                 addWarning(warnings.iterator().next());
                             }
                         } catch (final OXException e) {
-                            /*
-                             * Batch-load failed...
-                             */
-                            if (log.isWarnEnabled()) {
-                                log.warn("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
-                            }
+                            log.warn("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
                             folders = null;
                         }
                         if (null == folders) {
@@ -613,10 +592,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                 try {
                                     subfolder = tmp.getFolder(treeId, id, newParameters);
                                 } catch (final OXException e) {
-                                    log.warn(
-                                        new com.openexchange.java.StringAllocator(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(treeId).append(
-                                            "\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append('"').toString(),
-                                        e);
+                                    log.warn("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, tmp.getClass().getSimpleName(), e);
                                     addWarning(e);
                                     continue NextIndex;
                                 }

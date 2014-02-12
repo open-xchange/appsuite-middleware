@@ -86,7 +86,7 @@ public class RTResultFormatter {
 
         JSONObject result = (JSONObject) resultMap.get(RTAction.RESULT);
         formatter.append("\tresult:").append("\n");
-        if(error == null) {
+        if(result == null) {
             formatter.append("\t\t").append("none").append("\n");
         } else {
             formatter.append("\t\t").append(shortenOutput(result.toString())).append("\n");
@@ -107,9 +107,15 @@ public class RTResultFormatter {
         return formatter.toString();
     }
 
+    /**
+     * Shorten given String to 500 characters and add '...' as ellipsis.
+     * 
+     * @param input the input string
+     * @return the maybe shortened input string
+     */
     public static String shortenOutput(String input) {
-        if(input.length() > 500) {
-            return input.substring(0, 500)+"...";
+        if (input.length() > 500) {
+            return input.substring(0, 500) + "...";
         } else {
             return input;
         }

@@ -61,6 +61,7 @@ import org.json.JSONWriter;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.session.Session;
 
 /**
  * {@link CommonWriter} - Writer for common fields
@@ -88,24 +89,25 @@ public class CommonWriter extends FolderChildWriter {
      *
      * @param commonObj The common object
      * @param jsonObj The JSON object
+     * @param session The associated session
      * @throws JSONException If a JSON error occurs
      */
-    public void writeCommonFields(final CommonObject commonObj, final JSONObject jsonObj) throws JSONException {
-        writeFields(commonObj, timeZone, jsonObj);
+    public void writeCommonFields(final CommonObject commonObj, final JSONObject jsonObj, Session session) throws JSONException {
+        writeFields(commonObj, timeZone, jsonObj, session);
     }
 
-    protected boolean writeField(final CommonObject obj, final int column, final TimeZone tz, final JSONArray json) throws JSONException {
+    protected boolean writeField(final CommonObject obj, final int column, final TimeZone tz, final JSONArray json, Session session) throws JSONException {
         final FieldWriter<CommonObject> writer = WRITER_MAP.get(column);
         if (null == writer) {
-            return super.writeField(obj, column, tz, json);
+            return super.writeField(obj, column, tz, json, session);
         }
-        writer.write(obj, timeZone, json);
+        writer.write(obj, timeZone, json, session);
         return true;
     }
 
-    protected void writeFields(final CommonObject obj, final TimeZone tz, final JSONObject json) throws JSONException {
-        super.writeFields(obj, tz, json);
-        final WriterProcedure<CommonObject> procedure = new WriterProcedure<CommonObject>(obj, json, tz);
+    protected void writeFields(final CommonObject obj, final TimeZone tz, final JSONObject json, final Session session) throws JSONException {
+        super.writeFields(obj, tz, json, session);
+        final WriterProcedure<CommonObject> procedure = new WriterProcedure<CommonObject>(obj, json, tz, session);
         if (!WRITER_MAP.forEachValue(procedure)) {
             final JSONException je = procedure.getError();
             if (null != je) {
@@ -116,55 +118,55 @@ public class CommonWriter extends FolderChildWriter {
 
     private static final FieldWriter<CommonObject> CATEGORIES_WRITER = new FieldWriter<CommonObject>() {
         @Override
-        public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json, Session session) {
             writeValue(obj.getCategories(), json, obj.containsCategories());
         }
         @Override
-        public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json, Session session) throws JSONException {
             writeParameter(CommonFields.CATEGORIES, obj.getCategories(), json, obj.containsCategories());
         }
     };
 
     private static final FieldWriter<CommonObject> PRIVATE_FLAG_WRITER = new FieldWriter<CommonObject>() {
         @Override
-        public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json, Session session) {
             writeValue(obj.getPrivateFlag(), json, obj.containsPrivateFlag());
         }
         @Override
-        public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json, Session session) throws JSONException {
             writeParameter(CommonFields.PRIVATE_FLAG, obj.getPrivateFlag(), json, obj.containsPrivateFlag());
         }
     };
 
     private static final FieldWriter<CommonObject> COLORLABEL_WRITER = new FieldWriter<CommonObject>() {
         @Override
-        public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json, Session session) {
             writeValue(obj.getLabel(), json, obj.containsLabel());
         }
         @Override
-        public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json, Session session) throws JSONException {
             writeParameter(CommonFields.COLORLABEL, obj.getLabel(), json, obj.containsLabel());
         }
     };
 
     private static final FieldWriter<CommonObject> NUMBER_OF_ATTACHMENTS_WRITER = new FieldWriter<CommonObject>() {
         @Override
-        public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json, Session session) {
             writeValue(obj.getNumberOfAttachments(), json, obj.containsNumberOfAttachments());
         }
         @Override
-        public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json, Session session) throws JSONException {
             writeParameter(CommonFields.NUMBER_OF_ATTACHMENTS, obj.getNumberOfAttachments(), json, obj.containsNumberOfAttachments());
         }
     };
 
     private static final FieldWriter<CommonObject> LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC_WRITER = new FieldWriter<CommonObject>() {
         @Override
-        public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json, Session session) {
             writeValue(obj.getLastModifiedOfNewestAttachment(), UTC, json, obj.containsLastModifiedOfNewestAttachment());
         }
         @Override
-        public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json, Session session) throws JSONException {
             writeParameter(
                 CommonFields.LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC,
                 obj.getLastModifiedOfNewestAttachment(),
@@ -176,23 +178,23 @@ public class CommonWriter extends FolderChildWriter {
 
     private static final FieldWriter<CommonObject> NUMBER_OF_LINKS_WRITER = new FieldWriter<CommonObject>() {
         @Override
-        public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json) {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json, Session session) {
             writeValue(obj.getNumberOfLinks(), json, obj.containsNumberOfLinks());
         }
         @Override
-        public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json) {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json, Session session) {
             // This value is nowhere written to a JSON object.
         }
     };
 
     private static final FieldWriter<CommonObject> EXTENDED_PROPERTIES_WRITER = new FieldWriter<CommonObject>() {
         @Override
-        public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json) throws JSONException {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json, Session session) throws JSONException {
             final Map<String, Object> extendedProperties = obj.getExtendedProperties();
             writeValue(null == extendedProperties ? null : (JSONValue) JSONCoercion.coerceToJSON(extendedProperties), json, obj.containsExtendedProperties());
         }
         @Override
-        public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json) throws JSONException {
+        public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json, Session session) throws JSONException {
             final Map<String, Object> extendedProperties = obj.getExtendedProperties();
             writeParameter(CommonFields.EXTENDED_PROPERTIES,null == extendedProperties ? null : (JSONValue) JSONCoercion.coerceToJSON(extendedProperties), json, obj.containsExtendedProperties());
         }

@@ -95,8 +95,8 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 responseDescription = "Response with timestamp: An array with appointment data. Each array element describes one appointment and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public final class ListAction extends AppointmentAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ListAction.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(ListAction.class);
 
     /**
      * Initializes a new {@link ListAction}.
@@ -186,7 +186,7 @@ public final class ListAction extends AppointmentAction {
                         try {
                             recuResults = recColl.calculateFirstRecurring(appointment);
                         } catch (final OXException e) {
-                            LOG.error("Can not calculate recurrence " + appointment.getObjectID() + ":" + req.getSession().getContextId(), e);
+                            LOG.error("Can not calculate recurrence {}:{}", appointment.getObjectID(), req.getSession().getContextId(), e);
                             appointmentList.add(appointment);
                         }
 
@@ -196,7 +196,7 @@ public final class ListAction extends AppointmentAction {
 
                             appointmentList.add(appointment);
                         } else {
-                            LOG.warn("cannot load first recurring appointment from appointment object: " + +appointment.getRecurrenceType() + " / " + appointment.getObjectID() + "\n\n\n");
+                            LOG.warn("cannot load first recurring appointment from appointment object: {} / {}\n\n\n", appointment.getRecurrenceType(), appointment.getObjectID());
                         }
                     } else {
                         // Commented this because this is done in CalendarOperation.next():726 that calls extractRecurringInformation()
@@ -230,7 +230,7 @@ public final class ListAction extends AppointmentAction {
                             try {
                                 recuResults = recColl.calculateFirstRecurring(appointment);
                             } catch (final OXException e) {
-                                LOG.error("Can not calculate recurrence " + appointment.getObjectID() + ":" + req.getSession().getContextId(), e);
+                                LOG.error("Can not calculate recurrence {}:{}", appointment.getObjectID(), req.getSession().getContextId(), e);
                                 appointmentList.add(appointment);
                             }
                             if (recuResults != null && recuResults.size() > 0) {
@@ -266,7 +266,7 @@ public final class ListAction extends AppointmentAction {
         } catch (final SearchIteratorException e) {
             throw e;
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         } finally {
             if (it != null) {

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Service for persistent Presence Subscriptions
 Bundle-SymbolicName: com.openexchange.realtime.presence.subscribe
-Bundle-Version: 7.4.1
+Bundle-Version: 7.4.2
 Bundle-Activator: com.openexchange.realtime.presence.subscribe.osgi.PresenceSubscribeActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -36,8 +36,8 @@ Import-Package: com.openexchange.config,
  com.openexchange.tools.update,
  com.openexchange.user,
  org.apache.commons.logging,
- org.osgi.framework
-Bundle-ActivationPolicy: lazy
+ org.osgi.framework,
+ org.slf4j
 Bundle-ClassPath: .,
  lib/org.apache.felix.ipojo.junit4osgi-1.0.0.jar
 Export-Package: com.openexchange.realtime.presence.subscribe

@@ -53,7 +53,6 @@ import static com.openexchange.ajax.framework.ListIDs.l;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import com.openexchange.ajax.AppointmentTest;
@@ -76,7 +75,7 @@ import com.openexchange.server.impl.OCLPermission;
 
 public class ListTest extends AppointmentTest {
 
-    private static final Log LOG = LogFactory.getLog(ListTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ListTest.class);
 
     public ListTest(final String name) {
         super(name);

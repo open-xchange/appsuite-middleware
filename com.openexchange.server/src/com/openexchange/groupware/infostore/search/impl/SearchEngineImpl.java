@@ -62,7 +62,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import org.apache.commons.logging.Log;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
@@ -82,7 +81,6 @@ import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -98,7 +96,7 @@ import com.openexchange.tools.sql.SearchStrings;
  */
 public class SearchEngineImpl extends DBService implements InfostoreSearchEngine {
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SearchEngineImpl.class));
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SearchEngineImpl.class);
 
     private final InfostoreSecurityImpl security = new InfostoreSecurityImpl();
 
@@ -249,10 +247,10 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                 keepConnection = true;
                 return iter;
             } catch (final SQLException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, SQL_QUERY.toString());
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
             } finally {
                 if (con != null && !keepConnection) {
@@ -342,7 +340,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
                 objectIDs.add(results.getInt(1));
             }
         } catch (SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, sqlQuery.toString());
         } finally {
             DBUtils.closeSQLStuff(results, statement);
@@ -367,10 +365,10 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
             keepConnection = true;
             return iter;
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, sqlQuery.toString());
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
         } finally {
             if (connection != null && !keepConnection) {

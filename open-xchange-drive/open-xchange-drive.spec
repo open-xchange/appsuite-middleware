@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:	@OXVERSION@
-%define		ox_release 21
+%define		ox_release 6
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -15,6 +15,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Server module for Open-Xchange Drive file synchronization
+Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 
 %description
@@ -46,8 +47,14 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Fri Feb 07 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Sixth release candidate for 7.4.2
 * Thu Feb 06 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2014-02-11
+* Thu Feb 06 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Fifth release candidate for 7.4.2
+* Tue Feb 04 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Fourth release candidate for 7.4.2
 * Thu Jan 30 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2014-02-03
 * Wed Jan 29 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
@@ -56,20 +63,42 @@ Build for patch 2014-01-30
 Build for patch 2014-01-31
 * Tue Jan 28 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2014-01-30
+* Tue Jan 28 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Build for patch 2014-01-30
+* Fri Jan 24 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Build for patch 2013-12-17
+* Thu Jan 23 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Third release candidate for 7.4.2
 * Mon Jan 20 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2014-01-20
 * Thu Jan 16 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2014-01-16
 * Mon Jan 13 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2014-01-14
+* Fri Jan 10 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Second release candidate for 7.4.2
+* Fri Jan 10 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Build for patch 2013-12-17
 * Fri Jan 03 2014 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2014-01-06
 * Mon Dec 23 2013 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2013-12-09
+* Mon Dec 23 2013 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+First release candidate for 7.4.2
 * Thu Dec 19 2013 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2013-12-23
+* Thu Dec 19 2013 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Build for patch 2013-12-23
+* Wed Dec 18 2013 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+prepare for 7.4.2
+* Tue Dec 17 2013 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Build for patch 2013-12-19
 * Tue Dec 17 2013 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2013-12-18
+* Tue Dec 17 2013 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Build for patch 2013-12-16
+* Thu Dec 12 2013 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Build for patch 2013-12-12
 * Thu Dec 12 2013 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2013-12-12
 * Mon Dec 09 2013 Tobias Friedrich <tobias.friedrich@open-xchange.com>

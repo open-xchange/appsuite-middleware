@@ -54,10 +54,12 @@ import java.util.concurrent.ConcurrentMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
@@ -79,37 +81,38 @@ public class LoaderActivatorTest {
     /**
      * Class under test
      */
+    @InjectMocks
     private LoaderActivator loaderActivator = null;
 
     /**
      * {@link BundleContext} mock
      */
+    @Mock
     private BundleContext bundleContext;
 
     /**
      * {@link Bundle} mock
      */
+    @Mock
     private Bundle bundle;
 
     /**
      * {@link IDBasedFileAccessFactory} mock
      */
+    @Mock
     private IDBasedFileAccessFactory idBasedFileAccessFactory;
 
     /**
      * {@link IDBasedFolderAccessFactory} mock
      */
+    @Mock
     private IDBasedFolderAccessFactory idBasedFolderAccessFactory;
 
     @Before
     public void setUp() throws Exception {
-        this.loaderActivator = new LoaderActivator();
+        MockitoAnnotations.initMocks(this);
 
-        // MEMBERS
-        this.bundleContext = PowerMockito.mock(BundleContext.class);
-        this.bundle = PowerMockito.mock(Bundle.class);
-        this.idBasedFileAccessFactory = PowerMockito.mock(IDBasedFileAccessFactory.class);
-        this.idBasedFolderAccessFactory = PowerMockito.mock(IDBasedFolderAccessFactory.class);
+        this.loaderActivator = new LoaderActivator();
 
         // SERVICES
         ConcurrentMap<Class<?>, ServiceProvider<?>> services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>();

@@ -49,7 +49,6 @@
 
 package com.openexchange.realtime.dispatch.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceReference;
@@ -58,13 +57,14 @@ import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
+import com.openexchange.realtime.cleanup.RealtimeJanitor;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.impl.LocalMessageDispatcherImpl;
 import com.openexchange.realtime.dispatch.management.ManagementHouseKeeper;
 
 public class RealtimeDispatchActivator extends HousekeepingActivator {
 
-    static final Log LOG = com.openexchange.log.Log.loggerFor(RealtimeDispatchActivator.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RealtimeDispatchActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -95,10 +95,11 @@ public class RealtimeDispatchActivator extends HousekeepingActivator {
         RealtimeServiceRegistry.SERVICES.set(this);
         ManagementHouseKeeper managementHouseKeeper = ManagementHouseKeeper.getInstance();
         managementHouseKeeper.initialize(this);
-        
-        final LocalMessageDispatcher dispatcher = new LocalMessageDispatcherImpl();
 
+        final LocalMessageDispatcher dispatcher = new LocalMessageDispatcherImpl();
         registerService(LocalMessageDispatcher.class, dispatcher);
+        RealtimeJanitor gate = dispatcher.getGate();
+        registerService(RealtimeJanitor.class, gate);
 
         track(Channel.class, new SimpleRegistryListener<Channel>() {
 

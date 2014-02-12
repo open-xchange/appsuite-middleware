@@ -51,6 +51,7 @@ package com.openexchange.exception;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
@@ -63,7 +64,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.Category.EnumType;
 import com.openexchange.exception.internal.I18n;
 import com.openexchange.i18n.LocalizableStrings;
@@ -85,7 +85,7 @@ public class OXException extends Exception implements OXExceptionConstants {
     // ([A-Za-z_]+)\((".*"),
     // $1($1_MSG,
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(OXException.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXException.class);
 
     private static final long serialVersionUID = 2058371531364916608L;
 
@@ -138,6 +138,18 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public static OXException general(final String logMessage) {
         return new OXException(CODE_DEFAULT, OXExceptionStrings.MESSAGE).setLogMessage(logMessage).setCategory(CATEGORY_ERROR).setPrefix(
+            PREFIX_GENERAL);
+    }
+
+    /**
+     * Creates a general exception.
+     *
+     * @param logMessage The log message
+     * @param cause The cause
+     * @return A general exception.
+     */
+    public static OXException general(final String logMessage, final Throwable cause) {
+        return new OXException(CODE_DEFAULT, OXExceptionStrings.MESSAGE, cause).setLogMessage(logMessage).setCategory(CATEGORY_ERROR).setPrefix(
             PREFIX_GENERAL);
     }
 
@@ -236,8 +248,6 @@ public class OXException extends Exception implements OXExceptionConstants {
     private String prefix;
 
     private Generic generic;
-
-    private LogLevel optLogLevel;
 
     /**
      * Initializes a default {@link OXException}.
@@ -478,10 +488,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         } catch (final NullPointerException e) {
             this.logMessage = null;
         } catch (final IllegalFormatException e) {
-            LOG.error(e.getMessage(), e);
-            final Exception logMe = new Exception(super.getMessage());
-            logMe.setStackTrace(super.getStackTrace());
-            LOG.error("Illegal message format.", logMe);
+            LOG.error("Illegal format: >>{}<<, params: {}, code: {}", displayFormat, (null == args || 0 == args.length ? "<none>" : Arrays.toString(args)), getErrorCode(), e);
             this.logMessage = null;
         }
         return this;
@@ -533,7 +540,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      *
      * @param log The logger
      */
-    public void log(final Log log) {
+    public void log(final org.slf4j.Logger log) {
         final LogLevel logLevel = getCategories().get(0).getLogLevel();
         if (!logLevel.appliesTo(log)) {
             return;
@@ -566,7 +573,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @return The log message for specified log level or <code>defaultLog</code> if not loggable.
      */
     public String getLogMessage(final LogLevel logLevel, final String defaultLog) {
-        if (!isLoggable(logLevel)) {
+        if (!isLoggable()) {
             return defaultLog;
         }
         return getLogMessage();
@@ -639,6 +646,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         /*
          * Append message
          */
+        final String logMessage = this.logMessage;
         if (null == logMessage) {
             final String str = getDisplayMessage0(Locale.US);
             if (null == str) {
@@ -658,15 +666,12 @@ public class OXException extends Exception implements OXExceptionConstants {
     /**
      * Checks if this {@link OXException} is loggable for specified log level.
      *
-     * @param logLevel The log level
      * @return <code>true</code> if this {@link OXException} is loggable for specified log level; otherwise <code>false</code>
+     * @deprecated
      */
-    public boolean isLoggable(final LogLevel logLevel) {
-        final LogLevel thisLogLevel = this.optLogLevel;
-        if (null == thisLogLevel) {
-            return logLevel.implies(getCategories().get(0));
-        }
-        return logLevel.implies(thisLogLevel);
+    @Deprecated
+    public boolean isLoggable() {
+        return true;
     }
 
     /**
@@ -753,19 +758,6 @@ public class OXException extends Exception implements OXExceptionConstants {
             }
             categories.add(category);
         }
-        return this;
-    }
-
-    /**
-     * Sets the log level for this exception.
-     * <p>
-     * If <code>null</code> log level is taken from {@link #getCategory() category}.
-     *
-     * @param logLevel The log level to set
-     * @return This exception with log level applied
-     */
-    public OXException setLogLevel(final LogLevel logLevel) {
-        this.optLogLevel = logLevel;
         return this;
     }
 
@@ -884,9 +876,9 @@ public class OXException extends Exception implements OXExceptionConstants {
             } catch (final NullPointerException e) {
                 msg = null;
             } catch (final MissingFormatArgumentException e) {
-                LOG.debug("Missing format argument: >>" + msg + "<<", e);
+                LOG.debug("Missing format argument: >>{}<<", msg, e);
             } catch (final IllegalFormatException e) {
-                LOG.error("Illegal message format: >>" + msg + "<<", e);
+                LOG.error("Illegal message format: >>{}<<", msg, e);
             }
         }
         return dropSubsequentWhitespaces(msg);

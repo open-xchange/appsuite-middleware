@@ -61,7 +61,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 
 /**
  * @author choeger
@@ -102,10 +102,9 @@ public abstract class OXSOAPRMIMapper {
 
     protected Object rmistub = null;
 
-
     private Class<?> clazz = null;
 
-    protected static final Log log = org.apache.commons.logging.LogFactory.getLog(OXSOAPRMIMapper.class);
+    protected static final Logger log = org.slf4j.LoggerFactory.getLogger(OXSOAPRMIMapper.class);
 
     /**
      * @throws RemoteException
@@ -156,10 +155,10 @@ public abstract class OXSOAPRMIMapper {
                 log.debug(sb.toString());
             }
         } catch (final MalformedURLException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new RemoteException(e.getMessage());
         } catch (final IOException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new RemoteException(e.getMessage());
         }
     }
@@ -181,7 +180,7 @@ public abstract class OXSOAPRMIMapper {
         try {
             if( rmistub == null || force ) {
                 final String rmihost = RMI_HOSTNAME + clazz.getDeclaredField("RMI_NAME").get(this);
-                log.info("reconnecting to " + rmihost);
+                log.info("reconnecting to {}", rmihost);
                 boolean doloop = true;
                 int count = MAX_RMI_CONNECT_ATTEMPTS;
                 final int delay = CONNECT_ATTEMPTS_DELAY_TIME*1000;
@@ -193,11 +192,11 @@ public abstract class OXSOAPRMIMapper {
                     } catch (final java.rmi.ConnectException e) {
                         rmistub = null;
                         log.info("OXSOAPRMIMapper.reconnect: Connection problem");
-                        log.info("waiting " + CONNECT_ATTEMPTS_DELAY_TIME + " seconds and try again");
+                        log.info("waiting {} seconds and try again", CONNECT_ATTEMPTS_DELAY_TIME);
                         try {
                             Thread.sleep(delay);
                         } catch (final InterruptedException e1) {
-                            log.error(e1.getMessage(),e1);
+                            log.error("",e1);
                         }
                         count--;
                         if( count == 0 ) {
@@ -212,22 +211,22 @@ public abstract class OXSOAPRMIMapper {
                 //clazz.cast(rmistub);
             }
         } catch (final SecurityException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new RemoteException(e.getMessage());
         } catch (final NoSuchFieldException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new RemoteException(e.getMessage());
         } catch (final IllegalArgumentException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new RemoteException(e.getMessage());
         } catch (final IllegalAccessException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new RemoteException(e.getMessage());
         } catch (final MalformedURLException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new RemoteException(e.getMessage());
         } catch (final NotBoundException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new RemoteException(e.getMessage());
         } finally {
             LOCK.unlock();

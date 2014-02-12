@@ -55,9 +55,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.webdav.action.behaviour.BehaviourLookup;
 import com.openexchange.webdav.action.ifheader.IfHeader;
 import com.openexchange.webdav.action.ifheader.IfHeaderApply;
@@ -74,8 +72,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
 
 public class WebdavIfAction extends AbstractAction {
 
-	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
-			.getLog(WebdavIfAction.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavIfAction.class);
 
     private static final IfHeaderApply STANDARD_APPLY = new StandardIfHeaderApply();
 
@@ -124,10 +121,7 @@ public class WebdavIfAction extends AbstractAction {
 				checkDestinationLocks(ifHeader, req);
 			}
 		} catch (final IfHeaderParseException e) {
-			//Ignore
-			if (LOG.isTraceEnabled()) { // Added to suppress PMD warning
-				LOG.trace(e.getMessage(), e);
-			}
+			LOG.trace("", e);
 		}
 
 		yield(req,res);

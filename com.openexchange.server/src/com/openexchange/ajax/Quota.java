@@ -64,8 +64,7 @@ import com.openexchange.tools.session.ServerSession;
 
 public class Quota extends SessionServlet {
 
-	private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory
-			.getLog(Quota.class);
+	private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Quota.class);
 
     private static final long serialVersionUID = 6477434510302882905L;
 
@@ -96,10 +95,10 @@ public class Quota extends SessionServlet {
                 throw (IOException) cause;
             }
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error(oje.getMessage(), oje);
+            LOG.error("", oje);
             response.setException(oje);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         }
         writeResponse(response, res, session);

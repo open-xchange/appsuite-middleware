@@ -55,7 +55,6 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -92,7 +91,9 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.preferences.ServerUserSetting;
@@ -114,13 +115,10 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 responseDescription = "Object ID of the newly created/moved mail.")
 public final class NewAction extends AbstractMailAction {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(NewAction.class);
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NewAction.class);
 
     private static final String FLAGS = MailJSONField.FLAGS.getKey();
     private static final String FROM = MailJSONField.FROM.getKey();
-    private static final String ATTACHMENTS = MailJSONField.ATTACHMENTS.getKey();
-    private static final String CONTENT = MailJSONField.CONTENT.getKey();
     private static final String UPLOAD_FORMFIELD_MAIL = AJAXServlet.UPLOAD_FORMFIELD_MAIL;
 
     /**
@@ -153,6 +151,7 @@ public final class NewAction extends AbstractMailAction {
         final ServerSession session = req.getSession();
         final UploadEvent uploadEvent = request.getUploadEvent();
         String msgIdentifier = null;
+        UserSettingMail userSettingMail = null;
         {
             final JSONObject jMail;
             {
@@ -182,7 +181,7 @@ public final class NewAction extends AbstractMailAction {
                     // Re-throw
                     throw e;
                 }
-                LOG.warn(new com.openexchange.java.StringAllocator(128).append(e.getMessage()).append(". Using default account's transport.").toString());
+                LOG.warn("{}. Using default account's transport.", e.getMessage());
                 // Send with default account's transport provider
                 accountId = MailAccount.DEFAULT_ID;
             }
@@ -208,10 +207,42 @@ public final class NewAction extends AbstractMailAction {
                 final String protocol = request.isSecure() ? "https://" : "http://";
                 final ComposedMailMessage[] composedMails = MessageParser.parse4Transport(jMail, uploadEvent, session, accountId, protocol, request.getHostname(), warnings);
                 ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : ComposeType.NEW;
+                final String folder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
+                if (null != folder) {
+                    final MailTransport mailTransport = MailTransport.getInstance(session, accountId);
+                    final MailMessage mm = mailTransport.sendMailMessage(composedMails[0], sendType, new javax.mail.Address[] { MimeMessageUtility.POISON_ADDRESS });
+                    final String[] ids = mailInterface.appendMessages(folder, new MailMessage[] { mm }, false);
+                    msgIdentifier = ids[0];
+                    mailInterface.updateMessageFlags(folder, ids, MailMessage.FLAG_SEEN, true);
+                    final JSONObject responseObj = new JSONObject(2);
+                    responseObj.put(FolderChildFields.FOLDER_ID, folder);
+                    responseObj.put(DataFields.ID, ids[0]);
+                    final AJAXRequestResult result = new AJAXRequestResult(responseObj, "json");
+                    return result;
+                }
+                // Normal transport
                 if (ComposeType.DRAFT.equals(sendType)) {
-                    final boolean deleteDraftOnTransport = jMail.optBoolean("deleteDraftOnTransport", false);
-                    if (deleteDraftOnTransport || AJAXRequestDataTools.parseBoolParameter("deleteDraftOnTransport", request)) {
-                        sendType = ComposeType.DRAFT_DELETE_ON_TRANSPORT;
+                    final String paramName = "deleteDraftOnTransport";
+                    if (jMail.hasAndNotNull(paramName)) { // Provided by JSON body
+                        final Object object = jMail.opt(paramName);
+                        if (null != object) {
+                            if (AJAXRequestDataTools.parseBoolParameter(object.toString())) {
+                                sendType = ComposeType.DRAFT_DELETE_ON_TRANSPORT;
+                            } else if (false && Boolean.FALSE.equals(AJAXRequestDataTools.parseFalseBoolParameter(object.toString()))) {
+                                // Explicitly deny deletion of draft message
+                                sendType = ComposeType.DRAFT_NO_DELETE_ON_TRANSPORT;
+                            }
+                        }
+                    } else if (request.containsParameter(paramName)) { // Provided as URL parameter
+                        final String sDeleteDraftOnTransport = request.getParameter(paramName);
+                        if (null != sDeleteDraftOnTransport) {
+                            if (AJAXRequestDataTools.parseBoolParameter(sDeleteDraftOnTransport)) {
+                                sendType = ComposeType.DRAFT_DELETE_ON_TRANSPORT;
+                            } else if (false && Boolean.FALSE.equals(AJAXRequestDataTools.parseFalseBoolParameter(sDeleteDraftOnTransport))) {
+                                // Explicitly deny deletion of draft message
+                                sendType = ComposeType.DRAFT_NO_DELETE_ON_TRANSPORT;
+                            }
+                        }
                     }
                 }
                 for (final ComposedMailMessage cm : composedMails) {
@@ -220,13 +251,43 @@ public final class NewAction extends AbstractMailAction {
                     }
                 }
                 /*
+                 * User settings
+                 */
+                final UserSettingMail usm = session.getUserSettingMail();
+                usm.setNoSave(true);
+                {
+                    final String paramName = "copy2Sent";
+                    if (jMail.hasAndNotNull(paramName)) { // Provided by JSON body
+                        final Object object = jMail.opt(paramName);
+                        if (null != object) {
+                            if (AJAXRequestDataTools.parseBoolParameter(object.toString())) {
+                                usm.setNoCopyIntoStandardSentFolder(false);
+                            } else if (Boolean.FALSE.equals(AJAXRequestDataTools.parseFalseBoolParameter(object.toString()))) {
+                                // Explicitly deny copy to sent folder
+                                usm.setNoCopyIntoStandardSentFolder(true);
+                            }
+                        }
+                    } else if (request.containsParameter(paramName)) { // Provided as URL parameter
+                        final String sCopy2Sent = request.getParameter(paramName);
+                        if (null != sCopy2Sent) {
+                            if (AJAXRequestDataTools.parseBoolParameter(sCopy2Sent)) {
+                                usm.setNoCopyIntoStandardSentFolder(false);
+                            } else if (Boolean.FALSE.equals(AJAXRequestDataTools.parseFalseBoolParameter(sCopy2Sent))) {
+                                // Explicitly deny copy to sent folder
+                                usm.setNoCopyIntoStandardSentFolder(true);
+                            }
+                        }
+                    }
+                }
+                userSettingMail = usm;
+                /*
                  * Check
                  */
-                msgIdentifier = mailInterface.sendMessage(composedMails[0], sendType, accountId);
+                msgIdentifier = mailInterface.sendMessage(composedMails[0], sendType, accountId, usm);
                 for (int i = 1; i < composedMails.length; i++) {
                     final ComposedMailMessage cm = composedMails[i];
                     if (null != cm) {
-                        mailInterface.sendMessage(cm, sendType, accountId);
+                        mailInterface.sendMessage(cm, sendType, accountId, usm);
                     }
                 }
                 warnings.addAll(mailInterface.getWarnings());
@@ -246,6 +307,11 @@ public final class NewAction extends AbstractMailAction {
             }
         }
         if (msgIdentifier == null) {
+            if (null != userSettingMail && userSettingMail.isNoCopyIntoStandardSentFolder()) {
+                final AJAXRequestResult result = new AJAXRequestResult(JSONObject.NULL, "json");
+                result.addWarnings(warnings);
+                return result;
+            }
             if (warnings.isEmpty()) {
                 throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();
             }
@@ -364,7 +430,7 @@ public final class NewAction extends AbstractMailAction {
                 if (!force && MailExceptionCode.INVALID_SENDER.equals(e)) {
                     throw e;
                 }
-                LOG.warn(new com.openexchange.java.StringAllocator(128).append(e.getMessage()).append(". Using default account's transport.").toString());
+                LOG.warn("{}. Using default account's transport.", e.getMessage());
                 // Send with default account's transport provider
                 accId = MailAccount.DEFAULT_ID;
             }
@@ -413,7 +479,7 @@ public final class NewAction extends AbstractMailAction {
                                 session.getUserId(),
                                 session.getContext().getContextId());
                         } catch (final OXException e) {
-                            LOG.error(e.getMessage(), e);
+                            LOG.error("", e);
                         }
                     } catch (final OXException e) {
                         if (e.getMessage().indexOf("quota") != -1) {
@@ -430,7 +496,7 @@ public final class NewAction extends AbstractMailAction {
                     /*
                      * Compose JSON object
                      */
-                    responseData = new JSONObject();
+                    responseData = new JSONObject(2);
                     responseData.put(FolderChildFields.FOLDER_ID, MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, sentFullname));
                     responseData.put(DataFields.ID, uidArr[0]);
                 } finally {

@@ -51,10 +51,6 @@ package com.openexchange.admin.reseller.rmi.impl;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface;
@@ -71,7 +67,7 @@ import com.openexchange.admin.tools.GenericChecks;
  */
 public class ResellerAuth extends OXCommonImpl implements BasicAuthenticatorPluginInterface {
 
-    private final Log log = LogFactory.getLog(this.getClass());
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ResellerAuth.class);
 
     public ResellerAuth() throws StorageException {
         super();
@@ -96,16 +92,16 @@ public class ResellerAuth extends OXCommonImpl implements BasicAuthenticatorPlug
                 throw new InvalidCredentialsException("authentication failed");
             }
         } catch (StorageException e) {
-            log.error(e.getMessage(),e);
+            log.error("",e);
             throw new InvalidCredentialsException("authentication failed");
         } catch (InvalidCredentialsException e) {
-            log.error(e.getMessage(),e);
+            log.error("",e);
             throw e;
         } catch (NoSuchAlgorithmException e) {
-            log.error(e.getMessage(),e);
+            log.error("",e);
             throw new InvalidCredentialsException("authentication failed");
         } catch (UnsupportedEncodingException e) {
-            log.error(e.getMessage(),e);
+            log.error("",e);
             throw new InvalidCredentialsException("authentication failed");
         }
     }

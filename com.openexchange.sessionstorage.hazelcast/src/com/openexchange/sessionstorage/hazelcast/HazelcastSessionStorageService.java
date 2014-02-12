@@ -61,7 +61,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.logging.Log;
 import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
@@ -82,8 +81,8 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public class HazelcastSessionStorageService implements SessionStorageService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastSessionStorageService.class);
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastSessionStorageService.class);
+
     private static final AtomicReference<HazelcastInstance> REFERENCE = new AtomicReference<HazelcastInstance>();
 
     /**
@@ -174,7 +173,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             try {
                 HazelcastStoredSession removedSession = sessions().remove(sessionId);
                 if (null == removedSession) {
-                    LOG.debug("Session with ID '" + sessionId + "' not found, unable to remove from storage.");
+                    LOG.debug("Session with ID '{}' not found, unable to remove from storage.", sessionId);
                 }
             } catch (HazelcastException e) {
                 throw SessionStorageExceptionCodes.REMOVE_FAILED.create(e, sessionId);
@@ -214,7 +213,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                  if (null != removedSession) {
                      removedSessions.add(removedSession);
                  } else {
-                     LOG.debug("Session with ID '" + future.getKey() + "' not found, unable to remove from storage.");
+                     LOG.debug("Session with ID '{}' not found, unable to remove from storage.", future.getKey());
                  }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -251,7 +250,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             try {
                  HazelcastStoredSession removedSession = future.getValue().get();
                  if (null == removedSession) {
-                     LOG.debug("Session with ID '" + future.getKey() + "' not found, unable to remove from storage.");
+                     LOG.debug("Session with ID '{}' not found, unable to remove from storage.", future.getKey());
                  }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -271,7 +270,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                 return true;
             }
         } catch (HazelcastException e) {
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
         }
         /*
          * none found
@@ -307,13 +306,11 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         try {
             return new ArrayList<Session>(sessions().values());
         } catch (final HazelcastException e) {
-            if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
-            }
+            LOG.debug("", e);
+
         } catch (OXException e) {
-            if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
-            }
+            LOG.debug("", e);
+
         }
         return Collections.emptyList();
     }
@@ -323,9 +320,8 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         try {
             return sessions().size();
         } catch (OXException e) {
-            if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
-            }
+            LOG.debug("", e);
+
         }
         return 0;
     }
@@ -345,15 +341,13 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             }
             throw SessionStorageExceptionCodes.RANDOM_NOT_FOUND.create(randomToken);
         } catch (final HazelcastException e) {
-            if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
-            }
+            LOG.debug("", e);
+
             throw SessionStorageExceptionCodes.RANDOM_NOT_FOUND.create(e, randomToken);
         } catch (final OXException e) {
             if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
-                if (DEBUG) {
-                    LOG.debug(e.getMessage(), e);
-                }
+                LOG.debug("", e);
+
                 throw SessionStorageExceptionCodes.RANDOM_NOT_FOUND.create(e, randomToken);
             }
             throw e;
@@ -372,15 +366,11 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             }
             throw SessionStorageExceptionCodes.ALTID_NOT_FOUND.create(altId);
         } catch (final HazelcastException e) {
-            if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
-            }
+                LOG.debug("", e);
             throw SessionStorageExceptionCodes.ALTID_NOT_FOUND.create(e, altId);
         } catch (final OXException e) {
             if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
-                if (DEBUG) {
-                    LOG.debug(e.getMessage(), e);
-                }
+                    LOG.debug("", e);
                 throw SessionStorageExceptionCodes.ALTID_NOT_FOUND.create(e, altId);
             }
             throw e;
@@ -408,9 +398,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             storedSession.setPassword(newPassword);
             sessions.set(sessionId, storedSession, 0, TimeUnit.SECONDS);
         } catch (HazelcastException e) {
-            if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
-            }
+                LOG.debug("", e);
             throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -426,9 +414,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             storedSession.setLocalIp(localIp);
             sessions.set(sessionId, storedSession, 0, TimeUnit.SECONDS);
         } catch (HazelcastException e) {
-            if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
-            }
+                LOG.debug("", e);
             throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -444,9 +430,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             storedSession.setClient(client);
             sessions.set(sessionId, storedSession, 0, TimeUnit.SECONDS);
         } catch (HazelcastException e) {
-            if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
-            }
+                LOG.debug("", e);
             throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -462,9 +446,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             storedSession.setHash(hash);
             sessions.set(sessionId, storedSession, 0, TimeUnit.SECONDS);
         } catch (HazelcastException e) {
-            if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
-            }
+                LOG.debug("", e);
             throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -478,9 +460,7 @@ public class HazelcastSessionStorageService implements SessionStorageService {
                     throw SessionStorageExceptionCodes.DUPLICATE_AUTHID.create(session.getLogin(), login);
                 }
             } catch (final HazelcastException e) {
-                if (DEBUG) {
-                    LOG.debug(e.getMessage(), e);
-                }
+                    LOG.debug("", e);
                 throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
@@ -507,9 +487,9 @@ public class HazelcastSessionStorageService implements SessionStorageService {
          * calling containsKey resets map entries idle-time
          */
         if (false == sessions().containsKey(sessionID)) {
-            LOG.debug("Ignoring keep-alive even for not found session ID: " + sessionID);
+            LOG.debug("Ignoring keep-alive even for not found session ID: {}", sessionID);
         } else {
-            LOG.debug("Received keep-alive for '" + sessionID + "'.");
+            LOG.debug("Received keep-alive for '{}'.", sessionID);
         }
     }
 

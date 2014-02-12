@@ -53,7 +53,6 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.Date;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -67,7 +66,6 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
@@ -80,7 +78,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class AppointmentWriter extends CalendarWriter {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AppointmentWriter.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppointmentWriter.class);
 
     private volatile CalendarCollectionService calColl;
 
@@ -91,13 +89,13 @@ public class AppointmentWriter extends CalendarWriter {
     /**
      * Initializes a new {@link AppointmentWriter}
      *
-     * @param timeZone
-     *            The user time zone
+     * @param timeZone The user time zone
      */
     public AppointmentWriter(final TimeZone timeZone) {
         this(timeZone, false);
     }
 
+    /** Use for testing only */
     public AppointmentWriter(final TimeZone timeZone, final boolean forTesting) {
         super(timeZone, null);
         this.forTesting = forTesting;
@@ -107,9 +105,11 @@ public class AppointmentWriter extends CalendarWriter {
      * Applies specified session to this writer.
      *
      * @param session The session to set
+     * @return This writer with session applied
      */
-    public void setSession(final ServerSession session) {
+    public AppointmentWriter setSession(final ServerSession session) {
         this.session = session;
+        return this;
     }
 
     public CalendarCollectionService getCalendarCollectionService() {
@@ -147,7 +147,7 @@ public class AppointmentWriter extends CalendarWriter {
     }
 
     public void writeAppointment(final Appointment appointmentObject, final JSONObject jsonObj) throws JSONException {
-        super.writeFields(appointmentObject, timeZone, jsonObj);
+        super.writeFields(appointmentObject, timeZone, jsonObj, session);
         if (appointmentObject.containsTitle()) {
             writeParameter(CalendarFields.TITLE, appointmentObject.getTitle(), jsonObj);
         }
@@ -250,7 +250,7 @@ public class AppointmentWriter extends CalendarWriter {
         if (null != writer) {
             writer.write(appointment, json);
             return;
-        } else if (super.writeField(appointment, column, tz, json)) {
+        } else if (super.writeField(appointment, column, tz, json, session)) {
             return;
         }
         // No appropriate static writer found, write manually
@@ -279,7 +279,7 @@ public class AppointmentWriter extends CalendarWriter {
             }
             break;
         default:
-            LOG.warn("Column " + column + " is unknown for appointment.");
+            LOG.warn("Column {} is unknown for appointment.", column);
         }
     }
 

@@ -103,7 +103,7 @@ import com.openexchange.tools.regex.MatcherReplacer;
  */
 public final class HtmlProcessing {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HtmlProcessing.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HtmlProcessing.class);
 
     private static final String CHARSET_US_ASCII = "US-ASCII";
 
@@ -180,6 +180,7 @@ public final class HtmlProcessing {
                 retval = htmlService.dropScriptTagsInHeader(content);
                 if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
                     final boolean externalImagesAllowed = usm.isAllowHTMLImages();
+                    // Resolve <base> tags
                     retval = htmlService.checkBaseTag(retval, externalImagesAllowed);
                     final String cssPrefix = null == mailPath ? null : (embedded ? "ox-" + getHash(mailPath.toString(), 10) : null);
                     if (useSanitize()) {
@@ -541,13 +542,13 @@ public final class HtmlProcessing {
         try {
             return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(string)));
         } catch (final ParserConfigurationException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final SAXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return null;
     }
@@ -601,10 +602,10 @@ public final class HtmlProcessing {
             serializer.transform(new DOMSource(node), new StreamResult(sw));
             return sw.toString();
         } catch (final TransformerException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return fallback;
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return fallback;
         }
     }
@@ -704,31 +705,34 @@ public final class HtmlProcessing {
         for (int i = 0; i <= llen; i++) {
             String line = lines[i];
             int currentLevel = 0;
-            int offset = 0;
-            if ((offset = startsWithQuote(line)) != -1) {
+            if (line.trim().equalsIgnoreCase("&gt;")) {
                 currentLevel++;
-                int pos = -1;
-                boolean next = true;
-                while (next && ((pos = line.indexOf(STR_HTML_QUOTE, offset)) > -1)) {
-                    /*
-                     * Continue only if next starting position is equal to offset or if just one whitespace character has been skipped
-                     */
-                    next = ((offset == pos) || ((pos - offset == 1) && Strings.isWhitespace(line.charAt(offset))));
-                    if (next) {
-                        currentLevel++;
-                        offset = (pos + 4);
+                line = "";
+            } else {
+                int offset = 0;
+                if ((offset = startsWithQuote(line)) != -1) {
+                    currentLevel++;
+                    int pos = -1;
+                    boolean next = true;
+                    while (next && ((pos = line.indexOf(STR_HTML_QUOTE, offset)) > -1)) {
+                        /*
+                         * Continue only if next starting position is equal to offset or if just one whitespace character has been skipped
+                         */
+                        next = ((offset == pos) || ((pos - offset == 1) && Strings.isWhitespace(line.charAt(offset))));
+                        if (next) {
+                            currentLevel++;
+                            offset = (pos + 4);
+                        }
                     }
                 }
-            }
-            if (offset > 0) {
-                try {
-                    offset = (offset < line.length()) && Strings.isWhitespace(line.charAt(offset)) ? offset + 1 : offset;
-                } catch (final StringIndexOutOfBoundsException e) {
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace(e.getMessage(), e);
+                if (offset > 0) {
+                    try {
+                        offset = (offset < line.length()) && Strings.isWhitespace(line.charAt(offset)) ? offset + 1 : offset;
+                    } catch (final StringIndexOutOfBoundsException e) {
+                        LOG.trace("", e);
                     }
+                    line = line.substring(offset);
                 }
-                line = line.substring(offset);
             }
             if (levelBefore < currentLevel) {
                 for (; levelBefore < currentLevel; levelBefore++) {
@@ -877,7 +881,7 @@ public final class HtmlProcessing {
             imgReplacer.appendTail(sb);
             reval = sb.toString();
         } catch (final Exception e) {
-            LOG.warn("Unable to filter cid background images: " + e.getMessage());
+            LOG.warn("Unable to filter cid background images: {}", e.getMessage());
         }
         return reval;
     }
@@ -942,7 +946,7 @@ public final class HtmlProcessing {
             imgReplacer.appendTail(sb);
             reval = sb.toString();
         } catch (final Exception e) {
-            LOG.warn("Unable to filter cid Images: " + e.getMessage());
+            LOG.warn("Unable to filter cid Images: {}", e.getMessage());
         }
         return reval;
     }
@@ -1008,7 +1012,7 @@ public final class HtmlProcessing {
         try {
             return URLEncoder.encode(text, charset);
         } catch (final UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return text;
         }
     }
@@ -1023,9 +1027,9 @@ public final class HtmlProcessing {
             writer.write(content);
             writer.flush();
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final RuntimeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             Streams.close(writer);
         }

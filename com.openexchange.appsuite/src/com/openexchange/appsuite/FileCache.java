@@ -56,18 +56,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.commons.logging.Log;
 import com.openexchange.java.Streams;
 
 /**
  * An in-memory file cache for small files (mostly UI files). Since all data is held in RAM, this class should only be used as a singleton.
  * This pretty much restricts it to only storing publicly accessible files (e.g. the UI).
- * 
+ *
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
 public class FileCache {
 
-    private static Log LOG = com.openexchange.log.Log.loggerFor(FileCache.class);
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileCache.class);
 
     public interface Filter {
 
@@ -96,7 +95,7 @@ public class FileCache {
             timestamp = current;
 
             // Read the entire file into a byte array
-            LOG.debug("Reading '" + path + "'");
+            LOG.debug("Reading '{}'", path);
             final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(8192);
             InputStream in = null;
             try {
@@ -109,7 +108,7 @@ public class FileCache {
                 baos.flush(); // no-op
                 data = filter == null ? baos.toByteArray() : filter.filter(baos);
             } catch (final IOException e) {
-                LOG.debug("Could not read from '" + path + "'");
+                LOG.debug("Could not read from '{}'", path);
                 data = null;
             } finally {
                 Streams.close(in);
@@ -140,7 +139,7 @@ public class FileCache {
 
     /**
      * Returns the file contents as a byte array.
-     * 
+     *
      * @param path The file to return.
      * @param filter An optional Filter which processes loaded file data.
      * @return The file contents as a byte array, or null if the file does not exist or is not a normal file.
@@ -157,7 +156,7 @@ public class FileCache {
                 continue;
             }
             if (f.isFile()) {
-                CacheEntry entry = cache.get(f);
+                CacheEntry entry = cache.get(path);
                 if (entry == null) {
                     entry = new CacheEntry(f);
                     cache.put(path, entry);

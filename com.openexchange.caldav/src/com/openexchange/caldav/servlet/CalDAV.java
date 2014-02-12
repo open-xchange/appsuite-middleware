@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,12 +53,11 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
+import com.openexchange.caldav.CalDAVServiceLookup;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.Interface;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.webdav.AllowAsteriskAsSeparatorCustomizer;
@@ -74,14 +73,7 @@ public class CalDAV extends OXServlet {
 
 	private static final long serialVersionUID = -7768308794451862636L;
 
-	private static final transient Log LOG = com.openexchange.log.Log.loggerFor(CalDAV.class);
-
-    private static volatile ServiceLookup services;
-
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
-        services = serviceLookup;
-    }
-
+	private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalDAV.class);
 
     @Override
     protected Interface getInterface() {
@@ -185,7 +177,7 @@ public class CalDAV extends OXServlet {
 
     private boolean checkPermission(final ServerSession session) {
         try {
-            final ComposedConfigProperty<Boolean> property = services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.caldav.enabled", boolean.class);
+            final ComposedConfigProperty<Boolean> property = CalDAVServiceLookup.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.caldav.enabled", boolean.class);
             return property.isDefined() && property.get() && session.getUserPermissionBits().hasCalendar();
         } catch (final OXException e) {
             return false;

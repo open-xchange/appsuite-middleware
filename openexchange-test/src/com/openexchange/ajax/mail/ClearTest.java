@@ -51,7 +51,6 @@ package com.openexchange.ajax.mail;
 
 import java.io.IOException;
 import javax.mail.internet.AddressException;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
@@ -69,7 +68,7 @@ import com.openexchange.exception.OXException;
  */
 public class ClearTest extends AbstractMailTest {
 
-	private static final Log LOG = LogFactory.getLog(ClearTest.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ClearTest.class);
 
 	public ClearTest(final String name) {
 		super(name);

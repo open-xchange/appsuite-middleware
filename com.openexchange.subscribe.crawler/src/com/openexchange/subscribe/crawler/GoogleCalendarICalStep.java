@@ -49,7 +49,6 @@
 
 package com.openexchange.subscribe.crawler;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -59,7 +58,6 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import org.apache.commons.logging.Log;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.UnexpectedPage;
@@ -69,7 +67,7 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.log.LogFactory;
+import com.openexchange.java.Streams;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 
 /**
@@ -81,7 +79,7 @@ public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], U
 
     private String url;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(GoogleCalendarICalStep.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GoogleCalendarICalStep.class);
 
     public GoogleCalendarICalStep() {
         super();
@@ -102,12 +100,12 @@ public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], U
             // Unzip
             int buflen = 1024;
             // BufferedOutputStream dest = null;
-            ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-            ZipInputStream zis = new ZipInputStream(new BufferedInputStream(bis));
+            ByteArrayInputStream bis = Streams.newByteArrayInputStream(bytes);
+            ZipInputStream zis = new ZipInputStream(bis);
             ZipEntry entry;
             ICalParser iCalParser = workflow.getActivator().getICalParser();
             while ((entry = zis.getNextEntry()) != null) {
-                LOG.info("Extracting: " + entry);
+                LOG.info("Extracting: {}", entry);
                 int count;
                 byte data[] = new byte[buflen];
                 // write the files to the disk
@@ -136,13 +134,13 @@ public class GoogleCalendarICalStep extends AbstractStep<CalendarDataObject[], U
 
 
         } catch (ConversionError e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (FailingHttpStatusCodeException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (MalformedURLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
 
         output = new CalendarDataObject[events.size()];

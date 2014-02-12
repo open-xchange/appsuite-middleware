@@ -85,10 +85,10 @@ public final class Utility {
      */
     public static void debugSQL(final PreparedStatement stmt) {
         if (null != stmt) {
-            final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Utility.class));
-            if (LOG.isDebugEnabled()) {
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Utility.class);
+            if (log.isDebugEnabled()) {
                 final String sql = getSQLString(stmt);
-                LOG.debug(new StringBuilder(sql.length() + 16).append("Failed SQL:\n\t").append(sql).toString());
+                log.debug("Failed SQL:\n\t{}",  sql);
             }
         }
     }

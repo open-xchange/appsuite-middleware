@@ -61,7 +61,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.MatcherReplacer;
 import com.openexchange.html.internal.RegexUtility;
@@ -85,7 +84,7 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public final class CSSMatcher {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CSSMatcher.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSSMatcher.class);
 
     /** Perform CSS sanitizing with respect to nested blocks */
     private static final boolean CONSIDER_NESTED_BLOCKS = true;
@@ -347,9 +346,7 @@ public final class CSSMatcher {
             return false;
         }
         final int diff = pos - off;
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Next '{' is " + diff + " characters away -- " + (diff <= 2048 ? "Continue" : "Abort"));
-        }
+        LOG.debug("Next '{' is {} characters away -- {}", diff, (diff <= 2048 ? "Continue" : "Abort"));
         return diff <= MAX_ALLOWED_CSS_SELECTOR_SIZE;
     }
 
@@ -471,7 +468,7 @@ public final class CSSMatcher {
                 if (!ran) {
                     task.afterExecute(ex);
                 }
-                LOG.error(ex.getMessage(), ex);
+                LOG.error("", ex);
                 cssBuilder.setLength(0);
                 return false;
             }
@@ -491,7 +488,7 @@ public final class CSSMatcher {
             return false;
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
-            LOG.error(cause.getMessage(), cause);
+            LOG.error("", cause);
             cssBuilder.setLength(0);
             f.cancel(true);
             return false;
@@ -516,9 +513,6 @@ public final class CSSMatcher {
             return new StringAllocator(match).append('{').toString();
         }
         final int length = match.length();
-        if (1 == length) {
-            return new StringAllocator(match).append('{').toString();
-        }
         // Cut off trailing '{' character
         final String s = match.indexOf('{') < 0 ? match : match.substring(0, length - 1);
         if (isEmpty(s)) {
@@ -712,9 +706,7 @@ public final class CSSMatcher {
             cssBuilder.append(tail);
             return modified;
         } catch (final RuntimeException unchecked) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Unchecked exception while processing CSS content:" + System.getProperty("line.separator") + css, unchecked);
-            }
+            LOG.debug("Unchecked exception while processing CSS content:{}{}", System.getProperty("line.separator"), css, unchecked);
             throw unchecked;
         }
     }

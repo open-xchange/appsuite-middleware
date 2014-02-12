@@ -49,8 +49,6 @@
 
 package com.openexchange.database.osgi;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -63,7 +61,7 @@ import com.openexchange.database.internal.Initialization;
  */
 public class CacheServiceCustomizer implements ServiceTrackerCustomizer<CacheService, CacheService> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CacheServiceCustomizer.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheServiceCustomizer.class);
 
     private final BundleContext context;
 

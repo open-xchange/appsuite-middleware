@@ -76,7 +76,7 @@ public final class AJPv13RequestBody extends AbstractAJPv13Request {
                     /*
                      * Hmm... we actually expect more data
                      */
-                    if (LOG.isWarnEnabled()) {
+                    {
                         final AJPv13Exception ajpExc = new AJPv13Exception(
                             AJPCode.UNEXPECTED_EMPTY_DATA_PACKAGE,
                             true,
@@ -84,7 +84,7 @@ public final class AJPv13RequestBody extends AbstractAJPv13Request {
                             Long.valueOf(ajpRequestHandler.getContentLength()),
                             ajpRequestHandler.getForwardRequest());
                         ajpExc.fillInStackTrace();
-                        LOG.warn(ajpExc.getMessage(), ajpExc);
+                        LOG.warn("", ajpExc);
                     }
                     /*
                      * Set data to null to indicate that no more data is available from web server
@@ -138,6 +138,6 @@ public final class AJPv13RequestBody extends AbstractAJPv13Request {
         super(payloadData, dataLength);
     }
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13RequestBody.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AJPv13RequestBody.class);
 
 }

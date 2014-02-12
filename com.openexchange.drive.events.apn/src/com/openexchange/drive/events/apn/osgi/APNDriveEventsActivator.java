@@ -49,7 +49,6 @@
 
 package com.openexchange.drive.events.apn.osgi;
 
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.drive.events.DriveEventService;
@@ -72,7 +71,7 @@ import com.openexchange.tools.strings.TimeSpanParser;
  */
 public class APNDriveEventsActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(APNDriveEventsActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(APNDriveEventsActivator.class);
 
     /**
      * Initializes a new {@link APNDriveEventsActivator}.
@@ -132,7 +131,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
                     }
                 }, interval, interval);
             } else {
-                LOG.warn("Ignoring too small value '" + feedbackQueryInterval + " for APN feedback query interval.");
+                LOG.warn("Ignoring too small value '{} for APN feedback query interval.", feedbackQueryInterval);
             }
         }
     }

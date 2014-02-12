@@ -49,41 +49,11 @@
 
 package com.openexchange.groupware.infostore;
 
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.ALREADY_LOCKED_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.COULD_NOT_LOAD_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.DELETE_FAILED_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.DOCUMENT_CONTAINS_NO_FILE_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.DOCUMENT_NOT_EXISTS_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.DUPLICATE_SUBFOLDER_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.FILENAME_NOT_UNIQUE_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.ITERATE_FAILED_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.LOCKED_BY_ANOTHER_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.MODIFIED_CONCURRENTLY_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NEW_ID_FAILED_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NOT_ALL_DELETED_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NOT_EXIST_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NOT_INFOSTORE_FOLDER_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_CREATE_PERMISSION_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_DELETE_PERMISSION_FOR_VERSION_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_DELETE_PERMISSION_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_READ_PERMISSION_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_SOURCE_DELETE_PERMISSION_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_TARGET_CREATE_PERMISSION_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NO_WRITE_PERMISSION_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.NUMBER_OF_VERSIONS_FAILED_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.PATTERN_NEEDS_MORE_CHARACTERS_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.PREFETCH_FAILED_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.SQL_PROBLEM_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.TOO_LONG_VALUES_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.UPDATED_BETWEEN_DO_AND_UNDO_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.VALIDATION_FAILED_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.WRITE_PERMS_FOR_LOCK_MISSING_MSG;
-import static com.openexchange.groupware.infostore.InfostoreExceptionMessages.WRITE_PERMS_FOR_UNLOCK_MISSING_MSG;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.groupware.EnumComponent;
 
 /**
@@ -91,75 +61,205 @@ import com.openexchange.groupware.EnumComponent;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum InfostoreExceptionCodes implements OXExceptionCode {
-    TOO_LONG_VALUES(TOO_LONG_VALUES_MSG, CATEGORY_TRUNCATED, 100),
-    /** Invalid SQL Query: %s */
-    SQL_PROBLEM(SQL_PROBLEM_MSG, CATEGORY_ERROR, 200),
-    /** Cannot pre-fetch results. */
-    PREFETCH_FAILED(PREFETCH_FAILED_MSG, CATEGORY_TRY_AGAIN, 219),
-    /** The requested item does not exist. */
-    NOT_EXIST(NOT_EXIST_MSG, CATEGORY_USER_INPUT, 300),
-    /** Could not load documents to check the permissions */
-    COULD_NOT_LOAD(COULD_NOT_LOAD_MSG, CATEGORY_USER_INPUT, 301),
-    /** The folder %d is not an Infostore folder */
-    NOT_INFOSTORE_FOLDER(NOT_INFOSTORE_FOLDER_MSG, CATEGORY_ERROR, 302),
-    /** You do not have sufficient read permissions to read objects in this folder. */
-    NO_READ_PERMISSION(NO_READ_PERMISSION_MSG, CATEGORY_PERMISSION_DENIED, 400),
-    /** You do not have sufficient permissions to create objects in this folder. */
-    NO_CREATE_PERMISSION(NO_CREATE_PERMISSION_MSG, CATEGORY_PERMISSION_DENIED, 402),
-    /** You are not allowed to update this item. */
-    NO_WRITE_PERMISSION(NO_WRITE_PERMISSION_MSG, CATEGORY_PERMISSION_DENIED, 403),
-    /** You are not allowed to create objects in the target folder. */
-    NO_TARGET_CREATE_PERMISSION(NO_TARGET_CREATE_PERMISSION_MSG, CATEGORY_PERMISSION_DENIED, 404),
-    /** Could not delete all objects. */
-    NOT_ALL_DELETED(NOT_ALL_DELETED_MSG, CATEGORY_CONFLICT, 405),
-    /** You do not have sufficient permission to delete this version. */
-    NO_DELETE_PERMISSION_FOR_VERSION(NO_DELETE_PERMISSION_FOR_VERSION_MSG, CATEGORY_PERMISSION_DENIED, 406),
-    /** Could not iterate result. */
-    ITERATE_FAILED(ITERATE_FAILED_MSG, CATEGORY_ERROR, 413),
-    /** This document is locked. */
-    ALREADY_LOCKED(ALREADY_LOCKED_MSG, CATEGORY_CONFLICT, 415),
-    /** You cannot unlock this document. */
-    LOCKED_BY_ANOTHER(LOCKED_BY_ANOTHER_MSG, CATEGORY_CONFLICT, 416),
-    /** You need write permissions to unlock a document. */
-    WRITE_PERMS_FOR_UNLOCK_MISSING(WRITE_PERMS_FOR_UNLOCK_MISSING_MSG, CATEGORY_PERMISSION_DENIED, 417),
-    /** You need write permissions to lock a document. */
-    WRITE_PERMS_FOR_LOCK_MISSING(WRITE_PERMS_FOR_LOCK_MISSING_MSG, CATEGORY_PERMISSION_DENIED, 418),
-    /** Could not generate new ID. */
-    NEW_ID_FAILED(NEW_ID_FAILED_MSG, CATEGORY_ERROR, 420),
-    /** You are not allowed to delete objects in the source folder, so this document cannot be moved. */
-    NO_SOURCE_DELETE_PERMISSION(NO_SOURCE_DELETE_PERMISSION_MSG, CATEGORY_PERMISSION_DENIED, 421),
-    /** The document you requested does not exist. */
-    DOCUMENT_NOT_EXIST(DOCUMENT_NOT_EXISTS_MSG, CATEGORY_USER_INPUT, 438),
-    /** Files attached to InfoStore items must have unique names. Filename: %s. The other document with this file name is %s. */
-    FILENAME_NOT_UNIQUE(FILENAME_NOT_UNIQUE_MSG, CATEGORY_USER_INPUT, 441),
-    /** Could not determine number of versions for infoitem %s in context %s. Invalid Query: %s */
-    NUMBER_OF_VERSIONS_FAILED(NUMBER_OF_VERSIONS_FAILED_MSG, CATEGORY_ERROR, 442),
-    /** You do not have the permissions to delete at least one of the info items. */
-    NO_DELETE_PERMISSION(NO_DELETE_PERMISSION_MSG, CATEGORY_PERMISSION_DENIED, 445),
-    /** Illegal argument: Document %d contains no file */
-    DOCUMENT_CONTAINS_NO_FILE(DOCUMENT_CONTAINS_NO_FILE_MSG, CATEGORY_ERROR, 500),
-    /** Folder %d has two subfolders named %s. The database for context %d is not consistent. */
-    DUPLICATE_SUBFOLDER(DUPLICATE_SUBFOLDER_MSG, CATEGORY_ERROR, 501),
-    /** In order to accomplish the search, %1$d or more characters are required. */
-    PATTERN_NEEDS_MORE_CHARACTERS(PATTERN_NEEDS_MORE_CHARACTERS_MSG, CATEGORY_USER_INPUT, 602),
-    /** Could not delete DocumentMetadata %d. Please try again. */
-    DELETE_FAILED(DELETE_FAILED_MSG, CATEGORY_CONFLICT, 700),
-    /** The document could not be updated because it was modified. Reload the view. */
-    MODIFIED_CONCURRENTLY(MODIFIED_CONCURRENTLY_MSG, CATEGORY_CONFLICT, 1302),
-    /** The document was updated in between do and undo. The Database is now probably inconsistent. */
-    UPDATED_BETWEEN_DO_AND_UNDO(UPDATED_BETWEEN_DO_AND_UNDO_MSG, CATEGORY_CONFLICT, 1303),
-    /** This folder is a virtual folder. It cannot contain documents. */
-    NO_DOCUMENTS_IN_VIRTUAL_FOLDER(NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG, CATEGORY_USER_INPUT, 1700),
-    /** Validation failed: %1$s */
-    VALIDATION_FAILED(VALIDATION_FAILED_MSG, CATEGORY_USER_INPUT, 2100),
-    /** File name must not contain slashes. */
-    VALIDATION_FAILED_SLASH(InfostoreExceptionMessages.VALIDATION_FAILED_SLASH_MSG, CATEGORY_USER_INPUT, 2101),
-    /** File name contains illegal characters. */
-    VALIDATION_FAILED_CHARACTERS(InfostoreExceptionMessages.VALIDATION_FAILED_CHARACTERS_MSG, CATEGORY_USER_INPUT, 2101),
-    /** New file versions can't be saved with an offset. */
-    NO_OFFSET_FOR_NEW_VERSIONS(InfostoreExceptionMessages.NO_OFFSET_FOR_NEW_VERSIONS_MSG, CATEGORY_USER_INPUT, 2102),
-    ;
+public enum InfostoreExceptionCodes implements DisplayableOXExceptionCode {
+    /**
+     * Some field values are too long.
+     */
+    TOO_LONG_VALUES(InfostoreExceptionCodes.TOO_LONG_VALUES_MSG, CATEGORY_TRUNCATED, 100),
+    /**
+     * Invalid SQL Query: %s
+     */
+    SQL_PROBLEM(InfostoreExceptionCodes.SQL_PROBLEM_MSG, CATEGORY_ERROR, 200, OXExceptionStrings.SQL_ERROR_MSG),
+    /**
+     * Cannot pre-fetch results.
+     */
+    PREFETCH_FAILED(InfostoreExceptionCodes.PREFETCH_FAILED_MSG, CATEGORY_TRY_AGAIN, 219),
+    /**
+     * The requested item does not exist.
+     */
+    NOT_EXIST(InfostoreExceptionCodes.NOT_EXIST_MSG, CATEGORY_USER_INPUT, 300, InfostoreExceptionMessages.NOT_EXIST_MSG_DISPLAY),
+    /**
+     * Could not load documents to check the permissions
+     */
+    COULD_NOT_LOAD(InfostoreExceptionCodes.COULD_NOT_LOAD_MSG, CATEGORY_USER_INPUT, 301, InfostoreExceptionMessages.COULD_NOT_LOAD_MSG_DISPLAY),
+    /**
+     * The folder %d is not an Infostore folder
+     */
+    NOT_INFOSTORE_FOLDER(InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER_MSG, CATEGORY_ERROR, 302, InfostoreExceptionMessages.NOT_INFOSTORE_FOLDER_MSG_DISPLAY),
+    /**
+     * You do not have sufficient read permissions to read objects in this folder.
+     */
+    NO_READ_PERMISSION(InfostoreExceptionCodes.NO_READ_PERMISSION_MSG, CATEGORY_PERMISSION_DENIED, 400, InfostoreExceptionMessages.NO_READ_PERMISSION_MSG_DISPLAY),
+    /**
+     * You do not have sufficient permissions to create objects in this folder.
+     */
+    NO_CREATE_PERMISSION(InfostoreExceptionCodes.NO_CREATE_PERMISSION_MSG, CATEGORY_PERMISSION_DENIED, 402, InfostoreExceptionMessages.NO_CREATE_PERMISSION_MSG_DISPLAY),
+    /**
+     * You are not allowed to update this item.
+     */
+    NO_WRITE_PERMISSION(InfostoreExceptionCodes.NO_WRITE_PERMISSION_MSG, CATEGORY_PERMISSION_DENIED, 403, InfostoreExceptionMessages.NO_WRITE_PERMISSION_MSG_DISPLAY),
+    /**
+     * Could not delete all objects.
+     */
+    NOT_ALL_DELETED(InfostoreExceptionCodes.NOT_ALL_DELETED_MSG, CATEGORY_ERROR, 405, InfostoreExceptionMessages.NOT_ALL_DELETED_MSG_DISPLAY),
+    /**
+     * You do not have sufficient permission to delete this version.
+     */
+    NO_DELETE_PERMISSION_FOR_VERSION(InfostoreExceptionCodes.NO_DELETE_PERMISSION_FOR_VERSION_MSG, CATEGORY_PERMISSION_DENIED, 406, InfostoreExceptionMessages.NO_DELETE_PERMISSION_FOR_VERSION_MSG_DISPLAY),
+    /**
+     * Could not iterate result.
+     */
+    ITERATE_FAILED(InfostoreExceptionCodes.ITERATE_FAILED_MSG, CATEGORY_ERROR, 413),
+    /**
+     * This document is locked.
+     */
+    ALREADY_LOCKED(InfostoreExceptionCodes.ALREADY_LOCKED_MSG, CATEGORY_CONFLICT, 415, InfostoreExceptionMessages.ALREADY_LOCKED_MSG_DISPLAY),
+    /**
+     * You cannot unlock this document.
+     */
+    LOCKED_BY_ANOTHER(InfostoreExceptionCodes.LOCKED_BY_ANOTHER_MSG, CATEGORY_CONFLICT, 416),
+    /**
+     * You need write permissions to unlock a document.
+     */
+    WRITE_PERMS_FOR_UNLOCK_MISSING(InfostoreExceptionCodes.WRITE_PERMS_FOR_UNLOCK_MISSING_MSG, CATEGORY_PERMISSION_DENIED, 417, InfostoreExceptionMessages.WRITE_PERMS_FOR_UNLOCK_MISSING_MSG_DISPLAY),
+    /**
+     * You need write permissions to lock a document.
+     */
+    WRITE_PERMS_FOR_LOCK_MISSING(InfostoreExceptionCodes.WRITE_PERMS_FOR_LOCK_MISSING_MSG, CATEGORY_PERMISSION_DENIED, 418, InfostoreExceptionMessages.WRITE_PERMS_FOR_LOCK_MISSING_MSG_DISPLAY),
+    /**
+     * Could not generate new ID.
+     */
+    NEW_ID_FAILED(InfostoreExceptionCodes.NEW_ID_FAILED_MSG, CATEGORY_ERROR, 420),
+    /**
+     * You are not allowed to delete objects in the source folder, so this document cannot be moved.
+     */
+    NO_SOURCE_DELETE_PERMISSION(InfostoreExceptionCodes.NO_SOURCE_DELETE_PERMISSION_MSG, CATEGORY_PERMISSION_DENIED, 421, InfostoreExceptionMessages.NO_SOURCE_DELETE_PERMISSION_MSG_DISPLAY),
+    /**
+     * The document you requested does not exist.
+     */
+    DOCUMENT_NOT_EXIST(InfostoreExceptionCodes.DOCUMENT_NOT_EXISTS_MSG, CATEGORY_USER_INPUT, 438, InfostoreExceptionMessages.DOCUMENT_NOT_EXISTS_MSG_DISPLAY),
+    /**
+     * Files attached to InfoStore items must have unique names. Filename: %s. The other document with this file name is %s.
+     */
+    FILENAME_NOT_UNIQUE(InfostoreExceptionCodes.FILENAME_NOT_UNIQUE_MSG, CATEGORY_USER_INPUT, 441, InfostoreExceptionMessages.FILENAME_NOT_UNIQUE_MSG_DISPLAY),
+    /**
+     * Could not determine number of versions for infoitem %s in context %s. Invalid Query: %s
+     */
+    NUMBER_OF_VERSIONS_FAILED(InfostoreExceptionCodes.NUMBER_OF_VERSIONS_FAILED_MSG, CATEGORY_ERROR, 442),
+    /**
+     * You do not have the permissions to delete at least one of the info items.
+     */
+    NO_DELETE_PERMISSION(InfostoreExceptionCodes.NO_DELETE_PERMISSION_MSG, CATEGORY_PERMISSION_DENIED, 445, InfostoreExceptionMessages.NO_DELETE_PERMISSION_MSG_DISPLAY),
+    /**
+     * Illegal argument: Document %d contains no file
+     */
+    DOCUMENT_CONTAINS_NO_FILE(InfostoreExceptionCodes.DOCUMENT_CONTAINS_NO_FILE_MSG, CATEGORY_ERROR, 500),
+    /**
+     * Folder %d has two subfolders named %s. The database for context %d is not consistent.
+     */
+    DUPLICATE_SUBFOLDER(InfostoreExceptionCodes.DUPLICATE_SUBFOLDER_MSG, CATEGORY_ERROR, 501),
+    /**
+     * In order to accomplish the search, %1$d or more characters are required.
+     */
+    PATTERN_NEEDS_MORE_CHARACTERS(InfostoreExceptionCodes.PATTERN_NEEDS_MORE_CHARACTERS_MSG, CATEGORY_USER_INPUT, 602, InfostoreExceptionMessages.PATTERN_NEEDS_MORE_CHARACTERS_MSG_DISPLAY),
+    /**
+     * Could not delete DocumentMetadata %d. Please try again.
+     */
+    DELETE_FAILED(InfostoreExceptionCodes.DELETE_FAILED_MSG, CATEGORY_CONFLICT, 700),
+    /**
+     * The document could not be updated because it was modified. Reload the view.
+     */
+    MODIFIED_CONCURRENTLY(InfostoreExceptionCodes.MODIFIED_CONCURRENTLY_MSG, CATEGORY_CONFLICT, 1302, InfostoreExceptionMessages.MODIFIED_CONCURRENTLY_MSG_DISPLAY),
+    /**
+     * The document was updated in between do and undo. The Database is now probably inconsistent.
+     */
+    UPDATED_BETWEEN_DO_AND_UNDO(InfostoreExceptionCodes.UPDATED_BETWEEN_DO_AND_UNDO_MSG, CATEGORY_CONFLICT, 1303),
+    /**
+     * This folder is a virtual folder. It cannot contain documents.
+     */
+    NO_DOCUMENTS_IN_VIRTUAL_FOLDER(InfostoreExceptionCodes.NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG, CATEGORY_USER_INPUT, 1700),
+    /**
+     * Validation failed: %1$s
+     */
+    VALIDATION_FAILED(InfostoreExceptionCodes.VALIDATION_FAILED_MSG, CATEGORY_USER_INPUT, 2100),
+    /**
+     * File name must not contain slashes.
+     */
+    VALIDATION_FAILED_SLASH(InfostoreExceptionCodes.VALIDATION_FAILED_SLASH_MSG, CATEGORY_USER_INPUT, 2101, InfostoreExceptionMessages.VALIDATION_FAILED_SLASH_MSG_DISPLAY),
+    /**
+     * File name contains illegal characters.
+     */
+    VALIDATION_FAILED_CHARACTERS(InfostoreExceptionCodes.VALIDATION_FAILED_CHARACTERS_MSG, CATEGORY_USER_INPUT, 2101, InfostoreExceptionMessages.VALIDATION_FAILED_CHARACTERS_MSG_DISPLAY),
+    /**
+     * New file versions can't be saved with an offset.
+     */
+    NO_OFFSET_FOR_NEW_VERSIONS(InfostoreExceptionCodes.NO_OFFSET_FOR_NEW_VERSIONS_MSG, CATEGORY_USER_INPUT, 2102, InfostoreExceptionMessages.NO_OFFSET_FOR_NEW_VERSIONS_MSG_DISPLAY);
+
+    private static final String SQL_PROBLEM_MSG = "Invalid SQL Query: %1$s";
+
+    private static final String TOO_LONG_VALUES_MSG = "Some field values are too long.";
+
+    private static final String PREFETCH_FAILED_MSG = "Cannot pre-fetch results.";
+
+    private static final String NOT_EXIST_MSG = "The requested item does not exist.";
+
+    private static final String COULD_NOT_LOAD_MSG = "Could not load documents to check the permissions";
+
+    private static final String NOT_INFOSTORE_FOLDER_MSG = "The folder %1$s is not an Infostore folder";
+
+    private static final String NO_READ_PERMISSION_MSG = "You do not have sufficient read permissions to read objects in this folder..";
+
+    private static final String NO_CREATE_PERMISSION_MSG = "You do not have sufficient permissions to create objects in this folder.";
+
+    private static final String NO_WRITE_PERMISSION_MSG = "You are not allowed to update this item.";
+
+    private static final String NOT_ALL_DELETED_MSG = "Could not delete all objects.";
+
+    private static final String NO_DELETE_PERMISSION_FOR_VERSION_MSG = "You do not have sufficient permissions to delete this version.";
+
+    private static final String ITERATE_FAILED_MSG = "Could not iterate result.";
+
+    private static final String ALREADY_LOCKED_MSG = "This document is locked.";
+
+    private static final String LOCKED_BY_ANOTHER_MSG = "You cannot unlock this document.";
+
+    private static final String WRITE_PERMS_FOR_UNLOCK_MISSING_MSG = "You need write permissions to unlock a document.";
+
+    private static final String WRITE_PERMS_FOR_LOCK_MISSING_MSG = "You need write permissions to lock a document.";
+
+    private static final String NEW_ID_FAILED_MSG = "Could not generate new ID.";
+
+    private static final String NO_SOURCE_DELETE_PERMISSION_MSG = "You are not allowed to delete objects in the source folder. This document cannot be moved.";
+
+    private static final String DOCUMENT_NOT_EXISTS_MSG = "The document you requested does not exist.";
+
+    private static final String FILENAME_NOT_UNIQUE_MSG = "Files attached to InfoStore items must have unique names. File name: %1$s. The other document with this file name is %2$s.";
+
+    private static final String NUMBER_OF_VERSIONS_FAILED_MSG = "Could not determine number of versions for info item %1$s in context %s. Invalid query: %2$s";
+
+    private static final String NO_DELETE_PERMISSION_MSG = "You do not have the permissions to delete at least one of the info items.";
+
+    private static final String DOCUMENT_CONTAINS_NO_FILE_MSG = "Illegal argument: document %1$s contains no file";
+
+    private static final String DUPLICATE_SUBFOLDER_MSG = "Folder %1$s has two subfolders named %2$s. The database for context %3$s is not consistent.";
+
+    private static final String PATTERN_NEEDS_MORE_CHARACTERS_MSG = "In order to accomplish the search, %1$s or more characters are required.";
+
+    private static final String DELETE_FAILED_MSG = "DocumentMetadata %1$s could not be deleted. Please try again.";
+
+    private static final String MODIFIED_CONCURRENTLY_MSG = "The document could not be updated because it was modified. Reload the view.";
+
+    private static final String UPDATED_BETWEEN_DO_AND_UNDO_MSG = "The document was updated in between do and undo. The database is now probably inconsistent.";
+
+    private static final String NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG = "This folder is a virtual folder. It cannot contain documents.";
+
+    private static final String VALIDATION_FAILED_MSG = "Validation failed: %1$s";
+
+    private static final String VALIDATION_FAILED_SLASH_MSG = "File name must not contain slashes.";
+
+    private static final String VALIDATION_FAILED_CHARACTERS_MSG = "File name contains invalid characters.";
+
+    private static final String NO_OFFSET_FOR_NEW_VERSIONS_MSG = "New file versions can't be saved with an offset.";
 
     private final String message;
 
@@ -167,10 +267,35 @@ public enum InfostoreExceptionCodes implements OXExceptionCode {
 
     private final int number;
 
+    /**
+     * Message displayed to the user
+     */
+    private String displayMessage;
+
+    /**
+     * Initializes a new {@link InfostoreExceptionCodes}.
+     * 
+     * @param message
+     * @param category
+     * @param number
+     */
     private InfostoreExceptionCodes(final String message, final Category category, final int number) {
+        this(message, category, number, null);
+    }
+
+    /**
+     * Initializes a new {@link InfostoreExceptionCodes}.
+     * 
+     * @param message
+     * @param category
+     * @param number
+     * @param displayMessage
+     */
+    private InfostoreExceptionCodes(final String message, final Category category, final int number, final String displayMessage) {
         this.message = message;
         this.category = category;
         this.number = number;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     @Override
@@ -188,10 +313,6 @@ public enum InfostoreExceptionCodes implements OXExceptionCode {
         return message;
     }
 
-    public String getHelp() {
-        return null;
-    }
-
     @Override
     public Category getCategory() {
         return category;
@@ -203,8 +324,16 @@ public enum InfostoreExceptionCodes implements OXExceptionCode {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDisplayMessage() {
+        return this.displayMessage;
+    }
+
+    /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     *
+     * 
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {

@@ -57,11 +57,10 @@ import java.rmi.registry.Registry;
 import java.rmi.server.RMISocketFactory;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.rmi.exceptions.OXRMIExceptionCodes;
+import com.openexchange.rmi.exceptions.RMIExceptionCodes;
 import com.openexchange.rmi.osgi.RMIActivator;
 
 /**
@@ -71,7 +70,7 @@ import com.openexchange.rmi.osgi.RMIActivator;
  */
 public class RMIRegistry {
 
-    private static final Log log = com.openexchange.log.Log.loggerFor(RMIRegistry.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RMIRegistry.class);
 
     private static Registry registry = null;
 
@@ -107,8 +106,8 @@ public class RMIRegistry {
             }
             return registry;
         } catch (final RemoteException e) {
-            log.error(e.getMessage(), e);
-            throw OXRMIExceptionCodes.RMI_CREATE_REGISTRY_FAILED.create(e);
+            log.error("", e);
+            throw RMIExceptionCodes.RMI_CREATE_REGISTRY_FAILED.create(e);
         } finally {
             lock.unlock();
         }

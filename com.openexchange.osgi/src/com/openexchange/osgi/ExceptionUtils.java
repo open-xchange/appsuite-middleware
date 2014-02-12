@@ -17,15 +17,13 @@
 
 package com.openexchange.osgi;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 /**
  * Utilities for handling <tt>Throwable</tt>s and <tt>Exception</tt>s.
  */
 public class ExceptionUtils {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExceptionUtils.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExceptionUtils.class);
 
     /**
      * Checks whether the supplied <tt>Throwable</tt> is one that needs to be rethrown and swallows all others.
@@ -34,12 +32,12 @@ public class ExceptionUtils {
      */
     public static void handleThrowable(final Throwable t) {
         if (t instanceof ThreadDeath) {
-            LOG.fatal(surroundWithMarker("Thread death"), t);
+            LOG.error(surroundWithMarker("Thread death"), t);
             throw (ThreadDeath) t;
         }
         if (t instanceof VirtualMachineError) {
             final String message = "The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.";
-            LOG.fatal(surroundWithMarker(message), t);
+            LOG.error(surroundWithMarker(message), t);
             throw (VirtualMachineError) t;
         }
         // All other instances of Throwable will be silently swallowed

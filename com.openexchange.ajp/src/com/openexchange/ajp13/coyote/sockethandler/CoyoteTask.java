@@ -53,14 +53,12 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.concurrent.CountDownLatch;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.ajp13.coyote.ActionCode;
 import com.openexchange.ajp13.coyote.AjpProcessor;
 import com.openexchange.ajp13.coyote.Constants;
 import com.openexchange.ajp13.watcher.AJPv13TaskMonitor;
 import com.openexchange.ajp13.watcher.AJPv13TaskWatcher;
-import com.openexchange.log.LogFactory;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
@@ -73,8 +71,8 @@ import com.openexchange.tools.exceptions.ExceptionUtils;
  */
 public final class CoyoteTask implements Task<Object> {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CoyoteTask.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(CoyoteTask.class);
 
     /**
      * The client socket.
@@ -185,10 +183,10 @@ public final class CoyoteTask implements Task<Object> {
             ajpProcessor.process(client);
         } catch (final java.net.SocketException e) {
             // SocketExceptions are normal
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
         } catch (final java.io.IOException e) {
             // IOExceptions are normal
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
         } catch (final ThreadDeath fatal) {
             throw fatal;
         } catch (final VirtualMachineError fatal) {
@@ -198,7 +196,7 @@ public final class CoyoteTask implements Task<Object> {
              * Any other exception or error is odd.
              */
             ExceptionUtils.handleThrowable(e);
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } finally {
             ajpProcessor.action(ActionCode.STOP, null);
             // ajpProcessor.recycle();
@@ -213,10 +211,8 @@ public final class CoyoteTask implements Task<Object> {
         try {
             s.close();
         } catch (final IOException e) {
-            final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(CoyoteTask.class));
-            if (log.isDebugEnabled()) {
-                log.debug("Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe).", e);
-            }
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CoyoteTask.class);
+            log.debug("Socket could not be closed. Probably due to a broken socket connection (e.g. broken pipe).", e);
         }
     }
 

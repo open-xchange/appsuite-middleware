@@ -58,7 +58,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -91,7 +90,7 @@ public abstract class AbstractITipAction implements AJAXActionService{
 
     private static final String OWNER = "com.openexchange.conversion.owner";
 
-    protected static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractITipAction.class);
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractITipAction.class);
 
     protected ServiceLookup services;
 
@@ -176,7 +175,7 @@ public abstract class AbstractITipAction implements AJAXActionService{
             try {
                 return new ByteArrayInputStream(body.getString("ical").getBytes("UTF-8"));
             } catch (final UnsupportedEncodingException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 return null;
             } catch (final JSONException x) {
     			throw AjaxExceptionCodes.JSON_ERROR.create(x);

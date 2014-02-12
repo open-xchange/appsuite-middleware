@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HKerberosThriftClient extends HThriftClient implements HClient {
 
-  private static Logger log = LoggerFactory.getLogger(HKerberosThriftClient.class);
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(HKerberosThriftClient.class);
   
   private Subject kerberosTicket;
   private String servicePrincipalName;
@@ -92,7 +92,7 @@ public class HKerberosThriftClient extends HThriftClient implements HClient {
     } catch (TTransportException e) {
       // Thrift exceptions aren't very good in reporting, so we have to catch the exception here and
       // add details to it.
-      log.debug("Unable to open transport to " + cassandraHost.getName());
+      log.debug("Unable to open transport to {}", cassandraHost.getName());
       //clientMonitor.incCounter(Counter.CONNECT_ERROR);
       throw new HectorTransportException("Unable to open transport to " + cassandraHost.getName() +" , " +
           e.getLocalizedMessage(), e);

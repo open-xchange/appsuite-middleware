@@ -50,25 +50,26 @@
 package com.openexchange.mobile.configuration.json.exception;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link MobileProvisioningJsonExceptionCodes} - Enumeration of all {@link OXException}s.
  *
  * @author Tobias Prinz <a href="mailto:tobias.prinz@open-xchange.com">
  */
-public enum MobileProvisioningJsonExceptionCodes implements OXExceptionCode {
+public enum MobileProvisioningJsonExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(MobileProvisioningJsonExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
-    ACTION_ERROR(MobileProvisioningJsonExceptionMessages.ACTION_ERROR_MSG, Category.CATEGORY_ERROR, 2),
-    CONTEXT_ERROR(MobileProvisioningJsonExceptionMessages.CONTEXT_ERROR_MSG, Category.CATEGORY_ERROR, 3),
-    USER_ERROR(MobileProvisioningJsonExceptionMessages.USER_ERROR_MSG, Category.CATEGORY_ERROR, 4),
-    CONFIGURATION_ERROR(MobileProvisioningJsonExceptionMessages.CONFIGURATION_ERROR_MSG, Category.CATEGORY_ERROR, 5),
+    UNEXPECTED_ERROR("An error occurred: %1$s", Category.CATEGORY_ERROR, 1, null),
+    ACTION_ERROR("An error occurred for action: %1$s", Category.CATEGORY_ERROR, 2, null),
+    CONTEXT_ERROR("An error occurred loading context %1$s", Category.CATEGORY_ERROR, 3, null),
+    USER_ERROR("An error occurred loading user data for user %1$s", Category.CATEGORY_ERROR, 4, null),
+    CONFIGURATION_ERROR("Could not load configuration or necessary field from configuration", Category.CATEGORY_ERROR, 5, null),
 
     ;
 
@@ -77,11 +78,14 @@ public enum MobileProvisioningJsonExceptionCodes implements OXExceptionCode {
     private final int detailNumber;
 
     private final String message;
+    
+    private final String displayMessage;
 
-    private MobileProvisioningJsonExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private MobileProvisioningJsonExceptionCodes(final String message, final Category category, final int detailNumber, String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
     }
 
     public String getPrefix() {
@@ -98,6 +102,10 @@ public enum MobileProvisioningJsonExceptionCodes implements OXExceptionCode {
 
     public int getNumber() {
         return detailNumber;
+    }
+    
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     public boolean equals(final OXException e) {

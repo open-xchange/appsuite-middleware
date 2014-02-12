@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Snippet JSON Bundle
 Bundle-SymbolicName: com.openexchange.snippet.json
-Bundle-Version: 7.4.1
+Bundle-Version: 7.4.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
@@ -42,5 +42,6 @@ Import-Package: com.openexchange.ajax,
  org.json,
  org.osgi.framework,
  org.osgi.service.http,
- org.osgi.util.tracker;version="1.5.1"
+ org.osgi.util.tracker,
+ org.slf4j
 Bundle-Activator: com.openexchange.snippet.json.osgi.SnippetJsonActivator

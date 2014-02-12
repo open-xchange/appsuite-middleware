@@ -50,9 +50,6 @@
 package com.openexchange.publish.sql;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.publish.PublicationErrorMessage.IDGiven;
-import static com.openexchange.publish.PublicationErrorMessage.PublicationNotFound;
-import static com.openexchange.publish.PublicationErrorMessage.SQLException;
 import static com.openexchange.sql.grammar.Constant.ASTERISK;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import static com.openexchange.sql.schema.Tables.publications;
@@ -73,6 +70,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.publish.Entity;
 import com.openexchange.publish.Publication;
+import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.PublicationStorage;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.sql.builder.StatementBuilder;
@@ -125,7 +123,7 @@ public class PublicationSQLStorage implements PublicationStorage {
             delete(publication, writeConnection);
             txPolicy.commit(writeConnection);
         } catch (final SQLException e) {
-            throw SQLException.create(e);
+            throw PublicationErrorMessage.SQL_ERROR.create(e);
         } finally {
             tryToClose(publication.getContext(), writeConnection);
         }
@@ -155,14 +153,14 @@ public class PublicationSQLStorage implements PublicationStorage {
                 retval = publications.get(0);
             }
         } catch (final SQLException e) {
-            throw SQLException.create(e);
+            throw PublicationErrorMessage.SQL_ERROR.create(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
             } catch (final SQLException e) {
-                throw SQLException.create(e);
+                throw PublicationErrorMessage.SQL_ERROR.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);
             }
@@ -183,8 +181,8 @@ public class PublicationSQLStorage implements PublicationStorage {
             final SELECT select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id", "enabled", "created").FROM(publications).WHERE(
                 new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("module", PLACEHOLDER)).AND(new EQUALS("entity", PLACEHOLDER)));
 
-        	final List<Object> values = new ArrayList<Object>();
-        	values.add(I(ctx.getContextId()));
+            final List<Object> values = new ArrayList<Object>();
+            values.add(I(ctx.getContextId()));
             values.add(module);
             values.add(entityId);
 
@@ -192,14 +190,14 @@ public class PublicationSQLStorage implements PublicationStorage {
             resultSet = builder.executeQuery(readConnection, select, values);
             retval = parseResultSet(resultSet, ctx, readConnection);
         } catch (final SQLException e) {
-            throw SQLException.create(e);
+            throw PublicationErrorMessage.SQL_ERROR.create(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
             } catch (final SQLException e) {
-                throw SQLException.create(e);
+                throw PublicationErrorMessage.SQL_ERROR.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);
             }
@@ -228,14 +226,14 @@ public class PublicationSQLStorage implements PublicationStorage {
             resultSet = builder.executeQuery(readConnection, select, values);
             retval = parseResultSet(resultSet, ctx, readConnection);
         } catch (final SQLException e) {
-            throw SQLException.create(e);
+            throw PublicationErrorMessage.SQL_ERROR.create(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
             } catch (final SQLException e) {
-                throw SQLException.create(e);
+                throw PublicationErrorMessage.SQL_ERROR.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);
             }
@@ -246,7 +244,7 @@ public class PublicationSQLStorage implements PublicationStorage {
 
     @Override
     public List<Publication> getPublicationsOfUser(final Context ctx, final int userId)  throws OXException {
-    	return getPublicationsOfUser(ctx, userId, null);
+        return getPublicationsOfUser(ctx, userId, null);
     }
 
     @Override
@@ -263,14 +261,14 @@ public class PublicationSQLStorage implements PublicationStorage {
             SELECT select;
             final List<Object> values = new ArrayList<Object>();
             if (module == null) {
-            	select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id", "enabled", "created").FROM(publications).WHERE(
-                        new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("user_id", PLACEHOLDER)));
+                select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id", "enabled", "created").FROM(publications).WHERE(
+                    new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("user_id", PLACEHOLDER)));
 
                 values.add(I(contextId));
                 values.add(I(userId));
             } else {
-            	select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id", "enabled", "created").FROM(publications).WHERE(
-                        new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("user_id", PLACEHOLDER)).AND(new EQUALS("module", PLACEHOLDER)));
+                select = new SELECT("id", "cid", "user_id", "entity", "module", "configuration_id", "target_id", "enabled", "created").FROM(publications).WHERE(
+                    new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("user_id", PLACEHOLDER)).AND(new EQUALS("module", PLACEHOLDER)));
 
                 values.add(I(contextId));
                 values.add(I(userId));
@@ -282,14 +280,14 @@ public class PublicationSQLStorage implements PublicationStorage {
             resultSet = builder.executeQuery(readConnection, select, values);
             retval = parseResultSet(resultSet, ctx, readConnection);
         } catch (final SQLException e) {
-            throw SQLException.create(e);
+            throw PublicationErrorMessage.SQL_ERROR.create(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
             } catch (final SQLException e) {
-                throw SQLException.create(e);
+                throw PublicationErrorMessage.SQL_ERROR.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);
             }
@@ -301,7 +299,7 @@ public class PublicationSQLStorage implements PublicationStorage {
     @Override
     public void rememberPublication(final Publication publication) throws OXException {
         if (publication.getId() > 0) {
-            throw IDGiven.create();
+            throw PublicationErrorMessage.ID_GIVEN_EXCEPTION.create();
         }
 
         Connection writeConnection = null;
@@ -313,7 +311,7 @@ public class PublicationSQLStorage implements PublicationStorage {
             publication.setId(id);
             txPolicy.commit(writeConnection);
         } catch (final SQLException e) {
-            throw SQLException.create(e);
+            throw PublicationErrorMessage.SQL_ERROR.create(e);
         } finally {
             tryToClose(publication.getContext(), writeConnection);
         }
@@ -322,7 +320,7 @@ public class PublicationSQLStorage implements PublicationStorage {
     @Override
     public void updatePublication(final Publication publication) throws OXException {
         if (!exist(publication.getId(), publication.getContext())) {
-            throw PublicationNotFound.create();
+            throw PublicationErrorMessage.PUBLICATION_NOT_FOUND_EXCEPTION.create();
         }
 
         Connection writeConnection = null;
@@ -332,9 +330,9 @@ public class PublicationSQLStorage implements PublicationStorage {
             update(publication, writeConnection);
             txPolicy.commit(writeConnection);
         } catch (final SQLException e) {
-            throw SQLException.create(e);
+            throw PublicationErrorMessage.SQL_ERROR.create(e);
         } finally {
-           tryToClose(publication.getContext(), writeConnection);
+            tryToClose(publication.getContext(), writeConnection);
         }
     }
 
@@ -365,14 +363,14 @@ public class PublicationSQLStorage implements PublicationStorage {
                 retval.addAll(parseResultSet(resultSet, ctx, readConnection));
             }
         } catch (final SQLException e) {
-            throw SQLException.create(e);
+            throw PublicationErrorMessage.SQL_ERROR.create(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
             } catch (final SQLException e) {
-                throw SQLException.create(e);
+                throw PublicationErrorMessage.SQL_ERROR.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);
             }
@@ -392,7 +390,7 @@ public class PublicationSQLStorage implements PublicationStorage {
         } catch (final OXException e) {
             throw e;
         } catch (final SQLException e) {
-            throw SQLException.create(e);
+            throw PublicationErrorMessage.SQL_ERROR.create(e);
         } finally {
             tryToClose(context, writeConnection);
         }
@@ -405,7 +403,7 @@ public class PublicationSQLStorage implements PublicationStorage {
             writeConnection = dbProvider.getWriteConnection(ctx);
             deleteWhereContextID(contextId, ctx, writeConnection);
         } catch (final SQLException e) {
-            throw SQLException.create(e);
+            throw PublicationErrorMessage.SQL_ERROR.create(e);
         } finally {
             tryToClose(ctx, writeConnection);
         }
@@ -419,7 +417,7 @@ public class PublicationSQLStorage implements PublicationStorage {
                 }
                 txPolicy.setAutoCommit(writeConnection, true);
             } catch (final SQLException e) {
-                throw SQLException.create(e);
+                throw PublicationErrorMessage.SQL_ERROR.create(e);
             } finally {
                 dbProvider.releaseWriteConnection(context, writeConnection);
             }
@@ -568,14 +566,14 @@ public class PublicationSQLStorage implements PublicationStorage {
                 retval = resultSet.getInt("configuration_id");
             }
         } catch (final SQLException e) {
-            throw SQLException.create(e);
+            throw PublicationErrorMessage.SQL_ERROR.create(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
             } catch (final SQLException e) {
-                throw SQLException.create(e);
+                throw PublicationErrorMessage.SQL_ERROR.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConection);
             }
@@ -606,14 +604,14 @@ public class PublicationSQLStorage implements PublicationStorage {
             resultSet = builder.executeQuery(readConnection, select, values);
             retval = resultSet.next();
         } catch (final SQLException e) {
-            throw SQLException.create(e);
+            throw PublicationErrorMessage.SQL_ERROR.create(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
             } catch (final SQLException e) {
-                throw SQLException.create(e);
+                throw PublicationErrorMessage.SQL_ERROR.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);
             }
@@ -657,14 +655,14 @@ public class PublicationSQLStorage implements PublicationStorage {
                 }
             }
         } catch (final SQLException e) {
-            throw SQLException.create(e);
+            throw PublicationErrorMessage.SQL_ERROR.create(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
             } catch (final SQLException e) {
-                throw SQLException.create(e);
+                throw PublicationErrorMessage.SQL_ERROR.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);
             }

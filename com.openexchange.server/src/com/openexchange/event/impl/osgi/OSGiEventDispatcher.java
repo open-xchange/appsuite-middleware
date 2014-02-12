@@ -53,7 +53,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
@@ -68,7 +67,6 @@ import com.openexchange.event.impl.TaskEventInterface2;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 
 /**
@@ -79,7 +77,7 @@ import com.openexchange.session.Session;
  */
 public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispatcher {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OSGiEventDispatcher.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OSGiEventDispatcher.class);
 
     private final Queue<AppointmentEventInterface> appointmentListeners;
 
@@ -244,7 +242,7 @@ public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispa
         } catch (final Exception e) {
             // Catch all exceptions to get them into the normal logging
             // mechanism.
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 

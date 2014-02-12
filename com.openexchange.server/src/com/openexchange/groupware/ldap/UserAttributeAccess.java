@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.ldap;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.config.ConfigurationService;
@@ -133,9 +131,10 @@ public final class UserAttributeAccess {
      * @param contextId The identifier of user's context
      * @param defaultValue The default value to return if user has no attribute of specified name
      * @return The value of the <code>boolean</code> attribute
+     * @throws OXException
      */
-    public boolean getBooleanAttribute(final String name, final int userId, final int contextId, final boolean defaultValue) {
-        return getBooleanAttribute(name, UserStorage.getStorageUser(userId, contextId), defaultValue);
+    public boolean getBooleanAttribute(final String name, final int userId, final int contextId, final boolean defaultValue) throws OXException {
+        return getBooleanAttribute(name, UserStorage.getInstance().getUser(userId, contextId), defaultValue);
     }
 
     /**
@@ -217,25 +216,6 @@ public final class UserAttributeAccess {
      * @throws OXException If setting attribute fails
      */
     public void setAttribute(final String name, final String value, final User user, final Context context) throws OXException {
-        final Map<String, Set<String>> attributes = user.getAttributes();
-        final Map<String, Set<String>> newAttributes = new HashMap<String, Set<String>>(attributes.size());
-        for (Map.Entry<String, Set<String>> entry : attributes.entrySet()) {
-            newAttributes.put(entry.getKey(), new HashSet<String>(entry.getValue()));
-        }
-        // Add specified boolean value
-        Set<String> set = newAttributes.get(name);
-        if (null == set) {
-            set = new HashSet<String>();
-            newAttributes.put(name, set);
-        } else {
-            set.clear();
-        }
-        set.add(value);
-        // Save modification
-        final UserImpl userImpl = new UserImpl();
-        userImpl.setId(user.getId());
-        userImpl.setAttributes(newAttributes);
-        userStorage.updateUser(userImpl, context);
+        userStorage.setAttribute(name, value, user.getId(), context);
     }
-
 }

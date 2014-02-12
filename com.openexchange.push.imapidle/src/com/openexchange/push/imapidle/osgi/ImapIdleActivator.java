@@ -49,7 +49,6 @@
 
 package com.openexchange.push.imapidle.osgi;
 
-import static com.openexchange.push.imapidle.services.ImapIdleServiceRegistry.getServiceRegistry;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
@@ -65,7 +64,7 @@ import com.openexchange.push.imapidle.ImapIdlePushListener;
 import com.openexchange.push.imapidle.ImapIdlePushListener.PushMode;
 import com.openexchange.push.imapidle.ImapIdlePushListenerRegistry;
 import com.openexchange.push.imapidle.ImapIdlePushManagerService;
-import com.openexchange.push.imapidle.services.ImapIdleServiceRegistry;
+import com.openexchange.push.imapidle.Services;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -74,7 +73,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public final class ImapIdleActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ImapIdleActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ImapIdleActivator.class);
 
     private String folder;
 
@@ -90,48 +89,25 @@ public final class ImapIdleActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            MailService.class, EventAdmin.class, ConfigurationService.class, ContextService.class, ThreadPoolService.class, SessiondService.class };
+            MailService.class, EventAdmin.class,
+            ConfigurationService.class, ContextService.class,
+            ThreadPoolService.class, SessiondService.class };
     }
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
-        getServiceRegistry().addService(clazz, getService(clazz));
-        if (ThreadPoolService.class == clazz) {
-            ImapIdlePushListenerRegistry.getInstance().openAll();
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
     }
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
-        if (ThreadPoolService.class == clazz) {
-            ImapIdlePushListenerRegistry.getInstance().closeAll();
-        }
-        getServiceRegistry().removeService(clazz);
+        LOG.warn("Absent service: {}", clazz.getName());
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
-            /*
-             * (Re-)Initialize service registry with available services
-             */
-            {
-                final ImapIdleServiceRegistry registry = getServiceRegistry();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (int i = 0; i < classes.length; i++) {
-                    final Object service = getService(classes[i]);
-                    if (null != service) {
-                        registry.addService(classes[i], service);
-                    }
-                }
-            }
+            Services.setServiceLookup(this);
             /*
              * Initialize & open tracker for SessionD service
              */
@@ -153,7 +129,7 @@ public final class ImapIdleActivator extends HousekeepingActivator {
             final String modestr =configurationService.getProperty("com.openexchange.push.imapidle.pushmode", PushMode.ALWAYS.toString());
             PushMode pushmode = PushMode.fromString(modestr);
             if( pushmode == null ) {
-                LOG.info("WARNING: " + modestr + " is an invalid setting for com.openexchange.push.imapidle.pushmode, using default");
+                LOG.info("WARNING: {} is an invalid setting for com.openexchange.push.imapidle.pushmode, using default", modestr);
                 pushmode = PushMode.ALWAYS;
             }
 
@@ -175,11 +151,11 @@ public final class ImapIdleActivator extends HousekeepingActivator {
             registerService(DeleteListener.class, new ImapIdleDeleteListener(), null);
             LOG.info("com.openexchange.push.imapidle bundle started");
             LOG.info(debug ? " debugging enabled" : "debugging disabled");
-            LOG.info("Foldername: " + folder);
-            LOG.info("Error delay: " + errordelay + "");
-            LOG.info("pushmode: " + pushmode);
+            LOG.info("Foldername: {}", folder);
+            LOG.info("Error delay: {}", errordelay);
+            LOG.info("pushmode: {}", pushmode);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -203,13 +179,13 @@ public final class ImapIdleActivator extends HousekeepingActivator {
             /*
              * Clear service registry
              */
-            getServiceRegistry().clearRegistry();
+            Services.setServiceLookup(null);
             /*
              * Reset
              */
             folder = null;
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Oauth Bundle
 Bundle-SymbolicName: com.openexchange.oauth
-Bundle-Version: 7.4.1
+Bundle-Version: 7.4.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
@@ -50,7 +50,6 @@ Import-Package: com.openexchange.config,
  org.apache.commons.httpclient,
  org.apache.commons.httpclient.util,
  org.apache.commons.logging,
- org.apache.commons.logging.impl,
  org.osgi.framework,
  org.osgi.service.event,
  org.osgi.util.tracker,
@@ -61,7 +60,8 @@ Import-Package: com.openexchange.config,
  org.scribe.model,
  org.scribe.oauth,
  org.scribe.services,
- org.scribe.utils
+ org.scribe.utils,
+ org.slf4j
 Export-Package: com.openexchange.oauth
 Bundle-ClassPath: .
 Bundle-Activator: com.openexchange.oauth.osgi.Activator

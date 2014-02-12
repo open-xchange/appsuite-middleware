@@ -49,12 +49,19 @@
 
 package com.openexchange.mailaccount.json.actions;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.meta.MetaContributor;
+import com.openexchange.ajax.meta.MetaContributorRegistry;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -66,7 +73,9 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
+import com.openexchange.server.services.MetaContributors;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -80,6 +89,8 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "id", description = "The ID of the account to return.")
 }, responseDescription = "A JSON object representing the desired mail account. See mail account data.")
 public final class GetAction extends AbstractMailAccountAction implements MailAccountFields {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(GetAction.class);
 
     public static final String ACTION = AJAXServlet.ACTION_GET;
 
@@ -120,8 +131,11 @@ public final class GetAction extends AbstractMailAccountAction implements MailAc
             {
                 final JSlobId jSlobId = new JSlobId(JSLOB_SERVICE_ID, Integer.toString(id), session.getUserId(), session.getContextId());
                 final JSlob jSlob = getStorage().opt(jSlobId);
-                if (null != jSlob) {
-                    jsonAccount.put(META, jSlob.getJsonObject());
+                Map<String, Object> map = null == jSlob ? null : (Map<String, Object>) JSONCoercion.coerceToNative(jSlob.getJsonObject());
+                map = contributeTo(map, id, session);
+
+                if (map != null && !map.isEmpty()) {
+                    jsonAccount.put(META, JSONCoercion.coerceToJSON(map));
                 }
             }
 
@@ -129,6 +143,27 @@ public final class GetAction extends AbstractMailAccountAction implements MailAc
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static Map<String, Object> contributeTo(final Map<String, Object> map, final int accountId, final Session session) {
+        final MetaContributorRegistry registry = MetaContributors.getRegistry();
+        if (null == registry) {
+            return map;
+        }
+        final Set<MetaContributor> contributors = registry.getMetaContributors("ox/mail/account");
+        if (null != contributors && !contributors.isEmpty()) {
+            final Map<String, Object> mapp = null == map ? new LinkedHashMap<String, Object>(2) : map;
+            final String id = Integer.toString(accountId);
+            for (final MetaContributor contributor : contributors) {
+                try {
+                    contributor.contributeTo(mapp, id, session);
+                } catch (final Exception e) {
+                    LOG.warn("Cannot contribute to entity (contributor={}, entity={})", contributor.getClass().getName(), Integer.valueOf(accountId), e);
+                }
+            }
+            return mapp;
+        }
+        return map;
     }
 
 }

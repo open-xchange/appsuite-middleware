@@ -56,8 +56,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 
 /**
@@ -67,7 +65,7 @@ import com.openexchange.session.Session;
  */
 public final class TreeLockManagement {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TreeLockManagement.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TreeLockManagement.class);
 
     private static final TreeLockManagement INSTANCE = new TreeLockManagement();
 
@@ -108,10 +106,7 @@ public final class TreeLockManagement {
         final ConcurrentMap<Integer, ConcurrentMap<String, ReadWriteLock>> userMap = map.get(Integer.valueOf(session.getContextId()));
         if (null != userMap) {
             userMap.remove(Integer.valueOf(session.getUserId()));
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(new com.openexchange.java.StringAllocator("Cleaned folder locks for user ").append(session.getUserId()).append(" in context ").append(
-                    session.getContextId()).toString());
-            }
+            LOG.debug("Cleaned folder locks for user {} in context {}", session.getUserId(), session.getContextId());
         }
     }
 
@@ -122,9 +117,7 @@ public final class TreeLockManagement {
      */
     public void dropFor(final int contextId) {
         map.remove(Integer.valueOf(contextId));
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned folder locks for context ").append(contextId).toString());
-        }
+        LOG.debug("Cleaned folder locks for context {}", contextId);
     }
 
     /**

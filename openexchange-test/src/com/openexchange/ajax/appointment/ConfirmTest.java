@@ -1,6 +1,5 @@
 package com.openexchange.ajax.appointment;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.FolderTest;
@@ -10,7 +9,7 @@ import com.openexchange.groupware.container.UserParticipant;
 
 public class ConfirmTest extends AppointmentTest {
 
-	private static final Log LOG = LogFactory.getLog(ConfirmTest.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfirmTest.class);
 
 	public ConfirmTest(final String name) {
 		super(name);

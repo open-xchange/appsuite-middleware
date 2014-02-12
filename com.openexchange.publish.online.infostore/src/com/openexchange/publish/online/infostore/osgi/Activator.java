@@ -49,12 +49,10 @@
 
 package com.openexchange.publish.online.infostore.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 import com.openexchange.context.ContextService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.PublicationService;
@@ -65,7 +63,7 @@ import com.openexchange.userconf.UserPermissionService;
 
 public class Activator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
     private static final String ALIAS = InfostoreDocumentPublicationService.PREFIX;
     private InfostorePublicationServlet servlet;
@@ -95,7 +93,7 @@ public class Activator extends HousekeepingActivator {
                     fileAccessFactory,
                     infostorePublisher), null, null);
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

@@ -59,7 +59,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.dataRetrieval.Constants;
 import com.openexchange.groupware.dataRetrieval.DataProvider;
@@ -68,7 +67,6 @@ import com.openexchange.groupware.dataRetrieval.config.Configuration;
 import com.openexchange.groupware.dataRetrieval.registry.DataProviderRegistry;
 import com.openexchange.groupware.dataRetrieval.services.Services;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.RandomTokenContainer;
 import com.openexchange.tools.io.IOTools;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
@@ -82,7 +80,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class FileDeliveryServlet extends HttpServlet {
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FileDeliveryServlet.class));
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileDeliveryServlet.class);
 
     public static RandomTokenContainer<Map<String, Object>> PARAM_MAP = null;
     public static DataProviderRegistry DATA_PROVIDERS = null;
@@ -137,7 +136,7 @@ public class FileDeliveryServlet extends HttpServlet {
                 PARAM_MAP.remove(token);
             }
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         } finally {
             if(state != null && provider != null) {
@@ -147,7 +146,7 @@ public class FileDeliveryServlet extends HttpServlet {
     }
 
     private InputStream setHeaders(final InputStream stream, final FileMetadata metadata, final HttpServletRequest req, final HttpServletResponse resp) throws OXException, IOException {
-        final InputStream in = new BufferedInputStream(stream); // FIXME: How come backends don't supply correct size? This has memory implications that are not so nice.
+        final InputStream in = new BufferedInputStream(stream, 65536); // FIXME: How come backends don't supply correct size? This has memory implications that are not so nice.
         final ByteArrayOutputStream out = new ByteArrayOutputStream((int) metadata.getSize());
         int count = 0;
         int value = 0;

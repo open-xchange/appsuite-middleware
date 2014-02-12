@@ -54,7 +54,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -84,7 +83,7 @@ import com.openexchange.group.Group;
  */
 public final class FunctionTest extends AbstractAJAXSession {
 
-    private static final Log LOG = LogFactory.getLog(FunctionTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FunctionTest.class);
 
     private Set<Integer> groupsToDelete;
 

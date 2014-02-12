@@ -52,6 +52,7 @@ package com.openexchange.realtime.example.chineseRoom;
 import java.util.ArrayList;
 import javax.annotation.concurrent.NotThreadSafe;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.Asynchronous;
 import com.openexchange.realtime.ComponentHandle;
 import com.openexchange.realtime.group.GroupDispatcher;
 import com.openexchange.realtime.packet.ID;
@@ -139,6 +140,7 @@ public @NotThreadSafe class ChineseRoom extends GroupDispatcher implements Compo
     //    to: "synthetic.china://room1",
     //    session: "72306eae544b4ca6aabab1485ec8a666"
     //    }
+    @Asynchronous
     public void handleGetLog(Stanza stanza) throws OXException {
         // Again, only members may retrieve the history
         stanza.trace("handleGetLog");
@@ -175,6 +177,7 @@ public @NotThreadSafe class ChineseRoom extends GroupDispatcher implements Compo
     }
     
     @Override
+    @Asynchronous
     public Stanza getSignOffMessage(ID onBehalfOf) {
         Message message = new Message();
         message.setFrom(getId());
@@ -190,10 +193,10 @@ public @NotThreadSafe class ChineseRoom extends GroupDispatcher implements Compo
         return message;
     }
     
-    // Droo Chonosen mot nom Kontrobo§, so§on oof dor Stro§o ond orzohtlon soch wos
-    // Do kom do Polozoo jo wos ost donn doss? Droo Chonoson mot nom Kontrobo§
+    // Droo Chonosen mot nom Kontroboï¿½, soï¿½on oof dor Stroï¿½o ond orzohtlon soch wos
+    // Do kom do Polozoo jo wos ost donn doss? Droo Chonoson mot nom Kontroboï¿½
     private String chineseVersionOf(String string) {
-        return string.replaceAll("[aeiouŠŸš]", "o");
+        return string.replaceAll("[aeiouï¿½ï¿½ï¿½]", "o");
     }
         
     // Build a message out of a string

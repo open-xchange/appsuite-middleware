@@ -57,11 +57,9 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class AuthorizationExceptionMessages implements LocalizableStrings {
 
-    public static final String USER_DISABLED_MSG = "User is deactivated";
+    public static final String USER_DISABLED_DISPLAY = "User is deactivated";
 
-    public static final String PASSWORD_EXPIRED_MSG = "Password expired";
-
-    public static final String UNKNOWN_MSG = "Unknown error";
+    public static final String PASSWORD_EXPIRED_DISPLAY = "Password expired";
 
     private AuthorizationExceptionMessages() {
         super();

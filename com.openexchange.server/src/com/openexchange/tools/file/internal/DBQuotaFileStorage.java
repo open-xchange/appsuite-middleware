@@ -58,23 +58,23 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.file.external.FileStorage;
+import com.openexchange.tools.file.external.FileStorageCodes;
 import com.openexchange.tools.file.external.QuotaFileStorage;
 import com.openexchange.tools.file.external.QuotaFileStorageExceptionCodes;
 import com.openexchange.tools.sql.DBUtils;
 
 public class DBQuotaFileStorage implements QuotaFileStorage {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(QuotaFileStorage.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QuotaFileStorage.class);
 
     /**
      * The context of the QuotaFileStorage
@@ -207,7 +207,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
             if (newUsage < 0) {
                 newUsage = 0;
                 final OXException e = QuotaFileStorageExceptionCodes.QUOTA_UNDERRUN.create(I(context.getContextId()));
-                LOG.fatal(e.getMessage(), e);
+                LOG.error("", e);
             }
 
             ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=?");
@@ -237,9 +237,17 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         final SortedSet<String> set = new TreeSet<String>();
         for (final String identifier : identifiers) {
             boolean deleted;
-            final Long size = L(getFileSize(identifier)); // Get size before attempting delete. File is not found afterwards
-            deleted = fileStorage.deleteFile(identifier);
-            fileSizes.put(identifier, size);
+            try {
+                // Get size before attempting delete. File is not found afterwards
+                final Long size = L(getFileSize(identifier));
+                deleted = fileStorage.deleteFile(identifier);
+                fileSizes.put(identifier, size);
+            } catch (final OXException e) {
+                if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                    throw e;
+                }
+                deleted = false;
+            }
             if (!deleted) {
                 set.add(identifier);
             }
@@ -321,14 +329,20 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
      */
     @Override
     public void recalculateUsage() throws OXException {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Recalculating usage for Context " + context.getContextId());
-        }
+        Set<String> filesToIgnore = Collections.emptySet();
+        recalculateUsage(filesToIgnore);
+    }
+
+    @Override
+    public void recalculateUsage(Set<String> filesToIgnore) throws OXException {
+        LOG.info("Recalculating usage for Context {}", context.getContextId());
         final SortedSet<String> filenames = fileStorage.getFileList();
         long entireFileSize = 0;
 
         for (final String filename : filenames) {
-            entireFileSize += fileStorage.getFileSize(filename);
+            if (!filesToIgnore.contains(filename)) {
+                entireFileSize += fileStorage.getFileSize(filename);
+            }
         }
 
         final Connection con = db.getWritable(context);

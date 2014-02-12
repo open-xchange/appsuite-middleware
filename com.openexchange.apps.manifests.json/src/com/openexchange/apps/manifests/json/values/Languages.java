@@ -56,7 +56,6 @@ import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -64,7 +63,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.apps.manifests.ComputedServerConfigValueService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -75,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class Languages implements ComputedServerConfigValueService {
 
-	private static final Log LOG = LogFactory.getLog(Languages.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Languages.class);
 
 	private JSONObject allLanguages;
 
@@ -123,7 +121,7 @@ public class Languages implements ComputedServerConfigValueService {
 			}
 		} catch (JSONException x) {
 			// Doesn't happen
-			LOG.error(x.getMessage(), x);
+			LOG.error("", x);
 		}
 	}
 

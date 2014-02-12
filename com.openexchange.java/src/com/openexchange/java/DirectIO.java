@@ -52,8 +52,7 @@ package com.openexchange.java;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
 
 /**
  * {@link DirectIO} - A utility class for direct byte buffers and I/O.
@@ -81,7 +80,7 @@ public final class DirectIO {
                         m.setAccessible(true);
                         cleanerMethod = m;
                     } catch (final Exception e) {
-                        final Log log = LogFactory.getLog(DirectIO.class);
+                        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DirectIO.class);
                         log.error("Couldn't initialze Java Reflection method for \"cleaner\".", e);
                     }
                 }

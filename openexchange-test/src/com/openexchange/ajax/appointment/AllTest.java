@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,7 +26,7 @@ import com.openexchange.java.util.TimeZones;
 
 public class AllTest extends AppointmentTest {
 
-    private static final Log LOG = LogFactory.getLog(AllTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AllTest.class);
 
     private static final int[] SIMPLE_COLUMNS = new int[] {
         Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE, Appointment.START_DATE, Appointment.END_DATE };

@@ -59,7 +59,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -296,7 +298,12 @@ public class Patches {
          * @param updatedTask
          */
         public static void adjustTaskStatus(Task originalTask, Task updatedTask) {
-            if (Task.DONE == updatedTask.getStatus() && Task.DONE != originalTask.getStatus()) {
+            if (false == originalTask.containsStatus()) {
+                /*
+                 * Nothing to restore
+                 */
+                return;
+            } else if (Task.DONE == updatedTask.getStatus() && Task.DONE != originalTask.getStatus()) {
                 /*
                  * 'Done' in Mac OS client: STATUS:COMPLETED / PERCENT-COMPLETE:100
                  */
@@ -534,6 +541,44 @@ public class Patches {
                 if (0 < createdBy) {
                     User user = factory.resolveUser(createdBy);
                     appointment.setOrganizer(user.getMail());
+                }
+            }
+        }
+
+        /**
+         * Removes the implicitly added folder owner participant for appointments in private/shared folders in case no further
+         * participants were added, along with any organizer information.
+         * <p/>
+         * This effectively makes the appointment to not appear as group appointment in the Mac OS client, as well as allowing
+         * modifications on it.
+         *
+         * @param folder The parent folder of the appointment
+         * @param appointment The appointment
+         */
+        public static void removeImplicitParticipant(UserizedFolder folder, Appointment appointment) {
+            int folderOwnerID = -1;
+            if (PrivateType.getInstance().equals(folder.getType())) {
+                folderOwnerID = folder.getUser().getId();
+            } else if (SharedType.getInstance().equals(folder.getType())) {
+                Permission[] permissions = folder.getPermissions();
+                if (null != permissions && 0 < permissions.length) {
+                    for (Permission permission : permissions) {
+                        if (permission.isAdmin() && false == permission.isGroup()) {
+                            folderOwnerID = permission.getEntity();
+                            break;
+                        }
+                    }
+                }
+            }
+            if (-1 != folderOwnerID) {
+                Participant[] participants = appointment.getParticipants();
+                if (null != participants && 1 == participants.length && UserParticipant.class.isInstance(participants[0]) &&
+                    ((UserParticipant)participants[0]).getIdentifier() == folderOwnerID) {
+                    appointment.removeParticipants();
+                    appointment.removeUsers();
+                    appointment.removeCreatedBy();
+                    appointment.removeOrganizer();
+                    appointment.removeOrganizerId();
                 }
             }
         }

@@ -58,8 +58,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.event.EventFactoryService;
@@ -84,7 +82,7 @@ public class PushOutputQueue implements Runnable {
 
     private static volatile boolean isInit;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushOutputQueue.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushOutputQueue.class);
 
     private static volatile PushConfiguration pushConfigInterface;
 
@@ -103,9 +101,7 @@ public class PushOutputQueue implements Runnable {
      * @throws OXException If an event exception occurs
      */
     public static void add(final PushObject pushObject) throws OXException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("add PushObject: " + pushObject);
-        }
+        LOG.debug("add PushObject: {}", pushObject);
         if (!isEnabled) {
             return;
         }
@@ -148,9 +144,7 @@ public class PushOutputQueue implements Runnable {
      * @throws OXException If an event exception occurs
      */
     public static void add(final RegisterObject registerObject, final boolean noDelay) throws OXException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("add RegisterObject: " + registerObject);
-        }
+        LOG.debug("add RegisterObject: {}", registerObject);
 
         if (!isEnabled) {
             return;
@@ -278,9 +272,7 @@ public class PushOutputQueue implements Runnable {
                     if (System.currentTimeMillis() <= (remoteHostObject.getTimer().getTime() + remoteHostTimeOut)) {
                         channels.makeAndSendPackage(b, remoteHostObject.getHost(), remoteHostObject.getPort(), INTERNAL);
                     } else {
-                        if (LOG.isTraceEnabled()) {
-                            LOG.trace("remote host object is timed out");
-                        }
+                        LOG.trace("remote host object is timed out");
                         iter.remove();
                     }
                 } catch (final Exception exc) {
@@ -341,9 +333,7 @@ public class PushOutputQueue implements Runnable {
                     if (System.currentTimeMillis() <= (remoteHostObject.getTimer().getTime() + remoteHostTimeOut)) {
                         channels.makeAndSendPackage(b, remoteHostObject.getHost(), remoteHostObject.getPort(), INTERNAL);
                     } else {
-                        if (LOG.isTraceEnabled()) {
-                            LOG.trace("remote host object is timed out");
-                        }
+                        LOG.trace("remote host object is timed out");
                         iter.remove();
                     }
                 } catch (final Exception exc) {
@@ -362,18 +352,14 @@ public class PushOutputQueue implements Runnable {
         final AbstractPushObject abstractPushObject = pushDelayedObject.getPushObject();
 
         if (abstractPushObject instanceof PushObject) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Send Push Object");
-            }
+            LOG.debug("Send Push Object");
 
             final PushObject pushObject = (PushObject) abstractPushObject;
             existingPushObjects.remove(pushObject);
 
             createAndDeliverPushPackage(pushObject);
         } else if (abstractPushObject instanceof RegisterObject) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Send Register Object");
-            }
+            LOG.debug("Send Register Object");
 
             createAndDeliverRegisterPackage((RegisterObject) abstractPushObject);
         }
@@ -389,9 +375,7 @@ public class PushOutputQueue implements Runnable {
         remoteHost = pushConfigInterface.getRemoteHost();
 
         if (pushConfigInterface.isPushEnabled()) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Starting PushOutputQueue");
-            }
+            LOG.info("Starting PushOutputQueue");
 
             remoteHost = pushConfigInterface.getRemoteHost();
 
@@ -409,9 +393,7 @@ public class PushOutputQueue implements Runnable {
             th.setName(this.getClass().getName());
             th.start();
         } else {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("PushOutputQueue is disabled");
-            }
+            LOG.info("PushOutputQueue is disabled");
         }
 
         isInit = true;
@@ -424,9 +406,7 @@ public class PushOutputQueue implements Runnable {
     @Override
     public void run() {
         while (isRunning) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("get push objects from queue: " + queue.size());
-            }
+            LOG.debug("get push objects from queue: {}", queue.size());
 
             try {
                 // Breaks IBM Java < 1.5.0_sr9
@@ -443,7 +423,7 @@ public class PushOutputQueue implements Runnable {
                 // Thread.sleep(10000);
                 // }
             } catch (final Exception exc) {
-                LOG.error(exc.getMessage(), exc);
+                LOG.error("", exc);
             }
         }
     }

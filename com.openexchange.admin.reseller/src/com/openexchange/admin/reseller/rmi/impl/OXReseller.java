@@ -52,8 +52,6 @@ package com.openexchange.admin.reseller.rmi.impl;
 import java.rmi.RemoteException;
 import java.util.HashSet;
 import java.util.Map;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
@@ -79,7 +77,7 @@ import com.openexchange.admin.tools.GenericChecks;
  */
 public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
-    private final static Log log = LogFactory.getLog(OXReseller.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXReseller.class);
 
     private final BasicAuthenticator basicauth;
 
@@ -89,15 +87,13 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
     public OXReseller() throws StorageException {
         super();
-        if (log.isDebugEnabled()) {
-            log.debug("Class loaded: " + this.getClass().getName());
-        }
+        log.debug("Class loaded: {}", this.getClass().getName());
         basicauth = new BasicAuthenticator();
         resellerauth = new ResellerAuth();
         try {
             oxresell = OXResellerStorageInterface.getInstance();
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -124,6 +120,9 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             } else {
                 resellerauth.doAuthentication(creds);
                 pid = oxresell.getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin(), creds.getPassword()) })[0].getId();
+                if (adm.getParentId() != null ) {
+                    throw new OXResellerException(Code.SUBAMIN_NOT_ALLOWED_TO_CHANGE_PARENTID);
+                }
             }
 
             checkIdOrName(adm);
@@ -137,11 +136,22 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             // if no password mech supplied, use the old one as set in db
             final ResellerAdmin dbadm = oxresell.getData(new ResellerAdmin[] { adm })[0];
             if( pid > 0 && dbadm.getParentId() != pid ) {
-                log.error("unathorized access to " + dbadm.getName() + " by " + creds.getLogin());
+                log.error("unathorized access to {} by {}", dbadm.getName(), creds.getLogin());
                 throw new InvalidCredentialsException("authentication failed");
             }
             if (adm.getPasswordMech() == null) {
                 adm.setPasswordMech(dbadm.getPasswordMech());
+            }
+
+            final Integer parentId = adm.getParentId();
+            if ( parentId != null && 0 != parentId ) {
+                if( !oxresell.existsAdmin(new ResellerAdmin(adm.getParentId())) ) {
+                    throw new OXResellerException(Code.RESELLER_ADMIN_NOT_EXIST, "with parentId=" + adm.getParentId());
+                }
+                final ResellerAdmin parentAdmin = oxresell.getData(new ResellerAdmin[]{new ResellerAdmin(adm.getParentId())})[0];
+                if( parentAdmin.getParentId() > 0 ) {
+                    throw new OXResellerException(Code.CANNOT_SET_PARENTID_TO_SUBSUBADMIN);
+                }
             }
 
             Restriction[] res = adm.getRestrictions();
@@ -168,16 +178,16 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             log.error("Invalid data sent by client!", e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final OXResellerException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -238,19 +248,19 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             return oxresell.create(adm);
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final OXResellerException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final EnforceableDataObjectException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new InvalidDataException(e.getMessage());
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -305,16 +315,16 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             log.error("Invalid data sent by client!", e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final OXResellerException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -344,10 +354,10 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             }
             return ret.toArray(new Restriction[ret.size()]);
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -397,19 +407,19 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             return oxresell.getData(admins);
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final OXResellerException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
 
@@ -445,13 +455,13 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             return oxresell.getRestrictionsFromContext(ctx);
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -471,16 +481,16 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             }
             oxresell.initDatabaseRestrictions();
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final OXResellerException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -510,13 +520,13 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
                 return oxresell.list(search_pattern, pid);
             }
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -538,16 +548,16 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             oxresell.removeDatabaseRestrictions();
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final OXResellerException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -568,16 +578,16 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             oxresell.updateModuleAccessRestrictions();
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (OXResellerException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -652,16 +662,16 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
             oxresell.updateRestrictions();
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final RuntimeException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (OXResellerException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }

@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
@@ -66,6 +67,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.slf4j.MDC;
 import com.openexchange.threadpool.CompletionFuture;
 import com.openexchange.threadpool.RefusedExecutionBehavior;
 import com.openexchange.threadpool.Task;
@@ -79,7 +81,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public final class ThreadPoolServiceImpl implements ThreadPoolService {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ThreadPoolServiceImpl.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolServiceImpl.class);
 
     /**
      * Creates a new {@link ThreadPoolServiceImpl} with the given properties.
@@ -180,10 +182,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
     private static int getCorePoolSize(final int desiredCorePoolSize) {
         final int minCorePoolSize = Runtime.getRuntime().availableProcessors() + 1;
         if (desiredCorePoolSize < minCorePoolSize) {
-            LOG.warn(new com.openexchange.java.StringAllocator(128).append("\n\n\tConfigured pool size of ").append(desiredCorePoolSize).append(
-                " through property \"com.openexchange.threadpool.corePoolSize\" does not obey the rule\n\tfor minimum core pool size: ").append(
-                Runtime.getRuntime().availableProcessors()).append(" (number of CPUs) + 1 = ").append(minCorePoolSize).append(". Using ").append(
-                minCorePoolSize).append(" as core pool size.\n"));
+            LOG.warn("\n\n\tConfigured pool size of {} through property \"com.openexchange.threadpool.corePoolSize\" does not obey the rule\n\tfor minimum core pool size: {} (number of CPUs) + 1 = {}. Using {} as core pool size.\n", desiredCorePoolSize, Runtime.getRuntime().availableProcessors(), minCorePoolSize, minCorePoolSize);
             return minCorePoolSize;
         }
         return desiredCorePoolSize;
@@ -264,19 +263,24 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         final List<Future<T>> futures = new ArrayList<Future<T>>(tasks.size());
         boolean done = false;
         try {
-            for (final Task<T> t : tasks) {
-                final CustomFutureTask<T> ftask = new CustomFutureTask<T>(t);
-                futures.add(ftask);
-                threadPoolExecutor.execute(ftask);
+            {
+                @SuppressWarnings("unchecked")
+                final Map<String, Object> mdcMap = MDC.getCopyOfContextMap();
+                for (final Task<T> t : tasks) {
+                    final CustomFutureTask<T> ftask = new CustomFutureTask<T>(t, mdcMap);
+                    futures.add(ftask);
+                    threadPoolExecutor.execute(ftask);
+                }
             }
+
             for (final Future<T> f : futures) {
                 if (!f.isDone()) {
                     try {
                         f.get();
                     } catch (final CancellationException ignore) {
-                        LOG.debug(ignore.getMessage(), ignore);
+                        LOG.debug("", ignore);
                     } catch (final ExecutionException ignore) {
-                        LOG.debug(ignore.getMessage(), ignore);
+                        LOG.debug("", ignore);
                     }
                 }
             }
@@ -300,8 +304,12 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         final List<Future<T>> futures = new ArrayList<Future<T>>(tasks.size());
         boolean done = false;
         try {
-            for (final Task<T> t : tasks) {
-                futures.add(new CustomFutureTask<T>(t));
+            {
+                @SuppressWarnings("unchecked")
+                final Map<String, Object> mdcMap = MDC.getCopyOfContextMap();
+                for (final Task<T> t : tasks) {
+                    futures.add(new CustomFutureTask<T>(t, mdcMap));
+                }
             }
 
             long lastTime = System.nanoTime();
@@ -327,9 +335,9 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
                     try {
                         f.get(nanos, TimeUnit.NANOSECONDS);
                     } catch (final CancellationException ignore) {
-                        LOG.debug(ignore.getMessage(), ignore);
+                        LOG.debug("", ignore);
                     } catch (final ExecutionException ignore) {
-                        LOG.debug(ignore.getMessage(), ignore);
+                        LOG.debug("", ignore);
                     } catch (final TimeoutException toe) {
                         return futures;
                     }
@@ -378,7 +386,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         if (tasks == null) {
             throw new NullPointerException();
         }
-        final CompletionService<T> completionService = new CustomExecutorCompletionService<T>(threadPoolExecutor, behavior);
+        final CompletionService<T> completionService = new CustomExecutorCompletionService<T>(threadPoolExecutor, behavior, MDC.getCopyOfContextMap());
         for (final Task<T> task : tasks) {
             completionService.submit(task);
         }
@@ -424,7 +432,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         if (task == null) {
             throw new NullPointerException();
         }
-        final CustomFutureTask<T> ftask = new CustomFutureTask<T>(task);
+        final CustomFutureTask<T> ftask = new CustomFutureTask<T>(task, MDC.getCopyOfContextMap());
         threadPoolExecutor.execute(ftask);
         return ftask;
     }
@@ -434,7 +442,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         if (task == null) {
             throw new NullPointerException();
         }
-        final CustomFutureTask<T> ftask = new CustomFutureTask<T>(task, refusedExecutionBehavior);
+        final CustomFutureTask<T> ftask = new CustomFutureTask<T>(task, refusedExecutionBehavior, MDC.getCopyOfContextMap());
         threadPoolExecutor.execute(ftask);
         return ftask;
     }
@@ -446,18 +454,17 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
     private static final class CustomExecutorCompletionService<V> implements CompletionService<V> {
 
         private final Executor executor;
-
         private final RefusedExecutionBehavior behavior;
-
         private final BlockingQueue<Future<V>> completionQueue;
+        private final Map<String, Object> mdcMap;
 
         /**
          * FutureTask extension to enqueue upon completion
          */
         private class CustomQueueingFuture extends CustomFutureTask<V> {
 
-            CustomQueueingFuture(final Task<V> task) {
-                super(task, behavior);
+            CustomQueueingFuture(final Task<V> task, final Map<String, Object> mdcMap) {
+                super(task, behavior, mdcMap);
             }
 
             @Override
@@ -471,12 +478,14 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
          * {@link LinkedBlockingQueue} as a completion queue.
          *
          * @param executor the executor to use
+         * @param mdcMap The MDC map
          * @throws NullPointerException if executor is <tt>null</tt>
          */
-        public CustomExecutorCompletionService(final Executor executor, final RefusedExecutionBehavior behavior) {
+        public CustomExecutorCompletionService(final Executor executor, final RefusedExecutionBehavior behavior, Map<String, Object> mdcMap) {
             if (executor == null) {
                 throw new NullPointerException();
             }
+            this.mdcMap = mdcMap;
             this.behavior = behavior;
             this.executor = executor;
             this.completionQueue = new LinkedBlockingQueue<Future<V>>();
@@ -487,7 +496,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
             if (task == null) {
                 throw new NullPointerException();
             }
-            final CustomQueueingFuture f = new CustomQueueingFuture((Task<V>) task);
+            final CustomQueueingFuture f = new CustomQueueingFuture((Task<V>) task, mdcMap);
             executor.execute(f);
             return f;
         }

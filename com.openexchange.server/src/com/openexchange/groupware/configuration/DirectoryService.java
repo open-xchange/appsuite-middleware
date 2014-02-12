@@ -57,11 +57,9 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -121,7 +119,7 @@ public final class DirectoryService {
    /**
     * Logger.
     */
-   private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DirectoryService.class));
+   private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DirectoryService.class);
 
    /**
     * The customization properties for the directory service.
@@ -181,7 +179,7 @@ public final class DirectoryService {
                     try {
                         propfile = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getFileByName("ldap.properties");
                     } catch (final NullPointerException e) {
-                        LOG.fatal("Config file ldap.properties is not set in " + "ComfireConfig.");
+                        LOG.error("Config file ldap.properties is not set in ComfireConfig.");
                     }
                     tmp = new Properties();
                     FileInputStream fis = null;
@@ -285,8 +283,7 @@ public final class DirectoryService {
                uri = confValues[3];
             } else {
                if (null == confValues[1]) {
-                   LOG.error("Missing HOST and URI in directory service "
-                       + "configuration.");
+                   LOG.error("Missing HOST and URI in directory service configuration.");
                } else {
                   uri = "ldap://" + confValues[1];
                   if (null != confValues[2]) {
@@ -304,12 +301,10 @@ public final class DirectoryService {
                bindPW = confValues[5];
             }
          } catch (final IOException e) {
-            LOG.error("Error while reading writable directory service "
-                + "configuration.", e);
+            LOG.error("Error while reading writable directory service configuration.", e);
          }
       } else {
-         LOG.error("Cannot read directory service configuration file \""
-            + ldapConfFile.getAbsolutePath() + "\"");
+         LOG.error("Cannot read directory service configuration file \"{}\"", ldapConfFile.getAbsolutePath());
       }
    }
 
@@ -329,8 +324,7 @@ public final class DirectoryService {
                writableURI = confValues[3];
             } else {
                if (null == confValues[1]) {
-                  LOG.error("Missing HOST and URI in directory service "
-                      + "configuration.");
+                  LOG.error("Missing HOST and URI in directory service configuration.");
                } else {
                   writableURI = "ldap://" + confValues[1];
                   if (null != confValues[2]) {
@@ -339,8 +333,7 @@ public final class DirectoryService {
                }
             }
          } catch (final IOException e) {
-            LOG.error("Error while reading writable directory service "
-                + "configuration.", e);
+            LOG.error("Error while reading writable directory service configuration.", e);
          }
       } else {
          loadLdapConf();

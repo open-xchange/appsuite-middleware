@@ -60,7 +60,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 
@@ -73,7 +72,7 @@ public class AppsLoadServlet extends HttpServlet {
 
     private static final long serialVersionUID = -8909104490806162791L;
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AppsLoadServlet.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppsLoadServlet.class);
 
     private static String ZONEINFO = "io.ox/core/date/tz/zoneinfo/";
 
@@ -227,7 +226,7 @@ public class AppsLoadServlet extends HttpServlet {
             final Matcher m = moduleRE.matcher(module);
             if (!m.matches()) {
                 final String escapedName = escapeName(module);
-                LOG.debug("Invalid module name: '" + escapedName + "'");
+                LOG.debug("Invalid module name: '{}'", escapedName);
                 ew.error(("console.error('Invalid module name: \\'" + escapedName + "\\'');\n").getBytes("UTF-8"));
                 continue;
             }

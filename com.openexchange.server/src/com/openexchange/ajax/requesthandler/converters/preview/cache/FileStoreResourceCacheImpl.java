@@ -55,31 +55,22 @@ import java.io.InputStream;
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.DataTruncation;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import org.apache.commons.logging.Log;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
+import java.util.List;
+import com.openexchange.ajax.requesthandler.cache.AbstractResourceCache;
 import com.openexchange.ajax.requesthandler.cache.CachedResource;
-import com.openexchange.ajax.requesthandler.cache.ResourceCache;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadata;
+import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadataStore;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.java.Streams;
 import com.openexchange.preview.PreviewExceptionCodes;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.session.Session;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.external.FileStorageCodes;
@@ -89,9 +80,9 @@ import com.openexchange.tools.file.external.FileStorageCodes;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FileStoreResourceCacheImpl implements ResourceCache, EventHandler {
+public final class FileStoreResourceCacheImpl extends AbstractResourceCache {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FileStoreResourceCacheImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileStoreResourceCacheImpl.class);
 
     private static final ConcurrentTIntObjectHashMap<FileStorage> FILE_STORE_CACHE = new ConcurrentTIntObjectHashMap<FileStorage>();
 
@@ -143,30 +134,6 @@ public final class FileStoreResourceCacheImpl implements ResourceCache, EventHan
     }
 
     @Override
-    public void handleEvent(final Event event) {
-        final String topic = event.getTopic();
-        if (FileStorageEventConstants.UPDATE_TOPIC.equals(topic)) {
-            try {
-                final Session session = (Session) event.getProperty(FileStorageEventConstants.SESSION);
-                final int userId = session.getUserId();
-                final int contextId = session.getContextId();
-                removeAlikes(event.getProperty(FileStorageEventConstants.E_TAG).toString(), userId, contextId);
-            } catch (final OXException e) {
-                LOG.warn("Couldn't remove cache entry.", e);
-            }
-        } else if (FileStorageEventConstants.DELETE_TOPIC.equals(topic)) {
-            try {
-                final Session session = (Session) event.getProperty(FileStorageEventConstants.SESSION);
-                final int userId = session.getUserId();
-                final int contextId = session.getContextId();
-                removeAlikes(event.getProperty(FileStorageEventConstants.E_TAG).toString(), userId, contextId);
-            } catch (final OXException e) {
-                LOG.warn("Couldn't remove cache entry.", e);
-            }
-        }
-    }
-
-    @Override
     public boolean save(final String id, final CachedResource resource, final int userId, final int contextId) throws OXException {
         final InputStream in = resource.getInputStream();
         if (null == in) {
@@ -175,8 +142,7 @@ public final class FileStoreResourceCacheImpl implements ResourceCache, EventHan
         return save(id, in, resource.getFileName(), resource.getFileType(), userId, contextId);
     }
 
-    @Override
-    public boolean save(final String id, final InputStream in, final String optName, final String optType, final int userId, final int contextId) throws OXException {
+    private boolean save(final String id, final InputStream in, final String optName, final String optType, final int userId, final int contextId) throws OXException {
         try {
             return save(id, Streams.stream2bytes(in), optName, optType, userId, contextId);
         } catch (final IOException e) {
@@ -184,88 +150,38 @@ public final class FileStoreResourceCacheImpl implements ResourceCache, EventHan
         }
     }
 
-    @Override
-    public boolean save(final String id, final byte[] bytes, final String optName, final String optType, final int userId, final int contextId) throws OXException {
-        // Check existence
-        String refId = optRefId(id, userId, contextId);
-        final boolean exists = null != refId;
-        // Get quota
-        final long[] qts = getContextQuota(contextId);
-        final long total = qts[0];
-        final long totalPerDocument = qts[0];
-        if (total > 0 || totalPerDocument > 0) {
-            final String ignoree = exists ? id : null;
-            if (!ensureUnexceededContextQuota(bytes.length, total, totalPerDocument, contextId, ignoree)) {
-                return false;
-            }
-        }
-        final DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        if (databaseService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        }
-
-        // Save file
+    private boolean save(final String id, final byte[] bytes, final String optName, final String optType, final int userId, final int contextId) throws OXException {
+        final ResourceCacheMetadataStore metadataStore = getMetadataStore();
         final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
-        if (null != refId) {
-            fileStorage.deleteFile(refId);
-        }
-        refId = fileStorage.saveNewFile(Streams.newByteArrayInputStream(bytes));
+        final DatabaseService dbService = getDBService();
 
-        final Connection con = databaseService.getWritable(contextId);
-        boolean committed = true;
-        PreparedStatement stmt = null;
+        final Connection con = dbService.getWritable(contextId);
+        ResourceCacheMetadata existingMetadata = loadExistingEntry(metadataStore, con, contextId, userId, id);
+        long existingSize = existingMetadata == null ? 0L : existingMetadata.getSize();
+        if (!ensureUnexceededContextQuota(con, bytes.length, contextId, existingSize)) {
+            dbService.backWritable(contextId, con);
+            return false;
+        }
+
+        String refId = null;
+        boolean committed = false;
         try {
-            /*
-             * Load
-             */
-            con.setAutoCommit(false);
-            committed = false;
-            final long now = System.currentTimeMillis();
-            int pos = 1;
-            if (exists) {
-                /*
-                 * Update
-                 */
-                stmt = con.prepareStatement("UPDATE preview SET refId = ?, size = ?, createdAt = ?, fileName = ?, fileType = ? WHERE cid = ? AND user = ? AND id = ?");
-                stmt.setString(pos++, refId);
-                stmt.setLong(pos++, bytes.length);
-                stmt.setLong(pos++, now);
-                if (null == optName) {
-                    stmt.setNull(pos++, Types.VARCHAR);
-                } else {
-                    stmt.setString(pos++, optName);
-                }
-                if (null == optType) {
-                    stmt.setNull(pos++, Types.VARCHAR);
-                } else {
-                    stmt.setString(pos++, optType);
-                }
-                stmt.setLong(pos++, contextId);
-                stmt.setLong(pos++, userId);
-                stmt.setString(pos++, id);
+            Databases.startTransaction(con);
+            refId = fileStorage.saveNewFile(Streams.newByteArrayInputStream(bytes));
+            ResourceCacheMetadata metadata = new ResourceCacheMetadata();
+            metadata.setContextId(contextId);
+            metadata.setUserId(userId);
+            metadata.setResourceId(id);
+            metadata.setFileName(optName);
+            metadata.setFileType(optType);
+            metadata.setSize(bytes.length);
+            metadata.setCreatedAt(System.currentTimeMillis());
+            metadata.setRefId(refId);
+            if (existingMetadata == null) {
+                metadataStore.store(con, metadata);
             } else {
-                /*
-                 * Insert
-                 */
-                stmt = con.prepareStatement("INSERT INTO preview (cid, user, id, size, createdAt, refId, fileName, fileType) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-                stmt.setLong(pos++, contextId);
-                stmt.setLong(pos++, userId);
-                stmt.setString(pos++, id);
-                stmt.setLong(pos++, bytes.length);
-                stmt.setLong(pos++, now);
-                stmt.setString(pos++, refId);
-                if (null == optName) {
-                    stmt.setNull(pos++, Types.VARCHAR);
-                } else {
-                    stmt.setString(pos++, optName);
-                }
-                if (null == optType) {
-                    stmt.setNull(pos++, Types.VARCHAR);
-                } else {
-                    stmt.setString(pos++, optType);
-                }
+                metadataStore.update(con, metadata);
             }
-            stmt.executeUpdate();
             con.commit();
             committed = true;
             return true;
@@ -274,227 +190,75 @@ public final class FileStoreResourceCacheImpl implements ResourceCache, EventHan
         } catch (final SQLException e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
-            if (!committed) {
-                Databases.rollback(con);
-            }
-            Databases.closeSQLStuff(stmt);
-            Databases.autocommit(con);
             if (committed) {
-                databaseService.backWritable(contextId, con);
-            } else {
-                databaseService.backWritableAfterReading(contextId, con);
-            }
-        }
-    }
-
-    @Override
-    public long[] getContextQuota(final int contextId) {
-        long quota = -1L;
-        long quotaPerDocument = -1L;
-
-        // TODO: Check context-wise quota values
-
-        final ConfigurationService confService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-        if (null != confService) {
-            String property = confService.getProperty("com.openexchange.preview.cache.quota", "10485760").trim();
-            try {
-                quota = Long.parseLong(property);
-            } catch (final NumberFormatException e) {
-                quota = -1L;
-            }
-            property = confService.getProperty("com.openexchange.preview.cache.quotaPerDocument", "524288").trim();
-            try {
-                quotaPerDocument = Long.parseLong(property);
-            } catch (final NumberFormatException e) {
-                quotaPerDocument = -1L;
-            }
-        }
-        return new long[] { quota, quotaPerDocument };
-    }
-
-    @Override
-    public boolean ensureUnexceededContextQuota(final long desiredSize, final long total, final long totalPerDocument, final int contextId, final String ignoree) throws OXException {
-        if (total <= 0L) {
-            // Unlimited total quota
-            return (totalPerDocument <= 0 || desiredSize <= totalPerDocument);
-        }
-        // Check if document's size fits into quota limits at all
-        if (desiredSize > total || desiredSize > totalPerDocument) {
-            return false;
-        }
-        // Try to create space through removing oldest entries
-        // until enough space is available
-        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        if (dbService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        }
-        Connection con = dbService.getReadOnly(contextId);
-        boolean readOnly = true;
-        try {
-            long usedContextQuota = getUsedContextQuota(contextId, ignoree, con);
-            if (usedContextQuota <= 0 && desiredSize > total) {
-                return false;
-            }
-            while (usedContextQuota + desiredSize > total) {
-                // Upgrade to writable connection
-                if (readOnly) {
-                    dbService.backReadOnly(contextId, con);
-                    con = dbService.getWritable(contextId);
-                    readOnly = false;
-                }
-                // Drop oldest entry
-                dropOldestEntry(contextId, con);
-                // Re-Calculate used quota
-                usedContextQuota = getUsedContextQuota(contextId, ignoree, con);
-                if (usedContextQuota <= 0 && desiredSize > total) {
-                    return false;
-                }
-            }
-            return true;
-        } finally {
-            if (readOnly) {
-                dbService.backReadOnly(contextId, con);
-            } else {
+                Databases.autocommit(con);
                 dbService.backWritable(contextId, con);
-            }
-        }
-    }
-
-    private void dropOldestEntry(final int contextId, final Connection con) throws OXException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT MIN(createdAt) FROM preview WHERE cid = ?");
-            stmt.setLong(1, contextId);
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return;
-            }
-            final long oldestStamp = rs.getLong(1);
-            if (rs.wasNull()) {
-                return;
-            }
-            Databases.closeSQLStuff(rs, stmt);
-            rs = null;
-            stmt = null;
-            // Delete entry
-            stmt = con.prepareStatement("SELECT id, refId FROM preview WHERE cid = ? AND createdAt <= ?");
-            stmt.setLong(1, contextId);
-            stmt.setLong(2, oldestStamp);
-            rs = stmt.executeQuery();
-            final Map<String, String> map = new HashMap<String, String>(16);
-            while (rs.next()) {
-                map.put(rs.getString(1), rs.getString(2));
-            }
-            Databases.closeSQLStuff(rs, stmt);
-            rs = null;
-            stmt = null;
-            if (!map.isEmpty()) {
-                stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND createdAt <= ?");
-                stmt.setLong(1, contextId);
-                stmt.setLong(2, oldestStamp);
-                stmt.executeUpdate();
-
-                // Remove from file storage
-                final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
-                batchDeleteFiles(map.values(), fileStorage);
-            }
-        } catch (final SQLException e) {
-            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-        }
-    }
-
-    private long getUsedContextQuota(final int contextId, final String ignoree, final Connection con) throws OXException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            if (null == ignoree) {
-                stmt = con.prepareStatement("SELECT SUM(size) FROM preview WHERE cid = ?");
-                stmt.setLong(1, contextId);
+                if (existingMetadata != null) {
+                    try {
+                        if (!fileStorage.deleteFile(existingMetadata.getRefId())) {
+                            LOG.warn("Could not remove stored file '{}' after updating cached resource. Consider using 'checkconsistency' to clean up the filestore.", existingMetadata.getRefId());
+                        }
+                    } catch (OXException e) {
+                        LOG.warn("Could not remove stored file '{}' after updating cached resource. Consider using 'checkconsistency' to clean up the filestore.", existingMetadata.getRefId(), e);
+                    }
+                }
             } else {
-                stmt = con.prepareStatement("SELECT SUM(size) FROM preview WHERE cid = ? AND id <> ?");
-                stmt.setLong(1, contextId);
-                stmt.setString(2, ignoree);
+                if (con != null) {
+                    try {
+                        con.rollback();
+                    } catch (SQLException e) {
+                        LOG.warn("Could not rollback database transaction after failing to cache a resource. Consider using 'checkconsistency' to clean up the database.");
+                    }
+                    Databases.autocommit(con);
+                    dbService.backWritableAfterReading(contextId, con);
+                }
+
+                try {
+                    if (refId != null && !fileStorage.deleteFile(refId)) {
+                        LOG.warn("Could not remove stored file '{}' during transaction rollback. Consider using 'checkconsistency' to clean up the filestore.", refId);
+                    }
+                } catch (OXException e) {
+                    LOG.warn("Could not remove stored file '{}' during transaction rollback. Consider using 'checkconsistency' to clean up the filestore.", refId, e);
+                }
             }
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return 0L;
-            }
-            if (rs.wasNull()) {
-                return 0L;
-            }
-            return rs.getLong(1);
-        } catch (final SQLException e) {
-            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
         }
+    }
+
+    @Override
+    public void remove(final int userId, final int contextId) throws OXException {
+        ResourceCacheMetadataStore metadataStore = getMetadataStore();
+        FileStorage fileStorage = getFileStorage(contextId, quotaAware);
+        List<ResourceCacheMetadata> removed = metadataStore.removeAll(contextId, userId);
+        List<String> refIds = new ArrayList<String>();
+        for (ResourceCacheMetadata metadata : removed) {
+            if (metadata.getRefId() != null) {
+                refIds.add(metadata.getRefId());
+            }
+        }
+        batchDeleteFiles(refIds, fileStorage);
+    }
+
+    @Override
+    public void removeAlikes(final String id, final int userId, final int contextId) throws OXException {
+        if (null == id) {
+            throw PreviewExceptionCodes.ERROR.create("Missing identifier.");
+        }
+
+        ResourceCacheMetadataStore metadataStore = getMetadataStore();
+        FileStorage fileStorage = getFileStorage(contextId, quotaAware);
+        List<ResourceCacheMetadata> removed = metadataStore.removeAll(contextId, userId, id);
+        List<String> refIds = new ArrayList<String>();
+        for (ResourceCacheMetadata metadata : removed) {
+            if (metadata.getRefId() != null) {
+                refIds.add(metadata.getRefId());
+            }
+        }
+        batchDeleteFiles(refIds, fileStorage);
     }
 
     @Override
     public void clearFor(final int contextId) throws OXException {
-        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        if (dbService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        }
-        final Connection con = dbService.getWritable(contextId);
-        boolean changed = false;
-        try {
-            changed = clearFor(contextId, con);
-        } finally {
-            if (changed) {
-                dbService.backWritable(contextId, con);
-            } else {
-                dbService.backWritableAfterReading(contextId, con);
-            }
-        }
-    }
-
-    private boolean clearFor(final int contextId, final Connection con) throws OXException {
-        boolean changed = false;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        boolean rollback = false;
-        try {
-            Databases.startTransaction(con);
-            rollback = true;
-
-            stmt = con.prepareStatement("SELECT id, refId FROM preview WHERE cid=?");
-            stmt.setInt(1, contextId);
-            rs = stmt.executeQuery();
-            final Map<String, String> map = new HashMap<String, String>(16);
-            while (rs.next()) {
-                map.put(rs.getString(1), rs.getString(2));
-            }
-            Databases.closeSQLStuff(rs, stmt);
-            rs = null;
-            stmt = null;
-
-            if (!map.isEmpty()) {
-                stmt = con.prepareStatement("DELETE FROM preview WHERE cid=?");
-                stmt.setInt(1, contextId);
-                stmt.executeUpdate();
-                changed = true;
-
-                // Remove from file storage
-                final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
-                batchDeleteFiles(map.values(), fileStorage);
-            }
-
-            con.commit();
-            rollback = false;
-        } catch (final SQLException e) {
-            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
-        } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
-            Databases.autocommit(con);
-            Databases.closeSQLStuff(rs, stmt);
-        }
-        return changed;
+        remove(-1, contextId);
     }
 
     @Override
@@ -502,204 +266,22 @@ public final class FileStoreResourceCacheImpl implements ResourceCache, EventHan
         if (null == id || contextId <= 0) {
             return null;
         }
-        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        if (dbService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        }
-        final Connection con = dbService.getReadOnly(contextId);
-        try {
-            return load(id, userId, contextId, con);
-        } finally {
-            dbService.backReadOnly(contextId, con);
-        }
-    }
 
-    private CachedResource load(final String id, final int userId, final int contextId, final Connection con) throws OXException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            if (userId > 0) {
-                // A user-sensitive document
-                stmt = con.prepareStatement("SELECT refId, fileName, fileType, size FROM preview WHERE cid = ? AND user = ? AND id = ?");
-                stmt.setLong(1, contextId);
-                stmt.setLong(2, userId);
-                stmt.setString(3, id);
-            } else {
-                // A context-global document
-                stmt = con.prepareStatement("SELECT refId, fileName, fileType, size FROM preview WHERE cid = ? AND id = ?");
-                stmt.setLong(1, contextId);
-                stmt.setString(2, id);
-            }
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return null;
-            }
-            final String refIf = rs.getString(1);
-            final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
-            return new CachedResource(fileStorage.getFile(refIf), rs.getString(2), rs.getString(3), rs.getLong(4));
-        } catch (final SQLException e) {
-            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-        }
-    }
-
-    @Override
-    public void remove(final int userId, final int contextId) throws OXException {
-        final DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        if (databaseService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        }
-        final Connection con = databaseService.getWritable(contextId);
-
-        boolean rollback = false;
-        boolean deletePerformed = false;
-        boolean transactionInitiated = false;
-
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            // Determine entries to remove
-            if (userId > 0) {
-                stmt = con.prepareStatement("SELECT id, refId FROM preview WHERE cid=? AND user=?");
-                int pos = 1;
-                stmt.setInt(pos++, contextId);
-                stmt.setInt(pos, userId);
-            } else {
-                stmt = con.prepareStatement("SELECT id, refId FROM preview WHERE cid=?");
-                stmt.setInt(1, contextId);
-            }
-            rs = stmt.executeQuery();
-            final Map<String, String> map = new HashMap<String, String>(16);
-            while (rs.next()) {
-                map.put(rs.getString(1), rs.getString(2));
-            }
-            Databases.closeSQLStuff(rs, stmt);
-            rs = null;
-            stmt = null;
-
-            if (!map.isEmpty()) {
-                Databases.startTransaction(con);
-                rollback = true;
-                transactionInitiated = true;
-
-                // Remove from database
-                if (userId > 0) {
-                    stmt = con.prepareStatement("DELETE FROM preview WHERE cid=? AND user=?");
-                    int pos = 1;
-                    stmt.setInt(pos++, contextId);
-                    stmt.setInt(pos, userId);
-                } else {
-                    stmt = con.prepareStatement("DELETE FROM preview WHERE cid=?");
-                    stmt.setInt(1, contextId);
-                }
-                stmt.executeUpdate();
-                deletePerformed = true;
-                con.commit();
-                rollback = false;
-
-                // Remove from file storage
-                final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
-                batchDeleteFiles(map.values(), fileStorage);
-            }
-
-        } catch (final DataTruncation e) {
-            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
-        } catch (final SQLException e) {
-            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
-        } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
-            Databases.closeSQLStuff(rs, stmt);
-            if (transactionInitiated) {
-                Databases.autocommit(con);
-            }
-            if (deletePerformed) {
-                databaseService.backWritable(contextId, con);
-            } else {
-                databaseService.backWritableAfterReading(contextId, con);
-            }
-        }
-    }
-
-    @Override
-    public void removeAlikes(final String id, final int userId, final int contextId) throws OXException {
-        final DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        if (databaseService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        }
-        if (null == id) {
-            throw PreviewExceptionCodes.ERROR.create("Missing identifier.");
+        ResourceCacheMetadataStore metadataStore = getMetadataStore();
+        FileStorage fileStorage = getFileStorage(contextId, quotaAware);
+        ResourceCacheMetadata metadata = metadataStore.load(contextId, userId, id);
+        if (metadata == null) {
+            return null;
         }
 
-        final Connection con = databaseService.getWritable(contextId);
-
-        boolean rollback = false;
-        boolean deletePerformed = false;
-        boolean transactionInitiated = false;
-
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            // Determine entries to remove
-            stmt = con.prepareStatement("SELECT id, refId FROM preview WHERE cid=? AND user=? AND id LIKE ?");
-            int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
-            stmt.setString(pos, id + "%");
-            rs = stmt.executeQuery();
-            final Map<String, String> map = new HashMap<String, String>(16);
-            while (rs.next()) {
-                map.put(rs.getString(1), rs.getString(2));
-            }
-            Databases.closeSQLStuff(rs, stmt);
-            rs = null;
-            stmt = null;
-
-            if (!map.isEmpty()) {
-                Databases.startTransaction(con);
-                rollback = true;
-                transactionInitiated = true;
-
-                // Remove from database
-                stmt = con.prepareStatement("DELETE FROM preview WHERE cid=? AND user=? AND id=?");
-                pos = 1;
-                stmt.setInt(pos++, contextId);
-                stmt.setInt(pos++, userId);
-                for (final String currentId : map.keySet()) {
-                    stmt.setString(pos, currentId);
-                    stmt.addBatch();
-                }
-                stmt.executeBatch();
-                deletePerformed = true;
-                con.commit();
-                rollback = false;
-
-                // Remove from file storage
-                final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
-                batchDeleteFiles(map.values(), fileStorage);
-            }
-        } catch (final DataTruncation e) {
-            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
-        } catch (final SQLException e) {
-            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
-        } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
-            Databases.closeSQLStuff(rs, stmt);
-            if (transactionInitiated) {
-                Databases.autocommit(con);
-            }
-            if (deletePerformed) {
-                databaseService.backWritable(contextId, con);
-            } else {
-                databaseService.backWritableAfterReading(contextId, con);
-            }
+        if (metadata.getRefId() == null) {
+            // drop invalid entry
+            metadataStore.remove(contextId, userId, id);
+            return null;
         }
+
+        InputStream file = fileStorage.getFile(metadata.getRefId());
+        return new CachedResource(file, metadata.getFileName(), metadata.getFileType(), metadata.getSize());
     }
 
     @Override
@@ -707,107 +289,96 @@ public final class FileStoreResourceCacheImpl implements ResourceCache, EventHan
         if (null == id || contextId <= 0) {
             return false;
         }
-        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        if (dbService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
+
+        FileStorage fileStorage = getFileStorage(contextId, quotaAware);
+        ResourceCacheMetadataStore metadataStore = getMetadataStore();
+        ResourceCacheMetadata metadata = metadataStore.load(contextId, userId, id);
+        if (metadata == null) {
+            return false;
         }
-        final Connection con = dbService.getReadOnly(contextId);
+
+        if (metadata.getRefId() == null) {
+            // drop invalid entry
+            metadataStore.remove(contextId, userId, id);
+            return false;
+        }
+
         try {
-            return null != optRefId(id, userId, contextId, con);
-        } finally {
-            dbService.backReadOnly(contextId, con);
+            Streams.close(fileStorage.getFile(metadata.getRefId()));
+        } catch (final OXException e) {
+            if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                throw e;
+            }
+
+            metadataStore.remove(contextId, userId, id);
+            return false;
         }
+
+        return true;
     }
 
-    private String optRefId(final String id, final int userId, final int contextId) throws OXException {
-        if (null == id || contextId <= 0) {
-            return null;
-        }
-        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        if (dbService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        }
-        final Connection con = dbService.getReadOnly(contextId);
-        try {
-            return optRefId(id, userId, contextId, con);
-        } finally {
-            dbService.backReadOnly(contextId, con);
-        }
-    }
+    private boolean ensureUnexceededContextQuota(final Connection con, final long desiredSize, final int contextId, final long existingSize) throws OXException {
+        final ResourceCacheMetadataStore metadataStore = getMetadataStore();
+        final long[] qts = getContextQuota(contextId);
+        final long total = qts[0];
+        final long totalPerDocument = qts[1];
+        if (total > 0L || totalPerDocument > 0L) {
+            if (total <= 0L) {
+                return (totalPerDocument <= 0 || desiredSize <= totalPerDocument);
+            }
 
-    private String optRefId(final String id, final int userId, final int contextId, final Connection con) throws OXException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            if (userId > 0) {
-                // A user-sensitive document
-                stmt = con.prepareStatement("SELECT refId FROM preview WHERE cid = ? AND user = ? AND id = ?");
-                stmt.setLong(1, contextId);
-                stmt.setLong(2, userId);
-                stmt.setString(3, id);
-            } else {
-                // A context-global document
-                stmt = con.prepareStatement("SELECT refId FROM preview WHERE cid = ? AND id = ?");
-                stmt.setLong(1, contextId);
-                stmt.setString(2, id);
+            // Check if document's size fits into quota limits at all
+            if (desiredSize > total || desiredSize > totalPerDocument) {
+                return false;
             }
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return null;
-            }
-            final String refId = rs.getString(1);
-            if (null == refId) {
-                // Drop incomplete entry
-                dropFromTable(id, userId, contextId);
-                return null;
-            }
-            // Try to load to ensure existence
-            final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
+
+            // Try to create space through removing oldest entries
+            // until enough space is available
+            List<ResourceCacheMetadata> toRemove = new ArrayList<ResourceCacheMetadata>();
+            boolean commited = false;
             try {
-                Streams.close(fileStorage.getFile(refId));
-            } catch (final OXException e) {
-                if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
-                    throw e;
-                }
-                dropFromTable(id, userId, contextId);
-                return null;
-            }
-            return refId;
-        } catch (final SQLException e) {
-            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-        }
-    }
+                Databases.startTransaction(con);
+                long usedContextQuota = metadataStore.getUsedSize(con, contextId) - existingSize;
+                while (usedContextQuota + desiredSize > total) {
+                    ResourceCacheMetadata metadata = metadataStore.removeOldest(con, contextId);
+                    if (metadata == null) {
+                        return false;
+                    }
 
-    private void dropFromTable(final String id, final int userId, final int contextId) {
-        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        if (dbService != null) {
-            Connection con = null;
-            PreparedStatement stmt = null;
-            try {
-                con = dbService.getWritable(contextId);
-                if (userId > 0) {
-                    // A user-sensitive document
-                    stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND user = ? AND id = ?");
-                    stmt.setLong(1, contextId);
-                    stmt.setLong(2, userId);
-                    stmt.setString(3, id);
-                } else {
-                    // A context-global document
-                    stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND id = ?");
-                    stmt.setLong(1, contextId);
-                    stmt.setString(2, id);
+                    toRemove.add(metadata);
+                    usedContextQuota = metadataStore.getUsedSize(con, contextId) - existingSize;
+                    if (usedContextQuota <= 0 && desiredSize > total) {
+                        return false;
+                    }
                 }
-                stmt.executeUpdate();
-            } catch (final Exception e) {
-                // Ignore
+                con.commit();
+                commited = true;
+            } catch (SQLException e) {
+                throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
             } finally {
-                Databases.closeSQLStuff(stmt);
-                if (null != con) {
-                    dbService.backWritable(contextId, con);
+                if (commited) {
+                    deleteResources(contextId, toRemove);
+                } else {
+                    Databases.rollback(con);
                 }
+
+                Databases.autocommit(con);
             }
+        }
+
+        return true;
+    }
+
+    private void deleteResources(int contextId, List<ResourceCacheMetadata> toRemove) throws OXException {
+        List<String> refIds = new ArrayList<String>(toRemove.size());
+        for (ResourceCacheMetadata metadata : toRemove) {
+            if (metadata.getRefId() != null) {
+                refIds.add(metadata.getRefId());
+            }
+        }
+
+        if (refIds.size() > 0) {
+            batchDeleteFiles(refIds, getFileStorage(contextId, quotaAware));
         }
     }
 

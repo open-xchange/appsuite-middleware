@@ -51,38 +51,190 @@ package com.openexchange.admin.console;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import com.openexchange.admin.rmi.AbstractRMITest;
 
 /**
  * @author d7
  */
-public class StatisticToolsTest extends AbstractTest {
+public class StatisticToolsTest extends AbstractRMITest {
+
+    private int returnCodeXchange;
+
+    private int returnCodeAll;
+
+    private int returnCodeThreadpool;
+
+    private int returnCodeRuntime;
+
+    private int returnCodeOs;
+
+    private int returnCodeThreading;
+
+    private int returnCodeShowOperations;
+
+    private int returnCodeMemory;
+
+    private int returnCodeGc;
+
+    private int returnCodeMemoryFull;
+
+    private int returnCodeDocumentconverter;
+
+    private int returnCodeOffice;
 
     @Test
-    public void testgetServerStats() {
-        resetBuffers();
+    public void testGetXchangeStats() {
         final StatisticTools statisticTools = new StatisticTools() {
 
             @Override
             protected void sysexit(int exitCode) {
-                StatisticToolsTest.this.returnCode = exitCode;
+                StatisticToolsTest.this.returnCodeXchange = exitCode;
             }
         };
-        statisticTools.start(new String[] { "-x" }, "showruntimestats");
-        assertEquals("Expected 0 as return code!", 0, this.returnCode);
+        statisticTools.start(new String[] { "-x", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeXchange);
     }
 
     @Test
-    public void testgetAdminStats() {
-        resetBuffers();
+    public void testGetAllStats() {
         final StatisticTools statisticTools = new StatisticTools() {
 
             @Override
             protected void sysexit(int exitCode) {
-                StatisticToolsTest.this.returnCode = exitCode;
+                StatisticToolsTest.this.returnCodeAll = exitCode;
             }
         };
-        statisticTools.start(new String[] { "-x", "-A" }, "showruntimestats");
-        assertEquals("Expected 0 as return code!", 0, this.returnCode);
+        statisticTools.start(new String[] { "-a", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeAll);
     }
 
+    @Test
+    public void testGetThreadpoolstats() {
+        final StatisticTools statisticTools = new StatisticTools() {
+
+            @Override
+            protected void sysexit(int exitCode) {
+                StatisticToolsTest.this.returnCodeThreadpool = exitCode;
+            }
+        };
+        statisticTools.start(new String[] { "-p", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeThreadpool);
+    }
+
+    @Test
+    public void testGetRuntimestats() {
+        final StatisticTools statisticTools = new StatisticTools() {
+
+            @Override
+            protected void sysexit(int exitCode) {
+                StatisticToolsTest.this.returnCodeRuntime = exitCode;
+            }
+        };
+        statisticTools.start(new String[] { "-r", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeRuntime);
+    }
+
+    @Test
+    public void testGetOsstats() {
+        final StatisticTools statisticTools = new StatisticTools() {
+
+            @Override
+            protected void sysexit(int exitCode) {
+                StatisticToolsTest.this.returnCodeOs = exitCode;
+            }
+        };
+        statisticTools.start(new String[] { "-o", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeOs);
+    }
+
+    @Test
+    public void testGetThreadingstats() {
+        final StatisticTools statisticTools = new StatisticTools() {
+
+            @Override
+            protected void sysexit(int exitCode) {
+                StatisticToolsTest.this.returnCodeThreading = exitCode;
+            }
+        };
+        statisticTools.start(new String[] { "-t", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeThreading);
+    }
+
+    @Test
+    public void testGetShowoperationsstats() {
+        final StatisticTools statisticTools = new StatisticTools() {
+
+            @Override
+            protected void sysexit(int exitCode) {
+                StatisticToolsTest.this.returnCodeShowOperations = exitCode;
+            }
+        };
+        statisticTools.start(new String[] { "-s", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeShowOperations);
+    }
+
+    @Test
+    public void testGetMemory() {
+        final StatisticTools statisticTools = new StatisticTools() {
+
+            @Override
+            protected void sysexit(int exitCode) {
+                StatisticToolsTest.this.returnCodeMemory = exitCode;
+            }
+        };
+        statisticTools.start(new String[] { "-m", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeMemory);
+    }
+
+    @Test
+    public void testGetGcstats() {
+        final StatisticTools statisticTools = new StatisticTools() {
+
+            @Override
+            protected void sysexit(int exitCode) {
+                StatisticToolsTest.this.returnCodeGc = exitCode;
+            }
+        };
+        statisticTools.start(new String[] { "-z", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeGc);
+    }
+
+    @Test
+    public void testGetMemoryFullstats() {
+        final StatisticTools statisticTools = new StatisticTools() {
+
+            @Override
+            protected void sysexit(int exitCode) {
+                StatisticToolsTest.this.returnCodeMemoryFull = exitCode;
+            }
+        };
+        statisticTools.start(new String[] { "-M", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeMemoryFull);
+    }
+
+    @Test
+    public void testGetDocumentconverterstats() {
+        final StatisticTools statisticTools = new StatisticTools() {
+
+            @Override
+            protected void sysexit(int exitCode) {
+                StatisticToolsTest.this.returnCodeDocumentconverter = exitCode;
+            }
+        };
+        statisticTools.start(new String[] { "-y", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeDocumentconverter);
+    }
+
+    @Test
+    public void testGetOfficestats() {
+        final StatisticTools statisticTools = new StatisticTools() {
+
+            @Override
+            protected void sysexit(int exitCode) {
+                StatisticToolsTest.this.returnCodeOffice = exitCode;
+            }
+        };
+        statisticTools.start(new String[] { "-f", "-H", getRMIHost() }, "showruntimestats");
+        assertEquals("Expected 0 as return code!", 0, this.returnCodeOffice);
+    }
 }

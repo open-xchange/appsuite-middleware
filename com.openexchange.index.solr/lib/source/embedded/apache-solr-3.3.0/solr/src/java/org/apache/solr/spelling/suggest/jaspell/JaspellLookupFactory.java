@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * Factory for {@link JaspellLookup}
  */
 public class JaspellLookupFactory extends LookupFactory {
-  private static final Logger LOG = LoggerFactory.getLogger(JaspellLookup.class);
+  private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(JaspellLookup.class);
 
   @Override
   public Lookup create(NamedList params, SolrCore core) {

@@ -50,7 +50,7 @@
 package com.openexchange.appsuite.osgi;
 
 import java.io.File;
-import org.apache.commons.logging.Log;
+import java.text.MessageFormat;
 import org.osgi.framework.BundleException;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.requesthandler.Dispatcher;
@@ -90,12 +90,12 @@ public class Activator extends HousekeepingActivator {
         HttpService service = getService(HttpService.class);
         service.registerServlet(prefix + "apps/load", new AppsLoadServlet(apps, zoneinfo), null, null);
 
-        final Log logger = com.openexchange.log.Log.loggerFor(Activator.class);
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(Activator.class);
         StringBuilder sb = new StringBuilder();
         for (File app : apps) {
             sb.append(':');
             sb.append(app.getPath());
         }
-        logger.info("Servlet path \"apps/load\" successfully registered with \"apps\"=" + sb.substring(1) + " and \"zoneinfo\"=" + zoneinfo.getPath());
+        logger.info("Servlet path \"apps/load\" successfully registered with \"apps\"={} and \"zoneinfo\"={}", sb.substring(1), zoneinfo.getPath());
     }
 }

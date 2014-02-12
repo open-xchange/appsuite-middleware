@@ -97,7 +97,6 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.http.server.Response;
@@ -115,7 +114,7 @@ import org.osgi.service.http.HttpContext;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class OSGiResourceHandler extends HttpHandler implements OSGiHandler {
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(OSGiResourceHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OSGiResourceHandler.class);
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private final String alias;
     private final String prefix;
@@ -144,23 +143,22 @@ public class OSGiResourceHandler extends HttpHandler implements OSGiHandler {
     @Override
     public void service(Request request, Response response) throws Exception {
         String requestURI = request.getDecodedRequestURI();
-        LOG.debug(new StringBuilder(128).append("OSGiResourceHandler requestURI: ").append(requestURI).toString());
+        LOG.debug("OSGiResourceHandler requestURI: {}", requestURI);
         String path = requestURI.replaceFirst(alias, prefix);
         try {
             // authentication
             if (!authenticate(request, response, new OSGiServletContext(httpContext))) {
-                LOG.debug("OSGiResourceHandler Request not authenticated (" + requestURI + ").");
+                LOG.debug("OSGiResourceHandler Request not authenticated ({}).", requestURI);
                 return;
             }
         } catch (IOException e) {
-            LOG.warn("Error while authenticating request: " + request, e);
+            LOG.warn("Error while authenticating request: {}", request, e);
         }
 
         // find resource
         URL resource = httpContext.getResource(path);
         if (resource == null) {
-            LOG.debug(new StringBuilder(128).append("OSGiResourceHandler \'").append(alias).append("\' Haven't found '").append(path)
-                    .append("'.").toString());
+            LOG.debug("OSGiResourceHandler \'{}\' Haven't found '{}'.", alias, path);
             response.setStatus(404);
             return;
         } else {
@@ -191,7 +189,7 @@ public class OSGiResourceHandler extends HttpHandler implements OSGiHandler {
             os.flush();
             response.finish();
             if (total != length) {
-                LOG.warn("Was supposed to send " + length + ", but sent " + total);
+                LOG.warn("Was supposed to send {}, but sent {}", length, total);
             }
         } catch (IOException e) {
             LOG.warn("", e);

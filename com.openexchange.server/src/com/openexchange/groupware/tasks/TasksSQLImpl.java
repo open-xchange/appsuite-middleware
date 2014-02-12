@@ -52,7 +52,6 @@ package com.openexchange.groupware.tasks;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -61,7 +60,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -72,7 +70,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class TasksSQLImpl implements TasksSQLInterface {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TasksSQLImpl.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TasksSQLImpl.class);
 
     private final Session session;
 
@@ -286,7 +284,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
             try {
                 tasks.add(get.loadAndCheck());
             } catch (final OXException e) {
-                LOG.debug(e.getMessage(), e);
+                LOG.debug("", e);
             }
         }
         return new ArrayIterator<Task>(tasks.toArray(new Task[tasks.size()]));

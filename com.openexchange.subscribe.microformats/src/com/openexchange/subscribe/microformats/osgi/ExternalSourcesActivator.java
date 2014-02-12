@@ -51,10 +51,8 @@ package com.openexchange.subscribe.microformats.osgi;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.external.ExternalSubscriptionSourceDiscoveryService;
@@ -71,7 +69,7 @@ import com.openexchange.timer.TimerService;
  */
 public class ExternalSourcesActivator extends HousekeepingActivator {
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExternalSourcesActivator.class));
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExternalSourcesActivator.class);
 
     private static final String SOURCES_LIST = "com.openexchange.subscribe.external.sources";
 
@@ -131,7 +129,7 @@ public class ExternalSourcesActivator extends HousekeepingActivator {
                         try {
                             service.refresh();
                         } catch (final OXException x) {
-                            LOG.error(x.getMessage(), x);
+                            LOG.error("", x);
                         }
                     }
                 }

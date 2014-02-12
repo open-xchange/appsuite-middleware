@@ -24,7 +24,6 @@
 //--------------------------------------
 package org.xerial.snappy;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
+import com.openexchange.java.Streams;
 
 /**
  * <b>Internal only - Do not use this class.</b> This class loads a native
@@ -332,7 +332,7 @@ public class SnappyLoader
      * @throws NoSuchAlgorithmException
      */
     static String md5sum(InputStream input) throws IOException {
-        BufferedInputStream in = new BufferedInputStream(input);
+        InputStream in = Streams.bufferedInputStreamFor(input);
         try {
             MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
             DigestInputStream digestInputStream = new DigestInputStream(in, digest);
@@ -347,7 +347,7 @@ public class SnappyLoader
             throw new IllegalStateException("MD5 algorithm is not available: " + e);
         }
         finally {
-            in.close();
+            Streams.close(input);
         }
     }
 

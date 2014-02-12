@@ -91,13 +91,11 @@
 
 package com.openexchange.http.grizzly.service.http;
 
-import static java.text.MessageFormat.format;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.EventListener;
-import org.apache.commons.logging.Log;
 import org.glassfish.grizzly.http.server.util.MimeType;
 import org.glassfish.grizzly.servlet.WebappContext;
 import org.osgi.service.http.HttpContext;
@@ -109,7 +107,7 @@ import org.osgi.service.http.HttpContext;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class OSGiServletContext extends WebappContext {
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(OSGiServletContext.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OSGiServletContext.class);
     /**
      * {@link HttpContext} providing OSGi integration.
      */
@@ -157,14 +155,14 @@ public class OSGiServletContext extends WebappContext {
 
         URL resource = httpContext.getResource(path);
         if(resource == null) {
-            LOG.warn(format("Error getting resource ''{0}''. Message: {1}", path, "Can't locate resource."));
+            LOG.warn("Error getting resource ''{}''. Message: {}", path, "Can't locate resource.");
             return null;
         }
 
         try {
             return httpContext.getResource(path).openStream();
         } catch (IOException e) {
-            LOG.warn(format("Error getting resource ''{0}''. Message: {1}", path, e.getMessage()));
+            LOG.warn("Error getting resource ''{}''. Message: {}", path, e.getMessage());
         }
         return null;
     }

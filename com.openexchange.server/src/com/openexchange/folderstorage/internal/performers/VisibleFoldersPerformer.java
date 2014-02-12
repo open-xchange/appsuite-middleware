@@ -62,7 +62,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
-import org.apache.commons.logging.Log;
 import com.openexchange.concurrent.CallerRunsCompletionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
@@ -81,7 +80,6 @@ import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.log.LogFactory;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -94,17 +92,16 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerformer {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(VisibleFoldersPerformer.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(VisibleFoldersPerformer.class);
 
     /**
      * Initializes a new {@link VisibleFoldersPerformer} from given session.
      *
      * @param session The session
      * @param decorator The optional folder service decorator
+     * @throws OXException If passed session is invalid
      */
-    public VisibleFoldersPerformer(final ServerSession session, final FolderServiceDecorator decorator) {
+    public VisibleFoldersPerformer(final ServerSession session, final FolderServiceDecorator decorator) throws OXException {
         super(session, decorator);
     }
 
@@ -125,8 +122,9 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
      * @param session The session
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
+     * @throws OXException If passed session is invalid
      */
-    public VisibleFoldersPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public VisibleFoldersPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(session, decorator, folderStorageDiscoverer);
     }
 
@@ -179,14 +177,13 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType);
         }
-        final long start = DEBUG ? System.currentTimeMillis() : 0L;
         final boolean started = folderStorage.startTransaction(storageParameters, false);
         try {
             final List<SortableId> allSubfolderIds;
             try {
                 allSubfolderIds = Arrays.asList(folderStorage.getVisibleFolders(treeId, contentType, type, storageParameters));
             } catch (final UnsupportedOperationException e) {
-                LOG.warn("Operation is not supported for folder storage " + folderStorage.getClass().getSimpleName() + " (content-type=" + contentType.toString() + ")", e);
+                LOG.warn("Operation is not supported for folder storage {} (content-type={})", folderStorage.getClass().getSimpleName(), contentType, e);
                 return new UserizedFolder[0];
             }
             /*
@@ -233,7 +230,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
             for (final Entry<FolderStorage, TIntList> entry : map.entrySet()) {
                 final FolderStorage tmp = entry.getKey();
                 final int[] indexes = entry.getValue().toArray();
-                final Log log = LOG;
+                final org.slf4j.Logger log = LOG;
                 completionService.submit(new Callable<Object>() {
 
                     @Override
@@ -259,12 +256,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                                     addWarning(warnings.iterator().next());
                                 }
                             } catch (final OXException e) {
-                                /*
-                                 * Batch-load failed...
-                                 */
-                                if (log.isWarnEnabled()) {
-                                    log.warn("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
-                                }
+                                log.warn("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
                                 folders = null;
                             }
                             if (null == folders) {
@@ -280,10 +272,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                                     try {
                                         subfolder = tmp.getFolder(treeId, id, newParameters);
                                     } catch (final OXException e) {
-                                        log.warn(
-                                            new StringBuilder(128).append("The folder with ID \"").append(id).append("\" in tree \"").append(treeId).append(
-                                                "\" could not be fetched from storage \"").append(tmp.getClass().getSimpleName()).append('"').toString(),
-                                            e);
+                                        log.warn("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, tmp.getClass().getSimpleName(), e);
                                         addWarning(e);
                                         continue NextIndex;
                                     }
@@ -368,11 +357,6 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
              */
             if (started) {
                 folderStorage.commitTransaction(storageParameters);
-            }
-            if (DEBUG) {
-                final long duration = System.currentTimeMillis() - start;
-                LOG.debug(new StringBuilder().append("VisibleSubfoldersPerformer.doVisibleSubfolders() took ").append(duration).append(
-                    "msec").toString());
             }
             return ret;
         } catch (final OXException e) {

@@ -49,8 +49,8 @@
 
 package com.openexchange.importexport.importers;
 
+import java.text.MessageFormat;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
@@ -58,7 +58,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.osgi.ImportExportServices;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -75,7 +74,7 @@ public abstract class ContactImporter extends AbstractImporter {
         super(services);
     }
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactImporter.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactImporter.class);
 
     /**
      * Defines the maximum number of implicit retries in case of truncation errors.
@@ -103,7 +102,7 @@ public abstract class ContactImporter extends AbstractImporter {
             } catch (OXException e) {
                 if (retryCount < MAX_RETRIES && handle(e, contact)) {
                     // try again
-                    LOG.debug(e.getMessage() + " - trying again (" + retryCount + "/" + MAX_RETRIES + ")", e);
+                    LOG.debug("{} - trying again ({}/{})", e.getMessage(), retryCount, MAX_RETRIES, e);
                     continue;
                 } else {
                     // re-throw

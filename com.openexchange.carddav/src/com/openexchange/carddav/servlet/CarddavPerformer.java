@@ -51,12 +51,8 @@ package com.openexchange.carddav.servlet;
 
 import java.util.EnumMap;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.logging.Log;
-
 import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -105,7 +101,7 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
  */
 public class CarddavPerformer implements SessionHolder {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CarddavPerformer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CarddavPerformer.class);
 
     private static volatile CarddavPerformer INSTANCE = null;
 
@@ -176,7 +172,7 @@ public class CarddavPerformer implements SessionHolder {
         mkcol = prepare(new WebdavMkcolAction(), true, true, new WebdavIfAction(0, true, false));
         lock = prepare(new WebdavLockAction(), true, true, new WebdavIfAction(0, true, false));
         copy = prepare(new WebdavCopyAction(factory), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, true));
-        delete = prepare(new WebdavDeleteAction(), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false));
+        delete = prepare(new WebdavDeleteAction(), true, true, new WebdavExistsAction(), new WebdavIfMatchAction(), new WebdavIfAction(0, true, false));
         get = prepare(new WebdavGetAction(), true, false, new WebdavExistsAction(), new WebdavIfAction(0, false, false));
         head = prepare(new WebdavHeadAction(), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false));
 
@@ -186,7 +182,7 @@ public class CarddavPerformer implements SessionHolder {
         final OXWebdavMaxUploadSizeAction oxWebdavMaxUploadSize = new OXWebdavMaxUploadSizeAction();
         oxWebdavMaxUploadSize.setSessionHolder(this);
 
-        put = prepare(oxWebdavPut, false, true, oxWebdavMaxUploadSize);
+        put = prepare(oxWebdavPut, false, true, new WebdavIfMatchAction(), oxWebdavMaxUploadSize);
         trace = prepare(new WebdavTraceAction(), true, true, new WebdavIfAction(0, false, false));
 
         actions.put(Action.UNLOCK, unlock);
@@ -240,12 +236,8 @@ public class CarddavPerformer implements SessionHolder {
         final AbstractAction defaultHeader = new WebdavDefaultHeaderAction();
         final AbstractAction ifMatch = new WebdavIfMatchAction();
 
-        if (logAction.isEnabled()) {
-            lifeCycle.setNext(logAction);
-            logAction.setNext(defaultHeader);
-        } else {
-            lifeCycle.setNext(defaultHeader);
-        }
+        lifeCycle.setNext(logAction);
+        logAction.setNext(defaultHeader);
         defaultHeader.setNext(ifMatch);
         AbstractAction a = ifMatch;
         for (final AbstractAction a2 : additionals) {
@@ -292,9 +284,7 @@ public class CarddavPerformer implements SessionHolder {
 
             sess.setParameter("user-agent", req.getHeader("user-agent"));
             session.set(sess);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Executing " + action);
-            }
+            LOG.debug("Executing {}", action);
             actions.get(action).perform(webdavRequest, webdavResponse);
         } catch (final WebdavProtocolException x) {
             resp.setStatus(x.getStatus());

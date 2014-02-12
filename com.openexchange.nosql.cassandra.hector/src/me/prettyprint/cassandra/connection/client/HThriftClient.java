@@ -4,12 +4,10 @@ import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.SystemProperties;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
-
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.commons.lang.StringUtils;
@@ -17,11 +15,10 @@ import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSSLTransportFactory;
+import org.apache.thrift.transport.TSSLTransportFactory.TSSLTransportParameters;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
-import org.apache.thrift.transport.TSSLTransportFactory.TSSLTransportParameters;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /*
@@ -37,7 +34,7 @@ import org.slf4j.LoggerFactory;
 */
 public class HThriftClient implements HClient {
 
-  private static Logger log = LoggerFactory.getLogger(HThriftClient.class);
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(HThriftClient.class);
 
   private static final String NAME_FORMAT = "CassandraClient<%s-%d>";
 
@@ -80,7 +77,8 @@ public class HThriftClient implements HClient {
   /**
    * {@inheritDoc}
    */
-  public Cassandra.Client getCassandra() {
+  @Override
+public Cassandra.Client getCassandra() {
     if ( !isOpen() ) {
       throw new IllegalStateException("getCassandra called on client that was not open. You should not have gotten here.");
     }
@@ -93,11 +91,13 @@ public class HThriftClient implements HClient {
   /**
    * {@inheritDoc}
    */
-  public Cassandra.Client getCassandra(String keyspaceNameArg) {
+  @Override
+public Cassandra.Client getCassandra(String keyspaceNameArg) {
     getCassandra();
     if ( keyspaceNameArg != null && !StringUtils.equals(keyspaceName, keyspaceNameArg)) {
-      if ( log.isDebugEnabled() )
+      if ( log.isDebugEnabled() ) {
         log.debug("keyspace reseting from {} to {}", keyspaceName, keyspaceNameArg);
+    }
       try {
         cassandraClient.set_keyspace(keyspaceNameArg);
       } catch (InvalidRequestException ire) {
@@ -113,7 +113,8 @@ public class HThriftClient implements HClient {
   /**
    * {@inheritDoc}
    */
-  public HThriftClient close() {
+  @Override
+public HThriftClient close() {
     if ( log.isDebugEnabled() ) {
       log.debug("Closing client {}", this);
     }
@@ -121,12 +122,12 @@ public class HThriftClient implements HClient {
       try {
         transport.flush();
       } catch (Exception e) {
-        log.error("Could not flush transport (to be expected if the pool is shutting down) in close for client: " + toString(), e);
+        log.error("Could not flush transport (to be expected if the pool is shutting down) in close for client: {}", toString(), e);
       } finally {
         try {
           transport.close();
         } catch (Exception e) {
-          log.error("Error on transport close for client: " +toString(), e);
+          log.error("Error on transport close for client: {}", toString(), e);
         }
       }
     }
@@ -136,7 +137,8 @@ public class HThriftClient implements HClient {
   /**
    * {@inheritDoc}
    */
-  public HThriftClient open() {
+  @Override
+public HThriftClient open() {
     if ( isOpen() ) {
       throw new IllegalStateException("Open called on already open connection. You should not have gotten here.");
     }
@@ -144,15 +146,15 @@ public class HThriftClient implements HClient {
       log.debug("Creating a new thrift connection to {}", cassandraHost);
     }
 
-    TSocket socket;    
+    TSocket socket;
     try {
-        socket = params == null ? 
+        socket = params == null ?
                                 new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), timeout)
                                 : TSSLTransportFactory.getClientSocket(cassandraHost.getHost(), cassandraHost.getPort(), timeout, params);
     } catch (TTransportException e) {
         throw new HectorTransportException("Could not get client socket: ", e);
     }
-    
+
     if ( cassandraHost.getUseSocketKeepalive() ) {
       try {
         socket.getSocket().setKeepAlive(true);
@@ -172,7 +174,7 @@ public class HThriftClient implements HClient {
       } catch (TTransportException e) {
         // Thrift exceptions aren't very good in reporting, so we have to catch the exception here and
         // add details to it.
-        log.debug("Unable to open transport to " + cassandraHost.getName());
+        log.debug("Unable to open transport to {}", cassandraHost.getName());
         //clientMonitor.incCounter(Counter.CONNECT_ERROR);
         throw new HectorTransportException("Unable to open transport to " + cassandraHost.getName() +" , " +
             e.getLocalizedMessage(), e);
@@ -192,14 +194,13 @@ public class HThriftClient implements HClient {
   /**
    * {@inheritDoc}
    */
-  public boolean isOpen() {
+  @Override
+public boolean isOpen() {
     boolean open = false;
     if (transport != null) {
       open = transport.isOpen();
     }
-    if ( log.isTraceEnabled() ) {
-      log.trace("Transport open status {} for client {}", open, this);
-    }
+    log.trace("Transport open status {} for client {}", open, this);
     return open;
   }
 
@@ -231,14 +232,16 @@ public class HThriftClient implements HClient {
   /**
    * {@inheritDoc}
    */
-  public void startToUse() {
+  @Override
+public void startToUse() {
       useageStartTime = System.currentTimeMillis();
   }
 
   /**
    * {@inheritDoc}
    */
-  public long getSinceLastUsed() {
+  @Override
+public long getSinceLastUsed() {
 	  return System.currentTimeMillis() - useageStartTime;
   }
 

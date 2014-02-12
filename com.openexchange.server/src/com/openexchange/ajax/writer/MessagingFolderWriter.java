@@ -82,7 +82,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class MessagingFolderWriter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessagingFolderWriter.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MessagingFolderWriter.class);
 
     public interface JSONValuePutter {
 
@@ -561,8 +561,8 @@ public final class MessagingFolderWriter {
             final int curField = fields[i];
             final MessagingFolderFieldWriter mffw = WRITERS_MAP.get(curField);
             if (mffw == null) {
-                if (!additionalFields.knows(curField) && LOG.isWarnEnabled()) {
-                    LOG.warn("Unknown folder field: " + curField);
+                if (!additionalFields.knows(curField)) {
+                    LOG.warn("Unknown folder field: {}", curField);
                 }
 
                 final AdditionalFolderField folderField = additionalFields.get(curField);

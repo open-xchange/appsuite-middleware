@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The Open-Xchange EMiG Bundle
+Bundle-SymbolicName: com.openexchange.emig
+Bundle-Version: 7.4.2
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: com.openexchange.emig
+Import-Package: com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.log,
+ org.slf4j

@@ -53,6 +53,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import com.mortennobel.imagescaling.DimensionConstrain;
 import com.mortennobel.imagescaling.ResampleOp;
+import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.images.impl.AutoDimensionConstrain;
 import com.openexchange.tools.images.impl.ContainDimensionConstrain;
@@ -77,7 +78,7 @@ public class ScaleTransformation implements ImageTransformation {
     }
 
     @Override
-    public BufferedImage perform(BufferedImage sourceImage, ImageInformation imageInformation) throws IOException {
+    public BufferedImage perform(BufferedImage sourceImage, TransformationContext transformationContext, ImageInformation imageInformation) throws IOException {
         DimensionConstrain constrain;
         switch (scaleType) {
         case COVER:
@@ -93,6 +94,7 @@ public class ScaleTransformation implements ImageTransformation {
             constrain = new AutoDimensionConstrain(maxWidth, maxHeight);
             break;
         }
+        transformationContext.addExpense(ImageTransformations.HIGH_EXPENSE);
         return new ResampleOp(constrain).filter(sourceImage, null);
     }
 

@@ -54,7 +54,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -77,7 +76,7 @@ import com.openexchange.tools.session.ServerSession;
 public final class LoginWriter {
 
     private static final Locale DEFAULT_LOCALE = Locale.US;
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(LoginWriter.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LoginWriter.class);
 
     /**
      * Initializes a new {@link LoginWriter}.
@@ -133,7 +132,7 @@ public final class LoginWriter {
             locale = ((ServerSession) session).getUser().getLocale();
         } else {
             try {
-                locale = UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
+                locale = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getLocale();
             } catch (final Exception e) {
                 // Ignore
             }
@@ -160,7 +159,7 @@ public final class LoginWriter {
         } else {
             isRandomTokenEnabled = configurationService.getBoolProperty(ConfigurationProperty.RANDOM_TOKEN.getPropertyName(), false);
         }
-        
+
         json.put(PARAMETER_SESSION, session.getSessionID());
         if(isRandomTokenEnabled) {
             json.put(RANDOM_PARAM, session.getRandomToken());
@@ -186,7 +185,7 @@ public final class LoginWriter {
             return ((ServerSession) session).getUser().getLocale();
         }
         try {
-            return UserStorage.getStorageUser(session.getUserId(), session.getContextId()).getLocale();
+            return UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getLocale();
         } catch (final Exception e) {
             return defaultLocale;
         }

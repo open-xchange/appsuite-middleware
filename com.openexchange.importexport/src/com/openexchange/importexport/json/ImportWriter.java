@@ -51,6 +51,7 @@ package com.openexchange.importexport.json;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.json.JSONException;
@@ -98,7 +99,8 @@ public class ImportWriter extends DataWriter {
         if (importResult.hasError()) {
             final OXException exception = importResult.getException();
             final JSONObject jsonObject = new JSONObject();
-            ResponseWriter.addException(jsonObject, exception, session.getUser().getLocale());
+            final Locale locale = session.getUser().getLocale();
+            ResponseWriter.addException(jsonObject, exception, locale);
 
             jsonwriter.object();
             writeDepth1(jsonObject);
@@ -110,7 +112,7 @@ public class ImportWriter extends DataWriter {
                 for (final ConversionWarning warning : warnings) {
                     jsonwriter.object();
                     final JSONObject jsonWarning = new JSONObject();
-                    ResponseWriter.addWarning(jsonWarning, warning,  session.getUser().getLocale());
+                    ResponseWriter.addWarning(jsonWarning, warning,  locale);
                     writeDepth1(jsonWarning.getJSONObject("warnings"));
                     jsonwriter.endObject();
                 }

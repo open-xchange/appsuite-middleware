@@ -54,12 +54,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Charsets;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.encoding.Base64;
 
 /**
@@ -69,7 +67,7 @@ import com.openexchange.tools.encoding.Base64;
  */
 public class HashCalculator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HashCalculator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HashCalculator.class);
 
     private static final String USER_AGENT = LoginFields.USER_AGENT;
     private static final String CLIENT_PARAM = LoginFields.CLIENT_PARAM;
@@ -154,7 +152,7 @@ public class HashCalculator {
             }
             return PATTERN_NON_WORD_CHAR.matcher(Base64.encode(md.digest())).replaceAll("");
         } catch (final NoSuchAlgorithmException e) {
-            LOG.fatal(e.getMessage(), e);
+            LOG.error("", e);
         }
         return "";
     }
@@ -198,8 +196,8 @@ public class HashCalculator {
      * @return The calculated hash string
      */
     public String getUserAgentHash(final HttpServletRequest req, final String userAgent) {
-        final String sha256 = com.openexchange.tools.HashUtility.getSha256(null == userAgent ? getUserAgent(req) : userAgent, "hex");
-        return null == sha256 ? "" : sha256;
+        final String md5 = com.openexchange.tools.HashUtility.getMD5(null == userAgent ? getUserAgent(req) : userAgent, "hex");
+        return null == md5 ? "" : md5;
     }
 
     /**
@@ -215,12 +213,12 @@ public class HashCalculator {
     }
 
     /**
-     *  Gets the <code>"User-Agent"</code> request header or an empty String if absent.
+     * Gets the <code>"User-Agent"</code> request header or an empty String if absent.
      *
      * @param req The request
      * @return The <code>"User-Agent"</code> request header or an empty String if absent
      */
-    private static String getUserAgent(final HttpServletRequest req) {
+    public static String getUserAgent(final HttpServletRequest req) {
         final String header = req.getHeader(Header.USER_AGENT);
         if (header == null) {
             return "";

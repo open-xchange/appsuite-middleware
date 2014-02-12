@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractCluster implements Cluster {
   private static final Map<String, String> EMPTY_CREDENTIALS = Collections.emptyMap();
 
-  private final Logger log = LoggerFactory.getLogger(AbstractCluster.class);
+  private final org.slf4j.Logger log = LoggerFactory.getLogger(AbstractCluster.class);
   
   /**
    * Linked to Cassandra StorageProxy.

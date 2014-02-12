@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 public class CassandraHostRetryService extends BackgroundCassandraHostService {
 
-  private static Logger log = LoggerFactory.getLogger(CassandraHostRetryService.class);
+  private static org.slf4j.Logger log = LoggerFactory.getLogger(CassandraHostRetryService.class);
 
   public static final int DEF_QUEUE_SIZE = -1;
   public static final int DEF_RETRY_DELAY = 10;
@@ -150,7 +150,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
         // to connect to it. If the ThriftCluster is unknown to HFactory, ringInfo may not be available,
         // in which case we have no choice but to continue checking.
         if ( checkRing && ringInfo != null && !ringInfo.contains(cassandraHost)) {
-          log.info("Removing host " + cassandraHost.getName() + " - It does no longer exist in the ring.");
+          log.info("Removing host {} - It does no longer exist in the ring.", cassandraHost.getName());
           iter.remove();
           continue;
         }

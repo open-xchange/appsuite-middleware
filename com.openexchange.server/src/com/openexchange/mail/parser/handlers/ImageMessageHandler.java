@@ -79,7 +79,7 @@ import com.openexchange.version.Version;
  */
 public final class ImageMessageHandler implements MailMessageHandler {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ImageMessageHandler.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ImageMessageHandler.class);
 
     private final String cid;
 
@@ -306,7 +306,7 @@ public final class ImageMessageHandler implements MailMessageHandler {
                 throw MimeMailException.handleMessagingException(e);
             }
         } else {
-            LOG.error("Ignoring nested message. Cannot handle part's content which should be a RFC822 message according to its content type: " + (null == content ? "null" : content.getClass().getSimpleName()));
+            LOG.error("Ignoring nested message. Cannot handle part's content which should be a RFC822 message according to its content type: {}", (null == content ? "null" : content.getClass().getSimpleName()));
             return true;
         }
         final ImageMessageHandler handler = new ImageMessageHandler(cid);

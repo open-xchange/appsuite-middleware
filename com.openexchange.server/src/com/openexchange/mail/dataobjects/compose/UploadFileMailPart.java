@@ -61,6 +61,7 @@ import javax.activation.DataSource;
 import javax.mail.Part;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -70,7 +71,6 @@ import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
-import com.openexchange.java.CharsetDetector;
 
 /**
  * {@link UploadFileMailPart} - A {@link MailPart} implementation that keeps a reference to a temporary uploaded file that shall be added as
@@ -82,8 +82,8 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
 
     private static final long serialVersionUID = 257902073011243269L;
 
-    private static final transient org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UploadFileMailPart.class));
+    private static final transient org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(UploadFileMailPart.class);
 
     private final File uploadFile;
 
@@ -166,14 +166,11 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
                      */
                     final String cs = detectCharset(new FileInputStream(uploadFile));
                     getContentType().setCharsetParameter(cs);
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn(new com.openexchange.java.StringAllocator("Uploaded file contains textual content but").append(
-                            " does not specify a charset. Assumed charset is: ").append(cs).toString());
-                    }
+                    LOG.warn("Uploaded file contains textual content but does not specify a charset. Assumed charset is: {}", cs);
                 }
                 dataSource = new FileDataSource(uploadFile, getContentType().toString());
             } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 dataSource = new MessageDataSource(new byte[0], MimeTypes.MIME_APPL_OCTET);
             }
         }
@@ -189,10 +186,6 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
         return uploadFile;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.dataobjects.MailPart#getContent()
-     */
     @Override
     public Object getContent() throws OXException {
         if (cachedContent != null) {
@@ -203,10 +196,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
             if (charset == null) {
                 try {
                     charset = detectCharset(new FileInputStream(uploadFile));
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn(new com.openexchange.java.StringAllocator("Uploaded file contains textual content but").append(
-                            " does not specify a charset. Assumed charset is: ").append(charset).toString());
-                    }
+                    LOG.warn("Uploaded file contains textual content but does not specify a charset. Assumed charset is: {}", charset);
                 } catch (final FileNotFoundException e) {
                     throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                 }
@@ -227,7 +217,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
                     try {
                         fis.close();
                     } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }

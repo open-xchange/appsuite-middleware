@@ -64,14 +64,12 @@ import net.htmlparser.jericho.StartTagType;
 import net.htmlparser.jericho.StreamedSource;
 import net.htmlparser.jericho.Tag;
 import net.htmlparser.jericho.TagType;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.parser.HtmlHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 
 /**
  * {@link JerichoParser} - Parses specified real-life HTML document.
@@ -80,10 +78,10 @@ import com.openexchange.log.LogFactory;
  */
 public final class JerichoParser {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(JerichoParser.class));
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
+    /**
+     * {@link ParsingDeniedException} - Thrown if HTML content cannot be parsed by {@link JerichoParser#parse(String, JerichoHandler)}
+     * without wasting too many JVM resources.
+     */
     public static final class ParsingDeniedException extends RuntimeException {
 
         private static final long serialVersionUID = 150733382242549446L;
@@ -116,6 +114,11 @@ public final class JerichoParser {
             super(cause);
         }
 
+        @Override
+        public synchronized Throwable fillInStackTrace() {
+            return this;
+        }
+
     } // End of ParsingDeniedException
 
     private static final JerichoParser INSTANCE = new JerichoParser();
@@ -143,16 +146,21 @@ public final class JerichoParser {
     private volatile Integer maxLength;
     private int maxLength() {
         Integer i = maxLength;
-        if (null == maxLength) {
-            synchronized (JerichoParser.class) {
+        if (null == i) {
+            synchronized (this) {
                 i = maxLength;
-                if (null == maxLength) {
-                    // Default is 512KB
+                if (null == i) {
+                    // Default is 1MB
                     final ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    final int defaultMaxLength = 1048576 >> 1;
-                    i = Integer.valueOf(null == service ? defaultMaxLength : service.getIntProperty(
-                        "com.openexchange.html.maxLength",
-                        defaultMaxLength));
+                    final int defaultMaxLength = 1048576;
+                    if (null == service) {
+                        return defaultMaxLength;
+                    }
+                    int prop = service.getIntProperty("com.openexchange.html.maxLength", defaultMaxLength);
+                    if (prop <= 0) {
+                        prop = Integer.MAX_VALUE;
+                    }
+                    i = Integer.valueOf(prop);
                     maxLength = i;
                 }
             }
@@ -198,7 +206,6 @@ public final class JerichoParser {
      * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
      */
     public void parse(final String html, final JerichoHandler handler) {
-        final long st = DEBUG ? System.currentTimeMillis() : 0L;
         StreamedSource streamedSource = null;
         try {
             streamedSource = checkBody(html);
@@ -219,10 +226,6 @@ public final class JerichoParser {
                  * Handle current segment
                  */
                 handleSegment(handler, segment);
-            }
-            if (DEBUG) {
-                final long dur = System.currentTimeMillis() - st;
-                LOG.debug("\tJerichoParser.parse() took " + dur + "msec.");
             }
         } catch (final StackOverflowError parserOverflow) {
             throw new ParsingDeniedException("Parser overflow detected.", parserOverflow);

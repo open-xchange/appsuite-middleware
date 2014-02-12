@@ -50,9 +50,10 @@
 package com.openexchange.messaging.facebook;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link FacebookMessagingExceptionCodes} - Enumeration of all {@link OXException}s.
@@ -60,91 +61,97 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public enum FacebookMessagingExceptionCodes implements OXExceptionCode {
+public enum FacebookMessagingExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(FacebookMessagingExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An error occurred: %1$s", CATEGORY_ERROR, 1),
     /**
      * A SQL error occurred: %1$s
      */
-    SQL_ERROR(FacebookMessagingExceptionMessages.SQL_ERROR_MSG, CATEGORY_ERROR, 2),
+    SQL_ERROR("A SQL error occurred: %1$s", CATEGORY_ERROR, 2, OXExceptionStrings.SQL_ERROR_MSG),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(FacebookMessagingExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 3),
+    IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 3),
     /**
      * An I/O error occurred: %1$s
      */
-    JSON_ERROR(FacebookMessagingExceptionMessages.JSON_ERROR_MSG, CATEGORY_ERROR, 4),
+    JSON_ERROR("A JSON error occurred: %1$s", CATEGORY_ERROR, 4),
+
+    // <---------------------- begin currently unused ---------------------->
+
     /**
      * Login to Facebook failed for login %1$s.
      */
-    FAILED_LOGIN(FacebookMessagingExceptionMessages.FAILED_LOGIN_MSG, CATEGORY_ERROR, 5),
+    FAILED_LOGIN("Login to Facebook failed for login %1$s.", CATEGORY_ERROR, 5),
     /**
      * Communication error with Facebook service: %1$s
      */
-    COMMUNICATION_ERROR(FacebookMessagingExceptionMessages.COMMUNICATION_ERROR_MSG, CATEGORY_SERVICE_DOWN, 6),
+    COMMUNICATION_ERROR("Communication error with Facebook service: %1$s", CATEGORY_SERVICE_DOWN, 6),
     /**
      * Login form not found on page: %1$s
      */
-    LOGIN_FORM_NOT_FOUND(FacebookMessagingExceptionMessages.LOGIN_FORM_NOT_FOUND_MSG, CATEGORY_SERVICE_DOWN, 7),
+    LOGIN_FORM_NOT_FOUND("Login form not found on page: %1$s", CATEGORY_SERVICE_DOWN, 7),
     /**
      * Element with attribute %1$s not found on page %2$s.
      */
-    ELEMENT_NOT_FOUND(FacebookMessagingExceptionMessages.ELEMENT_NOT_FOUND_MSG, CATEGORY_SERVICE_DOWN, 8),
+    ELEMENT_NOT_FOUND("Element with attribute %1$s not found on page %2$s.", CATEGORY_SERVICE_DOWN, 8),
     /**
      * Missing permission "%1$s" in Facebook login %2$s. Please copy following URL to your browser, login as %2$s (if not done yet) and grant access:<br>
      * %3$s
      */
-    MISSING_PERMISSION(FacebookMessagingExceptionMessages.MISSING_PERMISSION_MSG, CATEGORY_SERVICE_DOWN, 9),
+    MISSING_PERMISSION("Missing permission \"%1$s\" in Facebook login %2$s. Please copy following URL to your browser, login as %2$s (if not done yet) and grant access:\n%3$s", CATEGORY_SERVICE_DOWN, 9),
     /**
      * An error occurred during the processing of a script.
      */
-    SCRIPT_ERROR(FacebookMessagingExceptionMessages.SCRIPT_ERROR_MSG, CATEGORY_SERVICE_DOWN, 10),
+    SCRIPT_ERROR("An error occurred during the processing of a script.", CATEGORY_SERVICE_DOWN, 10),
     /**
      * Missing permission for the application associated with configured Facebook API key: %1$s<br>
      * Please grant access for that application in your Facebook account settings.
      */
-    MISSING_APPLICATION_PERMISSION(FacebookMessagingExceptionMessages.MISSING_APPLICATION_PERMISSION_MSG, CATEGORY_SERVICE_DOWN, 10),
+    MISSING_APPLICATION_PERMISSION("Missing permission for the application associated with configured Facebook API key: %1$s\n" + "Please grant access for that application in your Facebook account settings.", CATEGORY_SERVICE_DOWN, 10),
+
+    // <---------------------- end currently unused ---------------------->
+
     /**
      * FQL query result size (%1$s) does not match requested number of post identifiers (%2$s).
      */
-    FQL_QUERY_RESULT_MISMATCH(FacebookMessagingExceptionMessages.FQL_QUERY_RESULT_MISMATCH_MSG, CATEGORY_ERROR, 11),
+    FQL_QUERY_RESULT_MISMATCH("FQL query result size (%1$s) does not match requested number of post identifiers (%2$s).", CATEGORY_ERROR, 11),
     /**
      * Unsupported query type: %1$s.
      */
-    UNSUPPORTED_QUERY_TYPE(FacebookMessagingExceptionMessages.UNSUPPORTED_QUERY_TYPE_MSG, CATEGORY_ERROR, 12),
+    UNSUPPORTED_QUERY_TYPE("Unsupported query type: %1$s.", CATEGORY_ERROR, 12),
     /**
      * An OAuth error occurred: %1$s.
      */
-    OAUTH_ERROR(FacebookMessagingExceptionMessages.OAUTH_ERROR_MSG, CATEGORY_USER_INPUT, 13),
+    OAUTH_ERROR("An OAuth error occurred: %1$s.", CATEGORY_USER_INPUT, 13, FacebookMessagingExceptionMessages.OAUTH_ERROR_MSG),
     /**
      * A FQL error of type %1$s occurred: %2$s.
      */
-    FQL_ERROR(FacebookMessagingExceptionMessages.FQL_ERROR_MSG, CATEGORY_ERROR, 14),
+    FQL_ERROR("A FQL error of type %1$s occurred: %2$s.", CATEGORY_ERROR, 14),
     /**
      * FQL response body cannot be parsed to a JSON value:<br>
      * %1$s
      */
-    INVALID_RESPONSE_BODY(FacebookMessagingExceptionMessages.INVALID_RESPONSE_BODY_MSG, CATEGORY_ERROR, 15),
+    INVALID_RESPONSE_BODY("FQL response body cannot be parsed to a JSON value:\n%1$s", CATEGORY_ERROR, 15),
     /**
      * XML parse error: %1$s.
      */
-    XML_PARSE_ERROR(FacebookMessagingExceptionMessages.XML_PARSE_ERROR_MSG, CATEGORY_ERROR, 16),
+    XML_PARSE_ERROR("XML parse error: %1$s.", CATEGORY_ERROR, 16),
     /**
      * Missing Facebook configuration. Please re-create Facebook account.
      */
-    MISSING_CONFIG(FacebookMessagingExceptionMessages.MISSING_CONFIG_MSG, CATEGORY_USER_INPUT, 17),
+    MISSING_CONFIG(FacebookMessagingExceptionMessages.MISSING_CONFIG_MSG, CATEGORY_USER_INPUT, 17, FacebookMessagingExceptionMessages.MISSING_CONFIG_MSG),
     /**
      * Missing Facebook configuration parameter "%1$s". Please re-create Facebook account.
      */
-    MISSING_CONFIG_PARAM(FacebookMessagingExceptionMessages.MISSING_CONFIG_PARAM_MSG, CATEGORY_USER_INPUT, 18),
+    MISSING_CONFIG_PARAM(FacebookMessagingExceptionMessages.MISSING_CONFIG_PARAM_MSG, CATEGORY_USER_INPUT, 18, FacebookMessagingExceptionMessages.MISSING_CONFIG_MSG),
     /**
      * A Facebook API error occurred. Error code: %1$s. Error message: "%2$s". Please refer to http://fbdevwiki.com/wiki/Error_codes to look-up error code.
      */
-    FB_API_ERROR(FacebookMessagingExceptionMessages.FB_API_ERROR_MSG, CATEGORY_SERVICE_DOWN, 19),
+    FB_API_ERROR("A Facebook API error occurred. Error code: %1$s. Error message: \"%2$s\". Please refer to http://fbdevwiki.com/wiki/Error_codes to look-up error code.", CATEGORY_SERVICE_DOWN, 19),
 
     ;
 
@@ -155,10 +162,17 @@ public enum FacebookMessagingExceptionCodes implements OXExceptionCode {
 
     private final String message;
 
+    private final String displayMessage;
+
     private FacebookMessagingExceptionCodes(final String message, final Category category, final int detailNumber) {
+        this(message, category, detailNumber, null);
+    }
+
+    private FacebookMessagingExceptionCodes(final String message, final Category category, final int detailNumber, final String displayMessage) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        this.displayMessage = displayMessage == null ? OXExceptionStrings.MESSAGE : displayMessage;
     }
 
     @Override
@@ -184,6 +198,11 @@ public enum FacebookMessagingExceptionCodes implements OXExceptionCode {
     @Override
     public boolean equals(final OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     /**

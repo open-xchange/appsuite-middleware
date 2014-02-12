@@ -58,7 +58,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
 import org.joox.Context;
 import org.joox.Filter;
 import org.joox.JOOX;
@@ -75,7 +74,7 @@ import com.openexchange.index.IndexField;
  */
 public class XMLBasedFieldConfiguration implements FieldConfiguration {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(XMLBasedFieldConfiguration.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(XMLBasedFieldConfiguration.class);
 
     private final Set<IndexField> indexedFields = new HashSet<IndexField>();
 
@@ -173,7 +172,7 @@ public class XMLBasedFieldConfiguration implements FieldConfiguration {
                             indexField = (IndexField) Enum.valueOf(casted, enumValue);
                         }
                     } catch (Throwable e) {
-                        LOG.warn("Could not instantiate Enum value " + enumValue + " for class " + enumClass, e);
+                        LOG.warn("Could not instantiate Enum value {} for class {}", enumValue, enumClass, e);
                     }
                 }
 

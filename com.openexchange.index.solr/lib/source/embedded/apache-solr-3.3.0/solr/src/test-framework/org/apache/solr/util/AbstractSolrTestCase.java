@@ -119,7 +119,7 @@ public abstract class AbstractSolrTestCase extends LuceneTestCase {
    *
    */
 
-  public static Logger log = LoggerFactory.getLogger(AbstractSolrTestCase.class);
+  public static org.slf4j.Logger log = LoggerFactory.getLogger(AbstractSolrTestCase.class);
 
   private String factoryProp;
   @Override

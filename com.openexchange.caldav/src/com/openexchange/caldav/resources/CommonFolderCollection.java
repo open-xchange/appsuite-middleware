@@ -56,7 +56,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.caldav.Tools;
 import com.openexchange.caldav.mixins.CTag;
-import com.openexchange.caldav.mixins.Owner;
 import com.openexchange.caldav.mixins.SyncToken;
 import com.openexchange.caldav.reports.Syncstatus;
 import com.openexchange.exception.OXException;
@@ -98,9 +97,9 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
         this.folder = folder;
         if (null != folder) {
             this.folderID = Tools.parse(folder.getID());
-            includeProperties(new CurrentUserPrivilegeSet(folder.getOwnPermission()), new CTag(this), new SyncToken(this), new Owner(this));
+            includeProperties(new CurrentUserPrivilegeSet(folder.getOwnPermission()), new CTag(this), new SyncToken(this));
         }
-        LOG.debug(getUrl() + ": initialized.");
+        LOG.debug("{}: initialized.", getUrl());
     }
 
     @Override
@@ -110,7 +109,7 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
             for (T object : this.getObjects()) {
                 children.add(createResource(object, constructPathForChildResource(object)));
             }
-            LOG.debug(this.getUrl() + ": added " + children.size() + " child resources.");
+            LOG.debug("{}: added {} child resources.", this.getUrl(), children.size());
             return children;
         } catch (OXException e) {
             throw protocolException(e);
@@ -131,10 +130,10 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
             String resourceName = Tools.extractResourceName(name, getFileExtension());
             T object = this.getObject(resourceName);
             if (null != object) {
-                LOG.debug(this.getUrl() + ": found child resource by name '" + name + "'");
+                LOG.debug("{}: found child resource by name '{}'", this.getUrl(), name);
                 return createResource(object, constructPathForChildResource(object));
             } else {
-                LOG.debug(this.getUrl() + ": child resource '" + name + "' not found, creating placeholder resource");
+                LOG.debug("{}: child resource '{}' not found, creating placeholder resource", this.getUrl(), name);
                 return createResource(null, constructPathForChildResource(name));
             }
         } catch (OXException e) {
@@ -156,7 +155,7 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends Com
             try {
                 since = Long.parseLong(token);
             } catch (NumberFormatException e) {
-                LOG.warn("Invalid sync token: '" + token + "', falling back to '0'.");
+                LOG.warn("Invalid sync token: '{}', falling back to '0'.", token);
             }
         }
         try {

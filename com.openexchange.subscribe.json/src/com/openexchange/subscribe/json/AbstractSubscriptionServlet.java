@@ -51,11 +51,10 @@ package com.openexchange.subscribe.json;
 
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
@@ -68,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractSubscriptionServlet extends PermissionServlet {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractSubscriptionServlet.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractSubscriptionServlet.class);
 
     @Override
     protected boolean hasModulePermission(final ServerSession session) {
@@ -76,7 +75,7 @@ public abstract class AbstractSubscriptionServlet extends PermissionServlet {
     }
 
     protected void writeOXException(final OXException x, final HttpServletResponse resp, final Session session) {
-        x.log(getLog());
+        getLog().error("", x);
         final Response response = new Response();
         response.setException(x);
         writeResponseSafely(response, resp, session);
@@ -89,7 +88,7 @@ public abstract class AbstractSubscriptionServlet extends PermissionServlet {
     }
 
     protected OXException wrapThrowable(final Throwable t) {
-        LOG.error(t.getMessage(), t);
+        LOG.error("", t);
         return SubscriptionJSONErrorMessages.THROWABLE.create(t, t.getMessage());
     }
 
@@ -97,9 +96,9 @@ public abstract class AbstractSubscriptionServlet extends PermissionServlet {
         try {
             writeResponse(response, resp, session);
         } catch (final IOException e) {
-            getLog().error(e.getMessage(), e);
+            getLog().error("", e);
         }
     }
 
-    protected abstract Log getLog();
+    protected abstract Logger getLog();
 }

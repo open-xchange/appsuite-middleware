@@ -597,6 +597,10 @@ public final class ByteChunk {
         return true;
     }
 
+    public boolean equals(final CharChunk cc) {
+        return equals(cc.getChars(), cc.getStart(), cc.getLength());
+    }
+
     public boolean equals(final char c2[], int off2, final int len2) {
         // XXX works only for enc compatible with ASCII/UTF !!!
         final byte b1[] = buff;

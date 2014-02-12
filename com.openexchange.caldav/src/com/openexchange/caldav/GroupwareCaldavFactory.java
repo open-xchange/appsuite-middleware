@@ -49,13 +49,13 @@
 
 package com.openexchange.caldav;
 
+import java.text.MessageFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.caldav.mixins.ScheduleInboxURL;
@@ -95,7 +95,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
  */
 public class GroupwareCaldavFactory extends AbstractWebdavFactory implements BulkLoader {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(GroupwareCaldavFactory.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupwareCaldavFactory.class);
     private static final CaldavProtocol PROTOCOL = new CaldavProtocol();
     public static final WebdavPath ROOT_URL = new WebdavPath();
 
@@ -260,7 +260,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
                 try {
                     treeID = factory.getConfigValue("com.openexchange.caldav.tree", FolderStorage.REAL_TREE_ID);
                 } catch (OXException e) {
-                    LOG.warn("falling back to tree id '" + FolderStorage.REAL_TREE_ID + "'.", e);
+                    LOG.warn("falling back to tree id ''{}''.", FolderStorage.REAL_TREE_ID, e);
                     treeID = FolderStorage.REAL_TREE_ID;
                 }
             }

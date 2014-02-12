@@ -49,8 +49,6 @@
 
 package com.openexchange.osgi.osgi;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.DeferredActivator;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -80,7 +78,7 @@ public class OsgiActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(OsgiActivator.class));
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OsgiActivator.class);
         logger.info("starting bundle: com.openexchange.osgi");
         try {
             registerService(ServiceStateLookup.class, DeferredActivator.getLookup());
@@ -90,14 +88,14 @@ public class OsgiActivator extends HousekeepingActivator {
             consoleActivator.start(context);
             this.consoleActivator = consoleActivator;
         } catch (final Exception e) {
-            logger.error("OsgiActivator: start: " + e.getMessage(), e);
+            logger.error("OsgiActivator: start", e);
             throw e;
         }
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(OsgiActivator.class));
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OsgiActivator.class);
         logger.info("stopping bundle: com.openexchange.osgi");
         try {
             final ConsoleActivator consoleActivator = this.consoleActivator;
@@ -107,7 +105,7 @@ public class OsgiActivator extends HousekeepingActivator {
             }
             cleanUp();
         } catch (final Exception e) {
-            logger.error("OsgiActivator: stop: " + e.getMessage(), e);
+            logger.error("OsgiActivator: stop", e);
             throw e;
         }
     }

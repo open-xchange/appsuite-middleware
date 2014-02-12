@@ -51,8 +51,6 @@ package com.openexchange.admin.autocontextid.storage.mysqlStorage;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.admin.autocontextid.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.autocontextid.storage.sqlStorage.OXAutoCIDSQLStorage;
 import com.openexchange.admin.rmi.exceptions.PoolException;
@@ -67,7 +65,7 @@ public final class OXAutoCIDMySQLStorage extends OXAutoCIDSQLStorage {
 
     private static AdminCache cache = null;
 
-    private static final Log log = LogFactory.getLog(OXAutoCIDMySQLStorage.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXAutoCIDMySQLStorage.class);
 
     static {
         cache = ClientAdminThreadExtended.cache;
@@ -77,37 +75,40 @@ public final class OXAutoCIDMySQLStorage extends OXAutoCIDSQLStorage {
         super();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#generateContextId()
-     */
     @Override
     public int generateContextId() throws StorageException {
         final Connection con;
         try {
             con = cache.getConnectionForConfigDB();
         } catch (final PoolException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new StorageException(e.getMessage());
         }
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
             int id = IDGenerator.getId(con, -2);
             con.commit();
+            rollback = false;
             return id;
         } catch (final SQLException e) {
-            log.error(e.getMessage(), e);
-            doRollback(con);
             throw new StorageException(e.getMessage());
         } finally {
+            if (rollback) {
+                doRollback(con);
+            }
             cache.closeConfigDBSqlStuff(con, null);
         }
     }
 
     private static void doRollback(final Connection con) {
-        try {
-            con.rollback();
-        } catch (final SQLException e2) {
-            log.error("Error doing rollback", e2);
+        if (null != con) {
+            try {
+                con.rollback();
+            } catch (final SQLException e2) {
+                log.error("Error doing rollback", e2);
+            }
         }
     }
 

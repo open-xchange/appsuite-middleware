@@ -305,6 +305,8 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
             try {
                 final SyndFeedInput input = new SyndFeedInput();
                 final URLConnection urlConnection = url.openConnection();
+                urlConnection.setConnectTimeout(2500);
+                urlConnection.setReadTimeout(2500);
                 urlConnection.connect();
                 in = urlConnection.getInputStream();
                 /*

@@ -51,13 +51,11 @@ package com.openexchange.ajax.helper;
 
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.java.AllocatingStringWriter;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -69,7 +67,7 @@ public final class Send {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Send.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Send.class);
 
     /**
      * Prevent instantiation.
@@ -90,7 +88,7 @@ public final class Send {
         try {
             ResponseWriter.write(response, sWriter);
         } catch (final JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             sendError(resp);
         }
         Tools.disableCaching(resp);
@@ -107,7 +105,7 @@ public final class Send {
         try {
             ResponseWriter.write(response, resp.getWriter());
         } catch (final JSONException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             sendError(resp);
         }
     }

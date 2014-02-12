@@ -78,11 +78,19 @@ public class EditDirectoryAction extends AbstractDirectoryAction {
         int result = super.compareTo(other);
         if (0 == result && EditDirectoryAction.class.isInstance(other)) {
             /*
-             * compare paths (hierarchical tree order)
+             * compare paths of new version (hierarchical tree order)
              */
             EditDirectoryAction otherEditDirectoryAction = (EditDirectoryAction)other;
-            if (null != this.getVersion() && null != otherEditDirectoryAction.getVersion()) {
-                result = this.getVersion().getPath().compareTo(otherEditDirectoryAction.getVersion().getPath());
+            if (null != this.getNewVersion() && null != otherEditDirectoryAction.getNewVersion()) {
+                result = this.getNewVersion().getPath().compareTo(otherEditDirectoryAction.getNewVersion().getPath());
+            }
+            if (0 == result) {
+                /*
+                 * compare paths of version (hierarchical tree order)
+                 */
+                if (null != this.getVersion() && null != otherEditDirectoryAction.getVersion()) {
+                    result = this.getVersion().getPath().compareTo(otherEditDirectoryAction.getVersion().getPath());
+                }
             }
         }
         return result;

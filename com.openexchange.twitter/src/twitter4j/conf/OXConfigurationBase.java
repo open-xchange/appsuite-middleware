@@ -101,7 +101,7 @@ public final class OXConfigurationBase {
      * @param configurationService The service
      */
     public void parseFrom(final ConfigurationService configurationService) {
-        final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TwitterConfiguration.class));
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TwitterConfiguration.class);
         {
             String property = configurationService.getProperty("com.openexchange.twitter.clientVersion");
             if (null == property) {
@@ -112,7 +112,7 @@ public final class OXConfigurationBase {
                     clientVersion = property;
                 } else {
                     // Not a valid version
-                    log.warn(MessageFormat.format("Not a valid version string: {0}. Using fallback \"2.2.3\"", property));
+                    log.warn("Not a valid version string: {}. Using fallback \"2.2.3\"", property);
                     clientVersion = "2.2.3";
                 }
             }
@@ -126,7 +126,7 @@ public final class OXConfigurationBase {
                     httpUseSSL = false;
                 } else {
                     // Not a valid boolean value
-                    log.warn(MessageFormat.format("Not a valid flag whether to use SSL over HTTP: {0}. Using fallback \"false\"", property));
+                    log.warn("Not a valid flag whether to use SSL over HTTP: {}. Using fallback \"false\"", property);
                     httpUseSSL = false;
                 }
             }
@@ -144,9 +144,8 @@ public final class OXConfigurationBase {
                     httpProxyPort = Integer.parseInt(property.trim());
                 } catch (final NumberFormatException e) {
                     // NAN
-                    log.warn(MessageFormat.format(
-                        "Connection timeout property is not a number: {0}. Using fallback 0.",
-                        property.trim()));
+                    log.warn("Connection timeout property is not a number: {}. Using fallback 0.",
+                        property.trim());
                     httpProxyPort = 0;
                 }
             }
@@ -158,9 +157,8 @@ public final class OXConfigurationBase {
                     httpConnectionTimeout = Integer.parseInt(property.trim());
                 } catch (final NumberFormatException e) {
                     // NAN
-                    log.warn(MessageFormat.format(
-                        "Connection timeout property is not a number: {0}. Using fallback 20000.",
-                        property.trim()));
+                    log.warn("Connection timeout property is not a number: {}. Using fallback 20000.",
+                        property.trim());
                     httpConnectionTimeout = 20000;
                 }
             }
@@ -172,7 +170,7 @@ public final class OXConfigurationBase {
                     httpReadTimeout = Integer.parseInt(property.trim());
                 } catch (final NumberFormatException e) {
                     // NAN
-                    log.warn(MessageFormat.format("Read timeout property is not a number: {0}. Using fallback 120000.", property.trim()));
+                    log.warn("Read timeout property is not a number: {}. Using fallback 120000.", property.trim());
                     httpReadTimeout = 120000;
                 }
             }
@@ -184,7 +182,7 @@ public final class OXConfigurationBase {
                     httpRetryCount = Integer.parseInt(property.trim());
                 } catch (final NumberFormatException e) {
                     // NAN
-                    log.warn(MessageFormat.format("Retry count property is not a number: {0}. Using fallback 3.", property.trim()));
+                    log.warn("Retry count property is not a number: {}. Using fallback 3.", property.trim());
                     httpRetryCount = 3;
                 }
             }
@@ -196,9 +194,8 @@ public final class OXConfigurationBase {
                     httpRetryIntervalSecs = Integer.parseInt(property.trim());
                 } catch (final NumberFormatException e) {
                     // NAN
-                    log.warn(MessageFormat.format(
-                        "Retry Interval Seconds property is not a number: {0}. Using fallback 10.",
-                        property.trim()));
+                    log.warn("Retry Interval Seconds property is not a number: {}. Using fallback 10.",
+                        property.trim());
                     httpRetryIntervalSecs = 10;
                 }
             }

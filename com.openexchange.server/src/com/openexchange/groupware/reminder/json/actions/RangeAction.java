@@ -64,6 +64,7 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.json.ReminderAJAXRequest;
@@ -83,8 +84,8 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "An Array with all reminders which are scheduled until the specified time. Each reminder is described in Reminder response.")
 public final class RangeAction extends AbstractReminderAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RangeAction.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(RangeAction.class);
 
     /**
      * Initializes a new {@link RangeAction}.
@@ -108,7 +109,8 @@ public final class RangeAction extends AbstractReminderAction {
         try {
             final ServerSession session = req.getSession();
             final ReminderService reminderSql = new ReminderHandler(session.getContext());
-            final SearchIterator<ReminderObject> it = reminderSql.getArisingReminder(session, session.getContext(), session.getUser(), end);
+            final User user = session.getUser();
+            final SearchIterator<ReminderObject> it = reminderSql.getArisingReminder(session, session.getContext(), user, end);
             final JSONArray jsonResponseArray = new JSONArray();
             try {
                 while (it.hasNext()) {
@@ -127,7 +129,7 @@ public final class RangeAction extends AbstractReminderAction {
                         } catch (final OXException e) {
                             if (e.isGeneric(Generic.NOT_FOUND)) {
                                 LOG.warn("Cannot load target object of this reminder.", e);
-                                reminderSql.deleteReminder(reminder.getTargetId(), session.getUser().getId(), reminder.getModule());
+                                reminderSql.deleteReminder(reminder.getTargetId(), user.getId(), reminder.getModule());
                             } else {
                                 LOG.error(
                                     "Can not calculate recurrence of appointment " + reminder.getTargetId() + ':' + session.getContextId(),

@@ -82,8 +82,7 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "Just an empty JSON array is going to be returned since this action cannot be applied to IMAP.")
 public final class GetUpdatesAction extends AbstractMailAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        Log.valueOf(com.openexchange.log.LogFactory.getLog(GetUpdatesAction.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetUpdatesAction.class);
 
     /**
      * Initializes a new {@link GetUpdatesAction}.

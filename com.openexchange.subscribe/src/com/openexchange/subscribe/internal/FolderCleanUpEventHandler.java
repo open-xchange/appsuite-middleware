@@ -52,7 +52,6 @@ package com.openexchange.subscribe.internal;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
@@ -63,7 +62,6 @@ import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionStorage;
 
@@ -76,7 +74,7 @@ import com.openexchange.subscribe.SubscriptionStorage;
  */
 public class FolderCleanUpEventHandler implements EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderCleanUpEventHandler.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderCleanUpEventHandler.class);
     private final ContextService contexts;
     private final SubscriptionStorage storage;
     private ServiceRegistration<EventHandler> registration;
@@ -108,7 +106,7 @@ public class FolderCleanUpEventHandler implements EventHandler {
         try {
             context = contexts.getContext(commonEvent.getContextId());
         } catch (final OXException e) {
-            LOG.error("Could not delete all dependent subscriptions: " + e.getMessage(), e);
+            LOG.error("Could not delete all dependent subscriptions", e);
             return;
         }
 
@@ -118,7 +116,7 @@ public class FolderCleanUpEventHandler implements EventHandler {
                 storage.forgetSubscription(subscription);
             }
         } catch (final OXException e) {
-            LOG.error("Could not delete all dependent subscriptions: " + e.getMessage(), e);
+            LOG.error("Could not delete all dependent subscriptions", e);
         }
 
 

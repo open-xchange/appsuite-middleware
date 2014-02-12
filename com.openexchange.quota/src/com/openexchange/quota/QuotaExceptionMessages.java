@@ -59,13 +59,6 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class QuotaExceptionMessages implements LocalizableStrings {
 
-    // An error occurred: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-
-    // Quota exceeded. Please delete some items in order to create new ones.
     public static final String QUOTA_EXCEEDED_MSG = "Quota exceeded. Please delete some items in order to create new ones.";
 
     /**

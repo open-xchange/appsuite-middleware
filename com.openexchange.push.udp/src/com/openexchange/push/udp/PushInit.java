@@ -50,8 +50,6 @@
 package com.openexchange.push.udp;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
@@ -71,7 +69,7 @@ public class PushInit {
     /**
      * Logger.
      */
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushInit.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushInit.class);
 
     private PushMulticastSocket multicast;
 
@@ -113,9 +111,7 @@ public class PushInit {
             config = new PushConfigurationImpl(conf);
         }
 
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Starting Push UDP");
-        }
+        LOG.info("Starting Push UDP");
 
         if (config == null) {
             throw PushUDPExceptionCode.MISSING_CONFIG.create();

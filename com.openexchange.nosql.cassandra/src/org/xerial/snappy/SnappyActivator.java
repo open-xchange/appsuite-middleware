@@ -52,7 +52,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -63,7 +62,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 @Deprecated
 public class SnappyActivator extends HousekeepingActivator {
-	private static Log log = com.openexchange.log.Log.loggerFor(SnappyActivator.class);
+	private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SnappyActivator.class);
 	private static String snappyPathProp = "com.openexchange.nosql.cassandra.snappyjava.nativelibs";
 
 	/*
@@ -99,7 +98,7 @@ public class SnappyActivator extends HousekeepingActivator {
     	String osName = System.getProperty("os.name");
     	String osArch = System.getProperty("os.arch");
     	String fileSeparator = System.getProperty("file.separator");
-    	log.info(osName + " " + osArch);
+    	log.info("{} {}", osName, osArch);
 
     	String postfix = null;
     	if (osName.equals("Linux")) {

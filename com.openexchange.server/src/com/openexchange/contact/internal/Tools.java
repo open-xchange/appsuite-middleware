@@ -56,7 +56,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
@@ -80,7 +79,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.l10n.SuperCollator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -105,7 +103,7 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public final class Tools {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Tools.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Tools.class);
 
 	/**
 	 * Gets a comparator for contacts based on the supplied sort options.

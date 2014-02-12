@@ -55,6 +55,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
 
 /**
  * HttpErrorServlet
@@ -66,7 +67,7 @@ public class HttpErrorServlet extends HttpServlet {
 
     private static final long serialVersionUID = -4233220177036230470L;
 
-    private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(HttpErrorServlet.class));
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpErrorServlet.class);
 
     private final String message;
 
@@ -89,7 +90,7 @@ public class HttpErrorServlet extends HttpServlet {
             final PrintWriter writer = resp.getWriter();
             writer.write(new com.openexchange.java.StringAllocator().append("<html>").append(message).append("</html>").toString());
         } catch (final IOException exc) {
-            LOG.error(exc.getMessage(), exc);
+            LOG.error("", exc);
         }
 
     }

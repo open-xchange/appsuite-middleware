@@ -57,8 +57,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCacheExtended;
@@ -73,7 +71,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class ContextSearcher extends AbstractTask<Collection<Integer>> {
 
-    private static final Log LOG = LogFactory.getLog(ContextSearcher.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContextSearcher.class);
 
     private final AdminCacheExtended cache;
     private final String sql;
@@ -116,7 +114,7 @@ public class ContextSearcher extends AbstractTask<Collection<Integer>> {
             try {
                 cache.pushConnectionForConfigDB(con);
             } catch (PoolException e1) {
-                LOG.error(e1.getMessage(), e1);
+                LOG.error("", e1);
             }
         }
         return cids;

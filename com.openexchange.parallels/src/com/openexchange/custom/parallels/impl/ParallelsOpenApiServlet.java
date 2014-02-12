@@ -57,6 +57,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import com.openexchange.ajax.DataServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.exception.OXException;
@@ -67,20 +68,20 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * 
+ *
  * Servlet which manages the POA Black/White Lists for an OX User.
- * 
- * 
+ *
+ *
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
- * 
+ *
  */
 public final class ParallelsOpenApiServlet extends DataServlet {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 7650360590998502303L;
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ParallelsOpenApiServlet.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ParallelsOpenApiServlet.class);
 
     public ParallelsOpenApiServlet() {
         super();
@@ -116,7 +117,7 @@ public final class ParallelsOpenApiServlet extends DataServlet {
             try {
                 jsonObj = convertParameter2JSONObject(req);
             } catch (final JSONException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
                 response.setException(OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e));
                 writeResponse(response, resp, session);
                 return;
@@ -127,11 +128,11 @@ public final class ParallelsOpenApiServlet extends DataServlet {
             response.setData(responseObj);
 
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             response.setException(e);
         } catch (final JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            LOG.error(oje.getMessage(), oje);
+            LOG.error("", oje);
             response.setException(oje);
         }
 

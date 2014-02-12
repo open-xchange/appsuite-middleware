@@ -54,6 +54,7 @@ import java.io.OutputStream;
 import javax.activation.DataHandler;
 import javax.mail.Part;
 import javax.mail.internet.MimeMessage;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -168,7 +169,7 @@ public final class MimeMailMessage extends MailMessage implements MimeRawSource,
             try {
                 ((ManagedMimeMessage) mimeMessage).cleanUp();
             } catch (final Exception e) {
-                com.openexchange.log.Log.loggerFor(MimeMailMessage.class).warn("Couldn't clean-up MIME resource.", e);
+                LoggerFactory.getLogger(MimeMailMessage.class).warn("Couldn't clean-up MIME resource.", e);
             }
         }
     }

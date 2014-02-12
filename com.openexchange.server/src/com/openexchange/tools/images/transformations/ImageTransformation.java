@@ -64,10 +64,11 @@ public interface ImageTransformation {
      * Performs the image transformation.
      *
      * @param sourceImage The source image
-     * @param imageInformation The additionl image information, or <code>null</code> if not needed
+     * @param transformationContext The transformation context
+     * @param imageInformation The additional image information, or <code>null</code> if not needed
      * @return The resulting image
      */
-    BufferedImage perform(BufferedImage sourceImage, ImageInformation imageInformation) throws IOException;
+    BufferedImage perform(BufferedImage sourceImage, TransformationContext transformationContext, ImageInformation imageInformation) throws IOException;
 
     /**
      * Gets a value indicating whether the supplied image format is supported by the transformation or not.

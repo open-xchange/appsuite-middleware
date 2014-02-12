@@ -67,7 +67,6 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.activation.FileTypeMap;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
@@ -90,7 +89,6 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -111,7 +109,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     private static final FetchMode fetchMode = FetchMode.PREFETCH;
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AttachmentBaseImpl.class));
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttachmentBaseImpl.class);
 
     private static final AttachmentQueryCatalog QUERIES = new AttachmentQueryCatalog();
 
@@ -136,7 +134,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
         checkMayAttach(ServerSessionAdapter.valueOf(session, ctx, user, userConfig),
             attachment.getModuleId(), attachment.getFolderId(), attachment.getAttachedId());
-//        checkMayAttach(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), ctx, user, userConfig);
 
         checkCharacters(attachment);
 
@@ -173,7 +170,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     @Override
     public long detachFromObject(final int folderId, final int objectId, final int moduleId, final int[] ids, final Session session, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         checkMayDetach(ServerSessionAdapter.valueOf(session, ctx, user, userConfig), moduleId, folderId, objectId);
-//        checkMayDetach(folderId, objectId, moduleId, ctx, user, userConfig);
 
         if (ids.length == 0) {
             return System.currentTimeMillis();
@@ -193,7 +189,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     @Override
     public AttachmentMetadata getAttachment(final Session session, final int folderId, final int objectId, final int moduleId, final int id, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         checkMayReadAttachments(ServerSessionAdapter.valueOf(session, ctx, user, userConfig), moduleId, folderId, objectId);
-//        checkMayReadAttachments(folderId, objectId, moduleId, ctx, user, userConfig);
 
         contextHolder.set(ctx);
 
@@ -203,7 +198,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     @Override
     public InputStream getAttachedFile(final Session session, final int folderId, final int objectId, final int moduleId, final int id, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         checkMayReadAttachments(ServerSessionAdapter.valueOf(session, ctx, user, userConfig), moduleId, folderId, objectId);
-//        checkMayReadAttachments(folderId, objectId, moduleId, ctx, user, userConfig);
         contextHolder.set(ctx);
 
         return getFile(id, ctx);
@@ -242,7 +236,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     @Override
     public TimedResult<AttachmentMetadata> getAttachments(final Session session, final int folderId, final int attachedId, final int moduleId, final AttachmentField[] columns, final AttachmentField sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         checkMayReadAttachments(ServerSessionAdapter.valueOf(session, ctx, user, userConfig), moduleId, folderId, attachedId);
-//        checkMayReadAttachments(folderId, attachedId, moduleId, ctx, user, userConfig);
 
         contextHolder.set(ctx);
         final AttachmentField[] cols = addCreationDateAsNeeded(columns);
@@ -275,7 +268,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     @Override
     public TimedResult<AttachmentMetadata> getAttachments(final Session session, final int folderId, final int attachedId, final int moduleId, final int[] idsToFetch, final AttachmentField[] columns, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         checkMayReadAttachments(ServerSessionAdapter.valueOf(session, ctx, user, userConfig), moduleId, folderId, attachedId);
-//        checkMayReadAttachments(folderId, attachedId, moduleId, ctx, user, userConfig);
 
         contextHolder.set(ctx);
 
@@ -301,13 +293,12 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     @Override
     public Delta<AttachmentMetadata> getDelta(final Session session, final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-        return getDelta(session, folderId, attachedId, moduleId, ts, ignoreDeleted, QUERIES.getFields(), null, ASC, ctx, user, null);
+        return getDelta(session, folderId, attachedId, moduleId, ts, ignoreDeleted, QUERIES.getFields(), null, ASC, ctx, user, userConfig);
     }
 
     @Override
     public Delta<AttachmentMetadata> getDelta(final Session session, final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final AttachmentField[] columns, final AttachmentField sort, final int order, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         checkMayReadAttachments(ServerSessionAdapter.valueOf(session, ctx, user, userConfig), moduleId, folderId, attachedId);
-//        checkMayReadAttachments(folderId, attachedId, moduleId, ctx, user, userConfig);
 
         contextHolder.set(ctx);
 
@@ -501,24 +492,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         }
     }
 
-//    private void checkMayAttach(final int folderId, final int attachedId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-//        for (final AttachmentAuthorization authz : getAuthorizors(moduleId)) {
-//            authz.checkMayAttach(folderId, attachedId, user, userConfig, ctx);
-//        }
-//    }
-//
-//    private void checkMayReadAttachments(final int folderId, final int objectId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-//        for (final AttachmentAuthorization authz : getAuthorizors(moduleId)) {
-//            authz.checkMayReadAttachments(folderId, objectId, user, userConfig, ctx);
-//        }
-//    }
-//
-//    private void checkMayDetach(final int folderId, final int objectId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-//        for (final AttachmentAuthorization authz : getAuthorizors(moduleId)) {
-//            authz.checkMayDetach(folderId, objectId, user, userConfig, ctx);
-//        }
-//    }
-//
     private List<AttachmentListener> getListeners(final int moduleId) {
         List<AttachmentListener> listener = moduleListeners.get(moduleId);
         if (listener == null) {
@@ -533,13 +506,28 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         attachment.setCreatedBy(user.getId());
         if (attachment.getId() == NEW) {
             Connection writeCon = null;
+            boolean afterReading = true;
             try {
                 writeCon = getWriteConnection(ctx);
-                attachment.setId(getId(ctx, writeCon));
+
+                // Acquire new identifier dependent on connection's auto-commit flag
+                final int newId;
+                if (writeCon.getAutoCommit()) {
+                    newId = IDGenerator.getId(ctx, Types.ATTACHMENT);
+                }else {
+                    newId = IDGenerator.getId(ctx, Types.ATTACHMENT, writeCon);
+                    afterReading = false;
+                }
+
+                attachment.setId(newId);
             } catch (final SQLException e) {
                 throw AttachmentExceptionCodes.GENERATIING_ID_FAILED.create(e);
             } finally {
-                releaseWriteConnection(ctx, writeCon);
+                if (afterReading) {
+                    releaseWriteConnectionAfterReading(ctx, writeCon);
+                } else {
+                    releaseWriteConnection(ctx, writeCon);
+                }
             }
         }
 
@@ -549,13 +537,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             final String mimetypes = FileTypeMap.getDefaultFileTypeMap().getContentType(attachment.getFilename());
             attachment.setFileMIMEType(mimetypes);
         }
-    }
-
-    private int getId(final Context ctx, final Connection writeCon) throws SQLException {
-        if (writeCon.getAutoCommit()) {
-            return IDGenerator.getId(ctx, Types.ATTACHMENT);
-        }
-        return IDGenerator.getId(ctx, Types.ATTACHMENT, writeCon);
     }
 
     private String saveFile(final InputStream data, final AttachmentMetadata attachment, final Context ctx) throws OXException, OXException {
@@ -1146,13 +1127,13 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                     delegate = new SearchIteratorAdapter<AttachmentMetadata>(values.iterator());
                 }
             } catch (final SearchIteratorException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
                 this.exception = e;
             } catch (final SQLException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
                 this.exception = e;
             } catch (final OXException e) {
-                LOG.error(e);
+                LOG.error(e.toString());
                 this.exception = e;
             }
         }

@@ -64,7 +64,6 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -146,7 +145,7 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
     public FileStorageFolder getPersonalFolder() throws OXException {
         final FolderService service = Services.getService(FolderService.class);
         return FolderWriter.writeFolder(service.getDefaultFolder(
-            UserStorage.getStorageUser(session.getUserId(), session.getContext()),
+            session.getUser(),
             REAL_TREE_ID,
             FolderParser.getContentType(),
             session,
@@ -231,11 +230,19 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
 
     @Override
     public String moveFolder(final String folderId, final String newParentId) throws OXException {
+        return moveFolder(folderId, newParentId, null);
+    }
+
+    @Override
+    public String moveFolder(final String folderId, final String newParentId, String newName) throws OXException {
         final FolderService service = Services.getService(FolderService.class);
         final ParsedFolder folder = new ParsedFolder();
         folder.setID(folderId);
         folder.setParentID(newParentId);
         folder.setTreeID(REAL_TREE_ID);
+        if (null != newName) {
+            folder.setName(newName);
+        }
         service.updateFolder(folder, null, session, null);
         return folder.getNewID() == null ? folderId : folder.getNewID();
     }

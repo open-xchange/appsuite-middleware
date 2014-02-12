@@ -55,10 +55,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
-import org.apache.commons.logging.Log;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 
 /**
  * ReminderConfigImpl
@@ -74,7 +72,7 @@ public class ReminderConfigImpl extends AbstractConfigWrapper implements Reminde
 
 	private boolean isInit = false;
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReminderConfigImpl.class));
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReminderConfigImpl.class);
 
 	public ReminderConfigImpl(final String propfile) {
 		if (isInit) {
@@ -88,9 +86,7 @@ public class ReminderConfigImpl extends AbstractConfigWrapper implements Reminde
 		Properties prop = null;
 
 		try {
-			if(LOG.isDebugEnabled()) {
-				LOG.debug("try to load propfile: " + propfile);
-			}
+			LOG.debug("try to load propfile: {}", propfile);
 
 			prop = new Properties();
 			FileInputStream fis = null;
@@ -101,20 +97,16 @@ public class ReminderConfigImpl extends AbstractConfigWrapper implements Reminde
 			    Streams.close(fis);
 			}
 		} catch (final FileNotFoundException exc) {
-			LOG.error("Cannot find propfile: " + propfile, exc);
+			LOG.error("Cannot find propfile: {}", propfile, exc);
 		} catch (final IOException exc) {
-			LOG.error("Cannot read propfile: " + propfile, exc);
+			LOG.error("Cannot read propfile: {}", propfile, exc);
 		}
 
 		isReminderEnabled = parseProperty(prop, "com.openexchange.groupware.reminder.isReminderEnabled", isReminderEnabled);
-		if(LOG.isDebugEnabled()) {
-			LOG.debug("Reminder property: com.openexchange.groupware.reminder.isReminderEnabled=" + isReminderEnabled);
-		}
+		LOG.debug("Reminder property: com.openexchange.groupware.reminder.isReminderEnabled={}", isReminderEnabled);
 
 		reminderInterval = parseProperty(prop, "com.openexchange.groupware.reminder.reminderInterval", reminderInterval);
-		if(LOG.isDebugEnabled()) {
-			LOG.debug("Reminder property: com.openexchange.groupware.reminder.reminderInterval=" + reminderInterval);
-		}
+		LOG.debug("Reminder property: com.openexchange.groupware.reminder.reminderInterval={}", reminderInterval);
 
 		isInit = true;
 	}

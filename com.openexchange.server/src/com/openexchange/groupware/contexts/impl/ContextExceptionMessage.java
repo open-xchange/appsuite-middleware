@@ -59,35 +59,16 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class ContextExceptionMessage implements LocalizableStrings {
 
+    public final static String NOT_FOUND_MSG = "The account %1$d was not found.";
+    public final static String UPDATE_MSG = "The server is currently down for maintenance. Please try again later.";
+    public final static String NO_CONNECTION_TO_CONTEXT_MSG = "Could not connect to the context storage.";
+    public final static String NO_MAPPING_MSG = "The account \"%1$s\" was not found.";
+
     /**
      * Initializes a new {@link ContextExceptionMessage}.
      */
     private ContextExceptionMessage() {
         super();
     }
-
-    // Mailadmin for a context is missing.
-    public final static String NO_MAILADMIN_MSG = "Cannot resolve mailadmin for context %d.";
-
-    // Cannot find context %d.
-    public final static String NOT_FOUND_MSG = "Cannot find context %d.";
-
-    // No connection to database.
-    public final static String NO_CONNECTION_MSG = "Cannot get connection to database.";
-
-    // SQL problem: %1$s.
-    public final static String SQL_ERROR_MSG = "SQL problem: %1$s.";
-
-    // Updating database ... Try again later.
-    public final static String UPDATE_MSG = "Updating database ... Try again later.";
-
-    // Problem initializing the cache.
-    public final static String CACHE_INIT_MSG = "Problem initializing the cache.";
-
-    // Cannot remove object %s from cache.
-    public final static String CACHE_REMOVE_MSG = "Object %s can not be removed from cache.";
-
-    // Cannot find context "%s".
-    public final static String NO_MAPPING_MSG = "Context \"%s\" cannot be found.";
 
 }

@@ -62,7 +62,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+
 import junit.framework.Assert;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -85,6 +87,7 @@ import org.apache.http.impl.cookie.BasicClientCookie2;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
+
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -154,16 +157,24 @@ public class Executor extends Assert {
 
         final String urlString = protocol + "://" + hostname + request.getServletPath();
         final HttpUriRequest httpRequest;
-        switch (request.getMethod()) {
+        final Method method = request.getMethod();
+        switch (method) {
         case GET:
             httpRequest = new HttpGet(
                 addQueryParamsToUri(urlString, getGETParameter(session, request)));
             break;
         case POST:
             final HttpPost httpPost = new HttpPost(urlString + getURLParameter(session, request, true));
-            httpPost.setEntity( getBodyParameters(request));
-            httpPost.getParams().setParameter("Content-Type", "application/x-www-form-urlencoded");
-            //Kommt so nicht an, ist immer noch text/plain
+            String contentType = detectContentTypeHeader(request);
+
+            HttpEntity postEntity;
+            if ("multipart/form-data".equals(contentType)) {
+                postEntity = buildMultipartEntity(request);
+            } else {
+                postEntity = getBodyParameters(request);
+            }
+
+            httpPost.setEntity(postEntity);
             httpRequest = httpPost;
             break;
         case UPLOAD:
@@ -182,7 +193,13 @@ public class Executor extends Assert {
             throw AjaxExceptionCodes.IMVALID_PARAMETER.create(request.getMethod().name());
         }
         for (final Header header : request.getHeaders()) {
-            httpRequest.addHeader(header.getName(), header.getValue());
+            if (method == Method.POST ) {
+                if (!"Content-Type".equalsIgnoreCase(header.getName())) {
+                    httpRequest.addHeader(header.getName(), header.getValue());
+                }
+            } else {
+                httpRequest.addHeader(header.getName(), header.getValue());
+            }
         }
         // Test echo header
         final String echoHeaderName = AJAXConfig.getProperty(AJAXConfig.Property.ECHO_HEADER, "");
@@ -227,6 +244,16 @@ public class Executor extends Assert {
         retval.setParseDuration(parseDuration);
 
         return retval;
+    }
+
+    private static String detectContentTypeHeader(AJAXRequest<?> request) {
+        for (final Header header : request.getHeaders()) {
+            if ("Content-Type".equalsIgnoreCase(header.getName())) {
+                return header.getValue();
+            }
+        }
+
+        return null;
     }
 
     private static boolean isEmpty(final String string) {
@@ -418,6 +445,21 @@ public class Executor extends Assert {
 
         return new UrlEncodedFormEntity(pairs);
     }
+
+    private static HttpEntity buildMultipartEntity(AJAXRequest<?> request) throws IOException, JSONException {
+        MultipartEntity entity = new MultipartEntity();
+        for (final Parameter param : request.getParameters()) {
+            if (param instanceof FileParameter) {
+                entity.addPart(param.getName(), new InputStreamBody(
+                      ((FileParameter) param).getInputStream(),
+                      ((FileParameter) param).getMimeType(),
+                      ((FileParameter) param).getFileName()));
+            }
+        }
+
+        return entity;
+    }
+
     /*************************************
      *** Rewrite for HttpClient: End   ***
      *************************************/

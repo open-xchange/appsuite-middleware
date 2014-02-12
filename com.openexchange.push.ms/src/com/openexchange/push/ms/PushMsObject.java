@@ -58,9 +58,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.StringCollection;
 
 /**
@@ -70,7 +68,7 @@ import com.openexchange.tools.StringCollection;
  */
 public class PushMsObject extends AbstractPushMsObject implements Serializable {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushMsObject.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushMsObject.class);
 
     private static final long serialVersionUID = -8490584616201401142L;
 
@@ -158,7 +156,7 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
             InetAddress addr = InetAddress.getLocalHost();
             hostname = addr.getHostName();
         } catch (UnknownHostException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         this.hostname = hostname;
     }

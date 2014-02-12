@@ -54,7 +54,7 @@ import com.openexchange.management.AbstractManagementHouseKeeper;
 
 /**
  * {@link ManagementHouseKeeper}
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class ManagementHouseKeeper extends AbstractManagementHouseKeeper {
@@ -63,7 +63,7 @@ public class ManagementHouseKeeper extends AbstractManagementHouseKeeper {
 
     /**
      * Return the instance of the ManagementHouseKeeper singleton
-     * 
+     *
      * @return the instance of the ManagementHouseKeeper singleton
      */
     public static ManagementHouseKeeper getInstance() {

@@ -2,12 +2,40 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Logging Configuration
 Bundle-SymbolicName: com.openexchange.logging
-Bundle-Version: 7.4.1
+Bundle-Version: 7.4.2
 Bundle-Activator: com.openexchange.logging.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.osgi,
+Import-Package: ch.qos.logback.classic,
+ ch.qos.logback.classic.filter,
+ ch.qos.logback.classic.joran,
+ ch.qos.logback.classic.jul,
+ ch.qos.logback.classic.spi,
+ ch.qos.logback.classic.turbo,
+ ch.qos.logback.core,
+ ch.qos.logback.core.filter,
+ ch.qos.logback.core.spi,
+ com.openexchange.ajax.response,
+ com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.log,
+ com.openexchange.management,
+ com.openexchange.marker,
  com.openexchange.server,
- org.apache.commons.logging,
- org.apache.log4j;resolution:=optional,
- org.osgi.framework
+ javax.management,
+ javax.management.loading,
+ javax.management.modelmbean,
+ javax.management.monitor,
+ javax.management.openmbean,
+ javax.management.relation,
+ javax.management.remote,
+ javax.management.remote.rmi,
+ javax.management.timer,
+ org.apache.commons.lang,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j,
+ org.slf4j.bridge,
+ org.slf4j.helpers,
+ org.slf4j.impl,
+ org.slf4j.spi

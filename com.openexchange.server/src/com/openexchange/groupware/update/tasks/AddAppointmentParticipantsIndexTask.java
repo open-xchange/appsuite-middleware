@@ -55,8 +55,6 @@ import static com.openexchange.tools.update.Tools.createIndex;
 import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Schema;
@@ -69,7 +67,7 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public class AddAppointmentParticipantsIndexTask implements UpdateTask {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AddAppointmentParticipantsIndexTask.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AddAppointmentParticipantsIndexTask.class);
 
     public AddAppointmentParticipantsIndexTask() {
         super();
@@ -107,13 +105,13 @@ public class AddAppointmentParticipantsIndexTask implements UpdateTask {
             try {
                 String indexName = existsIndex(con, table, columns);
                 if (null == indexName) {
-                    LOG.info("Creating new index named member with columns (cid,member_uid,object_id) on table " + table + ".");
+                    LOG.info("Creating new index named member with columns (cid,member_uid,object_id) on table {}.", table);
                     createIndex(con, table, "member", columns, true);
                 } else {
-                    LOG.info("New unique index named " + indexName + " with columns (cid,member_uid,object_id) already exists on table " + table + ".");
+                    LOG.info("New unique index named {} with columns (cid,member_uid,object_id) already exists on table {}.", indexName, table);
                 }
             } catch (SQLException e) {
-                LOG.error("Problem correcting indexes on table " + table + ".", e);
+                LOG.error("Problem correcting indexes on table {}.", table, e);
             }
         }
     }

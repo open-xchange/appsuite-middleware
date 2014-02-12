@@ -49,7 +49,6 @@
 
 package com.openexchange.index.solr.osgi;
 
-import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleActivator;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
@@ -69,7 +68,6 @@ import com.openexchange.index.solr.groupware.IndexedFoldersCreateTableTask;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.SolrIndexFacadeService;
 import com.openexchange.index.solr.internal.SolrIndexManagementService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.solr.SolrAccessService;
 import com.openexchange.solr.SolrCoreConfigService;
@@ -86,7 +84,7 @@ import com.openexchange.user.UserService;
  */
 public class SolrIndexActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrIndexActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SolrIndexActivator.class);
 
     private SolrIndexFacadeService solrFacadeService;
 

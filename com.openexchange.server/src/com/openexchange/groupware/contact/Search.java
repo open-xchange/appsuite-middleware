@@ -50,7 +50,6 @@
 package com.openexchange.groupware.contact;
 
 import static com.openexchange.java.Autoboxing.I;
-import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.search.ContactSearchObject;

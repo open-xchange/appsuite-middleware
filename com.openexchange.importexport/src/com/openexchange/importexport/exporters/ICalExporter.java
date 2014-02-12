@@ -57,7 +57,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.apache.commons.logging.Log;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.data.conversion.ical.ConversionError;
@@ -83,7 +82,6 @@ import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Charsets;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -103,7 +101,8 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public class ICalExporter implements Exporter {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ICalExporter.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalExporter.class);
+
     private static final Date DATE_ZERO = new Date(0);
     private final static int[] _appointmentFields = {
         DataObject.OBJECT_ID,
@@ -249,7 +248,7 @@ public class ICalExporter implements Exporter {
                     try {
                         searchIterator.close();
                     } catch (final SearchIteratorException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
 
@@ -273,7 +272,7 @@ public class ICalExporter implements Exporter {
                     try {
                         searchIterator.close();
                     } catch (final SearchIteratorException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             } else {
@@ -380,7 +379,7 @@ public class ICalExporter implements Exporter {
             try {
                 versitWriter.close();
             } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }

@@ -49,11 +49,12 @@
 
 package com.openexchange.mail.smal.impl.index;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
@@ -87,7 +88,7 @@ import com.openexchange.sessiond.SessiondEventConstants;
  */
 public class SmalSessionEventHandler implements EventHandler {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SmalSessionEventHandler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SmalSessionEventHandler.class);
 
     private static final int MAX_OFFSET = 60000 * 5;
 
@@ -96,6 +97,16 @@ public class SmalSessionEventHandler implements EventHandler {
     private static final int PROGRESSION_RATE = 10;
 
     private static final long START_INTERVAL = 60000 * 60;
+
+    private final Set<String> handleAdded;
+
+    /**
+     * Initializes a new {@link SmalSessionEventHandler}.
+     */
+    public SmalSessionEventHandler() {
+        super();
+        handleAdded = new HashSet<String>(Arrays.asList(SessiondEventConstants.TOPIC_ADD_SESSION, SessiondEventConstants.TOPIC_REACTIVATE_SESSION, SessiondEventConstants.TOPIC_RESTORED_SESSION));
+    }
 
     @Override
     public void handleEvent(Event event) {
@@ -108,8 +119,7 @@ public class SmalSessionEventHandler implements EventHandler {
             }
 
             String topic = event.getTopic();
-            boolean isReactivation = SessiondEventConstants.TOPIC_REACTIVATE_SESSION.equals(topic);
-            if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic) || isReactivation) {
+            if (handleAdded.contains(topic)) {
                 Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
                 if (session.isTransient()) {
                     return;
@@ -120,7 +130,7 @@ public class SmalSessionEventHandler implements EventHandler {
                 if (!isIndexingPermitted(contextId, userId)) {
                     if (LOG.isDebugEnabled()) {
                         OXException e = IndexExceptionCodes.INDEXING_NOT_ENABLED.create(Types.EMAIL, userId, contextId);
-                        LOG.debug("Skipping event handling execution because: " + e.getMessage());
+                        LOG.debug("Skipping event handling execution", e);
                     }
                     return;
                 }
@@ -135,7 +145,7 @@ public class SmalSessionEventHandler implements EventHandler {
                 Map<Integer, Set<MailFolder>> allFolders = IndexableFoldersCalculator.calculatePrivateMailFolders(
                     session,
                     storageService);
-                scheduleFolderJobs(session, allFolders, indexingService, isReactivation);
+                scheduleFolderJobs(session, allFolders, indexingService, SessiondEventConstants.TOPIC_REACTIVATE_SESSION.equals(topic));
             }
         } catch (Exception e) {
             LOG.warn("Error while triggering mail indexing jobs.", e);

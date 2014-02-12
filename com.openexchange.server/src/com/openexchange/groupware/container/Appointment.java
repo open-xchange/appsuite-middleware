@@ -149,6 +149,7 @@ public class Appointment extends CalendarObject implements Cloneable {
      */
     public Appointment() {
         super();
+        topic = "ox/common/appointment";
     }
 
     // GET METHODS

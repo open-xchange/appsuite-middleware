@@ -76,7 +76,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class ResourceUpdate {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ResourceUpdate.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ResourceUpdate.class);
 
     private final User user;
 
@@ -193,7 +193,7 @@ public final class ResourceUpdate {
          * Check timestamp
          */
         if (clientLastModified != null && clientLastModified.getTime() < getOrig().getLastModified().getTime()) {
-            throw ResourceExceptionCode.CONCURRENT_MODIFICATION.create();
+            throw ResourceExceptionCode.CONCURRENT_MODIFICATION.create(resource.getSimpleName());
         }
         if (resource.isSimpleNameSet()) {
             if (isEmpty(resource.getSimpleName())) {

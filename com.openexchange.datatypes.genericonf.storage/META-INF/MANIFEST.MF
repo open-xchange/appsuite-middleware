@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Storage for Generic Configuration Plug-in
 Bundle-SymbolicName: com.openexchange.datatypes.genericonf.storage
-Bundle-Version: 7.4.1
+Bundle-Version: 7.4.2
 Bundle-Activator: com.openexchange.datatypes.genericonf.storage.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -23,6 +23,7 @@ Import-Package: com.openexchange.database,
  com.openexchange.tools.sql,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Export-Package: com.openexchange.datatypes.genericonf.storage,
  com.openexchange.datatypes.genericonf.storage.osgi.tools

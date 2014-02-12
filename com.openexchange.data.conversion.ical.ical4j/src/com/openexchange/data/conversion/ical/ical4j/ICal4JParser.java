@@ -85,7 +85,6 @@ import net.fortuna.ical4j.model.component.VFreeBusy;
 import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.DateProperty;
 import net.fortuna.ical4j.util.CompatibilityHints;
-import org.apache.commons.logging.Log;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.FreeBusyInformation;
@@ -103,7 +102,6 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
@@ -116,7 +114,7 @@ public class ICal4JParser implements ICalParser {
 
     private static final Charset UTF8 = Charsets.UTF_8;
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ICal4JParser.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICal4JParser.class);
 
     private static final Map<String, Integer> WEEKDAYS = new HashMap<String, Integer>(7);
     static {
@@ -150,7 +148,7 @@ public class ICal4JParser implements ICalParser {
         try {
             return parseAppointments(new ByteArrayInputStream(icalText.getBytes(UTF8)), defaultTZ, ctx, errors, warnings);
         } catch (final UnsupportedCharsetException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return Collections.emptyList();
     }
@@ -200,7 +198,7 @@ public class ICal4JParser implements ICalParser {
         try {
             return parseFreeBusy(new ByteArrayInputStream(icalText.getBytes(UTF8)), defaultTZ, ctx, errors, warnings);
         } catch (UnsupportedCharsetException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return Collections.emptyList();
 	}
@@ -228,7 +226,7 @@ public class ICal4JParser implements ICalParser {
                 }
             }
         } catch (UnsupportedCharsetException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             // IGNORE
         } catch (ConversionError e) {
         	errors.add(e);
@@ -282,7 +280,7 @@ public class ICal4JParser implements ICalParser {
         try {
             return parseTasks(new ByteArrayInputStream(icalText.getBytes(UTF8)), defaultTZ, ctx, errors, warnings);
         } catch (final UnsupportedCharsetException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return new LinkedList<Task>();
     }
@@ -475,18 +473,19 @@ public class ICal4JParser implements ICalParser {
             	workaroundFor20453(
             	workaroundFor27706And28942(
             	workaroundFor29282(
+            	workaroundFor30027(
             	removeAnnoyingWhitespaces(chunk.toString()
-                ))))))))))
+                )))))))))))
             ); // FIXME: Encoding?
             return builder.build(chunkedReader);
         } catch (final IOException e) {
             if (null == exceptions) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             } else {
                 exceptions.add(e);
             }
         } catch (final ParserException e) {
-            LOG.warn(e.getMessage(), e);
+            LOG.warn("", e);
             throw new ConversionError(-1, ConversionWarning.Code.PARSE_EXCEPTION, e, e.getMessage());
         }
         return null;
@@ -526,6 +525,8 @@ public class ICal4JParser implements ICalParser {
         }
 	    m.appendTail(sb);
 
+        // -------------------------------------------------------------------------------------------------- //
+
 	    m = Pattern.compile("COMPLETED;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
         sb.setLength(0);
         while (m.find()) {
@@ -533,6 +534,8 @@ public class ICal4JParser implements ICalParser {
             m.appendReplacement(sb, Strings.quoteReplacement("COMPLETED:" + getUtcPropertyFrom(m.group(2), tz)));
         }
         m.appendTail(sb);
+
+        // -------------------------------------------------------------------------------------------------- //
 
         m = Pattern.compile("LAST-MODIFIED;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
         sb.setLength(0);
@@ -542,6 +545,8 @@ public class ICal4JParser implements ICalParser {
         }
         m.appendTail(sb);
 
+        // -------------------------------------------------------------------------------------------------- //
+
         m = Pattern.compile("CREATED;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
         sb.setLength(0);
         while (m.find()) {
@@ -549,6 +554,8 @@ public class ICal4JParser implements ICalParser {
             m.appendReplacement(sb, Strings.quoteReplacement("CREATED:" + getUtcPropertyFrom(m.group(2), tz)));
         }
         m.appendTail(sb);
+
+        // -------------------------------------------------------------------------------------------------- //
 
         m = Pattern.compile("TRIGGER;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
         sb.setLength(0);
@@ -581,6 +588,17 @@ public class ICal4JParser implements ICalParser {
             return s;
         }
 	}
+
+	private String workaroundFor30027(final String input) {
+        final Matcher m = Pattern.compile(":\\s{2,}([0-9]{8}T[0-9]{6}Z?)[ \\t]*").matcher(input);
+        final StringBuffer sb = new StringBuffer(input.length());
+        while (m.find()) {
+            m.appendReplacement(sb, ": $1");
+        }
+        m.appendTail(sb);
+
+        return sb.toString();
+    }
 
 	/**
      * Method written out of laziness: Because you can spread iCal attributes

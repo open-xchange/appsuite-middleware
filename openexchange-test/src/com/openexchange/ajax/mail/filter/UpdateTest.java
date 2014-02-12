@@ -1,6 +1,5 @@
 package com.openexchange.ajax.mail.filter;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.mail.filter.action.AbstractAction;
@@ -10,7 +9,7 @@ import com.openexchange.ajax.mail.filter.test.HeaderTest;
 
 public class UpdateTest extends AbstractMailFilterTest {
 
-	private static final Log LOG = LogFactory.getLog(UpdateTest.class);
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateTest.class);
 
 	public static final int[] cols = { Rule.ID };
 

@@ -59,11 +59,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.util.concurrent.atomic.AtomicLong;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.pooling.PoolingException;
 
 /**
@@ -73,7 +71,7 @@ import com.openexchange.pooling.PoolingException;
  */
 public class ReplicationMonitor {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReplicationMonitor.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReplicationMonitor.class);
 
     private final FetchAndSchema TIMEOUT = new TimeoutFetchAndSchema(this);
     private final FetchAndSchema NOTIMEOUT = new NotimeoutFetchAndSchema(this);
@@ -112,7 +110,7 @@ public class ReplicationMonitor {
                     throw e1;
                 }
                 // Try fallback to master.
-                LOG.warn(e1.getMessage(), e1);
+                LOG.warn("", e1);
                 try {
                     retval = fetch.get(pools, assign, true, true);
                     incrementInstead();
@@ -140,8 +138,13 @@ public class ReplicationMonitor {
             try {
                 retval = fetch.get(pools, assign, write, false);
                 incrementFetched(assign, write);
-            } catch (PoolingException e) {
-                OXException e1 = createException(assign, write, e);
+            } catch (Exception e) {
+                final OXException e1;
+                if (e instanceof OXException) {
+                    e1 = (OXException) e;
+                } else {
+                    e1 = createException(assign, write, e);
+                }
                 // Immediately fail if connection to master is wanted or no fallback is there.
                 if (write || assign.getWritePoolId() == assign.getReadPoolId()) {
                     throw e1;
@@ -159,7 +162,7 @@ public class ReplicationMonitor {
                 try {
                     clientTransaction = readTransaction(retval, assign.getContextId());
                 } catch (final OXException e) {
-                    LOG.warn(e.getMessage(), e);
+                    LOG.warn("", e);
                     if (10 == tries) {
                         // Do a fall back to the master.
                         clientTransaction = -1;
@@ -168,7 +171,7 @@ public class ReplicationMonitor {
                             retval.close();
                         } catch (final SQLException e1) {
                             OXException e2 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-                            LOG.error(e2.getMessage(), e2);
+                            LOG.error("", e2);
                         }
                         retval = null;
                     }
@@ -179,7 +182,7 @@ public class ReplicationMonitor {
             throw createException(assign, write, null);
         }
         if (!write && assign.isTransactionInitialized() && !isUpToDate(assign.getTransaction(), clientTransaction)) {
-            LOG.debug("Slave " + assign.getReadPoolId() + " is not actual. Using master " + assign.getWritePoolId() + " instead.");
+            LOG.debug("Slave {} is not actual. Using master {} instead.", assign.getReadPoolId(), assign.getWritePoolId());
             final Connection toReturn = retval;
             try {
                 retval = fetch.get(pools, assign, true, true);
@@ -188,12 +191,12 @@ public class ReplicationMonitor {
                     toReturn.close();
                 } catch (final SQLException e) {
                     final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-                    LOG.error(e1.getMessage(), e1);
+                    LOG.error("", e1);
                 }
             } catch (final PoolingException e) {
                 // Use not actual slave if master connection cannot be obtained.
                 final OXException e1 = createException(assign, true, e);
-                LOG.warn(e1.getMessage(), e1);
+                LOG.warn("", e1);
             }
         }
         return retval;
@@ -225,7 +228,7 @@ public class ReplicationMonitor {
                         try {
                             assign.setTransaction(readTransaction(con, assign.getContextId()));
                         } catch (OXException e) {
-                            LOG.warn(e.getMessage(), e);
+                            LOG.warn("", e);
                         }
                     }
                     // Warn if a master connection was only used for reading.
@@ -242,7 +245,7 @@ public class ReplicationMonitor {
         try {
             pool = pools.getPool(poolId);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return;
         }
         if (noTimeout) {
@@ -253,7 +256,7 @@ public class ReplicationMonitor {
             } catch (final PoolingException e) {
                 DBUtils.close(con);
                 final OXException e1 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
-                LOG.error(e1.getMessage(), e1);
+                LOG.error("", e1);
             }
         }
     }
@@ -301,7 +304,7 @@ public class ReplicationMonitor {
             if (result.next()) {
                 assign.setTransaction(result.getLong(1));
             } else {
-                LOG.error("Updating transaction for replication monitor failed for context " + contextId + ".");
+                LOG.error("Updating transaction for replication monitor failed for context {}.", contextId);
             }
         } finally {
             closeSQLStuff(result, stmt);
@@ -315,12 +318,15 @@ public class ReplicationMonitor {
             increaseCounter(assign, con);
             con.releaseSavepoint(save);
         } catch (SQLException e) {
-            rollback(con, save);
+            if (1213 != e.getErrorCode()) {
+                // In case of a transaction deadlock MySQL already rolled the transaction back. Then the savepoint does not exist anymore.
+                rollback(con, save);
+            }
             throw e;
         }
     }
 
-    private void increateCounterSeparateTransaction(AssignmentImpl assign, Connection con) {
+    private void increaseCounterSeparateTransaction(AssignmentImpl assign, Connection con) {
         try {
             con.setAutoCommit(false);
             increaseCounter(assign, con);
@@ -331,11 +337,11 @@ public class ReplicationMonitor {
                 if (lastLogged + 300000 < System.currentTimeMillis()) {
                     lastLogged = System.currentTimeMillis();
                     final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-                    LOG.error(e1.getMessage(), e1);
+                    LOG.error("", e1);
                 }
             } else {
                 final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-                LOG.error(e1.getMessage(), e1);
+                LOG.error("", e1);
             }
         } finally {
             autocommit(con);
@@ -373,10 +379,10 @@ public class ReplicationMonitor {
             }
         } catch (SQLException e) {
             final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            LOG.error(e1.getMessage(), e1);
+            LOG.error("", e1);
             return;
         }
-        increateCounterSeparateTransaction(assign, con);
+        increaseCounterSeparateTransaction(assign, con);
     }
 
     public void increaseInCurrentTransaction(AssignmentImpl assign, Connection delegate, ConnectionState state) {
@@ -392,11 +398,11 @@ public class ReplicationMonitor {
                 if (lastLogged + 300000 < System.currentTimeMillis()) {
                     lastLogged = System.currentTimeMillis();
                     final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-                    LOG.error(e1.getMessage(), e1);
+                    LOG.error("", e1);
                 }
             } else {
                 final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-                LOG.error(e1.getMessage(), e1);
+                LOG.error("", e1);
             }
         }
     }

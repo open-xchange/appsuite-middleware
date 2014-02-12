@@ -59,7 +59,6 @@ import java.util.Queue;
 import java.util.UUID;
 
 import org.apache.cassandra.utils.ByteBufferUtil;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -89,7 +88,7 @@ import com.openexchange.loxandra.impl.cassandra.CassandraEAVContactFactoryServic
  */
 public class TransactionManager {
 
-	private static final Log log = com.openexchange.log.Log.loggerFor(TransactionManager.class);
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TransactionManager.class);
 
 	private static Map<String, Queue<Transaction>> queue;
 
@@ -313,7 +312,7 @@ public class TransactionManager {
 		 		q.add(tx);
 		 		queue.put(key, q);
 
-		 		log.info("waiting for lock " + key + " to be released");
+		 		log.info("waiting for lock {} to be released", key);
 
 		 		return lockAcquired;
 		 	}

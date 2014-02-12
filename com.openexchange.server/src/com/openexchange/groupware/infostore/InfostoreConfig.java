@@ -50,7 +50,7 @@
 package com.openexchange.groupware.infostore;
 
 import java.io.File;
-import org.apache.commons.logging.Log;
+import java.text.MessageFormat;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
@@ -66,7 +66,7 @@ import com.openexchange.tools.conf.AbstractConfig;
 
 public class InfostoreConfig extends AbstractConfig implements Initialization {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreConfig.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreConfig.class);
 
     /**
      * InfoStore properties.
@@ -148,7 +148,7 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
         try {
             size = Long.parseLong(sizeS.trim());
         } catch (final NumberFormatException e) {
-            LOG.warn(InfoProperty.MAX_UPLOAD_SIZE.name() + " is not a number: " + sizeS + ". Fall-back to system upload limitation.");
+            LOG.warn("{} is not a number: {}. Fall-back to system upload limitation.", InfoProperty.MAX_UPLOAD_SIZE.name(), sizeS);
             size = -1;
         }
         if (size < 0) {
@@ -165,7 +165,7 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
         try {
             return Long.parseLong(sizeS.trim());
         } catch (final NumberFormatException e) {
-            LOG.warn(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE.name() + " is not a number: " + sizeS + ". Fall-back to no upload limitation for InfoStore module.");
+            LOG.warn("{} is not a number: {}. Fall-back to no upload limitation for InfoStore module.", com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE.name(), sizeS);
             return 0;
         }
     }

@@ -54,10 +54,8 @@ import java.util.Dictionary;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-import org.apache.commons.logging.Log;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -67,7 +65,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public abstract class AbstractServletActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractServletActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractServletActivator.class);
 
     private final List<String> servlets = new ArrayList<String>();
 
@@ -80,9 +78,9 @@ public abstract class AbstractServletActivator extends HousekeepingActivator {
             httpService.registerServlet(alias, servlet, params, null);
             servlets.add(alias);
         } catch (final ServletException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         } catch (final NamespaceException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
@@ -99,7 +97,7 @@ public abstract class AbstractServletActivator extends HousekeepingActivator {
                 try {
                     httpService.unregister(servlet);
                 } catch (final Exception e) {
-                    LOG.warn("Failed to unregister servlet alias: " + servlet, e);
+                    LOG.warn("Failed to unregister servlet alias: {}", servlet, e);
                 }
             }
         }

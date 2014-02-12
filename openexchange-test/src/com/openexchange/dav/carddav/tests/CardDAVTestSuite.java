@@ -54,7 +54,7 @@ import junit.framework.TestSuite;
 
 /**
  * {@link CardDAVTestSuite} - Testsuite for the CardDAV interface.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public final class CardDAVTestSuite {
@@ -72,6 +72,7 @@ public final class CardDAVTestSuite {
         suite.addTestSuite(MoveTest.class);
         suite.addTestSuite(UpgradeTest.class);
         suite.addTestSuite(ImageTest.class);
+        suite.addTestSuite(CookieTest.class);
         return suite;
     }
 }

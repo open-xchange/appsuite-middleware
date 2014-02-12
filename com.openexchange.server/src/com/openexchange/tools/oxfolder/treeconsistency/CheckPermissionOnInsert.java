@@ -77,7 +77,7 @@ import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
  */
 public final class CheckPermissionOnInsert extends CheckPermission {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CheckPermissionOnInsert.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CheckPermissionOnInsert.class);
 
     /**
      * Initializes a new {@link CheckPermissionOnInsert}
@@ -125,22 +125,12 @@ public final class CheckPermissionOnInsert extends CheckPermission {
                     final ToDoPermission toDoPermission = it.value();
                     final int[] users = toDoPermission.getUsers();
                     for (int j = 0; j < users.length; j++) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Auto-Insert system-folder-read permission for user " + UserStorage.getStorageUser(users[j], ctx).getDisplayName() + " to folder " + folderId);
-                        }
+                        LOG.debug("Auto-Insert system-folder-read permission for user {} to folder {}", UserStorage.getInstance().getUser(users[j], ctx).getDisplayName(), folderId);
                         addSystemFolderReadPermission(folderId, users[j], false);
                     }
                     final int[] groups = toDoPermission.getGroups();
                     for (int j = 0; j < groups.length; j++) {
-                        if (LOG.isDebugEnabled()) {
-                            try {
-                                LOG.debug("Auto-Insert system-folder-read permission for group " + GroupStorage.getInstance().getGroup(
-                                    groups[j],
-                                    ctx).getDisplayName() + " to folder " + folderId);
-                            } catch (final OXException e) {
-                                LOG.trace("Logging failed", e);
-                            }
-                        }
+                        LOG.debug("Auto-Insert system-folder-read permission for group {} to folder {}", GroupStorage.getInstance().getGroup(groups[j], ctx).getDisplayName(), folderId);
                         addSystemFolderReadPermission(folderId, groups[j], true);
                     }
                     /*
@@ -163,7 +153,7 @@ public final class CheckPermissionOnInsert extends CheckPermission {
                             CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
                         }
                     } catch (final OXException e) {
-                        LOG.error(e.getMessage(), e);
+                        LOG.error("", e);
                     }
                 }
             }

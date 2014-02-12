@@ -52,12 +52,10 @@ package com.openexchange.configuration;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
 import java.util.Properties;
-import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 
 /**
  * This class handles the configuration parameters read from the configuration property file server.properties.
@@ -66,7 +64,7 @@ import com.openexchange.log.LogFactory;
  */
 public final class ServerConfig {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServerConfig.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServerConfig.class);
 
     /**
      * Singleton object.
@@ -124,11 +122,11 @@ public final class ServerConfig {
     public void initialize(final ConfigurationService confService) {
         final Properties newProps = confService.getFile(FILENAME);
         if (null == newProps) {
-            LOG.info("Configuration file " + FILENAME + " is missing. Using defaults.");
+            LOG.info("Configuration file {} is missing. Using defaults.", FILENAME);
         } else {
             this.props.clear();
             this.props.putAll(newProps);
-            LOG.info("Read configuration file " + FILENAME + ".");
+            LOG.info("Read configuration file {}.", FILENAME);
         }
         reinit();
     }
@@ -149,12 +147,10 @@ public final class ServerConfig {
             if (new File(uploadDirectory).mkdir()) {
                 Runtime.getRuntime().exec("chmod 700 " + uploadDirectory);
                 Runtime.getRuntime().exec("chown open-xchange:open-xchange " + uploadDirectory);
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Temporary upload directory created");
-                }
+                LOG.info("Temporary upload directory created");
             }
         } catch (final Exception e) {
-            LOG.error("Temporary upload directory could NOT be properly created");
+            LOG.error("Temporary upload directory could NOT be properly created", e);
         }
         // MAX_FILE_UPLOAD_SIZE
         try {
@@ -270,7 +266,7 @@ public final class ServerConfig {
             }
             return (V) value;
         } catch (final ClassCastException e) {
-            LOG.debug(e.getMessage(), e);
+            LOG.debug("", e);
             return null;
         }
     }

@@ -68,7 +68,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 public final class Rtf2HtmlConverter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Rtf2HtmlConverter.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Rtf2HtmlConverter.class);
 
     private static final class HTMLStateMachine {
 
@@ -399,10 +399,10 @@ public final class Rtf2HtmlConverter {
         try {
             rtfeditorkit.read(new UnsynchronizedByteArrayInputStream(Charsets.toAsciiBytes(s)), document, 0);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return;
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return;
         }
     }
@@ -415,7 +415,7 @@ public final class Rtf2HtmlConverter {
             hsm.closeTags(sb);
             return sb.toString();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return "";
     }
@@ -443,7 +443,7 @@ public final class Rtf2HtmlConverter {
                 sb.append(s);
             }
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return;
         }
     }

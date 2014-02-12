@@ -79,8 +79,8 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "Response with timestamp: An array with new, modified and deleted resources. New, modified and deleted resources are represented by JSON objects as described in Resource response.")
 public final class UpdatesAction extends AbstractResourceAction {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UpdatesAction.class));
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(UpdatesAction.class);
 
     /**
      * Initializes a new {@link UpdatesAction}.
@@ -101,7 +101,7 @@ public final class UpdatesAction extends AbstractResourceAction {
             updatedResources = resService .listModified(lastModified, session.getContext());
             deletedResources = resService.listDeleted(lastModified, session.getContext());
         } catch (final OXException exc) {
-            LOG.debug("Tried to find resources that were modified since "+lastModified, exc);
+            LOG.debug("Tried to find resources that were modified since {}", lastModified, exc);
         }
 
         final JSONArray modified = new JSONArray();

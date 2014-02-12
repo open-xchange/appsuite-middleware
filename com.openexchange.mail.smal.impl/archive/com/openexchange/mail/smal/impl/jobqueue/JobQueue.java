@@ -59,8 +59,6 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.smal.impl.SmalServiceLookup;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.behavior.AbortBehavior;
@@ -127,7 +125,7 @@ public final class JobQueue {
         identifiers = new ConcurrentHashMap<String, Job>(CAPACITY);
         consumer = new JobConsumer(queue, identifiers, false, jobCounter);
         consumerFuture = threadPool.submit(consumer, AbortBehavior.getInstance());
-        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(JobQueue.class));
+        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(JobQueue.class);
         logger.info("\n\tSMAL JobQueue orderly started.");
     }
 
@@ -149,8 +147,8 @@ public final class JobQueue {
         } catch (final ExecutionException e) {
             // What?!
             final Throwable t = e.getCause();
-            final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(JobQueue.class));
-            log.error(t.getMessage(), t);
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JobQueue.class);
+            log.error("", t);
         }
     }
 

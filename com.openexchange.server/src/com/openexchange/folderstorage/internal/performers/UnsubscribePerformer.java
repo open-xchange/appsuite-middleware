@@ -74,8 +74,9 @@ public final class UnsubscribePerformer extends AbstractPerformer {
      * Initializes a new {@link UnsubscribePerformer}.
      *
      * @param session
+     * @throws OXException If passed session is invalid
      */
-    public UnsubscribePerformer(final ServerSession session) {
+    public UnsubscribePerformer(final ServerSession session) throws OXException {
         super(session);
     }
 
@@ -94,8 +95,9 @@ public final class UnsubscribePerformer extends AbstractPerformer {
      *
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
+     * @throws OXException If passed session is invalid
      */
-    public UnsubscribePerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public UnsubscribePerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(session, folderStorageDiscoverer);
     }
 

@@ -77,14 +77,14 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
         publicationsToDelete.add(I(pub1.getId()));
 
         final SELECT select = new SELECT(ASTERISK).
-        FROM(publications).
-        WHERE(new EQUALS("id", I(pub1.getId())).
-            AND(new EQUALS("cid", I(ctx.getContextId()))).
-            AND(new EQUALS("user_id", I(pub1.getUserId()))).
-            AND(new EQUALS("entity", pub1.getEntityId())).
-            AND(new EQUALS("module", pub1.getModule())).
-            AND(new EQUALS("target_id", pub1.getTarget().getId())).
-            AND(new EQUALS("enabled", pub1.isEnabled())));
+            FROM(publications).
+            WHERE(new EQUALS("id", I(pub1.getId())).
+                AND(new EQUALS("cid", I(ctx.getContextId()))).
+                AND(new EQUALS("user_id", I(pub1.getUserId()))).
+                AND(new EQUALS("entity", pub1.getEntityId())).
+                AND(new EQUALS("module", pub1.getModule())).
+                AND(new EQUALS("target_id", pub1.getTarget().getId())).
+                AND(new EQUALS("enabled", pub1.isEnabled())));
         assertResult(new StatementBuilder().buildCommand(select));
     }
 
@@ -96,13 +96,13 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
         storage.forgetPublication(pub1);
 
         final SELECT select = new SELECT(ASTERISK).
-        FROM(publications).
-        WHERE(new EQUALS("id", I(pub1.getId())).
-            AND(new EQUALS("cid", I(ctx.getContextId()))).
-            AND(new EQUALS("user_id", I(pub1.getUserId()))).
-            AND(new EQUALS("entity", pub1.getEntityId())).
-            AND(new EQUALS("module", pub1.getModule())).
-            AND(new EQUALS("target_id", pub1.getTarget().getId())));
+            FROM(publications).
+            WHERE(new EQUALS("id", I(pub1.getId())).
+                AND(new EQUALS("cid", I(ctx.getContextId()))).
+                AND(new EQUALS("user_id", I(pub1.getUserId()))).
+                AND(new EQUALS("entity", pub1.getEntityId())).
+                AND(new EQUALS("module", pub1.getModule())).
+                AND(new EQUALS("target_id", pub1.getTarget().getId())));
 
         assertNoResult(new StatementBuilder().buildCommand(select));
     }
@@ -192,13 +192,13 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
         assertEquals("Id should not changed", pub1.getId(), pub2.getId());
 
         final SELECT select = new SELECT(ASTERISK).
-        FROM(publications).
-        WHERE(new EQUALS("id", I(pub1.getId())).
-            AND(new EQUALS("cid", I(ctx.getContextId()))).
-            AND(new EQUALS("user_id", I(pub2.getUserId()))).
-            AND(new EQUALS("entity", "3546")).
-            AND(new EQUALS("module", "newModule")).
-            AND(new EQUALS("target_id", pub2.getTarget().getId())));
+            FROM(publications).
+            WHERE(new EQUALS("id", I(pub1.getId())).
+                AND(new EQUALS("cid", I(ctx.getContextId()))).
+                AND(new EQUALS("user_id", I(pub2.getUserId()))).
+                AND(new EQUALS("entity", "3546")).
+                AND(new EQUALS("module", "newModule")).
+                AND(new EQUALS("target_id", pub2.getTarget().getId())));
 
         assertResult(new StatementBuilder().buildCommand(select));
     }
@@ -210,7 +210,7 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
             publicationsToDelete.add(I(pub1.getId()));
             fail("Exception expected");
         } catch (final OXException e) {
-            assertTrue("Wrong error code", PublicationErrorMessage.IDGiven.equals(e));
+            assertTrue("Wrong error code", PublicationErrorMessage.ID_GIVEN_EXCEPTION.equals(e));
         }
     }
 
@@ -249,14 +249,14 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
         assertEquals("Id should not changed", pub1.getId(), pub2.getId());
 
         final SELECT select = new SELECT(ASTERISK).
-        FROM(publications).
-        WHERE(new EQUALS("id", I(pub1.getId())).
-            AND(new EQUALS("cid", I(ctx.getContextId()))).
-            AND(new EQUALS("user_id", I(pub2.getUserId()))).
-            AND(new EQUALS("entity", "3546")).
-            AND(new EQUALS("module", "newModule")).
-            AND(new EQUALS("target_id", pub2.getTarget().getId())).
-            AND(new EQUALS("enabled", false)));
+            FROM(publications).
+            WHERE(new EQUALS("id", I(pub1.getId())).
+                AND(new EQUALS("cid", I(ctx.getContextId()))).
+                AND(new EQUALS("user_id", I(pub2.getUserId()))).
+                AND(new EQUALS("entity", "3546")).
+                AND(new EQUALS("module", "newModule")).
+                AND(new EQUALS("target_id", pub2.getTarget().getId())).
+                AND(new EQUALS("enabled", false)));
 
         assertResult(new StatementBuilder().buildCommand(select));
 
@@ -273,14 +273,14 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
         assertEquals("Id should not changed", pub1.getId(), pub2.getId());
 
         final SELECT select = new SELECT(ASTERISK).
-        FROM(publications).
-        WHERE(new EQUALS("id", I(pub1.getId())).
-            AND(new EQUALS("cid", I(ctx.getContextId()))).
-            AND(new EQUALS("user_id", I(pub2.getUserId()))).
-            AND(new EQUALS("entity", "3546")).
-            AND(new EQUALS("module", "newModule")).
-            AND(new EQUALS("target_id", pub2.getTarget().getId())).
-            AND(new EQUALS("enabled", true)));
+            FROM(publications).
+            WHERE(new EQUALS("id", I(pub1.getId())).
+                AND(new EQUALS("cid", I(ctx.getContextId()))).
+                AND(new EQUALS("user_id", I(pub2.getUserId()))).
+                AND(new EQUALS("entity", "3546")).
+                AND(new EQUALS("module", "newModule")).
+                AND(new EQUALS("target_id", pub2.getTarget().getId())).
+                AND(new EQUALS("enabled", true)));
 
         assertResult(new StatementBuilder().buildCommand(select));
 
@@ -291,7 +291,7 @@ public class PublicationSQLTest extends AbstractPublicationSQLStorageTest {
         assertTrue("Id should be greater 0", pub2.getId() > 0);
         publicationsToDelete.add(I(pub2.getId()));
 
-        final SELECT select = new SELECT(ASTERISK).
+        new SELECT(ASTERISK).
         FROM(publications).
         WHERE(new EQUALS("id", I(pub2.getId())).
             AND(new EQUALS("cid", I(ctx.getContextId()))).

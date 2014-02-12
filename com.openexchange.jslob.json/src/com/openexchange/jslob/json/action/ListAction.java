@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -76,8 +75,7 @@ import com.openexchange.server.ServiceLookup;
 @Action(name = "list", description = "Get a list of JSlobs associated with the current user and context.", method = RequestMethod.PUT, parameters = { @Parameter(name = "serviceId", description = "Optional identifier for the JSlob. Default is <tt>com.openexchange.jslob.config</tt>", optional = true) }, requestBody = "An array containing JSlob identifiers.", responseDescription = "An array containing JSlobs.")
 public final class ListAction extends JSlobAction {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ListAction.class);
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ListAction.class);
 
     /**
      * Initializes a new {@link ListAction}.

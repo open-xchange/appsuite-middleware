@@ -51,8 +51,6 @@ package com.openexchange.admin.rmi.impl;
 import java.rmi.RemoteException;
 import java.util.concurrent.ExecutionException;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.OXTaskMgmtInterface;
@@ -75,7 +73,7 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
         this.cache = ClientAdminThread.cache;
     }
 
-    private static final Log log = LogFactory.getLog(OXTaskMgmtImpl.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXTaskMgmtImpl.class);
 
     private void doAuth(final Credentials creds, final Context ctx) throws InvalidCredentialsException, StorageException, InvalidDataException {
         if( cache.isMasterAdmin(creds) ) {
@@ -100,16 +98,16 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
                 TaskManager.getInstance().deleteJob(id, ctx.getId());
             }
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final TaskManagerException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -125,16 +123,16 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
                 TaskManager.getInstance().flush(ctx.getId());
             }
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final TaskManagerException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -150,13 +148,13 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
                 return TaskManager.getInstance().getJobList(ctx.getId());
             }
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         }
     }
@@ -172,19 +170,19 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
                 return getTaskResults(id, ctx.getId());
             }
         } catch (final InvalidCredentialsException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final StorageException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (final InterruptedException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw e;
         } catch (TaskManagerException e) {
-            log.error(e.getMessage(), e);
+            log.error("", e);
             throw new InvalidDataException(e.getMessage());
         }
     }

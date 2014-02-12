@@ -52,11 +52,9 @@ package com.openexchange.publish.helpers;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
-import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.PublicationService;
@@ -75,7 +73,7 @@ public abstract class AbstractPublicationService implements PublicationService {
         CREATE, DELETE, UPDATE;
     }
 
-    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractPublicationService.class));
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractPublicationService.class);
 
     public static SecurityStrategy ALLOW_ALL = new AllowEverything();
 
@@ -120,9 +118,7 @@ public abstract class AbstractPublicationService implements PublicationService {
                 returnPublications.add(publication);
             } catch (OXException e) {
                 if (InfostoreExceptionCodes.NOT_EXIST.equals(e)){
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e.getLogMessage());
-                    }
+                    LOG.debug("", e);
                 } else {
                     throw e;
                 }
@@ -143,9 +139,7 @@ public abstract class AbstractPublicationService implements PublicationService {
                 returnPublications.add(publication);
             } catch (OXException e) {
                 if (InfostoreExceptionCodes.NOT_EXIST.equals(e)){
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e.getLogMessage());
-                    }
+                    LOG.debug("", e);
                 } else {
                     throw e;
                 }
@@ -157,24 +151,22 @@ public abstract class AbstractPublicationService implements PublicationService {
 
     @Override
     public Collection<Publication> getAllPublications(final Context ctx, final int userId, final String module) throws OXException {
-    	List<Publication> publications;
-    	List<Publication> returnPublications = new ArrayList<Publication>();
-    	if (module == null) {
-    		publications = STORAGE.getPublicationsOfUser(ctx, userId);
-    	} else {
-    		publications = STORAGE.getPublicationsOfUser(ctx, userId, module);
-    	}
+        List<Publication> publications;
+        List<Publication> returnPublications = new ArrayList<Publication>();
+        if (module == null) {
+            publications = STORAGE.getPublicationsOfUser(ctx, userId);
+        } else {
+            publications = STORAGE.getPublicationsOfUser(ctx, userId, module);
+        }
 
-    	for (final Publication publication : publications) {
-    	    /* as some publications are not working anymore, we should at least filter out the not working ones and write them to LOG */
+        for (final Publication publication : publications) {
+            /* as some publications are not working anymore, we should at least filter out the not working ones and write them to LOG */
             try {
                 modifyOutgoing(publication);
                 returnPublications.add(publication);
             } catch (OXException e) {
                 if (InfostoreExceptionCodes.NOT_EXIST.equals(e)){
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e.getLogMessage());
-                    }
+                    LOG.debug("", e);
                 } else {
                     throw e;
                 }
@@ -271,10 +263,6 @@ public abstract class AbstractPublicationService implements PublicationService {
         // Empty method
     }
 
-    public OXException uniquenessConstraintViolation(final String key, final String value) {
-        return PublicationErrorMessage.UniquenessConstraintViolation.create(value, key);
-    }
-
     public void checkPermission(final Permission permission, final Publication publication) throws OXException {
         boolean allow = false;
         try {
@@ -293,7 +281,7 @@ public abstract class AbstractPublicationService implements PublicationService {
             throw x;
         }
         if (!allow) {
-            throw PublicationErrorMessage.AccessDenied.create(permission);
+            throw PublicationErrorMessage.ACCESS_DENIED_EXCEPTION.create(permission);
         }
     }
 

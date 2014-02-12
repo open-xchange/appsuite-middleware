@@ -76,7 +76,7 @@ import com.openexchange.user.UserService;
  */
 public final class UnifiedInboxActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UnifiedInboxActivator.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UnifiedInboxActivator.class);
 
     /**
      * Initializes a new {@link UnifiedInboxActivator}
@@ -94,17 +94,13 @@ public final class UnifiedInboxActivator extends HousekeepingActivator {
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
+        LOG.warn("Absent service: {}", clazz.getName());
         getServiceRegistry().removeService(clazz);
     }
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
+        LOG.info("Re-available service: {}", clazz.getName());
         getServiceRegistry().addService(clazz, getService(clazz));
     }
 
@@ -155,7 +151,7 @@ public final class UnifiedInboxActivator extends HousekeepingActivator {
                 UnifiedInboxSynchronousQueueProvider.initInstance("1.5".compareTo(property) < 0);
             }
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -170,7 +166,7 @@ public final class UnifiedInboxActivator extends HousekeepingActivator {
              */
             getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw e;
         }
     }

@@ -63,7 +63,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.model.OAuthRequest;
@@ -73,7 +72,6 @@ import org.w3c.dom.Element;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.messaging.IndexRange;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAddressHeader;
@@ -328,7 +326,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                         FacebookMessagingExceptionCodes.FQL_QUERY_RESULT_MISMATCH.create(
                             Integer.valueOf(size),
                             Integer.valueOf(messageIds.length));
-                    com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookMessagingMessageAccess.class)).debug(warning.getMessage(), warning);
+                    org.slf4j.LoggerFactory.getLogger(FacebookMessagingMessageAccess.class).debug("", warning);
                 }
                 final Iterator<JSONObject> iterator = results.iterator();
                 final Map<String, FacebookMessagingMessage> orderMap = new HashMap<String, FacebookMessagingMessage>(size);
@@ -866,10 +864,8 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
          * Check if any entity is missing
          */
         if (!safetyCheck.isEmpty()) {
-            final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(FacebookMessagingMessageAccess.class));
-            if (logger.isWarnEnabled()) {
-                logger.warn("Information of following Facebook " + (group ? "groups" : "users") + " are missing: " + Arrays.toString(safetyCheck.toArray()));
-            }
+            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(FacebookMessagingMessageAccess.class);
+            logger.warn("Information of following Facebook {} are missing: {}", (group ? "groups" : "users"), Arrays.toString(safetyCheck.toArray()));
             if (retrySafetyCheck) {
                 for (final TLongIterator iter = safetyCheck.iterator(); iter.hasNext();) {
                     final long missingId = iter.next();
@@ -891,9 +887,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                         /*
                          * Entity not visible
                          */
-                        if (logger.isWarnEnabled()) {
-                            logger.warn("FQL query delivered no result(s):\n" + fqlQuery.getCharSequence());
-                        }
+                        logger.warn("FQL query delivered no result(s):\n{}", fqlQuery.getCharSequence());
                         /*
                          * Remove corresponding messages.
                          */

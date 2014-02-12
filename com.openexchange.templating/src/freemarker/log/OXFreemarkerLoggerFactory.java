@@ -57,7 +57,7 @@ package freemarker.log;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OXFreemarkerLoggerFactory implements LoggerFactory {
-    
+
     /**
      * Initializes a new {@link OXFreemarkerLoggerFactory}.
      */
@@ -67,7 +67,7 @@ public final class OXFreemarkerLoggerFactory implements LoggerFactory {
 
     @Override
     public Logger getLogger(String category) {
-        return new OXFreemarkerLogger(com.openexchange.log.Log.loggerFor(category));
+        return new OXFreemarkerLogger(org.slf4j.LoggerFactory.getLogger(category));
     }
 
 }

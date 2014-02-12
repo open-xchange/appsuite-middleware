@@ -55,7 +55,6 @@ import static com.openexchange.tools.update.Tools.createIndex;
 import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -63,7 +62,6 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -97,56 +95,41 @@ public final class CalendarAddUIDIndexTask extends UpdateTaskAdapter {
         final int cid = params.getContextId();
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         final Connection con = dbService.getForUpdateTask(cid);
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
             final String[] tables = new String[] {"prg_dates", "del_dates"};
             createCalendarIndex(con, tables);
             con.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                rollback(con);
+            }
             autocommit(con);
             Database.backNoTimeout(cid, true, con);
         }
     }
 
     private void createCalendarIndex(final Connection con, final String[] tables) {
-        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(CalendarAddUIDIndexTask.class));
+        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CalendarAddUIDIndexTask.class);
         final String name = "uidIndex";
-        final StringBuilder sb = new StringBuilder(64);
         for (final String table : tables) {
             try {
                 final String indexName = existsIndex(con, table, new String[] { "cid", "uid" });
                 if (null == indexName) {
-                    if (log.isInfoEnabled()) {
-                        sb.setLength(0);
-                        sb.append("Creating new index named \"");
-                        sb.append(name);
-                        sb.append("\" with columns (cid,uid) on table ");
-                        sb.append(table);
-                        sb.append('.');
-                        log.info(sb.toString());
-                    }
-                    createIndex(con, table, name, new String[] { "cid", "uid(255)" }, false);
+                    log.info("Creating new index named \"{}\" with columns (cid,uid) on table {}.", name, table);
+                    createIndex(con, table, name, new String[] { "cid", "`uid`(255)" }, false);
                 } else {
-                    if (log.isInfoEnabled()) {
-                        sb.setLength(0);
-                        sb.append("New index named \"");
-                        sb.append(indexName);
-                        sb.append("\" with columns (cid,uid) already exists on table ");
-                        sb.append(table);
-                        sb.append('.');
-                        log.info(sb.toString());
-                    }
+                    log.info("New index named \"{}\" with columns (cid,uid) already exists on table {}.", indexName, table);
                 }
             } catch (final SQLException e) {
-                log.error(
-                    new StringBuilder("Problem adding index ").append(name).append(" on table ").append(table).append('.').toString(),
-                    e);
+                log.error("Problem adding index \"{}\" on table {}.", name, table, e);
             }
         }
     }

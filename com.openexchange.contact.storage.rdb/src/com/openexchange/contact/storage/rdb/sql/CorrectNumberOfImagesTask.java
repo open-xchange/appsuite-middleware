@@ -55,7 +55,6 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import org.apache.commons.logging.Log;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -64,7 +63,6 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.log.LogFactory;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -77,7 +75,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class CorrectNumberOfImagesTask extends UpdateTaskAdapter {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CorrectNumberOfImagesTask.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CorrectNumberOfImagesTask.class);
 
     private static final String UPDATE =
         "UPDATE prg_contacts " +
@@ -115,7 +113,7 @@ public class CorrectNumberOfImagesTask extends UpdateTaskAdapter {
             statement = connnection.prepareStatement(UPDATE);
             updated = statement.executeUpdate();
             connnection.commit();
-            LOG.info("Corrected number of images in prg_contacts, " + updated + " rows affected.");
+            LOG.info("Corrected number of images in prg_contacts, {} rows affected.", updated);
         } catch (SQLException e) {
             rollback(connnection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());

@@ -90,7 +90,7 @@ import com.sun.mail.pop3.POP3Store;
  */
 public final class POP3StoreConnector {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(POP3StoreConnector.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(POP3StoreConnector.class);
 
     private static final PrintStream EMPTY_PRINTER = new PrintStream(new OutputStream() {
 
@@ -267,7 +267,7 @@ public final class POP3StoreConnector {
                 try {
                     tmpPass = new String(tmpPass.getBytes(POP3Properties.getInstance().getPOP3AuthEnc()), com.openexchange.java.Charsets.ISO_8859_1);
                 } catch (final UnsupportedEncodingException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                 }
             }
             /*
@@ -437,8 +437,8 @@ public final class POP3StoreConnector {
                      */
                     final List<Exception> warnings = prober.getWarnings();
                     if (!warnings.isEmpty()) {
-                        final org.apache.commons.logging.Log logger =
-                            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(POP3StoreConnector.class));
+                        final org.slf4j.Logger logger =
+                            org.slf4j.LoggerFactory.getLogger(POP3StoreConnector.class);
                         if (logger.isDebugEnabled()) {
                             final StringBuilder sb = new StringBuilder(128);
                             sb.append("Exception during probing POP3 server \"").append(server).append("\": ");

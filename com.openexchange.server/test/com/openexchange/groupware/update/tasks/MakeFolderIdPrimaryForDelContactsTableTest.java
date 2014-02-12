@@ -5,8 +5,10 @@ import java.sql.SQLException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -24,21 +26,24 @@ import com.openexchange.tools.update.Tools;
 @PrepareForTest({ Database.class, Tools.class })
 public class MakeFolderIdPrimaryForDelContactsTableTest {
 
+    @InjectMocks
+    private MakeFolderIdPrimaryForDelContactsTable makeFolderIdPrimaryForDelContactsTable;
+
     @Mock
     private PerformParameters mockParams;
 
     @Mock
     private Connection mockConnection;
 
+    int contextId = 1;
+
     @Before
     public void setUp() throws OXException {
-        int contextId = 1;
-        // mockConnection = Mockito.mock(Connection.class);
+        MockitoAnnotations.initMocks(this);
 
         PowerMockito.mockStatic(Database.class);
         PowerMockito.when(Database.getNoTimeout(contextId, true)).thenReturn(mockConnection);
 
-        // mockParams = Mockito.mock(PerformParameters.class);
         Mockito.when(mockParams.getContextId()).thenReturn(contextId);
     }
 
@@ -49,7 +54,6 @@ public class MakeFolderIdPrimaryForDelContactsTableTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testPerform_paramsNull_throwExpception() throws OXException {
-        MakeFolderIdPrimaryForDelContactsTable makeFolderIdPrimaryForDelContactsTable = new MakeFolderIdPrimaryForDelContactsTable();
         makeFolderIdPrimaryForDelContactsTable.perform(null);
     }
 
@@ -60,7 +64,6 @@ public class MakeFolderIdPrimaryForDelContactsTableTest {
      */
     @Test(expected = OXException.class)
     public void testPerform_connectionNotProper_throwException() throws OXException {
-        MakeFolderIdPrimaryForDelContactsTable makeFolderIdPrimaryForDelContactsTable = new MakeFolderIdPrimaryForDelContactsTable();
         makeFolderIdPrimaryForDelContactsTable.perform(mockParams);
     }
 
@@ -82,7 +85,6 @@ public class MakeFolderIdPrimaryForDelContactsTableTest {
                 this.mockConnection,
                 com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTable.PRG_CONTACTS)).thenReturn(false);
 
-        MakeFolderIdPrimaryForDelContactsTable makeFolderIdPrimaryForDelContactsTable = new MakeFolderIdPrimaryForDelContactsTable();
         makeFolderIdPrimaryForDelContactsTable.perform(mockParams);
 
         PowerMockito.verifyStatic(Mockito.never());
@@ -120,7 +122,6 @@ public class MakeFolderIdPrimaryForDelContactsTableTest {
                 this.mockConnection,
                 com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTable.PRG_CONTACTS)).thenReturn(true);
 
-        MakeFolderIdPrimaryForDelContactsTable makeFolderIdPrimaryForDelContactsTable = new MakeFolderIdPrimaryForDelContactsTable();
         makeFolderIdPrimaryForDelContactsTable.perform(mockParams);
 
         PowerMockito.verifyStatic(Mockito.times(1));

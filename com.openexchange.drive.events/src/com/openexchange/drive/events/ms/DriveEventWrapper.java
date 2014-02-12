@@ -51,8 +51,8 @@ package com.openexchange.drive.events.ms;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.drive.events.DriveEvent;
@@ -75,11 +75,15 @@ public class DriveEventWrapper {
         if (null == driveEvent) {
             return null;
         }
-        Map<String, Serializable> map = new HashMap<String, Serializable>(2);
+        Map<String, Serializable> map = new LinkedHashMap<String, Serializable>(2);
         map.put("__contextID", Integer.valueOf(driveEvent.getContextID()));
         Set<String> folderIDs = driveEvent.getFolderIDs();
         if (null != folderIDs) {
             map.put("__folderIDs", driveEvent.getFolderIDs().toArray(new String[folderIDs.size()]));
+        }
+        String pushToken = driveEvent.getPushTokenReference();
+        if (null != pushToken) {
+            map.put("__pushToken", pushToken);
         }
         return map;
     }
@@ -96,8 +100,9 @@ public class DriveEventWrapper {
         }
         Integer contextID = (Integer)map.get("__contextID");
         String[] folderIDs = (String[])map.get("__folderIDs");
+        String pushToken = (String)map.get("__pushToken");
         if (null != folderIDs && null != contextID) {
-            return new DriveEventImpl(contextID.intValue(), new HashSet<String>(Arrays.asList(folderIDs)), true);
+            return new DriveEventImpl(contextID.intValue(), new HashSet<String>(Arrays.asList(folderIDs)), true, pushToken);
         } else {
             return null;
         }

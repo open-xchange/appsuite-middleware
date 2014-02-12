@@ -54,7 +54,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
-import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -137,7 +136,7 @@ public abstract class AppointmentAction implements AJAXActionService {
      * Gets the service of specified type
      *
      * @param clazz The service's class
-     * @return The service or <code>null</code> is absent
+     * @return The service or <code>null</code> if absent
      */
     protected <S> S getService(final Class<? extends S> clazz) {
         return services.getService(clazz);
@@ -264,7 +263,7 @@ public abstract class AppointmentAction implements AJAXActionService {
         }
     }
 
-    protected void convertExternalToInternalUsersIfPossible(final CalendarObject appointmentObj, final Context ctx, final Log log) {
+    protected void convertExternalToInternalUsersIfPossible(final CalendarObject appointmentObj, final Context ctx, final org.slf4j.Logger log) {
         final Participant[] participants = appointmentObj.getParticipants();
         if (participants == null) {
             return;
@@ -283,7 +282,7 @@ public abstract class AppointmentAction implements AJAXActionService {
                     }
                     participants[pos] = new UserParticipant(foundUser.getId());
                 } catch (final OXException e) {
-                    log.debug("Couldn't resolve E-Mail address to an internal user: " + part.getEmailAddress(), e); // ...and continue doing this for the remaining users
+                    log.debug("Couldn't resolve E-Mail address to an internal user: {}", part.getEmailAddress(), e); // ...and continue doing this for the remaining users
                 }
             }
         }

@@ -82,7 +82,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class DBJSlobStorageActivcator extends HousekeepingActivator {
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(DBJSlobStorageActivcator.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DBJSlobStorageActivcator.class);
 
     /** List of known JSlobService identifiers */
     public static final List<String> SERVICE_IDS = new CopyOnWriteArrayList<String>();
@@ -202,7 +202,7 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
             }
             openTrackers();
         } catch (final Exception e) {
-            LOG.error("Starting bundle \"com.openexchange.jslob.storage.db\" failed: " + e.getMessage());
+            LOG.error("Starting bundle \"com.openexchange.jslob.storage.db\" failed", e);
             throw e;
         }
     }
@@ -224,7 +224,7 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
             CachingJSlobStorage.shutdown();
             super.stopBundle();
         } catch (final Exception e) {
-            LOG.error("Stopping bundle \"com.openexchange.jslob.storage.db\" failed: " + e.getMessage());
+            LOG.error("Stopping bundle \"com.openexchange.jslob.storage.db\" failed", e);
             throw e;
         } finally {
             Services.setServices(null);

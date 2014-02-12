@@ -54,15 +54,18 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -106,7 +109,7 @@ import com.openexchange.tools.session.ServerSession;
 public class Multiple extends SessionServlet {
 
     private static final long serialVersionUID = 3029074251138469122L;
-    private static final transient Log LOG = com.openexchange.log.Log.loggerFor(Multiple.class);
+    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Multiple.class);
 
     private static final String ACTION = PARAMETER_ACTION;
 
@@ -151,7 +154,7 @@ public class Multiple extends SessionServlet {
                 dataArray = new JSONArray(reader);
             } catch (final JSONException e) {
                 final OXException exc = OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
-                LOG.warn(exc.getMessage() + Tools.logHeaderForError(req), exc);
+                LOG.warn("{}{}", exc.getMessage(), Tools.logHeaderForError(req), exc);
                 dataArray = new JSONArray();
             } finally {
                 Streams.close(reader);
@@ -200,7 +203,7 @@ public class Multiple extends SessionServlet {
             try {
                 // Distinguish between serially and concurrently executable requests
                 List<JsonInOut> serialTasks = null;
-                CompletionService<Object> concurrentTasks = null;
+                CompletionService<Object> completionService = null;
                 int concurrentTasksCount = 0;
                 // Build-up mapping & schedule for either serial or concurrent execution
                 final ConcurrentTIntObjectHashMap<JsonInOut> mapping = new ConcurrentTIntObjectHashMap<JsonInOut>(length);
@@ -219,15 +222,15 @@ public class Multiple extends SessionServlet {
                         }
                         serialTasks.add(jsonInOut);
                     } else {
-                        if (null == concurrentTasks) {
+                        if (null == completionService) {
                             final int concurrencyLevel = CONCURRENCY_LEVEL;
                             if (concurrencyLevel <= 0 || length <= concurrencyLevel) {
-                                concurrentTasks = new ThreadPoolCompletionService<Object>(ThreadPools.getThreadPool()).setTrackable(true);
+                                completionService = new ThreadPoolCompletionService<Object>(ThreadPools.getThreadPool()).setTrackable(true);
                             } else {
-                                concurrentTasks = new BoundedCompletionService<Object>(ThreadPools.getThreadPool(), concurrencyLevel).setTrackable(true);
+                                completionService = new BoundedCompletionService<Object>(ThreadPools.getThreadPool(), concurrencyLevel).setTrackable(true);
                             }
                         }
-                        concurrentTasks.submit(new CallableImpl(jsonInOut, session, module, req));
+                        completionService.submit(new CallableImpl(jsonInOut, session, module, req));
                         concurrentTasksCount++;
                     }
                 }
@@ -245,16 +248,9 @@ public class Multiple extends SessionServlet {
                         serialTasks.get(i).setOutputObject((JSONValue) serialResponses.get(i));
                     }
                 }
-                if (null != concurrentTasks) {
+                if (null != completionService) {
                     // Await completion service
-                    for (int i = 0; i < concurrentTasksCount; i++) {
-                        try {
-                            concurrentTasks.take();
-                        } catch (final InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-                        }
-                    }
+                    awaitCompletionOfConcurrentTasks(completionService, concurrentTasksCount);
                 }
                 // Add single responses to JSON array
                 for (int pos = 0; pos < length; pos++) {
@@ -273,6 +269,21 @@ public class Multiple extends SessionServlet {
         return respArr;
     }
 
+    private static void awaitCompletionOfConcurrentTasks(final CompletionService<Object> completionService, final int concurrentTasksCount) throws OXException {
+        for (int i = 0; i < concurrentTasksCount; i++) {
+            try {
+                completionService.take();
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        }
+    }
+
+    private static final Set<String> SERIAL_ON_MODIFICATION_MODULES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(MODULE_CALENDAR, MODULE_TASK, MODULE_FOLDER, MODULE_FOLDERS, MODULE_CONTACT)));
+
+    private static final Set<String> MODIFYING_ACTIONS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(ACTION_DELETE, ACTION_NEW, ACTION_UPDATE)));
+
     private static boolean indicatesSerial(JSONObject dataObject) throws JSONException {
         final String module = Strings.toLowerCase(dataObject.getString(MODULE));
 
@@ -281,27 +292,15 @@ public class Multiple extends SessionServlet {
             return true;
         }
 
-        // Check for appointment delete
-        if (MODULE_CALENDAR.equals(module)) {
-            if (ACTION_DELETE.equals(Strings.toLowerCase(dataObject.optString(ACTION, null)))) {
-                return true;
-            }
-            return false;
+        // Check for a modifying operation
+        if ((null != module) && SERIAL_ON_MODIFICATION_MODULES.contains(module)) {
+            final String action = Strings.toLowerCase(dataObject.optString(ACTION, null));
+            return ((null != action) && MODIFYING_ACTIONS.contains(action));
         }
 
-        // Check for folder modification operation
-        if ((MODULE_FOLDER.equals(module) || MODULE_FOLDERS.equals(module))) {
-            final String action = Strings.toLowerCase(dataObject.optString(ACTION, null));
-            if (ACTION_DELETE.equals(action)) {
-                return true;
-            }
-            if (ACTION_NEW.equals(action)) {
-                return true;
-            }
-            if (ACTION_UPDATE.equals(action)) {
-                return true;
-            }
-            return false;
+        // Check for templating module (causes concurrent lookup of the templating folders)
+        if ("templating".equals(module)) {
+            return true;
         }
 
         // Check for templating module (causes concurrent lookup of the templating folders)
@@ -579,7 +578,7 @@ public class Multiple extends SessionServlet {
             /*
              * Cannot occur
              */
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
         return state;
     }
@@ -615,14 +614,14 @@ public class Multiple extends SessionServlet {
             try {
                 mi.close(true);
             } catch (final Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error("", e);
             }
         }
     }
 
     private static void logError(final Object message, final Session session, final Exception e) {
         LogProperties.putSessionProperties(session);
-        LOG.error(message, e);
+        LOG.error(message.toString(), e);
     }
 
     private static final class CallableImpl implements Callable<Object> {

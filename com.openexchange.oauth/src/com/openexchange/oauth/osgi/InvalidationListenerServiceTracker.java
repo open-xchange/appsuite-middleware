@@ -62,7 +62,7 @@ import com.openexchange.oauth.internal.InvalidationListenerRegistry;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class InvalidationListenerServiceTracker implements ServiceTrackerCustomizer<OAuthAccountInvalidationListener, OAuthAccountInvalidationListener> {
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(InvalidationListenerServiceTracker.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InvalidationListenerServiceTracker.class);
 
     private final BundleContext context;
 
@@ -80,8 +80,7 @@ public class InvalidationListenerServiceTracker implements ServiceTrackerCustomi
         if (InvalidationListenerRegistry.getInstance().addInvalidationListener( addedService)) {
             return addedService;
         }
-        LOG.warn(new StringBuilder(64).append("Duplicate invalidation listener \"").append(addedService.getClass().getName()).append(
-            "\" is not be added to registry."));
+        LOG.warn("Duplicate invalidation listener \"{}\" is not be added to registry.", addedService.getClass().getName());
         // This service needs not to be tracked, thus return null
         context.ungetService(reference);
         return null;

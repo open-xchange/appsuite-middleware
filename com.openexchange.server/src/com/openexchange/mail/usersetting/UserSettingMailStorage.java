@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class UserSettingMailStorage implements CacheAvailabilityListener {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UserSettingMailStorage.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserSettingMailStorage.class);
 
     private static volatile UserSettingMailStorage singleton;
 
@@ -160,7 +160,7 @@ public abstract class UserSettingMailStorage implements CacheAvailabilityListene
         try {
             return loadUserSettingMail(user, ctx, readCon);
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return null;
         }
     }

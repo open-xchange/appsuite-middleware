@@ -55,7 +55,7 @@ import com.openexchange.groupware.update.FullPrimaryKeySupportService;
 
 /**
  * Creates the tables required for the calendar.
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
@@ -212,7 +212,7 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "PRIMARY KEY (cid, object_id, member_uid),"
         + "UNIQUE INDEX member (cid, member_uid, object_id)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     /**
      * SQL statement for del_dates_members table
      */
@@ -247,7 +247,7 @@ public class CreateCalendarTables extends AbstractCreateTableImpl {
         + "PRIMARY KEY (cid, object_id, member_uid),"
         + "UNIQUE INDEX member (cid, member_uid, object_id)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-    
+
     /**
      * SQL statement for prg_dates_members table
      */

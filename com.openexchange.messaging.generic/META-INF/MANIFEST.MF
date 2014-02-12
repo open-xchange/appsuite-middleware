@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Messaging Generic Bundle
 Bundle-SymbolicName: com.openexchange.messaging.generic
-Bundle-Version: 7.4.1
+Bundle-Version: 7.4.2
 Bundle-Activator: com.openexchange.messaging.generic.osgi.MessagingGenericActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -53,6 +53,7 @@ Import-Package: com.openexchange.cache,
  javax.mail.internet.idn,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Export-Package: com.openexchange.messaging.generic,
  com.openexchange.messaging.generic.internet

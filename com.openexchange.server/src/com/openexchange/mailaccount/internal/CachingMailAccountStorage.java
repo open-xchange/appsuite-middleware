@@ -56,9 +56,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -66,7 +63,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.folderstorage.cache.CacheServiceRegistry;
@@ -98,11 +94,6 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     private final RdbMailAccountStorage delegate;
 
     /**
-     * Lock for the cache.
-     */
-    private final Lock cacheLock;
-
-    /**
      * Initializes a new {@link CachingMailAccountStorage}.
      *
      * @param delegate The database-backed delegate storage
@@ -110,7 +101,6 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     CachingMailAccountStorage(final RdbMailAccountStorage delegate) {
         super();
         this.delegate = delegate;
-        cacheLock = new ReentrantLock(true);
     }
 
     RdbMailAccountStorage getDelegate() {
@@ -162,6 +152,12 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     @Override
     public void clearFullNamesForMailAccount(final int id, final int user, final int cid) throws OXException {
         delegate.clearFullNamesForMailAccount(id, user, cid);
+        invalidateMailAccount(id, user, cid);
+    }
+
+    @Override
+    public void clearFullNamesForMailAccount(final int id, final int[] indexes, final int user, final int cid) throws OXException {
+        delegate.clearFullNamesForMailAccount(id, indexes, user, cid);
         invalidateMailAccount(id, user, cid);
     }
 
@@ -262,15 +258,8 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
             /*
              * Not contained in cache. Load with specified connection
              */
-            acquire(cacheLock);
-            try {
-                if (cache.get(key) == null) {
-                    final MailAccount mailAccount = delegate.getMailAccount(id, user, cid, con);
-                    cache.put(key, mailAccount, false);
-                }
-            } finally {
-                cacheLock.unlock();
-            }
+            final MailAccount mailAccount = delegate.getMailAccount(id, user, cid, con);
+            cache.put(key, mailAccount, false);
         }
         /*
          * Return mail account
@@ -455,22 +444,6 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
             }
         }
         return i.intValue();
-    }
-
-    private static void acquire(final Lock lock) throws OXException {
-        if (null == lock) {
-            return;
-        }
-        try {
-            // true if the lock was acquired and false if the waiting time elapsed before the lock was acquired
-            if (!lock.tryLock(maxWaitMillis(), TimeUnit.MILLISECONDS)) {
-                throw FolderExceptionErrorMessage.TRY_AGAIN.create("The maximum time to wait for the lock is exceeded.");
-            }
-        } catch (final InterruptedException e) {
-            // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-            Thread.currentThread().interrupt();
-            throw FolderExceptionErrorMessage.TRY_AGAIN.create(e, e.getMessage());
-        }
     }
 
 }

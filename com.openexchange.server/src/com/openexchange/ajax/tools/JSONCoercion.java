@@ -103,7 +103,7 @@ public class JSONCoercion {
         }
         return object;
     }
-    
+
     public static Object parseAndCoerceToNative(String s) {
         try {
             JSONObject object = new JSONObject("{v:"+s+"}");
@@ -175,20 +175,24 @@ public class JSONCoercion {
         if (null == value || JSONObject.NULL.equals(value)) {
             return JSONObject.NULL;
         }
-        if (value instanceof JSONObject) {
+
+        if (value instanceof JSONValue) {
             return value;
         }
-        if (value instanceof JSONArray) {
-            return value;
-        }
+
         if (value instanceof Map) {
-            @SuppressWarnings("unchecked") final Map<String, ?> map = (Map<String, ?>) value;
-            final JSONObject jsonObject = new JSONObject(map.size());
-            for (final Map.Entry<String, ?> entry : map.entrySet()) {
-                jsonObject.put(entry.getKey(), coerceToJSON(entry.getValue()));
+            try {
+                @SuppressWarnings("unchecked") final Map<String, ?> map = (Map<String, ?>) value;
+                final JSONObject jsonObject = new JSONObject(map.size());
+                for (final Map.Entry<String, ?> entry : map.entrySet()) {
+                    jsonObject.put(entry.getKey(), coerceToJSON(entry.getValue()));
+                }
+                return jsonObject;
+            } catch (final ClassCastException e) {
+                throw new JSONException("Value cannot be coerced to JSON,", e);
             }
-            return jsonObject;
         }
+
         if (value instanceof Collection) {
             final Collection<?> collection = (Collection<?>) value;
             final JSONArray jsonArray = new JSONArray(collection.size());
@@ -197,6 +201,7 @@ public class JSONCoercion {
             }
             return jsonArray;
         }
+
         if (isArray(value)) {
             final int length = Array.getLength(value);
             final JSONArray jsonArray = new JSONArray(length);
@@ -206,10 +211,8 @@ public class JSONCoercion {
             }
             return jsonArray;
         }
-        /*
-         * Return directly
-         */
-        return value;
+
+        return new JSONObject(2).put("tmp", value).get("tmp");
     }
 
     /**

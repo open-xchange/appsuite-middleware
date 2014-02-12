@@ -90,7 +90,7 @@ public final class ServletConfigLoader {
      */
     private static final String FILEEXT_PROPERTIES = ".properties";
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ServletConfigLoader.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServletConfigLoader.class);
 
     /**
      * Puts properties into map
@@ -199,7 +199,7 @@ public final class ServletConfigLoader {
         final Properties props = new Properties();
         InputStream in = null;
         try {
-            in = new BufferedInputStream(new FileInputStream(propFile));
+            in = new BufferedInputStream(new FileInputStream(propFile), 65536);
             props.load(in);
         } catch (final IOException x) {
             return null;

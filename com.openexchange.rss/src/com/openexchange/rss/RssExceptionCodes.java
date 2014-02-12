@@ -50,47 +50,57 @@
 package com.openexchange.rss;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  * {@link RssExceptionCodes} - Enumeration of all {@link OXException}s known in RSS module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum RssExceptionCodes implements OXExceptionCode {
+public enum RssExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(RssExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("An error occurred: %1$s", null, CATEGORY_ERROR, 1),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(RssExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 2),
+    IO_ERROR("An I/O error occurred: %1$s", null, CATEGORY_ERROR, 2),
     /**
      * Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s
      */
-    INVALID_RSS(RssExceptionMessages.INVALID_RSS_MSG, CATEGORY_USER_INPUT, 3),
+    INVALID_RSS("Invalid RSS URL or not well-formed XML content provided by URL: %1$s", RssExceptionMessages.INVALID_RSS_MSG,
+        CATEGORY_USER_INPUT, 3),
 
     ;
 
     /**
      * The error code prefix for RSS module.
      */
-    public static final String PREFIX = "RSS";
+    public static String PREFIX = "RSS";
+    
+    private String displayMessage;
 
-    private final Category category;
+    private Category category;
 
-    private final int detailNumber;
+    private int detailNumber;
 
-    private final String message;
+    private String message;
 
-    private RssExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private RssExceptionCodes(String message, String displayMessage, Category category, int detailNumber) {
         this.message = message;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
         this.detailNumber = detailNumber;
         this.category = category;
+    }
+    
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
     }
 
     @Override
@@ -114,7 +124,7 @@ public enum RssExceptionCodes implements OXExceptionCode {
     }
 
     @Override
-    public boolean equals(final OXException e) {
+    public boolean equals(OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
     }
 
@@ -133,7 +143,7 @@ public enum RssExceptionCodes implements OXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Object... args) {
+    public OXException create(Object... args) {
         return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
@@ -144,7 +154,7 @@ public enum RssExceptionCodes implements OXExceptionCode {
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Throwable cause, final Object... args) {
+    public OXException create(Throwable cause, Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

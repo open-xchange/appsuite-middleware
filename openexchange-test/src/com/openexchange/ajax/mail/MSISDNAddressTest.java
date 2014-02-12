@@ -73,7 +73,7 @@ import com.openexchange.mail.MailJSONField;
  * our sender address handling in the backend is able to use MSISDNS specified in the users contact object within the phone number fields.
  * MSISDN numbers are allowed to consist of up to 15 digits and are formed by three pieces Country Code + National Destination Code +
  * Subscriber Number
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class MSISDNAddressTest extends AbstractMailTest {
@@ -151,8 +151,6 @@ public class MSISDNAddressTest extends AbstractMailTest {
         SendResponse response = client.execute(request);
         assertTrue(response.getException() != null);
         assertEquals(OXException.CATEGORY_USER_INPUT, response.getException().getCategory());
-        assertEquals(
-            "The specified E-Mail address "+ invalidTestCellPhoneNumber +" is not covered by allowed E-Mail address aliases.",
-            response.getErrorMessage());
+        assertEquals(response.getErrorMessage(), "MSG-0056", response.getException().getErrorCode());
     }
 }

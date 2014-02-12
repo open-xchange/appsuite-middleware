@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.reminder.osgi;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -65,7 +63,7 @@ import com.openexchange.java.Autoboxing;
  */
 public class TargetRegistryCustomizer implements ServiceTrackerCustomizer<TargetService, TargetService> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TargetRegistryCustomizer.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TargetRegistryCustomizer.class);
 
     private final BundleContext context;
 
@@ -79,7 +77,7 @@ public class TargetRegistryCustomizer implements ServiceTrackerCustomizer<Target
         final TargetService targetService = context.getService(reference);
         final int module = parseModule(reference);
         if (-1 == module) {
-            LOG.error("Registration of service " + targetService.getClass().getName() + " is missing property defining the module.");
+            LOG.error("Registration of service {} is missing property defining the module.", targetService.getClass().getName());
             context.ungetService(reference);
             return null;
         }

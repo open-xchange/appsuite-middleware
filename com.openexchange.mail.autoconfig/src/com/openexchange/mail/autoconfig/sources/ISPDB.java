@@ -52,6 +52,7 @@ package com.openexchange.mail.autoconfig.sources;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -59,6 +60,8 @@ import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -71,34 +74,58 @@ import com.openexchange.mail.autoconfig.xmlparser.ClientConfig;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * Connects to the Mozilla ISPDB. For more information see https://developer.mozilla.org/en/Thunderbird/Autoconfiguration
+ * Connects to the Mozilla ISPDB. For more information see <a
+ * href="https://developer.mozilla.org/en/Thunderbird/Autoconfiguration">https://developer.mozilla.org/en/Thunderbird/Autoconfiguration</a>
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added google-common cache
  */
 public class ISPDB extends AbstractConfigSource {
 
-    static final org.apache.commons.logging.Log LOG = com.openexchange.log.LogFactory.getLog(ISPDB.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ISPDB.class);
 
     private static final String locationProperty = "com.openexchange.mail.autoconfig.ispdb";
 
+    // -------------------------------------------------------------------------------------------------- //
+
     private final ServiceLookup services;
+    private final Cache<String, Autoconfig> autoConfigCache;
 
     public ISPDB(ServiceLookup services) {
+        super();
         this.services = services;
+        autoConfigCache = CacheBuilder.newBuilder().initialCapacity(16).expireAfterAccess(1, TimeUnit.DAYS).maximumSize(500).build();
     }
 
     @Override
     public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) throws OXException {
         ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
         ConfigView view = configViewFactory.getView(user.getId(), context.getContextId());
-        String url = view.get(locationProperty, String.class);
-        if (url == null) {
+
+        String sUrl = view.get(locationProperty, String.class);
+        if (sUrl == null) {
             return null;
         }
-        if (!url.endsWith("/")) {
-            url += "/";
+        if (!sUrl.endsWith("/")) {
+            sUrl += "/";
         }
-        url += emailDomain;
+        sUrl += emailDomain;
+
+        // Check cache
+        {
+            Autoconfig autoconfig = autoConfigCache.getIfPresent(sUrl);
+            if (null != autoconfig) {
+                return autoconfig;
+            }
+        }
+
+        URL url;
+        try {
+            url = new URL(sUrl);
+        } catch (MalformedURLException e) {
+            LOG.warn("Unable to parse URL: {}", sUrl, e);
+            return null;
+        }
 
         HttpClient client = new HttpClient();
         int timeout = 3000;
@@ -108,31 +135,23 @@ public class ISPDB extends AbstractConfigSource {
         client.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
         client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
 
-        URL javaURL;
-        try {
-            javaURL = new URL(url);
-        } catch (MalformedURLException e) {
-            LOG.warn("Unable to parse URL: " + url, e);
-            return null;
-        }
-
         GetMethod getMethod;
 
-        if (javaURL.getProtocol().equalsIgnoreCase("https")) {
-            int port = javaURL.getPort();
+        if (url.getProtocol().equalsIgnoreCase("https")) {
+            int port = url.getPort();
             if (port == -1) {
                 port = 443;
             }
 
             Protocol https = new Protocol("https", new TrustAllAdapter(), 443);
-            client.getHostConfiguration().setHost(javaURL.getHost(), port, https);
+            client.getHostConfiguration().setHost(url.getHost(), port, https);
 
-            getMethod = new GetMethod(javaURL.getFile());
+            getMethod = new GetMethod(url.getFile());
 
-            getMethod.getParams().setSoTimeout(1000);
-            getMethod.setQueryString(javaURL.getQuery());
+            getMethod.getParams().setSoTimeout(timeout);
+            getMethod.setQueryString(url.getQuery());
         } else {
-            getMethod = new GetMethod(url);
+            getMethod = new GetMethod(sUrl);
         }
 
         try {
@@ -140,7 +159,7 @@ public class ISPDB extends AbstractConfigSource {
             int httpCode = client.executeMethod(getMethod);
 
             if (httpCode != 200) {
-                LOG.info("Could not retrieve config XML. Return code was: " + httpCode);
+                LOG.info("Could not retrieve config XML. Return code was: {}", httpCode);
                 return null;
             }
 
@@ -148,8 +167,10 @@ public class ISPDB extends AbstractConfigSource {
 
             Autoconfig autoconfig = getBestConfiguration(clientConfig, emailDomain);
             replaceUsername(autoconfig, emailLocalPart, emailDomain);
-            return autoconfig;
 
+            autoConfigCache.put(sUrl, autoconfig);
+
+            return autoconfig;
         } catch (HttpException e) {
             LOG.warn("Could not retrieve config XML.", e);
             return null;

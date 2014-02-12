@@ -59,8 +59,6 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -80,48 +78,34 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class CachingUserSettingMailStorage extends UserSettingMailStorage {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CachingUserSettingMailStorage.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CachingUserSettingMailStorage.class);
 
     private static final String CACHE_REGION_NAME = "UserSettingMail";
 
-    private Cache cache;
-
-    private final Lock cacheWriteLock;
+    private volatile Cache m_cache;
 
     /**
      * Default constructor
      */
     protected CachingUserSettingMailStorage() {
         super();
-        cacheWriteLock = new ReentrantLock();
         try {
             initCache();
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
         }
     }
 
     private void initCache() throws OXException {
-        if (null != cache) {
-            return;
-        }
-        cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
+        m_cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
     }
 
     private void releaseCache() throws OXException {
-        if (null == cache) {
-            return;
-        }
-        cache.clear();
-        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-        if (null != cacheService) {
-            cacheService.freeCache(CACHE_REGION_NAME);
-        }
-        cache = null;
+        this.m_cache = null;
     }
 
-    private boolean useCache() {
-        return (cache != null);
+    private Cache getCache() {
+        return m_cache;
     }
 
     private static final String SQL_LOAD = "SELECT bits, send_addr, reply_to_addr, msg_format, display_msg_headers, auto_linebreak, std_trash, std_sent, std_drafts, std_spam, " + "upload_quota, upload_quota_per_file, confirmed_spam, confirmed_ham FROM user_setting_mail WHERE cid = ? AND user = ?";
@@ -185,26 +169,24 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                 closeResources(rs, stmt, closeCon ? writeCon : null, false, ctx);
             }
             usm.setModifiedDuringSession(false);
-            if (useCache()) {
+            final Cache cache = getCache();
+            if (null != cache) {
                 /*
                  * Put clone into cache
                  */
-                cacheWriteLock.lock();
                 try {
                     usm.setNoSave(false);
                     final CacheKey key = cache.newCacheKey(ctx.getContextId(), user);
                     if (null != cache.get(key)) {
                         cache.remove(key);
                     }
-                    cache.put(key, (Serializable) usm.clone(), false);
+                    cache.put(key, usm.clone(), false);
                 } catch (final OXException e) {
                     LOG.error("UserSettingMail could not be put into cache", e);
-                } finally {
-                    cacheWriteLock.unlock();
                 }
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -234,26 +216,24 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                 closeResources(rs, stmt, closeCon ? writeCon : null, false, ctx);
             }
             usm.setModifiedDuringSession(false);
-            if (useCache()) {
+            final Cache cache = getCache();
+            if (null != cache) {
                 /*
                  * Put clone into cache
                  */
-                cacheWriteLock.lock();
                 try {
                     usm.setNoSave(false);
                     final CacheKey key = cache.newCacheKey(ctx.getContextId(), user);
                     if (null != cache.get(key)) {
                         cache.remove(key);
                     }
-                    cache.put(key, (Serializable) usm.clone(), false);
+                    cache.put(key, usm.clone(), false);
                 } catch (final OXException e) {
                     LOG.error("UserSettingMail could not be put into cache", e);
-                } finally {
-                    cacheWriteLock.unlock();
                 }
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -298,17 +278,15 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                 stmt.executeUpdate();
                 stmt.close();
                 stmt = null;
-                if (useCache()) {
+                final Cache cache = getCache();
+                if (null != cache) {
                     /*
                      * Remove from cache
                      */
-                    cacheWriteLock.lock();
                     try {
                         cache.remove(cache.newCacheKey(ctx.getContextId(), user));
                     } catch (final OXException e) {
                         LOG.error("UserSettingMail could not be removed from cache", e);
-                    } finally {
-                        cacheWriteLock.unlock();
                     }
                 }
             } finally {
@@ -316,7 +294,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                 stmt = null;
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -332,76 +310,63 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
     @Override
     public UserSettingMail loadUserSettingMail(final int user, final Context ctx, final Connection readConArg) throws OXException {
         try {
-            final boolean useCache = useCache();
-            UserSettingMail usm = useCache ? (UserSettingMail) cache.get(cache.newCacheKey(ctx.getContextId(), user)) : null;
+            final Cache cache = getCache();
+            UserSettingMail usm = null == cache ? null : (UserSettingMail) cache.get(cache.newCacheKey(ctx.getContextId(), user));
             if (null != usm) {
-                return (UserSettingMail) usm.clone();
+                return usm.clone();
             }
-            /*
-             * Fetch from database
-             */
-            cacheWriteLock.lock();
+            usm = new UserSettingMail(user, ctx.getContextId());
+            Connection readCon = readConArg;
+            boolean closeCon = false;
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
             try {
-                /*
-                 * Still not in cache?
-                 */
-                if (null == (usm = useCache ? (UserSettingMail) cache.get(cache.newCacheKey(ctx.getContextId(), user)) : null)) {
-                    usm = new UserSettingMail(user, ctx.getContextId());
-                    Connection readCon = readConArg;
-                    boolean closeCon = false;
-                    PreparedStatement stmt = null;
-                    ResultSet rs = null;
+                if (readCon == null) {
+                    readCon = DBPool.pickup(ctx);
+                    closeCon = true;
+                }
+                stmt = readCon.prepareStatement(SQL_LOAD);
+                stmt.setInt(1, ctx.getContextId());
+                stmt.setInt(2, user);
+                rs = stmt.executeQuery();
+                if (!rs.next()) {
+                    throw UserConfigurationCodes.MAIL_SETTING_NOT_FOUND.create(
+                        Integer.valueOf(user),
+                        Integer.valueOf(ctx.getContextId()));
+                }
+                usm.parseBits(rs.getInt(1));
+                usm.setSendAddr(rs.getString(2));
+                usm.setReplyToAddr(rs.getString(3));
+                usm.setMsgFormat(rs.getInt(4));
+                setDisplayMsgHeadersString(usm, rs.getString(5));
+                usm.setAutoLinebreak(rs.getInt(6) >= 0 ? rs.getInt(6) : 0);
+                usm.setStdTrashName(rs.getString(7));
+                usm.setStdSentName(rs.getString(8));
+                usm.setStdDraftsName(rs.getString(9));
+                usm.setStdSpamName(rs.getString(10));
+                usm.setUploadQuota(rs.getLong(11));
+                usm.setUploadQuotaPerFile(rs.getLong(12));
+                usm.setConfirmedSpam(rs.getString(13));
+                usm.setConfirmedHam(rs.getString(14));
+                loadSignatures(usm, user, ctx, readCon);
+                usm.setModifiedDuringSession(false);
+                if (null != cache) {
+                    /*
+                     * Put into cache
+                     */
+                    usm.setNoSave(false);
                     try {
-                        if (readCon == null) {
-                            readCon = DBPool.pickup(ctx);
-                            closeCon = true;
-                        }
-                        stmt = readCon.prepareStatement(SQL_LOAD);
-                        stmt.setInt(1, ctx.getContextId());
-                        stmt.setInt(2, user);
-                        rs = stmt.executeQuery();
-                        if (!rs.next()) {
-                            throw UserConfigurationCodes.MAIL_SETTING_NOT_FOUND.create(
-                                Integer.valueOf(user),
-                                Integer.valueOf(ctx.getContextId()));
-                        }
-                        usm.parseBits(rs.getInt(1));
-                        usm.setSendAddr(rs.getString(2));
-                        usm.setReplyToAddr(rs.getString(3));
-                        usm.setMsgFormat(rs.getInt(4));
-                        setDisplayMsgHeadersString(usm, rs.getString(5));
-                        usm.setAutoLinebreak(rs.getInt(6) >= 0 ? rs.getInt(6) : 0);
-                        usm.setStdTrashName(rs.getString(7));
-                        usm.setStdSentName(rs.getString(8));
-                        usm.setStdDraftsName(rs.getString(9));
-                        usm.setStdSpamName(rs.getString(10));
-                        usm.setUploadQuota(rs.getLong(11));
-                        usm.setUploadQuotaPerFile(rs.getLong(12));
-                        usm.setConfirmedSpam(rs.getString(13));
-                        usm.setConfirmedHam(rs.getString(14));
-                        loadSignatures(usm, user, ctx, readCon);
-                        usm.setModifiedDuringSession(false);
-                        if (useCache) {
-                            /*
-                             * Put into cache
-                             */
-                            usm.setNoSave(false);
-                            try {
-                                cache.put(cache.newCacheKey(ctx.getContextId(), user), usm, false);
-                            } catch (final OXException e) {
-                                LOG.error("UserSettingMail could not be put into cache", e);
-                            }
-                        }
-                    } finally {
-                        closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
+                        cache.put(cache.newCacheKey(ctx.getContextId(), user), usm, false);
+                    } catch (final OXException e) {
+                        LOG.error("UserSettingMail could not be put into cache", e);
                     }
                 }
-                return (UserSettingMail) usm.clone();
             } finally {
-                cacheWriteLock.unlock();
+                closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             }
+            return usm.clone();
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -443,7 +408,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                 closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -554,7 +519,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                 closeResources(null, stmt, closeCon ? writeCon : null, false, ctx);
             }
         } catch (final SQLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
@@ -582,45 +547,32 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
         usm.setModifiedDuringSession(true);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.usersetting.UserSettingMailStorage#clearStorage()
-     */
     @Override
     public void clearStorage() throws OXException {
-        if (useCache()) {
+        final Cache cache = getCache();
+        if (null != cache) {
             /*
              * Put clone into cache
              */
-            cacheWriteLock.lock();
             try {
                 cache.clear();
-            } catch (final OXException e) {
+            } catch (final Exception e) {
                 LOG.error("UserSettingMail's cache could not be cleared", e);
-            } finally {
-                cacheWriteLock.unlock();
             }
         }
-
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.usersetting.UserSettingMailStorage#removeUserSettingMail(int, com.openexchange.groupware.contexts.Context)
-     */
     @Override
     public void removeUserSettingMail(final int user, final Context ctx) throws OXException {
-        if (useCache()) {
+        final Cache cache = getCache();
+        if (null != cache) {
             /*
              * Put clone into cache
              */
-            cacheWriteLock.lock();
             try {
                 cache.remove(cache.newCacheKey(ctx.getContextId(), user));
-            } catch (final OXException e) {
+            } catch (final Exception e) {
                 LOG.error("UserSettingMail could not be removed from cache", e);
-            } finally {
-                cacheWriteLock.unlock();
             }
         }
     }
@@ -629,8 +581,8 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
     public void shutdownStorage() {
         try {
             releaseCache();
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+        } catch (final Exception e) {
+            LOG.error("", e);
         }
     }
 

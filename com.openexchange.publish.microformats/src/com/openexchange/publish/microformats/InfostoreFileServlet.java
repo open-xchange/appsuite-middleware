@@ -59,7 +59,6 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -67,22 +66,20 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.infostore.FileMetadata;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
-import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -99,7 +96,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
     private static final String SITE = "site";
     private static final String INFOSTORE_ID = "infoId";
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(InfostoreFileServlet.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreFileServlet.class);
 
     private static OXMFPublicationService infostorePublisher = null;
 
@@ -157,7 +154,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
             if(!startedWriting) {
                 t.printStackTrace(resp.getWriter());
             }
-            LOG.error(t.getMessage(), t);
+            LOG.error("", t);
         }
 
     }
@@ -169,17 +166,31 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
             return FileMetadata.getMetadata(fileAccess.getFileMetadata(String.valueOf(infoId), FileStorageFileAccess.CURRENT_VERSION));
         } catch (final OXException e) {
             if (InfostoreExceptionCodes.NOT_EXIST.equals(e)) {
-                throw PublicationErrorMessage.NotExist.create(e, new Object[0]);
+                throw PublicationErrorMessage.NOT_FOUND_EXCEPTION.create(e, new Object[0]);
             }
             throw e;
         }
     }
 
     private void writeFile(final Session session, final DocumentMetadata metadata, final InputStream fileData, final HttpServletRequest req, final HttpServletResponse resp) throws IOException, OXException {
-        final AJAXRequestData request = AJAXRequestDataTools.getInstance().parseRequest(req, false, false, ServerSessionAdapter.valueOf(session), "/publications/infostore", resp);
+        final FileResponseRenderer renderer = fileResponseRenderer;
+        if (null == fileResponseRenderer) {
+            throw new IOException("Missing " + FileResponseRenderer.class.getName());
+        }
+        final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        final AJAXRequestData request = AJAXRequestDataTools.getInstance().parseRequest(req, false, false, serverSession, "/publications/infostore", resp);
+        request.setModule("files");
+        request.setAction("document");
+        request.setSession(serverSession);
         final AJAXRequestResult result = new AJAXRequestResult(new FileHolder(fileData, metadata.getFileSize(), metadata.getFileMIMEType(), metadata.getFileName()), "file");
-
-        fileResponseRenderer.write(request, result, req, resp);
+        // Set ETag
+        final String eTag = FileStorageUtility.getETagFor(Integer.toString(metadata.getId()), Integer.toString(metadata.getVersion()), metadata.getLastModified());
+        result.setExpires(0);
+        if (eTag != null) {
+            result.setHeader("ETag", eTag);
+        }
+        // Trigger renderer
+        renderer.write(request, result, req, resp);
     }
 
     private InputStream loadFile(final Publication publication, final int infoId) throws OXException {

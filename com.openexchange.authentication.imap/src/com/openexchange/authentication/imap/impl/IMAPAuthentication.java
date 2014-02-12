@@ -56,6 +56,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.text.MessageFormat;
 import java.util.Properties;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
@@ -64,7 +65,6 @@ import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.idn.IDNA;
 import javax.security.auth.login.LoginException;
-import org.apache.commons.logging.Log;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -75,7 +75,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.java.Streams;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.api.MailConfig.LoginSource;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
@@ -120,7 +119,7 @@ public class IMAPAuthentication implements AuthenticationService {
         }
     }
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IMAPAuthentication.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPAuthentication.class);
 
     private static Properties props;
 
@@ -180,7 +179,7 @@ public class IMAPAuthentication implements AuthenticationService {
                 try {
                     password = new String(password.getBytes(authenc), CHARENC_ISO8859);
                 } catch (final UnsupportedEncodingException e) {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("", e);
                     throw LoginExceptionCodes.COMMUNICATION.create(e);
                 }
             }
@@ -209,9 +208,9 @@ public class IMAPAuthentication implements AuthenticationService {
                 port = Integer.parseInt((String) props.get(PropertyNames.IMAP_PORT.name));
             }
 
-            LOG.debug("Using imap server: " + host);
-            LOG.debug("Using imap port: " + port);
-            LOG.debug("Using full login info: " + use_full_login);
+            LOG.debug("Using imap server: {}", host);
+            LOG.debug("Using imap port: {}", port);
+            LOG.debug("Using full login info: {}", use_full_login);
 
             // set imap username
             if (use_full_login) {
@@ -270,7 +269,7 @@ public class IMAPAuthentication implements AuthenticationService {
 	            host = IDNA.toASCII(defaultMailAccount.getMailServer());
 	            port = defaultMailAccount.getMailPort();
 	            USE_IMAPS = defaultMailAccount.isMailSecure();
-	            LOG.debug("Parsed IMAP Infos: " + (USE_IMAPS ? "imaps" : "imap") + " " + host + " " + port + "  (" + userId + "@" + ctxId + ")");
+	            LOG.debug("Parsed IMAP Infos: {} {} {}  ({}@{})", (USE_IMAPS ? "imaps" : "imap"), host, port, userId, ctxId);
 
 
             } else {
@@ -328,14 +327,14 @@ public class IMAPAuthentication implements AuthenticationService {
             imapconnection = session.getStore("imap");
             // try to connect with the credentials set above
             imapconnection.connect(host, port, user, password);
-            LOG.info("Imap authentication for user " + user + " successful on host " + host + ":" + port);
+            LOG.info("Imap authentication for user {} successful on host {}:{}", user, host, port);
 
             /*
              * Set the context of the user, If full login was configured, we use the domain part as the context name/mapping entry. If NO
              * full login was configured, we assume that only 1 context is in the system which is named "defaultcontext".
              */
             if (use_full_login) {
-                LOG.debug("Using domain: " + splitted[0] + " as context name!");
+                LOG.debug("Using domain: {} as context name!", splitted[0]);
             } else {
                 LOG.debug("Using \"defaultcontext\" as context name!");
                 splitted[0] = "defaultcontext";
@@ -348,11 +347,11 @@ public class IMAPAuthentication implements AuthenticationService {
             LOG.error("Error setup initial imap envorinment!", e);
             throw LoginExceptionCodes.COMMUNICATION.create(e);
         } catch (final AuthenticationFailedException e) {
-            LOG.info("Authentication error on host " + host + ":" + port + " for user " + user, e);
+            LOG.info("Authentication error on host {}:{} for user {}", host, port, user, e);
             LOG.debug("Debug imap authentication", e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
         } catch (final MessagingException e) {
-            LOG.info("Messaging error on host " + host + ":" + port + " for user " + user, e);
+            LOG.info("Messaging error on host {}:{} for user {}", host, port, user, e);
             LOG.debug("Debug imap error", e);
             throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
         } finally {

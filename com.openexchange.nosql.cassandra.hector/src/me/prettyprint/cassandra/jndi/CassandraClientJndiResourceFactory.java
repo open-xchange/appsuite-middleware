@@ -45,7 +45,7 @@ import me.prettyprint.hector.api.factory.HFactory;
  */
 
 public class CassandraClientJndiResourceFactory implements ObjectFactory {
-  private Logger log = LoggerFactory.getLogger(CassandraClientJndiResourceFactory.class);
+  private org.slf4j.Logger log = LoggerFactory.getLogger(CassandraClientJndiResourceFactory.class);
   
   private CassandraHostConfigurator cassandraHostConfigurator;
   private Cluster cluster;

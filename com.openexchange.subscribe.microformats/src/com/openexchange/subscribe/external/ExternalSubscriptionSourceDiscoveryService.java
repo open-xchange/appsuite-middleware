@@ -54,8 +54,6 @@ import java.io.Reader;
 import java.net.MalformedURLException;
 import java.util.List;
 import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.modules.Module;
@@ -84,7 +82,7 @@ import com.openexchange.subscribe.microformats.transformers.MapToObjectTransform
  */
 public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionSourceDiscoveryService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExternalSubscriptionSourceDiscoveryService.class));
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExternalSubscriptionSourceDiscoveryService.class);
 
     private final String sourceURL;
     private SubscriptionSourceCollector sources = new SubscriptionSourceCollector();
@@ -164,7 +162,7 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
 
             final MapToObjectTransformer transformer = getTransformer(external.getFolderModule());
             if(transformer == null) {
-                LOG.error("We don't support subscription sources of type "+Module.getModuleString(external.getFolderModule(), -1)+" yet");
+                LOG.error("We don''t support subscription sources of type {} yet", Module.getModuleString(external.getFolderModule(), -1));
                 return null;
             }
             final MicroformatSubscribeService subscribeService = new MicroformatSubscribeService() {
@@ -189,10 +187,10 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
 
             return subscribeService;
         } catch (final HttpException e) {
-            LOG.error("Could not grab external service: "+externalAddress+" Got Error: "+e.getMessage(), e);
+            LOG.error("Could not grab external service: {} Got Error", externalAddress, e);
             throw OXMFSubscriptionErrorMessage.HttpException.create(e.getMessage(), externalAddress, e);
         } catch (final IOException e) {
-            LOG.error("Could not grab external service: "+externalAddress+" Got Error: "+e.getMessage(), e);
+            LOG.error("Could not grab external service: {} Got Error", externalAddress, e);
             throw OXMFSubscriptionErrorMessage.IOException.create(e.getMessage(), externalAddress, e);
         }
     }
@@ -220,7 +218,7 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
             final java.net.URL url = new java.net.URL(sibling);
             return url.getProtocol()+"://"+url.getHost()+relative;
         } catch (final MalformedURLException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             return relative;
         }
     }
@@ -250,10 +248,10 @@ public class ExternalSubscriptionSourceDiscoveryService implements SubscriptionS
             final Reader r = HTTPToolkit.grab(sourceURL);
             return parser.parse(r);
         } catch (final HttpException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw OXMFSubscriptionErrorMessage.HttpException.create(e.getMessage(), e);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("", e);
             throw OXMFSubscriptionErrorMessage.IOException.create(e.getMessage(), e);
         }
     }
