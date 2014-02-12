@@ -739,7 +739,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         // final Map<String, PropertyWatcher> watchers = PropertyWatcher.getAllWatchers();
         loadConfiguration(getDirectories());
 
-        // Check if properties has been changed, abort if not
+        // Check if properties have been changed, abort if not
         Set<String> changes = getChanges(oldPropertiesByFile);
         if (changes.isEmpty()) {
             return;
