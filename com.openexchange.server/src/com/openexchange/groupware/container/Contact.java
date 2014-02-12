@@ -577,7 +577,7 @@ public class Contact extends CommonObject {
 
     protected Date image_last_modified;
 
-    protected AtomicInteger number_of_images;
+    protected AtomicInteger number_of_images = new AtomicInteger();
 
     protected String file_as;
 
