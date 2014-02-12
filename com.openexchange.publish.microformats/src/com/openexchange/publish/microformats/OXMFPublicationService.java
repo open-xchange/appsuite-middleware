@@ -53,6 +53,7 @@ import static com.openexchange.publish.microformats.FormStrings.FORM_LABEL_LINK;
 import static com.openexchange.publish.microformats.FormStrings.FORM_LABEL_PROTECTED;
 import static com.openexchange.publish.microformats.FormStrings.FORM_LABEL_SITE;
 import static com.openexchange.publish.microformats.FormStrings.FORM_LABEL_TEMPLATE;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -109,6 +110,8 @@ public class OXMFPublicationService extends AbstractPublicationService {
     private String defaultTemplateName;
 
     private FormElement templateChooser;
+
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXMFPublicationService.class);
 
     public OXMFPublicationService() {
         super();
@@ -343,8 +346,12 @@ public class OXMFPublicationService extends AbstractPublicationService {
         if(!URL.contains(tmpRootUrl)){
             return null;
         }
+        final Pattern firstSplit = Pattern.compile(getRootURL());
         final Pattern SPLIT = Pattern.compile("/");
-        final String[] path = SPLIT.split(URL, 0);
+        //The Url is something like http://localhost/rootURL/[cid]/[siteName][/[outerStuff]|]?secret=[secret]
+        final String[] pathSplitByRootUrl = firstSplit.split(URL, 0);
+        //We want to get everything behind rootUrl/
+        final String[] path = SPLIT.split(pathSplitByRootUrl[1], 0);
         final String site = getSite(path);
         if (site == null) {
             return null;
@@ -353,9 +360,17 @@ public class OXMFPublicationService extends AbstractPublicationService {
     }
 
     private String getSite(final String[] path) {
-        String tmpPath = path[path.length-1];
+        String tmpPath = path[2];
         if (tmpPath.contains("?secret")){
-            return tmpPath.split("\\?secret",0)[0];
+            tmpPath = tmpPath.split("\\?secret",0)[0];
+        }
+        Pattern splitPattern = Pattern.compile("\\+");
+        //We need to decode this path Element here
+        String encoding = "UTF-8";
+        try {
+            tmpPath = HelperClass.decode(tmpPath, encoding, splitPattern);
+        } catch (UnsupportedEncodingException e) {
+            LOG.warn("", e);
         }
         return tmpPath;
     }

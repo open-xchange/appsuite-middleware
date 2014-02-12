@@ -93,7 +93,7 @@ public class OnlinePublicationServlet extends HttpServlet {
     /**
      * The pattern to split by <code>"+"</code> character.
      */
-    private static final Pattern SPLIT2 = Pattern.compile("\\+");
+    protected static final Pattern SPLIT2 = Pattern.compile("\\+");
 
     protected static volatile ContextService contexts;
 
@@ -151,30 +151,5 @@ public class OnlinePublicationServlet extends HttpServlet {
         return false;
     }
 
-    // FIXME: Get Default Encoding from config service
-    protected Collection<String> decode(final List<String> subList, final HttpServletRequest req) throws UnsupportedEncodingException {
-        final String encoding = req.getCharacterEncoding() == null ? "UTF-8" : req.getCharacterEncoding();
-        final List<String> decoded = new ArrayList<String>();
-        for (final String component : subList) {
-            final String decodedComponent = decode(component, encoding);
-            decoded.add(decodedComponent);
-        }
-        return decoded;
-    }
 
-    // FIXME use server service for this
-    private String decode(final String string, final String encoding) throws UnsupportedEncodingException {
-        final String[] chunks = SPLIT2.split(string, 0);
-        final StringBuilder decoded = new StringBuilder(string.length());
-        final boolean endsWithPlus = string.endsWith("+");
-        for (int i = 0; i < chunks.length; i++) {
-            final String chunk = chunks[i];
-            decoded.append(URLDecoder.decode(chunk, encoding));
-            if (i != chunks.length - 1 || endsWithPlus) {
-                decoded.append('+');
-            }
-        }
-
-        return decoded.toString();
-    }
 }

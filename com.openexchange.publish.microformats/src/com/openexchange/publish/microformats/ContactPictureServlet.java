@@ -177,7 +177,7 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
             }
         }
 
-        final String site = Strings.join(decode(normalized.subList(1, normalized.size()-2), req), "/");
+        final String site = Strings.join(HelperClass.decode(normalized.subList(1, normalized.size()-2), req,SPLIT2), "/");
         final Map<String, String> args = new HashMap<String, String>();
         args.put(CONTEXTID, normalized.get(0));
         args.put(SITE, site);
