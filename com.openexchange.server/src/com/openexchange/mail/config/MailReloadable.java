@@ -82,6 +82,9 @@ public final class MailReloadable implements Reloadable {
     }
 
     public static Set<String> getConfigFiles() {
+        if (CONFIGFILES.size() == 0) {
+            CONFIGFILES.add("mail.properties");
+        }
         return CONFIGFILES;
     }
 
@@ -95,7 +98,6 @@ public final class MailReloadable implements Reloadable {
     private MailReloadable() {
         super();
         reloadables = new CopyOnWriteArrayList<Reloadable>();
-        CONFIGFILES.add("mail.properties");
     }
 
     /**
