@@ -763,8 +763,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
                     boolean doReload = false;
                     for (final Iterator<String> it = configfileNames.iterator(); !doReload && it.hasNext();) {
-                        final String fileName = it.next();
-                        if (changes.contains(fileName)) {
+                        if (changes.contains(it.next())) {
                             doReload = true;
                         }
                     }
