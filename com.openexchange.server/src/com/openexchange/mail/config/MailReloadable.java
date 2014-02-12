@@ -113,7 +113,7 @@ public final class MailReloadable implements Reloadable {
                 mailProperties.loadProperties();
             }
         } catch (final OXException e) {
-            LOGGER.warn("Failed to reload IMAP properties", e);
+            LOGGER.warn("Failed to reload mail properties", e);
         }
 
         for (final Reloadable reloadable : reloadables) {

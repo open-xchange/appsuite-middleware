@@ -47,75 +47,84 @@
  *
  */
 
-package com.openexchange.smtp.osgi;
+package com.openexchange.smtp;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import javax.activation.MailcapCommandMap;
-import org.osgi.framework.BundleActivator;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.mail.transport.TransportProvider;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.smtp.SMTPProvider;
-import com.openexchange.smtp.SmtpReloadable;
-import com.openexchange.smtp.services.Services;
-import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.exception.OXException;
+import com.openexchange.smtp.config.SMTPProperties;
 
 /**
- * {@link SMTPActivator} - The {@link BundleActivator activator} for SMTP bundle.
+ * {@link SmtpReloadable} - Collects reloadables for SMTP module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.6.0
  */
-public final class SMTPActivator extends HousekeepingActivator {
+public final class SmtpReloadable implements Reloadable {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SMTPActivator.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(SmtpReloadable.class);
+
+    private static final SmtpReloadable INSTANCE = new SmtpReloadable();
+
+    private static final Set<String> CONFIGFILES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("smtp.properties")));
 
     /**
-     * Initializes a new {@link SMTPActivator}
+     * Gets the instance.
+     *
+     * @return The instance
      */
-    public SMTPActivator() {
+    public static SmtpReloadable getInstance() {
+        return INSTANCE;
+    }
+
+    // --------------------------------------------------------------------------------------------------- //
+
+    private final List<Reloadable> reloadables;
+
+    /**
+     * Initializes a new {@link SmtpReloadable}.
+     */
+    private SmtpReloadable() {
         super();
+        reloadables = new CopyOnWriteArrayList<Reloadable>();
+    }
+
+    /**
+     * Adds given {@link Reloadable} instance.
+     *
+     * @param reloadable The instance to add
+     */
+    public void addReloadable(final Reloadable reloadable) {
+        reloadables.add(reloadable);
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, MailAccountStorageService.class, ConfigViewFactory.class, ThreadPoolService.class };
-    }
-
-    @Override
-    public void startBundle() throws Exception {
+    public void reloadConfiguration(final ConfigurationService configService) {
         try {
-            Services.setServiceLookup(this);
-
-            trackService(HostnameService.class);
-            track(MailcapCommandMap.class, new MailcapServiceTracker(context));
-            openTrackers();
-
-            final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
-            dictionary.put("protocol", SMTPProvider.PROTOCOL_SMTP.toString());
-            registerService(TransportProvider.class, SMTPProvider.getInstance(), dictionary);
-
-            registerService(Reloadable.class, SmtpReloadable.getInstance());
-        } catch (final Throwable t) {
-            LOG.error("", t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
+            final SMTPProperties smtpProperties = SMTPProperties.getInstance();
+            if (null != smtpProperties) {
+                smtpProperties.resetProperties();
+                smtpProperties.loadProperties();
+            }
+        } catch (final OXException e) {
+            LOGGER.warn("Failed to reload SMTP properties", e);
         }
 
+        for (final Reloadable reloadable : reloadables) {
+            reloadable.reloadConfiguration(configService);
+        }
     }
 
     @Override
-    public void stopBundle() throws Exception {
-        try {
-            cleanUp();
-            Services.setServiceLookup(null);
-        } catch (final Throwable t) {
-            LOG.error("", t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
-        }
+    public Set<String> getConfigfileNames() {
+        return CONFIGFILES;
     }
 
 }

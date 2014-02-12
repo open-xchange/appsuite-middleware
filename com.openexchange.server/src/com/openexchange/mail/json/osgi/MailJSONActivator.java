@@ -86,6 +86,7 @@ import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.json.converters.MailJSONConverter;
 import com.openexchange.mail.transport.config.TransportProperties;
+import com.openexchange.mail.transport.config.TransportReloadable;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -187,6 +188,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         registerService(ResultConverter.class, new MailJSONConverter(converter));
 
         registerService(Reloadable.class, MailReloadable.getInstance());
+        registerService(Reloadable.class, TransportReloadable.getInstance());
 
         final ContactField[] fields = new ContactField[] {
             ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.FOLDER_ID, ContactField.NUMBER_OF_IMAGES };

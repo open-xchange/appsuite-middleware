@@ -50,9 +50,13 @@
 package com.openexchange.smtp.config;
 
 import java.util.Properties;
+import java.util.Set;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeSessionPropertyNames;
+import com.openexchange.smtp.SmtpReloadable;
 
 /**
  * {@link SMTPSessionProperties} - Default properties for an SMTP session established via <code>JavaMail</code> API
@@ -100,6 +104,21 @@ public final class SMTPSessionProperties {
                 }
             }
         }
+    }
+
+    static {
+        SmtpReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(final ConfigurationService configService) {
+                sessionProperties = null;
+            }
+
+            @Override
+            public Set<String> getConfigfileNames() {
+                return null;
+            }
+        });
     }
 
     /**
