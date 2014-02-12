@@ -186,9 +186,7 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
                         LOG.warn("Can't reset auto commit", x);
                     }
 
-                    if(writeCon != null) {
-                        Database.back(contextId, true, writeCon);
-                    }
+                    Database.back(contextId, true, writeCon);
                 }
             }
         }
