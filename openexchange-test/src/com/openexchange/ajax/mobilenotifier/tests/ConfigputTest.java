@@ -49,6 +49,12 @@
 
 package com.openexchange.ajax.mobilenotifier.tests;
 
+import java.io.IOException;
+import org.json.JSONException;
+import com.openexchange.ajax.mobilenotifier.actions.ConfigputMobileNotifierRequest;
+import com.openexchange.ajax.mobilenotifier.actions.ConfigputMobileNotifierResponse;
+import com.openexchange.exception.OXException;
+import com.openexchange.mobilenotifier.json.convert.ParsedNotifyTemplate;
 
 /**
  * {@link ConfigputTest}
@@ -66,11 +72,24 @@ public class ConfigputTest extends AbstractMobileNotifierTest {
         super(name);
     }
 
-    public void testMobileNotifierPutAction() {
-        // TODO
+    public void testShouldUpdateTemplate() throws OXException, IOException, JSONException {
+        ParsedNotifyTemplate notifyTemplate = new ParsedNotifyTemplate();
+        notifyTemplate.setFrontendName("io.ox/mail");
+        notifyTemplate.setHtmlTemplate("<div></div>");
+
+        ConfigputMobileNotifierRequest updReq = new ConfigputMobileNotifierRequest(notifyTemplate);
+        ConfigputMobileNotifierResponse updResp = getClient().execute(updReq);
+
+        assertFalse("should not get error message ", updResp.hasError());
+        assertEquals("Should return true in case of success", new Boolean(true), updResp.getData());
     }
 
-    public void shouldThrowExceptionOnWrongJSONBodyMobileNotifierPutAction() {
-
+    public void testShouldThrowExceptionOnUndefinedService() throws OXException, IOException, JSONException {
+        ParsedNotifyTemplate notifyTemplate = new ParsedNotifyTemplate();
+        notifyTemplate.setFrontendName("io.ox/mehl");
+        notifyTemplate.setHtmlTemplate("<div></div>");
+        ConfigputMobileNotifierRequest updReq = new ConfigputMobileNotifierRequest(notifyTemplate);
+        ConfigputMobileNotifierResponse updResp = getClient().execute(updReq);
+        assertTrue(updResp.hasError());
     }
 }

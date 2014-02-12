@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,25 +47,65 @@
  *
  */
 
-package com.openexchange.ajax.mobilenotifier.actions;
+package com.openexchange.mobilenotifier;
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 
 /**
- * {@link ConfigputMobileNotifierResponse}
- *
+ * {@link MobileNotifierFileUtil} - Util for file handling
+ * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class ConfigputMobileNotifierResponse extends AbstractAJAXResponse {
+public abstract class MobileNotifierFileUtil {
 
+    private static final String TEMPLATEPATH = System.getProperty("openexchange.propdir") + "/templates/examples/";
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobileNotifierFileUtil.class);
     /**
-     * Initializes a new {@link ConfigputMobileNotifierResponse}.
+     * Gets a template file from the hard disk
      * 
-     * @param response
+     * @param templateFileName - The file name of the template
+     * @return String - The content of the file
      */
-    protected ConfigputMobileNotifierResponse(Response response) {
-        super(response);
+    public static String getTeamplateFileContent(final String templateFileName) throws OXException {
+        final File file = new File(TEMPLATEPATH + templateFileName);
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new FileReader(file));
+
+            StringAllocator sb = new StringAllocator(65532);
+            String sep = System.getProperty("line.separator");
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line).append(sep);
+            }
+            return sb.toString();
+        } catch (FileNotFoundException e) {
+            LOG.error("Could not found file: {} ", file.toString());
+            throw MobileNotifierExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+            throw MobileNotifierExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(br);
+        }
+    }
+
+    public static void writeTemplateFileContent(final String templateFileName, String content) throws OXException {
+        FileLocker fl = new FileLocker(TEMPLATEPATH + templateFileName);
+        try {
+            fl.writeChanges(content);
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+            throw MobileNotifierExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
     }
 
 }

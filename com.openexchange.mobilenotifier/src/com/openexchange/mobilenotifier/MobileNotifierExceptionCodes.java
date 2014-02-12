@@ -77,7 +77,7 @@ public enum MobileNotifierExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * The file %1$s is already locked %1$s
      */
-    ALREADY_LOCKED("The file %1$s is already locked", Category.CATEGORY_ERROR, 4);
+    ALREADY_LOCKED("The file %1$s is already locked", Category.CATEGORY_ERROR, 4, "The file is already locked");
     /**
      * The prefix constant.
      */

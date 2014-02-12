@@ -49,6 +49,7 @@
 
 package com.openexchange.mobilenotifier.json.actions;
 
+import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -103,6 +104,6 @@ public class ConfigPutAction extends AbstractMobileNotifierAction {
             MobileNotifierService notifierService = mobileNotifierRegistry.getService(parsedTemplate.getFrontendName(), uid, cid);
             notifierService.putTemplate(parsedTemplate.getHtmlTemplate());
         }
-        return new AJAXRequestResult(Boolean.TRUE);
+        return new AJAXRequestResult(Boolean.TRUE, new Date(), "json");
     }
 }

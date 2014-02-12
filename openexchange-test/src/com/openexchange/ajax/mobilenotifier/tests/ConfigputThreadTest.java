@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,66 +47,57 @@
  *
  */
 
-package com.openexchange.mobilenotifier.example;
+package com.openexchange.ajax.mobilenotifier.tests;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import org.json.JSONException;
+import com.openexchange.ajax.mobilenotifier.actions.ConfigputMobileNotifierRequest;
+import com.openexchange.ajax.mobilenotifier.actions.ConfigputMobileNotifierResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
-import com.openexchange.mobilenotifier.MobileNotifierExceptionCodes;
+import com.openexchange.mobilenotifier.json.convert.ParsedNotifyTemplate;
 
 /**
- * {@link MobileNotifierFileUtil} - Util for file handling
- * 
+ * {@link ConfigputThreadTest}
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public abstract class MobileNotifierFileUtil {
+public class ConfigputThreadTest extends AbstractMobileNotifierTest {
 
-    private static final String TEMPLATEPATH = System.getProperty("openexchange.propdir") + "/templates/examples/";
+    static int i = 0;
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobileNotifierFileUtil.class);
     /**
-     * Gets a template file from the hard disk
+     * Initializes a new {@link ConfigputThreadTest}.
      * 
-     * @param templateFileName - The file name of the template
-     * @return String - The content of the file
+     * @param name
      */
-    public static String getTeamplateFileContent(final String templateFileName) throws OXException {
-        final File file = new File(TEMPLATEPATH + templateFileName);
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new FileReader(file));
+    public ConfigputThreadTest(String name) {
+        super(name);
+    }
 
-            StringAllocator sb = new StringAllocator(65532);
-            String sep = System.getProperty("line.separator");
-            String line;
-            while ((line = br.readLine()) != null) {
-                sb.append(line).append(sep);
+    public void testShouldWaitUntilFileIsUnlocked() throws OXException, IOException, JSONException, InterruptedException {
+
+        int threadCount = 20;
+
+        Runnable configPutRunnable = new Runnable() {
+
+            @Override
+            public void run() {
+                ParsedNotifyTemplate notifyTemplate = new ParsedNotifyTemplate();
+                notifyTemplate.setFrontendName("io.ox/mail");
+                notifyTemplate.setHtmlTemplate("t");
+                final ConfigputMobileNotifierRequest updReq = new ConfigputMobileNotifierRequest(notifyTemplate);
+                final ConfigputMobileNotifierResponse updResp = client.executeSafe(updReq);
+                assertNull(updResp.getErrorMessage());
             }
-            return sb.toString();
-        } catch (FileNotFoundException e) {
-            LOG.error("Could not found file: {} ", file.toString());
-            throw MobileNotifierExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-            throw MobileNotifierExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } finally {
-            Streams.close(br);
+        };
+        Thread[] configPutThreads = new Thread[threadCount];
+        for (int i = 0; i < configPutThreads.length; i++) {
+            configPutThreads[i] = new Thread(configPutRunnable);
+            configPutThreads[i].start();
+            Thread.sleep(5);
+        }
+        for (int i = 0; i < configPutThreads.length; i++) {
+            configPutThreads[i].join();
         }
     }
-
-    public static void writeTemplateFileContent(final String templateFileName, String content) throws OXException {
-        FileLocker fl = new FileLocker(TEMPLATEPATH + templateFileName);
-        try {
-            fl.writeChanges(content);
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-            throw MobileNotifierExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        }
-    }
-
 }

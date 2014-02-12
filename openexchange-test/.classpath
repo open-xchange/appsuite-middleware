@@ -113,5 +113,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/org.apache.felix.eventadmin"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-codec-1.3.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.mobilenotifier"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.mobilenotifier.json"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

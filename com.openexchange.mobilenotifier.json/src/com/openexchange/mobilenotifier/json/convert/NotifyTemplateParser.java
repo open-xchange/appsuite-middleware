@@ -81,21 +81,17 @@ public class NotifyTemplateParser {
      */
     public static List<ParsedNotifyTemplate> parseJSON(JSONObject json) throws JSONException {
         final List<ParsedNotifyTemplate> parsedNotifiyTemplates = new ArrayList<ParsedNotifyTemplate>();
-        if (json.hasAndNotNull(MobileNotifyField.PROVIDER)) {
-            final JSONObject providerJSON = (JSONObject) json.get(MobileNotifyField.PROVIDER);
-            final Iterator<Entry<String, Object>> iter = providerJSON.entrySet().iterator();
-            while (iter.hasNext()) {
-                final Entry<String, Object> notifyTemplate = iter.next();
-                final ParsedNotifyTemplate parsedTemplate = new ParsedNotifyTemplate();
-                // get frontend name to find the service
-                parsedTemplate.setFrontendName(notifyTemplate.getKey());
-                // get template attribute
-                final JSONObject templateJSON = (JSONObject) notifyTemplate.getValue();
-                if (templateJSON.hasAndNotNull(MobileNotifyField.TEMPLATE)) {
-                    parsedTemplate.setHtmlTemplate(templateJSON.getString(MobileNotifyField.TEMPLATE));
-                }
-                parsedNotifiyTemplates.add(parsedTemplate);
-            }
+        final JSONObject providerJSON = (JSONObject) json.get(MobileNotifyField.PROVIDER);
+        final Iterator<Entry<String, Object>> iter = providerJSON.entrySet().iterator();
+        while (iter.hasNext()) {
+            final Entry<String, Object> notifyTemplate = iter.next();
+            final ParsedNotifyTemplate parsedTemplate = new ParsedNotifyTemplate();
+            // get frontend name to find the service
+            parsedTemplate.setFrontendName(notifyTemplate.getKey());
+            // get template attribute
+            final JSONObject templateJSON = (JSONObject) notifyTemplate.getValue();
+            parsedTemplate.setHtmlTemplate(templateJSON.getString(MobileNotifyField.TEMPLATE));
+            parsedNotifiyTemplates.add(parsedTemplate);
         }
         return parsedNotifiyTemplates;
     }

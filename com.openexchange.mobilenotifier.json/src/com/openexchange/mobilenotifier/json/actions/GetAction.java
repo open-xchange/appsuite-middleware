@@ -49,6 +49,7 @@
 
 package com.openexchange.mobilenotifier.json.actions;
 
+import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -107,6 +108,6 @@ public class GetAction extends AbstractMobileNotifierAction {
             itemJSON.put(notifierService.getFrontendName(), NotifyItemWriter.write(notifierService));
         }
         providerJSON.put(MobileNotifyField.PROVIDER, itemJSON);
-        return new AJAXRequestResult(providerJSON);
+        return new AJAXRequestResult(providerJSON, new Date(), "json");
     }
 }

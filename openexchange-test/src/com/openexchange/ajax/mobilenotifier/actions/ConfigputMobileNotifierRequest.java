@@ -49,13 +49,56 @@
 
 package com.openexchange.ajax.mobilenotifier.actions;
 
-
+import java.io.IOException;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.mobilenotifier.json.convert.ParsedNotifyTemplate;
 
 /**
  * {@link ConfigputMobileNotifierRequest}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class ConfigputMobileNotifierRequest {
+public class ConfigputMobileNotifierRequest extends AbstractMobileNotifierRequest<ConfigputMobileNotifierResponse> {
 
+    final private ParsedNotifyTemplate notifyTemplate;
+
+    public ConfigputMobileNotifierRequest(final ParsedNotifyTemplate notifyTemplate) {
+        this.notifyTemplate = notifyTemplate;
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.PUT;
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "configput") };
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends ConfigputMobileNotifierResponse> getParser() {
+        return new AbstractAJAXParser<ConfigputMobileNotifierResponse>(isFailOnError()) {
+
+            @Override
+            protected ConfigputMobileNotifierResponse createResponse(final Response response) throws JSONException {
+                return new ConfigputMobileNotifierResponse(response);
+            }
+        };
+    }
+
+    @Override
+    public Object getBody() throws JSONException {
+        final JSONObject providerJSON = new JSONObject();
+        final JSONObject frontend = new JSONObject();
+        final JSONObject attributes = new JSONObject();
+        attributes.put("template", notifyTemplate.getHtmlTemplate());
+        frontend.put(notifyTemplate.getFrontendName(), attributes);
+        providerJSON.put("provider", frontend);
+        return providerJSON;
+    }
 }

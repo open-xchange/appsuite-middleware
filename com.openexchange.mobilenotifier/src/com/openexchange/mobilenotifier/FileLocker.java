@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mobilenotifier.example;
+package com.openexchange.mobilenotifier;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -55,7 +55,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
-import com.openexchange.mobilenotifier.MobileNotifierExceptionCodes;
 
 /**
  * {@link FileLocker}
