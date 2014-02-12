@@ -751,15 +751,29 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
 
         // Propagate reloaded configuration among Reloadables
-        for (final Reloadable service : reloadableServices.values()) {
+        for (final Reloadable reloadable : reloadableServices.values()) {
             try {
-                for (String filename : service.getConfigfileNames()) {
-                    if (changes.contains(filename)) {
-                        service.reloadConfiguration(this);
+                final Set<String> configfileNames = reloadable.getConfigfileNames();
+                if (null == configfileNames || configfileNames.isEmpty()) {
+                    // Reloadable does not indicate the files of interest
+
+                    reloadable.reloadConfiguration(this);
+                } else {
+                    // Reloadable does indicate the files of interest; thus check against changed ones
+
+                    boolean doReload = false;
+                    for (final Iterator<String> it = configfileNames.iterator(); !doReload && it.hasNext();) {
+                        final String fileName = it.next();
+                        if (changes.contains(fileName)) {
+                            doReload = true;
+                        }
+                    }
+                    if (doReload) {
+                        reloadable.reloadConfiguration(this);
                     }
                 }
             } catch (final Exception e) {
-                LOG.warn("Failed to handle reloaded configuration to {}.", service.getClass().getName(), e);
+                LOG.warn("Failed to handle reloaded configuration to {}.", reloadable.getClass().getName(), e);
             }
         }
 
