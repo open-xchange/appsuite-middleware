@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.config;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -70,7 +72,7 @@ public final class MailReloadable implements Reloadable {
 
     private static final MailReloadable INSTANCE = new MailReloadable();
 
-    private static final Set<String> CONFIGFILES = new HashSet<String>(1);
+    private static final Set<String> CONFIGFILES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("mail.properties")));
 
     /**
      * Gets the instance.
@@ -81,10 +83,12 @@ public final class MailReloadable implements Reloadable {
         return INSTANCE;
     }
 
+    /**
+     * Gets the configuration file names of interest.
+     *
+     * @return The file names
+     */
     public static Set<String> getConfigFiles() {
-        if (CONFIGFILES.size() == 0) {
-            CONFIGFILES.add("mail.properties");
-        }
         return CONFIGFILES;
     }
 
