@@ -169,7 +169,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
             @Override
             public Set<String> getConfigfileNames() {
-                return ImapUtility.getConfigfileNames();
+                return null;
             }
         });
     }

@@ -91,7 +91,6 @@ import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.storecache.IMAPStoreCache;
 import com.openexchange.imap.storecache.IMAPStoreContainer;
-import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
@@ -267,7 +266,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
             @Override
             public Set<String> getConfigfileNames() {
-                return ImapUtility.getConfigfileNames();
+                return null;
             }
         });
     }

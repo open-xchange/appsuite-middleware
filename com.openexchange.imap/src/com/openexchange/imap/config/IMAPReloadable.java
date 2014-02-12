@@ -49,6 +49,9 @@
 
 package com.openexchange.imap.config;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -56,7 +59,6 @@ import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
-import com.openexchange.imap.util.ImapUtility;
 
 /**
  * {@link IMAPReloadable} - Collects reloadables for IMAP bundle.
@@ -69,6 +71,8 @@ public final class IMAPReloadable implements Reloadable {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(IMAPReloadable.class);
 
     private static final IMAPReloadable INSTANCE = new IMAPReloadable();
+
+    private static final Set<String> CONFIGFILES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("imap.properties")));
 
     /**
      * Gets the instance.
@@ -120,7 +124,7 @@ public final class IMAPReloadable implements Reloadable {
 
     @Override
     public Set<String> getConfigfileNames() {
-        return ImapUtility.getConfigfileNames();
+        return CONFIGFILES;
     }
 
 }

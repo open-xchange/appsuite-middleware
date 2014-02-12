@@ -174,7 +174,7 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
 
             @Override
             public Set<String> getConfigfileNames() {
-                return ImapUtility.getConfigfileNames();
+                return null;
             }
         });
     }

@@ -392,7 +392,7 @@ public final class ThresholdInputStreamProvider implements Closeable, InputStrea
 
             @Override
             public Set<String> getConfigfileNames() {
-                return ImapUtility.getConfigfileNames();
+                return null;
             }
         });
     }

@@ -173,7 +173,7 @@ public final class OperationKey implements Serializable {
 
             @Override
             public Set<String> getConfigfileNames() {
-                return ImapUtility.getConfigfileNames();
+                return null;
             }
         });
     }

@@ -145,7 +145,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
 
             @Override
             public Set<String> getConfigfileNames() {
-                return ImapUtility.getConfigfileNames();
+                return null;
             }
         });
     }

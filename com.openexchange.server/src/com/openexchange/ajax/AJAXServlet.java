@@ -905,20 +905,57 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         }
     }
 
+    private static final Pattern PATTERN_CONTROL = Pattern.compile("[\\x00-\\x1F\\x7F]");
+
     /**
-     * Sanitizes specified parameter value.
+     * Sanitizes specified String input.
+     * <ul>
+     * <li>Do URL decoding until fully decoded
+     * <li>Drop ASCII control characters
+     * <li>Escape using HTML entities
+     * <li>Replace double slashes with single one
+     * </ul>
+     *
+     * @param sInput The input to sanitize
+     * @return The sanitized input
      */
-    public static String sanitizeParam(final String s) {
-        if (isEmpty(s)) {
-            return s;
+    public static String sanitizeParam(String sInput) {
+        if (isEmpty(sInput)) {
+            return sInput;
         }
-        try {
-            // Strip possible "\r?\n" and/or "%0A?%0D"
-            return PATTERN_CRLF.matcher(s).replaceAll("");
-        } catch (final RuntimeException e) {
-            LOG.error("A runtime error occurred.", e);
-            return s;
+
+        String s = sInput;
+
+        // Do URL decoding until fully decoded
+        {
+            int pos;
+            while ((pos = s.indexOf('%')) >= 0 && pos < s.length() - 1) {
+                try {
+                    s = new URLCodec("UTF-8").decode(s);
+                } catch (org.apache.commons.codec.DecoderException e) {
+                    break;
+                }
+            }
         }
+
+        // Drop ASCII control characters
+        s = PATTERN_CONTROL.matcher(s).replaceAll("");
+
+        // Escape using HTML entities
+        s = org.apache.commons.lang.StringEscapeUtils.escapeHtml(s);
+
+        // Replace double slashes with single one
+        {
+            final Pattern patternDslash = PATTERN_DSLASH;
+            Matcher matcher = patternDslash.matcher(s);
+            while (matcher.find()) {
+                s = matcher.replaceAll("/");
+                matcher = patternDslash.matcher(s);
+            }
+        }
+
+        // Return result
+        return s;
     }
 
     private static final ConcurrentMap<String, URLCodec> URL_CODECS = new ConcurrentHashMap<String, URLCodec>(8);
