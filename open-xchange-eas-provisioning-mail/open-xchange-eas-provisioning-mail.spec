@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-eas-provisioning-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 6
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -49,6 +49,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Wed Feb 12 2014 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.6.0
 * Fri Feb 07 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Sixth release candidate for 7.4.2
 * Thu Feb 06 2014 Marcus Klein <marcus.klein@open-xchange.com>
@@ -71,6 +73,8 @@ Build for patch 2014-01-30
 Build for patch 2014-01-30
 * Fri Jan 24 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-12-17
+* Thu Jan 23 2014 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 7.4.2
 * Wed Jan 22 2014 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2014-01-22
 * Mon Jan 20 2014 Marcus Klein <marcus.klein@open-xchange.com>
@@ -89,10 +93,6 @@ Build for patch 2014-01-06
 Build for patch 2013-12-09
 * Mon Dec 23 2013 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 7.4.2
-* Thu Dec 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2013-12-23
-* Thu Dec 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2013-12-23
 * Thu Dec 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-12-23
 * Thu Dec 19 2013 Marcus Klein <marcus.klein@open-xchange.com>

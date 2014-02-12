@@ -1,3 +1,9 @@
+open-xchange-freebusy-ews (7.6.0-0) unstable; urgency=low
+
+  * prepare for 7.6.0
+
+ -- Markus Wagner <markus.wagner@open-xchange.com>  Wed, 12 Feb 2014 09:35:00 +0100
+
 open-xchange-freebusy-ews (7.4.2-0) unstable; urgency=low
 
   * prepare for 7.4.2
