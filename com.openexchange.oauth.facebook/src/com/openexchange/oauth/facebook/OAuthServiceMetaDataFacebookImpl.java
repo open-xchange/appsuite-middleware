@@ -57,7 +57,9 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.json.JSONException;
@@ -291,6 +293,13 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
 
         this.apiKey = apiKey;
         this.apiSecret = secretKey;
+    }
+
+    @Override
+    public Set<String> getConfigfileNames() {
+        Set<String> set = new HashSet<String>(1);
+        set.add("facebookoauth.properties");
+        return set;
     }
 
 }

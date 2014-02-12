@@ -49,6 +49,8 @@
 
 package com.openexchange.config;
 
+import java.util.Set;
+
 
 /**
  * {@link Reloadable} - Marks services that perform necessary actions in order to apply (possibly) new configuration.
@@ -67,5 +69,11 @@ public interface Reloadable {
      * @param configService The configuration service providing newly initialized properties
      */
     void reloadConfiguration(ConfigurationService configService);
+
+    /**
+     * Returns a set of configfile names, which are needed for the reloadable service.
+     * @return Set of configfile names
+     */
+    Set<String> getConfigfileNames();
 
 }

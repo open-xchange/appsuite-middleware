@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth.yahoo.internal;
 
+import java.util.HashSet;
+import java.util.Set;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.YahooApi;
 import com.openexchange.config.ConfigurationService;
@@ -113,5 +115,12 @@ public class OAuthServiceMetaDataYahooImpl extends AbstractOAuthServiceMetaData 
 
         this.apiKey = apiKey;
         this.apiSecret = secretKey;
+    }
+
+    @Override
+    public Set<String> getConfigfileNames() {
+        Set<String> set = new HashSet<String>(1);
+        set.add("yahoooauth.properties");
+        return set;
     }
 }

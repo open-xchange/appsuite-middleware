@@ -57,6 +57,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Queue;
+import java.util.Set;
 import javax.mail.Flags;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -110,6 +111,11 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
             @Override
             public void reloadConfiguration(ConfigurationService configService) {
                 managedCloneEnabled = null;
+            }
+
+            @Override
+            public Set<String> getConfigfileNames() {
+                return MailReloadable.getConfigFiles();
             }
         });
     }

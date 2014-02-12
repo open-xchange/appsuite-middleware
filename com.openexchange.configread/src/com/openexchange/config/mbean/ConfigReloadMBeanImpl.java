@@ -49,6 +49,9 @@
 
 package com.openexchange.config.mbean;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import com.openexchange.config.internal.ConfigurationImpl;
@@ -63,6 +66,8 @@ import com.openexchange.config.internal.ConfigurationImpl;
 public class ConfigReloadMBeanImpl extends StandardMBean implements ConfigReloadMBean {
 
     private final ConfigurationImpl configService;
+
+    private final Map<String, List<String>> MAP = new HashMap<String, List<String>>();
 
     /**
      * Initializes a new {@link ConfigReloadMBeanImpl}.
@@ -79,6 +84,16 @@ public class ConfigReloadMBeanImpl extends StandardMBean implements ConfigReload
         if (null != configService) {
             configService.reloadConfiguration();
         }
+    }
+
+    @Override
+    public Map<String, List<String>> listOptions() {
+        return MAP;
+    }
+
+    @Override
+    public Map<String, List<String>> listOptions(String property) {
+        return (Map<String, List<String>>) new HashMap<String, List<String>>().put(property, MAP.get(property));
     }
 
 }

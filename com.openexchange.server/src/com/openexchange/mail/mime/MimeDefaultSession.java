@@ -50,6 +50,7 @@
 package com.openexchange.mail.mime;
 
 import java.util.Properties;
+import java.util.Set;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.mail.config.MailProperties;
@@ -103,6 +104,11 @@ public final class MimeDefaultSession {
             public void reloadConfiguration(ConfigurationService configService) {
                 instance = null;
                 properties = null;
+            }
+
+            @Override
+            public Set<String> getConfigfileNames() {
+                return MailReloadable.getConfigFiles();
             }
         });
     }

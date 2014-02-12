@@ -56,6 +56,7 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.linked.TIntLinkedList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -71,6 +72,7 @@ import com.openexchange.imap.command.MessageFetchIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.services.Services;
+import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.config.MailProperties;
@@ -193,6 +195,11 @@ public final class IMAPSearch {
             @Override
             public void reloadConfiguration(final ConfigurationService configService) {
                 umlautFilterThreshold = null;
+            }
+
+            @Override
+            public Set<String> getConfigfileNames() {
+                return ImapUtility.getConfigfileNames();
             }
         });
     }

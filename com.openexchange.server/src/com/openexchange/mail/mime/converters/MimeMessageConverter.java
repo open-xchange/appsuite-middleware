@@ -70,6 +70,7 @@ import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.activation.DataHandler;
@@ -2474,6 +2475,11 @@ public final class MimeMessageConverter {
             @Override
             public void reloadConfiguration(ConfigurationService configService) {
                 enableMime4j = null;
+            }
+
+            @Override
+            public Set<String> getConfigfileNames() {
+                return MailReloadable.getConfigFiles();
             }
         });
     }

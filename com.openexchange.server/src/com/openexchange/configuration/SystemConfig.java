@@ -50,6 +50,8 @@
 package com.openexchange.configuration;
 
 import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
@@ -229,5 +231,12 @@ public final class SystemConfig extends AbstractConfig implements Initialization
         public String getPropertyName() {
             return propertyName;
         }
+    }
+
+    @Override
+    public Set<String> getConfigfileNames() {
+        Set<String> set = new HashSet<String>(1);
+        set.add("system.properties");
+        return set;
     }
 }

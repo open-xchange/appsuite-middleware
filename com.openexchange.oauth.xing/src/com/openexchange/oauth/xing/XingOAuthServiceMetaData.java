@@ -51,6 +51,8 @@ package com.openexchange.oauth.xing;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.XingApi;
 import com.openexchange.config.ConfigurationService;
@@ -214,6 +216,13 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
             throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.xing.apiSecret");
         }
         this.apiSecret = apiSecret;
+    }
+
+    @Override
+    public Set<String> getConfigfileNames() {
+        Set<String> set = new HashSet<String>(1);
+        set.add("xingoauth.properties");
+        return set;
     }
 
 }

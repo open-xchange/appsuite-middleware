@@ -49,6 +49,9 @@
 
 package com.openexchange.config.mbean;
 
+import java.util.List;
+import java.util.Map;
+
 
 /**
  * {@link ConfigReloadMBean}
@@ -61,5 +64,9 @@ public interface ConfigReloadMBean {
     public static final String DOMAIN = "com.openexchange.configuration";
 
     void reloadConfiguration();
+
+    Map<String, List<String>> listOptions();
+
+    Map<String, List<String>> listOptions(String property);
 
 }

@@ -49,7 +49,9 @@
 
 package com.openexchange.imap.util;
 
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 import javax.mail.MessagingException;
 import javax.mail.Store;
 import com.openexchange.java.StringAllocator;
@@ -186,6 +188,12 @@ public final class ImapUtility {
             isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    public static Set<String> getConfigfileNames() {
+        Set<String> set = new HashSet<String>(1);
+        set.add("imap.properties");
+        return set;
     }
 
 }

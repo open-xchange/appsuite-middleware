@@ -49,6 +49,8 @@
 
 package com.openexchange.twitter.internal;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
@@ -135,6 +137,13 @@ public final class TwitterConfiguration implements Reloadable {
      */
     public String getConsumerSecret() {
         return consumerSecret.get();
+    }
+
+    @Override
+    public Set<String> getConfigfileNames() {
+        Set<String> set = new HashSet<String>(1);
+        set.add("twitter.properties");
+        return set;
     }
 
 }

@@ -52,7 +52,9 @@ package com.openexchange.oauth.msn;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -243,6 +245,13 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData im
 
         this.apiKey = apiKey;
         this.apiSecret = secretKey;
+    }
+
+    @Override
+    public Set<String> getConfigfileNames() {
+        Set<String> set = new HashSet<String>(1);
+        set.add("msnoauth.properties");
+        return set;
     }
 
 }

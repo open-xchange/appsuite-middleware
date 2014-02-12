@@ -51,6 +51,7 @@ package com.openexchange.imap.storecache;
 
 import java.util.Iterator;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import javax.mail.MessagingException;
@@ -61,6 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.services.Services;
+import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.config.MailProperties;
@@ -125,6 +127,11 @@ public final class IMAPStoreCache {
             public void reloadConfiguration(final ConfigurationService configService) {
                shutDownInstance();
                initInstance();
+            }
+
+            @Override
+            public Set<String> getConfigfileNames() {
+                return ImapUtility.getConfigfileNames();
             }
         });
     }

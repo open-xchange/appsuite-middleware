@@ -51,8 +51,10 @@ package com.openexchange.secret.osgi;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
@@ -208,6 +210,13 @@ public class SecretActivator extends HousekeepingActivator implements Reloadable
         registerService(Reloadable.class, this);
 
         logger.info("(Re-)Initialized 'com.openexchange.secret' bundle.");
+    }
+
+    @Override
+    public Set<String> getConfigfileNames() {
+        Set<String> set = new HashSet<String>(1);
+        set.add("secret.properties");
+        return set;
     }
 
 }

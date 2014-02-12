@@ -1282,6 +1282,11 @@ public final class MimeMessageUtility {
             public void reloadConfiguration(ConfigurationService configService) {
                 checkReplaceWithComma = null;
             }
+
+            @Override
+            public Set<String> getConfigfileNames() {
+                return MailReloadable.getConfigFiles();
+            }
         });
     }
 

@@ -334,4 +334,11 @@ public abstract class AbstractOAuthProviderService implements OAuthProviderConst
         secret = configService.getProperty("com.openexchange.oauth.provider.secret");
     }
 
+    @Override
+    public Set<String> getConfigfileNames() {
+        Set<String> set = new HashSet<String>(1);
+        set.add("oauth-provider.properties");
+        return set;
+    }
+
 }

@@ -63,6 +63,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import javax.mail.FetchProfile;
 import javax.mail.Header;
@@ -143,6 +144,11 @@ public final class Threadables {
             @Override
             public void reloadConfiguration(final ConfigurationService configService) {
                 useCommonsNetThreader = null;
+            }
+
+            @Override
+            public Set<String> getConfigfileNames() {
+                return ImapUtility.getConfigfileNames();
             }
         });
     }

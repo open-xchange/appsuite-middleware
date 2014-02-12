@@ -174,6 +174,11 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
                 directory = null;
                 filesToDelete = null;
             }
+
+            @Override
+            public Set<String> getConfigfileNames() {
+                return MailReloadable.getConfigFiles();
+            }
         });
     }
 

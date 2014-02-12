@@ -57,6 +57,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Set;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
@@ -387,6 +388,11 @@ public final class ThresholdInputStreamProvider implements Closeable, InputStrea
             @Override
             public void reloadConfiguration(final ConfigurationService configService) {
                 uploadDirectory = null;
+            }
+
+            @Override
+            public Set<String> getConfigfileNames() {
+                return ImapUtility.getConfigfileNames();
             }
         });
     }

@@ -51,7 +51,9 @@ package com.openexchange.configuration;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
@@ -586,5 +588,12 @@ public final class ServerConfig implements Reloadable {
         public String getDefaultValue() {
             return defaultValue;
         }
+    }
+
+    @Override
+    public Set<String> getConfigfileNames() {
+        Set<String> set = new HashSet<String>(1);
+        set.add(FILENAME);
+        return set;
     }
 }

@@ -65,6 +65,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.configuration.SystemConfig;
@@ -109,6 +110,11 @@ public final class MimeType2ExtMap {
             public void reloadConfiguration(ConfigurationService configService) {
                 reset();
                 init();
+            }
+
+            @Override
+            public Set<String> getConfigfileNames() {
+                return MailReloadable.getConfigFiles();
             }
         });
     }

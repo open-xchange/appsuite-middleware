@@ -75,6 +75,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.services.Services;
+import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.mime.MimeMailException;
 import com.sun.mail.iap.Argument;
@@ -331,6 +332,11 @@ final class ListLsubCollection {
             public void reloadConfiguration(final ConfigurationService configService) {
                 initAclThreshold = null;
                 initStatusThreshold = null;
+            }
+
+            @Override
+            public Set<String> getConfigfileNames() {
+                return ImapUtility.getConfigfileNames();
             }
         });
     }

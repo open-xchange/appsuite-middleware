@@ -1127,6 +1127,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             public void reloadConfiguration(ConfigurationService configService) {
                 maxForwardCount = null;
             }
+
+            @Override
+            public Set<String> getConfigfileNames() {
+                return MailReloadable.getConfigFiles();
+            }
         });
     }
 

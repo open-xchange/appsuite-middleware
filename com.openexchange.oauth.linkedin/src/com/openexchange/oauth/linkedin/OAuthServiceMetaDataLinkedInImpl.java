@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth.linkedin;
 
+import java.util.HashSet;
+import java.util.Set;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.LinkedInApi;
 import com.openexchange.config.ConfigurationService;
@@ -128,6 +130,13 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaDa
 
         this.apiKey = apiKey;
         this.apiSecret = secretKey;
+    }
+
+    @Override
+    public Set<String> getConfigfileNames() {
+        Set<String> set = new HashSet<String>(1);
+        set.add("linkedinoauth.properties");
+        return set;
     }
 
 }

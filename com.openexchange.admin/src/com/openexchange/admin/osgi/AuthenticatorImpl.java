@@ -49,6 +49,8 @@
 
 package com.openexchange.admin.osgi;
 
+import java.util.HashSet;
+import java.util.Set;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -142,6 +144,14 @@ public final class AuthenticatorImpl implements Authenticator, Reloadable {
         } catch (Exception e) {
             log.error("Error reloading admin configuration", e);
         }
+    }
+
+    @Override
+    public Set<String> getConfigfileNames() {
+        Set<String> set = new HashSet<String>(2);
+        set.add("mpasswd");
+        set.add("ModuleAccessDefinitions.properties");
+        return set;
     }
 
 }

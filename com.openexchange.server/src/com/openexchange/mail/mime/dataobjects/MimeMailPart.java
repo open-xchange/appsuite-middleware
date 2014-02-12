@@ -58,6 +58,7 @@ import java.io.OutputStream;
 import java.io.PipedOutputStream;
 import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Set;
 import javax.activation.DataHandler;
 import javax.mail.Message;
 import javax.mail.MessageRemovedException;
@@ -138,6 +139,11 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             @Override
             public void reloadConfiguration(ConfigurationService configService) {
                 useMimeMultipartMailPart = null;
+            }
+
+            @Override
+            public Set<String> getConfigfileNames() {
+                return MailReloadable.getConfigFiles();
             }
         });
     }

@@ -60,6 +60,7 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.config.IMAPReloadable;
+import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -169,6 +170,11 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
             @Override
             public void reloadConfiguration(final ConfigurationService configService) {
                 dropFullNameChecker();
+            }
+
+            @Override
+            public Set<String> getConfigfileNames() {
+                return ImapUtility.getConfigfileNames();
             }
         });
     }

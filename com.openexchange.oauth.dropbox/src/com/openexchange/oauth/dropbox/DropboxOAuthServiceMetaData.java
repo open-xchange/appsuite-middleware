@@ -49,7 +49,9 @@
 
 package com.openexchange.oauth.dropbox;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.DropBoxApi;
 import com.dropbox.client2.DropboxAPI;
@@ -214,6 +216,13 @@ public final class DropboxOAuthServiceMetaData extends AbstractOAuthServiceMetaD
             throw new IllegalStateException("Missing following property in configuration: com.openexchange.oauth.dropbox.apiSecret");
         }
         this.apiSecret = apiSecret;
+    }
+
+    @Override
+    public Set<String> getConfigfileNames() {
+        Set<String> set = new HashSet<String>(1);
+        set.add("dropboxoauth.properties");
+        return set;
     }
 
 }

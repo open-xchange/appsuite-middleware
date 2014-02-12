@@ -313,6 +313,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 useImapThreaderIfSupported = null;
                 useReferenceOnlyThreader = null;
             }
+
+            @Override
+            public Set<String> getConfigfileNames() {
+                return ImapUtility.getConfigfileNames();
+            }
         });
     }
 

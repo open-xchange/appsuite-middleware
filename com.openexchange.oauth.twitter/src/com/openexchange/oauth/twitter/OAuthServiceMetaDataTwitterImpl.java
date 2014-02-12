@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth.twitter;
 
+import java.util.Collections;
+import java.util.Set;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.oauth.API;
@@ -101,6 +103,12 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractOAuthServiceMetaDat
     public void reloadConfiguration(final ConfigurationService configService) {
         // Nothing to do since AbstractOAuthServiceMetaData is initialized with property names;
         // Values are read on demand
+    }
+
+    @Override
+    public Set<String> getConfigfileNames() {
+        // Values are read on demand
+        return Collections.EMPTY_SET;
     }
 
 }
