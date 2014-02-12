@@ -60,6 +60,7 @@ import com.openexchange.find.SearchResult;
 import com.openexchange.find.SearchService;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.json.FindRequest;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
@@ -70,8 +71,8 @@ import com.openexchange.find.json.FindRequest;
  */
 public class QueryAction extends AbstractFindAction {
 
-    public QueryAction(SearchService searchService) {
-        super(searchService);
+    public QueryAction(ServiceLookup lookup) {
+        super(lookup);
     }
 
     @Override

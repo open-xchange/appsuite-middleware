@@ -53,8 +53,6 @@ import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
 import com.openexchange.groupware.container.Contact;
 
-
-
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
@@ -75,6 +73,11 @@ public class ContactDisplayItem implements DisplayItem {
 
     public Contact getContact() {
         return contact;
+    }
+
+    @Override
+    public String getDefaultValue() {
+        return contact.getDisplayName();
     }
 
 }

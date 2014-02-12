@@ -56,6 +56,7 @@ import com.openexchange.find.json.FindActionFactory;
 import com.openexchange.find.json.converters.AutocompleteResultJSONConverter;
 import com.openexchange.find.json.converters.ConfigJSONConverter;
 import com.openexchange.find.json.converters.SearchResultJSONConverter;
+import com.openexchange.i18n.I18nService;
 
 /**
  *
@@ -66,6 +67,8 @@ import com.openexchange.find.json.converters.SearchResultJSONConverter;
  */
 public class FindJsonActivator extends AJAXModuleActivator {
 
+    private static final String MODULE_PATH = "find";
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { SearchService.class };
@@ -73,10 +76,13 @@ public class FindJsonActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerService(ResultConverter.class, new ConfigJSONConverter());
-        registerService(ResultConverter.class, new AutocompleteResultJSONConverter());
-        registerService(ResultConverter.class, new SearchResultJSONConverter());
-        registerModule(new FindActionFactory(getService(SearchService.class)), "find");
+        I18nTracker translator = new I18nTracker(context);
+        track(I18nService.class, translator);
+        openTrackers();
+        registerService(ResultConverter.class, new ConfigJSONConverter(translator));
+        registerService(ResultConverter.class, new AutocompleteResultJSONConverter(translator));
+        registerService(ResultConverter.class, new SearchResultJSONConverter(translator));
+        registerModule(new FindActionFactory(this), MODULE_PATH);
     }
 
 }

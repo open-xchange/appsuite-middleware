@@ -50,13 +50,14 @@
 package com.openexchange.find.json.actions;
 
 import org.json.JSONException;
-
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.SearchService;
 import com.openexchange.find.json.FindRequest;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -69,11 +70,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractFindAction implements AJAXActionService {
 
-    private final SearchService searchService;
+    private final ServiceLookup serviceLookup;
 
-    protected AbstractFindAction(SearchService searchService) {
+    protected AbstractFindAction(ServiceLookup lookup) {
         super();
-        this.searchService = searchService;
+        this.serviceLookup = lookup;
     }
 
     @Override
@@ -87,7 +88,11 @@ public abstract class AbstractFindAction implements AJAXActionService {
     }
 
     protected SearchService getSearchService() {
-        return searchService;
+        return serviceLookup.getService(SearchService.class);
+    }
+
+    protected I18nService getI18nService() {
+        return serviceLookup.getService(I18nService.class);
     }
 
     protected abstract AJAXRequestResult doPerform(FindRequest request) throws OXException, JSONException;

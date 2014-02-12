@@ -59,6 +59,14 @@ package com.openexchange.find.facet;
  */
 public interface DisplayItem {
 
+    /**
+     * A display item must contain a default value. Clients
+     * may it for displaying the item if they have no implementation
+     * to handle the concrete item type.
+     * @return The default value. Never <code>null</code>.
+     */
+    String getDefaultValue();
+
     void accept(DisplayItemVisitor visitor);
 
 }

@@ -62,13 +62,6 @@ public class FacetValue implements Serializable {
 
     private static final long serialVersionUID = -7719065379433828901L;
 
-    public static final DisplayItem NO_DISPLAY_ITEM = new DisplayItem() {
-        @Override
-        public void accept(DisplayItemVisitor visitor) {
-            return;
-        }
-    };
-
     public static final int UNKNOWN_COUNT = -1;
 
     private final DisplayItem displayItem;
@@ -94,40 +87,7 @@ public class FacetValue implements Serializable {
     }
 
     /**
-     * Initializes a new {@link FacetValue}. Uses {@link FacetValue#NO_DISPLAY_ITEM} as display item.
-     * @param count The number of result documents that apply to the given filter.
-     * <code>-1</code> if unknown.
-     * @param filter The filter.
-     */
-    public FacetValue(int count, Filter filter) {
-        super();
-        this.displayItem = NO_DISPLAY_ITEM;
-        this.count = count;
-        this.filter = filter;
-    }
-
-    /**
-     * Initializes a new {@link FacetValue}. Uses {@link FacetValue#NO_DISPLAY_ITEM} as display item
-     * and {@link FacetValue#UNKNOWN_COUNT} as count.
-     * @param filter The filter.
-     */
-    public FacetValue(Filter filter) {
-        super();
-        this.displayItem = NO_DISPLAY_ITEM;
-        this.count = UNKNOWN_COUNT;
-        this.filter = filter;
-    }
-
-    /**
-     * @return Whether this value contains a display item or not.
-     */
-    public boolean hasDisplayItem() {
-        return displayItem != null && displayItem != NO_DISPLAY_ITEM;
-    }
-
-    /**
-     * @return The display item. May be {@link FacetValue#NO_DISPLAY_ITEM} if
-     * and only if this value is the only one for its facet.
+     * @return The display item. Never <code>null</code>.
      */
     public DisplayItem getDisplayItem() {
         return displayItem;

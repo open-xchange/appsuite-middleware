@@ -47,62 +47,27 @@
  *
  */
 
-package com.openexchange.find.common;
+package com.openexchange.find.json.converters;
 
-import com.openexchange.find.facet.DisplayItem;
-import com.openexchange.find.facet.DisplayItemVisitor;
-import com.openexchange.folderstorage.UserizedFolder;
+import java.util.Locale;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
+ * Translates strings that are localized.
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class FolderDisplayItem implements DisplayItem {
+public interface StringTranslator {
 
-    private final UserizedFolder folder;
-
-    private final DefaultFolderType defaultFolderType;
-
-    private final String accountName;
-
-    private final boolean isDefaultAccount;
-
-    public FolderDisplayItem(final UserizedFolder folder, final String accountName, final boolean isDefaultAccount) {
-        this(folder, DefaultFolderType.NONE, accountName, isDefaultAccount);
-    }
-
-    public FolderDisplayItem(final UserizedFolder folder, final DefaultFolderType defaultFolderType, final String accountName, final boolean isDefaultAccount) {
-        super();
-        this.folder = folder;
-        this.defaultFolderType = defaultFolderType;
-        this.accountName = accountName;
-        this.isDefaultAccount = isDefaultAccount;
-    }
-
-    @Override
-    public void accept(DisplayItemVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public String getDefaultValue() {
-        return folder.getLocalizedName(folder.getLocale());
-    }
-
-    public DefaultFolderType getDefaultType() {
-        return defaultFolderType;
-    }
-
-    public UserizedFolder getFolder() {
-        return folder;
-    }
-
-    public String getAccountName() {
-        return accountName;
-    }
-
-    public boolean isDefaultAccount() {
-        return isDefaultAccount;
-    }
+    /**
+     * Translates the given {@link LocalizableStrings}.
+     *
+     * @return The translated string or the origin string, if
+     * the translation is missing or there is no service for the
+     * given locale.
+     */
+    String translate(Locale locale, String localizable);
 
 }

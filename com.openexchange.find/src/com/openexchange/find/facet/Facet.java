@@ -66,22 +66,22 @@ public class Facet implements Serializable {
 
     private static final long serialVersionUID = -8445505622030799014L;
 
-    private final String name;
+    private final FacetType type;
 
     private final List<FacetValue> values;
 
 
-    public Facet(String name, List<FacetValue> values) {
+    public Facet(FacetType type, List<FacetValue> values) {
         super();
-        this.name = name;
+        this.type = type;
         this.values = values;
     }
 
     /**
-     * @return The facets name. E.g. "persons".
+     * @return The facets type, never <code>null</code>.
      */
-    public String getName() {
-        return name;
+    public FacetType getType() {
+        return type;
     }
 
     /**
@@ -96,7 +96,7 @@ public class Facet implements Serializable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((type == null) ? 0 : type.hashCode());
         result = prime * result + ((values == null) ? 0 : values.hashCode());
         return result;
     }
@@ -110,10 +110,10 @@ public class Facet implements Serializable {
         if (getClass() != obj.getClass())
             return false;
         Facet other = (Facet) obj;
-        if (name == null) {
-            if (other.name != null)
+        if (type == null) {
+            if (other.type != null)
                 return false;
-        } else if (!name.equals(other.name))
+        } else if (!type.equals(other.type))
             return false;
         if (values == null) {
             if (other.values != null)
@@ -125,7 +125,7 @@ public class Facet implements Serializable {
 
     @Override
     public String toString() {
-        return "Facet [name=" + name + ", values=" + values + "]";
+        return "Facet [type=" + type + ", values=" + values + "]";
     }
 
 }

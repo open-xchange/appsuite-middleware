@@ -52,15 +52,14 @@ package com.openexchange.find.json;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.find.SearchService;
 import com.openexchange.find.json.actions.AbstractFindAction;
 import com.openexchange.find.json.actions.AutocompleteAction;
 import com.openexchange.find.json.actions.ConfigAction;
 import com.openexchange.find.json.actions.QueryAction;
+import com.openexchange.server.ServiceLookup;
 
 /**
  *
@@ -73,12 +72,12 @@ public class FindActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AbstractFindAction> actions;
 
-    public FindActionFactory(SearchService searchService) {
+    public FindActionFactory(ServiceLookup lookup) {
         super();
         actions = new HashMap<String, AbstractFindAction>(3);
-        actions.put("config", new ConfigAction(searchService));
-        actions.put("autocomplete", new AutocompleteAction(searchService));
-        actions.put("query", new QueryAction(searchService));
+        actions.put("config", new ConfigAction(lookup));
+        actions.put("autocomplete", new AutocompleteAction(lookup));
+        actions.put("query", new QueryAction(lookup));
     }
 
     @Override

@@ -47,62 +47,30 @@
  *
  */
 
-package com.openexchange.find.common;
+package com.openexchange.find.mail;
 
-import com.openexchange.find.facet.DisplayItem;
-import com.openexchange.find.facet.DisplayItemVisitor;
-import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
+ * Mail-specific strings are potentially displayed in client applications and
+ * should therefore be localized.
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class FolderDisplayItem implements DisplayItem {
+public class MailStrings implements LocalizableStrings {
 
-    private final UserizedFolder folder;
+    // Search in mail field subject.
+    public static final String FACET_SUBJECT = "Subject";
 
-    private final DefaultFolderType defaultFolderType;
+    // Search in mail field text.
+    public static final String FACET_MAIL_TEXT = "Mail Text";
 
-    private final String accountName;
+    // Search in folders.
+    public static final String FACET_FOLDERS = "Folders";
 
-    private final boolean isDefaultAccount;
-
-    public FolderDisplayItem(final UserizedFolder folder, final String accountName, final boolean isDefaultAccount) {
-        this(folder, DefaultFolderType.NONE, accountName, isDefaultAccount);
-    }
-
-    public FolderDisplayItem(final UserizedFolder folder, final DefaultFolderType defaultFolderType, final String accountName, final boolean isDefaultAccount) {
-        super();
-        this.folder = folder;
-        this.defaultFolderType = defaultFolderType;
-        this.accountName = accountName;
-        this.isDefaultAccount = isDefaultAccount;
-    }
-
-    @Override
-    public void accept(DisplayItemVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public String getDefaultValue() {
-        return folder.getLocalizedName(folder.getLocale());
-    }
-
-    public DefaultFolderType getDefaultType() {
-        return defaultFolderType;
-    }
-
-    public UserizedFolder getFolder() {
-        return folder;
-    }
-
-    public String getAccountName() {
-        return accountName;
-    }
-
-    public boolean isDefaultAccount() {
-        return isDefaultAccount;
-    }
+    // Search in Persons.
+    public static final String FACET_CONTACTS = "Contacts";
 
 }

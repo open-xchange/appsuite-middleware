@@ -49,60 +49,28 @@
 
 package com.openexchange.find.common;
 
-import com.openexchange.find.facet.DisplayItem;
-import com.openexchange.find.facet.DisplayItemVisitor;
-import com.openexchange.folderstorage.UserizedFolder;
 
 /**
+ * If the folder instance within an {@link FolderDisplayItem} is a default folder,
+ * it might have a module specific default type (e.g. INBOX for mail folders).
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class FolderDisplayItem implements DisplayItem {
+public interface DefaultFolderType {
 
-    private final UserizedFolder folder;
+    public static DefaultFolderType NONE = new DefaultFolderType() {
+        @Override
+        public String getTypeName() {
+            return "none";
+        }
+    };
 
-    private final DefaultFolderType defaultFolderType;
-
-    private final String accountName;
-
-    private final boolean isDefaultAccount;
-
-    public FolderDisplayItem(final UserizedFolder folder, final String accountName, final boolean isDefaultAccount) {
-        this(folder, DefaultFolderType.NONE, accountName, isDefaultAccount);
-    }
-
-    public FolderDisplayItem(final UserizedFolder folder, final DefaultFolderType defaultFolderType, final String accountName, final boolean isDefaultAccount) {
-        super();
-        this.folder = folder;
-        this.defaultFolderType = defaultFolderType;
-        this.accountName = accountName;
-        this.isDefaultAccount = isDefaultAccount;
-    }
-
-    @Override
-    public void accept(DisplayItemVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public String getDefaultValue() {
-        return folder.getLocalizedName(folder.getLocale());
-    }
-
-    public DefaultFolderType getDefaultType() {
-        return defaultFolderType;
-    }
-
-    public UserizedFolder getFolder() {
-        return folder;
-    }
-
-    public String getAccountName() {
-        return accountName;
-    }
-
-    public boolean isDefaultAccount() {
-        return isDefaultAccount;
-    }
+    /**
+     * Gets the name of the default type.
+     * @return Never <code>null</code>. Might be {@link DefaultFolderType#NONE}
+     * if the folder is no default folder.
+     */
+    String getTypeName();
 
 }

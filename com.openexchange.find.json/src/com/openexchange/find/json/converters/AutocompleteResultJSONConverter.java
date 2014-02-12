@@ -66,6 +66,10 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class AutocompleteResultJSONConverter extends AbstractJSONConverter {
 
+    public AutocompleteResultJSONConverter(final StringTranslator translator) {
+        super(translator);
+    }
+
     @Override
     public String getInputFormat() {
         return AutocompleteResult.class.getName();
@@ -76,7 +80,7 @@ public class AutocompleteResultJSONConverter extends AbstractJSONConverter {
         AutocompleteResult autocompleteResult = (AutocompleteResult) result.getResultObject();
         try {
             JSONObject jsonResult = new JSONObject();
-            jsonResult.put("facets", convertFacets(autocompleteResult.getFacets()));
+            jsonResult.put("facets", convertFacets(session.getUser().getLocale(), autocompleteResult.getFacets()));
             result.setResultObject(jsonResult, "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());

@@ -47,62 +47,65 @@
  *
  */
 
-package com.openexchange.find.common;
+package com.openexchange.find.json.osgi;
 
-import com.openexchange.find.facet.DisplayItem;
-import com.openexchange.find.facet.DisplayItemVisitor;
-import com.openexchange.folderstorage.UserizedFolder;
+import java.util.Locale;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.find.json.converters.StringTranslator;
+import com.openexchange.i18n.I18nService;
+
 
 /**
+ * {@link I18nTracker}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class FolderDisplayItem implements DisplayItem {
+public class I18nTracker implements ServiceTrackerCustomizer<I18nService, I18nService>, StringTranslator {
 
-    private final UserizedFolder folder;
+    private final ConcurrentMap<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();
 
-    private final DefaultFolderType defaultFolderType;
+    private final BundleContext context;
 
-    private final String accountName;
-
-    private final boolean isDefaultAccount;
-
-    public FolderDisplayItem(final UserizedFolder folder, final String accountName, final boolean isDefaultAccount) {
-        this(folder, DefaultFolderType.NONE, accountName, isDefaultAccount);
-    }
-
-    public FolderDisplayItem(final UserizedFolder folder, final DefaultFolderType defaultFolderType, final String accountName, final boolean isDefaultAccount) {
+    public I18nTracker(final BundleContext context) {
         super();
-        this.folder = folder;
-        this.defaultFolderType = defaultFolderType;
-        this.accountName = accountName;
-        this.isDefaultAccount = isDefaultAccount;
+        this.context = context;
     }
 
     @Override
-    public void accept(DisplayItemVisitor visitor) {
-        visitor.visit(this);
+    public I18nService addingService(ServiceReference<I18nService> reference) {
+        I18nService service = context.getService(reference);
+        services.put(service.getLocale(), service);
+        return service;
     }
 
     @Override
-    public String getDefaultValue() {
-        return folder.getLocalizedName(folder.getLocale());
+    public void modifiedService(ServiceReference<I18nService> reference, I18nService service) {
+        services.put(service.getLocale(), service);
     }
 
-    public DefaultFolderType getDefaultType() {
-        return defaultFolderType;
+    @Override
+    public void removedService(ServiceReference<I18nService> reference, I18nService service) {
+        services.remove(service.getLocale());
     }
 
-    public UserizedFolder getFolder() {
-        return folder;
-    }
+    @Override
+    public String translate(Locale locale, String localizable) {
+        I18nService i18nService = services.get(locale);
+        if (i18nService == null) {
+            return localizable;
+        }
 
-    public String getAccountName() {
-        return accountName;
-    }
+        String localized = i18nService.getLocalized(localizable);
+        if (localized == null) {
+            return localizable;
+        }
 
-    public boolean isDefaultAccount() {
-        return isDefaultAccount;
+        return localized;
     }
 
 }

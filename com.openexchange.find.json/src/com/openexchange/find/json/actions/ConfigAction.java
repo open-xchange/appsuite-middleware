@@ -50,13 +50,13 @@
 package com.openexchange.find.json.actions;
 
 import java.util.Map;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.Module;
 import com.openexchange.find.ModuleConfig;
 import com.openexchange.find.SearchService;
 import com.openexchange.find.json.FindRequest;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
@@ -67,8 +67,8 @@ import com.openexchange.find.json.FindRequest;
  */
 public class ConfigAction extends AbstractFindAction {
 
-    public ConfigAction(SearchService searchService) {
-        super(searchService);
+    public ConfigAction(ServiceLookup lookup) {
+        super(lookup);
     }
 
     @Override

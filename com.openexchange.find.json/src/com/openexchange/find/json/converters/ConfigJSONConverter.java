@@ -73,6 +73,10 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ConfigJSONConverter extends AbstractJSONConverter {
 
+    public ConfigJSONConverter(final StringTranslator translator) {
+        super(translator);
+    }
+
     @Override
     public String getInputFormat() {
         return ModuleConfig.class.getName();
@@ -84,14 +88,14 @@ public class ConfigJSONConverter extends AbstractJSONConverter {
         JSONValue jsonResult;
         try {
             if (resultObject instanceof ModuleConfig) {
-                jsonResult = convertModuleConfig((ModuleConfig) resultObject);
+                jsonResult = convertModuleConfig(session, (ModuleConfig) resultObject);
             } else {
                 jsonResult = new JSONArray();
                 @SuppressWarnings("unchecked")
                 Map<Module, ModuleConfig> configMap = (Map<Module, ModuleConfig>) resultObject;
                 for (Entry<Module, ModuleConfig> entry : configMap.entrySet()) {
                     ModuleConfig config = entry.getValue();
-                    jsonResult.toArray().put(convertModuleConfig(config));
+                    jsonResult.toArray().put(convertModuleConfig(session, config));
                 }
             }
 
@@ -101,10 +105,10 @@ public class ConfigJSONConverter extends AbstractJSONConverter {
         }
     }
 
-    private JSONObject convertModuleConfig(ModuleConfig config) throws JSONException {
+    private JSONObject convertModuleConfig(ServerSession session, ModuleConfig config) throws JSONException {
         JSONObject moduleJSON = new JSONObject();
         moduleJSON.put("module", config.getModule().toString().toLowerCase());
-        moduleJSON.put("staticFacets", convertFacets(config.getStaticFacets()));
+        moduleJSON.put("staticFacets", convertFacets(session.getUser().getLocale(), config.getStaticFacets()));
         moduleJSON.put("mandatoryFilters", convertMandatoryFilters(config.getMandatoryFilters()));
         return moduleJSON;
     }
@@ -113,12 +117,8 @@ public class ConfigJSONConverter extends AbstractJSONConverter {
         JSONArray result = new JSONArray();
         for (MandatoryFilter mandatoryFilter : mandatoryFilters) {
             JSONObject filterJSON = new JSONObject();
-            filterJSON.put("facet", mandatoryFilter.getFacet().getName());
-            if (mandatoryFilter.getDefaultValue().hasDisplayItem()) {
-                filterJSON.put("defaultValue", convertFacetValue(mandatoryFilter.getDefaultValue()));
-            } else {
-                filterJSON.put("defaultValue", JSONObject.NULL);
-            }
+            filterJSON.put("facet", mandatoryFilter.getFacet().getType().getName());
+            filterJSON.put("defaultValue", convertFacetValue(mandatoryFilter.getDefaultValue()));
             result.put(filterJSON);
         }
         return result;

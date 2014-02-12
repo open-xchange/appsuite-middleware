@@ -54,15 +54,16 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.find.common.ContactDisplayItem;
+import com.openexchange.find.common.DefaultFolderType;
 import com.openexchange.find.common.FolderDisplayItem;
+import com.openexchange.find.common.SimpleDisplayItem;
+import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.Contact;
 
 
 /**
- * {@link JSONDisplayItemVisitor}
- *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
@@ -82,9 +83,13 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
     public void visit(FolderDisplayItem item) {
         UserizedFolder folder = item.getFolder();
         try {
+            addDefaultValue(item);
             json.put("accountName", convertString(item.getAccountName()));
             json.put("isDefaultAccount", item.isDefaultAccount());
             json.put("folderName", convertString(folder.getLocalizedName(folder.getLocale())));
+            if (item.getDefaultType() != DefaultFolderType.NONE) {
+                json.put("defaultType", item.getDefaultType().getTypeName());
+            }
         } catch (JSONException e) {
             errors.add(e);
         }
@@ -94,6 +99,7 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
     public void visit(ContactDisplayItem item) {
         Contact contact = item.getContact();
         try {
+            addDefaultValue(item);
             json.put("givenName", convertString(contact.getGivenName()));
             json.put("surName", convertString(contact.getSurName()));
             json.put("displayName", convertString(contact.getDisplayName()));
@@ -103,6 +109,19 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
         } catch (JSONException e) {
             errors.add(e);
         }
+    }
+
+    @Override
+    public void visit(SimpleDisplayItem item) {
+        try {
+            addDefaultValue(item);
+        } catch (JSONException e) {
+            errors.add(e);
+        }
+    }
+
+    private void addDefaultValue(DisplayItem item) throws JSONException {
+        json.put("defaultValue", item.getDefaultValue());
     }
 
     public JSONObject getJSONObject() {

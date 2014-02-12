@@ -69,6 +69,10 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class SearchResultJSONConverter extends AbstractJSONConverter {
 
+    public SearchResultJSONConverter(final StringTranslator translator) {
+        super(translator);
+    }
+
     @Override
     public String getInputFormat() {
         return SearchResult.class.getName();

@@ -102,7 +102,15 @@ public class JSONResponseVisitor implements DocumentVisitor {
         try {
             JSONObject jsonMessage = new JSONObject();
             for (MailFieldWriter writer : WRITERS) {
-                writer.writeField(jsonMessage, mailMessage, 0, true, mailMessage.getAccountId(), session.getUserId(), session.getContextId(), TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()));
+                writer.writeField(
+                    jsonMessage,
+                    mailMessage,
+                    0,
+                    true,
+                    mailMessage.getAccountId(),
+                    session.getUserId(),
+                    session.getContextId(),
+                    TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()));
             }
 
             json.put(jsonMessage);

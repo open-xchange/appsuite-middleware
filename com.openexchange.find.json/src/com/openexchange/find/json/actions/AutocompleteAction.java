@@ -56,6 +56,7 @@ import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchService;
 import com.openexchange.find.json.FindRequest;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
@@ -66,8 +67,8 @@ import com.openexchange.find.json.FindRequest;
  */
 public class AutocompleteAction extends AbstractFindAction {
 
-    public AutocompleteAction(SearchService searchService) {
-        super(searchService);
+    public AutocompleteAction(ServiceLookup lookup) {
+        super(lookup);
     }
 
     @Override

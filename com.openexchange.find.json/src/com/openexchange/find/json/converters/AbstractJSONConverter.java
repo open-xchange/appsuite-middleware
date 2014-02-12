@@ -50,12 +50,14 @@
 package com.openexchange.find.json.converters;
 
 import java.util.List;
+import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.Facet;
+import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.json.JSONDisplayItemVisitor;
@@ -67,6 +69,13 @@ import com.openexchange.find.json.JSONDisplayItemVisitor;
  */
 public abstract class AbstractJSONConverter implements ResultConverter {
 
+    private final StringTranslator translator;
+
+    protected AbstractJSONConverter(final StringTranslator translator) {
+        super();
+        this.translator = translator;
+    }
+
     @Override
     public String getOutputFormat() {
         return "json";
@@ -77,11 +86,13 @@ public abstract class AbstractJSONConverter implements ResultConverter {
         return Quality.GOOD;
     }
 
-    protected JSONArray convertFacets(List<Facet> facets) throws JSONException {
+    protected JSONArray convertFacets(Locale locale, List<Facet> facets) throws JSONException {
         JSONArray result = new JSONArray();
         for (Facet facet : facets) {
             JSONObject facetJSON = new JSONObject();
-            facetJSON.put("name", facet.getName());
+            FacetType type = facet.getType();
+            facetJSON.put("type", type.getName());
+            facetJSON.put("displayName", translator.translate(locale, type.getDisplayName()));
             JSONArray values = new JSONArray();
             for (FacetValue value : facet.getValues()) {
                 JSONObject valueJSON = convertFacetValue(value);
@@ -96,12 +107,11 @@ public abstract class AbstractJSONConverter implements ResultConverter {
 
     protected JSONObject convertFacetValue(FacetValue value) throws JSONException {
         JSONObject valueJSON = new JSONObject();
-        Object displayItem = JSONObject.NULL;
-        if (value.hasDisplayItem()) {
-            displayItem = convertDisplayItem(value.getDisplayItem());
+        valueJSON.put("displayItem", convertDisplayItem(value.getDisplayItem()));
+        int count = value.getCount();
+        if (count >= 0) {
+            valueJSON.put("count", value.getCount());
         }
-        valueJSON.put("displayItem", displayItem);
-        valueJSON.put("count", value.getCount());
         valueJSON.put("filter", convertFilter(value.getFilter()));
         return valueJSON;
     }

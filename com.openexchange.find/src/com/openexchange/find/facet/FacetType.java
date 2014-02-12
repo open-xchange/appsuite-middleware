@@ -47,62 +47,32 @@
  *
  */
 
-package com.openexchange.find.common;
+package com.openexchange.find.facet;
 
-import com.openexchange.find.facet.DisplayItem;
-import com.openexchange.find.facet.DisplayItemVisitor;
-import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.i18n.I18nService;
+
 
 /**
+ * Defines the type of a facet.
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class FolderDisplayItem implements DisplayItem {
+public interface FacetType {
 
-    private final UserizedFolder folder;
+    /**
+     * Gets the name of this type, that uniquely identifies
+     * a facet within a module.
+     * @return The name, never <code>null</code>.
+     */
+    String getName();
 
-    private final DefaultFolderType defaultFolderType;
-
-    private final String accountName;
-
-    private final boolean isDefaultAccount;
-
-    public FolderDisplayItem(final UserizedFolder folder, final String accountName, final boolean isDefaultAccount) {
-        this(folder, DefaultFolderType.NONE, accountName, isDefaultAccount);
-    }
-
-    public FolderDisplayItem(final UserizedFolder folder, final DefaultFolderType defaultFolderType, final String accountName, final boolean isDefaultAccount) {
-        super();
-        this.folder = folder;
-        this.defaultFolderType = defaultFolderType;
-        this.accountName = accountName;
-        this.isDefaultAccount = isDefaultAccount;
-    }
-
-    @Override
-    public void accept(DisplayItemVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public String getDefaultValue() {
-        return folder.getLocalizedName(folder.getLocale());
-    }
-
-    public DefaultFolderType getDefaultType() {
-        return defaultFolderType;
-    }
-
-    public UserizedFolder getFolder() {
-        return folder;
-    }
-
-    public String getAccountName() {
-        return accountName;
-    }
-
-    public boolean isDefaultAccount() {
-        return isDefaultAccount;
-    }
+    /**
+     * Gets the display name of this type, that might be shown in
+     * a user interface. Should be localizable and therefore a be valid
+     * key for {@link I18nService}.
+     * @return The display name, never <code>null</code>.
+     */
+    String getDisplayName();
 
 }

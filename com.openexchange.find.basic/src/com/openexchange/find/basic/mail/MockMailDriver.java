@@ -68,12 +68,16 @@ import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.common.ContactDisplayItem;
+import com.openexchange.find.common.DefaultFolderType;
 import com.openexchange.find.common.FolderDisplayItem;
+import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.MandatoryFilter;
+import com.openexchange.find.mail.DefaultMailFolderType;
 import com.openexchange.find.mail.MailDocument;
+import com.openexchange.find.mail.MailFacetType;
 import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
@@ -93,7 +97,6 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -171,7 +174,9 @@ public class MockMailDriver implements ModuleSearchDriver {
                 if (folder.isDefault() && folder.getDefaultType() == MailFolderType.INBOX.getType()) {
                     defaultFolder = folder;
                     it.remove();
-                    break;
+                } else if (folder.isDefault() && folder.getDefaultType() == MailFolderType.ROOT.getType()) {
+                    // Don't show root folder in facet
+                    it.remove();
                 }
             }
 
@@ -189,8 +194,14 @@ public class MockMailDriver implements ModuleSearchDriver {
         }
 
         List<Facet> staticFacets = new ArrayList<Facet>(3);
-        Facet subjectFacet = new Facet("subject", Collections.singletonList(new FacetValue(new Filter(Collections.singleton("subject"), "override"))));
-        Facet bodyFacet = new Facet("body", Collections.singletonList(new FacetValue(new Filter(Collections.singleton("body"), "override"))));
+        Facet subjectFacet = new Facet(MailFacetType.SUBJECT, Collections.singletonList(new FacetValue(
+            new SimpleDisplayItem("subject"),
+            FacetValue.UNKNOWN_COUNT,
+            new Filter(Collections.singleton("subject"), "override"))));
+        Facet bodyFacet = new Facet(MailFacetType.MAIL_TEXT, Collections.singletonList(new FacetValue(
+            new SimpleDisplayItem("body"),
+            FacetValue.UNKNOWN_COUNT,
+            new Filter(Collections.singleton("body"), "override"))));
         if (folderFacet != null) {
             staticFacets.add(folderFacet);
         }
@@ -222,7 +233,7 @@ public class MockMailDriver implements ModuleSearchDriver {
             Filter filter = new Filter(PERSONS_FILTER_FIELDS, mailAddress);
             contactValues.add(new FacetValue(new ContactDisplayItem(contact), FacetValue.UNKNOWN_COUNT, filter));
         }
-        Facet contactFacet = new Facet("persons", contactValues);
+        Facet contactFacet = new Facet(MailFacetType.CONTACTS, contactValues);
 
 //        List<UserizedFolder> folders = autocompleteFolders(session, autocompleteRequest);
 //        Facet folderFacet = buildFolderFacet(folders);
@@ -290,11 +301,6 @@ public class MockMailDriver implements ModuleSearchDriver {
         List<FacetValue> folderValues = new ArrayList<FacetValue>(folders.size());
         for (UserizedFolder folder : folders) {
             FullnameArgument fullnameArgument = MailFolderUtility.prepareMailFolderParam(folder.getID());
-            if (MailFolder.DEFAULT_FOLDER_ID.equals(fullnameArgument.getFullname())) {
-                // ignore the root folder (above INBOX)
-                continue;
-            }
-
             MailAccount mailAccount = accountCache.get(fullnameArgument.getAccountId());
             if (mailAccount == null) {
                 mailAccount = mass.getMailAccount(fullnameArgument.getAccountId(), folder.getUser().getId(), folder.getContext().getContextId());
@@ -307,12 +313,27 @@ public class MockMailDriver implements ModuleSearchDriver {
             }
         }
 
-        return new Facet("folders", folderValues);
+        return new Facet(MailFacetType.FOLDERS, folderValues);
     }
 
     private FacetValue buildFolderFacetValue(UserizedFolder folder, MailAccount mailAccount) throws OXException {
+        DefaultFolderType defaultFolderType = DefaultFolderType.NONE;
+        if (folder.isDefault()) {
+            int type = folder.getDefaultType();
+            if (type == MailFolderType.INBOX.getType()) {
+                defaultFolderType = DefaultMailFolderType.INBOX;
+            } else if (type == MailFolderType.SENT.getType()) {
+                defaultFolderType = DefaultMailFolderType.SENT;
+            } else if (type == MailFolderType.TRASH.getType()) {
+                defaultFolderType = DefaultMailFolderType.TRASH;
+            } else if (type == MailFolderType.SPAM.getType()) {
+                defaultFolderType = DefaultMailFolderType.SPAM;
+            } else if (type == MailFolderType.DRAFTS.getType()) {
+                defaultFolderType = DefaultMailFolderType.DRAFTS;
+            }
+        }
         Filter filter = new Filter(FOLDERS_FILTER_FIELDS, folder.getID());
-        return new FacetValue(new FolderDisplayItem(folder, mailAccount.getName(), mailAccount.isDefaultAccount()), FacetValue.UNKNOWN_COUNT, filter);
+        return new FacetValue(new FolderDisplayItem(folder, defaultFolderType, mailAccount.getName(), mailAccount.isDefaultAccount()), FacetValue.UNKNOWN_COUNT, filter);
     }
 
     private List<Contact> autocompleteContacts(Session session, AutocompleteRequest autocompleteRequest) throws OXException {
