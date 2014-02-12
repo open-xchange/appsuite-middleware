@@ -77,11 +77,13 @@ public class OSGiTestRunner extends Thread {
         if (test == null) {
             System.out.println("No test classes found.");
             exitOsgi();
+            return;
         }
         Class<?>[] testClasses = test.getTestClasses();
         if (testClasses == null) {
             System.out.println("No tests  found.");
             exitOsgi();
+            return;
         }
 
         for (Class<?> clazz : testClasses) {
