@@ -57,6 +57,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.java.Strings;
@@ -576,7 +577,7 @@ public class Contact extends CommonObject {
 
     protected Date image_last_modified;
 
-    protected volatile int number_of_images;
+    protected AtomicInteger number_of_images;
 
     protected String file_as;
 
@@ -1154,7 +1155,7 @@ public class Contact extends CommonObject {
     }
 
     public int getNumberOfImages() {
-        return number_of_images;
+        return number_of_images.get();
     }
 
     public String getUserField01() {
@@ -1763,7 +1764,7 @@ public class Contact extends CommonObject {
         this.image1 = image1;
         b_containsImage = true;
         b_image1 = true;
-        number_of_images = number_of_images + 1;
+        number_of_images.incrementAndGet();
     }
 
     public void setImageContentType(final String imageContentType) {
@@ -1772,7 +1773,7 @@ public class Contact extends CommonObject {
     }
 
     public void setNumberOfImages(final int number_of_images) {
-        this.number_of_images = number_of_images;
+        this.number_of_images.set(number_of_images);
     }
 
     @Override
@@ -2242,7 +2243,7 @@ public class Contact extends CommonObject {
         image1 = null;
         b_containsImage = false;
         b_image1 = false;
-        number_of_images = 0;
+        number_of_images.set(0);
     }
 
     public void removeImageContentType() {
