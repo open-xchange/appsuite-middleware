@@ -51,6 +51,8 @@ package com.openexchange.mail.messagestorage;
 
 import com.openexchange.exception.OXException;
 import java.util.Random;
+import org.junit.After;
+import org.junit.Before;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -87,7 +89,7 @@ public final class MailAppendTest extends MessageStorageTest {
         super();
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
     }
@@ -166,7 +168,7 @@ public final class MailAppendTest extends MessageStorageTest {
         }
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         mailAccess.close(false);
         super.tearDown();
