@@ -47,60 +47,21 @@
  *
  */
 
-package com.openexchange.find.mail;
+package com.openexchange.find.common;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.find.facet.FacetType;
-import com.openexchange.java.Strings;
+import com.openexchange.find.facet.DisplayItem;
 
 
 /**
- * Facet types for the mail module.
+ * Provides some static helper methods to cope with {@link DisplayItem}s.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public enum MailFacetType implements FacetType {
+public class DisplayItems {
 
-    CONTACTS(MailStrings.FACET_CONTACTS),
-    FOLDERS(MailStrings.FACET_FOLDERS),
-    SUBJECT(MailStrings.FACET_SUBJECT),
-    MAIL_TEXT(MailStrings.FACET_MAIL_TEXT);
-
-    private static final Map<String, MailFacetType> typesByName = new HashMap<String, MailFacetType>();
-    static {
-        for (MailFacetType type : values()) {
-            typesByName.put(type.getName(), type);
-        }
-    }
-
-    private final String displayName;
-
-    private MailFacetType(final String displayName) {
-        this.displayName = displayName;
-    }
-
-    @Override
-    public String getName() {
-        return toString().toLowerCase();
-    }
-
-    @Override
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    /**
-     * Gets a {@link MailFacetType} by its name.
-     * @return The type or <code>null</code>, if the name is invalid.
-     */
-    public static MailFacetType getByName(String name) {
-        if (Strings.isEmpty(name)) {
-            return null;
-        }
-
-        return typesByName.get(name);
+    private DisplayItems() {
+        super();
     }
 
 }

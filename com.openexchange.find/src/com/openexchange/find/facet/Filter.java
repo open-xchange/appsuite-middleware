@@ -49,6 +49,7 @@
 package com.openexchange.find.facet;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Set;
 import com.openexchange.find.SearchRequest;
 
@@ -62,6 +63,8 @@ import com.openexchange.find.SearchRequest;
  * @since 7.6.0
  */
 public class Filter implements Serializable {
+
+    public static final Filter NO_FILTER = new Filter(Collections.<String>emptySet(), "");
 
     private static final long serialVersionUID = -5712151560300214639L;
 

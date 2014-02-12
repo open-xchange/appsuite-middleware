@@ -49,6 +49,8 @@
 
 package com.openexchange.find;
 
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.java.Strings;
 
 /**
@@ -81,6 +83,13 @@ public enum Module {
      */
     DRIVE("drive"), ;
 
+    private static final Map<String, Module> modulesByName = new HashMap<String, Module>();
+    static {
+        for (Module module : values()) {
+            modulesByName.put(module.getIdentifier(), module);
+        }
+    }
+
     private final String identifier;
 
     private Module(final String identifier) {
@@ -108,13 +117,8 @@ public enum Module {
         if (Strings.isEmpty(identifier)) {
             return null;
         }
-        final String id = Strings.toLowerCase(identifier);
-        for (final Module module : Module.values()) {
-            if (id.equals(module.identifier)) {
-                return module;
-            }
-        }
-        return null;
+
+        return modulesByName.get(identifier.toLowerCase().trim());
     }
 
 }

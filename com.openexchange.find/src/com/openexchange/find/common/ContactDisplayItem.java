@@ -81,4 +81,9 @@ public class ContactDisplayItem implements DisplayItem {
         return contact.getDisplayName();
     }
 
+    @Override
+    public String toString() {
+        return "ContactDisplayItem [contact=" + contact.getDisplayName() + "(" + contact.getObjectID() + ")]";
+    }
+
 }

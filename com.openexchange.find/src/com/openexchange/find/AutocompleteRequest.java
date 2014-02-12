@@ -49,6 +49,10 @@
 package com.openexchange.find;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
+import com.openexchange.find.facet.Facet;
+import com.openexchange.find.facet.FacetValue;
 
 /**
  * Encapsulates an autocomplete request.
@@ -62,14 +66,27 @@ public class AutocompleteRequest implements Serializable {
 
     private final String prefix;
 
+    private final List<Facet> activeFacets;
+
     /**
      * Initializes a new {@link AutocompleteRequest}.
      *
      * @param prefix The prefix to autocomplete on; must not be <code>null</code>
      */
-    public AutocompleteRequest(String prefix) {
+    public AutocompleteRequest(final String prefix) {
+        this(prefix, Collections.<Facet>emptyList());
+    }
+
+    /**
+     * Initializes a new {@link AutocompleteRequest}.
+     *
+     * @param prefix The prefix to autocomplete on; must not be <code>null</code>
+     * @param activeFacets The list of currently active facets; must not be <code>null</code>
+     */
+    public AutocompleteRequest(final String prefix, final List<Facet> activeFacets) {
         super();
         this.prefix = prefix;
+        this.activeFacets = activeFacets;
     }
 
     /**
@@ -78,6 +95,16 @@ public class AutocompleteRequest implements Serializable {
      */
     public String getPrefix() {
         return prefix;
+    }
+
+    /**
+     * Gets a list of facets that are currently set. The
+     * according {@link FacetValue}s have to be removed from
+     * the response object.
+     * @return The list of facets. May be empty but never <code>null</code>.
+     */
+    public List<Facet> getActiveFactes() {
+        return activeFacets;
     }
 
     @Override

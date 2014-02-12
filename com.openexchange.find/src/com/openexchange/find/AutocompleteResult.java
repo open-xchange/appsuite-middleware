@@ -62,7 +62,7 @@ public class AutocompleteResult implements Serializable {
 
     private static final long serialVersionUID = -8830406356267375791L;
 
-    private final List<Facet> facets;
+    private List<Facet> facets;
 
 
     public AutocompleteResult(List<Facet> facets) {
@@ -76,6 +76,13 @@ public class AutocompleteResult implements Serializable {
      */
     public List<Facet> getFacets() {
         return facets;
+    }
+
+    /**
+     * Sets the facets.
+     */
+    public void setFacets(List<Facet> facets) {
+        this.facets = facets;
     }
 
     @Override

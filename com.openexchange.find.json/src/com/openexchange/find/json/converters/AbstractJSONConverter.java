@@ -116,7 +116,7 @@ public abstract class AbstractJSONConverter implements ResultConverter {
 
     protected JSONObject convertFacetValue(Locale locale, FacetValue value) throws JSONException {
         JSONObject valueJSON = new JSONObject(4);
-
+        valueJSON.put("id", value.getId());
         valueJSON.put("displayItem", convertDisplayItem(locale, value.getDisplayItem()));
         int count = value.getCount();
         if (count >= 0) {
@@ -147,7 +147,5 @@ public abstract class AbstractJSONConverter implements ResultConverter {
         filterJSON.put("query", filter.getQuery());
         return filterJSON;
     }
-
-
 
 }

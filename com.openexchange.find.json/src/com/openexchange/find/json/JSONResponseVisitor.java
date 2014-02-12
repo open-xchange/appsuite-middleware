@@ -76,14 +76,14 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class JSONResponseVisitor implements DocumentVisitor {
 
-    private static final MailFieldWriter[] WRITERS;
+    private static final MailFieldWriter[] MAIL_WRITERS;
     static {
         final MailListField[] listFields = new MailListField[MailField.FIELDS_LOW_COST.length];
         for (int i = 0; i < MailField.FIELDS_LOW_COST.length; i++) {
             final MailField mailField = MailField.FIELDS_LOW_COST[i];
             listFields[i] = mailField.getListField();
         }
-        WRITERS = MessageWriter.getMailFieldWriter(listFields);
+        MAIL_WRITERS = MessageWriter.getMailFieldWriter(listFields);
     }
 
     // ------------------------------------------------------------------------------------------------- //
@@ -105,10 +105,10 @@ public class JSONResponseVisitor implements DocumentVisitor {
     public void visit(final MailDocument mailDocument) {
         final MailMessage mailMessage = mailDocument.getMailMessage();
         try {
-            final JSONObject jsonMessage = new JSONObject(WRITERS.length);
+            final JSONObject jsonMessage = new JSONObject(MAIL_WRITERS.length);
             final int contextId = session.getContextId();
             final int userId = session.getUserId();
-            for (final MailFieldWriter writer : WRITERS) {
+            for (final MailFieldWriter writer : MAIL_WRITERS) {
                 writer.writeField(
                     jsonMessage,
                     mailMessage,

@@ -64,6 +64,8 @@ public class FacetValue implements Serializable {
 
     public static final int UNKNOWN_COUNT = -1;
 
+    private final String id;
+
     private final DisplayItem displayItem;
 
     private final int count;
@@ -73,17 +75,32 @@ public class FacetValue implements Serializable {
 
     /**
      * Initializes a new {@link FacetValue}.
-     * @param displayItem The display item. May be {@link FacetValue#NO_DISPLAY_ITEM} if
-     * and only if this value is the only one for its facet.
-     * @param count The number of result documents that apply to the given filter.
-     * {@link FacetValue#UNKNOWN_COUNT} if unknown.
-     * @param filter The filter.
+     *
+     * @param id
+     *   The values id which identifies it uniquely within all values of a facet.
+     * @param displayItem
+     *   The display item. May be {@link FacetValue#NO_DISPLAY_ITEM} if
+     *   and only if this value is the only one for its facet.
+     * @param count
+     *   The number of result documents that apply to the given filter.
+     *   {@link FacetValue#UNKNOWN_COUNT} if unknown.
+     * @param filter
+     *   The filter.
      */
-    public FacetValue(DisplayItem displayItem, int count, Filter filter) {
+    public FacetValue(String id, DisplayItem displayItem, int count, Filter filter) {
         super();
+        this.id = id;
         this.displayItem = displayItem;
         this.count = count;
         this.filter = filter;
+    }
+
+    /**
+     * Gets the values id which identifies it uniquely within all values of a facet.
+     * @return The id, never <code>null</code>.
+     */
+    public String getId() {
+        return id;
     }
 
     /**
@@ -115,6 +132,7 @@ public class FacetValue implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + count;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
         result = prime * result + ((filter == null) ? 0 : filter.hashCode());
         result = prime * result + ((displayItem == null) ? 0 : displayItem.hashCode());
         return result;
@@ -129,6 +147,8 @@ public class FacetValue implements Serializable {
         if (getClass() != obj.getClass())
             return false;
         FacetValue other = (FacetValue) obj;
+        if (!id.equals(other.id))
+            return false;
         if (count != other.count)
             return false;
         if (filter == null) {
@@ -146,6 +166,6 @@ public class FacetValue implements Serializable {
 
     @Override
     public String toString() {
-        return "FacetValue [name=" + displayItem + ", count=" + count + ", filter=" + filter + "]";
+        return "FacetValue [id=" + id + ", name=" + displayItem + ", count=" + count + ", filter=" + filter + "]";
     }
 }

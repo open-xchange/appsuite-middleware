@@ -56,7 +56,7 @@ import java.util.List;
  * on categories.<br>
  * <br>
  * Example:<br>
- * You are searching in the mail module. A possible facet here can be "persons".
+ * You are searching in the mail module. A possible facet here can be "contacts".
  * A possible {@link FacetValue} might be "John Doe".
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>

@@ -173,10 +173,12 @@ public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
         List<Facet> staticFacets = new ArrayList<Facet>(3);
         Facet subjectFacet = new Facet(MailFacetType.SUBJECT, Collections.singletonList(new FacetValue(
+            "subjectFacet",
             new SimpleDisplayItem("subject"),
             FacetValue.UNKNOWN_COUNT,
             new Filter(Collections.singleton("subject"), "override"))));
         Facet bodyFacet = new Facet(MailFacetType.MAIL_TEXT, Collections.singletonList(new FacetValue(
+            "bodyFacet",
             new SimpleDisplayItem("body"),
             FacetValue.UNKNOWN_COUNT,
             new Filter(Collections.singleton("body"), "override"))));
@@ -191,13 +193,15 @@ public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
     }
 
     @Override
-    public AutocompleteResult autocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
+    protected AutocompleteResult doAutocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
         List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
         List<FacetValue> contactValues = new ArrayList<FacetValue>(contacts.size());
         for (Contact contact : contacts) {
             for (final String mailAddress : extractMailAddessesFrom(contact)) {
                 Filter filter = new Filter(PERSONS_FILTER_FIELDS, mailAddress);
-                contactValues.add(new FacetValue(new ContactDisplayItem(contact), FacetValue.UNKNOWN_COUNT, filter));
+                contactValues.add(
+                    new FacetValue(prepareFacetValueId("contact", session.getContextId(), Integer.toString(contact.getObjectID())),
+                    new ContactDisplayItem(contact), FacetValue.UNKNOWN_COUNT, filter));
             }
         }
         Facet contactFacet = new Facet(MailFacetType.CONTACTS, contactValues);
@@ -321,7 +325,13 @@ public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
             }
         }
         Filter filter = new Filter(FOLDERS_FILTER_FIELDS, folder.getID());
-        return new FacetValue(new FolderDisplayItem(folder, defaultFolderType, mailAccount.getName(), mailAccount.isDefaultAccount()), FacetValue.UNKNOWN_COUNT, filter);
+        return new FacetValue(prepareFacetValueId("folder", folder.getContext().getContextId(), folder.getID()),
+            new FolderDisplayItem(folder,
+                defaultFolderType,
+                mailAccount.getName(),
+                mailAccount.isDefaultAccount()),
+                FacetValue.UNKNOWN_COUNT,
+                filter);
     }
 
     private List<UserizedFolder> autocompleteFolders(Session session, AutocompleteRequest autocompleteRequest) throws OXException {

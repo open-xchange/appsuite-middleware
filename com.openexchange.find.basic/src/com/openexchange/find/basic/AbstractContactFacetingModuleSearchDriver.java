@@ -55,7 +55,7 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
-import com.openexchange.find.spi.ModuleSearchDriver;
+import com.openexchange.find.spi.AbstractModuleSearchDriver;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
@@ -70,7 +70,7 @@ import com.openexchange.tools.iterator.SearchIterators;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractContactFacetingModuleSearchDriver implements ModuleSearchDriver {
+public abstract class AbstractContactFacetingModuleSearchDriver extends AbstractModuleSearchDriver {
 
     /**
      * Initializes a new {@link AbstractContactFacetingModuleSearchDriver}.

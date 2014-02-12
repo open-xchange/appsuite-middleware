@@ -75,14 +75,14 @@ public class FindRequest {
 
     private static final String PARAM_MODULE = "module";
     private static final String PARAM_PREFIX = "prefix";
-
     private static final String PARAM_START = "start";
     private static final String PARAM_SIZE = "size";
-
+    private static final String PARAM_ACTIVE_FACETS = "activeFacets";
     private static final String PARAM_QUERIES = "queries";
     private static final String PARAM_FILTERS = "filters";
 
     // -------------------------------------------------------------------------------------------- //
+
 
     private final AJAXRequestData request;
     private final ServerSession session;
@@ -243,6 +243,22 @@ public class FindRequest {
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
+    }
+
+    /**
+     * Gets the active facets.
+     *
+     * @return The facets.
+     * @throws OXException If facets are invalid
+     */
+    public JSONArray optActiveFacets() throws OXException {
+        JSONObject json = (JSONObject) request.requireData();
+        Object facetsObj = json.opt(PARAM_ACTIVE_FACETS);
+        if (facetsObj != null && facetsObj instanceof JSONArray) {
+            return (JSONArray) facetsObj;
+        }
+
+        return null;
     }
 
     /**

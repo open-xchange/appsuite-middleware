@@ -58,6 +58,26 @@ package com.openexchange.find.facet;
  */
 public interface DisplayItem {
 
+    public static final DisplayItem NO_DISPLAY_ITEM = new DisplayItem() {
+        @Override
+        public String getDefaultValue() {
+            return "";
+        }
+
+        @Override
+        public Object getItem() {
+            return null;
+        }
+
+        @Override
+        public void accept(DisplayItemVisitor visitor) {}
+
+        @Override
+        public String toString() {
+            return "NO_DISPLAY_ITEM";
+        }
+    };
+
     /**
      * A display item must contain a default value.
      * <p>
