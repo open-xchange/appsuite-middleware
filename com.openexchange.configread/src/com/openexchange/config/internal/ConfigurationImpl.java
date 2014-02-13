@@ -742,7 +742,10 @@ public final class ConfigurationImpl implements ConfigurationService {
         // Check if properties have been changed, abort if not
         Set<String> changes = getChanges(oldPropertiesByFile);
         if (changes.isEmpty()) {
+            LOG.info("No changes in configuration files detected, nothing to do");
             return;
+        } else {
+            LOG.info("Detected changes in the following configuration files: {}", changes);
         }
 
         final ConfigProviderServiceImpl configProvider = this.configProviderServiceImpl;
@@ -763,8 +766,11 @@ public final class ConfigurationImpl implements ConfigurationService {
 
                     boolean doReload = false;
                     for (final Iterator<String> it = configfileNames.iterator(); !doReload && it.hasNext();) {
-                        if (changes.contains(it.next())) {
-                            doReload = true;
+                        for (String changedFile : changes) {
+                            if (changedFile.endsWith(it.next())) {
+                                doReload = true;
+                                break;
+                            }
                         }
                     }
                     if (doReload) {
@@ -827,7 +833,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             final Properties oldProperties = oldPropertiesByFile.get(fileName);
             if (null == oldProperties || !newProperties.equals(oldProperties)) {
                 // New or changed .properties file
-                result.add(fileName.substring(fileName.lastIndexOf("/") + 1));
+                result.add(fileName);
             }
         }
         // Determine deleted ones
