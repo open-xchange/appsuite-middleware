@@ -98,7 +98,7 @@ public abstract class AbstractMobileNotifierAction implements AJAXActionService 
     /**
      * Performs specified MobileNotifierRequest request.
      * 
-     * @param req The Mobilenotifier request
+     * @param req The mobile notifier request
      * @return The result
      * @throws OXException If an error occurs
      * @throws JSONException If a JSON error occurs

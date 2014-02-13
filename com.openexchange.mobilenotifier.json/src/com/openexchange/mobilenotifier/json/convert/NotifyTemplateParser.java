@@ -58,7 +58,7 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link NotifyTemplateParser} - Parse a notify template
+ * {@link NotifyTemplateParser} - Parses notify templates
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */

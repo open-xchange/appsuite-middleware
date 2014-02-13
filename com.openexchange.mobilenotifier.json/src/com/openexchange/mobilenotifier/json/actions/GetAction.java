@@ -74,7 +74,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 @Action(method = RequestMethod.GET, name = "get", description = "Get a notifaction item", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "provider", description = "The requested providers.") }, responseDescription = "An JSON object describing an notification template for one or multiple providers.")
+    @Parameter(name = "provider", description = "The requested providers.") }, responseDescription = "Response with timestamp: An JSON object describing an mobile notification object for one or multiple providers.")
 public class GetAction extends AbstractMobileNotifierAction {
 
     /**
@@ -105,9 +105,9 @@ public class GetAction extends AbstractMobileNotifierAction {
         // Get service for provider
         for (String provider : providers) {
             MobileNotifierService notifierService = mobileNotifierRegistry.getService(provider, uid, cid);
-            itemJSON.put(notifierService.getFrontendName(), NotifyItemWriter.write(notifierService));
+            itemJSON.put(notifierService.getFrontendName(), NotifyItemWriter.write(notifierService.getItems()));
         }
         providerJSON.put(MobileNotifyField.PROVIDER, itemJSON);
-        return new AJAXRequestResult(providerJSON, new Date(), "json");
+        return new AJAXRequestResult(providerJSON, new Date(System.currentTimeMillis()), "json");
     }
 }

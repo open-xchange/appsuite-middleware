@@ -80,7 +80,7 @@ public class ConfigputTest extends AbstractMobileNotifierTest {
         ConfigputMobileNotifierRequest updReq = new ConfigputMobileNotifierRequest(notifyTemplate);
         ConfigputMobileNotifierResponse updResp = getClient().execute(updReq);
 
-        assertFalse("should not get error message ", updResp.hasError());
+        assertFalse("should have been successful, but got: " + updResp.getErrorMessage(), updResp.hasError());
         assertEquals("Should return true in case of success", new Boolean(true), updResp.getData());
     }
 
@@ -90,6 +90,6 @@ public class ConfigputTest extends AbstractMobileNotifierTest {
         notifyTemplate.setHtmlTemplate("<div></div>");
         ConfigputMobileNotifierRequest updReq = new ConfigputMobileNotifierRequest(notifyTemplate);
         ConfigputMobileNotifierResponse updResp = getClient().execute(updReq);
-        assertTrue(updResp.hasError());
+        assertTrue("should get an exception, but no error occured", updResp.hasError());
     }
 }

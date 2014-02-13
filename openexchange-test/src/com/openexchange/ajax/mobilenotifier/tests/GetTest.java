@@ -107,6 +107,6 @@ public class GetTest extends AbstractMobileNotifierTest {
         providerValue.add("mehl");
         GetMobileNotifierRequest req = new GetMobileNotifierRequest(providerValue);
         GetMobileNotifierResponse res = getClient().execute(req);
-        assertNotNull("exception not thrown" + res.getException());
+        assertNotNull("exception should have thrown " + res.getException());
     }
 }

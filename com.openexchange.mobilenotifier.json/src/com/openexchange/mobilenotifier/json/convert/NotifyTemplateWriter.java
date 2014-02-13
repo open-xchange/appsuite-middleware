@@ -53,12 +53,10 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.exception.OXException;
-import com.openexchange.mobilenotifier.MobileNotifierService;
 import com.openexchange.mobilenotifier.NotifyTemplate;
 
 /**
- * {@link NotifyTemplateWriter} - Converts a list of notification items to a JSON structure.
+ * {@link NotifyTemplateWriter} - Converts a notification template to a JSON structure.
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
@@ -69,18 +67,14 @@ public class NotifyTemplateWriter {
     }
 
     /**
-     * Writes the JSON structure of NotifyTemplates
+     * Writes the JSON structure of notify templates
      * 
-     * @param service - The service
-     * @param session - The session
-     * @return JSONObject - Returns the JSON structure
+     * @param template The notify template
+     * @return The JSON structure
      * @throws JSONException
-     * @throws OXException
      */
-    public static JSONObject write(final MobileNotifierService service) throws JSONException, OXException {
+    public static JSONObject write(final NotifyTemplate template) throws JSONException {
         final JSONObject attributes = new JSONObject();
-        final NotifyTemplate template = service.getTemplate();
-
         attributes.put(MobileNotifyField.TITLE, template.getTitle());
         attributes.put(MobileNotifyField.TEMPLATE, template.getHtmlTemplate());
         attributes.put(MobileNotifyField.SLOW, template.isSlow());

@@ -59,34 +59,35 @@ import com.openexchange.exception.OXException;
  * @since 7.6.0
  */
 public interface MobileNotifierService {
+    
     /**
      * Get the provider name
      * 
-     * @return String the name the providers
+     * @return The provider name
      */
     String getProviderName();
 
     /**
      * Get the frontend application name
      * 
-     * @return String the name the frontend application
+     * @return The frontend application name
      */
     String getFrontendName();
 
     /**
-     * Checks if a provider is enabled by a user
+     * Checks if a provider is enabled
      * 
-     * @param session
-     * @return True if a provider is enabled otherwise false
+     * @param uid The user id
+     * @param cid The context id
+     * @return true if a provider is enabled otherwise false
      * @throws OXException
      */
     boolean isEnabled(int uid, int cid) throws OXException;
 
     /**
-     * Gets the Items
+     * Gets the notify items
      * 
-     * @param session - The session
-     * @return list - List of NotifyItems
+     * @return List of NotifyItems
      * @throws OXException
      */
     List<NotifyItem> getItems() throws OXException;
@@ -94,7 +95,7 @@ public interface MobileNotifierService {
     /**
      * Gets a template
      * 
-     * @return NotifyTemplate - The template
+     * @return The notification template
      * @throws OXException
      */
     NotifyTemplate getTemplate() throws OXException;
@@ -102,6 +103,7 @@ public interface MobileNotifierService {
     /**
      * Writes changes to a template
      * 
+     * @param changedTemplate - The template
      * @throws OXException
      */
     void putTemplate(String changedTemplate) throws OXException;

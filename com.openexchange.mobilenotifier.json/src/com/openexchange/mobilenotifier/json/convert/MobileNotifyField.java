@@ -51,8 +51,8 @@ package com.openexchange.mobilenotifier.json.convert;
 
 
 /**
- * {@link MobileNotifyField}
- *
+ * {@link MobileNotifyField} - Constants for mobile notifier fields used as json keys
+ * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public final class MobileNotifyField {

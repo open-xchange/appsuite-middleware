@@ -61,6 +61,7 @@ import com.openexchange.mobilenotifier.osgi.Services;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public abstract class AbstractMobileNotifierService implements MobileNotifierService {
+
     @Override
     public final boolean isEnabled(int uid, int cid) throws OXException {
         ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
@@ -78,6 +79,8 @@ public abstract class AbstractMobileNotifierService implements MobileNotifierSer
     /**
      * Can be used to implement a custom enabled method by a provider
      * 
+     * @param uid The user id
+     * @param cid The context id
      * @return boolean
      */
     protected boolean isEnabledCustom(int uid, int cid) {

@@ -54,11 +54,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.mobilenotifier.MobileNotifierService;
 import com.openexchange.mobilenotifier.NotifyItem;
 
 /**
- * {@link NotifyItemWriter} - Converts a list of notification items to a JSON structure.
+ * {@link NotifyItemWriter} - Converts a list of notify items to a JSON structure.
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
@@ -67,31 +66,27 @@ public class NotifyItemWriter {
     private NotifyItemWriter() {
         super();
     }
+
     /**
-     * Writes the JSON structure of NotifyItems
+     * Writes the JSON structure of notify items
      * 
-     * @param service - The service
-     * @param session - The session
-     * @return JSONObject - Returns the JSON structure
+     * @param notifyItem The notify items
+     * @return The JSON structure
      * @throws JSONException
-     * @throws OXException
      */
-    public static JSONObject write(final MobileNotifierService service) throws JSONException, OXException {
+    public static JSONObject write(final List<NotifyItem> notifyItem) throws JSONException {
         final JSONArray itemsArray = new JSONArray();
         final JSONObject itemsJSON = new JSONObject();
-
-        itemsArray.put(transformListToJSONObject(service.getItems()));
+        itemsArray.put(transformListToJSONObject(notifyItem));
         itemsJSON.put(MobileNotifyField.ITEMS, itemsArray);
         return itemsJSON;
     }
 
     private static JSONObject transformListToJSONObject(List<NotifyItem> items) throws JSONException {
         final JSONObject itemJSON = new JSONObject();
-
         for (NotifyItem item : items) {
             itemJSON.put(item.getKey(), item.getValue());
         }
-
         return itemJSON;
     }
 }

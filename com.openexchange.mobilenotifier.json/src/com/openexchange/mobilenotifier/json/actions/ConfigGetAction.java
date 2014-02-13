@@ -75,7 +75,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 @Action(method = RequestMethod.GET, name = "get", description = "Gets a notifaction template", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "provider", optional = true, description = "The requested providers if this parameter is missing all templates will be returned.") }, responseDescription = "An JSON object describing an notification item for one or multiple providers.")
+    @Parameter(name = "provider", optional = true, description = "The requested providers if this parameter is missing all templates will be returned.") }, responseDescription = "Response with timestamp: An JSON object describing an notification template one or multiple providers.")
 public class ConfigGetAction extends AbstractMobileNotifierAction {
 
     /**
@@ -112,17 +112,16 @@ public class ConfigGetAction extends AbstractMobileNotifierAction {
             // Get all Services
             List<MobileNotifierService> notifierServices = mobileNotifierRegistry.getAllServices(uid, cid);
             for (MobileNotifierService notifierService : notifierServices) {
-                attributesJSON.put(notifierService.getFrontendName(), NotifyTemplateWriter.write(notifierService));
+                attributesJSON.put(notifierService.getFrontendName(), NotifyTemplateWriter.write(notifierService.getTemplate()));
             }
         } else {
             // Get service for provider
             for (String provider : providers) {
                 MobileNotifierService notifierService = mobileNotifierRegistry.getService(provider, uid, cid);
-                attributesJSON.put(notifierService.getFrontendName(), NotifyTemplateWriter.write(notifierService));
+                attributesJSON.put(notifierService.getFrontendName(), NotifyTemplateWriter.write(notifierService.getTemplate()));
             }
         }
-
         providerJSON.put(MobileNotifyField.PROVIDER, attributesJSON);
-        return new AJAXRequestResult(providerJSON, new Date(), "json");
+        return new AJAXRequestResult(providerJSON, new Date(System.currentTimeMillis()), "json");
     }
 }

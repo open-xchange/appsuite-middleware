@@ -51,8 +51,8 @@ package com.openexchange.mobilenotifier.example;
 
 
 /**
- * {@link MobileNotifierProviders}
- *
+ * {@link MobileNotifierProviders} - Enumeration of values for the provider
+ * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public enum MobileNotifierProviders {

@@ -58,6 +58,7 @@ import java.util.Map;
  * @author <a href="mailto:Lars.Hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class NotifyTemplate {
+
     private String title;
 
     private String htmlTemplate;

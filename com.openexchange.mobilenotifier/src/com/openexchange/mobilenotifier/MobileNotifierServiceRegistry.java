@@ -62,8 +62,10 @@ public interface MobileNotifierServiceRegistry {
     /**
      * Gets a specific mobile notifier service by a provider
      * 
-     * @param provider - Identifies the service
-     * @return A MobileNotifierService
+     * @param provider Identifies the service
+     * @param uid The user id
+     * @param cid The context id
+     * @return A mobile notifier service
      * @throws OXException
      */
     MobileNotifierService getService(String provider, int uid, int cid) throws OXException;
@@ -71,7 +73,9 @@ public interface MobileNotifierServiceRegistry {
     /**
      * Gets all mobile notifier services
      * 
-     * @return List of MobileNotifierService
+     * @param uid The user id
+     * @param cid The context id
+     * @return All mobile notifier services as list
      * @throws OXException
      */
     List<MobileNotifierService> getAllServices(int uid, int cid) throws OXException;

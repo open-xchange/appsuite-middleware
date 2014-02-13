@@ -53,7 +53,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.json.JSONArray;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
@@ -85,6 +86,7 @@ public class ConfiggetTest extends AbstractMobileNotifierTest {
         ConfiggetMobileNotifierRequest req = new ConfiggetMobileNotifierRequest(providerValue);
         ConfiggetMobileNotifierResponse res = getClient().execute(req);
 
+        
         assertNotNull(res.getData());
         JSONObject notifyTemplateJSON = (JSONObject) res.getData();
 
@@ -104,6 +106,8 @@ public class ConfiggetTest extends AbstractMobileNotifierTest {
             Assert.assertTrue("value of attribute template is empty ", providerObject.getString("template").length() > 0);
             assertNotNull("could not find attribute slow", providerObject.get("slow"));
             Assert.assertTrue("value of attribute template is empty ", providerObject.getString("slow").length() > 0);
+            assertNotNull("could not find attribute index", providerObject.get("index"));
+            Assert.assertTrue("value of attribute index is empty ", providerObject.getString("index").length() > 0);
         }
     }
 
@@ -117,7 +121,22 @@ public class ConfiggetTest extends AbstractMobileNotifierTest {
         assertNotNull("could not find element \"provider\" in json structure", notifyTemplateJSON.get("provider"));
         JSONObject providersObject = (JSONObject) notifyTemplateJSON.get("provider");
 
-        // TODO
+        Map<String, Object> map = providersObject.asMap();
+        Iterator<Entry<String, Object>> iter = map.entrySet().iterator();
+
+        while (iter.hasNext()) {
+            Entry<String, Object> entry = iter.next();
+            String key = entry.getKey();
+
+            assertNotNull(providersObject.get(key));
+            JSONObject providerObject = (JSONObject) providersObject.get(key);
+            assertNotNull("could not find attribute template", providerObject.get("template"));
+            Assert.assertTrue("value of attribute template is empty ", providerObject.getString("template").length() > 0);
+            assertNotNull("could not find attribute slow", providerObject.get("slow"));
+            Assert.assertTrue("value of attribute template is empty ", providerObject.getString("slow").length() > 0);
+            assertNotNull("could not find attribute index", providerObject.get("index"));
+            Assert.assertTrue("value of attribute index is empty ", providerObject.getString("index").length() > 0);
+        }
     }
 
     public void testShouldThrowExceptionIfUnknownProvider() throws OXException, IOException, JSONException {
@@ -127,6 +146,6 @@ public class ConfiggetTest extends AbstractMobileNotifierTest {
         ConfiggetMobileNotifierRequest req = new ConfiggetMobileNotifierRequest(providerValue);
         ConfiggetMobileNotifierResponse res = getClient().execute(req);
 
-        assertNotNull(res.getException());
+        assertTrue("should get an exception ", res.hasError());
     }
 }

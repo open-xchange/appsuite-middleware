@@ -75,7 +75,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 @Action(method = RequestMethod.PUT, name = "configput", description = "Change a template", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "provider", optional = true, description = "The provider identifier.") }, requestBody = "A JSON object providing notify templates", responseDescription = "The boolean value \"true\" if successful.")
+    @Parameter(name = "provider", optional = true, description = "The provider identifier.") }, requestBody = "A JSON object providing notify templates", responseDescription = "Response with timestamp: The boolean value \"true\" if successfully updated.")
 public class ConfigPutAction extends AbstractMobileNotifierAction {
     /**
      * Initializes a new {@link ConfigPutAction}.
@@ -104,6 +104,6 @@ public class ConfigPutAction extends AbstractMobileNotifierAction {
             MobileNotifierService notifierService = mobileNotifierRegistry.getService(parsedTemplate.getFrontendName(), uid, cid);
             notifierService.putTemplate(parsedTemplate.getHtmlTemplate());
         }
-        return new AJAXRequestResult(Boolean.TRUE, new Date(), "json");
+        return new AJAXRequestResult(Boolean.TRUE, new Date(System.currentTimeMillis()), "json");
     }
 }
