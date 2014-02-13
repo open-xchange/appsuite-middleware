@@ -50,14 +50,11 @@
 package com.openexchange.login.internal;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.regex.Pattern;
 import javax.security.auth.login.LoginException;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.authentication.Authenticated;
@@ -146,8 +143,6 @@ public final class LoginPerformer {
         return doLogin(request, new HashMap<String, Object>(1), new AutoLoginMethod(request, new HashMap<String, Object>(1)));
     }
 
-    private static final Pattern SPLIT = Pattern.compile(" *, *");
-
     /**
      * Performs the login for specified login request.
      *
@@ -211,22 +206,6 @@ public final class LoginPerformer {
             if (null == session) {
                 // Session could not be created
                 throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
-            }
-            // Initial parameters
-            {
-                final String capabilities = (String) properties.get("client.capabilities");
-                if (null == capabilities) {
-                    session.setParameter(Session.PARAM_CAPABILITIES, Collections.<String> emptyList());
-                    // retval.addWarning(LoginExceptionCodes.MISSING_CAPABILITIES.create());
-                } else {
-                    final String[] sa = SPLIT.split(capabilities, 0);
-                    final int length = sa.length;
-                    if (0 == length) {
-                        session.setParameter(Session.PARAM_CAPABILITIES, Collections.<String> emptyList());
-                    } else {
-                        session.setParameter(Session.PARAM_CAPABILITIES, Collections.<String> unmodifiableList(Arrays.asList(sa)));
-                    }
-                }
             }
             retval.setServerToken((String) session.getParameter(LoginFields.SERVER_TOKEN));
             if (SessionEnhancement.class.isInstance(authed)) {

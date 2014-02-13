@@ -129,10 +129,6 @@ public class StoredSession implements PutIfAbsent, Serializable {
             if (null != parameter) {
                 this.parameters.put(Session.PARAM_ALTERNATIVE_ID, parameter);
             }
-            parameter = parameters.get(Session.PARAM_CAPABILITIES);
-            if (null != parameter) {
-                this.parameters.put(Session.PARAM_CAPABILITIES, parameter);
-            }
         }
     }
 
@@ -163,10 +159,6 @@ public class StoredSession implements PutIfAbsent, Serializable {
             parameter = session.getParameter(Session.PARAM_ALTERNATIVE_ID);
             if (null != parameter) {
                 this.parameters.put(Session.PARAM_ALTERNATIVE_ID, parameter);
-            }
-            parameter = session.getParameter(Session.PARAM_CAPABILITIES);
-            if (null != parameter) {
-                this.parameters.put(Session.PARAM_CAPABILITIES, parameter);
             }
         }
         this.password = session.getPassword();

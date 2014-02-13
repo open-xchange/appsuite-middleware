@@ -50,11 +50,6 @@
 package com.openexchange.sessionstorage.hazelcast.portable;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import com.hazelcast.nio.ObjectDataInput;
-import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.CustomPortable;
@@ -137,17 +132,6 @@ public class PortableSession extends StoredSession implements CustomPortable {
          */
         Object altId = parameters.get(PARAM_ALTERNATIVE_ID);
         writer.writeUTF(PARAMETER_ALT_ID, null != altId && String.class.isInstance(altId) ? (String)altId : null);
-        Object capabilitiesValue = parameters.get(PARAM_CAPABILITIES);
-        boolean hasCapabilities = null != capabilitiesValue && java.util.Collection.class.isInstance(capabilitiesValue);
-        writer.writeBoolean("hasCapabilities", hasCapabilities);
-        if (hasCapabilities) {
-            Collection<?> capabilities = (Collection<?>)capabilitiesValue;
-            ObjectDataOutput out = writer.getRawDataOutput();
-            out.writeInt(capabilities.size());
-            for (Object capability : capabilities) {
-                out.writeUTF(null != capability && String.class.isInstance(capability) ? (String)capability : null);
-            }
-        }
     }
 
     @Override
@@ -174,16 +158,6 @@ public class PortableSession extends StoredSession implements CustomPortable {
         String altId = reader.readUTF(PARAMETER_ALT_ID);
         if (null != altId) {
             parameters.put(PARAM_ALTERNATIVE_ID, altId);
-        }
-        boolean hasCapabilities = reader.readBoolean("hasCapabilities");
-        if (hasCapabilities) {
-            ObjectDataInput in = reader.getRawDataInput();
-            int size = in.readInt();
-            List<String> capabilities = new ArrayList<String>(size);
-            for (int i = 0; i < size; i++) {
-                capabilities.add(in.readUTF());
-            }
-            parameters.put(PARAM_CAPABILITIES, capabilities);
         }
     }
 

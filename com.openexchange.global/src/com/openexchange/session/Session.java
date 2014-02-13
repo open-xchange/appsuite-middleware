@@ -168,13 +168,6 @@ public interface Session {
     public static final String PARAM_COUNTER = "com.openexchange.session.counter".intern();
 
     /**
-     * The parameter for client capabilities.
-     *
-     * @type <code>java.util.List&lt;String&gt;</code>
-     */
-    public static final String PARAM_CAPABILITIES = "session.clientCapabilities".intern();
-
-    /**
      * The parameter for optional alternative identifier.
      *
      * @type <code>java.lang.String</code>
