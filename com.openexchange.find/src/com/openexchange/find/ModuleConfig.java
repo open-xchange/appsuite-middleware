@@ -50,6 +50,7 @@
 package com.openexchange.find;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.MandatoryFilter;
@@ -57,15 +58,17 @@ import com.openexchange.find.spi.ModuleSearchDriver;
 
 /**
  * A {@link ModuleConfig} encapsulates the configuration for a specific module.
+ * <p>
  * Each {@link ModuleSearchDriver} provides its configuration via
- * {@link ModuleSearchDriver#getConfiguration(com.openexchange.tools.session.ServerSession)}
- * . A modules configuration models the limitations of a concrete
- * {@link ModuleSearchDriver} as static facets and mandatory filters. Static
- * facets are facets that are not calculated during search time. There is no
- * need to deliver them in an autocomplete response, so they are part of the
- * configuration response. A mandatory filter is a filter that must be set
- * within every search request. Every mandatory filter belongs to a static
- * facet. Additionally it references a filter from that facet as its default.
+ * {@link ModuleSearchDriver#getConfiguration(com.openexchange.tools.session.ServerSession)}.
+ * <p>
+ * A module's configuration models the limitations of a certain {@link ModuleSearchDriver} as static facets and mandatory filters.
+ * <ul>
+ * <li>Static facets are facets that are not calculated during search time. There is no need to deliver them in an auto-complete response,
+ * so they are part of the configuration response.
+ * <li>A mandatory filter is a filter that must be set within every search request. Every mandatory filter belongs to a static facet.
+ * Additionally it references a filter from that facet as its default.
+ * </ul>
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.0
@@ -75,39 +78,59 @@ public class ModuleConfig implements Serializable {
     private static final long serialVersionUID = 4128963449124744664L;
 
     private final Module module;
-
-    private final List<Facet> facets;
-
+    private final List<Facet> staticFacets;
     private final List<MandatoryFilter> mandatoryFilters;
 
-    public ModuleConfig(Module module, List<Facet> facets, List<MandatoryFilter> mandatoryFilters) {
+    /**
+     * Initializes a new {@link ModuleConfig} that has no mandatory filters;
+     *
+     * @param module The associated module
+     * @param staticFacets The static facets
+     */
+    public ModuleConfig(Module module, List<Facet> staticFacets) {
+        this(module, staticFacets, Collections.<MandatoryFilter> emptyList());
+    }
+
+    /**
+     * Initializes a new {@link ModuleConfig}.
+     *
+     * @param module The associated module
+     * @param staticFacets The static facets
+     * @param mandatoryFilters The mandatory filters
+     */
+    public ModuleConfig(Module module, List<Facet> staticFacets, List<MandatoryFilter> mandatoryFilters) {
         super();
         this.module = module;
-        this.facets = facets;
+        this.staticFacets = staticFacets;
         this.mandatoryFilters = mandatoryFilters;
     }
 
+    /**
+     * Gets the module.
+     *
+     * @return The module
+     */
     public Module getModule() {
         return module;
     }
 
     /**
-     * Returns the list of static facets. May be empty but never
-     * <code>null</code>.
+     * Gets the list of static facets.
+     *
+     * @return The list of static facets. May be empty, but never <code>null</code>.
      */
     public List<Facet> getStaticFacets() {
-        return facets;
+        return staticFacets;
     }
 
     /**
-     * Returns the list of mandatory filters. May be empty but never
-     * <code>null</code>.<br>
-     * <br>
-     * For every mandatory filter the value of
-     * {@link MandatoryFilter#getFacet()} must be contained in
-     * {@link ModuleConfig#getStaticFacets()}. Additionally the value of
-     * {@link MandatoryFilter#getDefaultValue()} must be part of that static
-     * facets value list.
+     * Gets the list of mandatory filters.
+     * <p>
+     * For every mandatory filter the value of {@link MandatoryFilter#getFacet()} must be contained in
+     * {@link ModuleConfig#getStaticFacets()}. Additionally the value of {@link MandatoryFilter#getDefaultValue()} must be part of that
+     * static facets value list.
+     *
+     * @return The mandatory filters. May be empty, but never <code>null</code>.
      */
     public List<MandatoryFilter> getMandatoryFilters() {
         return mandatoryFilters;
@@ -117,7 +140,7 @@ public class ModuleConfig implements Serializable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((facets == null) ? 0 : facets.hashCode());
+        result = prime * result + ((staticFacets == null) ? 0 : staticFacets.hashCode());
         result = prime * result + ((mandatoryFilters == null) ? 0 : mandatoryFilters.hashCode());
         result = prime * result + ((module == null) ? 0 : module.hashCode());
         return result;
@@ -125,31 +148,39 @@ public class ModuleConfig implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ModuleConfig other = (ModuleConfig) obj;
-        if (facets == null) {
-            if (other.facets != null)
+        if (staticFacets == null) {
+            if (other.staticFacets != null) {
                 return false;
-        } else if (!facets.equals(other.facets))
+            }
+        } else if (!staticFacets.equals(other.staticFacets)) {
             return false;
+        }
         if (mandatoryFilters == null) {
-            if (other.mandatoryFilters != null)
+            if (other.mandatoryFilters != null) {
                 return false;
-        } else if (!mandatoryFilters.equals(other.mandatoryFilters))
+            }
+        } else if (!mandatoryFilters.equals(other.mandatoryFilters)) {
             return false;
-        if (module != other.module)
+        }
+        if (module != other.module) {
             return false;
+        }
         return true;
     }
 
     @Override
     public String toString() {
-        return "ModuleConfig [module=" + module + ", facets=" + facets + ", mandatoryFilters=" + mandatoryFilters + "]";
+        return "ModuleConfig [module=" + module + ", facets=" + staticFacets + ", mandatoryFilters=" + mandatoryFilters + "]";
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -46,32 +46,36 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.find;
 
-import com.openexchange.find.drive.FileDocument;
-import com.openexchange.find.mail.MailDocument;
+package com.openexchange.tools.iterator;
 
 /**
- * A {@link DocumentVisitor} has to be used to process the {@link Document}s
- * of a {@link SearchResult}.
+ * {@link SearchIterators} - Utility class for {@link SearchIterator}.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since 7.6.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface DocumentVisitor {
+public final class SearchIterators {
 
     /**
-     * Handles given mail document.
-     *
-     * @param mailDocument The mail document
+     * Initializes a new {@link SearchIterators}.
      */
-    void visit(MailDocument mailDocument);
+    private SearchIterators() {
+        super();
+    }
 
     /**
-     * Handles given file document.
+     * (Safely) Closes specified {@link SearchIterator} instance.
      *
-     * @param driveDocument The file document
+     * @param iterator The iterator to close
      */
-    void visit(FileDocument driveDocument);
+    public static void close(final SearchIterator<?> iterator) {
+        if (null != iterator) {
+            try {
+                iterator.close();
+            } catch (final Exception e) {
+                // Ignore
+            }
+        }
+    }
 
 }

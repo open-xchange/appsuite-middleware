@@ -56,8 +56,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.contact.ContactService;
-import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
@@ -67,6 +65,7 @@ import com.openexchange.find.Module;
 import com.openexchange.find.ModuleConfig;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
+import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.DefaultFolderType;
@@ -79,7 +78,6 @@ import com.openexchange.find.facet.MandatoryFilter;
 import com.openexchange.find.mail.DefaultMailFolderType;
 import com.openexchange.find.mail.MailDocument;
 import com.openexchange.find.mail.MailFacetType;
-import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
@@ -87,9 +85,7 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.mail.MailFolderImpl.MailFolderType;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.type.PrivateType;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
@@ -104,7 +100,6 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
-import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -113,30 +108,9 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.0
  */
-public class MockMailDriver implements ModuleSearchDriver {
+public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
     private static final MailFolderFilter NO_FILTER = null;
-
-    private static final ContactField[] CONTACT_FIELDS = new ContactField[] {
-        ContactField.OBJECT_ID,
-        ContactField.FOLDER_ID,
-        ContactField.PRIVATE_FLAG,
-        ContactField.DISPLAY_NAME,
-        ContactField.GIVEN_NAME,
-        ContactField.SUR_NAME,
-        ContactField.TITLE,
-        ContactField.POSITION,
-        ContactField.INTERNAL_USERID,
-        ContactField.EMAIL1,
-        ContactField.EMAIL2,
-        ContactField.EMAIL3,
-        ContactField.COMPANY,
-        ContactField.DISTRIBUTIONLIST,
-        ContactField.MARK_AS_DISTRIBUTIONLIST,
-        ContactField.IMAGE1_URL,
-        ContactField.CELLULAR_TELEPHONE1,
-        ContactField.CELLULAR_TELEPHONE2
-    };
 
     private static final Set<String> PERSONS_FILTER_FIELDS = new HashSet<String>(3);
     static {
@@ -216,7 +190,7 @@ public class MockMailDriver implements ModuleSearchDriver {
     }
 
     @Override
-    public AutocompleteResult autocomplete(ServerSession session, AutocompleteRequest autocompleteRequest) throws OXException {
+    public AutocompleteResult autocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
         List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
         List<FacetValue> contactValues = new ArrayList<FacetValue>(contacts.size());
         for (Contact contact : contacts) {
@@ -249,7 +223,7 @@ public class MockMailDriver implements ModuleSearchDriver {
     }
 
     @Override
-    public SearchResult search(ServerSession session, SearchRequest searchRequest) throws OXException {
+    public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
         List<Filter> filters = searchRequest.getFilters();
         if (filters == null || filters.isEmpty()) {
             // TODO: throw exception, we need at least a folder filter!
@@ -337,36 +311,6 @@ public class MockMailDriver implements ModuleSearchDriver {
         }
         Filter filter = new Filter(FOLDERS_FILTER_FIELDS, folder.getID());
         return new FacetValue(new FolderDisplayItem(folder, defaultFolderType, mailAccount.getName(), mailAccount.isDefaultAccount()), FacetValue.UNKNOWN_COUNT, filter);
-    }
-
-    private List<Contact> autocompleteContacts(Session session, AutocompleteRequest autocompleteRequest) throws OXException {
-        ContactService contactService = Services.getContactService();
-        String prefix = autocompleteRequest.getPrefix() + '*';
-        ContactSearchObject searchObject = new ContactSearchObject();
-        searchObject.setOrSearch(true);
-        searchObject.setEmailAutoComplete(false);
-        searchObject.setDisplayName(prefix);
-        searchObject.setSurname(prefix);
-        searchObject.setGivenName(prefix);
-        searchObject.setEmail1(prefix);
-        searchObject.setEmail2(prefix);
-        searchObject.setEmail3(prefix);
-
-        SortOptions sortOptions = new SortOptions();
-        sortOptions.setRangeStart(0);
-        sortOptions.setLimit(10);
-
-        SearchIterator<Contact> it = contactService.searchContacts(session, searchObject, CONTACT_FIELDS, sortOptions);
-        if (it == null || !it.hasNext()) {
-            return Collections.emptyList();
-        }
-
-        List<Contact> contacts = new ArrayList<Contact>();
-        while (it.hasNext()) {
-            contacts.add(it.next());
-        }
-
-        return contacts;
     }
 
     private List<UserizedFolder> autocompleteFolders(Session session, AutocompleteRequest autocompleteRequest) throws OXException {

@@ -63,6 +63,11 @@ public class SimpleDisplayItem implements DisplayItem {
 
     private final String defaultValue;
 
+    /**
+     * Initializes a new {@link SimpleDisplayItem}.
+     *
+     * @param defaultValue The default value
+     */
     public SimpleDisplayItem(final String defaultValue) {
         super();
         this.defaultValue = defaultValue;

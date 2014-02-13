@@ -46,32 +46,46 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.find;
 
-import com.openexchange.find.drive.FileDocument;
-import com.openexchange.find.mail.MailDocument;
+package com.openexchange.find.drive;
+
+import com.openexchange.file.storage.File;
+import com.openexchange.find.Document;
+import com.openexchange.find.DocumentVisitor;
 
 /**
- * A {@link DocumentVisitor} has to be used to process the {@link Document}s
- * of a {@link SearchResult}.
+ * {@link FileDocument} - The document for a file.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since 7.6.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface DocumentVisitor {
+public class FileDocument implements Document {
+
+    private static final long serialVersionUID = -5944087974121811926L;
+
+    private final File file;
 
     /**
-     * Handles given mail document.
+     * Initializes a new {@link FileDocument}.
      *
-     * @param mailDocument The mail document
+     * @param file
      */
-    void visit(MailDocument mailDocument);
+    public FileDocument(final File file) {
+        super();
+        this.file = file;
+    }
 
     /**
-     * Handles given file document.
+     * Gets the file
      *
-     * @param driveDocument The file document
+     * @return The file
      */
-    void visit(FileDocument driveDocument);
+    public File getFile() {
+        return file;
+    }
+
+    @Override
+    public void accept(DocumentVisitor visitor) {
+        visitor.visit(this);
+    }
 
 }

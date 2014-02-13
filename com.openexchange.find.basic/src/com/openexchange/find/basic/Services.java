@@ -54,6 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -71,31 +72,30 @@ public class Services {
     }
 
     public static ContactService getContactService() throws OXException {
-        return getService(ContactService.class);
+        return requireService(ContactService.class);
     }
 
     public static FolderService getFolderService() throws OXException {
-        return getService(FolderService.class);
+        return requireService(FolderService.class);
     }
 
     public static MailService getMailService() throws OXException {
-        return getService(MailService.class);
+        return requireService(MailService.class);
     }
 
     public static MailAccountStorageService getMailAccountStorageService() throws OXException {
-        return getService(MailAccountStorageService.class);
+        return requireService(MailAccountStorageService.class);
     }
 
     public static void setServiceLookup(ServiceLookup lookup) {
         LOOKUP.set(lookup);
     }
 
-    private static <T> T getService(Class<T> clazz) throws OXException {
+    public static <T> T requireService(Class<T> clazz) throws OXException {
         T service = getServiceLookup().getService(clazz);
-        if (service == null) {
-            // TODO: OXException
+        if (null == service) {
+            throw ServiceExceptionCode.absentService(clazz);
         }
-
         return service;
     }
 

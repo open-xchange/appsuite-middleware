@@ -50,6 +50,7 @@
 package com.openexchange.file.storage;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
@@ -356,6 +357,16 @@ public interface File {
             }
         }
 
+        public static List<Field> get(final Collection<String> keys) {
+            if (keys == null) {
+                return Collections.emptyList();
+            }
+            final List<Field> retval = new ArrayList<Field>(keys.size());
+            for (final String key : keys) {
+                retval.add(get(key));
+            }
+            return retval;
+        }
 
     }
 }

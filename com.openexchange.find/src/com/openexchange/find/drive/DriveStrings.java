@@ -46,32 +46,29 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.find;
 
-import com.openexchange.find.drive.FileDocument;
-import com.openexchange.find.mail.MailDocument;
+package com.openexchange.find.drive;
+
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * A {@link DocumentVisitor} has to be used to process the {@link Document}s
- * of a {@link SearchResult}.
+ * {@link DriveStrings}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since 7.6.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface DocumentVisitor {
+public class DriveStrings implements LocalizableStrings {
 
-    /**
-     * Handles given mail document.
-     *
-     * @param mailDocument The mail document
-     */
-    void visit(MailDocument mailDocument);
+    // Search in file name.
+    public static final String FACET_FILE_NAME = "File name";
 
-    /**
-     * Handles given file document.
-     *
-     * @param driveDocument The file document
-     */
-    void visit(FileDocument driveDocument);
+    // Search in file content.
+    public static final String FACET_FILE_CONTENT = "File content";
+
+    // Search in folders.
+    public static final String FACET_FOLDERS = "Folders";
+
+    // Search in Persons.
+    public static final String FACET_CONTACTS = "Contacts";
 
 }

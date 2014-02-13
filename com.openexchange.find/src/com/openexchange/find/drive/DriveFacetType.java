@@ -46,32 +46,41 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.find;
 
-import com.openexchange.find.drive.FileDocument;
-import com.openexchange.find.mail.MailDocument;
+package com.openexchange.find.drive;
+
+import com.openexchange.find.facet.FacetType;
+
 
 /**
- * A {@link DocumentVisitor} has to be used to process the {@link Document}s
- * of a {@link SearchResult}.
+ * {@link DriveFacetType} - Facet types for the drive module.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since 7.6.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface DocumentVisitor {
+public enum DriveFacetType implements FacetType {
 
-    /**
-     * Handles given mail document.
-     *
-     * @param mailDocument The mail document
-     */
-    void visit(MailDocument mailDocument);
+    CONTACTS(DriveStrings.FACET_CONTACTS),
+    FOLDERS(DriveStrings.FACET_FOLDERS),
+    FILE_NAME(DriveStrings.FACET_FILE_NAME),
+    FILE_CONTENT(DriveStrings.FACET_FILE_CONTENT),
+    ;
 
-    /**
-     * Handles given file document.
-     *
-     * @param driveDocument The file document
-     */
-    void visit(FileDocument driveDocument);
+    // ---------------------------------------------------------------------------------------------- //
+
+    private final String displayName;
+
+    private DriveFacetType(final String displayName) {
+        this.displayName = displayName;
+    }
+
+    @Override
+    public String getName() {
+        return toString().toLowerCase();
+    }
+
+    @Override
+    public String getDisplayName() {
+        return displayName;
+    }
 
 }

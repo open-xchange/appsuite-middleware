@@ -49,10 +49,8 @@
 
 package com.openexchange.find.facet;
 
-
 /**
- * Interface for several kinds objects that can be displayed by a client.
- * Inheritors must implement hashCode() and equals().
+ * Interface for several kinds objects that can be displayed by a client. Inheritors must implement hashCode() and equals().
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
@@ -60,9 +58,10 @@ package com.openexchange.find.facet;
 public interface DisplayItem {
 
     /**
-     * A display item must contain a default value. Clients
-     * may it for displaying the item if they have no implementation
-     * to handle the concrete item type.
+     * A display item must contain a default value.
+     * <p>
+     * Clients may use it for displaying the item if they have no implementation to handle the concrete item type.
+     *
      * @return The default value. Never <code>null</code>.
      */
     String getDefaultValue();

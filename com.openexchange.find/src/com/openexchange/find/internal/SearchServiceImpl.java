@@ -112,13 +112,13 @@ public class SearchServiceImpl implements SearchService, ServiceTrackerCustomize
     @Override
     public AutocompleteResult autocomplete(ServerSession session, Module module, AutocompleteRequest autocompleteRequest) throws OXException {
         ModuleSearchDriver driver = requireDriver(session, module);
-        return driver.autocomplete(session, autocompleteRequest);
+        return driver.autocomplete(autocompleteRequest, session);
     }
 
     @Override
     public SearchResult search(ServerSession session, Module module, SearchRequest searchRequest) throws OXException {
         ModuleSearchDriver driver = requireDriver(session, module);
-        return driver.search(session, searchRequest);
+        return driver.search(searchRequest, session);
     }
 
     private ModuleSearchDriver requireDriver(ServerSession session, Module module) throws OXException {

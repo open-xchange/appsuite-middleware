@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.find.spi;
 
 import com.openexchange.exception.OXException;
@@ -58,8 +59,7 @@ import com.openexchange.find.SearchResult;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * A {@link ModuleSearchDriver} has to be implemented for every
- * module that enables searching via the find API.
+ * A {@link ModuleSearchDriver} has to be implemented for every module that enables searching via the find API.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.0
@@ -67,31 +67,42 @@ import com.openexchange.tools.session.ServerSession;
 public interface ModuleSearchDriver {
 
     /**
+     * Gets the module supported by this driver.
+     *
      * @return The module supported by this driver.
      */
     Module getModule();
 
     /**
      * Checks if this driver applies to a given {@link ServerSession}.
+     *
+     * @return <code>true</code> if valid; otherwise <code>false</code>
      */
     boolean isValidFor(ServerSession session) throws OXException;
 
     /**
      * Gets the configuration for this driver based on a given session.
+     *
      * @return The {@link ModuleConfig}. Never <code>null</code>.
      */
     ModuleConfig getConfiguration(ServerSession session) throws OXException;
 
     /**
-     * Performs an autocomplete request.
+     * Performs an auto-complete request.
+     *
+     * @param autocompleteRequest The associated request
+     * @param session The associated session
      * @return The {@link AutocompleteResult}. Never <code>null</code>.
      */
-    AutocompleteResult autocomplete(ServerSession session, AutocompleteRequest autocompleteRequest) throws OXException;
+    AutocompleteResult autocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException;
 
     /**
      * Performs a search request.
+     *
+     * @param searchRequest The associated request
+     * @param session The associated session
      * @return The {@link SearchResult}. Never <code>null</code>.
      */
-    SearchResult search(ServerSession session, SearchRequest searchRequest) throws OXException;
+    SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException;
 
 }
