@@ -1883,6 +1883,27 @@ msgid ""
 "The service you requested is currently not available. Please try again later."
 msgstr ""
 
+#. Search in mail field subject.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:65
+msgid "Subject"
+msgstr ""
+
+#. Search in mail field text.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:68
+msgid "Mail Text"
+msgstr ""
+
+#. Search in folders.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:71
+msgid "Folders"
+msgstr ""
+
+#. Search in Persons.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
+msgid "Contacts"
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.freebusy/src/com/openexchange/freebusy/FreeBusyExceptionMessages.java:63
 msgid "No free/busy providers available"
 msgstr ""
@@ -4211,10 +4232,6 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:90
 msgid "Tasks"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
-msgid "Contacts"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:96
