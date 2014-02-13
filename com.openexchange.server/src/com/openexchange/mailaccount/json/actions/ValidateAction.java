@@ -119,7 +119,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
 
         final MailAccountDescription accountDescription = new MailAccountDescription();
         final List<OXException> warnings = new LinkedList<OXException>();
-        MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings, false);
+        MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
 
         if (accountDescription.getId() >= 0 && null == accountDescription.getPassword()) {
             /*
