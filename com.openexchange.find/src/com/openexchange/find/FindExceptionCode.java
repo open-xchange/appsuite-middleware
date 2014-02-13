@@ -66,6 +66,10 @@ public enum FindExceptionCode implements DisplayableOXExceptionCode {
      * Did not find a search driver in module %1$s for user %2$d in context %3$d.
      */
     MISSING_DRIVER("Did not find a search driver in module %1$s for user %2$d in context %3$d.", Category.CATEGORY_TRY_AGAIN, 1, FindExceptionMessages.SERVICE_NOT_AVAILABLE),
+    /**
+     * No visible/readable folder found in module %1$s for user %2$d in context %3$d.
+     */
+    NO_READABLE_FOLDER("No visible/readable folder found in module %1$s for user %2$d in context %3$d.", Category.CATEGORY_TRY_AGAIN, 2, FindExceptionMessages.SERVICE_NOT_AVAILABLE),
 
     ;
 

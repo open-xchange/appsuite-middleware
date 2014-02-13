@@ -62,7 +62,11 @@ public class AutocompleteRequest implements Serializable {
 
     private final String prefix;
 
-
+    /**
+     * Initializes a new {@link AutocompleteRequest}.
+     *
+     * @param prefix The prefix to autocomplete on; must not be <code>null</code>
+     */
     public AutocompleteRequest(String prefix) {
         super();
         this.prefix = prefix;
@@ -86,18 +90,23 @@ public class AutocompleteRequest implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         AutocompleteRequest other = (AutocompleteRequest) obj;
         if (prefix == null) {
-            if (other.prefix != null)
+            if (other.prefix != null) {
                 return false;
-        } else if (!prefix.equals(other.prefix))
+            }
+        } else if (!prefix.equals(other.prefix)) {
             return false;
+        }
         return true;
     }
 

@@ -58,6 +58,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.UnsupportedCharsetException;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
@@ -534,8 +536,13 @@ public final class HtmlServiceImpl implements HtmlService {
 
     @Override
     public String sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified, final String cssPrefix) {
+        if (isEmpty(htmlContent)) {
+            return htmlContent;
+        }
         try {
             String html = htmlContent;
+            // Normalize the string
+            html = Normalizer.normalize(html, Form.NFKC);
             // Perform one-shot sanitizing
             html = replacePercentTags(html);
             html = replaceHexEntities(html);

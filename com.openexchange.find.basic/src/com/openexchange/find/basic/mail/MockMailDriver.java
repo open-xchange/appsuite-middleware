@@ -62,6 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.Document;
+import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.Module;
 import com.openexchange.find.ModuleConfig;
 import com.openexchange.find.SearchRequest;
@@ -162,12 +163,14 @@ public class MockMailDriver implements ModuleSearchDriver {
 
     @Override
     public ModuleConfig getConfiguration(ServerSession session) throws OXException {
-        List<UserizedFolder> mailFolders = loadMailFolders(session, NO_FILTER);
         Facet folderFacet = null;
         MandatoryFilter folderFilter = null;
-        if (mailFolders.isEmpty()) {
-            // TODO: exception?
-        } else {
+        {
+            List<UserizedFolder> mailFolders = loadMailFolders(session, NO_FILTER);
+            if (mailFolders.isEmpty()) {
+                throw FindExceptionCode.NO_READABLE_FOLDER.create(Module.MAIL, session.getUserId(), session.getContextId());
+            }
+
             UserizedFolder defaultFolder = null;
             for (Iterator<UserizedFolder> it = mailFolders.iterator(); it.hasNext();) {
                 UserizedFolder folder = it.next();

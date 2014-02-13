@@ -51,10 +51,10 @@ package com.openexchange.find.json;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.Module;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -123,12 +123,22 @@ public class FindRequest {
         return module;
     }
 
+    /**
+     * Gets the checked prefix to auto-complete on.
+     *
+     * @return The checked prefix
+     * @throws OXException If prefix is missing or invalid
+     */
     public String requirePrefix() throws OXException {
         JSONObject json = (JSONObject) request.requireData();
         try {
             String prefix = json.getString(PARAM_PREFIX);
-            if (prefix == null) {
+            if (prefix == null || Strings.isEmpty((prefix = prefix.trim()))) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAM_PREFIX);
+            }
+            final char lastChar = prefix.charAt(prefix.length() - 1);
+            if ('*' == lastChar || '?' == lastChar) {
+                throw AjaxExceptionCodes.IMVALID_PARAMETER.create(PARAM_PREFIX);
             }
 
             return prefix;
