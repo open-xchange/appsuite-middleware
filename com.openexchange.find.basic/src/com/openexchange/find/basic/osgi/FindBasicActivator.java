@@ -46,13 +46,16 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.find.basic.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.Constants;
 import com.openexchange.contact.ContactService;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.find.basic.Services;
+import com.openexchange.find.basic.drive.MockDriveDrive;
 import com.openexchange.find.basic.mail.MockMailDriver;
 import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.folderstorage.FolderService;
@@ -61,25 +64,39 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link Activator}
+ * {@link FindBasicActivator}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.0
  */
-public class Activator extends HousekeepingActivator {
+public class FindBasicActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactService.class, FolderService.class, MailService.class, MailAccountStorageService.class };
+        return new Class<?>[] { ContactService.class, FolderService.class, MailService.class, MailAccountStorageService.class, IDBasedFileAccessFactory.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
-        Dictionary<String, Object> properties = new Hashtable<String, Object>();
-        properties.put(Constants.SERVICE_RANKING, 0);
-        registerService(ModuleSearchDriver.class, new MockMailDriver(), properties);
+
+        {
+            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+            properties.put(Constants.SERVICE_RANKING, 0);
+            registerService(ModuleSearchDriver.class, new MockMailDriver(), properties);
+        }
+
+        {
+            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+            properties.put(Constants.SERVICE_RANKING, 0);
+            registerService(ModuleSearchDriver.class, new MockDriveDrive(), properties);
+        }
     }
 
+    @Override
+    protected void stopBundle() throws Exception {
+        Services.setServiceLookup(null);
+        super.stopBundle();
+    }
 
 }
