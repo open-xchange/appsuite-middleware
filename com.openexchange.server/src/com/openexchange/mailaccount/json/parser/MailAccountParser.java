@@ -285,7 +285,7 @@ public class MailAccountParser extends DataParser {
             final String string = parseString(json, MailAccountFields.TRASH);
             account.setTrash(null == string ? string : string.trim());
             attributes.add(Attribute.TRASH_LITERAL);
-        } else if (asNewAccount) {
+        } else if (asNewAccount && !json.has(MailAccountFields.TRASH_FULLNAME)) {
             account.setTrash(MailStrings.TRASH);
             attributes.add(Attribute.TRASH_LITERAL);
         }
@@ -293,7 +293,7 @@ public class MailAccountParser extends DataParser {
             final String string = parseString(json, MailAccountFields.ARCHIVE);
             account.setTrash(null == string ? string : string.trim());
             attributes.add(Attribute.ARCHIVE_LITERAL);
-        } else if (asNewAccount) {
+        } else if (asNewAccount && !json.has(MailAccountFields.ARCHIVE_FULLNAME)) {
             account.setArchive(MailStrings.ARCHIVE);
             attributes.add(Attribute.ARCHIVE_LITERAL);
         }
@@ -301,7 +301,7 @@ public class MailAccountParser extends DataParser {
             final String string = parseString(json, MailAccountFields.SENT);
             account.setSent(null == string ? string : string.trim());
             attributes.add(Attribute.SENT_LITERAL);
-        } else if (asNewAccount) {
+        } else if (asNewAccount && !json.has(MailAccountFields.SENT_FULLNAME)) {
             account.setSent(MailStrings.SENT_ALT);
             attributes.add(Attribute.SENT_LITERAL);
         }
@@ -309,7 +309,7 @@ public class MailAccountParser extends DataParser {
             final String string = parseString(json, MailAccountFields.DRAFTS);
             account.setDrafts(null == string ? string : string.trim());
             attributes.add(Attribute.DRAFTS_LITERAL);
-        } else if (asNewAccount) {
+        } else if (asNewAccount && !json.has(MailAccountFields.DRAFTS_FULLNAME)) {
             account.setDrafts(MailStrings.DRAFTS);
             attributes.add(Attribute.DRAFTS_LITERAL);
         }
@@ -317,7 +317,7 @@ public class MailAccountParser extends DataParser {
             final String string = parseString(json, MailAccountFields.SPAM);
             account.setSpam(null == string ? string : string.trim());
             attributes.add(Attribute.SPAM_LITERAL);
-        } else if (asNewAccount) {
+        } else if (asNewAccount && !json.has(MailAccountFields.SPAM_FULLNAME)) {
             account.setSpam(MailStrings.SPAM);
             attributes.add(Attribute.SPAM_LITERAL);
         }
@@ -325,7 +325,7 @@ public class MailAccountParser extends DataParser {
             final String string = parseString(json, MailAccountFields.CONFIRMED_SPAM);
             account.setConfirmedSpam(null == string ? string : string.trim());
             attributes.add(Attribute.CONFIRMED_SPAM_LITERAL);
-        } else if (asNewAccount) {
+        } else if (asNewAccount && !json.has(MailAccountFields.CONFIRMED_SPAM_FULLNAME)) {
             account.setConfirmedSpam(MailStrings.CONFIRMED_SPAM_ALT);
             attributes.add(Attribute.CONFIRMED_SPAM_LITERAL);
         }
@@ -333,7 +333,7 @@ public class MailAccountParser extends DataParser {
             final String string = parseString(json, MailAccountFields.CONFIRMED_HAM);
             account.setConfirmedHam(null == string ? string : string.trim());
             attributes.add(Attribute.CONFIRMED_HAM_LITERAL);
-        } else if (asNewAccount) {
+        } else if (asNewAccount && !json.has(MailAccountFields.CONFIRMED_HAM_FULLNAME)) {
             account.setConfirmedHam(MailStrings.CONFIRMED_HAM_ALT);
             attributes.add(Attribute.CONFIRMED_HAM_LITERAL);
         }

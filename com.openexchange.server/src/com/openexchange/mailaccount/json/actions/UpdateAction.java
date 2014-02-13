@@ -83,6 +83,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.parser.MailAccountParser;
 import com.openexchange.mailaccount.json.writer.MailAccountWriter;
@@ -186,6 +187,11 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
                 }
                 clearStamp |= (pop3 && !toUpdate.getTransportServer().equals(accountDescription.getTransportServer()));
             }
+        }
+
+        // Check standard folder names against full names
+        if (id != MailAccount.DEFAULT_ID) {
+            Tools.checkNames(accountDescription, fieldsToUpdate, Tools.getSeparator(id, session));
         }
 
         // Update
