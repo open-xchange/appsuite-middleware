@@ -80,7 +80,7 @@ public class DynamicPortableFactoryImpl implements DynamicPortableFactory {
     public Portable create(int classId) {
         CustomPortableFactory factory = factories.get(Integer.valueOf(classId));
         if (null == factory) {
-            LOG.error("No portable factory found for class ID " + classId + ", unable to instantiate Portable", new Throwable());
+            LOG.error("No portable factory found for class ID {}, unable to instantiate Portable", classId, new Throwable());
             return null; // will throw com.hazelcast.nio.serialization.HazelcastSerializationException afterwards
         }
         return factory.create();
