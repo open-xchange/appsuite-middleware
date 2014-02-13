@@ -56,6 +56,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -75,6 +76,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSlobId;
+import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
@@ -197,6 +199,19 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
 
                 // Invoke update
                 storageService.updateMailAccount(accountDescription, fieldsToUpdate, session.getUserId(), contextId, session, wcon, false);
+
+                // Clear standard folder information from session caches
+                {
+                    boolean standardFolderChanged = false;
+                    for (final Iterator<Attribute> it = fieldsToUpdate.iterator(); !standardFolderChanged && it.hasNext();) {
+                        if (DEFAULT.contains(it.next())) {
+                            standardFolderChanged = true;
+                        }
+                    }
+                    if (standardFolderChanged) {
+                        MailSessionCache.removeDefaultFolderInformationFrom(id, session.getUserId(), contextId);
+                    }
+                }
 
                 // Reload
                 final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), contextId, wcon);
