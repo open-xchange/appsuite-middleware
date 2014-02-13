@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  java-devel >= 1.6.0
 # TODO: version not hardcoded in spec file
 Version:	@OXVERSION@
-%define        ox_release 6
+%define        ox_release 7
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
@@ -68,12 +68,14 @@ fi
 %config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
+* Thu Feb 13 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-02-26
 * Fri Feb 07 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Sixth release candidate for 7.4.2
 * Thu Feb 06 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Build for patch 2014-02-11
-* Thu Feb 06 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Fifth release candidate for 7.4.2
+* Thu Feb 06 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2014-02-11
 * Tue Feb 04 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Fourth release candidate for 7.4.2
 * Thu Jan 30 2014 Marcus Klein <jenkins@hudson-slave-1.netline.de>

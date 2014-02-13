@@ -1,3 +1,9 @@
+open-xchange-themes-default (7.4.2-7) stable; urgency=low
+
+  * Build for patch 2014-02-26
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 13 Feb 2014 16:42:33 +0100
+
 open-xchange-themes-default (7.4.2-6) stable; urgency=low
 
   * Sixth release candidate for 7.4.2
