@@ -80,18 +80,44 @@ public class DynamicPortableFactoryImpl implements DynamicPortableFactory {
     public Portable create(int classId) {
         CustomPortableFactory factory = factories.get(Integer.valueOf(classId));
         if (null == factory) {
-            throw new RuntimeException();//TODO
+            LOG.error("No portable factory found for class ID " + classId + ", unable to instantiate Portable", new Throwable());
+            return null; // will throw com.hazelcast.nio.serialization.HazelcastSerializationException afterwards
         }
         return factory.create();
-//        return new DynamicPortable(classId, factory.create());
     }
 
+    /**
+     * Registers a custom portable factory.
+     *
+     * @param factory The factory to register
+     * @return The previously registered factory for the class ID, or <code>null</code> if there was no such factory registered before
+     */
     public CustomPortableFactory register(CustomPortableFactory factory) {
-        return factories.put(Integer.valueOf(factory.getClassId()), factory);
+        CustomPortableFactory previousRegistration = factories.put(Integer.valueOf(factory.getClassId()), factory);
+        if (null == previousRegistration) {
+            LOG.info("Registered custom portable factory for class ID {}: {}", factory.getClassId(), factory.getClass().getName());
+        } else {
+            LOG.warn("Replaced previously registered custom portable factory for class ID {} ({}) with new factory: {}",
+                factory.getClassId(), previousRegistration.getClass().getName(), factory.getClass().getName());
+        }
+        return previousRegistration;
     }
 
+    /**
+     * Unregisters a previously registered custom portable factory.
+     *
+     * @param factory The factory to unregister
+     * @return The previously registered factory for the class ID, or <code>null</code> if there was no such factory registered before
+     */
     public CustomPortableFactory unregister(CustomPortableFactory factory) {
-        return factories.remove(Integer.valueOf(factory.getClassId()));
+         CustomPortableFactory removedRegistration = factories.remove(Integer.valueOf(factory.getClassId()));
+         if (null != removedRegistration) {
+             LOG.info("Unregistered custom portable factory for class ID {}: {}", factory.getClassId(), factory.getClass().getName());
+         } else {
+             LOG.warn("Unable to unregister not yet registered custom portable factory for class ID {}: {}",
+                 factory.getClassId(), factory.getClass().getName());
+         }
+         return removedRegistration;
     }
 
 }
