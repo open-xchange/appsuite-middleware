@@ -56,7 +56,6 @@ import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.java.Strings;
-import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -136,8 +135,9 @@ public class HazelcastActivator extends HousekeepingActivator {
         /*
          * Register management mbean dynamically
          */
-        track(ManagementService.class, new ManagementRegisterer(context));
-        openTrackers();
+        // deactivated for now
+//        track(ManagementService.class, new ManagementRegisterer(context));
+//        openTrackers();
     }
 
     @Override
