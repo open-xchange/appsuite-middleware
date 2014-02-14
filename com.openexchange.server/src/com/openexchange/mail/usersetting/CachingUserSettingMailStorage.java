@@ -50,7 +50,6 @@
 package com.openexchange.mail.usersetting;
 
 import static com.openexchange.tools.sql.DBUtils.closeResources;
-import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
