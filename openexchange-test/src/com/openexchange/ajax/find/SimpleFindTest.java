@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.find;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import java.util.List;
+import java.util.Map;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -58,7 +58,10 @@ import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.ajax.find.actions.ConfigRequest;
 import com.openexchange.ajax.find.actions.ConfigResponse;
-
+import com.openexchange.find.Module;
+import com.openexchange.find.ModuleConfig;
+import com.openexchange.find.facet.Facet;
+import com.openexchange.find.facet.FacetValue;
 
 /**
  * {@link SimpleFindTest}
@@ -93,10 +96,34 @@ public class SimpleFindTest extends AbstractFindTest {
 
             assertNotNull(autocompleteResponse);
 
-            final JSONObject jData = (JSONObject) autocompleteResponse.getData();
-            assertNotNull("Missing response body", jData);
+            final List<Facet> facets = autocompleteResponse.getFacets();
+            assertNotNull("Missing response", facets);
 
-            System.out.println(jData.toString(2));
+            final int size = facets.size();
+            assertTrue("No autocomplete result, but expected", size > 0);
+
+            boolean foundContacFacet = false;
+            boolean foundSteffen = false;
+            for (int i = 0; i < size; i++) {
+                final Facet facet = facets.get(i);
+
+                final boolean isContactFacet = "contacts".equals(facet.getType().getName());
+
+                foundContacFacet |= isContactFacet;
+
+                if (isContactFacet) {
+                    List<FacetValue> values = facet.getValues();
+                    for (FacetValue facetValue : values) {
+                        Map<String, Object> item = (Map<String, Object>) facetValue.getDisplayItem().getItem();
+                        final String sEmail1 = (String) item.get("email1");
+                        foundSteffen |= ((null != sEmail1) && (sEmail1.indexOf("steffen") >= 0));
+                    }
+                }
+            }
+
+            assertTrue("Contacts facet missing in auto-complete response", foundContacFacet);
+
+            assertTrue("Expected facet value missing in auto-complete response", foundSteffen);
 
         } catch (final Exception e) {
             e.printStackTrace();
@@ -111,11 +138,26 @@ public class SimpleFindTest extends AbstractFindTest {
 
             assertNotNull(configResponse);
 
-            final JSONArray jData = (JSONArray) configResponse.getData();
-            assertNotNull("Missing response body", jData);
+            final Map<Module, ModuleConfig> configuration = configResponse.getConfiguration();
+            assertNotNull(configuration);
 
-            System.out.println(jData.toString(2));
+            final ModuleConfig moduleConfig = configuration.get(Module.DRIVE);
+            assertNotNull(moduleConfig);
 
+            final List<Facet> staticFacets = moduleConfig.getStaticFacets();
+            assertFalse("No static facets, but expected", staticFacets.isEmpty());
+
+            boolean foundFileNameFacet = false;
+            boolean foundFileContentFacet = false;
+
+            for (final Facet staticFacet : staticFacets) {
+                foundFileNameFacet |= "file_name".equals(staticFacet.getType().getName());
+                foundFileContentFacet |= "file_content".equals(staticFacet.getType().getName());
+            }
+
+            assertTrue("Missing \"file_name\" in static facets.", foundFileNameFacet);
+
+            assertTrue("Missing \"file_content\" in static facets.", foundFileContentFacet);
         } catch (final Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
