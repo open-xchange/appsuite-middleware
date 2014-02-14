@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.find;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.junit.AfterClass;
@@ -58,10 +59,13 @@ import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
 import com.openexchange.ajax.find.actions.ConfigRequest;
 import com.openexchange.ajax.find.actions.ConfigResponse;
+import com.openexchange.ajax.find.actions.QueryRequest;
+import com.openexchange.ajax.find.actions.QueryResponse;
 import com.openexchange.find.Module;
 import com.openexchange.find.ModuleConfig;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.facet.Filter;
 
 /**
  * {@link SimpleFindTest}
@@ -87,6 +91,24 @@ public class SimpleFindTest extends AbstractFindTest {
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
+    }
+
+    @Test
+    public void testQuerySimple() {
+        try {
+
+            List<String> queries = Collections.singletonList("afe");
+            List<Filter> filters = Collections.emptyList();
+            final QueryResponse queryResponse = getClient().execute(new QueryRequest(0, 10, queries, filters, "drive"));
+
+            assertNotNull(queryResponse);
+
+            System.err.println(queryResponse.getData());
+
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
     }
 
     @Test
