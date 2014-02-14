@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: com.openexchange.find
 Bundle-SymbolicName: com.openexchange.find
 Bundle-Version: 7.6.0
-Bundle-Activator: com.openexchange.find.osgi.Activator
+Bundle-Activator: com.openexchange.find.osgi.FindActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
@@ -16,7 +16,8 @@ Import-Package: com.openexchange.exception,
  com.openexchange.session,
  com.openexchange.tools.session,
  org.osgi.framework,
- org.osgi.util.tracker
+ org.osgi.util.tracker,
+ org.slf4j
 Export-Package: com.openexchange.find,
  com.openexchange.find.common,
  com.openexchange.find.drive,

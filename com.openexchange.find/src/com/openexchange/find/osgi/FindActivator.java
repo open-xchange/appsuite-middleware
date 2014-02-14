@@ -46,44 +46,78 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.find.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
 import com.openexchange.find.SearchService;
 import com.openexchange.find.internal.SearchServiceImpl;
 import com.openexchange.find.spi.ModuleSearchDriver;
 
 /**
+ * The activator for find bundle.
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Exception handling + logging
  * @since 7.6.0
  */
-public class Activator implements BundleActivator {
+public class FindActivator implements BundleActivator {
 
-    private SearchServiceImpl searchService;
-    private ServiceTracker<ModuleSearchDriver, ModuleSearchDriver> driverTracker;
-    private ServiceRegistration<SearchService> registration;
+    private volatile ServiceTracker<ModuleSearchDriver, ModuleSearchDriver> driverTracker;
+    private volatile ServiceRegistration<SearchService> registration;
 
-    public void start(BundleContext context) throws Exception {
-        searchService = new SearchServiceImpl(context);
-        driverTracker = new ServiceTracker<ModuleSearchDriver, ModuleSearchDriver>(context, ModuleSearchDriver.class, searchService);
-        driverTracker.open();
-
-        registration = context.registerService(SearchService.class, searchService, null);
+    /**
+     * Initializes a new {@link FindActivator}.
+     */
+    public FindActivator() {
+        super();
     }
 
-    public void stop(BundleContext context) throws Exception {
-        searchService = null;
-        if (registration != null) {
-            registration.unregister();
-            registration = null;
-        }
+    @Override
+    public void start(final BundleContext context) throws Exception {
+        final Logger logger = org.slf4j.LoggerFactory.getLogger(FindActivator.class);
+        logger.info("Starting bundle: com.openexchange.find");
+        try {
+            final SearchServiceImpl searchService = new SearchServiceImpl(context);
 
-        if (driverTracker != null) {
-            driverTracker.close();
-            driverTracker = null;
+            final ServiceTracker<ModuleSearchDriver, ModuleSearchDriver> driverTracker = new ServiceTracker<ModuleSearchDriver, ModuleSearchDriver>(context, ModuleSearchDriver.class, searchService);
+            this.driverTracker = driverTracker;
+            driverTracker.open();
+
+            registration = context.registerService(SearchService.class, searchService, null);
+
+            logger.info("Bundle successfully started: com.openexchange.find");
+        } catch (final Exception e) {
+            logger.error("Error while starting bundle: com.openexchange.find", e);
+            throw e;
+        }
+    }
+
+    @Override
+    public void stop(final BundleContext context) throws Exception {
+        final Logger logger = org.slf4j.LoggerFactory.getLogger(FindActivator.class);
+        logger.info("Stopping bundle: com.openexchange.find");
+        try {
+            final ServiceRegistration<SearchService> registration = this.registration;
+            if (registration != null) {
+                registration.unregister();
+                this.registration = null;
+            }
+
+            final ServiceTracker<ModuleSearchDriver, ModuleSearchDriver> driverTracker = this.driverTracker;
+            if (driverTracker != null) {
+                driverTracker.close();
+                this.driverTracker = null;
+            }
+
+            logger.info("Bundle successfully stopped: com.openexchange.find");
+        } catch (final Exception e) {
+            logger.error("Error while stopping bundle: com.openexchange.find", e);
+            throw e;
         }
     }
 
