@@ -148,7 +148,7 @@ public class JSONResponseVisitor implements DocumentVisitor {
     }
 
     /**
-     * Gets possible error that occurred during conversion.
+     * Gets possible errors that occurred during conversion.
      *
      * @return The possible errors or an empty list
      */
