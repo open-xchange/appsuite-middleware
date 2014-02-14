@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,56 +47,32 @@
  *
  */
 
-package com.openexchange.find.basic.osgi;
+package com.openexchange.find.json;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.Constants;
-import com.openexchange.contact.ContactService;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.find.basic.Services;
-import com.openexchange.find.basic.drive.MockDriveDriver;
-import com.openexchange.find.basic.mail.MockMailDriver;
-import com.openexchange.find.spi.ModuleSearchDriver;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.mail.service.MailService;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link FindBasicActivator}
+ * {@link Offset} - A query's offset/length.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since 7.6.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FindBasicActivator extends HousekeepingActivator {
+public final class Offset {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactService.class, FolderService.class, MailService.class, MailAccountStorageService.class, IDBasedFileAccessFactory.class };
-    }
+    /** The start offset */
+    public final int off;
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
+    /** The maximum number of documents to return */
+    public final int len;
 
-        {
-            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-            registerService(ModuleSearchDriver.class, new MockMailDriver(), properties);
-        }
-
-        {
-            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-            registerService(ModuleSearchDriver.class, new MockDriveDriver(), properties);
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        super.stopBundle();
+    /**
+     * Initializes a new {@link Offset}.
+     *
+     * @param off The start offset
+     * @param len The maximum number of documents to return
+     */
+    public Offset(int off, int len) {
+        super();
+        this.off = off;
+        this.len = len;
     }
 
 }

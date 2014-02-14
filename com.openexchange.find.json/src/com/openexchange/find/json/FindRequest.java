@@ -49,11 +49,18 @@
 
 package com.openexchange.find.json;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.Module;
+import com.openexchange.find.facet.Filter;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -67,8 +74,13 @@ import com.openexchange.tools.session.ServerSession;
 public class FindRequest {
 
     private static final String PARAM_MODULE = "module";
-
     private static final String PARAM_PREFIX = "prefix";
+
+    private static final String PARAM_START = "start";
+    private static final String PARAM_SIZE = "size";
+
+    private static final String PARAM_QUERIES = "queries";
+    private static final String PARAM_FILTERS = "filters";
 
     // -------------------------------------------------------------------------------------------- //
 
@@ -94,6 +106,22 @@ public class FindRequest {
      */
     public ServerSession getServerSession() {
         return session;
+    }
+
+    /**
+     * Gets the optional offset
+     *
+     * @return The offset
+     */
+    public Offset getOffset() throws OXException {
+        final int off = request.getIntParameter(PARAM_START);
+        final int len = request.getIntParameter(PARAM_SIZE);
+
+        if (off < 0 || len < 0) {
+            return null;
+        }
+
+        return new Offset(off, len);
     }
 
     /**
@@ -149,6 +177,69 @@ public class FindRequest {
             }
 
             return prefix;
+        } catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        }
+    }
+
+    /**
+     * Gets the checked queries for search.
+     *
+     * @return The queries
+     * @throws OXException If queries are missing or invalid
+     */
+    public List<String> requireQueries() throws OXException {
+        final JSONObject json = (JSONObject) request.requireData();
+        try {
+            final JSONArray jQueries = json.optJSONArray(PARAM_QUERIES);
+            if (null == jQueries) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAM_QUERIES);
+            }
+
+            final int length = jQueries.length();
+            final List<String> queries = new ArrayList<String>(length);
+            for (int i = 0; i < length; i++) {
+                queries.add(jQueries.getString(i));
+            }
+
+            return queries;
+        } catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        }
+    }
+
+    /**
+     * Gets the checked filters for search.
+     *
+     * @return The filters
+     * @throws OXException If filters are invalid
+     */
+    public List<Filter> optFilters() throws OXException {
+        final JSONObject json = (JSONObject) request.requireData();
+        try {
+            final JSONArray jFilters = json.optJSONArray(PARAM_FILTERS);
+            if (null == jFilters) {
+                return Collections.emptyList();
+            }
+
+            final int length = jFilters.length();
+            final List<Filter> filters = new ArrayList<Filter>(length);
+            for (int i = 0; i < length; i++) {
+                final JSONObject jFilter = jFilters.getJSONObject(i);
+
+                final String query = jFilter.getString("query");
+
+                final JSONArray jFields = jFilter.getJSONArray("fields");
+                final int len = jFields.length();
+                final Set<String> fields = new LinkedHashSet<String>(len);
+                for (int j = 0; j < len; j++) {
+                    fields.add(jFields.getString(j));
+                }
+
+                filters.add(new Filter(fields, query));
+            }
+
+            return filters;
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }

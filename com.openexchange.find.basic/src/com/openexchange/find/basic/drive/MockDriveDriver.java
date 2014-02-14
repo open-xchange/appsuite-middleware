@@ -88,16 +88,16 @@ import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link MockDriveDrive}
+ * {@link MockDriveDriver}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MockDriveDrive extends AbstractContactFacetingModuleSearchDriver {
+public class MockDriveDriver extends AbstractContactFacetingModuleSearchDriver {
 
     /**
-     * Initializes a new {@link MockDriveDrive}.
+     * Initializes a new {@link MockDriveDriver}.
      */
-    public MockDriveDrive() {
+    public MockDriveDriver() {
         super();
     }
 

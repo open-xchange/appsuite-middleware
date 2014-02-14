@@ -54,34 +54,51 @@ import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.find.Document;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.SearchService;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.json.FindRequest;
+import com.openexchange.find.json.Offset;
 import com.openexchange.server.ServiceLookup;
-
 
 /**
  * {@link QueryAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.0
  */
 public class QueryAction extends AbstractFindAction {
 
-    public QueryAction(ServiceLookup lookup) {
-        super(lookup);
+    /**
+     * Initializes a new {@link QueryAction}.
+     *
+     * @param services The service look-up
+     */
+    public QueryAction(final ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    protected AJAXRequestResult doPerform(FindRequest request) throws OXException, JSONException {
-        SearchService searchService = getSearchService();
-        List<String> queries = Collections.emptyList();
-        List<Filter> filters = Collections.singletonList(new Filter(Collections.singleton("folder"), "default0/INBOX"));
-        SearchRequest searchRequest = new SearchRequest(0, 10, queries, filters);
-        SearchResult result = searchService.search(searchRequest, Module.MAIL, request.getServerSession());
+    protected AJAXRequestResult doPerform(final FindRequest request) throws OXException, JSONException {
+        final SearchService searchService = getSearchService();
+
+        final Offset offset = request.getOffset();
+        if (offset.len <= 0) {
+            return new AJAXRequestResult(new SearchResult(-1, -1, Collections.<Document> emptyList()), SearchResult.class.getName());
+        }
+
+        final List<String> queries = request.requireQueries();
+        final List<Filter> filters = request.optFilters();
+
+        final Module module = request.requireModule();
+
+        final SearchRequest searchRequest = new SearchRequest(offset.off, offset.len, queries, filters);
+        final SearchResult result = searchService.search(searchRequest, module, request.getServerSession());
+
         return new AJAXRequestResult(result, SearchResult.class.getName());
     }
 
