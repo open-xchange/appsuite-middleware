@@ -59,7 +59,6 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.find.facet.DisplayItem;
@@ -76,23 +75,25 @@ import com.openexchange.find.facet.Filter;
  */
 public class AutocompleteRequest extends AbstractFindRequest<AutocompleteResponse> {
 
-    private final String[] identifiers;
     private final boolean failOnError;
+    private final String prefix;
+    private final String module;
 
     /**
      * Initializes a new {@link AutocompleteRequest}.
      */
-    public AutocompleteRequest(final String... identifiers) {
-        this(true, identifiers);
+    public AutocompleteRequest(final String prefix, final String module) {
+        this(prefix, module, true);
     }
 
     /**
      * Initializes a new {@link AutocompleteRequest}.
      */
-    public AutocompleteRequest(final boolean failOnError, final String... identifiers) {
+    public AutocompleteRequest(final String prefix, final String module, final boolean failOnError) {
         super();
         this.failOnError = failOnError;
-        this.identifiers = identifiers;
+        this.prefix = prefix;
+        this.module = module;
     }
 
     @Override
@@ -103,8 +104,8 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
         final List<Parameter> list = new LinkedList<Parameter>();
-        list.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST));
-        return list.toArray(new Parameter[list.size()]);
+        list.add(new Parameter("module", module));
+        return list.toArray(new Parameter[0]);
     }
 
     @Override
@@ -114,12 +115,9 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
 
     @Override
     public Object getBody() throws IOException, JSONException {
-        final int length = identifiers.length;
-        final JSONArray jArray = new JSONArray(length);
-        for (int i = 0; i < length; i++) {
-            jArray.put(identifiers[i]);
-        }
-        return jArray;
+        final JSONObject jBody = new JSONObject(2);
+        jBody.put("prefix", prefix);
+        return jBody;
     }
 
     private static class AutocompleteParser extends AbstractAJAXParser<AutocompleteResponse> {
@@ -127,12 +125,12 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
         /**
          * Initializes a new {@link AutocompleteParser}.
          */
-        protected AutocompleteParser(boolean failOnError) {
+        protected AutocompleteParser(final boolean failOnError) {
             super(failOnError);
         }
 
         @Override
-        protected AutocompleteResponse createResponse(Response response) throws JSONException {
+        protected AutocompleteResponse createResponse(final Response response) throws JSONException {
             final JSONObject jResponse = (JSONObject) response.getData();
 
             final JSONArray jFacets = jResponse.getJSONArray("facets");
@@ -148,7 +146,7 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
             // Type information
             final String type = jFacet.getString("type");
             final String displayName = jFacet.getString("displayName");
-            FacetType facetType = new FacetType() {
+            final FacetType facetType = new FacetType() {
 
                 @Override
                 public String getName() {
@@ -161,6 +159,7 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
                 }
             };
 
+            // Facets
             final JSONArray jFacetValues = jFacet.getJSONArray("values");
             final int len = jFacetValues.length();
             final List<FacetValue> values = new ArrayList<FacetValue>(len);
@@ -203,7 +202,7 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
                 }
 
                 @Override
-                public void accept(DisplayItemVisitor visitor) {
+                public void accept(final DisplayItemVisitor visitor) {
                     // Nothing
                 }
 

@@ -58,7 +58,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link FindRequest}
  *
@@ -71,51 +70,59 @@ public class FindRequest {
 
     private static final String PARAM_PREFIX = "prefix";
 
-    private static final String MODULE_MAIL = "mail";
-
-    private static final String MODULE_CONTACTS = "contacts";
-
-    private static final String MODULE_CALENDAR = "calendar";
-
-    private static final String MODULE_TASKS = "tasks";
-
-    private static final String MODULE_DRIVE = "drive";
+    // -------------------------------------------------------------------------------------------- //
 
     private final AJAXRequestData request;
-
     private final ServerSession session;
 
     /**
      * Initializes a new {@link FindRequest}.
+     *
      * @param request
      * @param session
      */
-    public FindRequest(AJAXRequestData request, ServerSession session) {
+    public FindRequest(final AJAXRequestData request, final ServerSession session) {
         super();
         this.request = request;
         this.session = session;
     }
 
+    /**
+     * Gets the associated session.
+     *
+     * @return The session
+     */
     public ServerSession getServerSession() {
         return session;
     }
 
+    /**
+     * Gets the module associated with this request.
+     *
+     * @return The module or <code>null</code>
+     */
     public Module getModule() {
-        String module = request.getParameter(PARAM_MODULE);
+        final String module = request.getParameter(PARAM_MODULE);
         if (module == null) {
             return null;
         }
 
-        return getModuleForName(module);
+        return Module.moduleFor(module);
     }
 
+    /**
+     * Gets the module associated with this request.
+     *
+     * @return The module
+     * @throws OXException If module cannot be returned
+     */
     public Module requireModule() throws OXException {
-        String moduleValue = request.getParameter(PARAM_MODULE);
+        final String moduleValue = request.getParameter(PARAM_MODULE);
         if (moduleValue == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAM_MODULE);
         }
 
-        Module module = getModuleForName(moduleValue);
+        final Module module = Module.moduleFor(moduleValue);
         if (module == null) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(PARAM_MODULE, moduleValue);
         }
@@ -130,7 +137,7 @@ public class FindRequest {
      * @throws OXException If prefix is missing or invalid
      */
     public String requirePrefix() throws OXException {
-        JSONObject json = (JSONObject) request.requireData();
+        final JSONObject json = (JSONObject) request.requireData();
         try {
             String prefix = json.getString(PARAM_PREFIX);
             if (prefix == null || Strings.isEmpty((prefix = prefix.trim()))) {
@@ -142,41 +149,53 @@ public class FindRequest {
             }
 
             return prefix;
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
     }
 
-    public String requireParameter(String name) throws OXException {
+    /**
+     * Gets specified parameter.
+     *
+     * @param name The parameter name
+     * @return The parameter value
+     * @throws OXException If parameter is absent
+     */
+    public String requireParameter(final String name) throws OXException {
         return request.requireParameter(name);
     }
 
-    public String getParameter(String name) {
+    /**
+     * Gets specified parameter.
+     *
+     * @param name The parameter name
+     * @return The parameter value or <code>null</code>
+     */
+    public String getParameter(final String name) {
         return request.getParameter(name);
     }
 
-    public int getIntParameter(String name) throws OXException {
+    /**
+     * Gets specified <code>int</code> parameter.
+     *
+     * @param name The parameter name
+     * @return The <code>int</code> value or <code>-1</code> if absent
+     * @throws OXException If parameter is <code>NaN</code>
+     */
+    public int getIntParameter(final String name) throws OXException {
         return request.getIntParameter(name);
     }
 
-    public <T> T getParameter(String name, Class<T> coerceTo) throws OXException {
+    /**
+     * Gets specified parameter.
+     *
+     * @param name The parameter name
+     * @param coerceTo The parameter type to coerce to
+     * @return The parameter value or <code>null</code> if absent
+     * @throws OXException If parameter cannot be coerced to specified type
+     */
+    public <T> T getParameter(final String name, final Class<T> coerceTo) throws OXException {
         return request.getParameter(name, coerceTo);
-    }
-
-    private Module getModuleForName(String module) {
-        if (MODULE_MAIL.equals(module)) {
-            return Module.MAIL;
-        } else if (MODULE_CONTACTS.equals(module)) {
-            return Module.CONTACTS;
-        } else if (MODULE_CALENDAR.equals(module)) {
-            return Module.CALENDAR;
-        } else if (MODULE_TASKS.equals(module)) {
-            return Module.TASKS;
-        } else if (MODULE_DRIVE.equals(module)) {
-            return Module.DRIVE;
-        }
-
-        return null;
     }
 
 }

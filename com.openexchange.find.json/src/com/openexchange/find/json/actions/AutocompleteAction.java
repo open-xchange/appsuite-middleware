@@ -53,7 +53,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
-import com.openexchange.find.Module;
 import com.openexchange.find.SearchService;
 import com.openexchange.find.json.FindRequest;
 import com.openexchange.server.ServiceLookup;
@@ -67,15 +66,21 @@ import com.openexchange.server.ServiceLookup;
  */
 public class AutocompleteAction extends AbstractFindAction {
 
-    public AutocompleteAction(ServiceLookup lookup) {
-        super(lookup);
+    /**
+     * Initializes a new {@link AutocompleteAction}.
+     *
+     * @param services The service look-up
+     */
+    public AutocompleteAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
     protected AJAXRequestResult doPerform(FindRequest request) throws OXException {
-        String prefix = request.requirePrefix();
         SearchService searchService = getSearchService();
-        AutocompleteResult result = searchService.autocomplete(new AutocompleteRequest(prefix), Module.MAIL, request.getServerSession());
+
+        String prefix = request.requirePrefix();
+        AutocompleteResult result = searchService.autocomplete(new AutocompleteRequest(prefix), request.requireModule(), request.getServerSession());
         return new AJAXRequestResult(result, AutocompleteResult.class.getName());
     }
 

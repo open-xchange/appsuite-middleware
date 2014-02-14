@@ -61,40 +61,64 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link AbstractFindAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @since 7.6.0
  */
 public abstract class AbstractFindAction implements AJAXActionService {
 
-    private final ServiceLookup serviceLookup;
+    /** The service look-up */
+    protected final ServiceLookup services;
 
-    protected AbstractFindAction(ServiceLookup lookup) {
+    /**
+     * Initializes a new {@link AbstractFindAction}.
+     *
+     * @param services The service look-up
+     */
+    protected AbstractFindAction(final ServiceLookup services) {
         super();
-        this.serviceLookup = lookup;
+        this.services = services;
     }
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        FindRequest searchRequest = new FindRequest(requestData, session);
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        final FindRequest searchRequest = new FindRequest(requestData, session);
         try {
             return doPerform(searchRequest);
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
     }
 
+    /**
+     * Gets the search service
+     *
+     * @return The search service
+     */
     protected SearchService getSearchService() {
-        return serviceLookup.getService(SearchService.class);
+        return services.getService(SearchService.class);
     }
 
+    /**
+     * Gets the i18n service.
+     *
+     * @return The i18n service
+     */
     protected I18nService getI18nService() {
-        return serviceLookup.getService(I18nService.class);
+        return services.getService(I18nService.class);
     }
 
+    /**
+     * Performs the find request.
+     *
+     * @param request The request
+     * @return The result
+     * @throws OXException If an error occurs
+     * @throws JSONException If a JSON error occurs
+     */
     protected abstract AJAXRequestResult doPerform(FindRequest request) throws OXException, JSONException;
 
 }

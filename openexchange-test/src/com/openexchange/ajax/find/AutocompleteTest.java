@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,74 +47,54 @@
  *
  */
 
-package com.openexchange.find;
+package com.openexchange.ajax.find;
 
-import com.openexchange.java.Strings;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import com.openexchange.ajax.find.actions.AutocompleteRequest;
+import com.openexchange.ajax.find.actions.AutocompleteResponse;
+
 
 /**
- * A {@link Module} defines a component that contributes a search implementation.
+ * {@link AutocompleteTest}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.6.0
  */
-public enum Module {
+public class AutocompleteTest extends AbstractFindTest {
 
     /**
-     * Mail module.
+     * Initializes a new {@link AutocompleteTest}.
      */
-    MAIL("mail"),
-    /**
-     * Contacts module.
-     */
-    CONTACTS("contacts"),
-    /**
-     * Calendar module.
-     */
-    CALENDAR("calendar"),
-    /**
-     * Tasks module.
-     */
-    TASKS("tasks"),
-    /**
-     * Drive module.
-     */
-    DRIVE("drive"), ;
-
-    private final String identifier;
-
-    private Module(final String identifier) {
-        this.identifier = identifier;
+    public AutocompleteTest(final String name) {
+        super(name);
     }
 
-    /**
-     * Gets the identifier
-     *
-     * @return The identifier
-     */
-    public String getIdentifier() {
-        return identifier;
+    @BeforeClass
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
     }
 
-    // ---------------------------------------------------------------------------------------- //
+    @AfterClass
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+    }
 
-    /**
-     * Gets the appropriate {@link Module} for specified identifier.
-     *
-     * @param identifier The identifier to look-up with
-     * @return The appropriate module or <code>null</code>
-     */
-    public static Module moduleFor(final String identifier) {
-        if (Strings.isEmpty(identifier)) {
-            return null;
+    @Test
+    public void testAutocompleteSimple() {
+        try {
+            final AutocompleteResponse autocompleteResponse = getClient().execute(new AutocompleteRequest("ste", "drive"));
+
+            assertNotNull(autocompleteResponse);
+
+            System.out.println(autocompleteResponse.getData());
+
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
         }
-        final String id = Strings.toLowerCase(identifier);
-        for (final Module module : Module.values()) {
-            if (id.equals(module.identifier)) {
-                return module;
-            }
-        }
-        return null;
     }
 
 }
