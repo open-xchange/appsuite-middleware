@@ -73,7 +73,11 @@ public enum MobileNotifierExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * An I/O error occured %1$s
      */
-    IO_ERROR("An I/O error occured %1$s", Category.CATEGORY_ERROR, 3, MobileNotifierExceptionMessages.MESSAGE);
+    IO_ERROR("An I/O error occured %1$s", Category.CATEGORY_ERROR, 3, MobileNotifierExceptionMessages.MESSAGE),
+    /**
+     * No notification items defined
+     */
+    NO_ITEMS_FOUND("No notification items defined", CATEGORY_ERROR, 4, MobileNotifierExceptionMessages.MESSAGE);
     /**
      * The prefix constant.
      */

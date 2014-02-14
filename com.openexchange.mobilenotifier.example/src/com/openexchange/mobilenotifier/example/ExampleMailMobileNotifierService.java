@@ -54,6 +54,7 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.mobilenotifier.AbstractMobileNotifierService;
 import com.openexchange.mobilenotifier.MobileNotifierFileUtil;
+import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.NotifyItem;
 import com.openexchange.mobilenotifier.NotifyTemplate;
 
@@ -81,15 +82,22 @@ public class ExampleMailMobileNotifierService extends AbstractMobileNotifierServ
     @Override
     public List<NotifyItem> getItems() throws OXException {
         List<NotifyItem> list = new ArrayList<NotifyItem>();
-        list.add(new NotifyItem("sender", "heinrich@example.com"));
-        list.add(new NotifyItem("subject", true));
-        list.add(new NotifyItem("receivedDate", "12.04.2013 - 12:45:00"));
+        list.add(new NotifyItem("from", "heinrich@example.com"));
+        list.add(new NotifyItem("subject", "a subject"));
+        list.add(new NotifyItem("received_date", "12.04.2013 - 12:45:00"));
+        list.add(new NotifyItem("flags", "flag"));
+        list.add(new NotifyItem("attachements", "an attachment"));
+        list.add(new NotifyItem("from", "anotherheinrich@example.com"));
+        list.add(new NotifyItem("subject", "another subject"));
+        list.add(new NotifyItem("received_date", "18.04.2013 - 12:45:00"));
+        list.add(new NotifyItem("flags", "another flag"));
+        list.add(new NotifyItem("attachements", "another attachment"));
         return list;
     }
 
     @Override
     public NotifyTemplate getTemplate() throws OXException {
-        final String fileName = MobileNotifierProviders.MAIL.getFileName();
+        final String fileName = MobileNotifierProviders.MAIL.getTemplateFileName();
         final String htmlTemplate = MobileNotifierFileUtil.getTeamplateFileContent(fileName);
         final String title = MobileNotifierProviders.MAIL.getTitle();
         int index = 1;
@@ -99,6 +107,6 @@ public class ExampleMailMobileNotifierService extends AbstractMobileNotifierServ
 
     @Override
     public void putTemplate(String changedTemplate) throws OXException {
-        MobileNotifierFileUtil.writeTemplateFileContent(MobileNotifierProviders.MAIL.getFileName(), changedTemplate);
+        MobileNotifierFileUtil.writeTemplateFileContent(MobileNotifierProviders.MAIL.getTemplateFileName(), changedTemplate);
     }
 }

@@ -81,7 +81,7 @@ public abstract class AbstractMobileNotifierService implements MobileNotifierSer
      * 
      * @param uid The user id
      * @param cid The context id
-     * @return boolean
+     * @return <code>true</code> provider is enabled, otherwise <code>false</code>
      */
     protected boolean isEnabledCustom(int uid, int cid) {
         return true;

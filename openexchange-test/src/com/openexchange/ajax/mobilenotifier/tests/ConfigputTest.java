@@ -84,7 +84,7 @@ public class ConfigputTest extends AbstractMobileNotifierTest {
         assertEquals("Should return true in case of success", new Boolean(true), updResp.getData());
     }
 
-    public void testShouldThrowExceptionOnUndefinedService() throws OXException, IOException, JSONException {
+    public void testShouldThrowExceptionIfUnknownService() throws OXException, IOException, JSONException {
         ParsedNotifyTemplate notifyTemplate = new ParsedNotifyTemplate();
         notifyTemplate.setFrontendName("io.ox/mehl");
         notifyTemplate.setHtmlTemplate("<div></div>");

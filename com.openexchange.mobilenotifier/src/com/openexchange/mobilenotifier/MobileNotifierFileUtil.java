@@ -66,10 +66,10 @@ import com.openexchange.java.StringAllocator;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public abstract class MobileNotifierFileUtil {
-
-    private static final String TEMPLATEPATH = System.getProperty("openexchange.propdir") + "/templates/examples/";
-
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobileNotifierFileUtil.class);
+    
+    private static final String TEMPLATEPATH = "/templates/";
+
     /**
      * Gets a template file from the hard disk
      * 
@@ -77,7 +77,7 @@ public abstract class MobileNotifierFileUtil {
      * @return String - The content of the file
      */
     public static String getTeamplateFileContent(final String templateFileName) throws OXException {
-        final File file = new File(TEMPLATEPATH + templateFileName);
+        final File file = new File(getTemplatePath() + templateFileName);
         BufferedReader br = null;
         try {
             br = new BufferedReader(new FileReader(file));
@@ -109,7 +109,7 @@ public abstract class MobileNotifierFileUtil {
      */
     public static void writeTemplateFileContent(final String templateFileName, String content) throws OXException {
         try {
-            final BufferedWriter isw = new BufferedWriter(new FileWriter(TEMPLATEPATH + templateFileName));
+            final BufferedWriter isw = new BufferedWriter(new FileWriter(getTemplatePath() + templateFileName));
             isw.write(content);
             Streams.close(isw);
         } catch (IOException e) {
@@ -118,4 +118,14 @@ public abstract class MobileNotifierFileUtil {
         }
     }
 
+    /**
+     * Gets the template path in the specific OS format
+     * 
+     * @return path to template folder
+     */
+    private static String getTemplatePath() {
+        final char fileSep = File.separatorChar;
+        final String path = TEMPLATEPATH.replace('/', fileSep);
+        return System.getProperty("openexchange.propdir") + path;
+    }
 }

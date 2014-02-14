@@ -52,14 +52,10 @@ package com.openexchange.ajax.mobilenotifier.actions;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import net.fortuna.ical4j.model.ParameterList;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.AJAXRequest.Parameter;
-import com.openexchange.ajax.publish.actions.GetPublicationResponse;
-import com.openexchange.ajax.user.actions.GetResponse;
 
 /**
  * {@link GetMobileNotifierRequest}

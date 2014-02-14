@@ -53,7 +53,6 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.exception.OXException;
 import com.openexchange.mobilenotifier.NotifyItem;
 
 /**
@@ -75,18 +74,19 @@ public class NotifyItemWriter {
      * @throws JSONException
      */
     public static JSONObject write(final List<NotifyItem> notifyItem) throws JSONException {
-        final JSONArray itemsArray = new JSONArray();
         final JSONObject itemsJSON = new JSONObject();
-        itemsArray.put(transformListToJSONObject(notifyItem));
+        final JSONArray itemsArray = transformListIntoJSONArray(notifyItem);
         itemsJSON.put(MobileNotifyField.ITEMS, itemsArray);
         return itemsJSON;
     }
 
-    private static JSONObject transformListToJSONObject(List<NotifyItem> items) throws JSONException {
-        final JSONObject itemJSON = new JSONObject();
+    private static JSONArray transformListIntoJSONArray(List<NotifyItem> items) throws JSONException {
+        final JSONArray itemsArray = new JSONArray();
         for (NotifyItem item : items) {
+            final JSONObject itemJSON = new JSONObject();
             itemJSON.put(item.getKey(), item.getValue());
+            itemsArray.put(itemJSON);
         }
-        return itemJSON;
+        return itemsArray;
     }
 }

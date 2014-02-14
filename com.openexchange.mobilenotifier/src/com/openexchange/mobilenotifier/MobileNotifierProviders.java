@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mobilenotifier.example;
+package com.openexchange.mobilenotifier;
 
 
 /**
@@ -71,15 +71,15 @@ public enum MobileNotifierProviders {
 
     private final String frontendName;
 
-    private final String fileName;
+    private final String templateFileName;
 
     private final String title;
 
-    private MobileNotifierProviders(final String providerName, final String frontendName, final String title, final String fileName) {
+    private MobileNotifierProviders(final String providerName, final String frontendName, final String title, final String templateFileName) {
         this.providerName = providerName;
         this.frontendName = frontendName;
         this.title = title;
-        this.fileName = fileName;
+        this.templateFileName = templateFileName;
     }
 
     public String getProviderName() {
@@ -90,8 +90,8 @@ public enum MobileNotifierProviders {
         return frontendName;
     }
 
-    public String getFileName() {
-        return fileName;
+    public String getTemplateFileName() {
+        return templateFileName;
     }
 
     public String getTitle() {

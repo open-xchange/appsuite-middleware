@@ -79,7 +79,7 @@ public interface MobileNotifierService {
      * 
      * @param uid The user id
      * @param cid The context id
-     * @return true if a provider is enabled otherwise false
+     * @return <code>true</code> if a provider is enabled otherwise <code>false</code>
      * @throws OXException
      */
     boolean isEnabled(int uid, int cid) throws OXException;

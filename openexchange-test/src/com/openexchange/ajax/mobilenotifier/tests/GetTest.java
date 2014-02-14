@@ -55,6 +55,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Assert;
 import com.openexchange.ajax.mobilenotifier.actions.GetMobileNotifierRequest;
 import com.openexchange.ajax.mobilenotifier.actions.GetMobileNotifierResponse;
 import com.openexchange.exception.OXException;
@@ -74,15 +75,13 @@ public class GetTest extends AbstractMobileNotifierTest {
         super(name);
     }
 
-    public void testMobileNotifierJSONResponse() throws OXException, IOException, JSONException {
-        List<String> providerValue = new ArrayList<String>();
-        providerValue.add("io.ox/mail");
-        providerValue.add("io.ox/calendar");
-
+    // TODO
+    private JSONObject getProvider(List<String> providerValue) throws OXException, IOException, JSONException {
         GetMobileNotifierRequest req = new GetMobileNotifierRequest(providerValue);
         GetMobileNotifierResponse res = getClient().execute(req);
 
-        assertNotNull(res.getData());
+        assertFalse("received following error: " + res.getErrorMessage(), res.hasError());
+        assertNotNull("no data in response", res.getData());
         JSONObject notifyItemJson = (JSONObject) res.getData();
 
         assertNotNull("could not find element \"provider\" in json structure", notifyItemJson.get("provider"));
@@ -97,9 +96,28 @@ public class GetTest extends AbstractMobileNotifierTest {
             assertNotNull("could not find provider", providersObject.get(providerValue.get(i)));
             JSONObject providerJSON = (JSONObject) providersObject.get(providerValue.get(i));
             assertNotNull("could not find element \"items\"", providerJSON.get("items"));
-            JSONArray itemsArray = (JSONArray) providerJSON.get("items");
-            assertNotNull(itemsArray.get(0));
         }
+
+        return (JSONObject) providersObject.get(providerValue.get(0));
+    }
+
+    public void testMailMobileNotifierJSONResponse() throws OXException, IOException, JSONException {
+        List<String> providerValue = new ArrayList<String>();
+        providerValue.add("io.ox/mail");
+        JSONObject providerJSON = getProvider(providerValue);
+
+        List<String> mandatoryItems = new ArrayList<String>();
+        mandatoryItems.add("from");
+        mandatoryItems.add("received_date");
+        mandatoryItems.add("subject");
+        mandatoryItems.add("flags");
+        mandatoryItems.add("attachements");
+        mandatoryItems.add("id");
+        mandatoryItems.add("folder");
+
+        JSONArray itemsArray = (JSONArray) providerJSON.get("items");
+
+        // TODO
     }
 
     public void testShouldGetExceptionIfUnknownProvider() throws OXException, IOException, JSONException {
