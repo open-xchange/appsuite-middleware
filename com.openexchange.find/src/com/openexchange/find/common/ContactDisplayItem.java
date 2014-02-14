@@ -71,7 +71,8 @@ public class ContactDisplayItem implements DisplayItem {
         visitor.visit(this);
     }
 
-    public Contact getContact() {
+    @Override
+    public Contact getItem() {
         return contact;
     }
 

@@ -81,7 +81,7 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
 
     @Override
     public void visit(FolderDisplayItem item) {
-        UserizedFolder folder = item.getFolder();
+        UserizedFolder folder = item.getItem();
         try {
             addDefaultValue(item);
             json.put("accountName", convertString(item.getAccountName()));
@@ -97,7 +97,7 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
 
     @Override
     public void visit(ContactDisplayItem item) {
-        Contact contact = item.getContact();
+        Contact contact = item.getItem();
         try {
             addDefaultValue(item);
             json.put("givenName", convertString(contact.getGivenName()));

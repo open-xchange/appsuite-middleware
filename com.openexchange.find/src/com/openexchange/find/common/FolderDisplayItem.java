@@ -60,11 +60,8 @@ import com.openexchange.folderstorage.UserizedFolder;
 public class FolderDisplayItem implements DisplayItem {
 
     private final UserizedFolder folder;
-
     private final DefaultFolderType defaultFolderType;
-
     private final String accountName;
-
     private final boolean isDefaultAccount;
 
     public FolderDisplayItem(final UserizedFolder folder, final String accountName, final boolean isDefaultAccount) {
@@ -93,7 +90,8 @@ public class FolderDisplayItem implements DisplayItem {
         return defaultFolderType;
     }
 
-    public UserizedFolder getFolder() {
+    @Override
+    public UserizedFolder getItem() {
         return folder;
     }
 

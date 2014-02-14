@@ -83,4 +83,8 @@ public class SimpleDisplayItem implements DisplayItem {
         visitor.visit(this);
     }
 
+    @Override
+    public String getItem() {
+        return defaultValue;
+    }
 }

@@ -53,6 +53,7 @@ package com.openexchange.find.facet;
  * Interface for several kinds objects that can be displayed by a client. Inheritors must implement hashCode() and equals().
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added method {@link #getItem()}
  * @since v7.6.0
  */
 public interface DisplayItem {
@@ -66,6 +67,18 @@ public interface DisplayItem {
      */
     String getDefaultValue();
 
+    /**
+     * Gets the item associated with this instance.
+     *
+     * @return The item
+     */
+    Object getItem();
+
+    /**
+     * Delegate to given visitor.
+     *
+     * @param visitor The visitor to delegate to
+     */
     void accept(DisplayItemVisitor visitor);
 
 }
