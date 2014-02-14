@@ -81,7 +81,7 @@ public class QueryAction extends AbstractFindAction {
         List<String> queries = Collections.emptyList();
         List<Filter> filters = Collections.singletonList(new Filter(Collections.singleton("folder"), "default0/INBOX"));
         SearchRequest searchRequest = new SearchRequest(0, 10, queries, filters);
-        SearchResult result = searchService.search(request.getServerSession(), Module.MAIL, searchRequest);
+        SearchResult result = searchService.search(searchRequest, Module.MAIL, request.getServerSession());
         return new AJAXRequestResult(result, SearchResult.class.getName());
     }
 

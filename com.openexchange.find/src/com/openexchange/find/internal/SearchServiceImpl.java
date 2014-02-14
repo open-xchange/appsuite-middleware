@@ -56,12 +56,10 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
@@ -110,15 +108,13 @@ public class SearchServiceImpl implements SearchService, ServiceTrackerCustomize
     }
 
     @Override
-    public AutocompleteResult autocomplete(ServerSession session, Module module, AutocompleteRequest autocompleteRequest) throws OXException {
-        ModuleSearchDriver driver = requireDriver(session, module);
-        return driver.autocomplete(autocompleteRequest, session);
+    public AutocompleteResult autocomplete(AutocompleteRequest autocompleteRequest, Module module, ServerSession session) throws OXException {
+        return requireDriver(session, module).autocomplete(autocompleteRequest, session);
     }
 
     @Override
-    public SearchResult search(ServerSession session, Module module, SearchRequest searchRequest) throws OXException {
-        ModuleSearchDriver driver = requireDriver(session, module);
-        return driver.search(searchRequest, session);
+    public SearchResult search(SearchRequest searchRequest, Module module, ServerSession session) throws OXException {
+        return requireDriver(session, module).search(searchRequest, session);
     }
 
     private ModuleSearchDriver requireDriver(ServerSession session, Module module) throws OXException {
@@ -126,7 +122,6 @@ public class SearchServiceImpl implements SearchService, ServiceTrackerCustomize
         if (determined == null) {
             throw FindExceptionCode.MISSING_DRIVER.create(module.name(), session.getUserId(), session.getContextId());
         }
-
         return determined;
     }
 
@@ -228,22 +223,28 @@ public class SearchServiceImpl implements SearchService, ServiceTrackerCustomize
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             ComparableDriver other = (ComparableDriver) obj;
             if (driver == null) {
-                if (other.driver != null)
+                if (other.driver != null) {
                     return false;
+                }
             } else if (driver.getModule() != other.driver.getModule()) {
                 return false;
-            } else if (!driver.getClass().equals(other.driver.getClass()))
+            } else if (!driver.getClass().equals(other.driver.getClass())) {
                 return false;
-            if (serviceRanking != other.serviceRanking)
+            }
+            if (serviceRanking != other.serviceRanking) {
                 return false;
+            }
             return true;
         }
 

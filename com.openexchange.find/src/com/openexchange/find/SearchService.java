@@ -46,38 +46,48 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.find;
 
 import java.util.Map;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- *
  * The {@link SearchService} is the entry point to utilize the Find API.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @since 7.6.0
  */
 public interface SearchService {
 
     /**
      * Gets a mapping of {@link Module}s to their according {@link ModuleConfig}s.
+     *
+     * @param session The associated session
      * @return A map containing available module configurations. Never <code>null</code>.
      */
     Map<Module, ModuleConfig> getConfiguration(ServerSession session) throws OXException;
 
     /**
-     * Performs an autocomplete request for a given module.
+     * Performs an auto-complete request for a given module.
+     *
+     * @param autocompleteRequest The auto-complete search request to execute
+     * @param module The module in which to perform the auto-complete search
+     * @param session The associated session
      * @return An {@link AutocompleteResult}. Never <code>null</code>.
      */
-    AutocompleteResult autocomplete(ServerSession session, Module module, AutocompleteRequest autocompleteRequest) throws OXException;
+    AutocompleteResult autocomplete(AutocompleteRequest autocompleteRequest, Module module, ServerSession session) throws OXException;
 
     /**
      * Performs a search request for a given module.
+     *
+     * @param searchRequest The search request to execute
+     * @param module The module in which to perform the search
+     * @param session The associated session
      * @return A {@link SearchResult}. Never <code>null</code>.
      */
-    SearchResult search(ServerSession session, Module module, SearchRequest searchRequest) throws OXException;
+    SearchResult search(SearchRequest searchRequest, Module module, ServerSession session) throws OXException;
 
 }
