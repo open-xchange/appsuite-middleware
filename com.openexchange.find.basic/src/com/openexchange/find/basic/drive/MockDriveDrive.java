@@ -49,7 +49,9 @@
 
 package com.openexchange.find.basic.drive;
 
+import static com.openexchange.java.Strings.isEmpty;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -79,7 +81,6 @@ import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.MandatoryFilter;
-import com.openexchange.find.mail.MailFacetType;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -132,12 +133,7 @@ public class MockDriveDrive extends AbstractContactFacetingModuleSearchDriver {
         return new ModuleConfig(Module.DRIVE, staticFacets, mandatoryFilters);
     }
 
-    private static final Set<String> PERSONS_FILTER_FIELDS = new HashSet<String>(3);
-    static {
-        PERSONS_FILTER_FIELDS.add("created_from");
-        PERSONS_FILTER_FIELDS.add("changed_from");
-        PERSONS_FILTER_FIELDS.add("author");
-    }
+    private static final Set<String> PERSONS_FILTER_FIELDS = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList("created_from","changed_from","author")));
 
     @Override
     public AutocompleteResult autocomplete(final AutocompleteRequest autocompleteRequest, final ServerSession session) throws OXException {
@@ -148,23 +144,27 @@ public class MockDriveDrive extends AbstractContactFacetingModuleSearchDriver {
             final List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
             final List<FacetValue> contactValues = new ArrayList<FacetValue>(contacts.size());
             for (final Contact contact : contacts) {
-                // TODO: add multiple times for different mail addresses?
-                String mailAddress = contact.getEmail1();
-                if (mailAddress == null) {
-                    mailAddress = contact.getEmail2();
-                    if (mailAddress == null) {
-                        mailAddress = contact.getEmail3();
+                // Get appropriate E-Mail address
+                String sInfo = contact.getEmail1();
+                if (isEmpty(sInfo)) {
+                    sInfo = contact.getEmail2();
+                    if (isEmpty(sInfo)) {
+                        sInfo = contact.getEmail3();
                     }
                 }
-
-                if (mailAddress == null) {
-                    continue;
+                if (sInfo != null) {
+                    final Filter filter = new Filter(PERSONS_FILTER_FIELDS, sInfo);
+                    contactValues.add(new FacetValue(new ContactDisplayItem(contact), FacetValue.UNKNOWN_COUNT, filter));
                 }
 
-                final Filter filter = new Filter(PERSONS_FILTER_FIELDS, mailAddress);
-                contactValues.add(new FacetValue(new ContactDisplayItem(contact), FacetValue.UNKNOWN_COUNT, filter));
+                // Get display name
+                sInfo = contact.getDisplayName();
+                if (!isEmpty(sInfo)) {
+                    final Filter filter = new Filter(PERSONS_FILTER_FIELDS, sInfo);
+                    contactValues.add(new FacetValue(new ContactDisplayItem(contact), FacetValue.UNKNOWN_COUNT, filter));
+                }
             }
-            facets.add(new Facet(MailFacetType.CONTACTS, contactValues));
+            facets.add(new Facet(DriveFacetType.CONTACTS, contactValues));
         }
 
         return new AutocompleteResult(facets);

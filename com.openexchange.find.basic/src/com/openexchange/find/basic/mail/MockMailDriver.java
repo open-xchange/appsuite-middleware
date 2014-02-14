@@ -49,6 +49,7 @@
 package com.openexchange.find.basic.mail;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -112,15 +113,15 @@ public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
     private static final MailFolderFilter NO_FILTER = null;
 
-    private static final Set<String> PERSONS_FILTER_FIELDS = new HashSet<String>(3);
-    static {
-        PERSONS_FILTER_FIELDS.add("from");
-        PERSONS_FILTER_FIELDS.add("to");
-        PERSONS_FILTER_FIELDS.add("cc");
-    }
+    private static final Set<String> PERSONS_FILTER_FIELDS = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList("from","to","cc")));
 
     private static final Set<String> FOLDERS_FILTER_FIELDS = Collections.singleton("folder");
 
+    // --------------------------------------------------------------------------------------------------- //
+
+    /**
+     * Initializes a new {@link MockMailDriver}.
+     */
     public MockMailDriver() {
         super();
     }
@@ -194,21 +195,10 @@ public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
         List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
         List<FacetValue> contactValues = new ArrayList<FacetValue>(contacts.size());
         for (Contact contact : contacts) {
-            // TODO: add multiple times for different mail addresses?
-            String mailAddress = contact.getEmail1();
-            if (mailAddress == null) {
-                mailAddress = contact.getEmail2();
-                if (mailAddress == null) {
-                    mailAddress = contact.getEmail3();
-                }
+            for (final String mailAddress : extractMailAddessesFrom(contact)) {
+                Filter filter = new Filter(PERSONS_FILTER_FIELDS, mailAddress);
+                contactValues.add(new FacetValue(new ContactDisplayItem(contact), FacetValue.UNKNOWN_COUNT, filter));
             }
-
-            if (mailAddress == null) {
-                continue;
-            }
-
-            Filter filter = new Filter(PERSONS_FILTER_FIELDS, mailAddress);
-            contactValues.add(new FacetValue(new ContactDisplayItem(contact), FacetValue.UNKNOWN_COUNT, filter));
         }
         Facet contactFacet = new Facet(MailFacetType.CONTACTS, contactValues);
 
@@ -220,6 +210,27 @@ public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
 //        facets.add(folderFacet);
 
         return new AutocompleteResult(facets);
+    }
+
+    private Set<String> extractMailAddessesFrom(final Contact contact) {
+        final Set<String> addrs = new HashSet<String>(4);
+
+        String mailAddress = contact.getEmail1();
+        if (mailAddress != null) {
+            addrs.add(mailAddress);
+        }
+
+        mailAddress = contact.getEmail2();
+        if (mailAddress != null) {
+            addrs.add(mailAddress);
+        }
+
+        mailAddress = contact.getEmail3();
+        if (mailAddress != null) {
+            addrs.add(mailAddress);
+        }
+
+        return addrs;
     }
 
     @Override
