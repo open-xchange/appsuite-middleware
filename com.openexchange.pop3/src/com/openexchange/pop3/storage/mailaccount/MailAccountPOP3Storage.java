@@ -59,7 +59,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -563,9 +562,16 @@ public class MailAccountPOP3Storage implements POP3Storage {
         try {
             final POP3StoreResult result = POP3StoreConnector.getPOP3Store(pop3Access.getPOP3Config(), pop3Access.getMailProperties(), false, session, !expunge);
             pop3Store = result.getPop3Store();
-            final boolean containsWarnings = result.containsWarnings();
-            if (containsWarnings) {
-                warnings.addAll(result.getWarnings());
+            boolean uidlNotSupported = false;
+            if (result.containsWarnings()) {
+                final Collection<OXException> warns = result.getWarnings();
+                warnings.addAll(warns);
+                for (final OXException warning : warns) {
+                    if (POP3ExceptionCode.EXPUNGE_MODE_ONLY.equals(warning)) {
+                        uidlNotSupported = true;
+                        break;
+                    }
+                }
             }
             /*
              * Increase counter
@@ -616,7 +622,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                     }
                     int start = 1;
                     while (start <= messageCount) {
-                        final int num = add2Storage(inbox, start, blockSize, containsWarnings, messageCount, seqnum2uidl);
+                        final int num = add2Storage(inbox, start, blockSize, uidlNotSupported, messageCount, seqnum2uidl);
                         start += num;
                         messageCache.clear();
                         messageCache.setSize(messageCount);
@@ -624,7 +630,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                     /*
                      * Expunge if necessary
                      */
-                    if (containsWarnings || expunge) {
+                    if (uidlNotSupported || expunge) {
                         /*
                          * Expunge all messages
                          */
@@ -791,7 +797,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         return null == property ? false : Boolean.parseBoolean(property.trim());
     }
 
-    private int add2Storage(final POP3Folder inbox, final int start, final int len, final boolean containsWarnings, final int messageCount, final TIntObjectMap<String> seqnum2uidl) throws MessagingException, OXException {
+    private int add2Storage(final POP3Folder inbox, final int start, final int len, final boolean uidlNotSupported, final int messageCount, final TIntObjectMap<String> seqnum2uidl) throws MessagingException, OXException {
         final int retval; // The number of messages added to storage
         final int end; // The ending sequence number (inclusive)
         {
@@ -808,7 +814,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         /*
          * Check for possible warnings. If so append messages to storage without filtering new messages.
          */
-        if (containsWarnings) {
+        if (uidlNotSupported) {
             /*
              * Append messages to storage
              */
