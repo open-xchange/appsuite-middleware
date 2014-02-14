@@ -49,24 +49,28 @@
 
 package com.openexchange.ajax.find;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import com.openexchange.ajax.find.actions.AutocompleteRequest;
 import com.openexchange.ajax.find.actions.AutocompleteResponse;
+import com.openexchange.ajax.find.actions.ConfigRequest;
+import com.openexchange.ajax.find.actions.ConfigResponse;
 
 
 /**
- * {@link AutocompleteTest}
+ * {@link SimpleFindTest}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AutocompleteTest extends AbstractFindTest {
+public class SimpleFindTest extends AbstractFindTest {
 
     /**
-     * Initializes a new {@link AutocompleteTest}.
+     * Initializes a new {@link SimpleFindTest}.
      */
-    public AutocompleteTest(final String name) {
+    public SimpleFindTest(final String name) {
         super(name);
     }
 
@@ -89,7 +93,28 @@ public class AutocompleteTest extends AbstractFindTest {
 
             assertNotNull(autocompleteResponse);
 
-            System.out.println(autocompleteResponse.getData());
+            final JSONObject jData = (JSONObject) autocompleteResponse.getData();
+            assertNotNull("Missing response body", jData);
+
+            System.out.println(jData.toString(2));
+
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testConfigSimple() {
+        try {
+            final ConfigResponse configResponse = getClient().execute(new ConfigRequest());
+
+            assertNotNull(configResponse);
+
+            final JSONArray jData = (JSONArray) configResponse.getData();
+            assertNotNull("Missing response body", jData);
+
+            System.out.println(jData.toString(2));
 
         } catch (final Exception e) {
             e.printStackTrace();
