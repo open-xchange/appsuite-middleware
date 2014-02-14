@@ -48,14 +48,17 @@
  */
 package com.openexchange.find.json;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.DocumentVisitor;
+import com.openexchange.find.drive.FileDocument;
+import com.openexchange.find.json.osgi.ResultConverterRegistry;
 import com.openexchange.find.mail.MailDocument;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailListField;
@@ -75,33 +78,35 @@ public class JSONResponseVisitor implements DocumentVisitor {
 
     private static final MailFieldWriter[] WRITERS;
     static {
-        MailListField[] listFields = new MailListField[MailField.FIELDS_LOW_COST.length];
+        final MailListField[] listFields = new MailListField[MailField.FIELDS_LOW_COST.length];
         for (int i = 0; i < MailField.FIELDS_LOW_COST.length; i++) {
-            MailField mailField = MailField.FIELDS_LOW_COST[i];
+            final MailField mailField = MailField.FIELDS_LOW_COST[i];
             listFields[i] = mailField.getListField();
         }
         WRITERS = MessageWriter.getMailFieldWriter(listFields);
     }
 
+    // ------------------------------------------------------------------------------------------------- //
+
     private final ServerSession session;
-
     private final List<OXException> errors;
-
     private final JSONArray json;
+    private final ResultConverterRegistry converterRegistry;
 
-    public JSONResponseVisitor(final ServerSession session) {
+    public JSONResponseVisitor(final ServerSession session, final ResultConverterRegistry converterRegistry) {
         super();
+        this.converterRegistry = converterRegistry;
         this.session = session;
-        errors = new ArrayList<OXException>();
+        errors = new LinkedList<OXException>();
         json = new JSONArray();
     }
 
     @Override
-    public void visit(MailDocument mailDocument) {
-        MailMessage mailMessage = mailDocument.getMailMessage();
+    public void visit(final MailDocument mailDocument) {
+        final MailMessage mailMessage = mailDocument.getMailMessage();
         try {
-            JSONObject jsonMessage = new JSONObject();
-            for (MailFieldWriter writer : WRITERS) {
+            final JSONObject jsonMessage = new JSONObject();
+            for (final MailFieldWriter writer : WRITERS) {
                 writer.writeField(
                     jsonMessage,
                     mailMessage,
@@ -112,17 +117,41 @@ public class JSONResponseVisitor implements DocumentVisitor {
                     session.getContextId(),
                     TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()));
             }
-
             json.put(jsonMessage);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             errors.add(e);
         }
     }
 
+    @Override
+    public void visit(final FileDocument fileDocument) {
+        try {
+            final ResultConverter converter = converterRegistry.getConverter("infostore");
+            if (null != converter) {
+                final AJAXRequestData requestData = new AJAXRequestData();
+                final AJAXRequestResult requestResult = new AJAXRequestResult(fileDocument.getFile());
+                converter.convert(requestData, requestResult, session, null);
+                json.put(requestResult.getResultObject());
+            }
+        } catch (final OXException e) {
+            errors.add(e);
+        }
+    }
+
+    /**
+     * Gets the JSON array containing documents.
+     *
+     * @return The documents' JSON array
+     */
     public JSONArray getJSONArray() {
         return json;
     }
 
+    /**
+     * Gets possible error that occurred during conversion.
+     *
+     * @return The possible errors or an empty list
+     */
     public List<OXException> getErrors() {
         return errors;
     }

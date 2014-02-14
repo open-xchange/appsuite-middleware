@@ -115,6 +115,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 	protected AJAXRequestData data;
 
     public AJAXInfostoreRequest(final AJAXRequestData requestData, final ServerSession session) {
+        super();
         this.data = requestData;
         this.session = session;
     }
@@ -138,7 +139,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     public int getAttachment() {
         return getInt(Param.ATTACHMENT);
     }
-    
+
 
     @Override
     public AttachmentBase getAttachmentBase() {

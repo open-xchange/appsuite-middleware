@@ -70,8 +70,8 @@ public interface DocumentVisitor {
     /**
      * Handles given file document.
      *
-     * @param driveDocument The file document
+     * @param fileDocument The file document
      */
-    void visit(FileDocument driveDocument);
+    void visit(FileDocument fileDocument);
 
 }

@@ -58,6 +58,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.find.Document;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.json.JSONResponseVisitor;
+import com.openexchange.find.json.osgi.ResultConverterRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -69,8 +70,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class SearchResultJSONConverter extends AbstractJSONConverter {
 
-    public SearchResultJSONConverter(final StringTranslator translator) {
+    private final ResultConverterRegistry converterRegistry;
+
+    public SearchResultJSONConverter(final StringTranslator translator, final ResultConverterRegistry converterRegistry) {
         super(translator);
+        this.converterRegistry = converterRegistry;
     }
 
     @Override
@@ -89,7 +93,7 @@ public class SearchResultJSONConverter extends AbstractJSONConverter {
                 json.put("from", searchResult.getStart());
                 json.put("size", searchResult.getSize());
 
-                JSONResponseVisitor visitor = new JSONResponseVisitor(session);
+                JSONResponseVisitor visitor = new JSONResponseVisitor(session, converterRegistry);
                 for (Document document : searchResult.getDocuments()) {
                     document.accept(visitor);
                 }

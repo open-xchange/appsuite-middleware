@@ -67,7 +67,7 @@ import com.openexchange.i18n.I18nService;
  */
 public class FindJsonActivator extends AJAXModuleActivator {
 
-    private static final String MODULE_PATH = "find";
+    private final String MODULE_PATH = "find";
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -78,10 +78,15 @@ public class FindJsonActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         I18nTracker translator = new I18nTracker(context);
         track(I18nService.class, translator);
+
+        final ResultConverterRegistry converterRegistry = new ResultConverterRegistry(context);
+        track(ResultConverter.class, converterRegistry);
+
         openTrackers();
+
         registerService(ResultConverter.class, new ConfigJSONConverter(translator));
         registerService(ResultConverter.class, new AutocompleteResultJSONConverter(translator));
-        registerService(ResultConverter.class, new SearchResultJSONConverter(translator));
+        registerService(ResultConverter.class, new SearchResultJSONConverter(translator, converterRegistry));
         registerModule(new FindActionFactory(this), MODULE_PATH);
     }
 
