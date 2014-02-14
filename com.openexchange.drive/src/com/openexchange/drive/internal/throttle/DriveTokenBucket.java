@@ -143,11 +143,22 @@ public class DriveTokenBucket implements TokenBucket {
     @Override
     public void takeBlocking(ServerSession session, int count) throws InterruptedException {
         if (0 < clientBytesPerSecond) {
-            getBucket(session).acquire(count);
+            acquire(count, getBucket(session), clientBytesPerSecond / BUCKET_FILLS_PER_SECOND);
         }
         if (0 < overallBytesPerSecond) {
-            overallBucket.acquire(count);
+            acquire(count, overallBucket, overallBytesPerSecond / BUCKET_FILLS_PER_SECOND);
         }
+    }
+
+    private static void acquire(int count, Semaphore semaphore, int maxPermits) throws InterruptedException {
+        int acquired = 0;
+        do {
+            int permits = Math.min(count - acquired, maxPermits);
+            System.out.println("acquire: " + permits + "/" + count);
+            semaphore.acquire(permits);
+            acquired += permits;
+            System.out.println("acquired: " + acquired + "/" + count);
+        } while (acquired < count);
     }
 
     @Override
