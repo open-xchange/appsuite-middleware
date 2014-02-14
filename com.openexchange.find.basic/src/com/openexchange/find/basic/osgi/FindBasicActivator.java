@@ -82,13 +82,13 @@ public class FindBasicActivator extends HousekeepingActivator {
 
         {
             Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(Constants.SERVICE_RANKING, 0);
+            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
             registerService(ModuleSearchDriver.class, new MockMailDriver(), properties);
         }
 
         {
             Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(Constants.SERVICE_RANKING, 0);
+            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
             registerService(ModuleSearchDriver.class, new MockDriveDrive(), properties);
         }
     }

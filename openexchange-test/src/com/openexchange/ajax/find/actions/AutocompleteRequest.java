@@ -59,6 +59,7 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.find.facet.DisplayItem;
@@ -104,6 +105,7 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
         final List<Parameter> list = new LinkedList<Parameter>();
+        list.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "autocomplete"));
         list.add(new Parameter("module", module));
         return list.toArray(new Parameter[0]);
     }
