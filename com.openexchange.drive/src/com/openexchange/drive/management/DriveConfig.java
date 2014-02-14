@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.management;
 
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
@@ -61,6 +62,7 @@ import com.openexchange.drive.DriveClientVersion;
 import com.openexchange.drive.DriveConstants;
 import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.server.Initialization;
 import com.openexchange.tools.strings.TimeSpanParser;
@@ -404,8 +406,11 @@ public class DriveConfig implements Initialization {
         /*
          * throttling
          */
-        maxBandwidth = configService.getIntProperty("com.openexchange.drive.maxBandwidth", -1);
-        maxBandwidthPerClient = configService.getIntProperty("com.openexchange.drive.maxBandwidthPerClient", -1);
+        String maxBandwidthValue = configService.getProperty("com.openexchange.drive.maxBandwidth");
+        maxBandwidth = Strings.isEmpty(maxBandwidthValue) || "-1".equals(maxBandwidthValue) ? -1 : parseBytes(maxBandwidthValue);
+        String maxBandwidthPerClientValue = configService.getProperty("com.openexchange.drive.maxBandwidthPerClient");
+        maxBandwidthPerClient = Strings.isEmpty(maxBandwidthPerClientValue) || "-1".equals(maxBandwidthPerClientValue) ?
+            -1 : parseBytes(maxBandwidthPerClientValue);
         maxConcurrentSyncOperations = configService.getIntProperty("com.openexchange.drive.maxConcurrentSyncOperations", -1);
         maxDirectoryActions = configService.getIntProperty("com.openexchange.drive.maxDirectoryActions", 1000);
         maxFileActions = configService.getIntProperty("com.openexchange.drive.maxFileActions", 500);
@@ -479,6 +484,40 @@ public class DriveConfig implements Initialization {
         } catch (NumberFormatException e) {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(1, value);
         }
+    }
+
+    /**
+     * Parses a byte value including an optional unit.
+     *
+     * @param value the value to parse
+     * @return The parsed number of bytes
+     * @throws NumberFormatException If the supplied string is not parsable or greater then <code>Integer.MAX_VALUE</code>
+     */
+    private static int parseBytes(String value) throws NumberFormatException {
+        StringAllocator numberAllocator = new StringAllocator(8);
+        StringAllocator unitAllocator = new StringAllocator(4);
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if (Character.isDigit(c) || '.' == c || '-' == c) {
+                numberAllocator.append(c);
+            } else if (false == Character.isWhitespace(c)) {
+                unitAllocator.append(c);
+            }
+        }
+        double number = Double.parseDouble(numberAllocator.toString());
+        if (0 < unitAllocator.length()) {
+            String unit = unitAllocator.toString().toUpperCase();
+            int exp = Arrays.asList("B", "KB", "MB", "GB").indexOf(unit);
+            if (0 <= exp) {
+                number *= Math.pow(1024, exp);
+            } else {
+                throw new NumberFormatException(value);
+            }
+        }
+        if (Integer.MAX_VALUE >= number) {
+            return (int)number;
+        }
+        throw new NumberFormatException(value);
     }
 
     /**
