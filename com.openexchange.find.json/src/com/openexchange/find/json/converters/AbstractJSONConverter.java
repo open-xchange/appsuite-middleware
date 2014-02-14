@@ -51,6 +51,7 @@ package com.openexchange.find.json.converters;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -87,18 +88,26 @@ public abstract class AbstractJSONConverter implements ResultConverter {
     }
 
     protected JSONArray convertFacets(Locale locale, List<Facet> facets) throws JSONException {
-        JSONArray result = new JSONArray();
+        JSONArray result = new JSONArray(facets.size());
+
         for (Facet facet : facets) {
-            JSONObject facetJSON = new JSONObject();
+            JSONObject facetJSON = new JSONObject(4);
+
+            // Type information
             FacetType type = facet.getType();
             facetJSON.put("type", type.getName());
             facetJSON.put("displayName", translator.translate(locale, type.getDisplayName()));
-            JSONArray values = new JSONArray();
-            for (FacetValue value : facet.getValues()) {
+
+            // Facet values
+            List<FacetValue> values = facet.getValues();
+            JSONArray jValues = new JSONArray(values.size());
+            for (FacetValue value : values) {
                 JSONObject valueJSON = convertFacetValue(value);
-                values.put(valueJSON);
+                jValues.put(valueJSON);
             }
-            facetJSON.put("values", values);
+            facetJSON.put("values", jValues);
+
+            // Put to JSON array
             result.put(facetJSON);
         }
 
@@ -106,13 +115,15 @@ public abstract class AbstractJSONConverter implements ResultConverter {
     }
 
     protected JSONObject convertFacetValue(FacetValue value) throws JSONException {
-        JSONObject valueJSON = new JSONObject();
+        JSONObject valueJSON = new JSONObject(4);
+
         valueJSON.put("displayItem", convertDisplayItem(value.getDisplayItem()));
         int count = value.getCount();
         if (count >= 0) {
             valueJSON.put("count", value.getCount());
         }
         valueJSON.put("filter", convertFilter(value.getFilter()));
+
         return valueJSON;
     }
 
@@ -123,12 +134,16 @@ public abstract class AbstractJSONConverter implements ResultConverter {
     }
 
     protected JSONObject convertFilter(Filter filter) throws JSONException {
-        JSONObject filterJSON = new JSONObject();
-        JSONArray fields = new JSONArray();
-        for (String field : filter.getFields()) {
-            fields.put(field);
+        // Put fields to JSON array
+        Set<String> fields = filter.getFields();
+        JSONArray jFields = new JSONArray(fields.size());
+        for (String field : fields) {
+            jFields.put(field);
         }
-        filterJSON.put("fields", fields);
+
+        // Compose JSON object
+        JSONObject filterJSON = new JSONObject(3);
+        filterJSON.put("fields", jFields);
         filterJSON.put("query", filter.getQuery());
         return filterJSON;
     }

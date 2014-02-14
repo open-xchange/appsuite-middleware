@@ -79,7 +79,7 @@ public class AutocompleteResultJSONConverter extends AbstractJSONConverter {
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         AutocompleteResult autocompleteResult = (AutocompleteResult) result.getResultObject();
         try {
-            JSONObject jsonResult = new JSONObject();
+            JSONObject jsonResult = new JSONObject(2);
             jsonResult.put("facets", convertFacets(session.getUser().getLocale(), autocompleteResult.getFacets()));
             result.setResultObject(jsonResult, "json");
         } catch (JSONException e) {
