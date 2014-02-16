@@ -5505,14 +5505,6 @@ msgid ""
 "user's attributes."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/links/LinkExceptionMessages.java:61
-msgid "You do not have appropriate permissions to access this link."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/links/LinkExceptionMessages.java:63
-msgid "This link already exists."
-msgstr ""
-
 #. *
 #. * User is missing for the reminder.
 #.
