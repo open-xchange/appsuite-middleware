@@ -212,8 +212,8 @@ public class QueuingIMAPStore extends IMAPStore {
                         try {
                             final boolean notInUse = tq.closeElapsed0(minStamp);
                             if (notInUse) {
-                                if (noneCount.incrementAndGet() >= 10 && tqueues.remove(url, tq)) {
-                                    // Atomically removed queue, because seen this queue as "not in use" for 10 times
+                                if (noneCount.incrementAndGet() >= 3 && tqueues.remove(url, tq)) {
+                                    // Atomically removed queue, because seen this queue as "not in use" for 3 times
                                     tq.deprecated = true;
                                     final ScheduledFuture<?> future = futureRef.getAndSet(null);
                                     if (null != future) {
