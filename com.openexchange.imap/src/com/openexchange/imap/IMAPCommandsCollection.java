@@ -918,6 +918,7 @@ public final class IMAPCommandsCollection {
      * @throws MessagingException If determining counts fails
      */
     public static int[] getTotalAndUnread(final IMAPStore imapStore, final String fullName) throws MessagingException {
+        // TODO: Main method for acquiring STATUS information
         final DefaultFolder defaultFolder = (DefaultFolder) imapStore.getDefaultFolder();
         return ((int[]) defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
