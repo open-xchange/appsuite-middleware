@@ -127,6 +127,7 @@ public final class ListLsubCache {
         return new Key(session.getUserId(), session.getContextId());
     }
 
+    /** The default timeout for LIST/LSUB cache (5 minutes) */
     private static final long DEFAULT_TIMEOUT = 300000;
 
     private static final String INBOX = "INBOX";
@@ -262,6 +263,10 @@ public final class ListLsubCache {
         return getCachedLISTEntry(INBOX, accountId, imapFolder, session).getSeparator();
     }
 
+    private static boolean seemsValid(final ListLsubEntry entry) {
+        return (null != entry) && (entry.canOpen() || entry.isNamespace() || entry.hasChildren());
+    }
+
     /**
      * Gets cached LSUB entry for specified full name.
      *
@@ -277,7 +282,7 @@ public final class ListLsubCache {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         if (isAccessible(collection)) {
             final ListLsubEntry entry = collection.getLsub(fullName);
-            if (null != entry && (entry.canOpen() || entry.isNamespace())) {
+            if (seemsValid(entry)) {
                 return entry;
             }
         }
@@ -290,7 +295,7 @@ public final class ListLsubCache {
              * Return
              */
             ListLsubEntry entry = collection.getLsub(fullName);
-            if (null != entry && (entry.canOpen() || entry.isNamespace())) {
+            if (seemsValid(entry)) {
                 return entry;
             }
             /*
@@ -318,7 +323,7 @@ public final class ListLsubCache {
             final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
             if (isAccessible(collection)) {
                 final ListLsubEntry entry = collection.getList(fullName);
-                if (null != entry && (entry.canOpen() || entry.isNamespace())) {
+                if (seemsValid(entry)) {
                     return entry;
                 }
             }
@@ -331,7 +336,7 @@ public final class ListLsubCache {
                  * Return
                  */
                 ListLsubEntry entry = collection.getList(fullName);
-                if (null != entry/* && (entry.canOpen() || entry.isNamespace())*/) {
+                if (seemsValid(entry)) {
                     return entry;
                 }
                 /*
@@ -407,7 +412,7 @@ public final class ListLsubCache {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         if (isAccessible(collection)) {
             final ListLsubEntry entry = collection.getList(fullName);
-            if (null != entry && (entry.canOpen() || entry.isNamespace() || entry.hasChildren())) {
+            if (seemsValid(entry)) {
                 return entry;
             }
         }
@@ -420,7 +425,7 @@ public final class ListLsubCache {
              * Return
              */
             ListLsubEntry entry = collection.getList(fullName);
-            if (null != entry && (entry.canOpen() || entry.isNamespace() || entry.hasChildren())) {
+            if (seemsValid(entry)) {
                 return entry;
             }
             /*
@@ -466,7 +471,7 @@ public final class ListLsubCache {
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         if (isAccessible(collection)) {
             ListLsubEntry listEntry = collection.getList(fullName);
-            if (null != listEntry && (listEntry.canOpen() || listEntry.isNamespace())) {
+            if (seemsValid(listEntry)) {
                 final ListLsubEntry lsubEntry = collection.getLsub(fullName);
                 final ListLsubEntry emptyEntryFor = ListLsubCollection.emptyEntryFor(fullName);
                 return new ListLsubEntry[] { listEntry, lsubEntry == null ? emptyEntryFor : lsubEntry };
@@ -483,7 +488,7 @@ public final class ListLsubCache {
              * Return
              */
             ListLsubEntry listEntry = collection.getList(fullName);
-            if (null == listEntry || (!listEntry.canOpen() && !listEntry.isNamespace())) {
+            if (!seemsValid(listEntry)) {
                 /*
                  * Update & re-check
                  */
