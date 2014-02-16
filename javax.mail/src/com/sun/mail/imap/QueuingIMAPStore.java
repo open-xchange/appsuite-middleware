@@ -615,7 +615,7 @@ public class QueuingIMAPStore extends IMAPStore {
                 }
                 // Wait time exceeded
                 if ((nanos <= 0) || (newCount >= max)) {
-                    throw new com.sun.mail.iap.ConnectQuotaExceededException("No connection available and not allowed to open further ones");
+                    throw new com.sun.mail.iap.ConnectQuotaExceededException("No connection available and not allowed to open more than " + max + " connections. Waited " + unit.toSeconds(timeout) + " seconds");
                 }
                 // Increment new count
                 newCount++;
