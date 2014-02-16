@@ -70,7 +70,6 @@ public final class InterfaceTests {
         tests.addTest(com.openexchange.SmokeTestSuite.suite());
 
         tests.addTestSuite(com.openexchange.ajax.FolderTest.class);
-        tests.addTestSuite(com.openexchange.ajax.LinkTest.class);
         tests.addTestSuite(com.openexchange.ajax.MultipleTest.class);
         tests.addTestSuite(com.openexchange.ajax.UserTest.class);
 
@@ -83,7 +82,6 @@ public final class InterfaceTests {
         tests.addTest(com.openexchange.ajax.group.GroupTestSuite.suite());
         tests.addTest(com.openexchange.ajax.importexport.ImportExportServerSuite.suite());
         tests.addTest(com.openexchange.ajax.infostore.InfostoreAJAXSuite.suite());
-        tests.addTest(com.openexchange.ajax.links.LinksTestSuite.suite());
         tests.addTest(com.openexchange.ajax.mail.MailTestSuite.suite());
         tests.addTest(com.openexchange.ajax.mail.filter.MailFilterTestSuite.suite());
         tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.redirect.RedirectTests.class));

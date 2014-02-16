@@ -171,9 +171,7 @@ public enum ContactField{
     USERFIELD20 (590 , "field89" , "USERFIELD20" , "Dynamic Field 20"  , ContactFields.USERFIELD20, Types.VARCHAR),
     OBJECT_ID (1 , "intfield01" , "OBJECT_ID" , "Object id"  , DataFields.ID, Types.INTEGER),
     NUMBER_OF_DISTRIBUTIONLIST (594 , "intfield02" , "NUMBER_OF_DISTRIBUTIONLIST" , "Number of distributionlists"  , ContactFields.NUMBER_OF_DISTRIBUTIONLIST, Types.INTEGER),
-    NUMBER_OF_LINKS (103 , "intfield03" , "NUMBER_OF_LINKS" , "Number of links"  , ContactFields.NUMBER_OF_LINKS, Types.INTEGER),
     DISTRIBUTIONLIST (592 , "" , "DISTRIBUTIONLIST" , ""  , ContactFields.DISTRIBUTIONLIST, 0),
-    LINKS (591 , "" , "LINKS" , ""  , ContactFields.LINKS, 0),
     FOLDER_ID (20 , "fid" , "FOLDER_ID" , "Folder id"  , ContactFields.FOLDER_ID, Types.INTEGER),
     CONTEXTID (593 , "cid" , "CONTEXTID" , "Context id"  , "", Types.INTEGER),
     PRIVATE_FLAG (101 , "pflag" , "PRIVATE_FLAG" , "private"  , ContactFields.PRIVATE_FLAG, Types.INTEGER),
@@ -446,9 +444,7 @@ public enum ContactField{
         case USERFIELD20 : return switcher.userfield20(objects);
         case OBJECT_ID : return switcher.objectid(objects);
         case NUMBER_OF_DISTRIBUTIONLIST : return switcher.numberofdistributionlists(objects);
-        case NUMBER_OF_LINKS : return switcher.numberoflinks(objects);
         case DISTRIBUTIONLIST : return switcher.distributionlist(objects);
-        case LINKS : return switcher.links(objects);
         case FOLDER_ID : return switcher.parentfolderid(objects);
         case CONTEXTID : return switcher.contextid(objects);
         case PRIVATE_FLAG : return switcher.privateflag(objects);
@@ -487,7 +483,7 @@ public enum ContactField{
         return VIRTUAL_FIELDS.contains(this);
     }
 
-    private static final EnumSet<ContactField> NON_DB_FIELDS = EnumSet.of(IMAGE1_URL, IMAGE1_CONTENT_TYPE, IMAGE_LAST_MODIFIED, IMAGE1, DISTRIBUTIONLIST, LINKS, SORT_NAME);
+    private static final EnumSet<ContactField> NON_DB_FIELDS = EnumSet.of(IMAGE1_URL, IMAGE1_CONTENT_TYPE, IMAGE_LAST_MODIFIED, IMAGE1, DISTRIBUTIONLIST, SORT_NAME);
     @Deprecated
     public boolean isDBField() {
         return !NON_DB_FIELDS.contains(this);

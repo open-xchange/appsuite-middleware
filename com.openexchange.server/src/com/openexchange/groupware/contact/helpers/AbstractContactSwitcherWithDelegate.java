@@ -272,11 +272,6 @@ public class AbstractContactSwitcherWithDelegate implements ContactSwitcher {
 	}
 
 	@Override
-    public Object links(final Object... objects) throws OXException {
-		return delegate.links(objects);
-	}
-
-	@Override
     public Object managername(final Object... objects) throws OXException {
 		return delegate.managername(objects);
 	}
@@ -324,11 +319,6 @@ public class AbstractContactSwitcherWithDelegate implements ContactSwitcher {
 	@Override
     public Object numberofemployee(final Object... objects) throws OXException {
 		return delegate.numberofemployee(objects);
-	}
-
-	@Override
-    public Object numberoflinks(final Object... objects) throws OXException {
-		return delegate.numberoflinks(objects);
 	}
 
 	@Override

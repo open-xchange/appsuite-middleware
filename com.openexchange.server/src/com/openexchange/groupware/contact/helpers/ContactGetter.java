@@ -883,30 +883,12 @@ public class ContactGetter implements ContactSwitcher {
     }
 
     @Override
-    public Object numberoflinks(final Object... objects) throws OXException {
-        if (objects.length < 1) {
-            throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("NumberOfLinks");
-        }
-        final Contact conObj = (Contact) objects[0];
-        return I(conObj.getNumberOfLinks());
-    }
-
-    @Override
     public Object distributionlist(final Object... objects) throws OXException {
         if (objects.length < 1) {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("DistributionList");
         }
         final Contact conObj = (Contact) objects[0];
         return conObj.getDistributionList();
-    }
-
-    @Override
-    public Object links(final Object... objects) throws OXException {
-        if (objects.length < 1) {
-            throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("Links");
-        }
-        final Contact conObj = (Contact) objects[0];
-        return conObj.getLinks();
     }
 
     @Override

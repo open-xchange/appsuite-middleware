@@ -2770,7 +2770,6 @@ public class CalendarMySQL implements CalendarSqlImp {
                 clone.setCreationDate(new Date(lastModified));
                 clone.setLastModified(new Date(lastModified));
                 clone.setNumberOfAttachments(0);
-                clone.setNumberOfLinks(0);
 
                 if (!clone.containsUid()) {
                     clone.setUid(edao.getUid());

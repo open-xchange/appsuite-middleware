@@ -2343,30 +2343,6 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 			}
         });
 
-        mappings.put(ContactField.NUMBER_OF_LINKS, new ContactMapping<Integer>() {
-
-            @Override
-            public void set(Contact contact, Integer value) {
-                contact.setNumberOfLinks(value);
-            }
-
-            @Override
-            public boolean isSet(Contact contact) {
-                return contact.containsNumberOfLinks();
-            }
-
-            @Override
-            public Integer get(Contact contact) {
-                return contact.getNumberOfLinks();
-            }
-
-			@Override
-			public void remove(Contact contact) {
-				contact.removeNumberOfLinks();
-
-			}
-        });
-
         mappings.put(ContactField.DISTRIBUTIONLIST, new ContactMapping<DistributionListEntryObject[]>() {
 
             @Override

@@ -84,7 +84,6 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Change;
-import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.ConfirmationChange;
 import com.openexchange.groupware.container.Difference;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -195,21 +194,21 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 		}
 		return analysis;
 	}
-	
+
 	private boolean containsChangesForUpdate(ITipAnalysis analysis) {
-	    if (analysis.getChanges() == null || analysis.getChanges().size() == 0) { 
+	    if (analysis.getChanges() == null || analysis.getChanges().size() == 0) {
 	        return false;
 	    }
-	    
+
 	    for (ITipChange change : analysis.getChanges()) {
 	        if (change.getDiff() == null) {
 	            continue;
 	        }
-	        
+
 	        if (change.getDiff().getUpdates() == null) {
 	            continue;
 	        }
-	        
+
 	        if (change.getDiff().getUpdates().size() != 0) {
 	            return true;
 	        }
@@ -559,7 +558,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 
 	private Set<Integer> skipFieldsInCounter(final ITipMessage message) {
 		final Set<Integer> skipList = new HashSet<Integer>();
-		skipList.add(CommonObject.NUMBER_OF_LINKS);
+//		skipList.add(CommonObject.NUMBER_OF_LINKS);
 		if (message.hasFeature(ITipSpecialHandling.MICROSOFT)) {
 			skipList.add(CalendarObject.TITLE);
 		}

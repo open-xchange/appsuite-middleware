@@ -246,11 +246,7 @@ public interface ContactSwitcher {
 
     public Object numberofdistributionlists(Object... objects) throws OXException;
 
-    public Object numberoflinks(Object... objects) throws OXException;
-
     public Object distributionlist(Object... objects) throws OXException;
-
-    public Object links(Object... objects) throws OXException;
 
     public Object parentfolderid(Object... objects) throws OXException;
 

@@ -140,7 +140,6 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.webdav.action.ApacheURLDecoderTest.class);
 
         tests.addTestSuite(com.openexchange.groupware.attach.CopyAttachmentsForChangeExceptionsTest.class);
-        tests.addTestSuite(com.openexchange.groupware.links.CopyLinksForChangeExceptionsTest.class);
 
         tests.addTestSuite(com.openexchange.groupware.container.DataObjectTest.class);
         tests.addTestSuite(com.openexchange.groupware.container.FolderChildObjectTest.class);

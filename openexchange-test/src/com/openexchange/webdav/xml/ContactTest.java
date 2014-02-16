@@ -8,7 +8,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.TimeZone;
-
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
@@ -27,7 +26,6 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
@@ -286,21 +284,8 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		contactObj.setParentFolderID(contactFolderId);
 
 		final Contact link1 = createContactObject("link1");
-		final Contact link2 = createContactObject("link2");
 		final int linkId1 = insertContact(webCon, link1, PROTOCOL + hostName, login, password, context);
 		link1.setObjectID(linkId1);
-		final int linkId2 = insertContact(webCon, link2, PROTOCOL + hostName, login, password, context);
-		link2.setObjectID(linkId2);
-
-		final LinkEntryObject[] links = new LinkEntryObject[2];
-		links[0] = new LinkEntryObject();
-		links[0].setLinkID(link1.getObjectID());
-		links[0].setLinkDisplayname(link1.getDisplayName());
-		links[1] = new LinkEntryObject();
-		links[1].setLinkID(link2.getObjectID());
-		links[1].setLinkDisplayname(link2.getDisplayName());
-
-		contactObj.setLinks(links);
 
 		final DistributionListEntryObject[] entry = new DistributionListEntryObject[2];
 		entry[0] = new DistributionListEntryObject("displayname a", "a@a.de", DistributionListEntryObject.INDEPENDENT);
@@ -580,28 +565,6 @@ public class ContactTest extends AbstractWebdavXMLTest {
 		// This status must be checked after throwing OXException.
         assertEquals("check response status", 200, response[0].getStatus());
 		return (Contact) response[0].getDataObject();
-	}
-
-	private static HashSet links2String(final LinkEntryObject[] linkEntryObject) throws Exception {
-		if (linkEntryObject == null) {
-			return null;
-		}
-
-		final HashSet hs = new HashSet();
-
-		for (int a = 0; a < linkEntryObject.length; a++) {
-			hs.add(link2String(linkEntryObject[a]));
-		}
-
-		return hs;
-	}
-
-	private static String link2String(final LinkEntryObject linkEntryObject) throws Exception {
-		final StringBuffer sb = new StringBuffer();
-		sb.append("ID" + linkEntryObject.getLinkID());
-		sb.append("DISPLAYNAME" + linkEntryObject.getLinkDisplayname());
-
-		return sb.toString();
 	}
 
 	private static HashSet distributionlist2String(final DistributionListEntryObject[] distributionListEntry) throws Exception {

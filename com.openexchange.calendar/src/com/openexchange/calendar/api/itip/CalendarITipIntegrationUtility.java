@@ -153,7 +153,7 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
         Appointment.UNTIL,
         Appointment.NOTIFICATION,
         Appointment.RECURRENCE_COUNT,
-        Appointment.NUMBER_OF_LINKS,
+//        Appointment.NUMBER_OF_LINKS,
         Appointment.LAST_MODIFIED_UTC));
 
     private static final int[] EXCEPTION_FIELDS = new int[Appointment.ALL_COLUMNS.length - EXEMPT.size()];

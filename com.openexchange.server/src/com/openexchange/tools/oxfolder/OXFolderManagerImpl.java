@@ -99,7 +99,6 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.links.Links;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
@@ -1662,7 +1661,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
         try {
             {
-                Links.deleteAllFolderLinks(folderID, ctx.getContextId(), wc);
+//                Links.deleteAllFolderLinks(folderID, ctx.getContextId(), wc);
 
                 final ServerUserSetting sus = ServerUserSetting.getInstance(wc);
                 final Integer collectFolder = sus.getContactCollectionFolder(ctx.getContextId(), user.getId());

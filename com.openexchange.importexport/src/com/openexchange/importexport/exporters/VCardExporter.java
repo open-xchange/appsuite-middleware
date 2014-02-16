@@ -132,7 +132,6 @@ public class VCardExporter implements Exporter {
         Contact.INSTANT_MESSENGER2,
         Contact.IMAGE1,
         Contact.IMAGE1_CONTENT_TYPE,
-        Contact.LINKS,
         Contact.MANAGER_NAME,
         Contact.MARITAL_STATUS,
         Contact.MIDDLE_NAME,

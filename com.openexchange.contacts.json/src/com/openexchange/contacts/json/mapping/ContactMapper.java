@@ -78,7 +78,6 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.groupware.tools.mappings.json.ArrayMapping;
 import com.openexchange.groupware.tools.mappings.json.BooleanMapping;
 import com.openexchange.groupware.tools.mappings.json.DateMapping;
@@ -2277,31 +2276,6 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.NUMBER_OF_LINKS, new IntegerMapping<Contact>(ContactFields.NUMBER_OF_LINKS, Contact.CONTACT_NUMBER_OF_LINKS) {
-
-            @Override
-            @Deprecated
-            public void set(Contact contact, Integer value) {
-            }
-
-            @Override
-            @Deprecated
-            public boolean isSet(Contact contact) {
-                return false;
-            }
-
-            @Override
-            @Deprecated
-            public Integer get(Contact contact) {
-                return 0;
-            }
-
-            @Override
-            @Deprecated
-            public void remove(Contact contact) {
-            }
-        });
-
         mappings.put(ContactField.DISTRIBUTIONLIST, new ArrayMapping<DistributionListEntryObject, Contact>(ContactFields.DISTRIBUTIONLIST, Contact.DISTRIBUTIONLIST) {
 
 			@Override
@@ -2382,43 +2356,6 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 		        return jsonArray;
 			}
 		});
-
-        mappings.put(ContactField.LINKS, new ArrayMapping<LinkEntryObject, Contact>(ContactFields.LINKS, Contact.LINKS) {
-
-            @Override
-            @Deprecated
-            public boolean isSet(Contact contact) {
-                return false;
-            }
-
-            @Override
-            @Deprecated
-            public void remove(Contact contact) {
-            }
-
-			@Override
-            @Deprecated
-			public LinkEntryObject[] newArray(int size) {
-				return new LinkEntryObject[size];
-			}
-
-			@Override
-            @Deprecated
-			public void set(Contact contact, LinkEntryObject[] value) throws OXException {
-			}
-
-			@Override
-            @Deprecated
-			public LinkEntryObject[] get(Contact contact) {
-				return null;
-			}
-
-			@Override
-            @Deprecated
-			protected LinkEntryObject deserialize(JSONArray array, int index) throws JSONException, OXException {
-				return new LinkEntryObject();
-			}
-        });
 
         mappings.put(ContactField.FOLDER_ID, new IntegerMapping<Contact>(FolderChildFields.FOLDER_ID, FolderChildObject.FOLDER_ID) {
 

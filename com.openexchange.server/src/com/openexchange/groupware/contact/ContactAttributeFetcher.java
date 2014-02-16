@@ -318,14 +318,6 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
             }
         });
 
-        m.put(ContactFields.LINKS, new AttributeGetter() {
-
-            @Override
-            public Object getObject(final Contact candidate) {
-                return candidate.getLinks();
-            }
-        });
-
         m.put(ContactFields.MANAGER_NAME, new AttributeGetter() {
 
             @Override

@@ -121,7 +121,6 @@ public class Bug18094Test_VCardRoundtrip extends AbstractManagedContactTest {
 			add(ContactField.MARK_AS_DISTRIBUTIONLIST);
 			add(ContactField.NUMBER_OF_ATTACHMENTS);
 			add(ContactField.NUMBER_OF_DISTRIBUTIONLIST);
-			add(ContactField.NUMBER_OF_LINKS);
 			add(ContactField.IMAGE1_URL);
 		}};
 

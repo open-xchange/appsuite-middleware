@@ -55,7 +55,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Date;
 import java.util.EnumMap;
-
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
@@ -2214,29 +2213,6 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 				contact.removeDistributionLists();
 			}
 		});
-
-        mappings.put(ContactField.NUMBER_OF_LINKS, new IntegerMapping<Contact>("intfield03", "Number of links") {
-
-            @Override
-            public void set(Contact contact, Integer value) {
-                contact.setNumberOfLinks(value);
-            }
-
-            @Override
-            public boolean isSet(Contact contact) {
-                return contact.containsNumberOfLinks();
-            }
-
-            @Override
-            public Integer get(Contact contact) {
-                return contact.getNumberOfLinks();
-            }
-
-			@Override
-			public void remove(Contact contact) {
-				contact.removeNumberOfLinks();
-			}
-        });
 
         mappings.put(ContactField.FOLDER_ID, new IntegerMapping<Contact>("fid", "Folder id") {
 

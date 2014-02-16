@@ -94,7 +94,6 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.data.Check;
@@ -423,7 +422,7 @@ public final class Contacts {
 
             for (int i = 0; i < 650; i++) {
                 final Mapper mapper = mapping[i];
-                if ((mapper != null) && mapper.containsElement(contact) && (i != Contact.DISTRIBUTIONLIST) && (i != Contact.LINKS) && (i != DataObject.OBJECT_ID) && (i != Contact.IMAGE_LAST_MODIFIED) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
+                if ((mapper != null) && mapper.containsElement(contact) && (i != Contact.DISTRIBUTIONLIST) && (i != DataObject.OBJECT_ID) && (i != Contact.IMAGE_LAST_MODIFIED) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
                     insert_fields.append(mapper.getDBFieldName()).append(',');
                     insert_values.append("?,");
                 }
@@ -484,7 +483,7 @@ public final class Contacts {
             ps = writecon.prepareStatement(insert.toString());
             int counter = 1;
             for (int i = 2; i < 650; i++) {
-                if ((mapping[i] != null) && mapping[i].containsElement(contact) && (i != Contact.DISTRIBUTIONLIST) && (i != Contact.LINKS) && (i != DataObject.OBJECT_ID) && (i != Contact.IMAGE_LAST_MODIFIED) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
+                if ((mapping[i] != null) && mapping[i].containsElement(contact) && (i != Contact.DISTRIBUTIONLIST) && (i != DataObject.OBJECT_ID) && (i != Contact.IMAGE_LAST_MODIFIED) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
                     mapping[i].fillPreparedStatement(ps, counter, contact);
                     counter++;
                 }
@@ -500,9 +499,6 @@ public final class Contacts {
 
             if (contact.containsNumberOfDistributionLists() && (contact.getSizeOfDistributionListArray() > 0)) {
                 writeDistributionListArrayInsert(contact.getDistributionList(), contact.getObjectID(), contextId, writecon);
-            }
-            if (contact.containsNumberOfLinks() && (contact.getSizeOfLinks() > 0)) {
-                writeContactLinkArrayInsert(contact.getLinks(), contact.getObjectID(), contextId, writecon);
             }
             if (contact.containsImage1()) {
                 String shouldScale = ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGES);
@@ -767,7 +763,7 @@ public final class Contacts {
             for (int i = 0; i < modtrim.length; i++) {
                 final int field = modtrim[i];
                 final Mapper mapper = mapping[field];
-                if ((mapper != null) && mapper.containsElement(co) && (field != Contact.DISTRIBUTIONLIST) && (field != Contact.LINKS) && (field != DataObject.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
+                if ((mapper != null) && mapper.containsElement(co) && (field != Contact.DISTRIBUTIONLIST) && (field != DataObject.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
 
                     addressBusinessChanged |= (Arrays.binarySearch(Contact.ADDRESS_FIELDS_BUSINESS, field) >= 0);
                     addressHomeChanged |= (Arrays.binarySearch(Contact.ADDRESS_FIELDS_HOME, field) >= 0);
@@ -815,7 +811,7 @@ public final class Contacts {
             int counter = 1;
             for (int i = 0; i < modtrim.length; i++) {
                 final Mapper mapper = mapping[modtrim[i]];
-                if ((mapper != null) && mapper.containsElement(co) && (modtrim[i] != Contact.DISTRIBUTIONLIST) && (modtrim[i] != Contact.LINKS) && (modtrim[i] != DataObject.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
+                if ((mapper != null) && mapper.containsElement(co) && (modtrim[i] != Contact.DISTRIBUTIONLIST) && (modtrim[i] != DataObject.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
                     mapper.fillPreparedStatement(ps, counter, co);
                     counter++;
                 }
@@ -858,9 +854,6 @@ public final class Contacts {
                     co.getObjectID(),
                     ctx.getContextId(),
                     writecon);
-            }
-            if (co.containsNumberOfLinks() && (co.getSizeOfLinks() > 0)) {
-                writeContactLinkArrayUpdate(co.getLinks(), original.getLinks(), co.getObjectID(), ctx.getContextId(), writecon);
             }
 
             if (co.containsImage1()) {
@@ -1162,7 +1155,7 @@ public final class Contacts {
             for (int i = 0; i < modtrim.length; i++) {
                 final int field = modtrim[i];
                 final Mapper mapper = mapping[field];
-                if ((mapper != null) && mapper.containsElement(contact) && (field != Contact.DISTRIBUTIONLIST) && (field != Contact.LINKS) && (field != DataObject.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
+                if ((mapper != null) && mapper.containsElement(contact) && (field != Contact.DISTRIBUTIONLIST) && (field != DataObject.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
                     update.append(mapper.getDBFieldName()).append(" = ?,");
                 }
             }
@@ -1206,7 +1199,7 @@ public final class Contacts {
             for (int i = 0; i < modtrim.length; i++) {
                 final int field = modtrim[i];
                 final Mapper mapper = mapping[field];
-                if ((mapper != null) && mapper.containsElement(contact) && (field != Contact.DISTRIBUTIONLIST) && (field != Contact.LINKS) && (field != DataObject.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
+                if ((mapper != null) && mapper.containsElement(contact) && (field != Contact.DISTRIBUTIONLIST) && (field != DataObject.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
                     mapper.fillPreparedStatement(ps, counter, contact);
                     counter++;
                 }
@@ -1238,9 +1231,6 @@ public final class Contacts {
                     contact.getObjectID(),
                     ctx.getContextId(),
                     writecon);
-            }
-            if (contact.containsNumberOfLinks() && (contact.getSizeOfLinks() > 0)) {
-                writeContactLinkArrayUpdate(contact.getLinks(), original.getLinks(), contact.getObjectID(), ctx.getContextId(), writecon);
             }
 
             if (contact.containsImage1()) {
@@ -1802,173 +1792,6 @@ public final class Contacts {
                 }
             } catch (final SQLException e) {
                 throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
-            } finally {
-                closeSQLStuff(ps);
-            }
-        }
-    }
-
-    public static LinkEntryObject[] fillLinkArray(final Contact co, final int user, final Context ctx, final Connection readcon) throws OXException {
-
-        Statement stmt = null;
-        ResultSet rs = null;
-        LinkEntryObject[] r = null;
-        final ContactSql cs = new ContactMySql(ctx, user);
-
-        try {
-            final int id = co.getObjectID();
-
-            stmt = readcon.createStatement();
-            rs = stmt.executeQuery(cs.iFgetFillLinkArrayString(id, ctx.getContextId()));
-
-            rs.last();
-            final int size = rs.getRow();
-            rs.beforeFirst();
-
-            final LinkEntryObject[] leos = new LinkEntryObject[size];
-            LinkEntryObject leo = null;
-
-            String contact_displayname = null;
-            String link_displayname = null;
-            int linkid = 0;
-
-            int cnt = 0;
-
-            while (rs.next()) {
-                leo = new LinkEntryObject();
-
-                leo.setContactID(id);
-
-                contact_displayname = rs.getString(3);
-                if (!rs.wasNull()) {
-                    leo.setContactDisplayname(contact_displayname);
-                }
-                link_displayname = rs.getString(4);
-                if (!rs.wasNull()) {
-                    leo.setLinkDisplayname(link_displayname);
-                }
-                linkid = rs.getInt(2);
-                if (!rs.wasNull()) {
-                    leo.setLinkID(linkid);
-                }
-
-                leos[cnt] = leo;
-                cnt++;
-            }
-
-            r = new LinkEntryObject[cnt];
-            System.arraycopy(leos, 0, r, 0, cnt);
-        } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
-        } finally {
-            closeSQLStuff(rs, stmt);
-        }
-
-        return r;
-    }
-
-    public static void writeContactLinkArrayInsert(final LinkEntryObject[] leos, final int id, final int cid, final Connection writecon) throws OXException {
-        LinkEntryObject leo = null;
-
-        PreparedStatement ps = null;
-        try {
-            final ContactSql cs = new ContactMySql(null);
-            ps = writecon.prepareStatement(cs.iFwriteContactLinkArrayInsert());
-            for (int i = 0; i < leos.length; i++) {
-                leo = leos[i];
-                ps.setInt(1, id);
-                ps.setInt(2, leo.getLinkID());
-                ps.setString(3, leo.getContactDisplayname());
-                ps.setString(4, leo.getLinkDisplayname());
-                ps.setInt(5, cid);
-                UUID uuid = UUID.randomUUID();
-                byte[] uuidBinary = UUIDs.toByteArray(uuid);
-                ps.setBytes(6, uuidBinary);
-                {
-                    LOG.debug("INSERT LINKAGE {}", getStatementString(ps));
-                }
-                ps.addBatch();
-            }
-            ps.executeBatch();
-        } catch (final SQLException e) {
-            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
-        } finally {
-            closeSQLStuff(ps);
-        }
-    }
-
-    public static void writeContactLinkArrayUpdate(final LinkEntryObject[] leos, final LinkEntryObject[] original, final int id, final int cid, final Connection writecon) throws OXException {
-
-        final int sizey = (null == leos ? 0 : leos.length) + (null == original ? 0 : original.length);
-        final LinkEntryObject[] inserts = new LinkEntryObject[sizey];
-        final LinkEntryObject[] deletes = new LinkEntryObject[sizey];
-        int delete_count = 0;
-        int insert_count = 0;
-
-        if (null != leos) {
-            for (int i = 0; i < leos.length; i++) {
-                final LinkEntryObject new_leo = leos[i];
-                boolean action = false;
-
-                if (original != null) {
-                    for (int u = 0; u < original.length; u++) {
-                        final LinkEntryObject old_leo = original[u];
-
-                        if (new_leo.compare(old_leo)) {
-                            // found this link in the old ones
-                            original[u] = null;
-                            action = true;
-                            break;
-                        }
-                        // this one don't equal
-                        action = false;
-                    }
-                }
-                if (!action) {
-                    // nothing found so it is a new one
-                    inserts[insert_count] = new_leo;
-                    insert_count++;
-                }
-            }
-        }
-        if (original != null) {
-            for (int i = 0; i < original.length; i++) {
-                final LinkEntryObject del_leo = original[i];
-                if (del_leo != null) {
-                    deletes[delete_count] = del_leo;
-                    delete_count++;
-                }
-            }
-        }
-        final LinkEntryObject[] deletecut = new LinkEntryObject[delete_count];
-        System.arraycopy(deletes, 0, deletecut, 0, delete_count);
-
-        final LinkEntryObject[] insertcut = new LinkEntryObject[insert_count];
-        System.arraycopy(inserts, 0, insertcut, 0, insert_count);
-
-        deleteLinkEntriesByIds(id, deletecut, cid, writecon);
-        writeContactLinkArrayInsert(insertcut, id, cid, writecon);
-    }
-
-    public static void deleteLinkEntriesByIds(final int id, final LinkEntryObject[] leos, final int cid, final Connection writecon) throws OXException {
-        if (leos.length > 0) {
-            LinkEntryObject leo = null;
-            PreparedStatement ps = null;
-            try {
-                final ContactSql cs = new ContactMySql(null);
-                ps = writecon.prepareStatement(cs.iFgetdeleteLinkEntriesByIdsString());
-                for (int i = 0; i < leos.length; i++) {
-                    leo = leos[i];
-                    ps.setInt(1, id);
-                    ps.setInt(2, leo.getLinkID());
-                    ps.setInt(3, cid);
-                    {
-                        LOG.debug("DELETE LINKAGE ENTRY{}", getStatementString(ps));
-                    }
-                    ps.execute();
-                }
-            } catch (final SQLException e) {
-                throw ContactExceptionCodes.SQL_PROBLEM.create(e);
             } finally {
                 closeSQLStuff(ps);
             }
@@ -6752,47 +6575,6 @@ public final class Contacts {
                 return "Number of distributionlists";
             }
         };
-        /** ************** * intfield03 * * ************ */
-        mapping[CommonObject.NUMBER_OF_LINKS] = new Mapper() {
-
-            @Override
-            public String getDBFieldName() {
-                return "intfield03";
-            }
-
-            @Override
-            public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
-                final int t = rs.getInt(pos);
-                if (!rs.wasNull() && (t > 0)) {
-                    co.setNumberOfLinks(t);
-                }
-            }
-
-            @Override
-            public boolean containsElement(final Contact co) {
-                return co.containsNumberOfLinks();
-            }
-
-            @Override
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
-                ps.setInt(pos, co.getNumberOfLinks());
-            }
-
-            @Override
-            public boolean compare(final Contact co, final Contact original) {
-                return (original.getNumberOfLinks() == co.getNumberOfLinks());
-            }
-
-            @Override
-            public String getValueAsString(final Contact co) {
-                return Integer.toString(co.getNumberOfLinks());
-            }
-
-            @Override
-            public String getReadableTitle() {
-                return "Number of links";
-            }
-        };
         /** ************** * intfield02 Part 2 * * ************ */
         mapping[Contact.DISTRIBUTIONLIST] = new Mapper() {
 
@@ -6836,51 +6618,6 @@ public final class Contacts {
             @Override
             public String getReadableTitle() {
                 return "Distribution list";
-            }
-        };
-        /** ************** * intfield03 Part 2 * * ************ */
-        mapping[Contact.LINKS] = new Mapper() {
-
-            @Override
-            public String getDBFieldName() {
-                return "intfield03";
-            }
-
-            @Override
-            public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) {
-                try {
-                    final int t = rs.getInt(pos);
-                    if (!rs.wasNull() && (t > 0)) {
-                        co.setLinks(fillLinkArray(co, user, ctx, readcon));
-                    }
-                } catch (final Exception e) {
-                    LOG.error("Unable to load Links", e);
-                }
-            }
-
-            @Override
-            public boolean containsElement(final Contact co) {
-                return co.containsLinks();
-            }
-
-            @Override
-            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) {
-                // nix
-            }
-
-            @Override
-            public boolean compare(final Contact co, final Contact original) {
-                return false;
-            }
-
-            @Override
-            public String getValueAsString(final Contact co) {
-                return null;
-            }
-
-            @Override
-            public String getReadableTitle() {
-                return null;
             }
         };
         /** ************** * fid * * ************ */

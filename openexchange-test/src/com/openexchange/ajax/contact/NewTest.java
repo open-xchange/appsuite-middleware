@@ -82,17 +82,6 @@ public class NewTest extends AbstractContactTest {
         createContactWithDistributionList("testNewWithDistributionList", contactEntry);
     }
 
-    public void testNewWithLinks() throws Exception {
-        final Contact link1 = createContactObject("link1");
-        final Contact link2 = createContactObject("link2");
-        final int linkId1 = insertContact(link1);
-        link1.setObjectID(linkId1);
-        final int linkId2 = insertContact(link2);
-        link2.setObjectID(linkId2);
-
-        createContactWithLinks("testNewWithLinks", link1, link2);
-    }
-
     public void testNewContactWithAttachment() throws Exception {
         final Contact contactObj = createContactObject("testNewContactWithAttachment");
         final int objectId = insertContact(contactObj);

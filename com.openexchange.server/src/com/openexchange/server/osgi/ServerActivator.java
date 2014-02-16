@@ -843,7 +843,6 @@ public final class ServerActivator extends HousekeepingActivator {
         // http.registerServlet(prefix+"reminder", new com.openexchange.ajax.Reminder(), null, null);
         // http.registerServlet(prefix+"group", new com.openexchange.ajax.Group(), null, null);
         // http.registerServlet(prefix+"resource", new com.openexchange.ajax.Resource(), null, null);
-        http.registerServlet(prefix + "link", new com.openexchange.ajax.Link(), null, null);
         http.registerServlet(prefix + "multiple", new com.openexchange.ajax.Multiple(), null, null);
         // http.registerServlet(prefix+"quota", new com.openexchange.ajax.Quota(), null, null);
         http.registerServlet(prefix + "control", new com.openexchange.ajax.ConfigJump(), null, null);

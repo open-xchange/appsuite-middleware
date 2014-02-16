@@ -1150,13 +1150,8 @@ public class ContactMySql implements ContactSql {
                             final String value = values[i];
                             sb.append(" ( co.").append(field).append(" LIKE ").append(value).append(") ").append(searchHabit).append(' ');
                             modified = true;
-                        } else if (fields[i] == Contact.NUMBER_OF_DISTRIBUTIONLIST || fields[i] == CommonObject.NUMBER_OF_LINKS) {
-                            String field = "";
-                            if (fields[i] == Contact.NUMBER_OF_DISTRIBUTIONLIST) {
-                                field = Contacts.mapping[Contact.NUMBER_OF_DISTRIBUTIONLIST].getDBFieldName();
-                            } else if (fields[i] == CommonObject.NUMBER_OF_LINKS) {
-                                field = Contacts.mapping[CommonObject.NUMBER_OF_LINKS].getDBFieldName();
-                            }
+                        } else if (fields[i] == Contact.NUMBER_OF_DISTRIBUTIONLIST) {
+                            String field = Contacts.mapping[Contact.NUMBER_OF_DISTRIBUTIONLIST].getDBFieldName();
                             final String value = values[i];
                             sb.append('(').append("co.").append(field).append(" = ").append(value).append(") ").append(searchHabit).append(
                                 ' ');

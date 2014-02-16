@@ -176,17 +176,6 @@ public class CommonWriter extends FolderChildWriter {
         }
     };
 
-    private static final FieldWriter<CommonObject> NUMBER_OF_LINKS_WRITER = new FieldWriter<CommonObject>() {
-        @Override
-        public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json, Session session) {
-            writeValue(obj.getNumberOfLinks(), json, obj.containsNumberOfLinks());
-        }
-        @Override
-        public void write(final CommonObject obj, final TimeZone timeZone, final JSONObject json, Session session) {
-            // This value is nowhere written to a JSON object.
-        }
-    };
-
     private static final FieldWriter<CommonObject> EXTENDED_PROPERTIES_WRITER = new FieldWriter<CommonObject>() {
         @Override
         public void write(final CommonObject obj, final TimeZone timeZone, final JSONArray json, Session session) throws JSONException {
@@ -206,7 +195,6 @@ public class CommonWriter extends FolderChildWriter {
         m.put(CommonObject.COLOR_LABEL, COLORLABEL_WRITER);
         m.put(CommonObject.NUMBER_OF_ATTACHMENTS, NUMBER_OF_ATTACHMENTS_WRITER);
         m.put(CommonObject.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC_WRITER);
-        m.put(CommonObject.NUMBER_OF_LINKS, NUMBER_OF_LINKS_WRITER);
         m.put(CommonObject.EXTENDED_PROPERTIES, EXTENDED_PROPERTIES_WRITER);
         WRITER_MAP = m;
     }

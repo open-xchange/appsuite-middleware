@@ -677,7 +677,6 @@ public class RoundtripTest extends AbstractRMITest {
                 assertEquals("Note is not equal.", a1.getNote(), a2.getNote());
                 assertEquals("Notification is not equal.", a1.getNotification(), a2.getNotification());
                 assertEquals("Number of attachments is not equal.", a1.getNumberOfAttachments(), a2.getNumberOfAttachments());
-                assertEquals("Number of links is not equal.", a1.getNumberOfLinks(), a2.getNumberOfLinks());
                 assertEquals("Occurence is not equal.", a1.getOccurrence(), a2.getOccurrence());
                 assertEquals("Organizer is not equal.", a1.getOrganizer(), a2.getOrganizer());
                 assertEquals("Private flag is not equal.", a1.getPrivateFlag(), a2.getPrivateFlag());
@@ -729,7 +728,6 @@ public class RoundtripTest extends AbstractRMITest {
                 assertEquals("Note is not equal.", t1.getNote(), t2.getNote());
                 assertEquals("Notification is not equal.", t1.getNotification(), t2.getNotification());
                 assertEquals("Number of attachments is not equal.", t1.getNumberOfAttachments(), t2.getNumberOfAttachments());
-                assertEquals("Number of links is not equal.", t1.getNumberOfLinks(), t2.getNumberOfLinks());
                 assertEquals("Occurence is not equal.", t1.getOccurrence(), t2.getOccurrence());
                 assertEquals("Organizer is not equal.", t1.getOrganizer(), t2.getOrganizer());
                 assertEquals("Participants is not equal.", t1.getParticipants(), t2.getParticipants());
@@ -804,7 +802,6 @@ public class RoundtripTest extends AbstractRMITest {
                     c2.getNumberOfDistributionLists());
                 assertEquals("Number of employee is not equal.", c1.getNumberOfEmployee(), c2.getNumberOfEmployee());
                 assertEquals("Number of images is not equal.", c1.getNumberOfImages(), c2.getNumberOfImages());
-                assertEquals("Number of links is not equal.", c1.getNumberOfLinks(), c2.getNumberOfLinks());
                 assertEquals("Position is not equal.", c1.getPosition(), c2.getPosition());
                 assertEquals("Postal code business is not equal.", c1.getPostalCodeBusiness(), c2.getPostalCodeBusiness());
                 assertEquals("Postal code home is not equal.", c1.getPostalCodeHome(), c2.getPostalCodeHome());
@@ -817,7 +814,6 @@ public class RoundtripTest extends AbstractRMITest {
                     "Size of distribution list array is not equal.",
                     c1.getSizeOfDistributionListArray(),
                     c2.getSizeOfDistributionListArray());
-                assertEquals("Size of links is not equal.", c1.getSizeOfLinks(), c2.getSizeOfLinks());
                 assertEquals("Spouse name is not equal.", c1.getSpouseName(), c2.getSpouseName());
                 assertEquals("State business is not equal.", c1.getStateBusiness(), c2.getStateBusiness());
                 assertEquals("State home is not equal.", c1.getStateHome(), c2.getStateHome());

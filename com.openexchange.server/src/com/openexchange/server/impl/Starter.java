@@ -155,10 +155,6 @@ public class Starter implements Initialization {
      * Initializes the Attachment Calendar Listener
      */
     new com.openexchange.groupware.attach.AttachmentInit(),
-    /**
-     * Initializes the Link Attachment Listener
-     */
-    new com.openexchange.groupware.links.LinkInit(),
     new com.openexchange.mailaccount.internal.MailAccountStorageInit(),
     new com.openexchange.multiple.internal.MultipleHandlerInit(),
     new com.openexchange.groupware.impl.id.IDGeneratorInit() };
