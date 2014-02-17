@@ -1925,7 +1925,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     @Override
     public User[] getData(final Context ctx, final User[] users) throws StorageException {
-        final int context_id = ctx.getId();
+        final int cid = i(ctx.getId());
         final Class<User> c = User.class;
         final Method[] theMethods = c.getMethods();
         final ArrayList<Method> list = new ArrayList<Method>();
@@ -1970,19 +1970,19 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         PreparedStatement stmtstd = null;
         final ArrayList<User> userlist = new ArrayList<User>();
         try {
-            read_ox_con = cache.getConnectionForContext(context_id);
+            read_ox_con = cache.getConnectionForContext(cid);
             final OXToolStorageInterface oxtool = OXToolStorageInterface.getInstance();
             final int adminForContext = oxtool.getAdminForContext(ctx, read_ox_con);
 
             stmt = read_ox_con.prepareStatement("SELECT uid FROM login2user WHERE cid = ? AND id = ?");
-            stmt.setInt(1, context_id);
+            stmt.setInt(1, cid);
             stmt2 = read_ox_con.prepareStatement(query.toString());
             stmtusername = read_ox_con.prepareStatement("SELECT id FROM login2user WHERE cid = ? AND uid = ?");
-            stmtusername.setInt(1, context_id);
+            stmtusername.setInt(1, cid);
             stmtuserattributes = read_ox_con.prepareStatement("SELECT name, value FROM user_attribute WHERE cid=? and id=?");
-            stmtuserattributes.setInt(1, context_id);
+            stmtuserattributes.setInt(1, cid);
             stmtstd = read_ox_con.prepareStatement("SELECT std_trash,std_sent,std_drafts,std_spam,confirmed_spam,confirmed_ham,bits,send_addr,upload_quota,upload_quota_per_file FROM user_setting_mail WHERE cid = ? and user = ?");
-            stmtstd.setInt(1, context_id);
+            stmtstd.setInt(1, cid);
             ResultSet rs = null;
             for (final User user : users) {
                 int user_id = user.getId();
@@ -2032,7 +2032,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
                 newuser.setName(username);
 
-                stmt2.setInt(2, context_id);
+                stmt2.setInt(2, cid);
                 rs = stmt2.executeQuery();
                 if (rs.next()) {
                     for (final Method method : list) {
@@ -2139,7 +2139,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             closePreparedStatement(stmtstd);
             if (read_ox_con != null) {
                 try {
-                        cache.pushConnectionForContextAfterReading(context_id, read_ox_con);
+                        cache.pushConnectionForContextAfterReading(cid, read_ox_con);
                 } catch (final PoolException exp) {
                     log.error("Pool Error pushing ox read connection to pool!", exp);
                 }

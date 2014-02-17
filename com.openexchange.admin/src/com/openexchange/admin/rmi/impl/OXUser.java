@@ -1047,15 +1047,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     public User[] getData(final Context ctx, final User[] users, Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
         auth = auth == null ? new Credentials("","") : auth;
         try {
-            doNullCheck((Object[])users);
+            doNullCheck((Object[]) users);
         } catch (final InvalidDataException e1) {
             log.error("One of the given arguments for getData is null", e1);
             throw e1;
         }
-
         try {
             checkContext(ctx);
-
             if (users.length <= 0) {
                 throw new InvalidDataException();
             }
@@ -1063,11 +1061,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             log.error("", e);
             throw e;
         }
-
-            log.debug("{} - {} - {}", ctx, Arrays.toString(users), auth);
-
+        log.debug("{} - {} - {}", ctx, Arrays.toString(users), auth);
         try {
-            // enable check who wants to get data if authentcaition is enabled
+            // enable check who wants to get data if authentication is enabled
             if (!cache.contextAuthenticationDisabled()) {
                 // ok here its possible that a user wants to get his own data
                 // SPECIAL USER AUTH CHECK FOR THIS METHOD!
@@ -1087,9 +1083,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                                 throw invalidCredentialsException;
                             }
                         } else {
-                            // id not set, try to resolv id by username and then
-                            // check
-                            // again
+                            // id not set, try to resolv id by username and then check again
                             final String username = users[0].getName();
                             if (username != null) {
                                 final int check_user_id = tool.getUserIDByUsername(ctx, username);
@@ -1119,14 +1113,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             for (final User usr : users) {
                 final String username = usr.getName();
                 final Integer userid = usr.getId();
-                if (userid != null && !tool.existsUser(ctx, userid.intValue())) {
+                if (null != userid && !tool.existsUser(ctx, i(userid))) {
                     if (username != null) {
-                        throw new NoSuchUserException("No such user " + username+" in context "+ctx.getId());
+                        throw new NoSuchUserException("No such user " + username + " in context " + ctx.getId());
                     }
-                    throw new NoSuchUserException("No such user "+userid+" in context "+ctx.getId());
+                    throw new NoSuchUserException("No such user " + userid + " in context " + ctx.getId());
                 }
-                if (username != null && !tool.existsUserName(ctx, username)) {
-                    throw new NoSuchUserException("No such user " + username+" in context "+ctx.getId());
+                if (null != username && !tool.existsUserName(ctx, username)) {
+                    throw new NoSuchUserException("No such user " + username + " in context " + ctx.getId());
                 }
                 if (username == null && userid == null) {
                     throw new InvalidDataException("Username and userid missing.");
@@ -1135,7 +1129,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 if (username == null && null != userid) {
                     usr.setName(tool.getUsernameByUserID(ctx, userid.intValue()));
                 }
-
                 if (userid == null) {
                     usr.setId(new Integer(tool.getUserIDByUsername(ctx, username)));
                 }
@@ -1456,22 +1449,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         // TODO mail checks
     }
 
-    private void checkContext(final Context ctx) throws InvalidDataException {
+    private static void checkContext(final Context ctx) throws InvalidDataException {
         if (null == ctx || null == ctx.getId()) {
             throw new InvalidDataException("Context invalid");
         }
-        /*-
-         * Check a context existence is considered as a security flaw
-         *
-        try {
-            if (!oxu.doesContextExist(ctx)) {
-                throw new InvalidDataException("Context " + ctx.getId() + " does not exist.");
-            }
-        } catch (StorageException e) {
-            throw new InvalidDataException(e);
-        }
-         *
-         */
+        // Check a context existence is considered as a security flaw
     }
 
     private String getUserIdArrayFromUsersAsString(final User[] users) throws InvalidDataException {

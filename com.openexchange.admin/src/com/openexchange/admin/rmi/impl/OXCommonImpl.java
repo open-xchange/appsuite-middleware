@@ -153,13 +153,13 @@ public abstract class OXCommonImpl {
      * @throws com.openexchange.admin.rmi.exceptions.NoSuchContextException
      */
     protected void checkContextAndSchema(final Context ctx) throws StorageException, DatabaseUpdateException, NoSuchContextException {
-        if(!tool.existsContext(ctx)) {
-            throw new NoSuchContextException("The context "+ctx.getId()+" does not exist!");
+        if (!tool.existsContext(ctx)) {
+            throw new NoSuchContextException("The context " + ctx.getId() + " does not exist!");
         }
         if (tool.checkAndUpdateSchemaIfRequired(ctx)) {
-            final DatabaseUpdateException databaseUpdateException = new DatabaseUpdateException("Database is locked or is now beeing updated, please try again later");
-            log.error("", databaseUpdateException);
-            throw databaseUpdateException;
+            final DatabaseUpdateException e = new DatabaseUpdateException("Database is locked or is now beeing updated, please try again later");
+            log.error(e.getMessage(), e);
+            throw e;
         }
     }
 }
