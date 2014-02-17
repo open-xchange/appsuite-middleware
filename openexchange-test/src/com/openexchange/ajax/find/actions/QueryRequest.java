@@ -143,7 +143,7 @@ public class QueryRequest extends AbstractFindRequest<QueryResponse> {
             final JSONArray jFilters = new JSONArray(filters.size());
             for (final Filter filter : filters) {
                 final JSONObject jFilter = new JSONObject(3);
-                
+
                 final Set<String> filterQueries = filter.getQueries();
                 final JSONArray jQueries = new JSONArray(filterQueries.size());
                 for (final String sQuery : filterQueries) {

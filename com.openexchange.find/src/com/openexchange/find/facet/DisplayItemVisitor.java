@@ -81,4 +81,6 @@ public interface DisplayItemVisitor {
 
     void visit(TaskTypeDisplayItem item);
 
+    void visit(NoDisplayItem item);
+
 }

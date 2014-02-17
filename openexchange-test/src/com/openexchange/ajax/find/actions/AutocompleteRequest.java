@@ -181,16 +181,21 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
         }
 
         private Filter parseJFilter(final JSONObject jFilter) throws JSONException {
-            final String query = jFilter.getString("query");
+            final JSONArray jQueries = jFilter.getJSONArray("queries");
+            int length = jQueries.length();
+            final Set<String> queries = new LinkedHashSet<String>(length);
+            for (int i = 0; i < length; i++) {
+                queries.add(jQueries.getString(i));
+            }
 
             final JSONArray jFields = jFilter.getJSONArray("fields");
-            final int length = jFields.length();
+            length= jFields.length();
             final Set<String> fields = new LinkedHashSet<String>(length);
             for (int i = 0; i < length; i++) {
                 fields.add(jFields.getString(i));
             }
 
-            return new Filter(fields, query);
+            return new Filter(fields, queries);
         }
 
         private DisplayItem parseJDisplayItem(final JSONObject jDisplayItem) throws JSONException {

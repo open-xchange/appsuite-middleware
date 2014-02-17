@@ -49,41 +49,38 @@
 
 package com.openexchange.find.facet;
 
+
 /**
- * Interface for several kinds objects that can be displayed by a client. Inheritors must implement hashCode() and equals().
+ * A null object for situations where a real display item makes no sense.
+ * Use it via {@link DisplayItem#NO_DISPLAY_ITEM}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added method {@link #getItem()}
  * @since v7.6.0
  */
-public interface DisplayItem {
+public class NoDisplayItem implements DisplayItem {
 
-    /**
-     * Use as null object in cases where a display makes no sense.
-     */
-    public static final DisplayItem NO_DISPLAY_ITEM = new NoDisplayItem();
+    NoDisplayItem() {
+        super();
+    }
 
-    /**
-     * A display item must contain a default value.
-     * <p>
-     * Clients may use it for displaying the item if they have no implementation to handle the concrete item type.
-     *
-     * @return The default value. Never <code>null</code>.
-     */
-    String getDefaultValue();
+    @Override
+    public String getDefaultValue() {
+        return "default";
+    }
 
-    /**
-     * Gets the item associated with this instance.
-     *
-     * @return The item
-     */
-    Object getItem();
+    @Override
+    public Object getItem() {
+        return null;
+    }
 
-    /**
-     * Delegate to given visitor.
-     *
-     * @param visitor The visitor to delegate to
-     */
-    void accept(DisplayItemVisitor visitor);
+    @Override
+    public void accept(DisplayItemVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    @Override
+    public String toString() {
+        return "NO_DISPLAY_ITEM";
+    }
 
 }

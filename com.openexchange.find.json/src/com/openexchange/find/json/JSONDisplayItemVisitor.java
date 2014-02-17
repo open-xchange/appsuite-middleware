@@ -62,6 +62,7 @@ import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.drive.FileTypeDisplayItem;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
+import com.openexchange.find.facet.NoDisplayItem;
 import com.openexchange.find.json.converters.StringTranslator;
 import com.openexchange.find.tasks.TaskStatusDisplayItem;
 import com.openexchange.find.tasks.TaskTypeDisplayItem;
@@ -169,6 +170,15 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
         try {
             json.put("defaultValue", translator.translate(locale, item.getDefaultValue()));
             json.put("task_type", Strings.toLowerCase(type.toString()));
+        } catch (JSONException e) {
+            errors.add(e);
+        }
+    }
+
+    @Override
+    public void visit(NoDisplayItem item) {
+        try {
+            addDefaultValue(item);
         } catch (JSONException e) {
             errors.add(e);
         }
