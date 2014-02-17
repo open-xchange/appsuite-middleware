@@ -58,6 +58,7 @@ import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.config.POP3Config;
+import com.openexchange.pop3.storage.AlreadyLockedException;
 import com.openexchange.pop3.storage.POP3Storage;
 import com.openexchange.pop3.storage.POP3StorageProperties;
 import com.openexchange.pop3.storage.POP3StoragePropertyNames;
@@ -158,12 +159,16 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
          *
          * Access POP3 account and synchronize
          */
-        pop3Storage.syncMessages(isExpungeOnQuit(), lastAccessed);
-        /*
-         * Update last-accessed time stamp
-         */
-        final long stamp = System.currentTimeMillis();
-        pop3StorageProperties.addProperty(POP3StoragePropertyNames.PROPERTY_LAST_ACCESSED, Long.toString(stamp));
+        try {
+            pop3Storage.syncMessages(isExpungeOnQuit(), lastAccessed);
+            /*
+             * Update last-accessed time stamp
+             */
+            final long stamp = System.currentTimeMillis();
+            pop3StorageProperties.addProperty(POP3StoragePropertyNames.PROPERTY_LAST_ACCESSED, Long.toString(stamp));
+        } catch (final AlreadyLockedException e) {
+            LOG.debug("\n\tPOP3 account {} locked.", server, e);
+        }
         return null;
     }
 

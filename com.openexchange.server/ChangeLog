@@ -1,3 +1,7 @@
+* 2014-02-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31110: Proper re-initialize POP3 server's capabilities of successful authentication
+
 * 2014-02-14 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 31106: Parse allowed units for bandwidth parameters as described in property file

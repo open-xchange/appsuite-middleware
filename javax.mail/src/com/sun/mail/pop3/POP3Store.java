@@ -43,7 +43,6 @@ package com.sun.mail.pop3;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.lang.reflect.*;
-
 import javax.mail.*;
 import javax.mail.internet.*;
 import java.io.File;
@@ -52,7 +51,6 @@ import java.io.IOException;
 import java.io.EOFException;
 import java.util.Collections;
 import java.util.Map;
-
 import com.sun.mail.util.PropUtil;
 import com.sun.mail.util.MailLogger;
 import com.sun.mail.util.SocketConnectException;
@@ -82,7 +80,7 @@ public class POP3Store extends Store {
     private boolean useStartTLS = false;
     private boolean requireStartTLS = false;
     private boolean usingSSL = false;
-    private Map capabilities;
+    private Map<String, String> capabilities;
     private MailLogger logger;
 
     // following set here and accessed by other classes in this package
@@ -385,7 +383,7 @@ public class POP3Store extends Store {
      * @return	Map of capabilities
      * @since	JavaMail 1.4.3
      */
-    public Map capabilities() throws MessagingException {
+    public Map<String, String> capabilities() throws MessagingException {
 	Map c;
 	synchronized (this) {
 	    c = capabilities;
@@ -394,6 +392,30 @@ public class POP3Store extends Store {
 	    return Collections.unmodifiableMap(c);
 	else
 	    return Collections.EMPTY_MAP;
+    }
+
+    /**
+     * Reinitializes & returns a Map of the capabilities the server provided,
+     * as per RFC 2449.  If the server doesn't support RFC 2449,
+     * an emtpy Map is returned.  The returned Map can not be modified.
+     * The key to the Map is the upper case capability name as
+     * a String.  The value of the entry is the entire String
+     * capability line returned by the server. <p>
+     *
+     * For example, to check if the server supports the STLS capability, use:
+     * <code>if (store.capabilities().containsKey("STLS")) ...</code>
+     *
+     * @return  Reinitialized Map of capabilities
+     */
+    public synchronized Map<String, String> reinitCapabilities() throws MessagingException {
+    try {
+        port.setCapabilities(port.capa());
+        capabilities = port.getCapabilities(); // save for later, may be null
+        Map<String, String> c = capabilities;
+        return c == null ? Collections.<String, String> emptyMap() : Collections.<String, String> unmodifiableMap(c);
+    } catch (IOException ioex) {
+        throw new MessagingException("CAPA failed", ioex);
+    }
     }
 
     /**

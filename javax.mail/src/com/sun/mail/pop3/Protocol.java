@@ -75,7 +75,7 @@ class Protocol {
     private MailLogger logger;
     private MailLogger traceLogger;
     private String apopChallenge = null;
-    private Map capabilities = null;
+    private Map<String, String> capabilities = null;
     private boolean pipelining;
     private boolean noauthdebug = true;	// hide auth info in debug output
     private boolean traceSuspended;	// temporarily suspend tracing
@@ -191,7 +191,7 @@ class Protocol {
 	    return;
 	}
 
-	capabilities = new HashMap(10);
+	capabilities = new HashMap<String, String>(10);
 	BufferedReader r = null;
 	try {
 	    r = new BufferedReader(new InputStreamReader(in, "us-ascii"));
@@ -230,7 +230,7 @@ class Protocol {
     /**
      * Return the map of capabilities returned by the server.
      */
-    synchronized Map getCapabilities() {
+    synchronized Map<String, String> getCapabilities() {
 	return capabilities;
     }
 
