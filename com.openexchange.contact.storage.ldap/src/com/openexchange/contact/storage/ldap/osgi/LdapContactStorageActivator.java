@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.storage.ldap.osgi;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -61,9 +62,11 @@ import com.openexchange.contact.storage.ldap.database.LdapCreateTableService;
 import com.openexchange.contact.storage.ldap.database.LdapCreateTableTask;
 import com.openexchange.contact.storage.ldap.database.LdapDeleteListener;
 import com.openexchange.contact.storage.ldap.internal.LdapServiceLookup;
+import com.openexchange.contact.storage.ldap.internal.Tools;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
@@ -79,7 +82,7 @@ import com.openexchange.user.UserService;
 public class LdapContactStorageActivator extends HousekeepingActivator implements Reloadable {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapContactStorageActivator.class);
-    private static final String[] PROPERTIES = new String[] {"all *.properties files in folder"};
+    private static final String[] PROPERTIES = new String[] {"all properties in file"};
 
     /**
      * Initializes a new {@link LdapContactStorageActivator}.
@@ -164,8 +167,14 @@ public class LdapContactStorageActivator extends HousekeepingActivator implement
 
     @Override
     public Map<String, String[]> getConfigfileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put("contact-storage-ldap/", PROPERTIES);
+        Map<String, String[]> map = new HashMap<String, String[]>();
+        try {
+            for (File propertyFile : Tools.listPropertyFiles()) {
+                map.put(propertyFile.getName(), PROPERTIES);
+            }
+        } catch (OXException e) {
+            LOG.error("error reloading config file: {}", e);
+        }
         return map;
     }
 
