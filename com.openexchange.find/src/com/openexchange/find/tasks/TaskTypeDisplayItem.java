@@ -47,63 +47,73 @@
  *
  */
 
-package com.openexchange.find.basic.osgi;
+package com.openexchange.find.tasks;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.Constants;
-import com.openexchange.contact.ContactService;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.find.basic.Services;
-import com.openexchange.find.basic.drive.MockDriveDriver;
-import com.openexchange.find.basic.mail.MockMailDriver;
-import com.openexchange.find.basic.tasks.MockTasksDriver;
-import com.openexchange.find.spi.ModuleSearchDriver;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.mail.service.MailService;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.find.facet.DisplayItem;
+import com.openexchange.find.facet.DisplayItemVisitor;
 
 /**
- * {@link FindBasicActivator}
+ * The display item for task types; either <i>Single Task</i> or <i>Series</i>.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since 7.6.0
+ * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
+ * @since v7.6.0
  */
-public class FindBasicActivator extends HousekeepingActivator {
+public class TaskTypeDisplayItem implements DisplayItem {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactService.class, FolderService.class, MailService.class, MailAccountStorageService.class, IDBasedFileAccessFactory.class };
-    }
+    /**
+     * The task  type enumeration.
+     */
+    public static enum Type {
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
+        SINGLE_TASK("single_task"),
+        SERIES("series"),
+        ;
 
-        {
-            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-            registerService(ModuleSearchDriver.class, new MockMailDriver(), properties);
+        private final String identifier;
+
+        private Type(final String identifier) {
+            this.identifier = identifier;
         }
 
-        {
-            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-            registerService(ModuleSearchDriver.class, new MockDriveDriver(), properties);
-        }
-
-        {
-            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-            registerService(ModuleSearchDriver.class, new MockTasksDriver(), properties);
+        /**
+         * Gets the identifier
+         *
+         * @return The identifier
+         */
+        public String getIdentifier() {
+            return identifier;
         }
     }
 
+    // ----------------------------------------------------------------------------- //
+
+    private final Type type;
+    private final String displayName;
+
+    /**
+     * Initializes a new {@link TaskTypeDisplayItem}.
+     *
+     * @param type The Task type associated with this display item
+     */
+    public TaskTypeDisplayItem(final String displayName, final Type type) {
+        super();
+        this.displayName = displayName;
+        this.type = type;
+    }
+
     @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        super.stopBundle();
+    public void accept(DisplayItemVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    @Override
+    public Type getItem() {
+        return type;
+    }
+
+    @Override
+    public String getDefaultValue() {
+        return displayName;
     }
 
 }

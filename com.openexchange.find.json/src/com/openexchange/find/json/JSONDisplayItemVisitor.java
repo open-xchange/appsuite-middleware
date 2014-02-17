@@ -63,6 +63,8 @@ import com.openexchange.find.drive.FileTypeDisplayItem;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
 import com.openexchange.find.json.converters.StringTranslator;
+import com.openexchange.find.tasks.TaskStatusDisplayItem;
+import com.openexchange.find.tasks.TaskTypeDisplayItem;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
@@ -145,6 +147,28 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
         try {
             json.put("defaultValue", translator.translate(locale, item.getDefaultValue()));
             json.put("file_type", Strings.toLowerCase(type.toString()));
+        } catch (JSONException e) {
+            errors.add(e);
+        }
+    }
+
+    @Override
+    public void visit(TaskStatusDisplayItem item) {
+        final TaskStatusDisplayItem.Type type = item.getItem();
+        try {
+            json.put("defaultValue", translator.translate(locale, item.getDefaultValue()));
+            json.put("task_status", Strings.toLowerCase(type.toString()));
+        } catch (JSONException e) {
+            errors.add(e);
+        }
+    }
+
+    @Override
+    public void visit(TaskTypeDisplayItem item) {
+        final TaskTypeDisplayItem.Type type = item.getItem();
+        try {
+            json.put("defaultValue", translator.translate(locale, item.getDefaultValue()));
+            json.put("task_type", Strings.toLowerCase(type.toString()));
         } catch (JSONException e) {
             errors.add(e);
         }

@@ -47,63 +47,45 @@
  *
  */
 
-package com.openexchange.find.basic.osgi;
+package com.openexchange.find.tasks;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.Constants;
-import com.openexchange.contact.ContactService;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.find.basic.Services;
-import com.openexchange.find.basic.drive.MockDriveDriver;
-import com.openexchange.find.basic.mail.MockMailDriver;
-import com.openexchange.find.basic.tasks.MockTasksDriver;
-import com.openexchange.find.spi.ModuleSearchDriver;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.mail.service.MailService;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.find.Document;
+import com.openexchange.find.DocumentVisitor;
 
 /**
- * {@link FindBasicActivator}
+ * {@link TasksDocument} - The document for a file.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since 7.6.0
+ * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
  */
-public class FindBasicActivator extends HousekeepingActivator {
+public class TasksDocument implements Document {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactService.class, FolderService.class, MailService.class, MailAccountStorageService.class, IDBasedFileAccessFactory.class };
+    private static final long serialVersionUID = 8600470657595326510L;
+
+    private final Task task;
+
+    /**
+     * Initializes a new {@link TasksDocument}.
+     *
+     * @param task
+     */
+    public TasksDocument(final Task task) {
+        super();
+        this.task = task;
+    }
+
+    /**
+     * Gets the file
+     *
+     * @return The file
+     */
+    public Task getTask() {
+        return task;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        {
-            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-            registerService(ModuleSearchDriver.class, new MockMailDriver(), properties);
-        }
-
-        {
-            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-            registerService(ModuleSearchDriver.class, new MockDriveDriver(), properties);
-        }
-
-        {
-            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-            registerService(ModuleSearchDriver.class, new MockTasksDriver(), properties);
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        super.stopBundle();
+    public void accept(DocumentVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

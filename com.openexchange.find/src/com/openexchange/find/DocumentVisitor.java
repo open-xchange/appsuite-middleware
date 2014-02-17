@@ -50,6 +50,7 @@ package com.openexchange.find;
 
 import com.openexchange.find.drive.FileDocument;
 import com.openexchange.find.mail.MailDocument;
+import com.openexchange.find.tasks.TasksDocument;
 
 /**
  * A {@link DocumentVisitor} has to be used to process the {@link Document}s
@@ -74,4 +75,10 @@ public interface DocumentVisitor {
      */
     void visit(FileDocument fileDocument);
 
+    /**
+     * Handles given task document.
+     *
+     * @param TasksDocument The task document
+     */
+    void visit(TasksDocument taskDocument);
 }

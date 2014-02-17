@@ -47,63 +47,65 @@
  *
  */
 
-package com.openexchange.find.basic.osgi;
+package com.openexchange.find.tasks;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.Constants;
-import com.openexchange.contact.ContactService;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.find.basic.Services;
-import com.openexchange.find.basic.drive.MockDriveDriver;
-import com.openexchange.find.basic.mail.MockMailDriver;
-import com.openexchange.find.basic.tasks.MockTasksDriver;
-import com.openexchange.find.spi.ModuleSearchDriver;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.mail.service.MailService;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link FindBasicActivator}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since 7.6.0
+ * {@link TasksStrings}
+ * 
+ * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
  */
-public class FindBasicActivator extends HousekeepingActivator {
+public class TasksStrings implements LocalizableStrings {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactService.class, FolderService.class, MailService.class, MailAccountStorageService.class, IDBasedFileAccessFactory.class };
-    }
+    // ------------------------- i18n strings for facet types -------------------------------------- //
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
+    // Search in task name.
+    public static final String FACET_TASK_NAME = "Task name";
 
-        {
-            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-            registerService(ModuleSearchDriver.class, new MockMailDriver(), properties);
-        }
+    // Search in folders.
+    public static final String FACET_TASK_FOLDERS = "Task folders";
 
-        {
-            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-            registerService(ModuleSearchDriver.class, new MockDriveDriver(), properties);
-        }
+    // Search in persons.
+    public static final String FACET_TASK_PARTICIPANTS = "Task participants";
 
-        {
-            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-            registerService(ModuleSearchDriver.class, new MockTasksDriver(), properties);
-        }
-    }
+    // Search in task type.
+    public static final String FACET_TASK_TYPE = "Task type";
 
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        super.stopBundle();
-    }
+    // Search in task status
+    public static final String FACET_TASK_STATUS = "Task status";
+
+    // Search in task description
+    public static final String FACET_TASK_DESCRIPTION = "Task description";
+
+    // Search in task location
+    public static final String FACET_TASK_LOCATION = "Task location";
+
+    // Search in task attachment name
+    public static final String FACET_TASK_ATTACHMENT_NAME = "Task attachment name";
+
+    // ------------------------- i18n strings for folder types ------------------------------------- //
+
+    public static final String TASK_NAME = FACET_TASK_NAME;
+
+    public static final String TASK_DESCRIPTION = FACET_TASK_DESCRIPTION;
+
+    public static final String TASK_LOCATION = FACET_TASK_LOCATION;
+
+    public static final String TASK_ATTACHMENT_NAME = FACET_TASK_ATTACHMENT_NAME;
+
+    public static final String TASK_TYPE_NOT_STARTED = "Not Started";
+
+    public static final String TASK_TYPE_IN_PROGRESS = "in Progress";
+
+    public static final String TASK_TYPE_DONE = "DONE";
+
+    public static final String TASK_TYPE_WAITING = "Waiting";
+
+    public static final String TASK_TYPE_DEFERRED = "Deferred";
+
+    public static final String TASK_STATUS_SINGLE_TASK = "Single Task";
+
+    public static final String TASK_STATUS_SERIES = "Series";
 
 }

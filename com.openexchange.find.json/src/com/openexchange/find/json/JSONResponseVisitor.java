@@ -60,6 +60,7 @@ import com.openexchange.find.DocumentVisitor;
 import com.openexchange.find.drive.FileDocument;
 import com.openexchange.find.json.osgi.ResultConverterRegistry;
 import com.openexchange.find.mail.MailDocument;
+import com.openexchange.find.tasks.TasksDocument;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -140,6 +141,21 @@ public class JSONResponseVisitor implements DocumentVisitor {
         }
     }
 
+    @Override
+    public void visit(TasksDocument taskDocument) {
+        try {
+            final ResultConverter converter = converterRegistry.getConverter("task");
+            if (null != converter) {
+                final AJAXRequestData requestData = new AJAXRequestData();
+                final AJAXRequestResult requestResult = new AJAXRequestResult(taskDocument.getTask());
+                converter.convert(requestData, requestResult, session, null);
+                json.put(requestResult.getResultObject());
+            }
+        } catch (final OXException e) {
+            errors.add(e);
+        }
+    }
+
     /**
      * Gets the JSON array containing documents.
      *
@@ -157,5 +173,7 @@ public class JSONResponseVisitor implements DocumentVisitor {
     public List<OXException> getErrors() {
         return errors;
     }
+
+    
 
 }

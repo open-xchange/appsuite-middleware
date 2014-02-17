@@ -47,63 +47,42 @@
  *
  */
 
-package com.openexchange.find.basic.osgi;
+package com.openexchange.find.tasks;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.Constants;
-import com.openexchange.contact.ContactService;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.find.basic.Services;
-import com.openexchange.find.basic.drive.MockDriveDriver;
-import com.openexchange.find.basic.mail.MockMailDriver;
-import com.openexchange.find.basic.tasks.MockTasksDriver;
-import com.openexchange.find.spi.ModuleSearchDriver;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.mail.service.MailService;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.find.facet.FacetType;
 
 /**
- * {@link FindBasicActivator}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since 7.6.0
+ * {@link TasksFacetType} - Facet types for the drive module.
+ * 
+ * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
  */
-public class FindBasicActivator extends HousekeepingActivator {
+public enum TasksFacetType implements FacetType {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactService.class, FolderService.class, MailService.class, MailAccountStorageService.class, IDBasedFileAccessFactory.class };
+    TASK_PARTICIPANTS(TasksStrings.FACET_TASK_PARTICIPANTS),
+    TASK_FOLDERS(TasksStrings.FACET_TASK_FOLDERS),
+    TASK_NAME(TasksStrings.FACET_TASK_NAME),
+    TASK_DESCRIPTION(TasksStrings.FACET_TASK_DESCRIPTION),
+    TASK_LOCATION(TasksStrings.FACET_TASK_LOCATION),
+    TASK_ATTACHMENT_NAME(TasksStrings.FACET_TASK_ATTACHMENT_NAME),
+    TASK_TYPE(TasksStrings.FACET_TASK_TYPE),
+    TASK_STATUS(TasksStrings.FACET_TASK_STATUS), ;
+
+    // ---------------------------------------------------------------------------------------------- //
+
+    private final String displayName;
+
+    private TasksFacetType(final String displayName) {
+        this.displayName = displayName;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        {
-            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-            registerService(ModuleSearchDriver.class, new MockMailDriver(), properties);
-        }
-
-        {
-            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-            registerService(ModuleSearchDriver.class, new MockDriveDriver(), properties);
-        }
-
-        {
-            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-            registerService(ModuleSearchDriver.class, new MockTasksDriver(), properties);
-        }
+    public String getName() {
+        return toString().toLowerCase();
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        super.stopBundle();
+    public String getDisplayName() {
+        return displayName;
     }
 
 }
