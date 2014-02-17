@@ -96,6 +96,7 @@ import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.connect.POP3StoreConnector;
 import com.openexchange.pop3.connect.POP3StoreConnector.POP3StoreResult;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
+import com.openexchange.pop3.storage.AlreadyLockedException;
 import com.openexchange.pop3.storage.POP3Storage;
 import com.openexchange.pop3.storage.POP3StorageProperties;
 import com.openexchange.pop3.storage.POP3StoragePropertyNames;
@@ -556,7 +557,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         // Acquire DB lock
         if (false == acquireLock(session)) {
             // Another thread is already in process.
-            return;
+            throw new AlreadyLockedException();
         }
         // Start sync process
         POP3Store pop3Store = null;
@@ -826,14 +827,20 @@ public class MailAccountPOP3Storage implements POP3Storage {
          * Gather new messages
          */
         final List<Message> toFetch = new ArrayList<Message>(messages.length);
-        for (int i = 0; i < messages.length; i++) {
-            final Message message = messages[i];
-            final String uidl = seqnum2uidl.get(message.getMessageNumber());
-            if (!storageUIDLs.contains(uidl)) {
-                /*
-                 * UIDL not yet contained in storage
-                 */
-                toFetch.add(message);
+        if (storageUIDLs.isEmpty()) {
+            for (int i = 0; i < messages.length; i++) {
+                toFetch.add(messages[i]);
+            }
+        } else {
+            for (int i = 0; i < messages.length; i++) {
+                final Message message = messages[i];
+                final String uidl = seqnum2uidl.get(message.getMessageNumber());
+                if (!storageUIDLs.contains(uidl)) {
+                    /*
+                     * UIDL not yet contained in storage
+                     */
+                    toFetch.add(message);
+                }
             }
         }
         /*

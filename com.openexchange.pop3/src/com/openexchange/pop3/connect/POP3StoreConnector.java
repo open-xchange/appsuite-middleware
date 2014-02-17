@@ -68,6 +68,7 @@ import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.pop3.POP3ExceptionCode;
@@ -116,16 +117,23 @@ public final class POP3StoreConnector {
      */
     public static final class POP3StoreResult {
 
-        private final String capabilities;
-
+        private String capabilities;
         private POP3Store pop3Store;
-
         private final List<OXException> warnings;
 
         protected POP3StoreResult(final String capabilities) {
             super();
             this.capabilities = capabilities;
             warnings = new ArrayList<OXException>(2);
+        }
+
+        /**
+         * Sets the capabilities
+         *
+         * @param capabilities The capabilities to set
+         */
+        public void setCapabilities(final String capabilities) {
+            this.capabilities = capabilities;
         }
 
         /**
@@ -237,9 +245,9 @@ public final class POP3StoreConnector {
             final IPOP3Properties pop3ConfProps = (IPOP3Properties) pop3Config.getMailProperties();
             final String server = pop3Config.getServer();
             final int port = pop3Config.getPort();
-            String capabilities;
+            String staticCapabilities;
             try {
-                capabilities =
+                staticCapabilities =
                     POP3CapabilityCache.getCapability(
                         InetAddress.getByName(IDNA.toASCII(server)),
                         port,
@@ -247,21 +255,15 @@ public final class POP3StoreConnector {
                         pop3ConfProps,
                         pop3Config.getLogin());
             } catch (final Exception e) {
-                final StringBuilder sb = new StringBuilder("Couldn't detect capabilities from POP3 server \"");
-                sb.append(server).append("\" with login \"");
-                sb.append(pop3Config.getLogin()).append("\" (user=");
-                sb.append(session.getUserId()).append(", context=");
-                sb.append(session.getContextId()).append("):\n");
-                sb.append(e.getMessage());
-                LOG.warn(sb.toString(), e);
-                capabilities = POP3CapabilityCache.getDeaultCapabilities();
+                LOG.warn("Couldn't detect capabilities from POP3 server \"{}\" with login \"{}\" (user={}, context={})", server, pop3Config.getLogin(), session.getUserId(), session.getContextId(), e);
+                staticCapabilities = POP3CapabilityCache.getDeaultCapabilities();
             }
             /*
              * JavaMail POP3 implementation requires capabilities "UIDL" and "TOP"
              */
-            final POP3StoreResult result = new POP3StoreResult(capabilities);
+            final POP3StoreResult result = new POP3StoreResult(staticCapabilities);
             final String login = pop3Config.getLogin();
-            final boolean responseCodeAware = capabilities.indexOf("RESP-CODES") >= 0;
+            boolean responseCodeAware = staticCapabilities.indexOf("RESP-CODES") >= 0;
             String tmpPass = pop3Config.getPassword();
             if (tmpPass != null) {
                 try {
@@ -296,7 +298,7 @@ public final class POP3StoreConnector {
              * Check if a secure POP3 connection should be established.
              *
              * With JavaMail v1.4.3 the JavaMail POP3 provider supports to start in plain text mode and
-             * switch the connection into TLS mode using the STLS command.
+             * then switching the connection into TLS mode using the STLS command.
              */
             final String sPort = String.valueOf(port);
             final String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
@@ -352,8 +354,20 @@ public final class POP3StoreConnector {
             /*
              * ... and connect
              */
+            String capabilities = staticCapabilities;
             try {
                 pop3Store.connect(server, port, login, tmpPass);
+                // Fetch capabilities again
+                final Map<String, String> caps = pop3Store.reinitCapabilities();
+                if (!caps.isEmpty()) {
+                    final StringAllocator sb = new StringAllocator(128);
+                    for (final String cap : caps.keySet()) {
+                        sb.append(cap).append('\n');
+                    }
+                    capabilities = sb.toString();
+                    result.setCapabilities(capabilities);
+                    responseCodeAware = caps.containsKey("RESP-CODES");
+                }
             } catch (final AuthenticationFailedException e) {
                 if (monitorFailedAuthentication) {
                     /*
@@ -361,23 +375,23 @@ public final class POP3StoreConnector {
                      */
                     failedAuths.put(new LoginAndPass(login, tmpPass), Long.valueOf(System.currentTimeMillis()));
                 }
+                // Fetch capabilities again
+                final Map<String, String> caps = pop3Store.reinitCapabilities();
+                if (!caps.isEmpty()) {
+                    final StringAllocator sb = new StringAllocator(128);
+                    for (final String cap : caps.keySet()) {
+                        sb.append(cap).append('\n');
+                    }
+                    capabilities = sb.toString();
+                    result.setCapabilities(capabilities);
+                    responseCodeAware = caps.containsKey("RESP-CODES");
+                }
                 if (responseCodeAware && e.getMessage().indexOf("[LOGIN-DELAY]") >= 0) {
                     final int seconds = parseLoginDelaySeconds(capabilities);
                     if (-1 == seconds) {
-                        throw POP3ExceptionCode.LOGIN_DELAY.create(e,
-                            server,
-                            login,
-                            Integer.valueOf(session.getUserId()),
-                            Integer.valueOf(session.getContextId()),
-                            e.getMessage());
+                        throw POP3ExceptionCode.LOGIN_DELAY.create(e, server, login, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e.getMessage());
                     }
-                    throw POP3ExceptionCode.LOGIN_DELAY2.create(e,
-                        server,
-                        login,
-                        Integer.valueOf(session.getUserId()),
-                        Integer.valueOf(session.getContextId()),
-                        Integer.valueOf(seconds),
-                        e.getMessage());
+                    throw POP3ExceptionCode.LOGIN_DELAY2.create(e, server, login, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), Integer.valueOf(seconds), e.getMessage());
                 }
                 throw e;
             } catch (final MessagingException e) {
@@ -403,7 +417,7 @@ public final class POP3StoreConnector {
                 inbox.open(Folder.READ_ONLY);
                 try {
                     final POP3Prober prober = new POP3Prober(pop3Store, inbox);
-                    if (!prober.probeUIDL()) {
+                    if (!hasUidl && !prober.probeUIDL()) {
                         /*-
                          * Probe failed.
                          * Avoid fetching UIDs when further working with JavaMail API
@@ -421,7 +435,7 @@ public final class POP3StoreConnector {
                             Integer.valueOf(session.getUserId()),
                             Integer.valueOf(session.getContextId())));
                     }
-                    if (!prober.probeTOP()) {
+                    if (!hasTop && !prober.probeTOP()) {
                         /*-
                          * Probe failed.
                          * Mandatory to further work with JavaMail API
@@ -437,16 +451,10 @@ public final class POP3StoreConnector {
                      */
                     final List<Exception> warnings = prober.getWarnings();
                     if (!warnings.isEmpty()) {
-                        final org.slf4j.Logger logger =
-                            org.slf4j.LoggerFactory.getLogger(POP3StoreConnector.class);
+                        final org.slf4j.Logger logger = LOG;
                         if (logger.isDebugEnabled()) {
-                            final StringBuilder sb = new StringBuilder(128);
-                            sb.append("Exception during probing POP3 server \"").append(server).append("\": ");
-                            final int resetLen = sb.length();
                             for (final Exception warning : warnings) {
-                                sb.setLength(resetLen);
-                                sb.append(warning.getMessage());
-                                logger.debug(sb.toString(), warning);
+                                logger.debug("Exception during probing POP3 server \"{}\".", server, warning);
                             }
                         }
                     }
