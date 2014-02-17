@@ -95,6 +95,13 @@ public class MsActivator extends HousekeepingActivator {
         final HazelcastConfigurationService configService = getService(HazelcastConfigurationService.class);
         final boolean enabled = configService.isEnabled();
         if (enabled) {
+            /*
+             * create & register portable message factory
+             */
+            registerService(CustomPortableFactory.class, new PortableMessageFactory());
+            /*
+             * start ms services based on hazelcast instance's lifecycle
+             */
             final BundleContext context = this.context;
             final AtomicReference<MsService> msServiceRef = new AtomicReference<MsService>();
             final AtomicReference<PortableMsService> portableMsServiceRef = new AtomicReference<PortableMsService>();
@@ -113,7 +120,6 @@ public class MsActivator extends HousekeepingActivator {
                         PortableMsService portableMsService = new PortableHzMsService(hz);
                         portableMsServiceRef.set(portableMsService);
                         registerService(PortableMsService.class, portableMsService);
-                        registerService(CustomPortableFactory.class, new PortableMessageFactory());
                         registerEventHandler(msService);
                         return hz;
                     }
