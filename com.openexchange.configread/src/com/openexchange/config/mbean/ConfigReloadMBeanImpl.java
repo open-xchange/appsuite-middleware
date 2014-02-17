@@ -88,11 +88,13 @@ public class ConfigReloadMBeanImpl extends StandardMBean implements ConfigReload
     @Override
     public Map<String, String[]> listReloadables() {
         Map<String, String[]> map = new HashMap<String, String[]>();
-        Iterator<Reloadable> i = configService.getReloadables().iterator();
-        while (i.hasNext()) {
-            Map<String, String[]> configs = i.next().getConfigfileNames();
-            for (String file : configs.keySet()) {
-                map.put(file, configs.get(file));
+        if (null != configService) {
+            Iterator<Reloadable> i = configService.getReloadables().iterator();
+            while (i.hasNext()) {
+                Map<String, String[]> configs = i.next().getConfigfileNames();
+                for (String file : configs.keySet()) {
+                    map.put(file, configs.get(file));
+                }
             }
         }
         return map;
