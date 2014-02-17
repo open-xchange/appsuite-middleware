@@ -99,7 +99,6 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -2240,13 +2239,18 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.executeUpdate();
                 stmt.close();
 
-                log.debug("Delete user {}({}) from contacts via groupware API ...", user_id, ctx.getId());
-
-                if (is_admin) {
-                    Contacts.deleteContact(getContactIdByUserId(ctx.getId(), user_id, write_ox_con), ctx.getId(), write_ox_con, true);
-                } else {
-                    Contacts.deleteContact(getContactIdByUserId(ctx.getId(), user_id, write_ox_con), ctx.getId(), write_ox_con, false);
-                }
+                log.debug("Delete user {}({}) from contacts ...", user_id, ctx.getId());
+                int contactID = getContactIdByUserId(ctx.getId(), user_id, write_ox_con);
+                stmt = write_ox_con.prepareStatement("DELETE FROM prg_contacts_image WHERE cid = ? AND intfield01 = ?");
+                stmt.setInt(1, ctx.getId());
+                stmt.setInt(2, contactID);
+                stmt.executeUpdate();
+                stmt.close();
+                stmt = write_ox_con.prepareStatement("DELETE FROM prg_contacts WHERE cid = ? AND userid = ?");
+                stmt.setInt(1, ctx.getId());
+                stmt.setInt(2, user_id);
+                stmt.executeUpdate();
+                stmt.close();
 
                 /*-
                  *
