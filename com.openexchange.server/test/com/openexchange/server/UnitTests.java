@@ -61,7 +61,6 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
     com.openexchange.ajax.ProcessUploadStaticTest.class,
-    com.openexchange.ajax.parser.ContactSearchtermSqlConverterTest.class,
     com.openexchange.ajax.parser.TaskLastModifiedTest.class,
     com.openexchange.ajax.LoginAddFragmentTest.class,
     com.openexchange.groupware.ldap.UserAttributeDiffTest.class,

@@ -49,8 +49,6 @@
 
 package com.openexchange.importexport.importers;
 
-import java.text.MessageFormat;
-import java.util.List;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
@@ -123,22 +121,6 @@ public abstract class ContactImporter extends AbstractImporter {
             LOG.warn("error trying to handle truncated attributes", x);
             return false;
         }
-    }
-
-    @Override
-    protected String getNameForFieldInTruncationError(int id, OXException e) {
-        if (null != e && ContactExceptionCodes.DATA_TRUNCATION.equals(e) && null != e.getProblematics()) {
-            List<MappedTruncation<Object>> truncations = MappedTruncation.extract(e.getProblematics());
-            if (0 < truncations.size()) {
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append(truncations.get(0).getReadableName());
-                for (int i = 1; i < truncations.size(); i++) {
-                    stringBuilder.append(", ").append(truncations.get(i).getReadableName());
-                }
-                return stringBuilder.toString();
-            }
-        }
-        return Integer.toString(id);
     }
 
 }

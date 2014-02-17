@@ -386,15 +386,6 @@ public class CSVContactImporter extends AbstractImporter {
         return boolSwitch;
     }
 
-    @Override
-    protected String getNameForFieldInTruncationError(final int id, final OXException unused) {
-        final ContactField field = ContactField.getByValue(id);
-        if (field == null) {
-            return String.valueOf(id);
-        }
-        return field.getReadableName();
-    }
-
     public static final class ImportIntention {
         public boolean exceedsLimit;
         public Contact contact;

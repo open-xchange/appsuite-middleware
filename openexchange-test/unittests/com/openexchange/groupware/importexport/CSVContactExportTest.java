@@ -142,9 +142,8 @@ public class CSVContactExportTest extends AbstractContactTest {
 		assertEquals("Two imports", parser.parse(TEST2_RESULT), parser.parse(resStr) );
 
 		//cleaning up
-		final RdbContactSQLImpl contactSql = new RdbContactSQLImpl(sessObj);
 		for(final ImportResult res : results){
-			contactSql.deleteContactObject(Integer.parseInt(res.getObjectId()), Integer.parseInt(res.getFolder()), res.getDate());
+		    contactStorage.delete(sessObj, res.getFolder(), res.getObjectId(), res.getDate());
 		}
 	}
 }

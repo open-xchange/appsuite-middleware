@@ -76,9 +76,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
 import com.openexchange.exception.OXException.ProblematicAttribute;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.CalendarField;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
@@ -88,7 +86,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TaskField;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
@@ -656,25 +653,6 @@ public class ICalImporter extends AbstractImporter {
 			offset = tz.getOffset(end);
 			appointmentObj.setEndDate(new Date(end + offset));
 		}
-	}
-
-	@Override
-	protected String getNameForFieldInTruncationError(final int id,
-			final OXException oxex) {
-		if (oxex.getPrefix().equals(EnumComponent.APPOINTMENT.getAbbreviation())) {
-			final CalendarField field = CalendarField
-					.getByAppointmentObjectId(id);
-			if (field != null) {
-				return field.getName();
-			}
-		} else if (oxex.getPrefix().equals(EnumComponent.TASK.getAbbreviation())) {
-			final TaskField field = TaskField.getByTaskID(id);
-			if (field != null) {
-				return field.getName();
-			}
-		}
-		return String.valueOf(id);
-
 	}
 
     /**

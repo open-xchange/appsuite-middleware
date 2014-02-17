@@ -76,12 +76,6 @@ public class FacebookArchiveImporter extends AbstractImporter {
     protected FacebookFriendsImporter delegate = null;
 
     @Override
-    protected String getNameForFieldInTruncationError(final int id, final OXException dataTruncation) {
-        // Nothing to do
-        return null;
-    }
-
-    @Override
     public boolean canImport(final ServerSession sessObj, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
         return format == Format.FacebookArchive;
     }
