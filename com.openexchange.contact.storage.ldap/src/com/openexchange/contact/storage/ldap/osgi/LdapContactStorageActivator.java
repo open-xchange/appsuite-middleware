@@ -50,8 +50,11 @@
 package com.openexchange.contact.storage.ldap.osgi;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
@@ -83,6 +86,7 @@ public class LdapContactStorageActivator extends HousekeepingActivator implement
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapContactStorageActivator.class);
     private static final String[] PROPERTIES = new String[] {"all properties in file"};
+    private static File[] oldProperties;
 
     /**
      * Initializes a new {@link LdapContactStorageActivator}.
@@ -169,8 +173,16 @@ public class LdapContactStorageActivator extends HousekeepingActivator implement
     public Map<String, String[]> getConfigfileNames() {
         Map<String, String[]> map = new HashMap<String, String[]>();
         try {
-            for (File propertyFile : Tools.listPropertyFiles()) {
-                map.put(propertyFile.getName(), PROPERTIES);
+            File[] newProperties = Tools.listPropertyFiles();
+            Set<File> files = new HashSet<File>(Arrays.asList(newProperties));
+            if (null != oldProperties && oldProperties.length > newProperties.length) {
+                files.addAll(Arrays.asList(oldProperties));
+            }
+            oldProperties = Arrays.copyOf(newProperties, newProperties.length);
+            for (File propertyFile : files) {
+                if (null != map.put(propertyFile.getName(), PROPERTIES)) {
+                    LOG.warn("Duplicate entry in map: {}", propertyFile.getName());
+                }
             }
         } catch (OXException e) {
             LOG.error("error reloading config file: {}", e);
