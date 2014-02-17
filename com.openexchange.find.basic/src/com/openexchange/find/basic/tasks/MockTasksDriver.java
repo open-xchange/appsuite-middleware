@@ -65,13 +65,10 @@ import com.openexchange.find.ModuleConfig;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
-import com.openexchange.find.common.CommonFacetType;
-import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.common.ContactDisplayItem;
-import com.openexchange.find.common.FolderTypeDisplayItem;
-import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.facet.FieldFacet;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.MandatoryFilter;
 import com.openexchange.find.mail.MailFacetType;
@@ -90,7 +87,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MockTasksDriver}
- * 
+ *
  * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
  * @since 7.6.0
  */
@@ -131,47 +128,24 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
 
         // subject or task name
         {
-            final String id = "task_name";
-            final FacetValue staticFacetValue = new FacetValue(
-                id,
-                new SimpleDisplayItem(TasksStrings.TASK_NAME),
-                FacetValue.UNKNOWN_COUNT,
-                new Filter(Collections.singleton(id), "override"));
-            final Facet fileNameFacet = new Facet(TasksFacetType.TASK_NAME, Collections.singletonList(staticFacetValue));
-            staticFacets.add(fileNameFacet);
+            final Facet facet = new FieldFacet(TasksFacetType.TASK_NAME, "task_name");
+            staticFacets.add(facet);
         }
         // description
         {
-            final String id = "task_description";
-            final FacetValue staticFacetValue = new FacetValue(
-                id,
-                new SimpleDisplayItem(TasksStrings.TASK_DESCRIPTION),
-                FacetValue.UNKNOWN_COUNT,
-                new Filter(Collections.singleton(id), "override"));
-            final Facet fileNameFacet = new Facet(TasksFacetType.TASK_DESCRIPTION, Collections.singletonList(staticFacetValue));
-            staticFacets.add(fileNameFacet);
+            final Facet facet = new FieldFacet(TasksFacetType.TASK_DESCRIPTION, "task_description");
+            staticFacets.add(facet);
         }
         // location
         {
-            final String id = "task_location";
-            final FacetValue staticFacetValue = new FacetValue(
-                id,
-                new SimpleDisplayItem(TasksStrings.TASK_LOCATION),
-                FacetValue.UNKNOWN_COUNT,
-                new Filter(Collections.singleton(id), "override"));
-            final Facet fileNameFacet = new Facet(TasksFacetType.TASK_LOCATION, Collections.singletonList(staticFacetValue));
-            staticFacets.add(fileNameFacet);
+            final Facet facet = new FieldFacet(TasksFacetType.TASK_LOCATION, "task_location");
+            staticFacets.add(facet);
         }
         // attachment name
         {
-            final String id = "task_attachment_name";
-            final FacetValue staticFacetValue = new FacetValue(
-                id,
-                new SimpleDisplayItem(TasksStrings.TASK_ATTACHMENT_NAME),
-                FacetValue.UNKNOWN_COUNT,
-                new Filter(Collections.singleton(id), "override"));
-            final Facet fileNameFacet = new Facet(TasksFacetType.TASK_ATTACHMENT_NAME, Collections.singletonList(staticFacetValue));
-            staticFacets.add(fileNameFacet);
+
+            final Facet facet = new FieldFacet(TasksFacetType.TASK_ATTACHMENT_NAME, "task_attachment_name");
+            staticFacets.add(facet);
         }
         // Status
         {
@@ -201,8 +175,8 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
                 TaskStatusDisplayItem.Type.DEFERRED), FacetValue.UNKNOWN_COUNT, new Filter(
                 Collections.singleton("task_status"),
                 TaskStatusDisplayItem.Type.DEFERRED.getIdentifier())));
-            final Facet fileNameFacet = new Facet(TasksFacetType.TASK_STATUS, staticFacetValues);
-            staticFacets.add(fileNameFacet);
+            final Facet statusFacet = new Facet(TasksFacetType.TASK_STATUS, staticFacetValues);
+            staticFacets.add(statusFacet);
         }
         // Folder
         {
@@ -222,8 +196,8 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
                 TaskTypeDisplayItem.Type.SERIES), FacetValue.UNKNOWN_COUNT, new Filter(
                 Collections.singleton("task_type"),
                 TaskTypeDisplayItem.Type.SERIES.getIdentifier())));
-            final Facet fileNameFacet = new Facet(TasksFacetType.TASK_TYPE, staticFacetValues);
-            staticFacets.add(fileNameFacet);
+            final Facet taskTypeFacet = new Facet(TasksFacetType.TASK_TYPE, staticFacetValues);
+            staticFacets.add(taskTypeFacet);
         }
 
         List<MandatoryFilter> mandatoryFilters = Collections.emptyList();
@@ -243,15 +217,9 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
                 FacetValue.UNKNOWN_COUNT,
                 filter));
         }
+
         Facet contactFacet = new Facet(MailFacetType.CONTACTS, contactValues);
-
-//        List<UserizedFolder> folders = autocompleteFolders(session, autocompleteRequest);
-//        Facet folderFacet = buildFolderFacet(folders);
-
-        List<Facet> facets = new ArrayList<Facet>();
-        facets.add(contactFacet);
-//        facets.add(folderFacet);
-
+        List<Facet> facets = Collections.singletonList(contactFacet);
         return new AutocompleteResult(facets);
     }
 

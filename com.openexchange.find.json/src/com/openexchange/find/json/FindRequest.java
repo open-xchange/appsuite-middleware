@@ -80,6 +80,7 @@ public class FindRequest {
     private static final String PARAM_ACTIVE_FACETS = "activeFacets";
     private static final String PARAM_QUERIES = "queries";
     private static final String PARAM_FILTERS = "filters";
+    private static final int DEFAULT_SIZE = 20;
 
     // -------------------------------------------------------------------------------------------- //
 
@@ -109,7 +110,7 @@ public class FindRequest {
     }
 
     /**
-     * Gets the optional offset
+     * Gets the offset
      *
      * @return The offset
      */
@@ -118,7 +119,7 @@ public class FindRequest {
         final int len = request.getIntParameter(PARAM_SIZE);
 
         if (off < 0 || len < 0) {
-            return null;
+            return new Offset(0, DEFAULT_SIZE);
         }
 
         return new Offset(off, len);

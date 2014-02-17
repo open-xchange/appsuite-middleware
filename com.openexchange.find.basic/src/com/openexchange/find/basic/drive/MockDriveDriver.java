@@ -73,19 +73,15 @@ import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
 import com.openexchange.find.basic.Services;
-import com.openexchange.find.common.CommonFacetType;
-import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.common.ContactDisplayItem;
-import com.openexchange.find.common.FolderTypeDisplayItem;
-import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.drive.DriveStrings;
 import com.openexchange.find.drive.FileDocument;
 import com.openexchange.find.drive.FileTypeDisplayItem;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.facet.FieldFacet;
 import com.openexchange.find.facet.Filter;
-import com.openexchange.find.facet.MandatoryFilter;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -120,21 +116,15 @@ public class MockDriveDriver extends AbstractContactFacetingModuleSearchDriver {
         // Define facets
         final List<Facet> staticFacets = new LinkedList<Facet>();
         {
-            final String id = "file_name";
-            final FacetValue staticFacetValue = new FacetValue(id, new SimpleDisplayItem(id), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton(id), "override"));
-            final Facet fileNameFacet = new Facet(DriveFacetType.FILE_NAME, Collections.singletonList(staticFacetValue));
+            final Facet fileNameFacet = new FieldFacet(DriveFacetType.FILE_NAME, "file_name");
             staticFacets.add(fileNameFacet);
         }
         {
-            final String id = "file_description";
-            final FacetValue staticFacetValue = new FacetValue(id, new SimpleDisplayItem(id), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton(id), "override"));
-            final Facet fileNameFacet = new Facet(DriveFacetType.FILE_DESCRIPTION, Collections.singletonList(staticFacetValue));
+            final Facet fileNameFacet = new FieldFacet(DriveFacetType.FILE_DESCRIPTION, "file_description");
             staticFacets.add(fileNameFacet);
         }
         {
-            final String id = "file_content";
-            final FacetValue staticFacetValue = new FacetValue(id, new SimpleDisplayItem(id), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton(id), "override"));
-            final Facet fileNameFacet = new Facet(DriveFacetType.FILE_CONTENT, Collections.singletonList(staticFacetValue));
+            final Facet fileNameFacet = new FieldFacet(DriveFacetType.FILE_CONTENT, "file_content");
             staticFacets.add(fileNameFacet);
         }
         {
@@ -152,11 +142,8 @@ public class MockDriveDriver extends AbstractContactFacetingModuleSearchDriver {
             staticFacets.add(folderTypeFacet);
         }
 
-        // Define mandatory filters
-        final List<MandatoryFilter> mandatoryFilters = Collections.emptyList();
-
         // Return configuration
-        return new ModuleConfig(Module.DRIVE, staticFacets, mandatoryFilters);
+        return new ModuleConfig(Module.DRIVE, staticFacets);
     }
 
     private static final Set<String> PERSONS_FILTER_FIELDS = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList("created_from","changed_from","author")));

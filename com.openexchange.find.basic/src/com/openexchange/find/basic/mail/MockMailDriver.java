@@ -71,9 +71,9 @@ import com.openexchange.find.basic.Services;
 import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.DefaultFolderType;
 import com.openexchange.find.common.FolderDisplayItem;
-import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.facet.FieldFacet;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.MandatoryFilter;
 import com.openexchange.find.mail.DefaultMailFolderType;
@@ -138,57 +138,45 @@ public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
     @Override
     public ModuleConfig getConfiguration(ServerSession session) throws OXException {
-        Facet folderFacet = null;
-        MandatoryFilter folderFilter = null;
-        {
-            List<UserizedFolder> mailFolders = loadMailFolders(session, NO_FILTER);
-            if (mailFolders.isEmpty()) {
-                throw FindExceptionCode.NO_READABLE_FOLDER.create(Module.MAIL, session.getUserId(), session.getContextId());
-            }
-
-            UserizedFolder defaultFolder = null;
-            for (Iterator<UserizedFolder> it = mailFolders.iterator(); it.hasNext();) {
-                UserizedFolder folder = it.next();
-                if (folder.isDefault() && folder.getDefaultType() == MailFolderType.INBOX.getType()) {
-                    defaultFolder = folder;
-                    it.remove();
-                } else if (folder.isDefault() && folder.getDefaultType() == MailFolderType.ROOT.getType()) {
-                    // Don't show root folder in facet
-                    it.remove();
-                }
-            }
-
-            // Fallback
-            if (defaultFolder == null) {
-                defaultFolder = mailFolders.remove(0);
-            }
-
-            MailAccountStorageService mass = Services.getMailAccountStorageService();
-            MailAccount mailAccount = mass.getMailAccount(new FullnameArgument(defaultFolder.getID()).getAccountId(), session.getUserId(), session.getContextId());
-            FacetValue defaultValue = buildFolderFacetValue(defaultFolder, mailAccount);
-            folderFacet = buildFolderFacet(mailFolders);
-            folderFacet.getValues().add(defaultValue);
-            folderFilter = new MandatoryFilter(folderFacet, defaultValue);
+        List<UserizedFolder> mailFolders = loadMailFolders(session, NO_FILTER);
+        if (mailFolders.isEmpty()) {
+            throw FindExceptionCode.NO_READABLE_FOLDER.create(Module.MAIL, session.getUserId(), session.getContextId());
         }
 
+        UserizedFolder defaultFolder = null;
+        for (Iterator<UserizedFolder> it = mailFolders.iterator(); it.hasNext();) {
+            UserizedFolder folder = it.next();
+            if (folder.isDefault() && folder.getDefaultType() == MailFolderType.INBOX.getType()) {
+                defaultFolder = folder;
+                it.remove();
+            } else if (folder.isDefault() && folder.getDefaultType() == MailFolderType.ROOT.getType()) {
+                // Don't show root folder in facet
+                it.remove();
+            }
+        }
+
+        // Fallback
+        if (defaultFolder == null) {
+            defaultFolder = mailFolders.remove(0);
+        }
+
+        MailAccountStorageService mass = Services.getMailAccountStorageService();
+        MailAccount mailAccount = mass.getMailAccount(new FullnameArgument(defaultFolder.getID()).getAccountId(), session.getUserId(), session.getContextId());
+        FacetValue defaultValue = buildFolderFacetValue(defaultFolder, mailAccount);
+        Facet folderFacet = buildFolderFacet(mailFolders);
+        folderFacet.getValues().add(defaultValue);
+        MandatoryFilter folderFilter = new MandatoryFilter(folderFacet, defaultValue);
+
         List<Facet> staticFacets = new ArrayList<Facet>(3);
-        Facet subjectFacet = new Facet(MailFacetType.SUBJECT, Collections.singletonList(new FacetValue(
-            "subjectFacet",
-            new SimpleDisplayItem("subject"),
-            FacetValue.UNKNOWN_COUNT,
-            new Filter(Collections.singleton("subject"), "override"))));
-        Facet bodyFacet = new Facet(MailFacetType.MAIL_TEXT, Collections.singletonList(new FacetValue(
-            "bodyFacet",
-            new SimpleDisplayItem("body"),
-            FacetValue.UNKNOWN_COUNT,
-            new Filter(Collections.singleton("body"), "override"))));
+        Facet subjectFacet = new FieldFacet(MailFacetType.SUBJECT, "subject");
+        Facet bodyFacet = new FieldFacet(MailFacetType.MAIL_TEXT, "body");
+        staticFacets.add(subjectFacet);
+        staticFacets.add(bodyFacet);
         if (folderFacet != null) {
             staticFacets.add(folderFacet);
         }
-        staticFacets.add(subjectFacet);
-        staticFacets.add(bodyFacet);
 
-        List<MandatoryFilter> mandatoryFilters = (List<MandatoryFilter>) (folderFilter == null ? Collections.emptyList() : Collections.singletonList(folderFilter));
+        List<MandatoryFilter> mandatoryFilters = Collections.singletonList(folderFilter);
         return new ModuleConfig(getModule(), staticFacets, mandatoryFilters);
     }
 
@@ -205,15 +193,9 @@ public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
                 FacetValue.UNKNOWN_COUNT,
                 filter));
         }
+
         Facet contactFacet = new Facet(MailFacetType.CONTACTS, contactValues);
-
-//        List<UserizedFolder> folders = autocompleteFolders(session, autocompleteRequest);
-//        Facet folderFacet = buildFolderFacet(folders);
-
-        List<Facet> facets = new ArrayList<Facet>();
-        facets.add(contactFacet);
-//        facets.add(folderFacet);
-
+        List<Facet> facets = Collections.singletonList(contactFacet);
         return new AutocompleteResult(facets);
     }
 
@@ -335,21 +317,6 @@ public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
                 filter);
     }
 
-    private List<UserizedFolder> autocompleteFolders(Session session, AutocompleteRequest autocompleteRequest) throws OXException {
-        final String prefix = autocompleteRequest.getPrefix();
-        return loadMailFolders(session, new MailFolderFilter() {
-            @Override
-            public boolean accept(UserizedFolder folder) {
-                String name = extractDisplayName(folder);
-                if (name != null && name.toLowerCase().startsWith(prefix.toLowerCase())) {
-                    return true;
-                }
-
-                return false;
-            }
-        });
-    }
-
     private List<UserizedFolder> loadMailFolders(Session session, MailFolderFilter filter) throws OXException {
         FolderService folderService = Services.getFolderService();
         FolderResponse<UserizedFolder[]> folderResponse = folderService.getVisibleFolders(
@@ -371,15 +338,6 @@ public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
         }
 
         return folders;
-    }
-
-    private static String extractDisplayName(UserizedFolder folder) {
-        String name = folder.getLocalizedName(folder.getUser().getLocale(), true);
-        if (name == null) {
-            name = folder.getName();
-        }
-
-        return name;
     }
 
     private static interface MailFolderFilter {
