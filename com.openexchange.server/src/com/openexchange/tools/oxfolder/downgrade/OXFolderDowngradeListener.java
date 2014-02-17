@@ -62,13 +62,13 @@ import org.osgi.service.event.EventAdmin;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
+import com.openexchange.contact.ContactService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCache;
-import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
@@ -397,17 +397,9 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
     }
 
     private static void deleteContainedContacts(final int folderID, final DowngradeEvent event) throws OXException {
-        Connection writeCon = event.getWriteCon();
-        final boolean createWriteCon = (writeCon == null);
-        if (createWriteCon) {
-            writeCon = DBPool.pickupWriteable(event.getContext());
-        }
-        try {
-            Contacts.trashContactsFromFolder(folderID, event.getSession(), writeCon, writeCon, false);
-        } finally {
-            if (createWriteCon && writeCon != null) {
-                DBPool.closeWriterSilent(event.getContext(), writeCon);
-            }
+        ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+        if (null != contactService) {
+            contactService.deleteContacts(event.getSession(), String.valueOf(folderID));
         }
     }
 
