@@ -49,9 +49,8 @@
 
 package com.openexchange.oauth.dropbox;
 
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.DropBoxApi;
 import com.dropbox.client2.DropboxAPI;
@@ -86,6 +85,9 @@ import com.openexchange.session.Session;
 public final class DropboxOAuthServiceMetaData extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware, Reloadable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DropboxOAuthServiceMetaData.class);
+
+    private static final String[] PROPERTIES = new String[] {"com.openexchange.oauth.dropbox.apiKey",
+        "com.openexchange.oauth.dropbox.apiSecret"};
 
     /**
      * Initializes a new {@link DropboxOAuthServiceMetaData}.
@@ -219,10 +221,10 @@ public final class DropboxOAuthServiceMetaData extends AbstractOAuthServiceMetaD
     }
 
     @Override
-    public Set<String> getConfigfileNames() {
-        Set<String> set = new HashSet<String>(1);
-        set.add("dropboxoauth.properties");
-        return set;
+    public Map<String, String[]> getConfigfileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put("dropboxoauth.properties", PROPERTIES);
+        return map;
     }
 
 }

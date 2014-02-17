@@ -49,11 +49,9 @@
 
 package com.openexchange.imap.config;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
@@ -72,7 +70,10 @@ public final class IMAPReloadable implements Reloadable {
 
     private static final IMAPReloadable INSTANCE = new IMAPReloadable();
 
-    private static final Set<String> CONFIGFILES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("imap.properties")));
+    private static final String CONFIGFILE = "imap.properties";
+
+    private static final String[] PROPERTIES = new String[] {"com.openexchange.imap.invalidMailboxNameCharacters",
+        "com.openexchange.imap.enableTls", "com.openexchange.imap.maxNumExternalConnections", "com.openexchange.imap.maxNumConnections"};
 
     /**
      * Gets the instance.
@@ -122,8 +123,10 @@ public final class IMAPReloadable implements Reloadable {
     }
 
     @Override
-    public Set<String> getConfigfileNames() {
-        return CONFIGFILES;
+    public Map<String, String[]> getConfigfileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put(CONFIGFILE, PROPERTIES);
+        return map;
     }
 
 }

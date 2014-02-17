@@ -47,82 +47,86 @@
  *
  */
 
-package com.openexchange.oauth.yahoo.internal;
+package com.openexchange.configread.clt;
 
-import java.util.HashMap;
 import java.util.Map;
-import org.scribe.builder.api.Api;
-import org.scribe.builder.api.YahooApi;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.http.deferrer.DeferringURLService;
-import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractOAuthServiceMetaData;
-import com.openexchange.session.Session;
+import javax.management.MBeanServerConnection;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
+import com.openexchange.auth.mbean.AuthenticatorMBean;
+import com.openexchange.cli.AbstractMBeanCLI;
+import com.openexchange.config.mbean.ConfigReloadMBean;
+
 
 /**
- * {@link OAuthServiceMetaDataYahooImpl}
+ * {@link ListReloadablesCLT}
  *
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since 7.6.0
  */
-public class OAuthServiceMetaDataYahooImpl extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware, Reloadable {
+public class ListReloadablesCLT extends AbstractMBeanCLI<Void> {
 
-    private static final String API_KEY = "com.openexchange.oauth.yahoo.apiKey";
-
-    private static final String API_SECRET = "com.openexchange.oauth.yahoo.apiSecret";
-
-    private static final String[] PROPERTIES = new String[] {API_KEY, API_SECRET};
-
-    private final DeferringURLService deferrer;
-
-    public OAuthServiceMetaDataYahooImpl(DeferringURLService deferrer) {
+    /**
+     * Initializes a new {@link ListReloadablesCLT}.
+     */
+    public ListReloadablesCLT() {
         super();
-        setId("com.openexchange.oauth.yahoo");
-        setAPIKeyName(API_KEY);
-        setAPISecretName(API_SECRET);
-        setDisplayName("Yahoo");
-        this.deferrer = deferrer;
+    }
+
+    /**
+     * @param args
+     */
+    public static void main(String[] args) {
+        new ListReloadablesCLT().execute(args);
     }
 
     @Override
-    public String modifyCallbackURL(String callbackUrl, Session session) {
-        if (deferrer == null) {
-            return callbackUrl;
+    protected boolean requiresAdministrativePermission() {
+        return false;
+    }
+
+    @Override
+    protected String getFooter() {
+        return null;
+    }
+
+    @Override
+    protected String getName() {
+        return "listreloadableoptions";
+    }
+
+    @Override
+    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
+        Object result = null;
+        result = mbsc.invoke(getObjectName(ConfigReloadMBean.class.getName(), ConfigReloadMBean.DOMAIN), "listReloadables", null, null);
+        Map<String, String[]> res = (Map<String, String[]>) result;
+        StringBuilder sb = new StringBuilder();
+        for (String configfile : res.keySet()) {
+            if (null != configfile && !configfile.isEmpty()) {
+                sb.append(configfile).append(":\n");
+                for (String property : res.get(configfile)) {
+                    sb.append(property).append("\n");
+                }
+                sb.append("\n");
+            }
         }
-        return deferrer.getDeferredURL(callbackUrl);
+        System.out.println(sb.toString());
+        return null;
     }
 
     @Override
-    public API getAPI() {
-        return API.YAHOO;
+    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) {
+        // nothing to do
     }
 
     @Override
-    public Class<? extends Api> getScribeService() {
-        return YahooApi.class;
+    protected void checkOptions(CommandLine cmd) {
+        // nothing to do
     }
 
     @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        String apiKey = configService.getProperty(apiKeyName);
-        String secretKey = configService.getProperty(apiSecretName);
-
-        if (apiKey.isEmpty()) {
-            throw new IllegalStateException("Missing following property in configuration: " + apiKeyName);
-        }
-        if (secretKey.isEmpty()) {
-            throw new IllegalStateException("Missing following property in configuration: " + apiSecretName);
-        }
-
-        this.apiKey = apiKey;
-        this.apiSecret = secretKey;
+    protected void addOptions(Options options) {
+     // nothing to do
     }
 
-    @Override
-    public Map<String, String[]> getConfigfileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put("yahoooauth.properties", PROPERTIES);
-        return map;
-    }
 }

@@ -60,7 +60,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
-import java.util.Set;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -280,7 +280,7 @@ public final class HtmlProcessing {
             }
 
             @Override
-            public Set<String> getConfigfileNames() {
+            public Map<String, String[]> getConfigfileNames() {
                 return null;
             }
         });

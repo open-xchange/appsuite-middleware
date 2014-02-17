@@ -176,7 +176,7 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
             }
 
             @Override
-            public Set<String> getConfigfileNames() {
+            public Map<String, String[]> getConfigfileNames() {
                 return null;
             }
         });

@@ -53,6 +53,7 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import javax.mail.Flags;
@@ -73,7 +74,6 @@ import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.services.Services;
-import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailMessageStorage;
@@ -144,7 +144,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
             }
 
             @Override
-            public Set<String> getConfigfileNames() {
+            public Map<String, String[]> getConfigfileNames() {
                 return null;
             }
         });

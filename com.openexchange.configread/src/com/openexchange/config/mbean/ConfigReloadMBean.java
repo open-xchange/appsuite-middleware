@@ -49,7 +49,6 @@
 
 package com.openexchange.config.mbean;
 
-import java.util.List;
 import java.util.Map;
 
 
@@ -65,8 +64,6 @@ public interface ConfigReloadMBean {
 
     void reloadConfiguration();
 
-    Map<String, List<String>> listOptions();
-
-    Map<String, List<String>> listOptions(String property);
+    Map<String, String[]> listReloadables();
 
 }

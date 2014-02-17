@@ -51,14 +51,13 @@ package com.openexchange.imap;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.services.Services;
-import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
 
@@ -172,7 +171,7 @@ public final class OperationKey implements Serializable {
             }
 
             @Override
-            public Set<String> getConfigfileNames() {
+            public Map<String, String[]> getConfigfileNames() {
                 return null;
             }
         });

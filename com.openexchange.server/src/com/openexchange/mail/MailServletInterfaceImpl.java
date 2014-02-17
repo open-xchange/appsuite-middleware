@@ -1129,7 +1129,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
 
             @Override
-            public Set<String> getConfigfileNames() {
+            public Map<String, String[]> getConfigfileNames() {
                 return null;
             }
         });

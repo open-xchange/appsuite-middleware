@@ -103,7 +103,6 @@ import com.openexchange.imap.entity2acl.UserGroupID;
 import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
-import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
@@ -168,7 +167,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
 
             @Override
-            public Set<String> getConfigfileNames() {
+            public Map<String, String[]> getConfigfileNames() {
                 return null;
             }
         });

@@ -58,7 +58,7 @@ import java.io.OutputStream;
 import java.io.PipedOutputStream;
 import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Set;
+import java.util.Map;
 import javax.activation.DataHandler;
 import javax.mail.Message;
 import javax.mail.MessageRemovedException;
@@ -142,7 +142,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             }
 
             @Override
-            public Set<String> getConfigfileNames() {
+            public Map<String, String[]> getConfigfileNames() {
                 return null;
             }
         });

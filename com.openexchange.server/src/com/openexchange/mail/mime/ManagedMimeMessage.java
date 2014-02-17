@@ -56,8 +56,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
 import javax.mail.Flags;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -114,7 +114,7 @@ public final class ManagedMimeMessage extends MimeMessage implements MimeCleanUp
             }
 
             @Override
-            public Set<String> getConfigfileNames() {
+            public Map<String, String[]> getConfigfileNames() {
                 return null;
             }
         });

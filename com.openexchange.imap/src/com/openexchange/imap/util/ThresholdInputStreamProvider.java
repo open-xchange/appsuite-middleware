@@ -57,7 +57,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Set;
+import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
@@ -391,7 +391,7 @@ public final class ThresholdInputStreamProvider implements Closeable, InputStrea
             }
 
             @Override
-            public Set<String> getConfigfileNames() {
+            public Map<String, String[]> getConfigfileNames() {
                 return null;
             }
         });

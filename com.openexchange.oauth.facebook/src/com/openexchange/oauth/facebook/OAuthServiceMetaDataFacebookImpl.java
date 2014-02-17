@@ -57,9 +57,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.json.JSONException;
@@ -87,6 +86,9 @@ import com.openexchange.session.Session;
 public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware, Reloadable {
 
     private final DeferringURLService deferrer;
+
+    private final static String[] PROPERTIES = new String[] {"com.openexchange.oauth.facebook.apiKey",
+        "com.openexchange.oauth.facebook.apiSecret"};
 
     /**
      * Initializes a new {@link OAuthServiceMetaDataFacebookImpl}.
@@ -296,10 +298,10 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     }
 
     @Override
-    public Set<String> getConfigfileNames() {
-        Set<String> set = new HashSet<String>(1);
-        set.add("facebookoauth.properties");
-        return set;
+    public Map<String, String[]> getConfigfileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put("facebookoauth.properties", PROPERTIES);
+        return map;
     }
 
 }

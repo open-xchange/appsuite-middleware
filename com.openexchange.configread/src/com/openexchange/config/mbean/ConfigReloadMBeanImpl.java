@@ -50,10 +50,11 @@
 package com.openexchange.config.mbean;
 
 import java.util.HashMap;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.internal.ConfigurationImpl;
 
 
@@ -66,8 +67,6 @@ import com.openexchange.config.internal.ConfigurationImpl;
 public class ConfigReloadMBeanImpl extends StandardMBean implements ConfigReloadMBean {
 
     private final ConfigurationImpl configService;
-
-    private final Map<String, List<String>> MAP = new HashMap<String, List<String>>();
 
     /**
      * Initializes a new {@link ConfigReloadMBeanImpl}.
@@ -87,13 +86,16 @@ public class ConfigReloadMBeanImpl extends StandardMBean implements ConfigReload
     }
 
     @Override
-    public Map<String, List<String>> listOptions() {
-        return MAP;
-    }
-
-    @Override
-    public Map<String, List<String>> listOptions(String property) {
-        return (Map<String, List<String>>) new HashMap<String, List<String>>().put(property, MAP.get(property));
+    public Map<String, String[]> listReloadables() {
+        Map<String, String[]> map = new HashMap<String, String[]>();
+        Iterator<Reloadable> i = configService.getReloadables().iterator();
+        while (i.hasNext()) {
+            Map<String, String[]> configs = i.next().getConfigfileNames();
+            for (String file : configs.keySet()) {
+                map.put(file, configs.get(file));
+            }
+        }
+        return map;
     }
 
 }

@@ -49,8 +49,8 @@
 
 package com.openexchange.contact.storage.ldap.osgi;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
@@ -79,6 +79,7 @@ import com.openexchange.user.UserService;
 public class LdapContactStorageActivator extends HousekeepingActivator implements Reloadable {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapContactStorageActivator.class);
+    private static final String[] PROPERTIES = new String[] {"all *.properties files in folder"};
 
     /**
      * Initializes a new {@link LdapContactStorageActivator}.
@@ -162,10 +163,10 @@ public class LdapContactStorageActivator extends HousekeepingActivator implement
     }
 
     @Override
-    public Set<String> getConfigfileNames() {
-        Set<String> set = new HashSet<String>();
-        set.add("contact-storage-ldap/");
-        return set;
+    public Map<String, String[]> getConfigfileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put("contact-storage-ldap/", PROPERTIES);
+        return map;
     }
 
 }

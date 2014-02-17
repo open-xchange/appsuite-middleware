@@ -51,8 +51,8 @@ package com.openexchange.oauth.xing;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.XingApi;
 import com.openexchange.config.ConfigurationService;
@@ -69,6 +69,9 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware, Reloadable {
+
+    private final static String[] PROPERTIES = new String[] {"com.openexchange.oauth.xing.apiKey",
+        "com.openexchange.oauth.xing.apiSecret"};
 
     private final String domain;
 
@@ -219,10 +222,10 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
     }
 
     @Override
-    public Set<String> getConfigfileNames() {
-        Set<String> set = new HashSet<String>(1);
-        set.add("xingoauth.properties");
-        return set;
+    public Map<String, String[]> getConfigfileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put("xingoauth.properties", PROPERTIES);
+        return map;
     }
 
 }

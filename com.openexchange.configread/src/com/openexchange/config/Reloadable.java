@@ -49,7 +49,7 @@
 
 package com.openexchange.config;
 
-import java.util.Set;
+import java.util.Map;
 
 
 /**
@@ -74,6 +74,6 @@ public interface Reloadable {
      * Returns a set of configfile names, which are needed for the reloadable service.
      * @return Set of configfile names
      */
-    Set<String> getConfigfileNames();
+    Map<String, String[]> getConfigfileNames();
 
 }

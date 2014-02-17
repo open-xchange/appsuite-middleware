@@ -49,8 +49,8 @@
 
 package com.openexchange.twitter.internal;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
@@ -63,6 +63,9 @@ import com.openexchange.config.Reloadable;
 public final class TwitterConfiguration implements Reloadable {
 
     private static final TwitterConfiguration INSTANCE = new TwitterConfiguration();
+
+    private static final String[] PROPERTIES = new String[] {"com.openexchange.twitter.consumerKey",
+        "com.openexchange.twitter.consumerSecret"};
 
     /**
      * Gets the instance.
@@ -140,10 +143,10 @@ public final class TwitterConfiguration implements Reloadable {
     }
 
     @Override
-    public Set<String> getConfigfileNames() {
-        Set<String> set = new HashSet<String>(1);
-        set.add("twitter.properties");
-        return set;
+    public Map<String, String[]> getConfigfileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put("twitter.properties", PROPERTIES);
+        return map;
     }
 
 }

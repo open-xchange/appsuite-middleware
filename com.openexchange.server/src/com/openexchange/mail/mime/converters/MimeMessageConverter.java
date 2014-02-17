@@ -70,7 +70,7 @@ import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.activation.DataHandler;
@@ -2478,7 +2478,7 @@ public final class MimeMessageConverter {
             }
 
             @Override
-            public Set<String> getConfigfileNames() {
+            public Map<String, String[]> getConfigfileNames() {
                 return null;
             }
         });

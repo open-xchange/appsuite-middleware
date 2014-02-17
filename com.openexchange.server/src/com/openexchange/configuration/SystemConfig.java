@@ -50,8 +50,8 @@
 package com.openexchange.configuration;
 
 import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
@@ -81,6 +81,11 @@ public final class SystemConfig extends AbstractConfig implements Initialization
      * system.properties configuration file.
      */
     private static final String KEY = "openexchange.propdir";
+
+    /**
+     * All reloadable properties
+     */
+    private static final String[] PROPERTIES = new String[] {"all properties in file"};
 
     /**
      * Returns the value of the property with the specified key. This method
@@ -234,9 +239,9 @@ public final class SystemConfig extends AbstractConfig implements Initialization
     }
 
     @Override
-    public Set<String> getConfigfileNames() {
-        Set<String> set = new HashSet<String>(1);
-        set.add("system.properties");
-        return set;
+    public Map<String, String[]> getConfigfileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put("system.properties", PROPERTIES);
+        return map;
     }
 }

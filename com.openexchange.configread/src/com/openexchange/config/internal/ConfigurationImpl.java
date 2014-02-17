@@ -60,6 +60,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -756,7 +757,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         // Propagate reloaded configuration among Reloadables
         for (final Reloadable reloadable : reloadableServices.values()) {
             try {
-                final Set<String> configfileNames = reloadable.getConfigfileNames();
+                final Set<String> configfileNames = reloadable.getConfigfileNames().keySet();
                 if (null == configfileNames || configfileNames.isEmpty()) {
                     // Reloadable does not indicate the files of interest
 
@@ -841,6 +842,10 @@ public final class ConfigurationImpl implements ConfigurationService {
         removedFiles.removeAll(propertiesByFile.keySet());
         result.addAll(removedFiles);
         return result;
+    }
+
+    public Collection<Reloadable> getReloadables() {
+        return reloadableServices.values();
     }
 
 }

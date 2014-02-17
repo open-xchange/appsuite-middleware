@@ -49,8 +49,8 @@
 
 package com.openexchange.admin.osgi;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -147,11 +147,11 @@ public final class AuthenticatorImpl implements Authenticator, Reloadable {
     }
 
     @Override
-    public Set<String> getConfigfileNames() {
-        Set<String> set = new HashSet<String>(2);
-        set.add("mpasswd");
-        set.add("ModuleAccessDefinitions.properties");
-        return set;
+    public Map<String, String[]> getConfigfileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(2);
+        map.put("mpasswd", new String[] {"all properties in file"});
+        map.put("ModuleAccessDefinitions.properties", new String[] {"all properties in file"});
+        return map;
     }
 
 }

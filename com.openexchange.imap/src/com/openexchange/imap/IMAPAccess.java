@@ -265,7 +265,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
 
             @Override
-            public Set<String> getConfigfileNames() {
+            public Map<String, String[]> getConfigfileNames() {
                 return null;
             }
         });

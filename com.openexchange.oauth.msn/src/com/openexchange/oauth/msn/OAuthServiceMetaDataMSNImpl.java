@@ -52,9 +52,8 @@ package com.openexchange.oauth.msn;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -93,6 +92,9 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData im
 
     private static final String REFRESH_TOKEN_KEY = "refresh_token";
     private static final String REFRESH_TOKEN_KEY_ALT = "authorization_code";
+
+    private final static String[] PROPERTIES = new String[] {"com.openexchange.oauth.msn.apiKey",
+        "com.openexchange.oauth.msn.apiSecret"};
 
     private final DeferringURLService deferrer;
 
@@ -248,10 +250,10 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData im
     }
 
     @Override
-    public Set<String> getConfigfileNames() {
-        Set<String> set = new HashSet<String>(1);
-        set.add("msnoauth.properties");
-        return set;
+    public Map<String, String[]> getConfigfileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put("msnoauth.properties", PROPERTIES);
+        return map;
     }
 
 }

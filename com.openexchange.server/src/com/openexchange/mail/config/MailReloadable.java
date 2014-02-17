@@ -49,11 +49,9 @@
 
 package com.openexchange.mail.config;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
@@ -72,7 +70,11 @@ public final class MailReloadable implements Reloadable {
 
     private static final MailReloadable INSTANCE = new MailReloadable();
 
-    private static final Set<String> CONFIGFILES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("mail.properties")));
+    private static final String CONFIGFILE = "mail.properties";
+
+    private static final String[] PROPERTIES = new String[] {"com.openexchange.mail.loginSource","com.openexchange.mail.passwordSource",
+        "com.openexchange.mail.mailServerSource", "com.openexchange.mail.masterPassword", "com.openexchange.mail.mailServer",
+        "com.openexchange.mail.transportServer"};
 
     /**
      * Gets the instance.
@@ -122,8 +124,10 @@ public final class MailReloadable implements Reloadable {
     }
 
     @Override
-    public Set<String> getConfigfileNames() {
-        return CONFIGFILES;
+    public Map<String, String[]> getConfigfileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put(CONFIGFILE, PROPERTIES);
+        return map;
     }
 
 }

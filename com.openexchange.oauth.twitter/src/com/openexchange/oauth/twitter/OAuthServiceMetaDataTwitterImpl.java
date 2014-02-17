@@ -49,8 +49,8 @@
 
 package com.openexchange.oauth.twitter;
 
-import java.util.Collections;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.oauth.API;
@@ -62,6 +62,9 @@ import com.openexchange.oauth.AbstractOAuthServiceMetaData;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class OAuthServiceMetaDataTwitterImpl extends AbstractOAuthServiceMetaData implements Reloadable {
+
+    private final static String[] PROPERTIES = new String[] {"com.openexchange.twitter.consumerKey",
+        "com.openexchange.twitter.consumerSecret"};
 
     public OAuthServiceMetaDataTwitterImpl() {
         super();
@@ -106,9 +109,10 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractOAuthServiceMetaDat
     }
 
     @Override
-    public Set<String> getConfigfileNames() {
-        // Values are read on demand
-        return Collections.EMPTY_SET;
+    public Map<String, String[]> getConfigfileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put("twitteroauth.properties", PROPERTIES);
+        return map;
     }
 
 }

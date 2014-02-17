@@ -49,8 +49,8 @@
 
 package com.openexchange.oauth.linkedin;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.LinkedInApi;
 import com.openexchange.config.ConfigurationService;
@@ -68,6 +68,9 @@ import com.openexchange.server.ServiceLookup;
 public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware, Reloadable {
 
     private final ServiceLookup services;
+
+    private final static String[] PROPERTIES = new String[] {"com.openexchange.oauth.linkedin.apiKey",
+        "com.openexchange.oauth.linkedin.apiSecret" };
 
     public OAuthServiceMetaDataLinkedInImpl(ServiceLookup services) {
         super();
@@ -133,10 +136,10 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaDa
     }
 
     @Override
-    public Set<String> getConfigfileNames() {
-        Set<String> set = new HashSet<String>(1);
-        set.add("linkedinoauth.properties");
-        return set;
+    public Map<String, String[]> getConfigfileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put("linkedin.properties", PROPERTIES);
+        return map;
     }
 
 }
