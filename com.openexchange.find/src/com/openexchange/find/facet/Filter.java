@@ -54,7 +54,6 @@ import java.util.Set;
 import com.openexchange.find.SearchRequest;
 
 /**
- *
  * {@link Filter}s are used to narrow down search results by conditions.
  * A filter belongs to a {@link FacetValue}. Multiple filters may be
  * contained in a {@link SearchRequest}.
@@ -70,13 +69,17 @@ public class Filter implements Serializable {
 
     private final Set<String> fields;
 
-    private final String query;
+    private final Set<String> queries;
 
 
     public Filter(Set<String> fields, String query) {
+        this(fields, Collections.singleton(query));
+    }
+
+    public Filter(Set<String> fields, Set<String> queries) {
         super();
         this.fields = fields;
-        this.query = query;
+        this.queries = queries;
     }
 
     /**
@@ -89,11 +92,11 @@ public class Filter implements Serializable {
     }
 
     /**
-     * The query to filter on in the given fields.
-     * Never <code>null</code> or an empty string.
+     * The queries to filter on in the given fields.
+     * Never <code>null</code> or empty.
      */
-    public String getQuery() {
-        return query;
+    public Set<String> getQueries() {
+        return queries;
     }
 
     @Override
@@ -101,7 +104,7 @@ public class Filter implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((fields == null) ? 0 : fields.hashCode());
-        result = prime * result + ((query == null) ? 0 : query.hashCode());
+        result = prime * result + ((queries == null) ? 0 : queries.hashCode());
         return result;
     }
 
@@ -119,17 +122,17 @@ public class Filter implements Serializable {
                 return false;
         } else if (!fields.equals(other.fields))
             return false;
-        if (query == null) {
-            if (other.query != null)
+        if (queries == null) {
+            if (other.queries != null)
                 return false;
-        } else if (!query.equals(other.query))
+        } else if (!queries.equals(other.queries))
             return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return "Filter [fields=" + fields + ", query=" + query + "]";
+        return "Filter [fields=" + fields + ", queries=" + queries + "]";
     }
 
 }

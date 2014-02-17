@@ -197,12 +197,13 @@ public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
         List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
         List<FacetValue> contactValues = new ArrayList<FacetValue>(contacts.size());
         for (Contact contact : contacts) {
-            for (final String mailAddress : extractMailAddessesFrom(contact)) {
-                Filter filter = new Filter(PERSONS_FILTER_FIELDS, mailAddress);
-                contactValues.add(
-                    new FacetValue(prepareFacetValueId("contact", session.getContextId(), Integer.toString(contact.getObjectID())),
-                    new ContactDisplayItem(contact), FacetValue.UNKNOWN_COUNT, filter));
-            }
+            Filter filter = new Filter(PERSONS_FILTER_FIELDS, extractMailAddessesFrom(contact));
+            String valueId = prepareFacetValueId("contact", session.getContextId(), Integer.toString(contact.getObjectID()));
+            contactValues.add(new FacetValue(
+                valueId,
+                new ContactDisplayItem(contact),
+                FacetValue.UNKNOWN_COUNT,
+                filter));
         }
         Facet contactFacet = new Facet(MailFacetType.CONTACTS, contactValues);
 
@@ -248,7 +249,7 @@ public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
         for (Filter filter : filters) {
             Set<String> fields = filter.getFields();
             if (fields.size() == 1 && "folder".equals(fields.iterator().next())) {
-                folderName = filter.getQuery();
+                folderName = filter.getQueries().iterator().next();
                 break;
             }
         }

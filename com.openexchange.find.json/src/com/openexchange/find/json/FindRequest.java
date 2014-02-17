@@ -227,16 +227,21 @@ public class FindRequest {
             for (int i = 0; i < length; i++) {
                 final JSONObject jFilter = jFilters.getJSONObject(i);
 
-                final String query = jFilter.getString("query");
+                final JSONArray jQueries = jFilter.getJSONArray("queries");
+                int len = jQueries.length();
+                final Set<String> queries = new LinkedHashSet<String>(len);
+                for (int j = 0; j < len; j++) {
+                    queries.add(jQueries.getString(j));
+                }
 
                 final JSONArray jFields = jFilter.getJSONArray("fields");
-                final int len = jFields.length();
+                len = jFields.length();
                 final Set<String> fields = new LinkedHashSet<String>(len);
                 for (int j = 0; j < len; j++) {
                     fields.add(jFields.getString(j));
                 }
 
-                filters.add(new Filter(fields, query));
+                filters.add(new Filter(fields, queries));
             }
 
             return filters;

@@ -87,7 +87,6 @@ import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.MandatoryFilter;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
@@ -209,26 +208,7 @@ public class MockDriveDriver extends AbstractContactFacetingModuleSearchDriver {
 
     @Override
     public SearchResult search(final SearchRequest searchRequest, final ServerSession session) throws OXException {
-        IDBasedFileAccessFactory factory = Services.requireService(IDBasedFileAccessFactory.class);
-
-        StringAllocator searchQuery = new StringAllocator(2048);
-        List<Filter> filters = searchRequest.getFilters();
-        Set<String> searchFields = new HashSet<String>(16);
-        if (null == filters || filters.isEmpty()) {
-            searchQuery.append("*");
-        } else {
-            boolean first = true;
-            for (Filter filter : filters) {
-                searchFields.addAll(filter.getFields());
-                if (first) {
-                    first = false;
-                } else {
-                    searchQuery.append(" AND "); // or whatever syntax required...
-                }
-                searchQuery.append(filter.getQuery());
-            }
-        }
-
+        final IDBasedFileAccessFactory factory = Services.requireService(IDBasedFileAccessFactory.class);
         final Field sortingField = Field.TITLE;
         final SortDirection sortingOrder = SortDirection.ASC;
         final IDBasedFileAccess fileAccess = factory.createAccess(session);
@@ -236,8 +216,8 @@ public class MockDriveDriver extends AbstractContactFacetingModuleSearchDriver {
         SearchIterator<File> results = null;
         try {
             results = fileAccess.search(
-                searchQuery.toString(),
-                Field.get(searchFields),
+                "*",
+                new ArrayList<Field>(File.DEFAULT_SEARCH_FIELDS),
                 FileStorageFileAccess.ALL_FOLDERS,
                 sortingField,
                 sortingOrder,

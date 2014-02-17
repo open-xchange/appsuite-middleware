@@ -141,10 +141,16 @@ public abstract class AbstractJSONConverter implements ResultConverter {
             jFields.put(field);
         }
 
+        Set<String> queries = filter.getQueries();
+        JSONArray jQueries = new JSONArray(queries.size());
+        for (String query : queries) {
+            jQueries.put(query);
+        }
+
         // Compose JSON object
         JSONObject filterJSON = new JSONObject(3);
         filterJSON.put("fields", jFields);
-        filterJSON.put("query", filter.getQuery());
+        filterJSON.put("queries", jQueries);
         return filterJSON;
     }
 
