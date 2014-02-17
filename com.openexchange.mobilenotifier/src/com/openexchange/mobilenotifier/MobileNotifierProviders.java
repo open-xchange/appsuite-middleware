@@ -65,15 +65,30 @@ public enum MobileNotifierProviders {
     /**
      * Enum field for appointment provider
      */
-    APPOINTMENT("appointment", "io.ox/calendar", "Appointments", "Appointment.tmpl");
+    APPOINTMENT("appointment", "io.ox/calendar", "Calendar", "Appointment.tmpl"),
+    
+    /**
+     * Enum field for task provider
+     */
+    TASKS("tasks", "io.ox/tasks", "Tasks", "Task.tmpl"),
+    
+    /**
+     * Enum field for reminder provider
+     */
+    REMINDER("reminder", "io.ox/reminder", "Reminder", "Reminder.tmpl"),
+    
+    /**
+     * Enum field for drive provider
+     */
+    DRIVE("drive", "io.ox/drive", "Drive", "Drive.tmpl");
 
     private final String providerName;
 
     private final String frontendName;
 
-    private final String templateFileName;
-
     private final String title;
+    
+    private final String templateFileName;
 
     private MobileNotifierProviders(final String providerName, final String frontendName, final String title, final String templateFileName) {
         this.providerName = providerName;

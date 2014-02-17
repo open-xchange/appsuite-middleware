@@ -105,7 +105,7 @@ public class GetAction extends AbstractMobileNotifierAction {
         // Get service for provider
         for (String provider : providers) {
             MobileNotifierService notifierService = mobileNotifierRegistry.getService(provider, uid, cid);
-            itemJSON.put(notifierService.getFrontendName(), NotifyItemWriter.write(notifierService.getItems()));
+            itemJSON.put(notifierService.getFrontendName(), NotifyItemWriter.write(notifierService.getItems(session)));
         }
         providerJSON.put(MobileNotifyField.PROVIDER, itemJSON);
         return new AJAXRequestResult(providerJSON, new Date(System.currentTimeMillis()), "json");

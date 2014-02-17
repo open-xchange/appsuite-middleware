@@ -57,6 +57,7 @@ import com.openexchange.mobilenotifier.MobileNotifierFileUtil;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.NotifyItem;
 import com.openexchange.mobilenotifier.NotifyTemplate;
+import com.openexchange.session.Session;
 
 /**
  * {@link ExampleMailMobileNotifierService} - Example mail implementation of a mobile notifier service
@@ -80,19 +81,24 @@ public class ExampleMailMobileNotifierService extends AbstractMobileNotifierServ
     }
 
     @Override
-    public List<NotifyItem> getItems() throws OXException {
-        List<NotifyItem> list = new ArrayList<NotifyItem>();
-        list.add(new NotifyItem("from", "heinrich@example.com"));
-        list.add(new NotifyItem("subject", "a subject"));
-        list.add(new NotifyItem("received_date", "12.04.2013 - 12:45:00"));
-        list.add(new NotifyItem("flags", "flag"));
-        list.add(new NotifyItem("attachements", "an attachment"));
-        list.add(new NotifyItem("from", "anotherheinrich@example.com"));
-        list.add(new NotifyItem("subject", "another subject"));
-        list.add(new NotifyItem("received_date", "18.04.2013 - 12:45:00"));
-        list.add(new NotifyItem("flags", "another flag"));
-        list.add(new NotifyItem("attachements", "another attachment"));
-        return list;
+    public List<List<NotifyItem>> getItems(Session session) throws OXException {
+        List<NotifyItem> item1 = new ArrayList<NotifyItem>();
+        item1.add(new NotifyItem("from", "heinrich@example.com"));
+        item1.add(new NotifyItem("subject", "a subject"));
+        item1.add(new NotifyItem("received_date", "12.04.2013 - 12:45:00"));
+        item1.add(new NotifyItem("flags", "flag"));
+        item1.add(new NotifyItem("attachements", "an attachment"));
+        List<NotifyItem> item2 = new ArrayList<NotifyItem>();
+        item2.add(new NotifyItem("from", "anotherheinrich@example.com"));
+        item2.add(new NotifyItem("subject", "another subject"));
+        item2.add(new NotifyItem("received_date", "18.04.2013 - 12:45:00"));
+        item2.add(new NotifyItem("flags", "another flag"));
+        item2.add(new NotifyItem("attachements", "another attachment"));
+
+        List<List<NotifyItem>> notifyItems = new ArrayList<List<NotifyItem>>();
+        notifyItems.add(item1);
+        notifyItems.add(item2);
+        return notifyItems;
     }
 
     @Override

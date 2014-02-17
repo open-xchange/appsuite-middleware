@@ -53,6 +53,8 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.mobilenotifier.MobileNotifierExceptionCodes;
 import com.openexchange.mobilenotifier.NotifyItem;
 
 /**
@@ -69,23 +71,31 @@ public class NotifyItemWriter {
     /**
      * Writes the JSON structure of notify items
      * 
-     * @param notifyItem The notify items
+     * @param notifyItem List of notify items
      * @return The JSON structure
      * @throws JSONException
+     * @throws OXException
      */
-    public static JSONObject write(final List<NotifyItem> notifyItem) throws JSONException {
+    public static JSONObject write(final List<List<NotifyItem>> notifyItem) throws JSONException, OXException {
+        // TODO: clarify what should happen if notifyitem is empty
+        if (notifyItem == null || notifyItem.size() == 0) {
+            return new JSONObject();
+        }
         final JSONObject itemsJSON = new JSONObject();
         final JSONArray itemsArray = transformListIntoJSONArray(notifyItem);
         itemsJSON.put(MobileNotifyField.ITEMS, itemsArray);
         return itemsJSON;
     }
 
-    private static JSONArray transformListIntoJSONArray(List<NotifyItem> items) throws JSONException {
+    private static JSONArray transformListIntoJSONArray(List<List<NotifyItem>> items) throws JSONException {
         final JSONArray itemsArray = new JSONArray();
-        for (NotifyItem item : items) {
+        for (List<NotifyItem> listItem : items) {
             final JSONObject itemJSON = new JSONObject();
-            itemJSON.put(item.getKey(), item.getValue());
+            for (NotifyItem item : listItem) {
+                itemJSON.put(item.getKey(), item.getValue());
+            }
             itemsArray.put(itemJSON);
+
         }
         return itemsArray;
     }

@@ -12,6 +12,7 @@ Import-Package: com.openexchange.config.cascade,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.server,
+ com.openexchange.session,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j

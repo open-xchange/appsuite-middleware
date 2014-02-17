@@ -69,10 +69,6 @@ public class NotifyTemplate {
 
     private Map<String, Object> attributes = new HashMap<String, Object>();
 
-    public NotifyTemplate() {
-        super();
-    }
-
     public NotifyTemplate(final String title, final String htmlTemplate, final boolean slow, final int index) {
         this.title = title;
         this.htmlTemplate = htmlTemplate;

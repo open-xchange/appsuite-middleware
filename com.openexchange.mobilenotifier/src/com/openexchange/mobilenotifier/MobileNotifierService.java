@@ -51,6 +51,7 @@ package com.openexchange.mobilenotifier;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link MobileNotifierService} - The mobile notifier service.
@@ -90,7 +91,7 @@ public interface MobileNotifierService {
      * @return List of NotifyItems
      * @throws OXException
      */
-    List<NotifyItem> getItems() throws OXException;
+    List<List<NotifyItem>> getItems(Session session) throws OXException;
 
     /**
      * Gets a template

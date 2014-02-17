@@ -59,6 +59,7 @@ import com.openexchange.mobilenotifier.MobileNotifierFileUtil;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.NotifyItem;
 import com.openexchange.mobilenotifier.NotifyTemplate;
+import com.openexchange.session.Session;
 
 /**
  * {@link ExampleAppointmentMobileNotifierService} - Example calendar implementation of a mobile notifier service
@@ -82,15 +83,19 @@ public class ExampleAppointmentMobileNotifierService extends AbstractMobileNotif
 
     // public List<List<NotifyItem>> ?
     @Override
-    public List<NotifyItem> getItems() throws OXException {
-        List<NotifyItem> list = new ArrayList<NotifyItem>();
-        list.add(new NotifyItem("title", "This is a test title1"));
-        list.add(new NotifyItem("location", "This is a test location1"));
-        list.add(new NotifyItem("description", "This is a test description1"));
-        list.add(new NotifyItem("title", "This is a test title2"));
-        list.add(new NotifyItem("location", "This is a test location2"));
-        list.add(new NotifyItem("description", "This is a test description2"));
-        return list;
+    public List<List<NotifyItem>> getItems(Session session) throws OXException {
+        List<NotifyItem> item1 = new ArrayList<NotifyItem>();
+        item1.add(new NotifyItem("title", "This is a test title1"));
+        item1.add(new NotifyItem("location", "This is a test location1"));
+        item1.add(new NotifyItem("description", "This is a test description1"));
+        List<NotifyItem> item2 = new ArrayList<NotifyItem>();
+        item2.add(new NotifyItem("title", "This is a test title2"));
+        item2.add(new NotifyItem("location", "This is a test location2"));
+        item2.add(new NotifyItem("description", "This is a test description2"));
+        List<List<NotifyItem>> notifyItems = new ArrayList<List<NotifyItem>>();
+        notifyItems.add(item1);
+        notifyItems.add(item2);
+        return notifyItems;
     }
 
     @Override
