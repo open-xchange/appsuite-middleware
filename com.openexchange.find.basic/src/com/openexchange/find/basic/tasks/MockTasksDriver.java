@@ -136,7 +136,7 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
                 id,
                 new SimpleDisplayItem(TasksStrings.TASK_NAME),
                 FacetValue.UNKNOWN_COUNT,
-                new Filter(Collections.singleton(TasksStrings.TASK_NAME), "override"));
+                new Filter(Collections.singleton(id), "override"));
             final Facet fileNameFacet = new Facet(TasksFacetType.TASK_NAME, Collections.singletonList(staticFacetValue));
             staticFacets.add(fileNameFacet);
         }
@@ -147,7 +147,7 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
                 id,
                 new SimpleDisplayItem(TasksStrings.TASK_DESCRIPTION),
                 FacetValue.UNKNOWN_COUNT,
-                new Filter(Collections.singleton(TasksStrings.TASK_DESCRIPTION), "override"));
+                new Filter(Collections.singleton(id), "override"));
             final Facet fileNameFacet = new Facet(TasksFacetType.TASK_DESCRIPTION, Collections.singletonList(staticFacetValue));
             staticFacets.add(fileNameFacet);
         }
@@ -158,7 +158,7 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
                 id,
                 new SimpleDisplayItem(TasksStrings.TASK_LOCATION),
                 FacetValue.UNKNOWN_COUNT,
-                new Filter(Collections.singleton(TasksStrings.TASK_LOCATION), "override"));
+                new Filter(Collections.singleton(id), "override"));
             final Facet fileNameFacet = new Facet(TasksFacetType.TASK_LOCATION, Collections.singletonList(staticFacetValue));
             staticFacets.add(fileNameFacet);
         }
@@ -169,7 +169,7 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
                 id,
                 new SimpleDisplayItem(TasksStrings.TASK_ATTACHMENT_NAME),
                 FacetValue.UNKNOWN_COUNT,
-                new Filter(Collections.singleton(TasksStrings.TASK_ATTACHMENT_NAME), "override"));
+                new Filter(Collections.singleton(id), "override"));
             final Facet fileNameFacet = new Facet(TasksFacetType.TASK_ATTACHMENT_NAME, Collections.singletonList(staticFacetValue));
             staticFacets.add(fileNameFacet);
         }
@@ -215,7 +215,7 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
             staticFacetValues.add(new FacetValue(TaskTypeDisplayItem.Type.SINGLE_TASK.getIdentifier(), new TaskTypeDisplayItem(
                 TasksStrings.TASK_STATUS_SINGLE_TASK,
                 TaskTypeDisplayItem.Type.SINGLE_TASK), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singleton("task_status"),
+                Collections.singleton("task_type"),
                 TaskTypeDisplayItem.Type.SINGLE_TASK.getIdentifier())));
             staticFacetValues.add(new FacetValue(TaskTypeDisplayItem.Type.SERIES.getIdentifier(), new TaskTypeDisplayItem(
                 TasksStrings.TASK_STATUS_SERIES,
