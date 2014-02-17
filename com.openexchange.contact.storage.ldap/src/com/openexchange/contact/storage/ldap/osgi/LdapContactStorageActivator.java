@@ -49,9 +49,12 @@
 
 package com.openexchange.contact.storage.ldap.osgi;
 
+import java.util.HashSet;
+import java.util.Set;
 import org.slf4j.Logger;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.contact.storage.ldap.config.LdapContactStorageFactory;
 import com.openexchange.contact.storage.ldap.database.LdapCreateTableService;
@@ -73,7 +76,7 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class LdapContactStorageActivator extends HousekeepingActivator {
+public class LdapContactStorageActivator extends HousekeepingActivator implements Reloadable {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapContactStorageActivator.class);
 
@@ -107,6 +110,9 @@ public class LdapContactStorageActivator extends HousekeepingActivator {
             for (ContactStorage storage : LdapContactStorageFactory.createAll()) {
                 registerService(ContactStorage.class, storage);
             }
+
+            // register reloadable service
+            registerService(Reloadable.class, this);
         } catch (Exception e) {
             LOG.error("error starting \"com.openexchange.contact.storage.ldap\"", e);
             throw e;
@@ -118,6 +124,48 @@ public class LdapContactStorageActivator extends HousekeepingActivator {
         LOG.info("stopping bundle: com.openexchange.contact.storage.ldap");
         LdapServiceLookup.set(null);
         super.stopBundle();
+    }
+
+    private void reinit() {
+        LOG.info("Stopping bundle com.openexchange.contact.storage.ldap for reinitialisation.");
+        try {
+            stopBundle();
+        } catch (Exception e) {
+            LOG.error("Bundle com.openexchange.contact.storage.ldap could not be stopped.", e);
+        }
+        try {
+            LOG.info("Restarting bundle: com.openexchange.contact.storage.ldap");
+            LdapServiceLookup.set(this);
+            /*
+             * register update task, create table job and delete listener
+             */
+            registerService(CreateTableService.class, new LdapCreateTableService());
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new LdapCreateTableTask()));
+            registerService(DeleteListener.class, new LdapDeleteListener());
+            /*
+             * register configured storages
+             */
+            for (ContactStorage storage : LdapContactStorageFactory.createAll()) {
+                registerService(ContactStorage.class, storage);
+            }
+
+            // register reloadable service
+            registerService(Reloadable.class, this);
+        } catch (Exception e) {
+            LOG.error("error restarting \"com.openexchange.contact.storage.ldap\"", e);
+        }
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        reinit();
+    }
+
+    @Override
+    public Set<String> getConfigfileNames() {
+        Set<String> set = new HashSet<String>();
+        set.add("contact-storage-ldap/");
+        return set;
     }
 
 }
