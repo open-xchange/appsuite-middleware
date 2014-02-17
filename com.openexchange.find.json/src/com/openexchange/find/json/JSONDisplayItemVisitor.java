@@ -144,7 +144,7 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
         final FileTypeDisplayItem.Type type = item.getItem();
         try {
             json.put("defaultValue", translator.translate(locale, item.getDefaultValue()));
-            json.put("folder_type", Strings.toLowerCase(type.toString()));
+            json.put("file_type", Strings.toLowerCase(type.toString()));
         } catch (JSONException e) {
             errors.add(e);
         }
