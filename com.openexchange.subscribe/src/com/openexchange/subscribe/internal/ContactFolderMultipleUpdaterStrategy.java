@@ -57,7 +57,6 @@ import java.util.Map;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
-import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -72,7 +71,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  * {@link ContactFolderMultipleUpdaterStrategy}
  * This differs from ContactFolderUpdaterStrategy in 2 ways
  * - individual fields are only written if present in the update and not filled yet. So no fields will be deleted and none will be overwritten.
- * - aggregating relations between contacts (see {@link ContactInterface}) are respected as well as generated if appropriate
+ * - aggregating relations between contacts are respected as well as generated if appropriate
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrategy<Contact> {
