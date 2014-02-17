@@ -51,16 +51,21 @@ package com.openexchange.find.json;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.DefaultFolderType;
 import com.openexchange.find.common.FolderDisplayItem;
+import com.openexchange.find.common.FolderTypeDisplayItem;
+import com.openexchange.find.common.FolderTypeDisplayItem.Type;
 import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
+import com.openexchange.find.json.converters.StringTranslator;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Strings;
 
 
 /**
@@ -70,11 +75,14 @@ import com.openexchange.groupware.container.Contact;
 public class JSONDisplayItemVisitor implements DisplayItemVisitor {
 
     private final List<JSONException> errors;
-
     private final JSONObject json;
+    private final StringTranslator translator;
+    private final Locale locale;
 
-    public JSONDisplayItemVisitor() {
+    public JSONDisplayItemVisitor(final StringTranslator translator, final Locale locale) {
         super();
+        this.translator = translator;
+        this.locale = locale;
         json = new JSONObject();
         errors = new ArrayList<JSONException>();
     }
@@ -115,6 +123,17 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
     public void visit(SimpleDisplayItem item) {
         try {
             addDefaultValue(item);
+        } catch (JSONException e) {
+            errors.add(e);
+        }
+    }
+
+    @Override
+    public void visit(final FolderTypeDisplayItem item) {
+        final Type type = item.getItem();
+        try {
+            json.put("defaultValue", translator.translate(locale, item.getDefaultValue()));
+            json.put("folder_type", Strings.toLowerCase(type.toString()));
         } catch (JSONException e) {
             errors.add(e);
         }

@@ -47,41 +47,86 @@
  *
  */
 
-package com.openexchange.find.drive;
+package com.openexchange.find.common;
 
-import com.openexchange.find.facet.FacetType;
-
+import com.openexchange.find.facet.DisplayItem;
+import com.openexchange.find.facet.DisplayItemVisitor;
 
 /**
- * {@link DriveFacetType} - Facet types for the drive module.
+ * The display item for folder type; either <i>private</i>, <i>public</i>, <i>shared</i> or <i>external</i>.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.0
  */
-public enum DriveFacetType implements FacetType {
+public class FolderTypeDisplayItem implements DisplayItem {
 
-    CONTACTS(DriveStrings.FACET_CONTACTS),
-    FOLDERS(DriveStrings.FACET_FOLDERS),
-    FILE_NAME(DriveStrings.FACET_FILE_NAME),
-    FILE_TYPE(DriveStrings.FACET_FILE_TYPE),
-    FILE_DESCRIPTION(DriveStrings.FACET_FILE_DESCRIPTION),
-    FILE_CONTENT(DriveStrings.FACET_FILE_CONTENT),
-    ;
+    /**
+     * The folder type enumeration.
+     */
+    public static enum Type {
 
-    // ---------------------------------------------------------------------------------------------- //
+        /**
+         * The type denoting private folders.
+         */
+        PRIVATE("private"),
+        /**
+         * The type denoting public folders.
+         */
+        PUBLIC("public"),
+        /**
+         * The type denoting shared folders.
+         */
+        SHARED("shared"),
+        /**
+         * The type denoting external folders; e.g. subscribed account.
+         */
+        EXTERNAL("external"),
+        ;
 
+        private final String identifier;
+
+        private Type(final String identifier) {
+            this.identifier = identifier;
+        }
+
+        /**
+         * Gets the identifier
+         *
+         * @return The identifier
+         */
+        public String getIdentifier() {
+            return identifier;
+        }
+    }
+
+    // ----------------------------------------------------------------------------- //
+
+    private final Type type;
     private final String displayName;
 
-    private DriveFacetType(final String displayName) {
+    /**
+     * Initializes a new {@link FolderTypeDisplayItem}.
+     *
+     * @param type The folder type associated with this display item
+     */
+    public FolderTypeDisplayItem(final String displayName, final Type type) {
+        super();
         this.displayName = displayName;
+        this.type = type;
     }
 
     @Override
-    public String getName() {
-        return toString().toLowerCase();
+    public void accept(DisplayItemVisitor visitor) {
+        visitor.visit(this);
     }
 
     @Override
-    public String getDisplayName() {
+    public Type getItem() {
+        return type;
+    }
+
+    @Override
+    public String getDefaultValue() {
         return displayName;
     }
 

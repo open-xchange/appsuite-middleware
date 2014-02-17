@@ -102,7 +102,7 @@ public abstract class AbstractJSONConverter implements ResultConverter {
             List<FacetValue> values = facet.getValues();
             JSONArray jValues = new JSONArray(values.size());
             for (FacetValue value : values) {
-                JSONObject valueJSON = convertFacetValue(value);
+                JSONObject valueJSON = convertFacetValue(locale, value);
                 jValues.put(valueJSON);
             }
             facetJSON.put("values", jValues);
@@ -114,10 +114,10 @@ public abstract class AbstractJSONConverter implements ResultConverter {
         return result;
     }
 
-    protected JSONObject convertFacetValue(FacetValue value) throws JSONException {
+    protected JSONObject convertFacetValue(Locale locale, FacetValue value) throws JSONException {
         JSONObject valueJSON = new JSONObject(4);
 
-        valueJSON.put("displayItem", convertDisplayItem(value.getDisplayItem()));
+        valueJSON.put("displayItem", convertDisplayItem(locale, value.getDisplayItem()));
         int count = value.getCount();
         if (count >= 0) {
             valueJSON.put("count", value.getCount());
@@ -127,8 +127,8 @@ public abstract class AbstractJSONConverter implements ResultConverter {
         return valueJSON;
     }
 
-    protected JSONObject convertDisplayItem(DisplayItem displayItem) {
-        JSONDisplayItemVisitor visitor = new JSONDisplayItemVisitor();
+    protected JSONObject convertDisplayItem(Locale locale, DisplayItem displayItem) {
+        JSONDisplayItemVisitor visitor = new JSONDisplayItemVisitor(translator, locale);
         displayItem.accept(visitor);
         return visitor.getJSONObject();
     }

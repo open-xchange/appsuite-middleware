@@ -50,6 +50,7 @@
 package com.openexchange.find.json.converters;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.json.JSONArray;
@@ -109,16 +110,16 @@ public class ConfigJSONConverter extends AbstractJSONConverter {
         JSONObject moduleJSON = new JSONObject();
         moduleJSON.put("module", config.getModule().toString().toLowerCase());
         moduleJSON.put("staticFacets", convertFacets(session.getUser().getLocale(), config.getStaticFacets()));
-        moduleJSON.put("mandatoryFilters", convertMandatoryFilters(config.getMandatoryFilters()));
+        moduleJSON.put("mandatoryFilters", convertMandatoryFilters(config.getMandatoryFilters(), session.getUser().getLocale()));
         return moduleJSON;
     }
 
-    private JSONArray convertMandatoryFilters(List<MandatoryFilter> mandatoryFilters) throws JSONException {
+    private JSONArray convertMandatoryFilters(List<MandatoryFilter> mandatoryFilters, Locale locale) throws JSONException {
         JSONArray result = new JSONArray();
         for (MandatoryFilter mandatoryFilter : mandatoryFilters) {
             JSONObject filterJSON = new JSONObject();
             filterJSON.put("facet", mandatoryFilter.getFacet().getType().getName());
-            filterJSON.put("defaultValue", convertFacetValue(mandatoryFilter.getDefaultValue()));
+            filterJSON.put("defaultValue", convertFacetValue(locale, mandatoryFilter.getDefaultValue()));
             result.put(filterJSON);
         }
         return result;

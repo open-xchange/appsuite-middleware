@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,42 +47,37 @@
  *
  */
 
-package com.openexchange.find.drive;
+package com.openexchange.find.common;
 
-import com.openexchange.find.facet.FacetType;
+import com.openexchange.i18n.LocalizableStrings;
 
 
 /**
- * {@link DriveFacetType} - Facet types for the drive module.
+ * {@link CommonStrings} - Provides common i18n strings for find module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum DriveFacetType implements FacetType {
+public final class CommonStrings implements LocalizableStrings {
 
-    CONTACTS(DriveStrings.FACET_CONTACTS),
-    FOLDERS(DriveStrings.FACET_FOLDERS),
-    FILE_NAME(DriveStrings.FACET_FILE_NAME),
-    FILE_TYPE(DriveStrings.FACET_FILE_TYPE),
-    FILE_DESCRIPTION(DriveStrings.FACET_FILE_DESCRIPTION),
-    FILE_CONTENT(DriveStrings.FACET_FILE_CONTENT),
-    ;
-
-    // ---------------------------------------------------------------------------------------------- //
-
-    private final String displayName;
-
-    private DriveFacetType(final String displayName) {
-        this.displayName = displayName;
+    /**
+     * Initializes a new {@link CommonStrings}.
+     */
+    private CommonStrings() {
+        super();
     }
 
-    @Override
-    public String getName() {
-        return toString().toLowerCase();
-    }
+    // ------------------------- i18n strings for facet types -------------------------------------- //
 
-    @Override
-    public String getDisplayName() {
-        return displayName;
-    }
+    public static final String FACET_TYPE_FOLDER_TYPE = "Folder type";
+
+    // ------------------------- i18n strings for folder types ------------------------------------- //
+
+    public static final String FOLDER_TYPE_PRIVATE = "Private";
+
+    public static final String FOLDER_TYPE_PUBLIC = "Public";
+
+    public static final String FOLDER_TYPE_SHARED = "Shared";
+
+    public static final String FOLDER_TYPE_EXTERNAL = "External";
 
 }

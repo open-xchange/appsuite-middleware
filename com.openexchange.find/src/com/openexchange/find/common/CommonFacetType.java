@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,31 +47,28 @@
  *
  */
 
-package com.openexchange.find.drive;
+package com.openexchange.find.common;
 
 import com.openexchange.find.facet.FacetType;
 
-
 /**
- * {@link DriveFacetType} - Facet types for the drive module.
+ * {@link CommonFacetType}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum DriveFacetType implements FacetType {
+public enum CommonFacetType implements FacetType {
 
-    CONTACTS(DriveStrings.FACET_CONTACTS),
-    FOLDERS(DriveStrings.FACET_FOLDERS),
-    FILE_NAME(DriveStrings.FACET_FILE_NAME),
-    FILE_TYPE(DriveStrings.FACET_FILE_TYPE),
-    FILE_DESCRIPTION(DriveStrings.FACET_FILE_DESCRIPTION),
-    FILE_CONTENT(DriveStrings.FACET_FILE_CONTENT),
+    /**
+     * The facet type for folder type.
+     */
+    FOLDER_TYPE(CommonStrings.FACET_TYPE_FOLDER_TYPE),
     ;
 
-    // ---------------------------------------------------------------------------------------------- //
+    // ------------------------------------------------------------ //
 
     private final String displayName;
 
-    private DriveFacetType(final String displayName) {
+    private CommonFacetType(String displayName) {
         this.displayName = displayName;
     }
 

@@ -71,4 +71,25 @@ public class DriveStrings implements LocalizableStrings {
     // Search in Persons.
     public static final String FACET_CONTACTS = "Contacts";
 
+    // Search in folder type (private, public, shared, external)
+    public static final String FACET_FOLDER_TYPE = "Folder type";
+
+    // Search in file description.
+    public static final String FACET_FILE_DESCRIPTION = "File description";
+
+    // Search in file type.
+    public static final String FACET_FILE_TYPE = "File type";
+
+    // -------------------------- i18n strings for file types ---------------------------- //
+
+    public static final String FILE_TYPE_IMAGES = "Images";
+
+    public static final String FILE_TYPE_AUDIO = "Audio";
+
+    public static final String FILE_TYPE_VIDEO = "Video";
+
+    public static final String FILE_TYPE_DOCUMENTS = "Documents";
+
+    public static final String FILE_TYPE_OTHER = "Other";
+
 }

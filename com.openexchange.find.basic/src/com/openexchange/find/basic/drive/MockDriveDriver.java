@@ -73,10 +73,15 @@ import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
 import com.openexchange.find.basic.Services;
+import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.common.ContactDisplayItem;
+import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.common.SimpleDisplayItem;
 import com.openexchange.find.drive.DriveFacetType;
+import com.openexchange.find.drive.DriveStrings;
 import com.openexchange.find.drive.FileDocument;
+import com.openexchange.find.drive.FileTypeDisplayItem;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
@@ -121,9 +126,33 @@ public class MockDriveDriver extends AbstractContactFacetingModuleSearchDriver {
             staticFacets.add(fileNameFacet);
         }
         {
+            final FacetValue staticFacetValue = new FacetValue(new SimpleDisplayItem("file_description"), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton("file_description"), "override"));
+            final Facet fileNameFacet = new Facet(DriveFacetType.FILE_DESCRIPTION, Collections.singletonList(staticFacetValue));
+            staticFacets.add(fileNameFacet);
+        }
+        {
             final FacetValue staticFacetValue = new FacetValue(new SimpleDisplayItem("file_content"), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton("file_content"), "override"));
             final Facet fileNameFacet = new Facet(DriveFacetType.FILE_CONTENT, Collections.singletonList(staticFacetValue));
             staticFacets.add(fileNameFacet);
+        }
+        {
+            final List<FacetValue> fileTypes = new ArrayList<FacetValue>(6);
+            fileTypes.add(new FacetValue(new FileTypeDisplayItem(DriveStrings.FILE_TYPE_AUDIO, FileTypeDisplayItem.Type.AUDIO), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton("file_type"), FileTypeDisplayItem.Type.AUDIO.getIdentifier())));
+            fileTypes.add(new FacetValue(new FileTypeDisplayItem(DriveStrings.FILE_TYPE_DOCUMENTS, FileTypeDisplayItem.Type.DOCUMENTS), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton("file_type"), FileTypeDisplayItem.Type.DOCUMENTS.getIdentifier())));
+            fileTypes.add(new FacetValue(new FileTypeDisplayItem(DriveStrings.FILE_TYPE_IMAGES, FileTypeDisplayItem.Type.IMAGES), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton("file_type"), FileTypeDisplayItem.Type.IMAGES.getIdentifier())));
+            fileTypes.add(new FacetValue(new FileTypeDisplayItem(DriveStrings.FILE_TYPE_OTHER, FileTypeDisplayItem.Type.OTHER), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton("file_type"), FileTypeDisplayItem.Type.OTHER.getIdentifier())));
+            fileTypes.add(new FacetValue(new FileTypeDisplayItem(DriveStrings.FILE_TYPE_VIDEO, FileTypeDisplayItem.Type.VIDEO), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton("file_type"), FileTypeDisplayItem.Type.VIDEO.getIdentifier())));
+            final Facet folderTypeFacet = new Facet(DriveFacetType.FILE_TYPE, fileTypes);
+            staticFacets.add(folderTypeFacet);
+        }
+        {
+            final List<FacetValue> folderTypes = new ArrayList<FacetValue>(4);
+            folderTypes.add(new FacetValue(new FolderTypeDisplayItem(CommonStrings.FOLDER_TYPE_PRIVATE, FolderTypeDisplayItem.Type.PRIVATE), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton("folder_type"), FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())));
+            folderTypes.add(new FacetValue(new FolderTypeDisplayItem(CommonStrings.FOLDER_TYPE_PUBLIC, FolderTypeDisplayItem.Type.PUBLIC), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton("folder_type"), FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())));
+            folderTypes.add(new FacetValue(new FolderTypeDisplayItem(CommonStrings.FOLDER_TYPE_SHARED, FolderTypeDisplayItem.Type.SHARED), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton("folder_type"), FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
+            folderTypes.add(new FacetValue(new FolderTypeDisplayItem(CommonStrings.FOLDER_TYPE_EXTERNAL, FolderTypeDisplayItem.Type.EXTERNAL), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton("folder_type"), FolderTypeDisplayItem.Type.EXTERNAL.getIdentifier())));
+            final Facet folderTypeFacet = new Facet(CommonFacetType.FOLDER_TYPE, folderTypes);
+            staticFacets.add(folderTypeFacet);
         }
 
         // Define mandatory filters
