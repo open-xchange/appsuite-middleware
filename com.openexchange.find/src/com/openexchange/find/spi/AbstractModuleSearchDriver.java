@@ -58,9 +58,13 @@ import java.util.Map.Entry;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
+import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.common.CommonStrings;
+import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.facet.Filter;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -70,6 +74,21 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.6.0
  */
 public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
+    
+    /**
+     * Builds the facet for folder types (private, public , shared, external) that is indicated on {@link ModuleSearchDriver#getConfiguration(com.openexchange.tools.session.ServerSession) getConfiguration(ServerSession)} invocation.
+     *
+     * @return The facet for folder types
+     */
+    protected Facet buildFolderTypeFacet() {
+        final List<FacetValue> folderTypes = new ArrayList<FacetValue>(4);
+        folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.PRIVATE.getIdentifier(), new FolderTypeDisplayItem(CommonStrings.FOLDER_TYPE_PRIVATE, FolderTypeDisplayItem.Type.PRIVATE), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton("folder_type"), FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())));
+        folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.PUBLIC.getIdentifier(), new FolderTypeDisplayItem(CommonStrings.FOLDER_TYPE_PUBLIC, FolderTypeDisplayItem.Type.PUBLIC), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton("folder_type"), FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())));
+        folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.SHARED.getIdentifier(), new FolderTypeDisplayItem(CommonStrings.FOLDER_TYPE_SHARED, FolderTypeDisplayItem.Type.SHARED), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton("folder_type"), FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
+        folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.EXTERNAL.getIdentifier(), new FolderTypeDisplayItem(CommonStrings.FOLDER_TYPE_EXTERNAL, FolderTypeDisplayItem.Type.EXTERNAL), FacetValue.UNKNOWN_COUNT, new Filter(Collections.singleton("folder_type"), FolderTypeDisplayItem.Type.EXTERNAL.getIdentifier())));
+        final Facet folderTypeFacet = new Facet(CommonFacetType.FOLDER_TYPE, folderTypes);
+        return folderTypeFacet;
+    }
 
     /**
      * Removes a list of facets from another one. Indeed only the facet values
