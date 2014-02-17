@@ -49,6 +49,7 @@
 
 package com.openexchange.mailaccount.json.actions;
 
+import static com.openexchange.mail.utils.ProviderUtility.extractProtocol;
 import static com.openexchange.mailaccount.Tools.getUnsignedInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -78,6 +79,7 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailProvider;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
@@ -331,7 +333,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
     protected static MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess(final MailAccountDescription accountDescription, final ServerSession session, final List<OXException> warnings) throws OXException {
         final String mailServerURL = accountDescription.generateMailServerURL();
         // Get the appropriate mail provider by mail server URL
-        final MailProvider mailProvider = MailProviderRegistry.getMailProviderByURL(mailServerURL);
+        final MailProvider mailProvider = getMailProviderByURL(mailServerURL);
         if (null == mailProvider) {
             LOG.debug("Validating mail account failed. No mail provider found for URL: {}", mailServerURL);
             return null;
@@ -378,6 +380,13 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
             session.setParameter("mail-account.request", null);
         }
         return null;
+    }
+
+    private static MailProvider getMailProviderByURL(final String serverUrl) {
+        /*
+         * Get appropriate provider
+         */
+        return MailProviderRegistry.getRealMailProvider(extractProtocol(serverUrl, MailProperties.getInstance().getDefaultMailProvider()));
     }
 
     /**
