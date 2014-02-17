@@ -51,7 +51,6 @@ package com.openexchange.pop3.storage.mailaccount;
 
 import static com.openexchange.pop3.storage.mailaccount.util.Utility.prependPath2Fullname;
 import static com.openexchange.pop3.storage.mailaccount.util.Utility.stripPathFromFullname;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
