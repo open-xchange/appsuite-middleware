@@ -58,7 +58,7 @@ import com.openexchange.find.facet.Filter;
 
 /**
  * {@link StockFolderNamingFactory}
- * 
+ *
  * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
  * @since v7.6.0
  */
@@ -66,13 +66,13 @@ public class StockFolderNamingFactory {
 
     public static Facet getStockFolderNamingFacet() {
         List<FacetValue> folderTypeValues = new ArrayList<FacetValue>(3);
-        folderTypeValues.add(new FacetValue(new SimpleDisplayItem("private_folder"), FacetValue.UNKNOWN_COUNT, new Filter(
+        folderTypeValues.add(new FacetValue("private_folder", new SimpleDisplayItem("private_folder"), FacetValue.UNKNOWN_COUNT, new Filter(
             Collections.singleton("private_folder"),
             "override")));
-        folderTypeValues.add(new FacetValue(new SimpleDisplayItem("public_folder"), FacetValue.UNKNOWN_COUNT, new Filter(
+        folderTypeValues.add(new FacetValue("private_folder", new SimpleDisplayItem("public_folder"), FacetValue.UNKNOWN_COUNT, new Filter(
             Collections.singleton("public_folder"),
             "override")));
-        folderTypeValues.add(new FacetValue(new SimpleDisplayItem("shared_folder"), FacetValue.UNKNOWN_COUNT, new Filter(
+        folderTypeValues.add(new FacetValue("private_folder", new SimpleDisplayItem("shared_folder"), FacetValue.UNKNOWN_COUNT, new Filter(
             Collections.singleton("shared_folder"),
             "override")));
 
