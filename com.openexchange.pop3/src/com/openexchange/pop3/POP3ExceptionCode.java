@@ -52,15 +52,14 @@ package com.openexchange.pop3;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 
 /**
- * {@link OXExceptionCode} - The POP3 error codes.
- *
+ * {@link DisplayableOXExceptionCode} - The POP3 error codes.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum POP3ExceptionCode implements DisplayableOXExceptionCode {
