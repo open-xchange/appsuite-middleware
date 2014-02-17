@@ -58,8 +58,8 @@ import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.DefaultFolderType;
 import com.openexchange.find.common.FolderDisplayItem;
 import com.openexchange.find.common.FolderTypeDisplayItem;
-import com.openexchange.find.common.FolderTypeDisplayItem.Type;
 import com.openexchange.find.common.SimpleDisplayItem;
+import com.openexchange.find.drive.FileTypeDisplayItem;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.find.facet.DisplayItemVisitor;
 import com.openexchange.find.json.converters.StringTranslator;
@@ -130,7 +130,18 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
 
     @Override
     public void visit(final FolderTypeDisplayItem item) {
-        final Type type = item.getItem();
+        final FolderTypeDisplayItem.Type type = item.getItem();
+        try {
+            json.put("defaultValue", translator.translate(locale, item.getDefaultValue()));
+            json.put("folder_type", Strings.toLowerCase(type.toString()));
+        } catch (JSONException e) {
+            errors.add(e);
+        }
+    }
+
+    @Override
+    public void visit(FileTypeDisplayItem item) {
+        final FileTypeDisplayItem.Type type = item.getItem();
         try {
             json.put("defaultValue", translator.translate(locale, item.getDefaultValue()));
             json.put("folder_type", Strings.toLowerCase(type.toString()));
