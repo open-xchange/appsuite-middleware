@@ -206,28 +206,7 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
         }
         // Folder
         {
-            final List<FacetValue> folderTypes = new ArrayList<FacetValue>(4);
-            folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.PRIVATE.getIdentifier(), new FolderTypeDisplayItem(
-                CommonStrings.FOLDER_TYPE_PRIVATE,
-                FolderTypeDisplayItem.Type.PRIVATE), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singleton("folder_type"),
-                FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())));
-            folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.PUBLIC.getIdentifier(), new FolderTypeDisplayItem(
-                CommonStrings.FOLDER_TYPE_PUBLIC,
-                FolderTypeDisplayItem.Type.PUBLIC), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singleton("folder_type"),
-                FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())));
-            folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.SHARED.getIdentifier(), new FolderTypeDisplayItem(
-                CommonStrings.FOLDER_TYPE_SHARED,
-                FolderTypeDisplayItem.Type.SHARED), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singleton("folder_type"),
-                FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
-            folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.EXTERNAL.getIdentifier(), new FolderTypeDisplayItem(
-                CommonStrings.FOLDER_TYPE_EXTERNAL,
-                FolderTypeDisplayItem.Type.EXTERNAL), FacetValue.UNKNOWN_COUNT, new Filter(
-                Collections.singleton("folder_type"),
-                FolderTypeDisplayItem.Type.EXTERNAL.getIdentifier())));
-            final Facet folderTypeFacet = new Facet(CommonFacetType.FOLDER_TYPE, folderTypes);
+            final Facet folderTypeFacet = buildFolderTypeFacet();
             staticFacets.add(folderTypeFacet);
         }
         // Type
