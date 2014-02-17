@@ -126,13 +126,15 @@ public class QueryRequest extends AbstractFindRequest<QueryResponse> {
         final JSONObject jBody = new JSONObject(3);
 
         // Add queries if present
-        final List<String> queries = this.queries;
-        if (null != queries) {
-            final JSONArray jQueries = new JSONArray(queries.size());
-            for (final String sQuery : queries) {
-                jQueries.put(sQuery);
+        {
+            final List<String> queries = this.queries;
+            if (null != queries) {
+                final JSONArray jQueries = new JSONArray(queries.size());
+                for (final String sQuery : queries) {
+                    jQueries.put(sQuery);
+                }
+                jBody.put("queries", jQueries);
             }
-            jBody.put("queries", jQueries);
         }
 
         // Add filters if present
@@ -141,7 +143,13 @@ public class QueryRequest extends AbstractFindRequest<QueryResponse> {
             final JSONArray jFilters = new JSONArray(filters.size());
             for (final Filter filter : filters) {
                 final JSONObject jFilter = new JSONObject(3);
-                jFilter.put("query", filter.getQuery());
+                
+                final Set<String> filterQueries = filter.getQueries();
+                final JSONArray jQueries = new JSONArray(filterQueries.size());
+                for (final String sQuery : filterQueries) {
+                    jQueries.put(sQuery);
+                }
+                jFilter.put("queries", jQueries);
 
                 final Set<String> fields = filter.getFields();
                 final JSONArray jFields = new JSONArray(fields.size());

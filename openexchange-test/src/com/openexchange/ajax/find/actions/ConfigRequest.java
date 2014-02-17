@@ -221,7 +221,7 @@ public class ConfigRequest extends AbstractFindRequest<ConfigResponse> {
             final int count = jFacetValue.optInt("count", -1);
             final JSONObject jFilter = jFacetValue.getJSONObject("filter");
 
-            return new FacetValue(parseJDisplayItem(jDisplayItem), count, parseJFilter(jFilter));
+            return new FacetValue(jFacetValue.getString("id"), parseJDisplayItem(jDisplayItem), count, parseJFilter(jFilter));
         }
 
         private Filter parseJFilter(final JSONObject jFilter) throws JSONException {
