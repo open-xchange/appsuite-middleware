@@ -74,6 +74,7 @@ import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.facet.MandatoryFilter;
+import com.openexchange.find.mail.MailFacetType;
 import com.openexchange.find.tasks.TaskStatusDisplayItem;
 import com.openexchange.find.tasks.TaskTypeDisplayItem;
 import com.openexchange.find.tasks.TasksDocument;
@@ -130,7 +131,9 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
 
         // subject or task name
         {
+            final String id = "task_name";
             final FacetValue staticFacetValue = new FacetValue(
+                id,
                 new SimpleDisplayItem(TasksStrings.TASK_NAME),
                 FacetValue.UNKNOWN_COUNT,
                 new Filter(Collections.singleton(TasksStrings.TASK_NAME), "override"));
@@ -139,7 +142,9 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
         }
         // description
         {
+            final String id = "task_description";
             final FacetValue staticFacetValue = new FacetValue(
+                id,
                 new SimpleDisplayItem(TasksStrings.TASK_DESCRIPTION),
                 FacetValue.UNKNOWN_COUNT,
                 new Filter(Collections.singleton(TasksStrings.TASK_DESCRIPTION), "override"));
@@ -148,7 +153,9 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
         }
         // location
         {
+            final String id = "task_location";
             final FacetValue staticFacetValue = new FacetValue(
+                id,
                 new SimpleDisplayItem(TasksStrings.TASK_LOCATION),
                 FacetValue.UNKNOWN_COUNT,
                 new Filter(Collections.singleton(TasksStrings.TASK_LOCATION), "override"));
@@ -157,7 +164,9 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
         }
         // attachment name
         {
+            final String id = "task_attachment_name";
             final FacetValue staticFacetValue = new FacetValue(
+                id,
                 new SimpleDisplayItem(TasksStrings.TASK_ATTACHMENT_NAME),
                 FacetValue.UNKNOWN_COUNT,
                 new Filter(Collections.singleton(TasksStrings.TASK_ATTACHMENT_NAME), "override"));
@@ -167,27 +176,27 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
         // Status
         {
             final List<FacetValue> staticFacetValues = new ArrayList<FacetValue>(5);
-            staticFacetValues.add(new FacetValue(new TaskStatusDisplayItem(
+            staticFacetValues.add(new FacetValue(TaskStatusDisplayItem.Type.NOT_STARTED.getIdentifier(), new TaskStatusDisplayItem(
                 TasksStrings.TASK_TYPE_NOT_STARTED,
                 TaskStatusDisplayItem.Type.NOT_STARTED), FacetValue.UNKNOWN_COUNT, new Filter(
                 Collections.singleton("task_status"),
                 TaskStatusDisplayItem.Type.NOT_STARTED.getIdentifier())));
-            staticFacetValues.add(new FacetValue(new TaskStatusDisplayItem(
+            staticFacetValues.add(new FacetValue(TaskStatusDisplayItem.Type.IN_PROGRESS.getIdentifier(), new TaskStatusDisplayItem(
                 TasksStrings.TASK_TYPE_IN_PROGRESS,
                 TaskStatusDisplayItem.Type.IN_PROGRESS), FacetValue.UNKNOWN_COUNT, new Filter(
                 Collections.singleton("task_status"),
                 TaskStatusDisplayItem.Type.IN_PROGRESS.getIdentifier())));
-            staticFacetValues.add(new FacetValue(new TaskStatusDisplayItem(
+            staticFacetValues.add(new FacetValue(TaskStatusDisplayItem.Type.DONE.getIdentifier(), new TaskStatusDisplayItem(
                 TasksStrings.TASK_TYPE_DONE,
                 TaskStatusDisplayItem.Type.DONE), FacetValue.UNKNOWN_COUNT, new Filter(
                 Collections.singleton("task_status"),
                 TaskStatusDisplayItem.Type.DONE.getIdentifier())));
-            staticFacetValues.add(new FacetValue(new TaskStatusDisplayItem(
+            staticFacetValues.add(new FacetValue(TaskStatusDisplayItem.Type.WAITING.getIdentifier(), new TaskStatusDisplayItem(
                 TasksStrings.TASK_TYPE_WAITING,
                 TaskStatusDisplayItem.Type.WAITING), FacetValue.UNKNOWN_COUNT, new Filter(
                 Collections.singleton("task_status"),
                 TaskStatusDisplayItem.Type.WAITING.getIdentifier())));
-            staticFacetValues.add(new FacetValue(new TaskStatusDisplayItem(
+            staticFacetValues.add(new FacetValue(TaskStatusDisplayItem.Type.DEFERRED.getIdentifier(), new TaskStatusDisplayItem(
                 TasksStrings.TASK_TYPE_DEFERRED,
                 TaskStatusDisplayItem.Type.DEFERRED), FacetValue.UNKNOWN_COUNT, new Filter(
                 Collections.singleton("task_status"),
@@ -198,19 +207,22 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
         // Folder
         {
             final List<FacetValue> folderTypes = new ArrayList<FacetValue>(4);
-            folderTypes.add(new FacetValue(
-                new FolderTypeDisplayItem(CommonStrings.FOLDER_TYPE_PRIVATE, FolderTypeDisplayItem.Type.PRIVATE),
-                FacetValue.UNKNOWN_COUNT,
-                new Filter(Collections.singleton("folder_type"), FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())));
-            folderTypes.add(new FacetValue(
-                new FolderTypeDisplayItem(CommonStrings.FOLDER_TYPE_PUBLIC, FolderTypeDisplayItem.Type.PUBLIC),
-                FacetValue.UNKNOWN_COUNT,
-                new Filter(Collections.singleton("folder_type"), FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())));
-            folderTypes.add(new FacetValue(
-                new FolderTypeDisplayItem(CommonStrings.FOLDER_TYPE_SHARED, FolderTypeDisplayItem.Type.SHARED),
-                FacetValue.UNKNOWN_COUNT,
-                new Filter(Collections.singleton("folder_type"), FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
-            folderTypes.add(new FacetValue(new FolderTypeDisplayItem(
+            folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.PRIVATE.getIdentifier(), new FolderTypeDisplayItem(
+                CommonStrings.FOLDER_TYPE_PRIVATE,
+                FolderTypeDisplayItem.Type.PRIVATE), FacetValue.UNKNOWN_COUNT, new Filter(
+                Collections.singleton("folder_type"),
+                FolderTypeDisplayItem.Type.PRIVATE.getIdentifier())));
+            folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.PUBLIC.getIdentifier(), new FolderTypeDisplayItem(
+                CommonStrings.FOLDER_TYPE_PUBLIC,
+                FolderTypeDisplayItem.Type.PUBLIC), FacetValue.UNKNOWN_COUNT, new Filter(
+                Collections.singleton("folder_type"),
+                FolderTypeDisplayItem.Type.PUBLIC.getIdentifier())));
+            folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.SHARED.getIdentifier(), new FolderTypeDisplayItem(
+                CommonStrings.FOLDER_TYPE_SHARED,
+                FolderTypeDisplayItem.Type.SHARED), FacetValue.UNKNOWN_COUNT, new Filter(
+                Collections.singleton("folder_type"),
+                FolderTypeDisplayItem.Type.SHARED.getIdentifier())));
+            folderTypes.add(new FacetValue(FolderTypeDisplayItem.Type.EXTERNAL.getIdentifier(), new FolderTypeDisplayItem(
                 CommonStrings.FOLDER_TYPE_EXTERNAL,
                 FolderTypeDisplayItem.Type.EXTERNAL), FacetValue.UNKNOWN_COUNT, new Filter(
                 Collections.singleton("folder_type"),
@@ -221,12 +233,12 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
         // Type
         {
             final List<FacetValue> staticFacetValues = new ArrayList<FacetValue>(2);
-            staticFacetValues.add(new FacetValue(new TaskTypeDisplayItem(
+            staticFacetValues.add(new FacetValue(TaskTypeDisplayItem.Type.SINGLE_TASK.getIdentifier(), new TaskTypeDisplayItem(
                 TasksStrings.TASK_STATUS_SINGLE_TASK,
                 TaskTypeDisplayItem.Type.SINGLE_TASK), FacetValue.UNKNOWN_COUNT, new Filter(
                 Collections.singleton("task_status"),
                 TaskTypeDisplayItem.Type.SINGLE_TASK.getIdentifier())));
-            staticFacetValues.add(new FacetValue(new TaskTypeDisplayItem(
+            staticFacetValues.add(new FacetValue(TaskTypeDisplayItem.Type.SERIES.getIdentifier(), new TaskTypeDisplayItem(
                 TasksStrings.TASK_STATUS_SERIES,
                 TaskTypeDisplayItem.Type.SERIES), FacetValue.UNKNOWN_COUNT, new Filter(
                 Collections.singleton("task_type"),
@@ -240,23 +252,26 @@ public class MockTasksDriver extends AbstractContactFacetingModuleSearchDriver {
     }
 
     @Override
-    public AutocompleteResult autocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
+    public AutocompleteResult doAutocomplete(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
         List<Contact> contacts = autocompleteContacts(session, autocompleteRequest);
         List<FacetValue> contactValues = new ArrayList<FacetValue>(contacts.size());
         for (Contact contact : contacts) {
-            for (final String mailAddress : extractMailAddessesFrom(contact)) {
-                Filter filter = new Filter(PERSONS_FILTER_FIELDS, mailAddress);
-                contactValues.add(new FacetValue(new ContactDisplayItem(contact), FacetValue.UNKNOWN_COUNT, filter));
-            }
+            Filter filter = new Filter(PERSONS_FILTER_FIELDS, extractMailAddessesFrom(contact));
+            String valueId = prepareFacetValueId("contact", session.getContextId(), Integer.toString(contact.getObjectID()));
+            contactValues.add(new FacetValue(
+                valueId,
+                new ContactDisplayItem(contact),
+                FacetValue.UNKNOWN_COUNT,
+                filter));
         }
-        Facet contactFacet = new Facet(TasksFacetType.TASK_PARTICIPANTS, contactValues);
+        Facet contactFacet = new Facet(MailFacetType.CONTACTS, contactValues);
 
-        // List<UserizedFolder> folders = autocompleteFolders(session, autocompleteRequest);
-        // Facet folderFacet = buildFolderFacet(folders);
+//        List<UserizedFolder> folders = autocompleteFolders(session, autocompleteRequest);
+//        Facet folderFacet = buildFolderFacet(folders);
 
         List<Facet> facets = new ArrayList<Facet>();
         facets.add(contactFacet);
-        // facets.add(folderFacet);
+//        facets.add(folderFacet);
 
         return new AutocompleteResult(facets);
     }
