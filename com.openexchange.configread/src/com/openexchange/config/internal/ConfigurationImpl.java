@@ -766,9 +766,11 @@ public final class ConfigurationImpl implements ConfigurationService {
                     // Reloadable does indicate the files of interest; thus check against changed ones
 
                     boolean doReload = false;
-                    for (final Iterator<String> it = configfileNames.iterator(); !doReload && it.hasNext();) {
+                    final Iterator<String> it = configfileNames.iterator();
+                    while (!doReload && it.hasNext()) {
+                        String next = it.next();
                         for (String changedFile : changes) {
-                            if (changedFile.endsWith(it.next())) {
+                            if (changedFile.endsWith(next)) {
                                 doReload = true;
                                 break;
                             }
