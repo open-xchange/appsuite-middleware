@@ -55,8 +55,8 @@ if ($response->is_error()){
 use Data::Dumper;
 
 $request = new JMX::Jmx4Perl::Request(READ,
-	"com.hazelcast:*,name=sessions-*,type=Map",
-	"Size");
+	"com.hazelcast:*,type=IMap,name=sessions-*",
+	"size");
 $response = $jmx->request($request);
 if ($response->is_ok()){
 	my %hash = %{$response->value()};
