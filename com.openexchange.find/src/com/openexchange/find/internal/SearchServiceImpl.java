@@ -208,7 +208,7 @@ public class SearchServiceImpl implements SearchService, ServiceTrackerCustomize
 
         @Override
         public int compareTo(ComparableDriver o) {
-            return serviceRanking - o.getServiceRanking();
+            return o.getServiceRanking() - serviceRanking;
         }
 
         @Override
