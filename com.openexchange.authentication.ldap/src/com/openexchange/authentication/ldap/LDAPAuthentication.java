@@ -49,6 +49,8 @@
 
 package com.openexchange.authentication.ldap;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import javax.naming.AuthenticationException;
 import javax.naming.Context;
@@ -66,6 +68,8 @@ import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
@@ -73,7 +77,10 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
  * This class implements the login by using an LDAP for authentication.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class LDAPAuthentication implements AuthenticationService {
+public class LDAPAuthentication implements AuthenticationService, Reloadable {
+
+    private static final String CONFIGFILE = "ldapauth.properties";
+    private static final String[] PROPERTIES = new String[] {"all properties in file"};
 
     private static final class AuthenticatedImpl implements Authenticated {
 
@@ -121,7 +128,7 @@ public class LDAPAuthentication implements AuthenticationService {
     /**
      * Properties for the JNDI context.
      */
-    private final Properties props;
+    private Properties props;
 
     /**
      * attribute name and base DN.
@@ -388,5 +395,23 @@ public class LDAPAuthentication implements AuthenticationService {
             splitted[0] = loginInfo.substring(pos + 1);
         }
         return splitted;
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        Properties properties = configService.getFile(CONFIGFILE);
+        this.props = properties;
+        try {
+            init();
+        } catch (OXException e) {
+            LOG.error("Error reloading configuration for bundle com.openexchange.authentication.ldap: {}", e);
+        }
+    }
+
+    @Override
+    public Map<String, String[]> getConfigfileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put(CONFIGFILE, PROPERTIES);
+        return map;
     }
 }
