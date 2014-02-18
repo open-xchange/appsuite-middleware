@@ -2,6 +2,10 @@
 
  - Fix for bug 31086: Ignore failed attempt to save non-existent setting
 
+* 2014-02-18 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 31185: Avoid Autoconfig cache from storing personal data.
+
 * 2014-02-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 31110: Proper re-initialize POP3 server's capabilities of successful authentication
