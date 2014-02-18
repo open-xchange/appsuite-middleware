@@ -1,3 +1,35 @@
+* 2014-02-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31086: Ignore failed attempt to save non-existent setting
+
+* 2014-02-18 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 31185: Avoid Autoconfig cache from storing personal data.
+
+* 2014-02-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31110: Proper re-initialize POP3 server's capabilities of successful authentication
+
+* 2014-02-14 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 31106: Parse allowed units for bandwidth parameters as described in property file
+
+* 2014-02-11 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 30966: Don't validate e-mail addresses of distribution list members when loading from the database
+
+* 2014-02-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31039: Perform a move to trash through a RENAME command on associated IMAP folder
+
+* 2014-02-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31021: Avoid needless examinations of all file stores to find a suitable one on context creation attempt
+
+* 2014-02-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 31010: More robust writing of JSON data BLOB to database
+
 * 2014-02-06 - dennis.sieben@open-xchange.com
 
  - Fix for bug 31003: Empty JSON arrays handed over to this extension now result in an exception
