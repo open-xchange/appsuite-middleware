@@ -79,6 +79,14 @@ public final class MailConfig extends AbstractConfig {
 		 */
 		LOGIN("login"),
 		/**
+		 * User login2
+		 */
+		LOGIN2("login2"),
+		/**
+		 * User login2
+		 */
+		LOGIN3("login3"),
+		/**
 		 * Password
 		 */
 		PASSWORD("password"),

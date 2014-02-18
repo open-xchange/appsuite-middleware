@@ -107,15 +107,8 @@ public class MailAccountValidateTest extends AbstractMailAccountTest {
             e.printStackTrace();
             fail(e.getMessage());
         }
-        mailAccountDescription.setMailServer(MailConfig.getProperty(MailConfig.Property.SERVER));
-        mailAccountDescription.setMailPort(Integer.parseInt(MailConfig.getProperty(MailConfig.Property.PORT)));
-        mailAccountDescription.setMailProtocol("imap");
-        mailAccountDescription.setMailSecure(false);
-        mailAccountDescription.setLogin(MailConfig.getProperty(MailConfig.Property.LOGIN));
-        mailAccountDescription.setPassword(MailConfig.getProperty(MailConfig.Property.PASSWORD));
-        mailAccountDescription.setTransportServer((String) null);
-        response = getClient().execute(new MailAccountValidateRequest(mailAccountDescription));
-        assertTrue("Valid access data in mail account do not pass validation but should", response.isValidated());
+
+        updateMailAccountDescription(mailAccountDescription, MailConfig.getProperty(MailConfig.Property.LOGIN));
 
         mailAccountDescription.setMailServer(MailConfig.getProperty(MailConfig.Property.SERVER));
         mailAccountDescription.setMailPort(Integer.parseInt(MailConfig.getProperty(MailConfig.Property.PORT)));
@@ -127,6 +120,7 @@ public class MailAccountValidateTest extends AbstractMailAccountTest {
         mailAccountDescription.setTransportPort(25);
         mailAccountDescription.setTransportProtocol("smtp");
         mailAccountDescription.setTransportSecure(false);
+
         response = getClient().execute(new MailAccountValidateRequest(mailAccountDescription));
         assertTrue("Valid access data in mail/transport account do not pass validation but should", response.isValidated());
 
@@ -159,5 +153,7 @@ public class MailAccountValidateTest extends AbstractMailAccountTest {
 //            }
 //        }
     }
+
+
 
 }
