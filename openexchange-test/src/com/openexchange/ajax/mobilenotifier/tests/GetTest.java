@@ -112,12 +112,11 @@ public class GetTest extends AbstractMobileNotifierTest {
         assertTrue("could not find element \"items\"", providerJSON.has("items"));
         JSONArray itemsArray = (JSONArray) providerJSON.get("items");
 
+        String[] mandatoryArr = mandatory.getMandatory();
         for (int i = 0; i < itemsArray.length(); i++) {
             JSONObject itemObject = itemsArray.getJSONObject(i);
-            for (int j = 0; j < mandatory.getMandatory().length; j++) {
-                assertTrue(
-                    "could not found the mandatory item: " + mandatory.getMandatory()[j],
-                    itemObject.has(mandatory.getMandatory()[j]));
+            for (int j = 0; j < mandatoryArr.length; j++) {
+                assertTrue("could not found the mandatory item: " + mandatoryArr[j], itemObject.has(mandatoryArr[j]));
             }
         }
     }

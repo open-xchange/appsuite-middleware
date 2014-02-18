@@ -75,7 +75,8 @@ public class ConfigputTest extends AbstractMobileNotifierTest {
     public void testShouldUpdateTemplate() throws OXException, IOException, JSONException {
         ParsedNotifyTemplate notifyTemplate = new ParsedNotifyTemplate();
         notifyTemplate.setFrontendName("io.ox/mail");
-        notifyTemplate.setHtmlTemplate("<div></div>");
+        final String template = "<div class=\"mail-listitem\">\n\t<div class=\"from\"><%= from %></div>\n\t<div class=\"received_date\"><%= received_date %></div>\n \t<div class=\"subject\"><%= subject %></div>\n" + "\t<div class=\"flags\"><%= flags %></div>\n" + "\t<div class=\"attachments\"><%= attachments %></div>\n" + "</div>";
+        notifyTemplate.setHtmlTemplate(template);
 
         ConfigputMobileNotifierRequest updReq = new ConfigputMobileNotifierRequest(notifyTemplate);
         ConfigputMobileNotifierResponse updResp = getClient().execute(updReq);

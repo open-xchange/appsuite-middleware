@@ -183,6 +183,6 @@ public class MobileNotifierMailImpl extends AbstractMobileNotifierService {
 
     @Override
     public void putTemplate(String changedTemplate) throws OXException {
-        // TODO Auto-generated method stub
+        MobileNotifierFileUtil.writeTemplateFileContent(MobileNotifierProviders.MAIL.getTemplateFileName(), changedTemplate);
     }
 }
