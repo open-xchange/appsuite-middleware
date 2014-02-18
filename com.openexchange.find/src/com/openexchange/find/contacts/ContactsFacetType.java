@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,55 @@
  *
  */
 
-package com.openexchange.find.common;
+package com.openexchange.find.contacts;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import com.openexchange.find.facet.FacetType;
 
 /**
- * {@link CommonStrings} - Provides common i18n strings for find module.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * The {@link FacetType}s for the contacts module.
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.0
  */
-public final class CommonStrings implements LocalizableStrings {
+public enum ContactsFacetType implements FacetType {
+    ADDRESSBOOK(ContactsStrings.FACET_ADRESSBOOK),
+    NAME(ContactsStrings.FACET_NAME),
+    EMAIL(ContactsStrings.FACET_EMAIL),
+    PHONE(ContactsStrings.FACET_PHONE),
+    ADDRESS(ContactsStrings.FACET_ADDRESS),
+    CONTACTS(ContactsStrings.FACET_CONTACTS),
+    FOLDERS(ContactsStrings.FACET_FOLDERS),
+    TYPE(ContactsStrings.FACET_TYPE)
+    ;
 
     /**
-     * Initializes a new {@link CommonStrings}.
+     * 
      */
-    private CommonStrings() {
-        super();
+    private final String displayName;
+
+    /**
+     * Initializes a new {@link ContactsFacetType}.
+     * 
+     * @param displayName
+     */
+    private ContactsFacetType(final String displayName) {
+        this.displayName = displayName;
     }
 
-    // ------------------------- i18n strings for facet types -------------------------------------- //
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getName() {
+        return toString().toLowerCase();
+    }
 
-    public static final String FACET_TYPE_FOLDER_TYPE = "Folder type";
-
-    // ------------------------- i18n strings for folder types ------------------------------------- //
-
-    public static final String FOLDER_TYPE_PRIVATE = "Private";
-
-    public static final String FOLDER_TYPE_PUBLIC = "Public";
-
-    public static final String FOLDER_TYPE_SHARED = "Shared";
-
-    public static final String FOLDER_TYPE_EXTERNAL = "External";
-
-    // ------------------------- i18n strings for contact types ------------------------------------- //
-
-    public static final String CONTACT_TYPE_CONTACT = "Contact";
-
-    public static final String CONTACT_TYPE_DISTRIBUTION_LIST = "Distribution List";
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDisplayName() {
+        return displayName;
+    }
 
 }

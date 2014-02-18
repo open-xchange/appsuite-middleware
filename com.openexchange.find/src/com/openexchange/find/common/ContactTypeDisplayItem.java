@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,41 +49,75 @@
 
 package com.openexchange.find.common;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import com.openexchange.find.facet.DisplayItem;
+import com.openexchange.find.facet.DisplayItemVisitor;
 
 /**
- * {@link CommonStrings} - Provides common i18n strings for find module.
+ * {@link ContactTypeDisplayItem}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.0
  */
-public final class CommonStrings implements LocalizableStrings {
+public class ContactTypeDisplayItem implements DisplayItem {
 
     /**
-     * Initializes a new {@link CommonStrings}.
+     * The contact type enumeration.
      */
-    private CommonStrings() {
-        super();
+    public static enum Type {
+
+        /**
+         * The type denoting 'normal' contacts.
+         */
+        CONTACT("contact"),
+        /**
+         * The type denoting distribution lists.
+         */
+        DISTRIBUTION_LIST("distribution list"), ;
+
+        private final String identifier;
+
+        private Type(final String identifier) {
+            this.identifier = identifier;
+        }
+
+        /**
+         * Gets the identifier
+         * 
+         * @return The identifier
+         */
+        public String getIdentifier() {
+            return identifier;
+        }
     }
 
-    // ------------------------- i18n strings for facet types -------------------------------------- //
+    private final Type type;
 
-    public static final String FACET_TYPE_FOLDER_TYPE = "Folder type";
+    private final String displayName;
 
-    // ------------------------- i18n strings for folder types ------------------------------------- //
+    /**
+     * Initializes a new {@link FolderTypeDisplayItem}.
+     * 
+     * @param type The folder type associated with this display item
+     */
+    public ContactTypeDisplayItem(final String displayName, final Type type) {
+        super();
+        this.displayName = displayName;
+        this.type = type;
+    }
 
-    public static final String FOLDER_TYPE_PRIVATE = "Private";
+    @Override
+    public void accept(DisplayItemVisitor visitor) {
+        visitor.visit(this);
+    }
 
-    public static final String FOLDER_TYPE_PUBLIC = "Public";
+    @Override
+    public Type getItem() {
+        return type;
+    }
 
-    public static final String FOLDER_TYPE_SHARED = "Shared";
-
-    public static final String FOLDER_TYPE_EXTERNAL = "External";
-
-    // ------------------------- i18n strings for contact types ------------------------------------- //
-
-    public static final String CONTACT_TYPE_CONTACT = "Contact";
-
-    public static final String CONTACT_TYPE_DISTRIBUTION_LIST = "Distribution List";
+    @Override
+    public String getDefaultValue() {
+        return displayName;
+    }
 
 }

@@ -55,6 +55,7 @@ import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.find.common.ContactDisplayItem;
+import com.openexchange.find.common.ContactTypeDisplayItem;
 import com.openexchange.find.common.DefaultFolderType;
 import com.openexchange.find.common.FolderDisplayItem;
 import com.openexchange.find.common.FolderTypeDisplayItem;
@@ -175,10 +176,25 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
         }
     }
 
+
     @Override
     public void visit(NoDisplayItem item) {
         try {
             addDefaultValue(item);
+        } catch (JSONException e) {
+            errors.add(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void visit(ContactTypeDisplayItem item) {
+        final ContactTypeDisplayItem.Type type = item.getItem();
+        try {
+            json.put("defaultValue", translator.translate(locale, item.getDefaultValue()));
+            json.put("contact_type", Strings.toLowerCase(type.toString()));
         } catch (JSONException e) {
             errors.add(e);
         }

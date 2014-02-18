@@ -48,6 +48,7 @@
  */
 package com.openexchange.find;
 
+import com.openexchange.find.contacts.ContactsDocument;
 import com.openexchange.find.drive.FileDocument;
 import com.openexchange.find.mail.MailDocument;
 import com.openexchange.find.tasks.TasksDocument;
@@ -81,4 +82,11 @@ public interface DocumentVisitor {
      * @param TasksDocument The task document
      */
     void visit(TasksDocument taskDocument);
+
+    /**
+     * Handles given contact document.
+     * 
+     * @param contactDocument The file document
+     */
+    void visit(ContactsDocument contactDocument);
 }

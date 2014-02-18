@@ -22,6 +22,7 @@ Import-Package: com.openexchange.exception,
  org.slf4j
 Export-Package: com.openexchange.find,
  com.openexchange.find.common,
+ com.openexchange.find.contacts,
  com.openexchange.find.drive,
  com.openexchange.find.facet,
  com.openexchange.find.mail,

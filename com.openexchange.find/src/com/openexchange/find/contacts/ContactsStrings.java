@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,41 @@
  *
  */
 
-package com.openexchange.find.common;
+package com.openexchange.find.contacts;
 
 import com.openexchange.i18n.LocalizableStrings;
 
-
 /**
- * {@link CommonStrings} - Provides common i18n strings for find module.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * Contact-specific strings are potentially displayed in client applications and should therefore be localized.
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.6.0
  */
-public final class CommonStrings implements LocalizableStrings {
+public class ContactsStrings implements LocalizableStrings {
 
-    /**
-     * Initializes a new {@link CommonStrings}.
-     */
-    private CommonStrings() {
-        super();
-    }
+    // Search in address book
+    public static final String FACET_ADRESSBOOK = "address book";
 
-    // ------------------------- i18n strings for facet types -------------------------------------- //
+    // Search in names
+    public static final String FACET_NAME = "name";
 
-    public static final String FACET_TYPE_FOLDER_TYPE = "Folder type";
+    // Search in email addresses
+    public static final String FACET_EMAIL = "email";
 
-    // ------------------------- i18n strings for folder types ------------------------------------- //
+    // Search in phone numbers
+    public static final String FACET_PHONE = "phone";
 
-    public static final String FOLDER_TYPE_PRIVATE = "Private";
+    // Search in addresses
+    public static final String FACET_ADDRESS = "address";
 
-    public static final String FOLDER_TYPE_PUBLIC = "Public";
+    // Search in specific types
+    public static final String FACET_TYPE = "Type";
 
-    public static final String FOLDER_TYPE_SHARED = "Shared";
+    // Search in folders.
+    public static final String FACET_FOLDERS = "Folder";
 
-    public static final String FOLDER_TYPE_EXTERNAL = "External";
+    // Search in Persons.
+    public static final String FACET_CONTACTS = "Contact";
 
-    // ------------------------- i18n strings for contact types ------------------------------------- //
-
-    public static final String CONTACT_TYPE_CONTACT = "Contact";
-
-    public static final String CONTACT_TYPE_DISTRIBUTION_LIST = "Distribution List";
 
 }

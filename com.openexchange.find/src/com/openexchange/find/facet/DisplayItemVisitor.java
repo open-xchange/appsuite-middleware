@@ -50,6 +50,7 @@
 package com.openexchange.find.facet;
 
 import com.openexchange.find.common.ContactDisplayItem;
+import com.openexchange.find.common.ContactTypeDisplayItem;
 import com.openexchange.find.common.FolderDisplayItem;
 import com.openexchange.find.common.FolderTypeDisplayItem;
 import com.openexchange.find.common.SimpleDisplayItem;
@@ -82,5 +83,7 @@ public interface DisplayItemVisitor {
     void visit(TaskTypeDisplayItem item);
 
     void visit(NoDisplayItem item);
+
+    void visit(ContactTypeDisplayItem contactTypeDisplayItem);
 
 }

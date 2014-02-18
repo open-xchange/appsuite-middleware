@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.DocumentVisitor;
+import com.openexchange.find.contacts.ContactsDocument;
 import com.openexchange.find.drive.FileDocument;
 import com.openexchange.find.json.osgi.ResultConverterRegistry;
 import com.openexchange.find.mail.MailDocument;
@@ -157,6 +158,24 @@ public class JSONResponseVisitor implements DocumentVisitor {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void visit(ContactsDocument contactDocument) {
+        try {
+            final ResultConverter converter = converterRegistry.getConverter("contact");
+            if (null != converter) {
+                final AJAXRequestData requestData = new AJAXRequestData();
+                final AJAXRequestResult requestResult = new AJAXRequestResult(contactDocument.getContact());
+                converter.convert(requestData, requestResult, session, null);
+                json.put(requestResult.getResultObject());
+            }
+        } catch (final OXException e) {
+            errors.add(e);
+        }
+    }
+
+    /**
      * Gets the JSON array containing documents.
      *
      * @return The documents' JSON array
@@ -174,6 +193,6 @@ public class JSONResponseVisitor implements DocumentVisitor {
         return errors;
     }
 
-    
+
 
 }
