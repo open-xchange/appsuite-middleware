@@ -364,7 +364,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     @Override
     public List<MailFolderInfo> getFolderInfos(final String optParentFullName, final boolean subscribedOnly) throws OXException {
         try {
-            final String pfn = null == optParentFullName ? null : (MailFolder.DEFAULT_FOLDER_ID.equals(optParentFullName) ? "" : optParentFullName);
+            final String pfn = null == optParentFullName ? null : (DEFAULT_FOLDER_ID.equals(optParentFullName) ? "" : optParentFullName);
             final List<ListLsubEntry> allEntries = ListLsubCache.getAllEntries(pfn, accountId, subscribedOnly, imapStore, session);
 
             // Fill map
@@ -386,14 +386,14 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 if (0 == fullName.length()) {
                     mfi.setRootFolder(true);
                     mfi.setParentFullname(null);
-                    mfi.setFullname(MailFolder.DEFAULT_FOLDER_ID);
+                    mfi.setFullname(DEFAULT_FOLDER_ID);
+                    map.put(DEFAULT_FOLDER_ID, mfi);
                 } else {
                     mfi.setDefaultFolder(false);
                     mfi.setDefaultFolderType(DefaultFolderType.NONE);
                     mfi.setParentFullname(entry.getParent().getFullName());
+                    map.put(fullName, mfi);
                 }
-
-                map.put(fullName, mfi);
             }
 
             // User's locale
