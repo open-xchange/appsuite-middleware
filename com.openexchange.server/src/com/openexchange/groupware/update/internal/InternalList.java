@@ -719,6 +719,14 @@ public final class InternalList {
         // Adds/corrects user mail index: INDEX (mail) -> INDEX (cid, mail(255))
         list.add(new com.openexchange.groupware.update.tasks.UserAddMailIndexTask());
 
+        // +++++++++++++++++++++++++++++++++ Version 7.6.0 starts here. +++++++++++++++++++++++++++++++++
+
+        // Extends those calendar tables that carry confirmation information by "occurrence" column
+        list.add(new com.openexchange.groupware.update.tasks.CalendarAddConfirmPerOccurrenceTask());
+
+        // Adapts the keys for those calendar tables that carry confirmation information to new "occurrence" column
+        list.add(new com.openexchange.groupware.update.tasks.CalendarAddNewPrimaryKeyForConfirmPerOccurrence());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 }
