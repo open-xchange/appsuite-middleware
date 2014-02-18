@@ -243,11 +243,16 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage, I
     }
 
     @Override
-    public List<MailFolderInfo> getFolderInfos() throws OXException {
+    public List<MailFolderInfo> getAllFolderInfos(final boolean subscribedOnly) throws OXException {
+        return getFolderInfos(null, subscribedOnly);
+    }
+
+    @Override
+    public List<MailFolderInfo> getFolderInfos(final String optParentFullName, final boolean subscribedOnly) throws OXException {
         if (delegatee instanceof IMailFolderStorageInfoSupport) {
             final IMailFolderStorageInfoSupport infoSupport = ((IMailFolderStorageInfoSupport) delegatee);
             if (infoSupport.isInfoSupported()) {
-                return infoSupport.getFolderInfos();
+                return infoSupport.getFolderInfos(optParentFullName, subscribedOnly);
             }
         }
         throw MailExceptionCode.UNSUPPORTED_OPERATION.create();

@@ -357,9 +357,15 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     }
 
     @Override
-    public List<MailFolderInfo> getFolderInfos() throws OXException {
+    public List<MailFolderInfo> getAllFolderInfos(final boolean subscribedOnly) throws OXException {
+        return getFolderInfos(null, subscribedOnly);
+    }
+
+    @Override
+    public List<MailFolderInfo> getFolderInfos(final String optParentFullName, final boolean subscribedOnly) throws OXException {
         try {
-            final List<ListLsubEntry> allEntries = ListLsubCache.getAllEntries(accountId, imapStore, session);
+            final String pfn = null == optParentFullName ? null : (MailFolder.DEFAULT_FOLDER_ID.equals(optParentFullName) ? "" : optParentFullName);
+            final List<ListLsubEntry> allEntries = ListLsubCache.getAllEntries(pfn, accountId, subscribedOnly, imapStore, session);
 
             // Fill map
             final Map<String, MailFolderInfo> map = new HashMap<String, MailFolderInfo>(allEntries.size());
@@ -377,9 +383,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 mfi.setSubfolders(entry.hasChildren());
                 mfi.setSubscribedSubfolders(entry.hasChildren());
 
-                if ("".equals(fullName)) {
+                if (0 == fullName.length()) {
                     mfi.setRootFolder(true);
                     mfi.setParentFullname(null);
+                    mfi.setFullname(MailFolder.DEFAULT_FOLDER_ID);
                 } else {
                     mfi.setDefaultFolder(false);
                     mfi.setDefaultFolderType(DefaultFolderType.NONE);

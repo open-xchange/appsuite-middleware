@@ -457,30 +457,41 @@ public final class ListLsubCache {
     }
 
     /**
-     * Gets all LSUB entries.
+     * Gets all LIST/LSUB entries.
      *
+     * @param optParentFullName The optional full name of the parent
      * @param accountId The account identifier
+     * @param subscribedOnly <code>false</code> for LIST entries; otherwise <code>true</code> for LSUB ones
      * @param imapStore The IMAP store
      * @param session The session
      * @return All LSUB entries
      * @throws OXException If loading the entry fails
      * @throws MessagingException If a messaging error occurs
      */
-    public static List<ListLsubEntry> getAllEntries(final int accountId, final IMAPStore imapStore, final Session session) throws OXException, MessagingException {
+    public static List<ListLsubEntry> getAllEntries(final String optParentFullName, final int accountId, final boolean subscribedOnly, final IMAPStore imapStore, final Session session) throws OXException, MessagingException {
         final IMAPFolder imapFolder = (IMAPFolder) imapStore.getDefaultFolder();
         final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
         if (isAccessible(collection)) {
-            return collection.getLsubs();
+            if (null != optParentFullName) {
+                return (subscribedOnly ? collection.getLsub(optParentFullName) : collection.getList(optParentFullName)).getChildren();
+            }
+            return subscribedOnly ? collection.getLsubs() : collection.getLists();
         }
         synchronized (collection) {
             if (checkTimeStamp(imapFolder, collection)) {
-                return collection.getLsubs();
+                if (null != optParentFullName) {
+                    return (subscribedOnly ? collection.getLsub(optParentFullName) : collection.getList(optParentFullName)).getChildren();
+                }
+                return subscribedOnly ? collection.getLsubs() : collection.getLists();
             }
             /*
              * Update & re-check
              */
             collection.reinit(imapStore, DO_STATUS, DO_GETACL);
-            return collection.getLsubs();
+            if (null != optParentFullName) {
+                return (subscribedOnly ? collection.getLsub(optParentFullName) : collection.getList(optParentFullName)).getChildren();
+            }
+            return subscribedOnly ? collection.getLsubs() : collection.getLists();
         }
     }
 
@@ -507,7 +518,7 @@ public final class ListLsubCache {
         }
         synchronized (collection) {
             if (checkTimeStamp(imapFolder, collection)) {
-                final ListLsubEntry listEntry = collection.getLsub(fullName);
+                final ListLsubEntry listEntry = collection.getList(fullName);
                 final ListLsubEntry lsubEntry = collection.getLsub(fullName);
                 final ListLsubEntry emptyEntryFor = ListLsubCollection.emptyEntryFor(fullName);
                 return new ListLsubEntry[] { listEntry == null ? emptyEntryFor : listEntry, lsubEntry == null ? emptyEntryFor : lsubEntry };

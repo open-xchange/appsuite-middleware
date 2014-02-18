@@ -367,10 +367,10 @@ public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
             if (folderStorage instanceof IMailFolderStorageInfoSupport) {
                 final IMailFolderStorageInfoSupport infoSupport = (IMailFolderStorageInfoSupport) folderStorage;
                 if (null == filter) {
-                    return infoSupport.getFolderInfos();
+                    return infoSupport.getAllFolderInfos(true);
                 }
                 // Need to filter
-                final List<MailFolderInfo> folderInfos = infoSupport.getFolderInfos();
+                final List<MailFolderInfo> folderInfos = infoSupport.getAllFolderInfos(true);
                 for (final Iterator<MailFolderInfo> i = folderInfos.iterator(); i.hasNext(); ) {
                     if (!filter.accept(i.next())) {
                         i.remove();

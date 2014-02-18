@@ -100,12 +100,17 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
     }
 
     @Override
-    public List<MailFolderInfo> getFolderInfos() throws OXException {
+    public List<MailFolderInfo> getAllFolderInfos(final boolean subscribedOnly) throws OXException {
+        return getFolderInfos(null, subscribedOnly);
+    }
+
+    @Override
+    public List<MailFolderInfo> getFolderInfos(final String optParentFullName, final boolean subscribedOnly) throws OXException {
         final IMailFolderStorage folderStorage = smalMailAccess.getDelegateMailAccess().getFolderStorage();
         if (folderStorage instanceof IMailFolderStorageInfoSupport) {
             final IMailFolderStorageInfoSupport infoSupport = ((IMailFolderStorageInfoSupport) folderStorage);
             if (infoSupport.isInfoSupported()) {
-                return infoSupport.getFolderInfos();
+                return infoSupport.getFolderInfos(optParentFullName, subscribedOnly);
             }
         }
         throw MailExceptionCode.UNSUPPORTED_OPERATION.create();

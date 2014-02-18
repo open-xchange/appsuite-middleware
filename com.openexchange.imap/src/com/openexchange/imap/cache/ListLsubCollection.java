@@ -1447,12 +1447,23 @@ final class ListLsubCollection {
     /**
      * Gets the LSUB entries.
      *
-     * @return The LSUB entry for specified full name or <code>null</code>
+     * @return The LSUB entries
      */
     public List<ListLsubEntry> getLsubs() {
         checkDeprecated();
         return new ArrayList<ListLsubEntry>(lsubMap.values());
     }
+
+    /**
+     * Gets the LIST entries.
+     *
+     * @return The LIST entries
+     */
+    public List<ListLsubEntry> getLists() {
+        checkDeprecated();
+        return new ArrayList<ListLsubEntry>(listMap.values());
+    }
+
 
     private static final TObjectIntHashMap<String> POS_MAP;
 
