@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,60 +47,33 @@
  *
  */
 
-package com.openexchange.find.common;
+package com.openexchange.mail.api;
 
-import com.openexchange.find.facet.DisplayItem;
-import com.openexchange.find.facet.DisplayItemVisitor;
+import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailFolderInfo;
 
 /**
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
+ * {@link IMailFolderStorageInfoSupport} - Extends basic folder storage by mailbox info support.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FolderDisplayItem implements DisplayItem {
+public interface IMailFolderStorageInfoSupport extends IMailFolderStorage {
 
-    private final MailFolderInfo folder;
-    private final DefaultFolderType defaultFolderType;
-    private final String accountName;
-    private final boolean isDefaultAccount;
+    /**
+     * Indicates if mailbox info is supported.
+     *
+     * @return <code>true</code> if supported; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    boolean isInfoSupported() throws OXException;
 
-    public FolderDisplayItem(final MailFolderInfo folder, final String accountName, final boolean isDefaultAccount) {
-        this(folder, DefaultFolderType.NONE, accountName, isDefaultAccount);
-    }
-
-    public FolderDisplayItem(final MailFolderInfo folder, final DefaultFolderType defaultFolderType, final String accountName, final boolean isDefaultAccount) {
-        super();
-        this.folder = folder;
-        this.defaultFolderType = defaultFolderType;
-        this.accountName = accountName;
-        this.isDefaultAccount = isDefaultAccount;
-    }
-
-    @Override
-    public void accept(DisplayItemVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public String getDefaultValue() {
-        return folder.getName();
-    }
-
-    public DefaultFolderType getDefaultType() {
-        return defaultFolderType;
-    }
-
-    @Override
-    public MailFolderInfo getItem() {
-        return folder;
-    }
-
-    public String getAccountName() {
-        return accountName;
-    }
-
-    public boolean isDefaultAccount() {
-        return isDefaultAccount;
-    }
+    /**
+     * Gets the folder information for this folder storage
+     *
+     * @return The folder information
+     * @throws OXException If an error occurs
+     */
+    List<MailFolderInfo> getFolderInfos() throws OXException;
 
 }

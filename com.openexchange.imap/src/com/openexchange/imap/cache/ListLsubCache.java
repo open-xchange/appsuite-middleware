@@ -457,6 +457,34 @@ public final class ListLsubCache {
     }
 
     /**
+     * Gets all LSUB entries.
+     *
+     * @param accountId The account identifier
+     * @param imapStore The IMAP store
+     * @param session The session
+     * @return All LSUB entries
+     * @throws OXException If loading the entry fails
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static List<ListLsubEntry> getAllEntries(final int accountId, final IMAPStore imapStore, final Session session) throws OXException, MessagingException {
+        final IMAPFolder imapFolder = (IMAPFolder) imapStore.getDefaultFolder();
+        final ListLsubCollection collection = getCollection(accountId, imapFolder, session);
+        if (isAccessible(collection)) {
+            return collection.getLsubs();
+        }
+        synchronized (collection) {
+            if (checkTimeStamp(imapFolder, collection)) {
+                return collection.getLsubs();
+            }
+            /*
+             * Update & re-check
+             */
+            collection.reinit(imapStore, DO_STATUS, DO_GETACL);
+            return collection.getLsubs();
+        }
+    }
+
+    /**
      * Gets cached LIST/LSUB entry for specified full name.
      *
      * @param fullName The full name

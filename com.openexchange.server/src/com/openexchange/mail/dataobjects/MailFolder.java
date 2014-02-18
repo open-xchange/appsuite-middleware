@@ -189,6 +189,29 @@ public class MailFolder implements Serializable, Cloneable {
     }
 
     /**
+     * Gets the {@link MailFolderInfo} view for this folder.
+     *
+     * @return The appropriate {@link MailFolderInfo} instance
+     */
+    public MailFolderInfo asMailFolderInfo(final int accountId) {
+        final MailFolderInfo mfi = new MailFolderInfo();
+        mfi.setAccountId(accountId);
+        mfi.setDefaultFolder(defaultFolder);
+        mfi.setDefaultFolderType(defaulFolderType);
+        mfi.setFullname(fullname);
+        mfi.setHoldsFolders(holdsFolders);
+        mfi.setHoldsMessages(holdsMessages);
+        mfi.setName(name);
+        mfi.setParentFullname(parentFullname);
+        mfi.setRootFolder(rootFolder);
+        mfi.setSeparator(separator);
+        mfi.setSubfolders(hasSubfolders);
+        mfi.setSubscribed(subscribed);
+        mfi.setSubscribedSubfolders(hasSubscribedSubfolders);
+        return mfi;
+    }
+
+    /**
      * Sets the live-access flag.
      *
      * @param liveAccess The flag to set

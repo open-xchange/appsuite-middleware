@@ -1444,6 +1444,16 @@ final class ListLsubCollection {
         return lsubMap.get(fullName);
     }
 
+    /**
+     * Gets the LSUB entries.
+     *
+     * @return The LSUB entry for specified full name or <code>null</code>
+     */
+    public List<ListLsubEntry> getLsubs() {
+        checkDeprecated();
+        return new ArrayList<ListLsubEntry>(lsubMap.values());
+    }
+
     private static final TObjectIntHashMap<String> POS_MAP;
 
     static {

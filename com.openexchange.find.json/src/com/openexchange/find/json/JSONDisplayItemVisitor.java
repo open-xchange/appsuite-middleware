@@ -66,9 +66,9 @@ import com.openexchange.find.facet.NoDisplayItem;
 import com.openexchange.find.json.converters.StringTranslator;
 import com.openexchange.find.tasks.TaskStatusDisplayItem;
 import com.openexchange.find.tasks.TaskTypeDisplayItem;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.dataobjects.MailFolderInfo;
 
 
 /**
@@ -92,12 +92,12 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
 
     @Override
     public void visit(FolderDisplayItem item) {
-        UserizedFolder folder = item.getItem();
+        MailFolderInfo folder = item.getItem();
         try {
             addDefaultValue(item);
             json.put("accountName", convertString(item.getAccountName()));
             json.put("isDefaultAccount", item.isDefaultAccount());
-            json.put("folderName", convertString(folder.getLocalizedName(folder.getLocale())));
+            json.put("folderName", folder.getName());
             if (item.getDefaultType() != DefaultFolderType.NONE) {
                 json.put("defaultType", item.getDefaultType().getTypeName());
             }

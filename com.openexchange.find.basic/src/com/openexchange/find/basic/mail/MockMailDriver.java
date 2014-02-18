@@ -48,14 +48,15 @@
  */
 package com.openexchange.find.basic.mail;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
@@ -79,13 +80,6 @@ import com.openexchange.find.facet.MandatoryFilter;
 import com.openexchange.find.mail.DefaultMailFolderType;
 import com.openexchange.find.mail.MailDocument;
 import com.openexchange.find.mail.MailFacetType;
-import com.openexchange.folderstorage.FolderResponse;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.mail.MailFolderImpl.MailFolderType;
-import com.openexchange.folderstorage.mail.contentType.MailContentType;
-import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.IndexRange;
@@ -93,13 +87,17 @@ import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailFolderStorageInfoSupport;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.dataobjects.MailFolderInfo;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
@@ -138,18 +136,19 @@ public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
     @Override
     public ModuleConfig getConfiguration(ServerSession session) throws OXException {
-        List<UserizedFolder> mailFolders = loadMailFolders(session, NO_FILTER);
+        final TIntObjectMap<MailAccount> accountCache = new TIntObjectHashMap<MailAccount>(8);
+        final List<MailFolderInfo> mailFolders = loadMailFolders(session, NO_FILTER, accountCache);
         if (mailFolders.isEmpty()) {
             throw FindExceptionCode.NO_READABLE_FOLDER.create(Module.MAIL, session.getUserId(), session.getContextId());
         }
 
-        UserizedFolder defaultFolder = null;
-        for (Iterator<UserizedFolder> it = mailFolders.iterator(); it.hasNext();) {
-            UserizedFolder folder = it.next();
-            if (folder.isDefault() && folder.getDefaultType() == MailFolderType.INBOX.getType()) {
+        MailFolderInfo defaultFolder = null;
+        for (final Iterator<MailFolderInfo> it = mailFolders.iterator(); it.hasNext();) {
+            final MailFolderInfo folder = it.next();
+            if (folder.isDefaultFolder() && folder.getDefaultFolderType() == com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType.INBOX) {
                 defaultFolder = folder;
                 it.remove();
-            } else if (folder.isDefault() && folder.getDefaultType() == MailFolderType.ROOT.getType()) {
+            } else if (folder.isRootFolder()) {
                 // Don't show root folder in facet
                 it.remove();
             }
@@ -160,24 +159,23 @@ public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
             defaultFolder = mailFolders.remove(0);
         }
 
-        MailAccountStorageService mass = Services.getMailAccountStorageService();
-        MailAccount mailAccount = mass.getMailAccount(new FullnameArgument(defaultFolder.getID()).getAccountId(), session.getUserId(), session.getContextId());
-        FacetValue defaultValue = buildFolderFacetValue(defaultFolder, mailAccount);
-        Facet folderFacet = buildFolderFacet(mailFolders);
+        final MailAccountStorageService mass = Services.getMailAccountStorageService();
+        final MailAccount mailAccount = mass.getMailAccount(defaultFolder.getAccountId(), session.getUserId(), session.getContextId());
+        final FacetValue defaultValue = buildFolderFacetValue(defaultFolder, mailAccount, session.getContextId());
+        final Facet folderFacet = buildFolderFacet(mailFolders, session.getUserId(), session.getContextId(), accountCache);
         folderFacet.getValues().add(defaultValue);
-        MandatoryFilter folderFilter = new MandatoryFilter(folderFacet, defaultValue);
+        final MandatoryFilter folderFilter = new MandatoryFilter(folderFacet, defaultValue);
 
-        List<Facet> staticFacets = new ArrayList<Facet>(3);
-        Facet subjectFacet = new FieldFacet(MailFacetType.SUBJECT, "subject");
-        Facet bodyFacet = new FieldFacet(MailFacetType.MAIL_TEXT, "body");
+        final List<Facet> staticFacets = new ArrayList<Facet>(3);
+        final Facet subjectFacet = new FieldFacet(MailFacetType.SUBJECT, "subject");
+        final Facet bodyFacet = new FieldFacet(MailFacetType.MAIL_TEXT, "body");
         staticFacets.add(subjectFacet);
         staticFacets.add(bodyFacet);
         if (folderFacet != null) {
             staticFacets.add(folderFacet);
         }
 
-        List<MandatoryFilter> mandatoryFilters = Collections.singletonList(folderFilter);
-        return new ModuleConfig(getModule(), staticFacets, mandatoryFilters);
+        return new ModuleConfig(getModule(), staticFacets, Collections.singletonList(folderFilter));
     }
 
     @Override
@@ -270,19 +268,17 @@ public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
         return new SearchResult(-1, searchRequest.getStart(), documents);
     }
 
-    private Facet buildFolderFacet(List<UserizedFolder> folders) throws OXException {
+    private Facet buildFolderFacet(List<MailFolderInfo> folders, int userId, int contextId, TIntObjectMap<MailAccount> accountCache) throws OXException {
         MailAccountStorageService mass = Services.getMailAccountStorageService();
-        Map<Integer, MailAccount> accountCache = new HashMap<Integer, MailAccount>();
         List<FacetValue> folderValues = new ArrayList<FacetValue>(folders.size());
-        for (UserizedFolder folder : folders) {
-            FullnameArgument fullnameArgument = MailFolderUtility.prepareMailFolderParam(folder.getID());
-            MailAccount mailAccount = accountCache.get(fullnameArgument.getAccountId());
+        for (MailFolderInfo folder : folders) {
+            MailAccount mailAccount = accountCache.get(folder.getAccountId());
             if (mailAccount == null) {
-                mailAccount = mass.getMailAccount(fullnameArgument.getAccountId(), folder.getUser().getId(), folder.getContext().getContextId());
+                mailAccount = mass.getMailAccount(folder.getAccountId(), userId, contextId);
                 accountCache.put(mailAccount.getId(), mailAccount);
             }
 
-            FacetValue value = buildFolderFacetValue(folder, mailAccount);
+            FacetValue value = buildFolderFacetValue(folder, mailAccount, contextId);
             if (value != null) {
                 folderValues.add(value);
             }
@@ -291,25 +287,25 @@ public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
         return new Facet(MailFacetType.FOLDERS, folderValues);
     }
 
-    private FacetValue buildFolderFacetValue(UserizedFolder folder, MailAccount mailAccount) throws OXException {
+    private FacetValue buildFolderFacetValue(MailFolderInfo defaultFolder, MailAccount mailAccount, int contextId) throws OXException {
         DefaultFolderType defaultFolderType = DefaultFolderType.NONE;
-        if (folder.isDefault()) {
-            int type = folder.getDefaultType();
-            if (type == MailFolderType.INBOX.getType()) {
+        if (defaultFolder.isDefaultFolder()) {
+            com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType type = defaultFolder.getDefaultFolderType();
+            if (type == com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType.INBOX) {
                 defaultFolderType = DefaultMailFolderType.INBOX;
-            } else if (type == MailFolderType.SENT.getType()) {
+            } else if (type == com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType.SENT) {
                 defaultFolderType = DefaultMailFolderType.SENT;
-            } else if (type == MailFolderType.TRASH.getType()) {
+            } else if (type == com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType.TRASH) {
                 defaultFolderType = DefaultMailFolderType.TRASH;
-            } else if (type == MailFolderType.SPAM.getType()) {
+            } else if (type == com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType.SPAM) {
                 defaultFolderType = DefaultMailFolderType.SPAM;
-            } else if (type == MailFolderType.DRAFTS.getType()) {
+            } else if (type == com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType.DRAFTS) {
                 defaultFolderType = DefaultMailFolderType.DRAFTS;
             }
         }
-        Filter filter = new Filter(FOLDERS_FILTER_FIELDS, folder.getID());
-        return new FacetValue(prepareFacetValueId("folder", folder.getContext().getContextId(), folder.getID()),
-            new FolderDisplayItem(folder,
+        Filter filter = new Filter(FOLDERS_FILTER_FIELDS, defaultFolder.getFullname());
+        return new FacetValue(prepareFacetValueId("folder", contextId, preparedName(defaultFolder)),
+            new FolderDisplayItem(defaultFolder,
                 defaultFolderType,
                 mailAccount.getName(),
                 mailAccount.isDefaultAccount()),
@@ -317,31 +313,101 @@ public class MockMailDriver extends AbstractContactFacetingModuleSearchDriver {
                 filter);
     }
 
-    private List<UserizedFolder> loadMailFolders(Session session, MailFolderFilter filter) throws OXException {
-        FolderService folderService = Services.getFolderService();
-        FolderResponse<UserizedFolder[]> folderResponse = folderService.getVisibleFolders(
-                FolderStorage.REAL_TREE_ID,
-                MailContentType.getInstance(),
-                PrivateType.getInstance(),
-                false,
-                session,
-                null);
+    private String preparedName(final MailFolderInfo defaultFolder) {
+        return MailFolderUtility.prepareFullname(defaultFolder.getAccountId(), defaultFolder.getFullname());
+    }
 
-        UserizedFolder[] folderArray = folderResponse.getResponse();
-        List<UserizedFolder> folders = new ArrayList<UserizedFolder>(folderArray.length);
-        for (UserizedFolder folder : folderArray) {
-            if (filter == NO_FILTER) {
-                folders.add(folder);
-            } else if (filter.accept(folder)) {
-                folders.add(folder);
+    private List<MailFolderInfo> autocompleteFolders(Session session, AutocompleteRequest autocompleteRequest) throws OXException {
+        final String prefix = autocompleteRequest.getPrefix();
+        return loadMailFolders(session, new MailFolderFilter() {
+            @Override
+            public boolean accept(MailFolderInfo folder) {
+                String name = folder.getDisplayName();
+                if (name != null && name.toLowerCase().startsWith(prefix.toLowerCase())) {
+                    return true;
+                }
+
+                return false;
+            }
+        });
+    }
+
+    private List<MailFolderInfo> loadMailFolders(final Session session, final MailFolderFilter optFilter) throws OXException {
+        return loadMailFolders(session, optFilter, null);
+    }
+
+    private List<MailFolderInfo> loadMailFolders(final Session session, final MailFolderFilter optFilter, final TIntObjectMap<MailAccount> optAccountCache) throws OXException {
+        final MailService mailService = Services.getMailService();
+        final List<MailFolderInfo> retval = new LinkedList<MailFolderInfo>();
+
+        // Primay account
+        retval.addAll(getFolderInfos(MailAccount.DEFAULT_ID, mailService, optFilter, session));
+
+        // Other accounts
+        final UnifiedInboxManagement uim = Services.requireService(UnifiedInboxManagement.class);
+        final MailAccountStorageService mass = Services.getMailAccountStorageService();
+        for (final MailAccount account : mass.getUserMailAccounts(session.getUserId(), session.getContextId())) {
+            if (null != optAccountCache) {
+                optAccountCache.put(account.getId(), account);
+            }
+            if (!account.isDefaultAccount() && account.getId() != uim.getUnifiedINBOXAccountID(session)) {
+                retval.addAll(getFolderInfos(account.getId(), mailService, optFilter, session));
             }
         }
 
-        return folders;
+        return retval;
+    }
+
+    private List<MailFolderInfo> getFolderInfos(final int accountId, final MailService mailService, final MailFolderFilter filter, final Session session) throws OXException {
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        try {
+            mailAccess = mailService.getMailAccess(session, accountId);
+            mailAccess.connect();
+            final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+            if (folderStorage instanceof IMailFolderStorageInfoSupport) {
+                final IMailFolderStorageInfoSupport infoSupport = (IMailFolderStorageInfoSupport) folderStorage;
+                if (null == filter) {
+                    return infoSupport.getFolderInfos();
+                }
+                // Need to filter
+                final List<MailFolderInfo> folderInfos = infoSupport.getFolderInfos();
+                for (final Iterator<MailFolderInfo> i = folderInfos.iterator(); i.hasNext(); ) {
+                    if (!filter.accept(i.next())) {
+                        i.remove();
+                    }
+                }
+                return folderInfos;
+            }
+            // The regular way...
+            final List<MailFolderInfo> folderInfos = new LinkedList<MailFolderInfo>();
+            final MailFolder rootFolder = folderStorage.getRootFolder();
+            collectMailFolderInfos(rootFolder.getFullname(), folderStorage, accountId, folderInfos);
+            if (null != filter) {
+                for (final Iterator<MailFolderInfo> i = folderInfos.iterator(); i.hasNext(); ) {
+                    if (!filter.accept(i.next())) {
+                        i.remove();
+                    }
+                }
+            }
+            return folderInfos;
+        } finally {
+            if (null != mailAccess) {
+                mailAccess.close(true);
+            }
+        }
+    }
+
+    private void collectMailFolderInfos(final String parentFullName, final IMailFolderStorage folderStorage, final int accountId, final List<MailFolderInfo> folderInfos) throws OXException {
+        for (final MailFolder child : folderStorage.getSubfolders(parentFullName, false)) {
+            folderInfos.add(child.asMailFolderInfo(accountId));
+            if (child.hasSubscribedSubfolders()) {
+                collectMailFolderInfos(child.getFullname(), folderStorage, accountId, folderInfos);
+            }
+        }
     }
 
     private static interface MailFolderFilter {
-        boolean accept(UserizedFolder folder);
+        boolean accept(MailFolderInfo folder);
     }
 
 }

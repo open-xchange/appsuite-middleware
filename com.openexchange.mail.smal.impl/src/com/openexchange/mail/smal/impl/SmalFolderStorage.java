@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.Quota;
@@ -62,10 +63,12 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageDelegator;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
+import com.openexchange.mail.api.IMailFolderStorageInfoSupport;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
+import com.openexchange.mail.dataobjects.MailFolderInfo;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.session.Session;
@@ -75,7 +78,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SmalFolderStorage extends AbstractSMALStorage implements IMailFolderStorage, IMailFolderStorageEnhanced2, IMailFolderStorageDelegator {
+public final class SmalFolderStorage extends AbstractSMALStorage implements IMailFolderStorage, IMailFolderStorageEnhanced2, IMailFolderStorageDelegator, IMailFolderStorageInfoSupport {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SmalFolderStorage.class);
 
@@ -88,6 +91,24 @@ public final class SmalFolderStorage extends AbstractSMALStorage implements IMai
      */
     public SmalFolderStorage(final Session session, final int accountId, final SmalMailAccess smalMailAccess) throws OXException {
         super(session, accountId, smalMailAccess);
+    }
+
+    @Override
+    public boolean isInfoSupported() throws OXException {
+        final IMailFolderStorage folderStorage = smalMailAccess.getDelegateMailAccess().getFolderStorage();
+        return (folderStorage instanceof IMailFolderStorageInfoSupport) && ((IMailFolderStorageInfoSupport) folderStorage).isInfoSupported();
+    }
+
+    @Override
+    public List<MailFolderInfo> getFolderInfos() throws OXException {
+        final IMailFolderStorage folderStorage = smalMailAccess.getDelegateMailAccess().getFolderStorage();
+        if (folderStorage instanceof IMailFolderStorageInfoSupport) {
+            final IMailFolderStorageInfoSupport infoSupport = ((IMailFolderStorageInfoSupport) folderStorage);
+            if (infoSupport.isInfoSupported()) {
+                return infoSupport.getFolderInfos();
+            }
+        }
+        throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
     }
 
     @Override

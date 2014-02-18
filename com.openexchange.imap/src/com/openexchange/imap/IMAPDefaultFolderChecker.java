@@ -74,6 +74,8 @@ import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -148,6 +150,40 @@ public class IMAPDefaultFolderChecker {
             }
         }
         return isDefaultFolder;
+    }
+
+    /**
+     * Checks if given full name denotes a default folder.
+     *
+     * @param folderFullName The full name to check
+     * @return A default folder type if given full name denotes a default folder; otherwise <code>DefaultFolderType.NONE</code>
+     * @throws OXException If check for default folder fails
+     */
+    public MailFolder.DefaultFolderType getDefaultFolderType(final String folderFullName) throws OXException {
+        if (folderFullName.equalsIgnoreCase(INBOX)) {
+            return DefaultFolderType.INBOX;
+        }
+        for (int index = 0; (index < 6); index++) {
+            if (folderFullName.equalsIgnoreCase(getDefaultFolder(index))) {
+                switch (index) {
+                case StorageUtility.INDEX_CONFIRMED_HAM:
+                    return DefaultFolderType.CONFIRMED_HAM;
+                case StorageUtility.INDEX_CONFIRMED_SPAM:
+                    return DefaultFolderType.CONFIRMED_SPAM;
+                case StorageUtility.INDEX_DRAFTS:
+                    return DefaultFolderType.DRAFTS;
+                case StorageUtility.INDEX_SENT:
+                    return DefaultFolderType.SENT;
+                case StorageUtility.INDEX_SPAM:
+                    return DefaultFolderType.SPAM;
+                case StorageUtility.INDEX_TRASH:
+                    return DefaultFolderType.TRASH;
+                default:
+                    break;
+                }
+            }
+        }
+        return DefaultFolderType.NONE;
     }
 
     /**

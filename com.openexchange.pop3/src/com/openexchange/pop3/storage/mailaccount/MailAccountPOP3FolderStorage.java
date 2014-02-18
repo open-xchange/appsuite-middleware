@@ -67,9 +67,11 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.Quota;
 import com.openexchange.mail.Quota.Type;
 import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailFolderStorageInfoSupport;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
+import com.openexchange.mail.dataobjects.MailFolderInfo;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
@@ -94,7 +96,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
+public final class MailAccountPOP3FolderStorage implements IMailFolderStorage, IMailFolderStorageInfoSupport {
 
     static final org.slf4j.Logger LOG =
         org.slf4j.LoggerFactory.getLogger(MailAccountPOP3FolderStorage.class);
@@ -233,6 +235,22 @@ public final class MailAccountPOP3FolderStorage implements IMailFolderStorage {
         } finally {
             lock.unlock();
         }
+    }
+
+    @Override
+    public boolean isInfoSupported() throws OXException {
+        return (delegatee instanceof IMailFolderStorageInfoSupport) && ((IMailFolderStorageInfoSupport) delegatee).isInfoSupported();
+    }
+
+    @Override
+    public List<MailFolderInfo> getFolderInfos() throws OXException {
+        if (delegatee instanceof IMailFolderStorageInfoSupport) {
+            final IMailFolderStorageInfoSupport infoSupport = ((IMailFolderStorageInfoSupport) delegatee);
+            if (infoSupport.isInfoSupported()) {
+                return infoSupport.getFolderInfos();
+            }
+        }
+        throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
     }
 
     @Override
