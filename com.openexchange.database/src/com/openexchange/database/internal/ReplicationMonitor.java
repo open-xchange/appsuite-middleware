@@ -314,7 +314,7 @@ public class ReplicationMonitor {
     private static void increaseCounterExistingTransaction(AssignmentImpl assign, Connection con) throws SQLException {
         Savepoint save = null;
         try {
-            save = con.setSavepoint("replication monitor");
+            save = con.setSavepoint("replicationMonitor");
             increaseCounter(assign, con);
             con.releaseSavepoint(save);
         } catch (SQLException e) {
