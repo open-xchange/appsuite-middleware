@@ -61,6 +61,7 @@ import org.osgi.service.http.HttpService;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.mailfilter.ajax.actions.MailfilterAction;
@@ -68,6 +69,7 @@ import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
 import com.openexchange.mailfilter.internal.MailFilterChecker;
 import com.openexchange.mailfilter.internal.MailFilterPreferencesItem;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
+import com.openexchange.mailfilter.internal.MailFilterReloadable;
 import com.openexchange.mailfilter.internal.MailFilterServletInit;
 import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
 import com.openexchange.osgi.DeferredActivator;
@@ -87,6 +89,8 @@ public class Activator extends DeferredActivator {
     private ServiceRegistration<EventHandler> handlerRegistration;
 
     private ServiceRegistration<CapabilityChecker> capabilityRegistration;
+
+    private ServiceRegistration<Reloadable> reloadableRegistration;
 
     /**
      * Initializes a new {@link MailFilterServletActivator}
@@ -181,6 +185,8 @@ public class Activator extends DeferredActivator {
             properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, MailFilterChecker.CAPABILITY);
             capabilityRegistration = context.registerService(CapabilityChecker.class, new MailFilterChecker(), properties);
 
+            reloadableRegistration = context.registerService(Reloadable.class, new MailFilterReloadable(), null);
+
         } catch (final Exception e) {
             LOG.error("", e);
             throw e;
@@ -202,6 +208,10 @@ public class Activator extends DeferredActivator {
                 capabilityRegistration.unregister();
                 capabilityRegistration = null;
             }
+            if (null != reloadableRegistration) {
+                reloadableRegistration.unregister();
+                reloadableRegistration = null;
+            }
             MailFilterServletInit.getInstance().stop();
 
             /*
@@ -222,7 +232,7 @@ public class Activator extends DeferredActivator {
      * @throws Exception
      */
     // protected to be able to test this
-    protected static void checkConfigfile() throws Exception {
+    public static void checkConfigfile() throws Exception {
         final ConfigurationService config = MailFilterServletServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
         final Properties file = config.getFile("mailfilter.properties");
         if (file.isEmpty()) {
