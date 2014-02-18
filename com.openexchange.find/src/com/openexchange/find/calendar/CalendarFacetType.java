@@ -47,52 +47,39 @@
  *
  */
 
-package com.openexchange.find.facet;
+package com.openexchange.find.calendar;
 
-import com.openexchange.find.calendar.RecurringTypeDisplayItem;
-import com.openexchange.find.calendar.RelativeDateDisplayItem;
-import com.openexchange.find.calendar.StatusDisplayItem;
-import com.openexchange.find.common.ContactDisplayItem;
-import com.openexchange.find.common.ContactTypeDisplayItem;
-import com.openexchange.find.common.FolderDisplayItem;
-import com.openexchange.find.common.FolderTypeDisplayItem;
-import com.openexchange.find.common.SimpleDisplayItem;
-import com.openexchange.find.drive.FileTypeDisplayItem;
-import com.openexchange.find.tasks.TaskStatusDisplayItem;
-import com.openexchange.find.tasks.TaskTypeDisplayItem;
-
-
+import com.openexchange.find.facet.FacetType;
 
 /**
- * {@link DisplayItemVisitor}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
+ * {@link CalendarFacetType}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public interface DisplayItemVisitor {
+public enum CalendarFacetType implements FacetType {
 
-    void visit(FolderDisplayItem item);
+    CONTACTS(CalendarStrings.CONTACTS),
+    SUBJECT(CalendarStrings.SUBJECT),
+    DESCRIPTION(CalendarStrings.DESCRIPTION),
+    LOCATION(CalendarStrings.LOCATION),
+    STATUS(CalendarStrings.STATUS),
+    RELATIVE_DATE(CalendarStrings.RELATIVE_DATE),
+    RECURRING_TYPE(CalendarStrings.RECURRING_TYPE);
 
-    void visit(ContactDisplayItem item);
+    private String displayName;
 
-    void visit(SimpleDisplayItem item);
+    private CalendarFacetType(String displayName) {
+        this.displayName = displayName;
+    }
 
-    void visit(FolderTypeDisplayItem item);
+    @Override
+    public String getName() {
+        return toString().toLowerCase();
+    }
 
-    void visit(FileTypeDisplayItem fileTypeDisplayItem);
-    
-    void visit(StatusDisplayItem item);
-    
-    void visit(RelativeDateDisplayItem item);
-    
-    void visit(RecurringTypeDisplayItem item);
-
-    void visit(TaskStatusDisplayItem item);
-
-    void visit(TaskTypeDisplayItem item);
-
-    void visit(NoDisplayItem item);
-
-    void visit(ContactTypeDisplayItem contactTypeDisplayItem);
+    @Override
+    public String getDisplayName() {
+        return displayName;
+    }
 
 }

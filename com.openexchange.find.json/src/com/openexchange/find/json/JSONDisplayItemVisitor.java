@@ -54,6 +54,9 @@ import java.util.List;
 import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.find.calendar.RecurringTypeDisplayItem;
+import com.openexchange.find.calendar.RelativeDateDisplayItem;
+import com.openexchange.find.calendar.StatusDisplayItem;
 import com.openexchange.find.common.ContactDisplayItem;
 import com.openexchange.find.common.ContactTypeDisplayItem;
 import com.openexchange.find.common.DefaultFolderType;
@@ -71,7 +74,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.MailFolderInfo;
 
-
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
@@ -79,8 +81,11 @@ import com.openexchange.mail.dataobjects.MailFolderInfo;
 public class JSONDisplayItemVisitor implements DisplayItemVisitor {
 
     private final List<JSONException> errors;
+
     private final JSONObject json;
+
     private final StringTranslator translator;
+
     private final Locale locale;
 
     public JSONDisplayItemVisitor(final StringTranslator translator, final Locale locale) {
@@ -165,6 +170,16 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
         }
     }
 
+    public void visit(StatusDisplayItem item) {
+        StatusDisplayItem.Status status = item.getItem();
+        try {
+            json.put("defaultValue", translator.translate(locale, item.getDefaultValue()));
+            json.put("status", Strings.toLowerCase(status.toString()));
+        } catch (JSONException e) {
+            errors.add(e);
+        }
+    }
+
     @Override
     public void visit(TaskTypeDisplayItem item) {
         final TaskTypeDisplayItem.Type type = item.getItem();
@@ -176,6 +191,15 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
         }
     }
 
+    public void visit(RelativeDateDisplayItem item) {
+        RelativeDateDisplayItem.RelativeDate date = item.getItem();
+        try {
+            json.put("defaultValue", translator.translate(locale, item.getDefaultValue()));
+            json.put("relative_date", Strings.toLowerCase(date.toString()));
+        } catch (JSONException e) {
+            errors.add(e);
+        }
+    }
 
     @Override
     public void visit(NoDisplayItem item) {
@@ -195,6 +219,17 @@ public class JSONDisplayItemVisitor implements DisplayItemVisitor {
         try {
             json.put("defaultValue", translator.translate(locale, item.getDefaultValue()));
             json.put("contact_type", Strings.toLowerCase(type.toString()));
+        } catch (JSONException e) {
+            errors.add(e);
+        }
+    }
+
+    @Override
+    public void visit(RecurringTypeDisplayItem item) {
+        RecurringTypeDisplayItem.RecurringType type = item.getItem();
+        try {
+            json.put("defaultValue", translator.translate(locale, item.getDefaultValue()));
+            json.put("recurring_type", Strings.toLowerCase(type.toString()));
         } catch (JSONException e) {
             errors.add(e);
         }

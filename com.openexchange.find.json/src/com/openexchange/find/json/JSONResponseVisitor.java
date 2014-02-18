@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.DocumentVisitor;
+import com.openexchange.find.calendar.CalendarDocument;
 import com.openexchange.find.contacts.ContactsDocument;
 import com.openexchange.find.drive.FileDocument;
 import com.openexchange.find.json.osgi.ResultConverterRegistry;
@@ -171,6 +172,19 @@ public class JSONResponseVisitor implements DocumentVisitor {
                 json.put(requestResult.getResultObject());
             }
         } catch (final OXException e) {
+            errors.add(e);
+        }
+    }
+
+    public void visit(CalendarDocument calendarDocument) {
+        try {
+            ResultConverter calendarConverter = converterRegistry.getConverter("appointment");
+            if (calendarConverter != null) {
+                AJAXRequestResult requestResult = new AJAXRequestResult(calendarDocument.getAppointment());
+                calendarConverter.convert(new AJAXRequestData(), requestResult, session, null);
+                json.put(requestResult.getResultObject());
+            }
+        } catch (OXException e) {
             errors.add(e);
         }
     }

@@ -47,52 +47,47 @@
  *
  */
 
-package com.openexchange.find.facet;
+package com.openexchange.find.calendar;
 
-import com.openexchange.find.calendar.RecurringTypeDisplayItem;
-import com.openexchange.find.calendar.RelativeDateDisplayItem;
-import com.openexchange.find.calendar.StatusDisplayItem;
-import com.openexchange.find.common.ContactDisplayItem;
-import com.openexchange.find.common.ContactTypeDisplayItem;
-import com.openexchange.find.common.FolderDisplayItem;
-import com.openexchange.find.common.FolderTypeDisplayItem;
-import com.openexchange.find.common.SimpleDisplayItem;
-import com.openexchange.find.drive.FileTypeDisplayItem;
-import com.openexchange.find.tasks.TaskStatusDisplayItem;
-import com.openexchange.find.tasks.TaskTypeDisplayItem;
-
-
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link DisplayItemVisitor}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
+ * {@link CalendarStrings}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public interface DisplayItemVisitor {
+public class CalendarStrings implements LocalizableStrings {
 
-    void visit(FolderDisplayItem item);
+    public static final String CONTACTS = "Contacts";
 
-    void visit(ContactDisplayItem item);
+    public static final String SUBJECT = "Subject";
 
-    void visit(SimpleDisplayItem item);
+    public static final String DESCRIPTION = "Description";
 
-    void visit(FolderTypeDisplayItem item);
+    public static final String LOCATION = "Location";
 
-    void visit(FileTypeDisplayItem fileTypeDisplayItem);
-    
-    void visit(StatusDisplayItem item);
-    
-    void visit(RelativeDateDisplayItem item);
-    
-    void visit(RecurringTypeDisplayItem item);
+    public static final String STATUS = "Status";
 
-    void visit(TaskStatusDisplayItem item);
+    public static final String RELATIVE_DATE = "Date";
 
-    void visit(TaskTypeDisplayItem item);
+    public static final String RECURRING_TYPE = "Type";
 
-    void visit(NoDisplayItem item);
+    // Status
+    public static final String STATUS_ACCEPTED = "Accepted";
 
-    void visit(ContactTypeDisplayItem contactTypeDisplayItem);
+    public static final String STATUS_DECLINED = "Declined";
 
+    public static final String STATUS_TENTATIVE = "Tentative";
+
+    public static final String STATUS_NONE = "None";
+
+    // Relative date
+    public static final String RELATIVE_DATE_COMMING = "Comming";
+
+    public static final String RELATIVE_DATE_PAST = "Past";
+
+    // Recurring type
+    public static final String RECURRING_TYPE_SINGLE = "Single";
+
+    public static final String RECURRING_TYPE_SERIES = "Series";
 }

@@ -21,6 +21,7 @@ Import-Package: com.openexchange.exception,
  org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.find,
+ com.openexchange.find.calendar,
  com.openexchange.find.common,
  com.openexchange.find.contacts,
  com.openexchange.find.drive,

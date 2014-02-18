@@ -55,12 +55,14 @@ import org.osgi.framework.Constants;
 import com.openexchange.contact.ContactService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.find.basic.Services;
+import com.openexchange.find.basic.calendar.MockCalendarDriver;
 import com.openexchange.find.basic.contacts.MockContactsDriver;
 import com.openexchange.find.basic.drive.MockDriveDriver;
 import com.openexchange.find.basic.mail.MockMailDriver;
 import com.openexchange.find.basic.tasks.MockTasksDriver;
 import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
@@ -76,7 +78,7 @@ public class FindBasicActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactService.class, FolderService.class, MailService.class, MailAccountStorageService.class, IDBasedFileAccessFactory.class, UnifiedInboxManagement.class };
+        return new Class<?>[] { ContactService.class, FolderService.class, MailService.class, MailAccountStorageService.class, IDBasedFileAccessFactory.class, UnifiedInboxManagement.class, AppointmentSqlFactoryService.class };
     }
 
     @Override
@@ -105,6 +107,12 @@ public class FindBasicActivator extends HousekeepingActivator {
             Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
             registerService(ModuleSearchDriver.class, new MockContactsDriver(), properties);
+        }
+
+        {
+            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
+            registerService(ModuleSearchDriver.class, new MockCalendarDriver(), properties);
         }
     }
 

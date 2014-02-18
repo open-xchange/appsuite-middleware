@@ -47,52 +47,54 @@
  *
  */
 
-package com.openexchange.find.facet;
+package com.openexchange.find.calendar;
 
-import com.openexchange.find.calendar.RecurringTypeDisplayItem;
-import com.openexchange.find.calendar.RelativeDateDisplayItem;
-import com.openexchange.find.calendar.StatusDisplayItem;
-import com.openexchange.find.common.ContactDisplayItem;
-import com.openexchange.find.common.ContactTypeDisplayItem;
-import com.openexchange.find.common.FolderDisplayItem;
-import com.openexchange.find.common.FolderTypeDisplayItem;
-import com.openexchange.find.common.SimpleDisplayItem;
-import com.openexchange.find.drive.FileTypeDisplayItem;
-import com.openexchange.find.tasks.TaskStatusDisplayItem;
-import com.openexchange.find.tasks.TaskTypeDisplayItem;
-
-
+import com.openexchange.find.facet.DisplayItem;
+import com.openexchange.find.facet.DisplayItemVisitor;
 
 /**
- * {@link DisplayItemVisitor}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
+ * {@link StatusDisplayItem}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public interface DisplayItemVisitor {
+public class StatusDisplayItem implements DisplayItem {
 
-    void visit(FolderDisplayItem item);
+    public static enum Status {
+        ACCEPTED("accepted"), DECLINED("declined"), TENTATIVE("tentative"), NONE("none");
 
-    void visit(ContactDisplayItem item);
+        private String identifier;
 
-    void visit(SimpleDisplayItem item);
+        private Status(String identifier) {
+            this.identifier = identifier;
+        }
 
-    void visit(FolderTypeDisplayItem item);
+        public String getIdentifier() {
+            return identifier;
+        }
+    }
 
-    void visit(FileTypeDisplayItem fileTypeDisplayItem);
-    
-    void visit(StatusDisplayItem item);
-    
-    void visit(RelativeDateDisplayItem item);
-    
-    void visit(RecurringTypeDisplayItem item);
+    private String displayName;
 
-    void visit(TaskStatusDisplayItem item);
+    private Status status;
 
-    void visit(TaskTypeDisplayItem item);
+    public StatusDisplayItem(String displayName, Status status) {
+        this.displayName = displayName;
+        this.status = status;
+    }
 
-    void visit(NoDisplayItem item);
+    @Override
+    public String getDefaultValue() {
+        return displayName;
+    }
 
-    void visit(ContactTypeDisplayItem contactTypeDisplayItem);
+    @Override
+    public Status getItem() {
+        return status;
+    }
+
+    @Override
+    public void accept(DisplayItemVisitor visitor) {
+        visitor.visit(this);
+    }
 
 }

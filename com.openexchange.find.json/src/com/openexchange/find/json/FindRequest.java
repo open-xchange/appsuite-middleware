@@ -115,8 +115,14 @@ public class FindRequest {
      * @return The offset
      */
     public Offset getOffset() throws OXException {
-        final int off = request.getIntParameter(PARAM_START);
-        final int len = request.getIntParameter(PARAM_SIZE);
+        JSONObject json = (JSONObject) request.requireData();
+        int off, len;
+        try {
+            off = json.getInt(PARAM_START);
+            len = json.getInt(PARAM_SIZE);
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        }
 
         if (off < 0 || len < 0) {
             return new Offset(0, DEFAULT_SIZE);

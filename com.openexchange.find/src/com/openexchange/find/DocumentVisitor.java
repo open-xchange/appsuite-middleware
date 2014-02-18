@@ -46,17 +46,18 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.find;
 
+import com.openexchange.find.calendar.CalendarDocument;
 import com.openexchange.find.contacts.ContactsDocument;
 import com.openexchange.find.drive.FileDocument;
 import com.openexchange.find.mail.MailDocument;
 import com.openexchange.find.tasks.TasksDocument;
 
 /**
- * A {@link DocumentVisitor} has to be used to process the {@link Document}s
- * of a {@link SearchResult}.
- *
+ * A {@link DocumentVisitor} has to be used to process the {@link Document}s of a {@link SearchResult}.
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.0
  */
@@ -64,14 +65,14 @@ public interface DocumentVisitor {
 
     /**
      * Handles given mail document.
-     *
+     * 
      * @param mailDocument The mail document
      */
     void visit(MailDocument mailDocument);
 
     /**
      * Handles given file document.
-     *
+     * 
      * @param fileDocument The file document
      */
     void visit(FileDocument fileDocument);
@@ -89,4 +90,12 @@ public interface DocumentVisitor {
      * @param contactDocument The file document
      */
     void visit(ContactsDocument contactDocument);
+
+    /**
+     * Handles given calendar document.
+     * 
+     * @param calendarDocument The calendar document
+     */
+    void visit(CalendarDocument calendarDocument);
+
 }
