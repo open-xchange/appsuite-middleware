@@ -55,6 +55,7 @@ import org.osgi.framework.Constants;
 import com.openexchange.contact.ContactService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.find.basic.Services;
+import com.openexchange.find.basic.contacts.MockContactsDriver;
 import com.openexchange.find.basic.drive.MockDriveDriver;
 import com.openexchange.find.basic.mail.MockMailDriver;
 import com.openexchange.find.basic.tasks.MockTasksDriver;
@@ -67,7 +68,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link FindBasicActivator}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.0
  */
@@ -98,6 +99,12 @@ public class FindBasicActivator extends HousekeepingActivator {
             Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
             registerService(ModuleSearchDriver.class, new MockTasksDriver(), properties);
+        }
+
+        {
+            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
+            registerService(ModuleSearchDriver.class, new MockContactsDriver(), properties);
         }
     }
 
