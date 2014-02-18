@@ -1879,6 +1879,52 @@ msgstr ""
 msgid "External"
 msgstr ""
 
+#. ------------------------- i18n strings for contact types ------------------------------------- //
+#. Search in Persons.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:85
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:84
+msgid "Contact"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:87
+msgid "Distribution List"
+msgstr ""
+
+#. Search in address book
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:63
+msgid "address book"
+msgstr ""
+
+#. Search in names
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:66
+msgid "name"
+msgstr ""
+
+#. Search in email addresses
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:69
+msgid "email"
+msgstr ""
+
+#. Search in phone numbers
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:72
+msgid "phone"
+msgstr ""
+
+#. Search in addresses
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:75
+msgid "address"
+msgstr ""
+
+#. Search in specific types
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:78
+msgid "Type"
+msgstr ""
+
+#. Search in folders.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:81
+msgid "Folder"
+msgstr ""
+
 #. Search in file name.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:63
 msgid "File name"
