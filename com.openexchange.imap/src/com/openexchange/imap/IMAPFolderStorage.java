@@ -396,10 +396,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 map.put(fullName, mfi);
             }
 
-            // User's locae
-            Locale locale = (session instanceof ServerSession ? ((ServerSession) session).getUser() : UserStorage.getInstance().getUser(session.getUserId(), session.getContextId())).getLocale();
+            // User's locale
+            final Locale locale = (session instanceof ServerSession ? ((ServerSession) session).getUser() : UserStorage.getInstance().getUser(session.getUserId(), session.getContextId())).getLocale();
 
             // Determine standard folders
+            final StringHelper stringHelper = StringHelper.valueOf(locale);
             for (int index = 0; index < 6; index++) {
                 final String fn = getChecker().getDefaultFolder(index);
                 if (null != fn) {
@@ -409,27 +410,27 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         switch (index) {
                         case StorageUtility.INDEX_CONFIRMED_HAM:
                             mfi.setDefaultFolderType(DefaultFolderType.CONFIRMED_HAM);
-                            mfi.setDisplayName(StringHelper.valueOf(locale).getString(MailStrings.CONFIRMED_HAM));
+                            mfi.setDisplayName(stringHelper.getString(MailStrings.CONFIRMED_HAM));
                             break;
                         case StorageUtility.INDEX_CONFIRMED_SPAM:
                             mfi.setDefaultFolderType(DefaultFolderType.CONFIRMED_SPAM);
-                            mfi.setDisplayName(StringHelper.valueOf(locale).getString(MailStrings.CONFIRMED_SPAM));
+                            mfi.setDisplayName(stringHelper.getString(MailStrings.CONFIRMED_SPAM));
                             break;
                         case StorageUtility.INDEX_DRAFTS:
                             mfi.setDefaultFolderType(DefaultFolderType.DRAFTS);
-                            mfi.setDisplayName(StringHelper.valueOf(locale).getString(MailStrings.DRAFTS));
+                            mfi.setDisplayName(stringHelper.getString(MailStrings.DRAFTS));
                             break;
                         case StorageUtility.INDEX_SENT:
                             mfi.setDefaultFolderType(DefaultFolderType.SENT);
-                            mfi.setDisplayName(StringHelper.valueOf(locale).getString(MailStrings.SENT));
+                            mfi.setDisplayName(stringHelper.getString(MailStrings.SENT));
                             break;
                         case StorageUtility.INDEX_SPAM:
                             mfi.setDefaultFolderType(DefaultFolderType.SPAM);
-                            mfi.setDisplayName(StringHelper.valueOf(locale).getString(MailStrings.SPAM));
+                            mfi.setDisplayName(stringHelper.getString(MailStrings.SPAM));
                             break;
                         case StorageUtility.INDEX_TRASH:
                             mfi.setDefaultFolderType(DefaultFolderType.TRASH);
-                            mfi.setDisplayName(StringHelper.valueOf(locale).getString(MailStrings.TRASH));
+                            mfi.setDisplayName(stringHelper.getString(MailStrings.TRASH));
                             break;
                         default:
                             break;
