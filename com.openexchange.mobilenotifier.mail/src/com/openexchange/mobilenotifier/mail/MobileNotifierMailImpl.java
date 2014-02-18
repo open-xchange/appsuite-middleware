@@ -144,7 +144,7 @@ public class MobileNotifierMailImpl extends AbstractMobileNotifierService {
                         final Date received_string = mailMessage.getReceivedDate();
 
                         final String subject = mailMessage.getSubject();
-                        final boolean attachements = mailMessage.hasAttachment();
+                        final boolean attachments = mailMessage.hasAttachment();
                         final String folder = mailMessage.getFolder();
                         final int flag = mailMessage.getFlags();
                         final String id = mailMessage.getMailId();
@@ -159,7 +159,7 @@ public class MobileNotifierMailImpl extends AbstractMobileNotifierService {
                         notifyItem.add(new NotifyItem("from", inetAddr[0]));
                         notifyItem.add(new NotifyItem("received_date", rect));
                         notifyItem.add(new NotifyItem("subject", subject));
-                        notifyItem.add(new NotifyItem("attachements", attachements));
+                        notifyItem.add(new NotifyItem("attachments", attachments));
                         notifyItem.add(new NotifyItem("flags", flag));
                         messages.add(mailMessage);
                         notifyItems.add(notifyItem);
