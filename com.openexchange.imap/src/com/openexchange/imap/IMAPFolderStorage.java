@@ -371,8 +371,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             final Locale locale = (session instanceof ServerSession ? ((ServerSession) session).getUser() : UserStorage.getInstance().getUser(session.getUserId(), session.getContextId())).getLocale();
 
             // Check whether to consider standard folders
-            final boolean considerStandardFolders = null == pfn || 0 == pfn.length() || "INBOX".equals(pfn);
-            if (!considerStandardFolders) {
+            if (!considerStandardFolders(pfn)) {
                 final List<MailFolderInfo> retval = new ArrayList<MailFolderInfo>(allEntries.size());
 
                 // Fill list
@@ -396,7 +395,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
 
             // Determine standard folders
-            if (considerStandardFolders) {
+            {
                 final StringHelper stringHelper = StringHelper.valueOf(locale);
                 for (int index = 0; index < 6; index++) {
                     final String fn = getChecker().getDefaultFolder(index);
@@ -446,6 +445,18 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
+    }
+
+    private boolean considerStandardFolders(final String parentFullName) throws OXException {
+        final boolean considerStandardFolders;
+        if (null == parentFullName) {
+            considerStandardFolders = true;
+        } else {
+            final String prefix = getDefaultFolderPrefix();
+            final int pLength = prefix.length();
+            considerStandardFolders = 1 == pLength ? 0 == parentFullName.length() : (parentFullName.equals(prefix.substring(0, pLength - 1)));
+        }
+        return considerStandardFolders;
     }
 
     private MailFolderInfo toFolderInfo(final ListLsubEntry entry) {
