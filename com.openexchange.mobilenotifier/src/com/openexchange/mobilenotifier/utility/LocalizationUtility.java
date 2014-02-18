@@ -81,7 +81,7 @@ public class LocalizationUtility {
      * @return localized date as a string
      */
     public static String dateLocalizer(final Date date, final LocaleAndTimeZone ltz) {
-        final StringHelper strHelper = new StringHelper(ltz.getLocale());
+        StringHelper strHelper = StringHelper.valueOf(ltz.getLocale());
         String replyPrefix = strHelper.getString(DATE_TIME_MSG);
         {
             try {
