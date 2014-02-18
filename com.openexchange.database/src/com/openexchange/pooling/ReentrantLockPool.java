@@ -50,6 +50,7 @@
 package com.openexchange.pooling;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -262,6 +263,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                         final String threadName = Thread.currentThread().getName();
                         final boolean writeWarning = System.currentTimeMillis() > (lastWarning + 60000L);
                         if (writeWarning) {
+                            logThreads(data.getActive());
                             lastWarning = System.currentTimeMillis();
                             final PoolingException warn = new PoolingException("Thread " + threadName
                                 + " is sent to sleep until an object in the pool is available. " + data.numActive()
@@ -371,6 +373,25 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
 
     private static final long getWaitTime(final long startTime) {
         return System.currentTimeMillis() - startTime;
+    }
+
+    private static <T> void logThreads(Collection<PooledData<T>> active) {
+        Log log = com.openexchange.log.Log.loggerFor(ReentrantLockPool.class.getName() + ".logThreads");
+        if (!log.isDebugEnabled()) {
+            return;
+        }
+        log.debug("All available objects in the pool are in use. Dumping now threads using the objects.");
+        for (PooledData<T> pooled : active) {
+            Thread thread = pooled.getThread();
+            PoolingException e = new PoolingException("All available objects in the pool are in use. Thread" + thread.getName() + " is using one.");
+            StackTraceElement[] trace = pooled.getTrace();
+            if (null != trace) {
+                e.setStackTrace(trace);
+            } else {
+                e.setStackTrace(thread.getStackTrace());
+            }
+            log.debug(e.getMessage(), e);
+        }
     }
 
     @Override
