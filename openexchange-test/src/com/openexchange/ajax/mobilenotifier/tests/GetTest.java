@@ -126,32 +126,32 @@ public class GetTest extends AbstractMobileNotifierTest {
         }
     }
 
-    // TODO
-    public void testAppointmentMobileNotifierJSONResponse() throws OXException, IOException, JSONException {
-        List<String> providerValue = new ArrayList<String>();
-        providerValue.add("io.ox/calendar");
-        JSONObject providerJSON = getProvider(providerValue);
-
-        List<String> mandatoryItems = new ArrayList<String>();
-        mandatoryItems.add("location");
-        mandatoryItems.add("title");
-        mandatoryItems.add("recurrence_start");
-        mandatoryItems.add("start_date");
-        mandatoryItems.add("organizer");
-        mandatoryItems.add("status");
-        mandatoryItems.add("id");
-        mandatoryItems.add("folder");
-
-        assertNotNull("could not found the attribute items", providerJSON.get("items"));
-        JSONArray itemsArray = (JSONArray) providerJSON.get("items");
-
-        for (int i = 0; i < itemsArray.length(); i++) {
-            JSONObject item = itemsArray.getJSONObject(i);
-            for (String mandatoryItem : mandatoryItems) {
-                assertTrue("could not found the mandatory item: " + mandatoryItem, item.has(mandatoryItem));
-            }
-        }
-    }
+    // TODO Implementation is missing
+    // public void testAppointmentMobileNotifierJSONResponse() throws OXException, IOException, JSONException {
+    // List<String> providerValue = new ArrayList<String>();
+    // providerValue.add("io.ox/calendar");
+    // JSONObject providerJSON = getProvider(providerValue);
+    //
+    // List<String> mandatoryItems = new ArrayList<String>();
+    // mandatoryItems.add("location");
+    // mandatoryItems.add("title");
+    // mandatoryItems.add("recurrence_start");
+    // mandatoryItems.add("start_date");
+    // mandatoryItems.add("organizer");
+    // mandatoryItems.add("status");
+    // mandatoryItems.add("id");
+    // mandatoryItems.add("folder");
+    //
+    // assertNotNull("could not found the attribute items", providerJSON.get("items"));
+    // JSONArray itemsArray = (JSONArray) providerJSON.get("items");
+    //
+    // for (int i = 0; i < itemsArray.length(); i++) {
+    // JSONObject item = itemsArray.getJSONObject(i);
+    // for (String mandatoryItem : mandatoryItems) {
+    // assertTrue("could not found the mandatory item: " + mandatoryItem, item.has(mandatoryItem));
+    // }
+    // }
+    // }
 
     public void testShouldGetExceptionIfUnknownProvider() throws OXException, IOException, JSONException {
         List<String> providerValue = new ArrayList<String>();

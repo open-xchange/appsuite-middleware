@@ -47,53 +47,46 @@
  *
  */
 
-package com.openexchange.mobilenotifier.json.convert;
+package com.openexchange.mobilenotifier.utility;
 
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.exception.OXException;
-import com.openexchange.mobilenotifier.MobileNotifierExceptionCodes;
-import com.openexchange.mobilenotifier.NotifyItem;
+import java.util.Locale;
+import java.util.TimeZone;
+import com.openexchange.tools.TimeZoneUtils;
 
 /**
- * {@link NotifyItemWriter} - Converts a list of notify items to a JSON structure.
+ * {@link LocaleAndTimeZone} - Helper class to pack up {@link Locale} and {@link TimeZone} combination.
  * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class NotifyItemWriter {
-
-    private NotifyItemWriter() {
-        super();
-    }
+public class LocaleAndTimeZone {
 
     /**
-     * Writes the JSON structure of notify items
-     * 
-     * @param notifyItem List of notify items
-     * @return The JSON structure
-     * @throws JSONException
+     * The locale.
      */
-    public static JSONObject write(final List<List<NotifyItem>> notifyItem) throws JSONException {
-        final JSONObject itemsJSON = new JSONObject();
-        final JSONArray itemsArray = transformListIntoJSONArray(notifyItem);
-        itemsJSON.put(MobileNotifyField.ITEMS, itemsArray);
-        return itemsJSON;
+    private final Locale locale;
+
+    /**
+     * The time zone.
+     */
+    private final TimeZone timeZone;
+
+    /**
+     * Initializes a new {@link LocaleAndTimeZone}.
+     *
+     * @param locale The locale
+     * @param timeZoneId The time zone ID
+     */
+    public LocaleAndTimeZone(final Locale locale, final String timeZoneId) {
+        this.locale = locale;
+        this.timeZone = TimeZoneUtils.getTimeZone(timeZoneId);
     }
 
-    private static JSONArray transformListIntoJSONArray(List<List<NotifyItem>> items) throws JSONException {
-        if (items == null || items.size() == 0) {
-            return new JSONArray();
-        }
-        final JSONArray itemsArray = new JSONArray();
-        for (List<NotifyItem> listItem : items) {
-            final JSONObject itemJSON = new JSONObject();
-            for (NotifyItem item : listItem) {
-                itemJSON.put(item.getKey(), item.getValue());
-            }
-            itemsArray.put(itemJSON);
-        }
-        return itemsArray;
+    public Locale getLocale() {
+        return locale;
     }
+
+    public TimeZone getTimeZone() {
+        return timeZone;
+    }
+
 }

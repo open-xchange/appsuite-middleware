@@ -1,0 +1,188 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.mobilenotifier.mail;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import javax.mail.internet.InternetAddress;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailSortField;
+import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.service.MailService;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
+import com.openexchange.mobilenotifier.AbstractMobileNotifierService;
+import com.openexchange.mobilenotifier.MobileNotifierProviders;
+import com.openexchange.mobilenotifier.NotifyItem;
+import com.openexchange.mobilenotifier.NotifyTemplate;
+import com.openexchange.mobilenotifier.utility.LocaleAndTimeZone;
+import com.openexchange.mobilenotifier.utility.LocalizationUtility;
+import com.openexchange.mobilenotifier.utility.MobileNotifierFileUtil;
+import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
+
+/**
+ * {@link MobileNotifierMailImpl}
+ *
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ */
+public class MobileNotifierMailImpl extends AbstractMobileNotifierService {
+
+    private final ServiceLookup services;
+
+    /**
+     * Initializes a new {@link MobileNotifierMailImpl}.
+     * 
+     * @param services The service look-up
+     */
+    public MobileNotifierMailImpl(final ServiceLookup services) {
+        super();
+        this.services = ExceptionOnAbsenceServiceLookup.valueOf(services);
+    }
+
+    @Override
+    public String getProviderName() {
+        return MobileNotifierProviders.MAIL.getProviderName();
+    }
+
+    @Override
+    public String getFrontendName() {
+        return MobileNotifierProviders.MAIL.getFrontendName();
+    }
+
+    @Override
+    public List<List<NotifyItem>> getItems(Session session) throws OXException {
+        final MailService mailService = services.getService(MailService.class);
+        final UnifiedInboxManagement unified = services.getService(UnifiedInboxManagement.class);
+        final List<List<NotifyItem>> notifyItems = new ArrayList<List<NotifyItem>>();
+        final MailField[] requestedFields = new MailField[] {
+            MailField.ID, MailField.FOLDER_ID, MailField.FROM, MailField.RECEIVED_DATE, MailField.SUBJECT, MailField.FLAGS,
+            MailField.CONTENT_TYPE };
+        final List<MailMessage> messages = new LinkedList<MailMessage>();
+
+        MailAccount[] userMailAccounts;
+        {
+            final MailAccountStorageService mailAccountService = services.getService(MailAccountStorageService.class);
+            userMailAccounts = new MailAccount[] { mailAccountService.getDefaultMailAccount(session.getUserId(), session.getContextId()) };
+        }
+
+        for (final MailAccount mailAccount : userMailAccounts) {
+            if (unified.getUnifiedINBOXAccountID(session) != mailAccount.getId()) {
+                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+                try {
+                    mailAccess = mailService.getMailAccess(session, mailAccount.getId());
+                    mailAccess.connect();
+                    List<MailMessage> mailMessages = Arrays.asList(mailAccess.getMessageStorage().getUnreadMessages(
+                        "INBOX",
+                        MailSortField.RECEIVED_DATE,
+                        OrderDirection.DESC,
+                        requestedFields,
+                        100));
+                    for (MailMessage mailMessage : mailMessages) {
+                        List<NotifyItem> notifyItem = new ArrayList<NotifyItem>();
+                        final InternetAddress[] inetAddr = mailMessage.getFrom();
+                        final Date received_string = mailMessage.getReceivedDate();
+
+                        final String subject = mailMessage.getSubject();
+                        final boolean attachements = mailMessage.hasAttachment();
+                        final String folder = mailMessage.getFolder();
+                        final int flag = mailMessage.getFlags();
+                        final String id = mailMessage.getMailId();
+
+                        final User user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
+                        final Locale locale = user.getLocale();
+                        final LocaleAndTimeZone ltz = new LocaleAndTimeZone(locale, user.getTimeZone());
+
+                        String rect = LocalizationUtility.dateLocalizer(received_string, ltz);
+                        notifyItem.add(new NotifyItem("folder", folder));
+                        notifyItem.add(new NotifyItem("id", id));
+                        notifyItem.add(new NotifyItem("from", inetAddr[0]));
+                        notifyItem.add(new NotifyItem("received_date", rect));
+                        notifyItem.add(new NotifyItem("subject", subject));
+                        notifyItem.add(new NotifyItem("attachements", attachements));
+                        notifyItem.add(new NotifyItem("flags", flag));
+                        messages.add(mailMessage);
+                        notifyItems.add(notifyItem);
+                    }
+                } finally {
+                    if (mailAccess != null) {
+                        mailAccess.close(true);
+                    }
+                }
+            }
+        }
+        return notifyItems;
+    }
+
+    @Override
+    public NotifyTemplate getTemplate() throws OXException {
+        final String template = MobileNotifierFileUtil.getTeamplateFileContent(MobileNotifierProviders.MAIL.getTemplateFileName());
+        final String title = MobileNotifierProviders.MAIL.getTitle();
+        return new NotifyTemplate(title, template, true, 1);
+    }
+
+    @Override
+    public void putTemplate(String changedTemplate) throws OXException {
+        // TODO Auto-generated method stub
+    }
+}

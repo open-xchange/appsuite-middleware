@@ -7,14 +7,18 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config.cascade,
  com.openexchange.exception,
+ com.openexchange.groupware.ldap,
  com.openexchange.i18n,
+ com.openexchange.i18n.tools,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
+ com.openexchange.tools,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
-Export-Package: com.openexchange.mobilenotifier
+Export-Package: com.openexchange.mobilenotifier,
+ com.openexchange.mobilenotifier.utility
 Bundle-Activator: com.openexchange.mobilenotifier.osgi.MobileNotifierActivator

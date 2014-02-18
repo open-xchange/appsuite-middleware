@@ -53,10 +53,10 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.mobilenotifier.AbstractMobileNotifierService;
-import com.openexchange.mobilenotifier.MobileNotifierFileUtil;
 import com.openexchange.mobilenotifier.MobileNotifierProviders;
 import com.openexchange.mobilenotifier.NotifyItem;
 import com.openexchange.mobilenotifier.NotifyTemplate;
+import com.openexchange.mobilenotifier.utility.MobileNotifierFileUtil;
 import com.openexchange.session.Session;
 
 /**
