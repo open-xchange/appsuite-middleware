@@ -47,56 +47,23 @@
  *
  */
 
-package com.openexchange.ajax.mobilenotifier.actions;
+package com.openexchange.ajax.mobilenotifier.tests;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link GetMobileNotifierRequest}
- *
+ * {@link MandatoryFields} - Represents a mandatory field in JSON structure
+ * 
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class GetMobileNotifierRequest extends AbstractMobileNotifierRequest<GetMobileNotifierResponse> {
+public class MandatoryFields {
 
-    private final String provider;
+    String[] mandatory;
 
-    public GetMobileNotifierRequest(final String provider) {
-        this.provider = provider;
+    public MandatoryFields(String... mandatory) {
+        this.mandatory = mandatory;
     }
 
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return Method.GET;
+    public String[] getMandatory() {
+        return mandatory;
     }
-
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        final List<Parameter> parameterList = new ArrayList<Parameter>();
-        parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
-        parameterList.add(new Parameter("provider", provider));
-        return parameterList.toArray(new Parameter[parameterList.size()]);
-    }
-
-    @Override
-    public AbstractAJAXParser<? extends GetMobileNotifierResponse> getParser() {
-        return new AbstractAJAXParser<GetMobileNotifierResponse>(isFailOnError()) {
-
-            @Override
-            protected GetMobileNotifierResponse createResponse(final Response response) throws JSONException {
-                return new GetMobileNotifierResponse(response);
-            }
-        };
-    }
-
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
-    }
-
 }

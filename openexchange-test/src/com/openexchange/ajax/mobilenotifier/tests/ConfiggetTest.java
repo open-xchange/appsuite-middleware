@@ -102,12 +102,12 @@ public class ConfiggetTest extends AbstractMobileNotifierTest {
             assertNotNull(providersArray.get(providerValue.get(i)));
             JSONObject providerObject = (JSONObject) providersArray.get(providerValue.get(i));
 
-            assertNotNull("could not find attribute template", providerObject.get("template"));
-            Assert.assertTrue("value of attribute template is empty ", providerObject.getString("template").length() > 0);
-            assertNotNull("could not find attribute slow", providerObject.get("slow"));
-            Assert.assertTrue("value of attribute template is empty ", providerObject.getString("slow").length() > 0);
-            assertNotNull("could not find attribute index", providerObject.get("index"));
-            Assert.assertTrue("value of attribute index is empty ", providerObject.getString("index").length() > 0);
+            assertTrue("could not find attribute template", providerObject.has("template"));
+            assertTrue("value of attribute template is empty ", providerObject.getString("template").length() > 0);
+            assertTrue("could not find attribute slow", providerObject.has("slow"));
+            assertTrue("value of attribute template is empty ", providerObject.getString("slow").length() > 0);
+            assertTrue("could not find attribute index", providerObject.has("index"));
+            assertTrue("value of attribute index is empty ", providerObject.getString("index").length() > 0);
         }
     }
 
@@ -130,12 +130,12 @@ public class ConfiggetTest extends AbstractMobileNotifierTest {
 
             assertNotNull(providersObject.get(key));
             JSONObject providerObject = (JSONObject) providersObject.get(key);
-            assertNotNull("could not find attribute template", providerObject.get("template"));
-            Assert.assertTrue("value of attribute template is empty ", providerObject.getString("template").length() > 0);
-            assertNotNull("could not find attribute slow", providerObject.get("slow"));
-            Assert.assertTrue("value of attribute template is empty ", providerObject.getString("slow").length() > 0);
-            assertNotNull("could not find attribute index", providerObject.get("index"));
-            Assert.assertTrue("value of attribute index is empty ", providerObject.getString("index").length() > 0);
+            assertTrue("could not find attribute template", providerObject.has("template"));
+            assertTrue("value of attribute template is empty ", providerObject.getString("template").length() > 0);
+            assertTrue("could not find attribute slow", providerObject.has("slow"));
+            assertTrue("value of attribute template is empty ", providerObject.getString("slow").length() > 0);
+            assertTrue("could not find attribute index", providerObject.has("index"));
+            assertTrue("value of attribute index is empty ", providerObject.getString("index").length() > 0);
         }
     }
 

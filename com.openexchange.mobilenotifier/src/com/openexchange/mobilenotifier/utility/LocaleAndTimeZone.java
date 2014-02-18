@@ -88,5 +88,4 @@ public class LocaleAndTimeZone {
     public TimeZone getTimeZone() {
         return timeZone;
     }
-
 }
