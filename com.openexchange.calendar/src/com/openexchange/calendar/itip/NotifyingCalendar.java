@@ -378,6 +378,13 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
     }
 
     @Override
+    public Date setExternalConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final String mail, final int confirm, final String message) throws OXException {
+
+        // TODO: Support occurrence confirmation -- anything to do than just delegate call?
+        return delegate.setExternalConfirmation(objectId, folderId, optOccurrenceId, mail, confirm, message);
+    }
+
+    @Override
     public void setIncludePrivateAppointments(final boolean include) {
         delegate.setIncludePrivateAppointments(include);
     }
@@ -421,6 +428,16 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
         } catch (final SQLException e) {
         	throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
         }
+    }
+
+    @Override
+    public Date setUserConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final int userId, final int confirm, final String confirmMessage) throws OXException {
+        if (optOccurrenceId <= 0) {
+            return setUserConfirmation(objectId, folderId, userId, confirm, confirmMessage);
+        }
+
+        // TODO: Support occurrence confirmation
+        return setUserConfirmation(objectId, folderId, userId, confirm, confirmMessage);
     }
 
     @Override

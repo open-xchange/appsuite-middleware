@@ -79,7 +79,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "id", description = "Object ID of the appointment to confirm."),
     @Parameter(name = "folder", description = "ID of the folder through which the appointment is accessed."),
-    @Parameter(name = "occurrence", description = "The numeric identifier of the occurrence to which the confirmation applies (in case \"id\" denotes a seris appointment)."),
+    @Parameter(name = "occurrence", description = "The numeric identifier of the occurrence to which the confirmation applies (in case \"id\" denotes a series appointment)."),
     @Parameter(name = "timestamp", description = "Timestamp of the last update of the to confirmed appointment.")
 }, requestBody = "The appointment object to delete. The fields for the object are described in Full identifier for an appointment.",
 responseDescription = "An array of objects identifying the appointments which were modified after the specified timestamp and were therefore not deleted. The fields of each object are described in Full identifier for an appointment.")

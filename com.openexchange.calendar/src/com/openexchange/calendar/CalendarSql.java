@@ -871,9 +871,6 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.api2.AppointmentSQLInterface#setUserConfirmation(int, int, int, java.lang.String)
-     */
     @Override
     public Date setUserConfirmation(final int oid, final int folderId, final int uid, final int confirm, final String confirmMessage) throws OXException {
         if (session == null) {
@@ -891,6 +888,16 @@ public class CalendarSql implements AppointmentSQLInterface {
     }
 
     @Override
+    public Date setUserConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final int userId, final int confirm, final String confirmMessage) throws OXException {
+        if (optOccurrenceId <= 0) {
+            return setUserConfirmation(objectId, folderId, userId, confirm, confirmMessage);
+        }
+
+        // TODO: Support occurrence confirmation
+        return setUserConfirmation(objectId, folderId, userId, confirm, confirmMessage);
+    }
+
+    @Override
     public Date setExternalConfirmation(final int objectId, final int folderId, final String mail, final int confirm, final String message) throws OXException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
@@ -904,6 +911,16 @@ public class CalendarSql implements AppointmentSQLInterface {
             }
         }
         return cimp.setExternalConfirmation(objectId, folderId, mail, confirm, message, session, ctx);
+    }
+
+    @Override
+    public Date setExternalConfirmation(final int objectId, final int folderId, final int optOccurrenceId, final String mail, final int confirm, final String message) throws OXException {
+        if (optOccurrenceId <= 0) {
+            return setExternalConfirmation(objectId, folderId, mail, confirm, message);
+        }
+
+        // TODO: Support occurrence confirmation
+        return setExternalConfirmation(objectId, folderId, mail, confirm, message);
     }
 
     @Override
