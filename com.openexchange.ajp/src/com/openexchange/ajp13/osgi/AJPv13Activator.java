@@ -60,6 +60,7 @@ import com.openexchange.ajp13.Services;
 import com.openexchange.ajp13.servlet.http.HttpSessionWrapper;
 import com.openexchange.ajp13.servlet.http.osgi.HttpServiceImpl;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -160,6 +161,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
              */
             final HttpServiceImpl http = new HttpServiceImpl();
             registerService(HttpService.class, http);
+            registerService(Reloadable.class, AJPv13Config.getInstance());
         } catch (final Exception e) {
             org.slf4j.LoggerFactory.getLogger(AJPv13Activator.class).error("", e);
             throw e;

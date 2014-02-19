@@ -62,6 +62,7 @@ import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
@@ -181,6 +182,8 @@ public class GrizzlyActivator extends HousekeepingActivator {
              */
             registerService(HttpService.class.getName(), new HttpServiceFactory(grizzly, context.getBundle()));
             log.info("Registered OSGi HttpService for Grizzly server.");
+
+            registerService(Reloadable.class, grizzlyConfig);
 
         } catch (final Exception e) {
             throw GrizzlyExceptionCode.GRIZZLY_SERVER_NOT_STARTED.create(e, new Object[] {});
