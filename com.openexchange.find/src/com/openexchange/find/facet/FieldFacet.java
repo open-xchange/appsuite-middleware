@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.find.common.SimpleDisplayItem;
 
 
 /**
@@ -88,7 +89,7 @@ public class FieldFacet extends Facet {
         Filter filter = new Filter(filterFields, Collections.singleton(QUERY_PLACEHOLDER));
         values.add(new FacetValue(
             type.getName(),
-            DisplayItem.NO_DISPLAY_ITEM,
+            new SimpleDisplayItem(type.getName()),
             FacetValue.UNKNOWN_COUNT,
             filter));
         return values;
