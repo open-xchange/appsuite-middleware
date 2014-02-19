@@ -1859,6 +1859,28 @@ msgid ""
 "The service you requested is currently not available. Please try again later."
 msgstr ""
 
+#. A filter for field '%1$s' is missing but is required to search in module %2$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:69
+msgid ""
+"A filter for field '%1$s' is missing but is required to search in module "
+"%2$s."
+msgstr ""
+
+#. A search filter did not contain a field to filter on.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:72
+msgid "A search filter did not contain a field to filter on."
+msgstr ""
+
+#. A search filter did not contain a query to search for.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:75
+msgid "A search filter did not contain a query to search for."
+msgstr ""
+
+#. A search filter contained an unknown field: '%1$s'.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:78
+msgid "A search filter contained an unknown field: '%1$s'."
+msgstr ""
+
 #. Search in Persons.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:72
