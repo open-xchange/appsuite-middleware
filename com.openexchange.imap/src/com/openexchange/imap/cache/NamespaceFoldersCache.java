@@ -51,7 +51,6 @@ package com.openexchange.imap.cache;
 
 import static com.openexchange.java.Strings.isEmpty;
 import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicInteger;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import com.openexchange.caching.CacheKey;
@@ -77,22 +76,11 @@ public final class NamespaceFoldersCache {
 
     private static final String[] EMPTY_ARR = new String[0];
 
-    private static final AtomicInteger DELIM = new AtomicInteger('\0');
-
     /**
      * No instance
      */
     private NamespaceFoldersCache() {
         super();
-    }
-
-    /**
-     * Gets the separator for personal namespace.
-     *
-     * @return The separator
-     */
-    public static char getPersonalSeparator() {
-        return (char) DELIM.get();
     }
 
     /**
@@ -118,7 +106,6 @@ public final class NamespaceFoldersCache {
                 for (int i = 0; i < pns.length; i++) {
                     final Folder namespaceFolder = pns[i];
                     fullnames[i] = namespaceFolder.getFullName();
-                    DELIM.set(namespaceFolder.getSeparator());
                 }
                 Arrays.sort(fullnames);
                 entry.setValue(fullnames);
