@@ -123,6 +123,10 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
                 if (null != result) {
                     LOG.debug("{}", result);
                 }
+                /*
+                 * process results
+                 */
+                processResult(event.getContextID(), registrationIDs, result);
             }
         }
     }
